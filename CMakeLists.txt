@@ -64,7 +64,7 @@ target_link_libraries(imread
 
 install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
-install(DIRECTORY ${PROJECT_NAME}/include DESTINATION include
+install(DIRECTORY include DESTINATION include
   FILES_MATCHING PATTERN "*.h")
-  install(DIRECTORY ${PROJECT_NAME}/include DESTINATION include
+  install(DIRECTORY include DESTINATION include
     FILES_MATCHING PATTERN "*.hpp")
