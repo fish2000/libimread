@@ -12,7 +12,7 @@ if(NOT libimread_FOUND)
     #Find the include directory
     find_path(${lib_name}_include_dir NAMES ${lib_name}.cmake.hpp
         PATHS ${${lib_name}_DIR}
-        PATH_SUFFIXES /../include)
+        PATH_SUFFIXES /../include/libimread)
 
     #Standard work to make sure the different variables have been set. This
     # command will set the libimread_FOUND variable.
