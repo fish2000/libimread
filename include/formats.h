@@ -7,7 +7,11 @@
 #include "base.h"
 #include <memory>
 
-std::auto_ptr<ImageFormat> get_format(const char*);
-const char* magic_format(byte_source*);
+namespace im {
+
+    std::auto_ptr<ImageFormat> get_format(const char*);
+    const char* magic_format(byte_source*);
+
+}
 
 #endif // LPC_FORMATS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012

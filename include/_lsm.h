@@ -62,11 +62,15 @@
 #include <string>
 #include <ostream>
 
-class LSMFormat : public ImageFormat {
-    public:
-        bool can_read() const { return true; }
+namespace im {
 
-        std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts);
-};
+    class LSMFormat : public ImageFormat {
+        public:
+            bool can_read() const { return true; }
+
+            std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts);
+    };
+
+}
 
 #endif

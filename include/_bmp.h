@@ -5,15 +5,20 @@
 #define LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
 
 #include "base.h"
+#include "tools.h"
+#include <sstream>
 
-class BMPFormat : public ImageFormat {
-    public:
-        bool can_read() const { return true; }
-        bool can_write() const { return false; }
+namespace im {
 
-        std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts);
-};
+    class BMPFormat : public ImageFormat {
+        public:
+            bool can_read() const override { return true; }
+            bool can_write() const override { return false; }
 
+            std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
+    };
+
+}
 
 #endif // LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
 

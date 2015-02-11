@@ -6,16 +6,21 @@
 
 #include "base.h"
 
-class JPEGFormat : public ImageFormat {
-    public:
-        bool can_read() const { return true; }
-        bool can_write() const { return true; }
+namespace im {
 
-        static bool match_format(byte_source* src) { return match_magic(src, "\xff\xd8\xff", 3); }
+    class JPEGFormat : public ImageFormat {
+        public:
+            bool can_read() const override { return true; }
+            bool can_write() const override { return true; }
 
-        std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts);
-        void write(Image* input, byte_sink* output, const options_map& opts);
-};
+            /// NOT AN OVERRIDE:
+            static bool match_format(byte_source* src) { return match_magic(src, "\xff\xd8\xff", 3); }
+
+            std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
+            void write(Image* input, byte_sink* output, const options_map& opts) override;
+    };
+
+}
 
 
 #endif // LPC_JPEG_H_INCLUDE_GUARD_THU_FEB__2_18_14_07_WET_2012

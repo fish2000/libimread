@@ -3,12 +3,18 @@
 
 #ifndef LPC_WEBP_H_INCLUDE_GUARD_
 #define LPC_WEBP_H_INCLUDE_GUARD_
-class WebPFormat : public ImageFormat {
-    public:
-        bool can_read() const { return true; }
-        bool can_write() const { return false; }
 
-        std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts);
-};
+namespace im {
+
+    class WebPFormat : public ImageFormat {
+        public:
+            bool can_read() const override { return true; }
+            bool can_write() const override { return false; }
+
+            std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
+    };
+
+}
+
 
 #endif // LPC_WEBP_H_INCLUDE_GUARD_

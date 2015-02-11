@@ -12,25 +12,28 @@
 
 #include "pvr.h"
 
-std::auto_ptr<Image> PVRTCFormat::read(byte_source* src, ImageFactory* factory, const options_map& opts) {
-    std::vector<byte> data = full_data(*src);
-    PVRTexture pvr;
+namespace im {
     
-    ePVRLoadResult res = pvr.load(&data[0], data.size());
+    std::auto_ptr<Image> PVRTCFormat::read(byte_source* src, ImageFactory* factory, const options_map& opts) {
+        std::vector<byte> data = full_data(*src);
+        PVRTexture pvr;
     
-    if (res) {
-        throw CannotReadError("imread.imread._pvrtc: File isn't a valid PVRTC texture.");
+        ePVRLoadResult res = pvr.load(&data[0], data.size());
+    
+        if (res) {
+            throw CannotReadError("imread.imread._pvrtc: File isn't a valid PVRTC texture.");
+        }
+    
+        std::auto_ptr<Image> output(factory->create(8, pvr.height, pvr.width, 4));
+    
+        if (pvr.data) {
+            byte* rowp = output->rowp_as<byte>(0);
+            memcpy(rowp, &pvr.data[0], pvr.width*pvr.height*4);
+        } else {
+            throw CannotReadError("imread.imread._pvrtc: Error reading PVRTC file.");
+        }
+    
+        return output;
     }
     
-    std::auto_ptr<Image> output(factory->create(8, pvr.height, pvr.width, 4));
-    
-    if (pvr.data) {
-        byte* rowp = output->rowp_as<byte>(0);
-        memcpy(rowp, &pvr.data[0], pvr.width*pvr.height*4);
-    } else {
-        throw CannotReadError("imread.imread._pvrtc: Error reading PVRTC file.");
-    }
-    
-    return output;
 }
-

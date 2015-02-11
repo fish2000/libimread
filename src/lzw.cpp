@@ -5,6 +5,8 @@
 #include <vector>
 #include "errors.h"
 
+using namespace im;
+
 struct code_stream {
     public:
         code_stream(unsigned char* buf, unsigned long len)

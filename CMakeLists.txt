@@ -53,6 +53,8 @@ link_directories(/usr/local/lib)
 #Set the source files required to build the library
 include(fileList.cmake)
 
+add_definitions(-std=c++1y -stdlib=libc++)
+
 #Build the library
 add_library(imread-static STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})

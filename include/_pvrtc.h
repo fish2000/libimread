@@ -6,11 +6,16 @@
 
 #include "base.h"
 
-class PVRTCFormat : public ImageFormat {
-    public:
-        bool can_read() const { return true; }
-        bool can_write() const { return false; }
-        std::auto_ptr<Image> read(byte_source *src, ImageFactory *factory, const options_map &opts);
-};
+namespace im {
+
+    class PVRTCFormat : public ImageFormat {
+        public:
+            bool can_read() const override { return true; }
+            bool can_write() const override { return false; }
+            std::auto_ptr<Image> read(byte_source *src, ImageFactory *factory, const options_map &opts) override;
+    };
+
+}
+
 
 #endif // LPC_PVRTC_H_INCLUDE_GUARD_
