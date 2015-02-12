@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <utility>
+#include <stdio.h>
 #include <stdint.h>
 #include "private/buffer_t.h"
 #include "base.h"
@@ -72,6 +73,9 @@ namespace im {
         
         protected:
             std::auto_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
+                fprintf(stderr, "CREATING IMAGE (WxHxD:bits) %ix%ix%i:%i",
+                    nbits, d1, d0, d2);
+                
                 uint8_t ndim = (d2 > 0) ? 3 : 2;
                 buffer_t buffer = {0};
                 //buffer.elem_size = int32_t(nbits / 8);
