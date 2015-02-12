@@ -4,7 +4,7 @@
 namespace im {
 
     void HalideBuffer::finalize() {
-        if (buffer.dev) { delete buffer.dev; }
+        //if (buffer.dev) { delete buffer.dev; }
         if (allocation != nullptr) { delete[] allocation; }
     }
     
