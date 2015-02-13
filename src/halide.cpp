@@ -1,11 +1,18 @@
 
 #include "halide.h"
+#include "tools.h"
 
 namespace im {
-
+    
     void HalideBuffer::finalize() {
-        //if (buffer.dev) { delete buffer.dev; }
-        if (allocation != nullptr) { delete[] allocation; }
+        if (allocation != nullptr) {
+            delete[] allocation;
+        }
+    }
+    
+    uint8_t *HalideBuffer::release(uint8_t *ptr) {
+        ptr_swap(ptr, allocation);
+        return ptr;
     }
     
     /*

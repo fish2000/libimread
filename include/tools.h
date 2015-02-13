@@ -8,7 +8,12 @@
 #include <vector>
 
 namespace im {
-
+    
+    template <typename T>
+    void ptr_swap(T*& oA, T*& oB) {
+        T* oT = oA; oA = oB; oB = oT;
+    }
+    
     template<typename T>
     inline std::vector<T*> allrows(Image& im) {
         std::vector<T*> res;
