@@ -60,7 +60,7 @@ namespace im {
             void set_dev_dirty(bool dirty=true) { buffer.dev_dirty = dirty; }
             operator buffer_t *() const { return const_cast<buffer_t *>(&buffer); }
             buffer_t *buf() const { return const_cast<buffer_t *>(&buffer); }
-            uint8_t *data() const { return &allocation; }
+            uint8_t *data() { return allocation; }
         
         private:
             uint8_t ndim = 0;
