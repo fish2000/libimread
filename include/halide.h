@@ -50,9 +50,9 @@ namespace im {
             
             void *rowp(int r) override {
                 /// WARNING: FREAKY POINTER ARITHMETIC FOLLOWS
-                uint8_t *host = reinterpret_cast<uint8_t *>(buffer.host);
-                host += (r * buffer.stride[1] * buffer.elem_size);
-                return reinterpret_cast<void *>(host);
+                uint8_t *host = buffer.host;
+                host += (r * buffer.stride[0] * buffer.elem_size);
+                return static_cast<void *>(host);
             }
             
             void set_host_dirty(bool dirty=true) { buffer.host_dirty = dirty; }
@@ -73,23 +73,17 @@ namespace im {
         
         protected:
             std::auto_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
-                fprintf(stderr, "CREATING IMAGE (WxHxD:bits) %ix%ix%i:%i",
-                    nbits, d1, d0, d2);
-                
                 uint8_t ndim = (d2 > 0) ? 3 : 2;
                 buffer_t buffer = {0};
-                //buffer.elem_size = int32_t(nbits / 8);
                 buffer.elem_size = sizeof(T);
-                
-                buffer.extent[0] = d1;
-                buffer.extent[1] = d0;
+            
+                buffer.extent[0] = d0;
+                buffer.extent[1] = d1;
                 buffer.extent[2] = d2 > 0 ? d2 : 1;
-                //buffer.extent[3] = d3 > 0 ? d3 : 0;
-                //buffer.extent[3] = 0;
-                
+            
                 buffer.stride[0] = buffer.extent[2];
                 buffer.stride[1] = d0 * buffer.extent[2];
-                buffer.stride[2] = 1;
+                buffer.stride[2] = d1 * d0 * buffer.extent[2];
                 
                 buffer.min[0] = 0;
                 buffer.min[1] = 0;
