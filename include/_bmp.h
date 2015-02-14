@@ -15,7 +15,7 @@ namespace im {
             bool can_read() const override { return true; }
             bool can_write() const override { return false; }
 
-            std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
+            std::unique_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
     };
 
 }

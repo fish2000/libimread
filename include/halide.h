@@ -74,7 +74,7 @@ namespace im {
             typedef T type;
         
         protected:
-            std::auto_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
+            std::unique_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
                 uint8_t ndim = (d2 > 0) ? 3 : 2;
                 buffer_t buffer = {0};
                 buffer.elem_size = sizeof(T);
@@ -99,7 +99,7 @@ namespace im {
                 buffer.dev_dirty = false;
                 
                 while ((size_t)buffer.host & 0x1f) { buffer.host++; }
-                return std::auto_ptr<Image>(
+                return std::unique_ptr<Image>(
                     new HalideBuffer(
                         std::move(buffer),
                         ndim, alloc_ptr));

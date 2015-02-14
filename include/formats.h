@@ -9,7 +9,7 @@
 
 namespace im {
 
-    std::auto_ptr<ImageFormat> get_format(const char*);
+    std::unique_ptr<ImageFormat> get_format(const char*);
     const char* magic_format(byte_source*);
 
 }

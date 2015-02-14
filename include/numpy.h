@@ -84,7 +84,7 @@ namespace im {
 
     class NumpyFactory : public ImageFactory {
         protected:
-            std::auto_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
+            std::unique_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
                 npy_intp dims[5];
                 dims[0] = d0;
                 dims[1] = d1;
@@ -112,7 +112,7 @@ namespace im {
                 PyArrayObject* array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(nd, dims, dtype));
                 if (!array) throw std::bad_alloc();
                 try {
-                    return std::auto_ptr<Image>(new NumpyImage(array));
+                    return std::unique_ptr<Image>(new NumpyImage(array));
                 } catch(...) {
                     Py_DECREF(array);
                     throw;

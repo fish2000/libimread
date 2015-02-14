@@ -38,7 +38,7 @@ namespace im {
         }
     }
     
-    std::auto_ptr<Image> BMPFormat::read(byte_source *src,
+    std::unique_ptr<Image> BMPFormat::read(byte_source *src,
                                          ImageFactory *factory,
                                          const options_map &opts) {
         char magick[2];
@@ -86,7 +86,7 @@ namespace im {
         }
         const int depth = (bitsppixel == 16 ? -1 : 3);
         const int nbits = (bitsppixel == 16 ? 16 : 8);
-        std::auto_ptr<Image> output(
+        std::unique_ptr<Image> output(
             factory->create(nbits, height, width, depth));
 
         std::vector<byte> color_table;

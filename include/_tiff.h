@@ -15,19 +15,19 @@ namespace im {
             bool can_write() const override { return true; }
             bool can_write_metadata() const override { return true; }
 
-            std::auto_ptr<Image> read(byte_source* s, ImageFactory* f, const options_map& opts) override {
-                std::auto_ptr<image_list> pages = this->do_read(s, f, false);
+            std::unique_ptr<Image> read(byte_source* s, ImageFactory* f, const options_map& opts) override {
+                std::unique_ptr<image_list> pages = this->do_read(s, f, false);
                 if (pages->size() != 1) throw ProgrammingError();
                 std::vector<Image*> ims = pages->release();
-                return std::auto_ptr<Image>(ims[0]);
+                return std::unique_ptr<Image>(ims[0]);
             }
 
-            std::auto_ptr<image_list> read_multi(byte_source* s, ImageFactory* f, const options_map& opts) override {
+            std::unique_ptr<image_list> read_multi(byte_source* s, ImageFactory* f, const options_map& opts) override {
                 return this->do_read(s, f, true);
             }
             void write(Image* input, byte_sink* output, const options_map& opts) override;
         private:
-            std::auto_ptr<image_list> do_read(byte_source* s, ImageFactory* f, bool is_multi);
+            std::unique_ptr<image_list> do_read(byte_source* s, ImageFactory* f, bool is_multi);
     };
 
 
@@ -37,7 +37,7 @@ namespace im {
             bool can_read_multi() const override { return true; }
             bool can_write() const override { return false; }
 
-            std::auto_ptr<image_list> read_multi(byte_source* s, ImageFactory* f, const options_map& opts) override;
+            std::unique_ptr<image_list> read_multi(byte_source* s, ImageFactory* f, const options_map& opts) override;
     };
 
 

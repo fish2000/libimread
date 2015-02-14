@@ -143,7 +143,7 @@ namespace im {
 
     } // namespace
 
-    std::auto_ptr<Image> JPEGFormat::read(byte_source *src,
+    std::unique_ptr<Image> JPEGFormat::read(byte_source *src,
                                           ImageFactory *factory,
                                           const options_map &opts) {
         jpeg_source_adaptor adaptor(src);
@@ -165,7 +165,7 @@ namespace im {
         const int h = c.info.output_height;
         const int w = c.info.output_width;
         const int d = c.info.output_components;
-        std::auto_ptr<Image> output(factory->create(8, h, w, d));
+        std::unique_ptr<Image> output(factory->create(8, h, w, d));
 
         for (int r = 0; r != h; ++r) {
             byte *rowp = output->rowp_as<byte>(r);

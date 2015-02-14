@@ -157,7 +157,7 @@ namespace im {
             ~LSMReader();
 
             void PrintSelf(std::ostream &os, const char *indent = "");
-            std::auto_ptr<Image> read(ImageFactory *factory,
+            std::unique_ptr<Image> read(ImageFactory *factory,
                                       const options_map &);
             void readHeader();
 
@@ -1140,14 +1140,14 @@ namespace im {
             }
         }
 
-        std::auto_ptr<Image> LSMReader::read(ImageFactory *factory,
+        std::unique_ptr<Image> LSMReader::read(ImageFactory *factory,
                                              const options_map &) {
             this->readHeader();
 
             const int dataType
                 = this->GetDataTypeForChannel(0); // This could vary by channel!
 
-            std::auto_ptr<Image> output = factory->create(
+            std::unique_ptr<Image> output = factory->create(
                 BYTES_BY_DATA_TYPE(dataType) * 8, this->dimensions_[2],
                 this->dimensions_[3], this->dimensions_[4],
                 this->dimensions_[0], this->dimensions_[1]);
@@ -1189,7 +1189,7 @@ namespace im {
 
     } // namespace
 
-    std::auto_ptr<Image> LSMFormat::read(byte_source *s, ImageFactory *factory,
+    std::unique_ptr<Image> LSMFormat::read(byte_source *s, ImageFactory *factory,
                                          const options_map &opts) {
         LSMReader reader(s);
         return reader.read(factory, opts);

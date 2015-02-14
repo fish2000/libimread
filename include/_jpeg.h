@@ -16,7 +16,7 @@ namespace im {
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source* src) { return match_magic(src, "\xff\xd8\xff", 3); }
 
-            std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
+            std::unique_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
             void write(Image* input, byte_sink* output, const options_map& opts) override;
     };
 

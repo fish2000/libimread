@@ -111,7 +111,7 @@ namespace im {
     class ImageFactory {
         public:
             virtual ~ImageFactory() { }
-            virtual std::auto_ptr<Image>
+            virtual std::unique_ptr<Image>
                 create(int nbits, int d0, int d1, int d2, int d3=-1, int d4=-1) = 0;
         protected:
     };
@@ -134,7 +134,7 @@ namespace im {
                 for (unsigned i = 0; i != content.size(); ++i) delete content[i];
             }
             std::vector<Image*>::size_type size() const { return content.size(); }
-            void push_back(std::auto_ptr<Image> p) { content.push_back(p.release()); }
+            void push_back(std::unique_ptr<Image> p) { content.push_back(p.release()); }
 
             /// After release(), all of the pointers will be owned by the caller
             /// who must figure out how to delete them. Note that release() resets the list.
@@ -230,10 +230,10 @@ namespace im {
             virtual bool can_write() const { return false; }
             virtual bool can_write_metadata() const { return false; }
 
-            virtual std::auto_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) {
+            virtual std::unique_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) {
                 throw NotImplementedError();
             }
-            virtual std::auto_ptr<image_list> read_multi(byte_source* src, ImageFactory* factory, const options_map& opts) {
+            virtual std::unique_ptr<image_list> read_multi(byte_source* src, ImageFactory* factory, const options_map& opts) {
                 throw NotImplementedError();
             }
             virtual void write(Image* input, byte_sink* output, const options_map& opts) {

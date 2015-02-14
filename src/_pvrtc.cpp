@@ -14,7 +14,7 @@
 
 namespace im {
     
-    std::auto_ptr<Image> PVRTCFormat::read(byte_source* src, ImageFactory* factory, const options_map& opts) {
+    std::unique_ptr<Image> PVRTCFormat::read(byte_source* src, ImageFactory* factory, const options_map& opts) {
         std::vector<byte> data = full_data(*src);
         PVRTexture pvr;
     
@@ -24,7 +24,7 @@ namespace im {
             throw CannotReadError("imread.imread._pvrtc: File isn't a valid PVRTC texture.");
         }
     
-        std::auto_ptr<Image> output(factory->create(8, pvr.height, pvr.width, 4));
+        std::unique_ptr<Image> output(factory->create(8, pvr.height, pvr.width, 4));
     
         if (pvr.data) {
             byte* rowp = output->rowp_as<byte>(0);
