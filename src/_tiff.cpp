@@ -70,7 +70,6 @@ namespace im {
         throw CannotReadError(std::string("imread._tiff: libtiff error: `") + buffer + std::string("`"));
     }
 
-
     struct tif_holder {
         tif_holder(TIFF* tif)
             :tif(tif)
@@ -110,19 +109,7 @@ namespace im {
         }
         return val;
     }
-
-    /*template <>
-    inline
-    std::string tiff_get<std::string>(const tif_holder& t, const int tag) {
-        char* val;
-        if (!TIFFGetField(t.tif, tag, &val)) {
-            std::stringstream out;
-            out << "imread.imread._tiff: Cannot find necessary tag (" << tag << ")";
-            throw CannotReadError(out.str());
-        }
-        return val;
-    }*/
-
+    
     template <typename T>
     inline
     T tiff_get(const tif_holder& t, const int tag, const T def) {
@@ -130,8 +117,7 @@ namespace im {
         if (!TIFFGetField(t.tif, tag, &val)) return def;
         return val;
     }
-
-
+    
     template <>
     inline
     std::string tiff_get<std::string>(const tif_holder& t, const int tag, const std::string def) {
@@ -172,8 +158,6 @@ namespace im {
         TIFFMergeFieldInfo(tif, stkTags, sizeof(stkTags)/sizeof(stkTags[0]));
     }
 
-
-
     class shift_source : public byte_source {
         public:
             explicit shift_source(byte_source* s)
@@ -206,7 +190,6 @@ namespace im {
     };
 
     } // namespace
-
 
     std::unique_ptr<image_list> STKFormat::read_multi(byte_source* src, ImageFactory* factory, const options_map& opts) {
         shift_source moved(src);
