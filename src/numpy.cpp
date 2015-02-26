@@ -3,7 +3,7 @@
 
 #include <cstring>
 #include <vector>
-#include <libimread/numpy.h>
+#include <libimread/numpy.hh>
 
 namespace im {
     

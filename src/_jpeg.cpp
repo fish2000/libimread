@@ -1,7 +1,7 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
-#include <libimread/base.h>
-#include <libimread/_jpeg.h>
+#include <libimread/base.hh>
+#include <libimread/_jpeg.hh>
 
 #include <stdio.h>
 #include <setjmp.h>

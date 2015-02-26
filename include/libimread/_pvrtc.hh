@@ -4,7 +4,7 @@
 #ifndef LPC_PVRTC_H_INCLUDE_GUARD_
 #define LPC_PVRTC_H_INCLUDE_GUARD_
 
-#include <libimread/base.h>
+#include <libimread/base.hh>
 
 namespace im {
 

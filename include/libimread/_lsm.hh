@@ -56,7 +56,7 @@
 // Kalle Pahajoki <kalpaha@st.jyu.fi>
 // Pasi Kankaanpää <ppkank@bytl.jyu.fi>
 //
-#include <libimread/base.h>
+#include <libimread/base.hh>
 
 #include <vector>
 #include <string>

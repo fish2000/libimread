@@ -9,7 +9,7 @@
 
 #include <memory>
 #include <sstream>
-#include <libimread/base.h>
+#include <libimread/base.hh>
 
 namespace im {
 
@@ -18,22 +18,22 @@ namespace im {
             NumpyImage(PyArrayObject* array = 0)
                 :array_(array)
                 { }
-
+            
             ~NumpyImage() {
                 Py_XDECREF(array_);
             }
-
+            
             PyArrayObject* release() {
                 PyArrayObject* r = array_;
                 array_ = 0;
                 return r;
             }
-
+            
             PyObject* releasePyObject() {
                 this->finalize();
                 return reinterpret_cast<PyObject*>(this->release());
             }
-
+            
             PyObject* metadataPyObject() {
                 std::string* s =  this->get_meta();
     #if PY_MAJOR_VERSION < 3
@@ -43,7 +43,7 @@ namespace im {
     #endif
                 Py_RETURN_NONE;
             }
-
+            
             virtual int nbits() const {
                 if (!array_) throw ProgrammingError();
                 switch (PyArray_TYPE(array_)) {
@@ -63,25 +63,27 @@ namespace im {
                         throw ProgrammingError();
                 }
             }
-
+            
             virtual int ndims() const {
                 if (!array_) throw ProgrammingError();
                 return PyArray_NDIM(array_);
             }
+            
             virtual int dim(int d) const {
                 if (!array_ || d >= this->ndims()) throw ProgrammingError();
                 return PyArray_DIM(array_, d);
             }
-
+            
             virtual void* rowp(int r) {
                 if (!array_) throw ProgrammingError();
                 if (r >= PyArray_DIM(array_, 0)) throw ProgrammingError();
                 return PyArray_GETPTR1(array_, r);
             }
+            
             void finalize();
             PyArrayObject* array_;
     };
-
+    
     class NumpyFactory : public ImageFactory {
         protected:
             std::unique_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
@@ -92,7 +94,7 @@ namespace im {
                 dims[3] = d3;
                 dims[4] = d4;
                 npy_intp nd = 5;
-
+                
                 if (d2 == -1) nd = 2;
                 else if (d3 == -1) nd = 3;
                 else if (d4 == -1) nd = 4;
@@ -104,18 +106,18 @@ namespace im {
                     case 32: dtype = NPY_UINT32; break;
                     default: {
                         std::ostringstream out;
-                        out << "numpy.factory: Cannot handle " << nbits << "-bit images.";
+                        out << "im::NumpyFactory::create(): Cannot handle " << nbits << "-bit images.";
                         throw ProgrammingError(out.str());
                     }
                 }
 
                 PyArrayObject* array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(nd, dims, dtype));
-                if (!array) throw std::bad_alloc();
+                if (!array) { throw std::bad_alloc(); }
                 try {
                     return std::unique_ptr<Image>(new NumpyImage(array));
-                } catch(...) {
+                } catch (...) {
                     Py_DECREF(array);
-                    throw;
+                    throw; /// ugh
                 }
             }
     };

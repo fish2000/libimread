@@ -1,16 +1,13 @@
 // Copyright 2012 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#ifdef PVRTC_DEBUG
 #include <stdio.h>
-#endif
-
 #include <string.h>
-#include <libimread/base.h>
-#include <libimread/_pvrtc.h>
-#include <libimread/tools.h>
 
-#include <libimread/pvr.h>
+#include <libimread/base.hh>
+#include <libimread/_pvrtc.hh>
+#include <libimread/tools.hh>
+#include <libimread/pvr.hh>
 
 namespace im {
     

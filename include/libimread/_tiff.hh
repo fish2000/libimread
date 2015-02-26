@@ -4,7 +4,7 @@
 #ifndef LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012
 #define LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012
 
-#include <libimread/base.h>
+#include <libimread/base.hh>
 
 namespace im {
 

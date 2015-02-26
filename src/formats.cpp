@@ -2,14 +2,15 @@
 // License: MIT (see COPYING.MIT file)
 
 #include <cstring>
-#include <libimread/formats.h>
-#include <libimread/_bmp.h>
-#include <libimread/_jpeg.h>
-#include <libimread/_lsm.h>
-#include <libimread/_png.h>
-#include <libimread/_tiff.h>
-#include <libimread/_pvrtc.h>
-#include <libimread/_webp.h>
+
+#include <libimread/formats.hh>
+#include <libimread/_bmp.hh>
+#include <libimread/_jpeg.hh>
+#include <libimread/_lsm.hh>
+#include <libimread/_png.hh>
+#include <libimread/_tiff.hh>
+#include <libimread/_pvrtc.hh>
+#include <libimread/_webp.hh>
 
 namespace im {
 

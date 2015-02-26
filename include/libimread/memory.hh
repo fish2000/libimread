@@ -3,8 +3,9 @@
 #ifndef LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
 #define LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
 
-#include <libimread/base.h>
 #include <cstring>
+
+#include <libimread/base.hh>
 
 namespace im {
 

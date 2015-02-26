@@ -9,10 +9,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "private/buffer_t.h"
-#include <libimread/errors.h>
-#include <libimread/base.h>
-#include <libimread/tools.h>
+#include <libimread/private/buffer_t.h>
+#include <libimread/errors.hh>
+#include <libimread/base.hh>
+#include <libimread/tools.hh>
 
 namespace im {
 

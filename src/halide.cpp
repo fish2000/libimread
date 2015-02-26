@@ -1,10 +1,10 @@
 
-#include <libimread/halide.h>
+#include <libimread/halide.hh>
 
 namespace im {
 
     /* HalideBuffer::HalideBuffer() = default; */
-
+    
     void HalideBuffer::finalize() {
         if (allocation != nullptr && allocation != NULL) {
             delete[] allocation;

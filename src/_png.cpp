@@ -1,9 +1,9 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#include <libimread/base.h>
-#include <libimread/_png.h>
-#include <libimread/tools.h>
+#include <libimread/base.hh>
+#include <libimread/_png.hh>
+#include <libimread/tools.hh>
 
 #ifdef __APPLE__
     #include <libpng16/png.h>   /* this is the Homebrew path */

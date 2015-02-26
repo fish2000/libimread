@@ -4,8 +4,8 @@
 #ifndef LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
 #define LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
 
-#include <libimread/base.h>
-#include <libimread/tools.h>
+#include <libimread/base.hh>
+#include <libimread/tools.hh>
 #include <sstream>
 
 namespace im {

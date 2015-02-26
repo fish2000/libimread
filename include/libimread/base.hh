@@ -19,7 +19,7 @@
  #include <unistd.h>
 #endif
 
-#include <libimread/errors.h>
+#include <libimread/errors.hh>
 
 #ifdef __GNUC__
 #define warn_if_return_not_used __attribute__ ((__warn_unused_result__))

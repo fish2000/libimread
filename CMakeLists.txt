@@ -47,7 +47,7 @@ include_directories(
 
 #Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
-include_directories("${CMAKE_BINARY_DIR}/include")
+include_directories("${CMAKE_BINARY_DIR}/../include")
 link_directories(/usr/local/lib)
 
 #Set the source files required to build the library
@@ -70,6 +70,8 @@ install(DIRECTORY include/libimread/private/ DESTINATION include/libimread/priva
   FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY include/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include/libimread/ DESTINATION include/libimread
+  FILES_MATCHING PATTERN "*.hh")
 install(DIRECTORY include/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY cmake/ DESTINATION share/libimread

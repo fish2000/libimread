@@ -39,7 +39,7 @@
 =========================================================================
 */
 
-#include <libimread/_lsm.h>
+#include <libimread/_lsm.hh>
 
 namespace {
     #include "lzw.cpp"

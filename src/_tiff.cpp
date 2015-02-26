@@ -3,9 +3,9 @@
 
 #define NO_IMPORT_ARRAY
 
-#include <libimread/base.h>
-#include <libimread/_tiff.h>
-#include <libimread/tools.h>
+#include <libimread/base.hh>
+#include <libimread/_tiff.hh>
+#include <libimread/tools.hh>
 
 #include <utility>
 #include <sstream>
