@@ -54,29 +54,32 @@ namespace im {
                 return static_cast<int>(buffer.extent[d]);
             }
             
+            inline int width() const { return buffer.extent[0]; }
+            inline int height() const { return buffer.extent[1]; }
+            inline int channels() const { return buffer.extent[2]; }
+            inline int stride(int dim) const { return buffer.stride[dim]; }
+            inline int rowp_stride() const {
+                return (channels() == 1 || channels() == 0) ? 0 : stride(2);
+            }
+            
             void *rowp(int r) override {
-                /// WARNING: FREAKY POINTER ARITHMETIC FOLLOWS
+                /// WARNING: FREAKY POINTERMATH FOLLOWS
                 uint8_t *host = buffer.host;
-                host += (r * stride(0) * nbytes());
+                host += (r * rowp_stride());
                 return static_cast<void *>(host);
             }
             
-            /// width and height are swapped in imread-istan
-            inline int width() const { return buffer.extent[1]; }
-            inline int height() const { return buffer.extent[0]; }
-            inline int channels() const { return buffer.extent[2]; }
-            inline int stride(int dim) const { return buffer.stride[dim]; }
             
             uint8_t &operator()(int x, int y=0, int z=0) {
-                // _ASSERT(x < buffer.extents[1], "[imread] X coordinate too large");
-                // _ASSERT(y < buffer.extents[0], "[imread] Y coordinate too large");
+                // _ASSERT(x < buffer.extents[0], "[imread] X coordinate too large");
+                // _ASSERT(y < buffer.extents[1], "[imread] Y coordinate too large");
                 // _ASSERT(z < buffer.extents[2], "[imread] Z coordinate too large");
-                return ((uint8_t *)buffer.host)[nbytes() * (x*stride(1) + y*stride(0) + z*stride(2))];
+                return buffer.host[nbytes() * (x*stride(0) + y*stride(1) + z*stride(2))];
             }
             
             template <typename T>
             T &at(int x, int y=0, int z=0) {
-                return ((T *)buffer.host)[sizeof(T) * (x*stride(1) + y*stride(0) + z*stride(2))];
+                return ((T *)buffer.host)[sizeof(T) * (x*stride(0) + y*stride(1) + z*stride(2))];
             }
             
             void set_host_dirty(bool dirty=true) { buffer.host_dirty = dirty; }
@@ -101,11 +104,11 @@ namespace im {
                 uint8_t ndim = (d2 > 0) ? 3 : 2;
                 buffer_t buffer = {0};
                 buffer.elem_size = sizeof(T);
-            
+                
                 buffer.extent[0] = d0;
                 buffer.extent[1] = d1;
                 buffer.extent[2] = d2 > 0 ? d2 : 1;
-            
+                
                 buffer.stride[0] = buffer.extent[2];
                 buffer.stride[1] = d0 * buffer.extent[2];
                 buffer.stride[2] = d1 * d0 * buffer.extent[2];
@@ -115,17 +118,16 @@ namespace im {
                 buffer.min[2] = 0;
                 
                 size_t size = buffer.extent[0] * buffer.extent[1] * buffer.extent[2];
-                uint8_t *alloc_ptr = new uint8_t[sizeof(T) * size + 40];
-                buffer.host = alloc_ptr;
+                //uint8_t *alloc_ptr = new uint8_t[sizeof(T) * size + 40];
+                //buffer.host = alloc_ptr;
+                buffer.host = new uint8_t[sizeof(T) * size + 40];
                 buffer.dev = 0;
                 buffer.host_dirty = false;
                 buffer.dev_dirty = false;
                 
                 while ((size_t)buffer.host & 0x1f) { buffer.host++; }
                 return std::unique_ptr<Image>(
-                    new HalideBuffer(
-                        std::move(buffer),
-                        ndim, alloc_ptr));
+                    new HalideBuffer(std::move(buffer), ndim));
             }
     };
 
