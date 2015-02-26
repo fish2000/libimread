@@ -3,10 +3,10 @@
 
 #include <cstring>
 #include <vector>
-#include "numpy.h"
+#include <libimread/numpy.h>
 
 namespace im {
-
+    
     void NumpyImage::finalize() {
         if (PyArray_TYPE(array_) == NPY_BOOL) {
             // We need to expand this

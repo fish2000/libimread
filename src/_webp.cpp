@@ -1,10 +1,9 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#include "base.h"
-#include "_webp.h"
-#include "tools.h"
-
+#include <libimread/base.h>
+#include <libimread/_webp.h>
+#include <libimread/tools.h>
 #include <webp/decode.h>
 
 namespace im {
@@ -14,7 +13,7 @@ namespace im {
         int w, h;
         int ok = WebPGetInfo(&data[0], data.size(), &w, &h);
         if (!ok) {
-            throw CannotReadError("imread.imread._webp: File does not validate as WebP");
+            throw CannotReadError("im::WebPFormat::read(): File does not validate as WebP");
         }
         std::unique_ptr<Image> output(factory->create(8, h, w, 4));
         const int stride = w*4;
@@ -22,7 +21,7 @@ namespace im {
                 &data[0], data.size(),
                 output->rowp_as<byte>(0), h*stride, stride);
         if (p != output->rowp_as<uint8_t>(0)) {
-            throw CannotReadError("imread.imread._webp: Error in decoding file");
+            throw CannotReadError("im::WebPFormat::read(): Error in decoding file");
         }
 
         return output;

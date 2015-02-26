@@ -66,11 +66,11 @@ target_link_libraries(imread
 
 install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
-install(DIRECTORY include/private/ DESTINATION include/libimread/private
+install(DIRECTORY include/libimread/private/ DESTINATION include/libimread/private
   FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY include/ DESTINATION include/libimread
+install(DIRECTORY include/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY include/ DESTINATION include/libimread
+install(DIRECTORY include/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY cmake/ DESTINATION share/libimread
   FILES_MATCHING PATTERN "*libimreadConfig.cmake")

@@ -3,7 +3,7 @@
 // License: MIT
 
 #include <vector>
-#include "errors.h"
+#include <libimread/errors.h>
 
 using namespace im;
 

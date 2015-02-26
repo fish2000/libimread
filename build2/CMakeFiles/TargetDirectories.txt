@@ -1,0 +1,2 @@
+/Users/fish/Dropbox/libimread/build2/CMakeFiles/imread.dir
+/Users/fish/Dropbox/libimread/build2/CMakeFiles/imread-static.dir

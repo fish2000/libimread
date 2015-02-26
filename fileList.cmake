@@ -2,7 +2,7 @@
 # 2011.10
 
 #To keep the file list clean
-set(hdrs_dir ${${PROJECT_NAME}_include_dir})
+set(hdrs_dir ${${PROJECT_NAME}_include_dir}/libimread)
 set(srcs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${source_dir})
 
 #Project header files
