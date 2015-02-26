@@ -3,10 +3,19 @@
 
 #ifndef LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 #define LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#include <stdio.h>
 #include <string>
 #include <exception>
 
 namespace im {
+
+#ifndef _ASSERT
+#define _ASSERT(condition, ...)                                                \
+    if (!(condition)) {                                                        \
+        fprintf(stderr, __VA_ARGS__);                                          \
+        exit(-1);                                                              \
+    }
+#endif /// _ASSERT
 
 #define DECLARE_IMREAD_ERROR_TYPE(TypeName, DefaultMsg) \
     struct TypeName : std::exception { \

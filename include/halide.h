@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "private/buffer_t.h"
+#include "errors.h"
 #include "base.h"
 
 namespace im {
@@ -41,6 +42,10 @@ namespace im {
                 return buffer.elem_size * 8;
             }
             
+            inline int nbytes() const {
+                return buffer.elem_size;
+            }
+            
             virtual int ndims() const override {
                 return ndim;
             }
@@ -52,8 +57,26 @@ namespace im {
             void *rowp(int r) override {
                 /// WARNING: FREAKY POINTER ARITHMETIC FOLLOWS
                 uint8_t *host = buffer.host;
-                host += (r * buffer.stride[0] * buffer.elem_size);
+                host += (r * stride(0) * nbytes());
                 return static_cast<void *>(host);
+            }
+            
+            /// width and height are swapped in imread-istan
+            inline int width() const { return buffer.extent[1]; }
+            inline int height() const { return buffer.extent[0]; }
+            inline int channels() const { return buffer.extent[2]; }
+            inline int stride(int dim) const { return buffer.stride[dim]; }
+            
+            uint8_t &operator()(int x, int y=0, int z=0) {
+                // _ASSERT(x < buffer.extents[1], "[imread] X coordinate too large");
+                // _ASSERT(y < buffer.extents[0], "[imread] Y coordinate too large");
+                // _ASSERT(z < buffer.extents[2], "[imread] Z coordinate too large");
+                return ((uint8_t *)buffer.host)[nbytes() * (x*stride(1) + y*stride(0) + z*stride(2))];
+            }
+            
+            template <typename T>
+            T &at(int x, int y=0, int z=0) {
+                return ((T *)buffer.host)[sizeof(T) * (x*stride(1) + y*stride(0) + z*stride(2))];
             }
             
             void set_host_dirty(bool dirty=true) { buffer.host_dirty = dirty; }
