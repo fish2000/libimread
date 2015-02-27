@@ -61,7 +61,7 @@ namespace im {
             inline int channels() const { return buffer.extent[2]; }
             inline int stride(int dim) const { return buffer.stride[dim]; }
             inline int rowp_stride() const {
-                return (channels() == 1 || channels() == 0) ? 0 : stride(2);
+                return (channels() == 1 || channels() == 0) ? 0 : stride(1);
             }
             
             void *rowp(int r) override {
@@ -70,7 +70,6 @@ namespace im {
                 host += (r * rowp_stride());
                 return static_cast<void *>(host);
             }
-            
             
             uint8_t &operator()(int x, int y=0, int z=0) {
                 // _ASSERT(x < buffer.extents[0], "[imread] X coordinate too large");
@@ -120,16 +119,16 @@ namespace im {
                 buffer.min[2] = 0;
                 
                 size_t size = buffer.extent[0] * buffer.extent[1] * buffer.extent[2];
-                //uint8_t *alloc_ptr = new uint8_t[sizeof(T) * size + 40];
-                //buffer.host = alloc_ptr;
-                buffer.host = new uint8_t[sizeof(T) * size + 40];
+                uint8_t *alloc_ptr = new uint8_t[sizeof(T) * size + 40];
+                buffer.host = alloc_ptr;
+                //buffer.host = new uint8_t[sizeof(T) * size + 40];
                 buffer.dev = 0;
                 buffer.host_dirty = false;
                 buffer.dev_dirty = false;
                 
                 while ((size_t)buffer.host & 0x1f) { buffer.host++; }
                 return std::unique_ptr<Image>(
-                    new HalideBuffer(std::move(buffer), ndim));
+                    new HalideBuffer(std::move(buffer), ndim, alloc_ptr));
             }
     };
 

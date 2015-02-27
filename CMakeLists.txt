@@ -38,6 +38,14 @@ find_package(JPEG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
+
+# Add the project include directory
+include_directories(${${PROJECT_NAME}_include_dir})
+include_directories("${CMAKE_BINARY_DIR}/../include")
+link_directories(/usr/local/lib)
+
+find_package(Halide REQUIRED)
+
 include_directories(
     ${PNG_INCLUDE_DIR}
     ${JPEG_INCLUDE_DIR}
@@ -45,12 +53,9 @@ include_directories(
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR})
 
-#Add the project include directory
-include_directories(${${PROJECT_NAME}_include_dir})
-include_directories("${CMAKE_BINARY_DIR}/../include")
-link_directories(/usr/local/lib)
+include_directories(${HALIDE_INCLUDE_DIR})
 
-#Set the source files required to build the library
+# Set the source files required to build the library
 include(fileList.cmake)
 
 add_definitions(-std=c++1y -stdlib=libc++)
