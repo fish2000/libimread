@@ -42,10 +42,10 @@ if (NOT(HALIDE_FOUND))
             HALIDERUNTIME_FOUND_HEADER)
     endif(HALIDE_FOUND_HEADER)
     
+    # if-else mess is if-elsey (I know)
     if (HALIDERUNTIME_FOUND_HEADER)
         # NOOp
     else(HALIDERUNTIME_FOUND_HEADER)
-        
         if (HALIDE_FOUND_HEADER)
             # NOOp
         else(HALIDE_FOUND_HEADER)
@@ -65,7 +65,7 @@ set(HALIDE_INCLUDE_DIR HALIDE_FOUND_HEADER)
 set(HALIDE_LIBRARIES ${HALIDE_LIBRARY})
 set(HALIDE_INCLUDE_DIRS ${HALIDE_INCLUDE_DIR})
 
-# 
+# and then this one lets you bar mitzvah your variables -- I have no idea what this does:
 mark_as_advanced(
     HALIDE_LIBRARY      HALIDE_INCLUDE_DIR
     HALIDE_LIBRARIES    HALIDE_INCLUDE_DIRS)
