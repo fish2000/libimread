@@ -75,7 +75,8 @@ target_link_libraries(imread
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES})
+    ${HALIDE_LIBRARIES}
+    ${JEMALLOC_LIBRARIES})
 
 install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
