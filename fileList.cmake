@@ -7,7 +7,7 @@ set(srcs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${source_dir})
 
 # Configure the project-settings header file
 configure_file(
-    "${hdrs_dir}/libimread.cmake.hpp"
+    "${hdrs_dir}/libimread.hpp.in"
     "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
 
 # Project header files

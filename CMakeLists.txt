@@ -10,10 +10,9 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 project(libimread)
 
 # Go through some stuff
-set(libimread_VERSION_MAJOR 0)
-set(libimread_VERSION_MINOR 1)
-set(libimread_VERSION_PATCH 2)
-
+set(libimread_VERSION_MAJOR "0")
+set(libimread_VERSION_MINOR "1")
+set(libimread_VERSION_PATCH "2")
 
 # If the build script is called from a parent project,
 # use the configuration from there.
