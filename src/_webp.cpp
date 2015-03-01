@@ -1,11 +1,12 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
+#include <webp/decode.h>
+
+#include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/_webp.hh>
 #include <libimread/tools.hh>
-
-#include <webp/decode.h>
 
 namespace im {
 

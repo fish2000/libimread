@@ -4,6 +4,8 @@
 #ifndef LPC_WEBP_H_INCLUDE_GUARD_
 #define LPC_WEBP_H_INCLUDE_GUARD_
 
+#include <libimread/libimread.hpp>
+
 namespace im {
 
     class WebPFormat : public ImageFormat {

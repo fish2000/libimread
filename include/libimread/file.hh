@@ -10,6 +10,7 @@
     #include <sys/types.h>
 #endif
 
+#include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 
 namespace im {

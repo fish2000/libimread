@@ -4,6 +4,7 @@
 #ifndef LPC_JPEG_H_INCLUDE_GUARD_THU_FEB__2_18_14_07_WET_2012
 #define LPC_JPEG_H_INCLUDE_GUARD_THU_FEB__2_18_14_07_WET_2012
 
+#include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 
 namespace im {

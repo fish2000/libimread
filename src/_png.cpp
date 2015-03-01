@@ -1,6 +1,11 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
+#include <cstring>
+#include <vector>
+#include <sstream>
+
+#include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/_png.hh>
 #include <libimread/tools.hh>
@@ -10,10 +15,6 @@
 #else
     #include <png.h>            /* this is the standard location */
 #endif
-
-#include <cstring>
-#include <vector>
-#include <sstream>
 
 namespace im {
     

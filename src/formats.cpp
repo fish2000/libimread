@@ -3,6 +3,7 @@
 
 #include <cstring>
 
+#include <libimread/libimread.hpp>
 #include <libimread/formats.hh>
 #include <libimread/_bmp.hh>
 #include <libimread/_jpeg.hh>

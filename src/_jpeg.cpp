@@ -1,5 +1,7 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
+
+#include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/_jpeg.hh>
 

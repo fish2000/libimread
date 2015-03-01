@@ -1,12 +1,18 @@
 # Author: Félix C. Morency
 # 2011.10
 
-#To keep the file list clean
+# To keep the file list clean
 set(hdrs_dir ${${PROJECT_NAME}_include_dir})
 set(srcs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${source_dir})
 
-#Project header files
+# Configure the project-settings header file
+configure_file(
+    "${hdrs_dir}/libimread.cmake.hpp"
+    "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
+
+# Project header files
 set(hdrs
+    ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/_bmp.hh
     ${hdrs_dir}/_jpeg.hh
@@ -26,8 +32,8 @@ set(hdrs
     ${hdrs_dir}/tools.hh
 )
 
-#Project source files
-set(srcs    
+# Project source files
+set(srcs
     ${srcs_dir}/_bmp.cpp
     ${srcs_dir}/_jpeg.cpp
     ${srcs_dir}/_lsm.cpp

@@ -1,2 +1,17 @@
 
-namespace im {}
+#ifndef LIBIMREAD_CMAKE_H_
+#define LIBIMREAD_CMAKE_H_
+
+#include <string>
+using namespace std;
+
+#define IM_VERSION_MAJOR @libimread_VERSION_MAJOR@
+#define IM_VERSION_MINOR @libimread_VERSION_MINOR@
+#define IM_VERSION_PATCH @libimread_VERSION_PATCH@
+#define IM_VERSION() IM_VERSION_MAJOR.IM_VERSION_MINOR.IM_VERSION_PATCH
+
+namespace im {
+    static const string kVERSION = IM_VERSION();
+}
+
+#endif /// LIBIMREAD_CMAKE_H_

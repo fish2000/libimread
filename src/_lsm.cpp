@@ -39,6 +39,7 @@
 =========================================================================
 */
 
+#include <libimread/libimread.hpp>
 #include <libimread/_lsm.hh>
 
 namespace {

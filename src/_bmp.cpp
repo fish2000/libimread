@@ -3,6 +3,7 @@
 
 #define NO_IMPORT_ARRAY
 
+#include <libimread/libimread.hpp>
 #include <libimread/_bmp.hh>
 
 namespace im {

@@ -19,6 +19,7 @@
  #include <unistd.h>
 #endif
 
+#include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 
 #ifdef __GNUC__

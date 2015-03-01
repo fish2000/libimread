@@ -4,8 +4,10 @@
 #ifndef LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
 #define LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
 
-#include <libimread/base.hh>
 #include <vector>
+
+#include <libimread/libimread.hpp>
+#include <libimread/base.hh>
 
 namespace im {
     

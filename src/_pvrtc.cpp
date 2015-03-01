@@ -4,9 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/_pvrtc.hh>
 #include <libimread/tools.hh>
+
 #include <libimread/pvr.hh>
 
 namespace im {
