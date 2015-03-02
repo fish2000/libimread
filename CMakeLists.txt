@@ -32,6 +32,7 @@ include(build_config)
 # set. This allow the library to be used by an external project without
 # overwritting the variable.
 if_defined_set(${PROJECT_NAME}_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+SET(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
 # Load the project configuration file. CMake will search in the directory setted
 # above for a module file named libimreadConfig.cmake. The configuration
@@ -68,7 +69,7 @@ include(fileList.cmake)
 add_definitions(-std=c++1y -stdlib=libc++)
 
 # Build the library
-add_library(imread-static STATIC ${srcs} ${hdrs})
+#add_library(imread-static STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})
 target_link_libraries(imread
     png z
@@ -78,7 +79,11 @@ target_link_libraries(imread
     ${HALIDE_LIBRARIES}
     ${JEMALLOC_LIBRARIES})
 
-install(TARGETS imread-static DESTINATION lib)
+# Run the tests
+add_subdirectory(${TEST_SOURCE_DIR})
+add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
+
+#install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
 install(DIRECTORY ${PROJECT_BINARY_DIR}/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "libimread.hpp")

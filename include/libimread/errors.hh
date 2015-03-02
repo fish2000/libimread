@@ -46,6 +46,9 @@ DECLARE_IMREAD_ERROR_TYPE(ProgrammingError, "Programming Error");
 DECLARE_IMREAD_ERROR_TYPE(OptionsError, "Options Error");
 DECLARE_IMREAD_ERROR_TYPE(WriteOptionsError, "Write Options Error");
 
+DECLARE_IMREAD_ERROR_TYPE(BufferAllocatorError, "Buffer Allocator Error");
+
+
 }
 
 #endif // LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
