@@ -5,11 +5,38 @@
 #define LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
 
 #include <vector>
+#include <string>
+#include <memory>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 
 namespace im {
+
+    inline const char *split_filename(const char *const filename,
+                                      char *const body = 0) {
+        if (!filename) {
+            if (body) { *body = 0; }
+            return 0;
+        }
+        
+        const char *p = 0;
+        for (const char *np = filename; np >= filename && (p = np);
+             np = std::strchr(np, '.') + 1) {
+        }
+        if (p == filename) {
+            if (body) { std::strcpy(body, filename); }
+            return filename + std::strlen(filename);
+        }
+        
+        const unsigned int l = static_cast<unsigned int>(p - filename - 1);
+        if (body) {
+            std::memcpy(body, filename, l);
+            body[l] = 0;
+        }
+        
+        return p;
+    }
     
     template <typename T>
     void ptr_swap(T*& oA, T*& oB) {

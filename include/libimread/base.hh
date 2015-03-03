@@ -90,7 +90,7 @@ namespace im {
             virtual void* rowp(int r) = 0;
 
             virtual int nbits() const = 0;
-            int nbytes() const {
+            virtual int nbytes() const {
                 const int bits = this->nbits();
                 return (bits / 8) + bool(bits % 8);
             }
@@ -119,12 +119,23 @@ namespace im {
 
     class ImageWithMetadata {
         public:
-            ImageWithMetadata():meta_(0) { }
-            virtual ~ImageWithMetadata() { delete meta_; };
-            std::string* get_meta() { return meta_; }
-            void set_meta(const std::string& m) { if (meta_) delete meta_; meta_ = new std::string(m); }
+            ImageWithMetadata()
+                :meta(0)
+                {}
+            ImageWithMetadata(const std::string &m)
+                :meta(m == "" ? 0 : new std::string(m))
+                {}
+            
+            virtual ~ImageWithMetadata() { delete meta; };
+            
+            std::string *get_meta() { return meta; }
+            void set_meta(const std::string &m) {
+                if (meta) { delete meta; }
+                meta = new std::string(m);
+            }
+            
         private:
-            std::string* meta_;
+            std::string *meta;
     };
 
     /// This class *owns* its members and will delete them if destroyed

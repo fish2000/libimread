@@ -82,6 +82,14 @@ target_link_libraries(imread
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
+link_directories(${CMAKE_BINARY_DIR})
+target_link_libraries("test_${PROJECT_NAME}"
+    png z imread
+    ${TIFF_LIBRARIES}
+    ${JPEG_LIBRARIES}
+    ${WEBP_LIBRARIES}
+    ${HALIDE_LIBRARIES}
+    ${JEMALLOC_LIBRARIES})
 
 #install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
