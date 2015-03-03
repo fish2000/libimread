@@ -43,8 +43,8 @@ namespace im {
         T* oT = oA; oA = oB; oB = oT;
     }
     
-    template<typename T>
-    inline std::vector<T*> allrows(Image& im) {
+    template <typename T>
+    inline std::vector<T*> allrows(Image &im) {
         std::vector<T*> res;
         const int h = im.dim(0);
         for (int r = 0; r != h; ++r) {
@@ -53,16 +53,16 @@ namespace im {
         return res;
     }
     
-    inline std::vector<byte> full_data(byte_source& s) {
+    inline std::vector<byte> full_data(byte_source &s) {
         std::vector<byte> res;
         byte buffer[4096];
-        while (int n = s.read(buffer, sizeof buffer)) {
+        while (int n = s.read(buffer, sizeof(buffer))) {
             res.insert(res.end(), buffer, buffer + n);
         }
         return res;
     }
     
-    inline uint8_t read8(byte_source& s) {
+    inline uint8_t read8(byte_source &s) {
         byte out;
         if (s.read(&out, 1) != 1) {
             throw CannotReadError("File ended prematurely");

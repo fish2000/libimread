@@ -7,8 +7,8 @@
 #include <cstring>
 #include <memory>
 #include <utility>
-#include <stdio.h>
-#include <stdint.h>
+#include <cstdio>
+#include <cstdint>
 
 #include <Halide.h>
 
@@ -28,9 +28,6 @@ namespace im {
     template <typename pT>
     class HybridImage : public HalImage<pT>, public Image, public MetaImage {
         public:
-            void finalize() {}
-            uint8_t *release(uint8_t *ptr) { return nullptr; }
-            
             HybridImage()
                 :HalImage<pT>(), Image(), MetaImage()
                 {}
@@ -58,7 +55,7 @@ namespace im {
                 return sizeof(pT) * 8;
             }
             
-            inline int nbytes() const {
+            virtual int nbytes() const override {
                 return sizeof(pT);
             }
             
@@ -70,15 +67,31 @@ namespace im {
                 return this->extent(d);
             }
             
-            inline int rowp_stride() const {
-                return this->channels() == 1 ? 0 : this->stride(1);
+            inline off_t rowp_stride() const {
+                return this->channels() == 1 ? 0 : off_t(this->stride(1));
             }
             
-            void *rowp(int r) override {
+            /*
+            virtual void *at(int r) {
+                return (void *)((pT *)this->data())[r*this->stride(1)];
+            }
+            virtual void *at(int x, int y=0, int z=0) {
+                return (void *)((pT *)this->data())[x*this->stride(0) + y*this->stride(1) + z*this->stride(2)];
+            }
+            */
+            
+            virtual void *rowp(int r) override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
-                pT *host = this->data();
-                host += (r * rowp_stride());
+                pT *host = (pT *)this->data();
+                host += off_t(r * rowp_stride());
                 return static_cast<void *>(host);
+            }
+            
+            template <typename T>
+            T* rowp_as(const int r) {
+                T *host = (T *)this->data();
+                host += off_t(r * rowp_stride());
+                return host;
             }
             
     };
@@ -137,7 +150,6 @@ namespace im {
             
             _ASSERT(image.data(), "[imread] No data!");
             _ASSERT(image.defined(), "[imread] Output image undefined!");
-            
             // fprintf(stderr, "Returning image: %ix%ix%i\n",
             //     image.width(), image.height(), image.channels());
             

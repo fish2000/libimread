@@ -6,10 +6,10 @@
 #ifndef _STATIC_IMAGE_H
 #define _STATIC_IMAGE_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <memory>
 #include <limits>
-#include <stdlib.h>
+#include <cstdlib>
 #include <cassert>
 
 #ifndef BUFFER_T_DEFINED

@@ -27,9 +27,9 @@
 
 #include <libimread/pvr.hh>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 
 unsigned int countBits(unsigned int x) {
     x  = x - ((x >> 1) & 0x55555555);

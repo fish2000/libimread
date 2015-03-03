@@ -66,7 +66,7 @@ include_directories(${JEMALLOC_INCLUDE_DIR})
 # Set the source files required to build the library
 include(fileList.cmake)
 
-add_definitions(-std=c++1y -stdlib=libc++)
+add_definitions(-std=c++1y -stdlib=libc++ -O3)
 
 # Build the library
 #add_library(imread-static STATIC ${srcs} ${hdrs})

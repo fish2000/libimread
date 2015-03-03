@@ -1,8 +1,8 @@
 // Copyright 2012 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>

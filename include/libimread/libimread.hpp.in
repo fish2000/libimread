@@ -2,8 +2,8 @@
 #ifndef LIBIMREAD_CMAKE_H_
 #define LIBIMREAD_CMAKE_H_
 
-#include <stdlib.h>
-#include <jemalloc/jemalloc.h>
+#include <cstdlib>
+/*#include <jemalloc/jemalloc.h>*/
 
 #include <string>
 using namespace std;

@@ -25,9 +25,9 @@
 
 #include <libimread/pvr.hh>
 
-#include <stdint.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdint>
+#include <cstring>
+#include <cassert>
 
 typedef struct { uint32_t PackedData[2]; } AMTC_BLOCK_STRUCT;
 

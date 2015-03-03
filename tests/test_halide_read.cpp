@@ -20,6 +20,21 @@ TEST_CASE("Read a JPEG and rewrite it as a PNG via image_io.h", "[read-jpeg-writ
     //     "/tmp/YO_DOGG.png");
 }
 
+TEST_CASE("Read a PNG", "[read-png]") {
+    U8Image halim = im::halide::read(
+        "/Users/fish/Downloads/dcaedd97ee8f64e63a21a14548e6a232.png");
+    //U8Image halim = ext::load<uint8_t>("/Users/fish/Downloads/dcaedd97ee8f64e63a21a14548e6a232.png");
+    ext::save(halim,
+        "/tmp/OH_DAWG666.png");
+}
+
+TEST_CASE("Read a TIFF", "[read-tiff]") {
+    U8Image halim = im::halide::read(
+        "/Library/User Pictures/Fun/Medal.tif");
+    ext::save(halim,
+        "/tmp/TIFF_DUG986.png");
+}
+
 TEST_CASE("Read a JPEG", "[read-jpeg]") {
     U8Image halim = im::halide::read(
         "/Users/fish/Downloads/480165102_76fbb0739a_o.jpg");

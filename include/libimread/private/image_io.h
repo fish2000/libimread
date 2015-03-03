@@ -9,9 +9,9 @@
 
 #include <png.h>
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 #include <algorithm>
-#include <string.h>
+#include <cstring>
 
 //#include <sys/time.h>
 

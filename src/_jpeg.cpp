@@ -5,8 +5,8 @@
 #include <libimread/base.hh>
 #include <libimread/_jpeg.hh>
 
-#include <stdio.h>
-#include <setjmp.h>
+#include <cstdio>
+#include <csetjmp>
 
 extern "C" {
     #include <jpeglib.h>

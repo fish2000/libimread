@@ -27,7 +27,7 @@
 #ifndef PVR_H
 #define PVR_H
 
-#include <stdint.h>
+#include <cstdint>
 
 enum ePVRPixelType
 {

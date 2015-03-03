@@ -5,12 +5,12 @@
 #define LPC_IMREAD_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 
 #include <inttypes.h>
+#include <assert.h>
 #include <memory>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <map>
-#include <assert.h>
 
 #if defined(_MSC_VER)
  #include <io.h>

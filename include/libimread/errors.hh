@@ -4,7 +4,7 @@
 #ifndef LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 #define LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <exception>
 
