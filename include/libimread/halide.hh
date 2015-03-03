@@ -110,8 +110,7 @@ namespace im {
                                           int d3, int d4) {
                 return std::unique_ptr<Image>(
                     new HybridImage<T>(
-                        xWIDTH, xHEIGHT, xDEPTH,
-                        *name));
+                        xWIDTH, xHEIGHT, xDEPTH));
             }
     };
 
@@ -121,10 +120,11 @@ namespace im {
 
     namespace halide {
         
-        static const options_map opts; /// not currently used when reading
+        //static const options_map opts; /// not currently used when reading
         
         template <typename T = uint8_t>
         Halide::Image<T> read(const std::string &filename) {
+            options_map opts;
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(get_format(split_filename(filename.c_str())));
             

@@ -14,6 +14,8 @@ configure_file(
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     ${hdrs_dir}/private/buffer_t.h
+    ${hdrs_dir}/private/image_io.h
+    ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/_bmp.hh
     ${hdrs_dir}/_jpeg.hh
     ${hdrs_dir}/_lsm.hh
