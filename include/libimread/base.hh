@@ -31,50 +31,49 @@
 #endif
 
 namespace im {
-
+    
     typedef uint8_t byte;
-
+    
     struct seekable {
         virtual ~seekable() { }
         virtual bool can_seek() const { return false; }
-
         virtual size_t seek_absolute(size_t) { throw NotImplementedError(); }
         virtual size_t seek_relative(int) { throw NotImplementedError(); }
         virtual size_t seek_end(int) { throw NotImplementedError(); }
     };
 
     class byte_source : virtual public seekable {
+        
         public:
             virtual ~byte_source() { }
             virtual size_t read(byte* buffer, size_t) warn_if_return_not_used = 0;
-            void read_check(byte* buffer, size_t n) {
-                if (this->read(buffer, n) != n) {
-                    throw CannotReadError("File ended prematurely");
-                }
-            }
-    #ifdef _GLIBCXX_DEBUG
+            
             template <size_t Nelems>
             size_t read(byte (&arr)[Nelems], size_t n) {
                 assert(n <= Nelems);
                 byte* p = arr;
                 return this->read(p, n);
             }
-    #endif
+            
+            void read_check(byte* buffer, size_t n) {
+                if (this->read(buffer, n) != n) {
+                    throw CannotReadError("File ended prematurely");
+                }
+            }
     };
 
     class byte_sink : virtual public seekable {
         public:
             virtual ~byte_sink() { }
-
             virtual size_t write(const byte* buffer, size_t n) warn_if_return_not_used = 0;
-    #ifdef _GLIBCXX_DEBUG
+            
             template <size_t Nelems>
             size_t write(byte (&arr)[Nelems], size_t n) {
                 assert(n <= Nelems);
                 byte* p = arr;
                 return this->write(p, n);
             }
-    #endif
+            
             void write_check(const byte* buffer, size_t n) {
                 if (this->write(buffer, n) != n) {
                     throw CannotWriteError("Writing failed");
@@ -86,23 +85,22 @@ namespace im {
     class Image {
         public:
             virtual ~Image() { }
-
+            
             virtual void* rowp(int r) = 0;
-
+            
             virtual int nbits() const = 0;
             virtual int nbytes() const {
                 const int bits = this->nbits();
                 return (bits / 8) + bool(bits % 8);
             }
-
+            
             virtual int ndims() const = 0;
             virtual int dim(int) const = 0;
-
             virtual int dim_or(int dim, int def) const {
                 if (dim >= this->ndims()) return def;
                 return this->dim(dim);
             }
-
+            
             template<typename T>
             T* rowp_as(const int r) {
                 return static_cast<T*>(this->rowp(r));
@@ -113,7 +111,9 @@ namespace im {
         public:
             virtual ~ImageFactory() { }
             virtual std::unique_ptr<Image>
-                create(int nbits, int d0, int d1, int d2, int d3=-1, int d4=-1) = 0;
+                create(int nbits,
+                    int d0, int d1, int d2,
+                    int d3=-1, int d4=-1) = 0;
         protected:
     };
 
@@ -127,8 +127,8 @@ namespace im {
                 {}
             
             virtual ~ImageWithMetadata() { delete meta; };
-            
             std::string *get_meta() { return meta; }
+            
             void set_meta(const std::string &m) {
                 if (meta) { delete meta; }
                 meta = new std::string(m);
@@ -145,9 +145,10 @@ namespace im {
             ~image_list() {
                 for (unsigned i = 0; i != content.size(); ++i) delete content[i];
             }
+            
             std::vector<Image*>::size_type size() const { return content.size(); }
             void push_back(std::unique_ptr<Image> p) { content.push_back(p.release()); }
-
+            
             /// After release(), all of the pointers will be owned by the caller
             /// who must figure out how to delete them. Note that release() resets the list.
             std::vector<Image*> release() {
@@ -190,64 +191,61 @@ namespace im {
             if (holds_ == ns_string) return str_.c_str();
             return 0;
         }
-
+        
         private:
             std::string str_;
             int int_;
             double double_;
             enum { ns_empty, ns_string, ns_int, ns_double } holds_;
     };
-
-
+    
     typedef std::map<std::string, number_or_string> options_map;
-
-    inline
-    const char* get_optional_cstring(const options_map& opts, const std::string key) {
+    
+    inline const char* get_optional_cstring(const options_map& opts, const std::string key) {
         options_map::const_iterator iter = opts.find(key);
         if (iter == opts.end()) return 0;
         return iter->second.maybe_c_str();
     }
-
-    inline
-    int get_optional_int(const options_map& opts, const std::string key, const int def) {
+    
+    inline int get_optional_int(const options_map& opts, const std::string key, const int def) {
         options_map::const_iterator iter = opts.find(key);
         if (iter == opts.end()) return def;
         int v;
         if (iter->second.get_int(v)) { return v; }
         return def;
     }
-
-    inline
-    bool get_optional_bool(const options_map& opts, const std::string key, const bool def) {
+    
+    inline bool get_optional_bool(const options_map& opts, const std::string key, const bool def) {
         return get_optional_int(opts, key, def);
     }
-
-    inline
-    bool match_magic(byte_source* src, const char* magic, const size_t n) {
+    
+    inline bool match_magic(byte_source* src, const char* magic, const size_t n) {
         if (!src->can_seek()) return false;
         std::vector<byte> buf;
         buf.resize(n);
         const size_t n_read = src->read(&buf.front(), n);
         src->seek_relative(-n_read);
-
+        
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }
-
+    
     class ImageFormat {
         public:
             virtual ~ImageFormat() { }
-
+            
             virtual bool can_read() const { return false; }
             virtual bool can_read_multi() const { return false; }
             virtual bool can_write() const { return false; }
             virtual bool can_write_metadata() const { return false; }
-
+            
             virtual std::unique_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) {
                 throw NotImplementedError();
             }
+            
             virtual std::unique_ptr<image_list> read_multi(byte_source* src, ImageFactory* factory, const options_map& opts) {
                 throw NotImplementedError();
             }
+            
             virtual void write(Image* input, byte_sink* output, const options_map& opts) {
                 throw NotImplementedError();
             }

@@ -16,6 +16,7 @@ set(hdrs
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
     ${hdrs_dir}/private/static_image.h
+    ${hdrs_dir}/_apple.hh
     ${hdrs_dir}/_bmp.hh
     ${hdrs_dir}/_jpeg.hh
     ${hdrs_dir}/_lsm.hh

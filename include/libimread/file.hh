@@ -29,9 +29,7 @@ namespace im {
     class fd_source_sink : public byte_source, public byte_sink {
         
         public:
-            
             fd_source_sink() {}
-            
             fd_source_sink(int fd)
                 :fd_(fd)
                 { }

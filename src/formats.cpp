@@ -5,6 +5,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/formats.hh>
+#include <libimread/_apple.hh>
 #include <libimread/_bmp.hh>
 #include <libimread/_jpeg.hh>
 #include <libimread/_lsm.hh>

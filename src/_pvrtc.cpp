@@ -26,7 +26,7 @@ namespace im {
     
         if (pvr.data) {
             byte* rowp = output->rowp_as<byte>(0);
-            memcpy(rowp, &pvr.data[0], pvr.width*pvr.height*4);
+            std::memcpy(rowp, &pvr.data[0], pvr.width*pvr.height*4);
         } else {
             throw CannotReadError("im::PVRTCFormat::read(): Error reading PVRTC file.");
         }

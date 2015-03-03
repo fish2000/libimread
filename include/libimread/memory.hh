@@ -13,12 +13,11 @@ namespace im {
     class memory_source : public byte_source {
         public:
             memory_source(const byte* c, const int len)
-                :data_(c)
-                ,len_(len)
-                ,pos_(0)
+                :data_(c), len_(len), pos_(0)
                 { }
+            
             ~memory_source() { }
-
+            
             virtual size_t read(byte* buffer, size_t n) {
                 if (pos_ + n > len_) n = len_-pos_;
                 std::memmove(buffer, data_ + pos_, n);
