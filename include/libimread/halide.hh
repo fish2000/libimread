@@ -133,27 +133,15 @@ namespace im {
 
     namespace halide {
         
-        //static const options_map opts; /// not currently used when reading
+        static const options_map opts; /// not currently used when reading
         
-        template <typename T = uint8_t>
+        template <typename T = byte>
         Halide::Image<T> read(const std::string &filename) {
-            options_map opts;
             HalideFactory<T> factory(filename);
-            std::unique_ptr<ImageFormat> format(get_format(split_filename(filename.c_str())));
-            
-            _ASSERT(format.get(), "[imread] Format is unknown to libimread\n");
-            _ASSERT(format->can_read(), "[imread] Format is unreadable by libimread\n");
-            
-            std::unique_ptr<byte_source> input(new file_source_sink(filename));
+            std::unique_ptr<ImageFormat> format(format_for_filename(filename));
+            std::unique_ptr<byte_source> input(new FileSource(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
-            HybridImage<T> image = dynamic_cast<HybridImage<T>&>(*output);
-            
-            _ASSERT(image.data(), "[imread] No data!");
-            _ASSERT(image.defined(), "[imread] Output image undefined!");
-            // fprintf(stderr, "Returning image: %ix%ix%i\n",
-            //     image.width(), image.height(), image.channels());
-            
-            return image;
+            return dynamic_cast<HybridImage<T>&>(*output);
         }
         
     }

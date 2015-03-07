@@ -7,12 +7,103 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <list>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 
 namespace im {
-
+    
+    namespace pre {
+        
+        /// based on variadic_capture by Scott Schurr
+        /*
+        template <typename... Types>
+        class Store {
+            private:
+                using Storage = std::tuple<Types...>;
+                Storage storage;
+            public:
+                void put(Types... values) {
+                    storage = std::make_tuple(values...);
+                }
+                constexpr std::size_t count() const {
+                    return sizeof...(Types);
+                }
+                template <std::size_t idx>
+                auto get -> const typename std::tuple_element<idx, Storage>::type& {
+                    return (std::get<idx>(storage));
+                }
+                template <std::size_t idx>
+                static auto preget -> const typename std::tuple_element<idx, Storage>::type& {
+                    return (std::get<idx>(storage));
+                }
+        };
+        */
+        
+        /// based on str_const by Scott Schurr
+        constexpr unsigned int inrange(unsigned int idx, unsigned int len) {
+            return idx >= len ? throw std::out_of_range("n/a") : idx;
+        }
+        
+        template <unsigned N>
+        constexpr char nth(const char (&chars)[N], unsigned int i) {
+            return inrange(i, N-1), chars[i];
+        }
+        
+        constexpr bool static_compare(const char *a, const char *b) {
+            return *a == *b && (*a == '\0' || static_compare(a + 1, b + 1));
+        }
+        
+        /*
+        class String {
+        private:
+                const char *cstr;
+                const std::size_t csiz;
+                static constexpr std::size_t fnv_prime = (
+                    sizeof(std::size_t) == 8 ? 1099511628211u : 16777619u);
+                static constexpr std::size_t fnv_offset = (
+                    sizeof(std::size_t) == 8 ? 14695981039346656037u : 2166136261u);
+            public:
+                template <std::size_t N>
+                constexpr String(const char(&a))
+                    : cstr(a), csiz(N-1)
+                    {}
+                constexpr String(const char* a, std::size_t Nn)
+                    : cstr(a), csiz(Nn-1)
+                    {}
+                constexpr String()
+                    : cstr(""), csiz(0)
+                    {}
+                constexpr operator const char*() { return cstr; }
+                constexpr char operator[](std::size_t n) {
+                    return n < csiz ? cstr[n] : throw std::out_of_range("n/a");
+                }
+                constexpr bool operator==(String const& rhs) {
+                    return static_compare(cstr, rhs.c_str());
+                }
+                constexpr bool operator==(const char *rhs) {
+                    return static_compare(cstr, rhs);
+                }
+                constexpr std::size_t size() const { return csiz; }
+                constexpr char first() const { return cstr[0]; }
+                constexpr char last() const { return cstr[csiz-1]; }
+                constexpr std::size_t end() const { return csiz; }
+                constexpr std::size_t begin() const { return 0; }
+                constexpr const char *c_str() const { return cstr; }
+                constexpr std::size_t fnv_1a_hash(unsigned int i) const {
+                    return (i == 0 ? fnv_offset : ((fnv_1a_hash(i-1) ^ cstr[i]) * fnv_prime));
+                }
+        };
+        
+        template <typename T>
+        struct format_suffixes {
+            constexpr list<String> suffixes {String(".h"), String(".c")};
+        };
+        
+        */
+    }
+    
     inline const char *split_filename(const char *const filename,
                                       char *const body = 0) {
         if (!filename) {
@@ -70,16 +161,16 @@ namespace im {
         return out;
     }
     
-    inline uint16_t read16_le(byte_source& s) {
+    inline uint16_t read16_le(byte_source &s) {
         uint8_t b0 = read8(s);
         uint8_t b1 = read8(s);
-        return (uint16_t(b1) << 8)|uint16_t(b0);
+        return (uint16_t(b1) << 8) | uint16_t(b0);
     }
     
-    inline uint32_t read32_le(byte_source& s) {
+    inline uint32_t read32_le(byte_source &s) {
         uint16_t s0 = read16_le(s);
         uint16_t s1 = read16_le(s);
-        return (uint32_t(s1) << 16)|uint32_t(s0);
+        return (uint32_t(s1) << 16) | uint32_t(s0);
     }
     
     struct stack_based_memory_pool {
@@ -88,16 +179,16 @@ namespace im {
         stack_based_memory_pool() { }
         
         ~stack_based_memory_pool() {
-            for (unsigned i = 0; i != data_.size(); ++i) {
-                operator delete(data_[i]);
-                data_[i] = 0;
+            for (unsigned i = 0; i != data.size(); ++i) {
+                operator delete(data[i]);
+                data[i] = 0;
             }
         }
         
-        void* allocate(const int n) {
-            data_.reserve(data_.size() + 1);
-            void* d = operator new(n);
-            data_.push_back(d);
+        void *allocate(const int n) {
+            data.reserve(data.size() + 1);
+            void *d = operator new(n);
+            data.push_back(d);
             return d;
         }
         
@@ -107,7 +198,7 @@ namespace im {
         }
         
         private:
-            std::vector<void*> data_;
+            std::vector<void*> data;
     };
 
 }

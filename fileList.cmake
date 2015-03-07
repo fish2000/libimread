@@ -28,9 +28,10 @@ set(hdrs
     ${hdrs_dir}/errors.hh
     ${hdrs_dir}/file.hh
     ${hdrs_dir}/formats.hh
+    ${hdrs_dir}/halide.hh
     ${hdrs_dir}/memory.hh
     # ${hdrs_dir}/numpy.hh
-    ${hdrs_dir}/halide.hh
+    ${hdrs_dir}/options.hh
     ${hdrs_dir}/pvr.hh
     ${hdrs_dir}/tools.hh
 )

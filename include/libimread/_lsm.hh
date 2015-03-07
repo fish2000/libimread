@@ -68,11 +68,17 @@ namespace im {
 
     class LSMFormat : public ImageFormat {
         public:
-            bool can_read() const { return true; }
-
-            std::unique_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts);
+            typedef std::true_type can_read;
+            
+            std::unique_ptr<Image> read(byte_source *src,
+                                        ImageFactory *factory,
+                                        const options_map &opts);
     };
-
+    
+    namespace format {
+        using LSM = LSMFormat;
+    }
+    
 }
 
 #endif

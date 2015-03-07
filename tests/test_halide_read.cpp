@@ -13,31 +13,25 @@ namespace ext {
 
 TEST_CASE("Read a JPEG and rewrite it as a PNG via image_io.h", "[read-jpeg-write-png]") {
     U8Image halim = im::halide::read(
-        "/Users/fish/Downloads/480165102_76fbb0739a_o.jpg");
-    ext::save(halim,
-        "/tmp/YO_DOGG222.png");
-    // U8Image halim2 = im::halide::read(
-    //     "/tmp/YO_DOGG.png");
+        "../tests/data/____10kulMSe.jpg");
+    ext::save(halim, "/tmp/YO_DOGG222.png");
 }
 
 TEST_CASE("Read a PNG", "[read-png]") {
     U8Image halim = im::halide::read(
-        "/Users/fish/Downloads/dcaedd97ee8f64e63a21a14548e6a232.png");
-    //U8Image halim = ext::load<uint8_t>("/Users/fish/Downloads/dcaedd97ee8f64e63a21a14548e6a232.png");
-    ext::save(halim,
-        "/tmp/OH_DAWG666.png");
+        "../tests/data/roses_512_rrt_srgb.png");
+    ext::save(halim, "/tmp/OH_DAWG666.png");
 }
 
 TEST_CASE("Read a TIFF", "[read-tiff]") {
     U8Image halim = im::halide::read(
-        "/Library/User Pictures/Fun/Medal.tif");
-    ext::save(halim,
-        "/tmp/TIFF_DUG986.png");
+        "../tests/data/ptlobos.tif");
+    ext::save(halim, "/tmp/TIFF_DUG986.png");
 }
 
 TEST_CASE("Read a JPEG", "[read-jpeg]") {
     U8Image halim = im::halide::read(
-        "/Users/fish/Downloads/480165102_76fbb0739a_o.jpg");
+        "../tests/data/___7rCLnWE.jpg");
     
     CHECK( halim.data() != nullptr );
     CHECK( halim.data() != 0 );
@@ -45,7 +39,7 @@ TEST_CASE("Read a JPEG", "[read-jpeg]") {
 
 TEST_CASE("Check the dimensions of a new image", "[image-dims]") {
     U8Image halim = im::halide::read(
-        "/Users/fish/Downloads/dd1c09d792a053508ef7a785dc28cbc9.jpg");
+        "../tests/data/___85CAAOP.jpg");
     
     //WARN( "extent[0] = " << buf->extent[0] );
     
@@ -68,7 +62,7 @@ TEST_CASE("Check the dimensions of a new image", "[image-dims]") {
     WARN( "1.stride(2) = " << halim.stride(2) );
     
     U8Image halim2 = im::halide::read(
-        "/Users/fish/Downloads/480165102_76fbb0739a_o.jpg");
+        "../tests/data/__1n68Pmd.jpg");
     
     WARN( "2.extent(0) = " << halim2.extent(0) );
     WARN( "2.extent(1) = " << halim2.extent(1) );

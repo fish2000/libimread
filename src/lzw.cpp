@@ -10,12 +10,10 @@ using namespace im;
 
 struct code_stream {
     public:
-        code_stream(unsigned char* buf, unsigned long len)
-                :buf_(buf)
-                ,byte_pos_(0)
-                ,bit_pos_(0)
-                ,len_(len)
-        { }
+        code_stream(unsigned char *buf, unsigned long len)
+            :buf_(buf), byte_pos_(0), bit_pos_(0), len_(len)
+                { }
+        
         unsigned short getbit() {
             unsigned char val = buf_[byte_pos_];
             unsigned short res = (val & (1 << (8-bit_pos_)));
@@ -37,8 +35,9 @@ struct code_stream {
             }
             return res;
         }
+    
     private:
-        const unsigned char* buf_;
+        const unsigned char *buf_;
         int byte_pos_;
         int bit_pos_;
         const int len_;
@@ -53,11 +52,11 @@ std::string table_at(const std::vector<std::string> table, unsigned short index)
     return table.at(index - 258);
 }
 
-void write_string(std::vector<unsigned char>& output, std::string s) {
+void write_string(std::vector<unsigned char> &output, std::string s) {
     output.insert(output.end(), s.begin(), s.end());
 }
 
-std::vector<unsigned char> lzw_decode(void* buf, unsigned long len) {
+std::vector<unsigned char> lzw_decode(void *buf, unsigned long len) {
     std::vector<std::string> table;
     std::vector<unsigned char> output;
     code_stream st(static_cast<unsigned char*>(buf), len);
@@ -79,8 +78,7 @@ std::vector<unsigned char> lzw_decode(void* buf, unsigned long len) {
         } else if (code < 256 || (code - 258) < short(table.size())) {
             write_string(output, table_at(table,code));
             table.push_back(
-                    table_at(table,old_code) + table_at(table,code)[0]
-                    );
+                    table_at(table,old_code) + table_at(table,code)[0]);
             old_code = code;
         } else {
             std::string out_string = table_at(table, old_code) + table_at(table, old_code)[0];

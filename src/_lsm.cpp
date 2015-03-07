@@ -438,7 +438,8 @@ namespace im {
             return length;
         }
 
-        int LSMReader::ReadChannelName(const char *nameBuff, const int length,
+        int LSMReader::ReadChannelName(const char *nameBuff,
+                                       const int length,
                                        char *buffer) {
             for (int i = 0; i < length; ++i) {
                 buffer[i] = nameBuff[i];
@@ -999,7 +1000,8 @@ namespace im {
             }
         }
 
-        void LSMReader::DecodeLZWCompression(unsigned char *buffer, int size,
+        void LSMReader::DecodeLZWCompression(unsigned char *buffer,
+                                             int size,
                                              int bytes) {
             throw ProgrammingError("Not tested");
             std::vector<unsigned char> decoded = lzw_decode(buffer, size);
@@ -1142,7 +1144,7 @@ namespace im {
         }
 
         std::unique_ptr<Image> LSMReader::read(ImageFactory *factory,
-                                             const options_map &) {
+                                               const options_map &) {
             this->readHeader();
 
             const int dataType
@@ -1190,8 +1192,9 @@ namespace im {
 
     } // namespace
 
-    std::unique_ptr<Image> LSMFormat::read(byte_source *s, ImageFactory *factory,
-                                         const options_map &opts) {
+    std::unique_ptr<Image> LSMFormat::read(byte_source *s,
+                                           ImageFactory *factory,
+                                           const options_map &opts) {
         LSMReader reader(s);
         return reader.read(factory, opts);
     }

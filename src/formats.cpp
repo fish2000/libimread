@@ -15,26 +15,41 @@
 #include <libimread/_webp.hh>
 
 namespace im {
-
-    std::unique_ptr<ImageFormat> get_format(const char* format) {
-        using std::strcmp;
-        if (!strcmp(format, "png")) return std::unique_ptr<ImageFormat>(new PNGFormat);
-        if (!strcmp(format, "jpeg") || !strcmp(format, "jpg")) return std::unique_ptr<ImageFormat>(new JPEGFormat);
-        if (!strcmp(format, "lsm")) return std::unique_ptr<ImageFormat>(new LSMFormat);
-        if (!strcmp(format, "tiff") || !strcmp(format, "tif")) return std::unique_ptr<ImageFormat>(new TIFFFormat);
-        
-        if (!strcmp(format, "pvr")) return std::unique_ptr<ImageFormat>(new PVRTCFormat);
-        if (!strcmp(format, "pvrtc")) return std::unique_ptr<ImageFormat>(new PVRTCFormat);
-        
-        if (!strcmp(format, "stk")) return std::unique_ptr<ImageFormat>(new STKFormat);
-        if (!strcmp(format, "bmp")) return std::unique_ptr<ImageFormat>(new BMPFormat);
-        if (!strcmp(format, "webp")) return std::unique_ptr<ImageFormat>(new WebPFormat);
-        return std::unique_ptr<ImageFormat>(nullptr);
+    
+    namespace {
+        inline bool check(const char *format, const char *suffix) {
+            return !std::strcmp(format, suffix);
+        }
     }
     
-    const char* magic_format(byte_source* src) {
-        if (PNGFormat::match_format(src)) return "png";
-        if (JPEGFormat::match_format(src)) return "jpeg";
+    std::unique_ptr<ImageFormat> get_format(const char *format) {
+        using format_ptr = std::unique_ptr<ImageFormat>;
+        
+        if (check(format, "png")) { return format_ptr(new format::PNG); }
+        if (check(format, "jpg") || check(format, "jpeg")) { return format_ptr(new format::JPG); }
+        if (check(format, "tif") || check(format, "tiff")) { return format_ptr(new format::TIFF); }
+        if (check(format, "pvr") || check(format, "pvrtc")) { return format_ptr(new format::PVR); }
+        if (check(format, "webp")) { return format_ptr(new format::WebP); }
+        if (check(format, "bmp")) { return format_ptr(new format::BMP); }
+        if (check(format, "lsm")) { return format_ptr(new format::LSM); }
+        if (check(format, "stk")) { return format_ptr(new format::STK); }
+        
+        return format_ptr(nullptr);
+    }
+    
+    std::unique_ptr<ImageFormat> format_for_filename(const char *cfilename) {
+        return get_format(split_filename(cfilename));
+    }
+    std::unique_ptr<ImageFormat> format_for_filename(std::string &filename) {
+        return get_format(split_filename(filename.c_str()));
+    }
+    std::unique_ptr<ImageFormat> format_for_filename(const std::string &filename) {
+        return get_format(split_filename(filename.c_str()));
+    }
+    
+    const char *magic_format(byte_source *src) {
+        if (format::PNG::match_format(src)) { return "png"; }
+        if (format::JPG::match_format(src)) { return "jpeg"; }
         return 0;
     }
 

@@ -8,11 +8,15 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
+#include <libimread/tools.hh>
 
 namespace im {
-
+    
     std::unique_ptr<ImageFormat> get_format(const char*);
-    const char* magic_format(byte_source*);
+    std::unique_ptr<ImageFormat> format_for_filename(const char*);
+    std::unique_ptr<ImageFormat> format_for_filename(std::string&);
+    std::unique_ptr<ImageFormat> format_for_filename(const std::string&);
+    const char *magic_format(byte_source*);
 
 }
 

@@ -7,7 +7,6 @@
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/_apple.hh>
-#include <libimread/tools.hh>
 
 namespace ns {
     std::unique_ptr<Image> IMDecodeDataVector(std::vector<byte> data,
@@ -30,8 +29,13 @@ namespace ns {
             //if (bitmapFormat & NSAlphaNonpremultipliedBitmapFormat) {}
             //if (bitmapFormat & NSFloatingPointSamplesBitmapFormat) {}
             
-            byte* rowp = output->rowp_as<byte>(0);
-            std::memcpy(rowp, [rep bitmapData], height*width*channels);
+            if (bitmapFormat & NSFloatingPointSamplesBitmapFormat) {
+                float *frowp = output->rowp_as<float>(0);
+                std::memcpy(frowp, (float *)[rep bitmapData], height*width*channels);
+            } else {
+                byte *rowp = output->rowp_as<byte>(0);
+                std::memcpy(rowp, [rep bitmapData], height*width*channels);
+            }
             return output;
         };
     }
@@ -41,7 +45,7 @@ namespace im {
     std::unique_ptr<Image> NSImageFormat::read(byte_source* src,
                                                ImageFactory* factory,
                                                const options_map& opts) {
-        std::vector<byte> data = full_data(*src);
+        std::vector<byte> data = src->full_data();
         return ns::IMDecodeDataVector(data, factory);
     }
 }

@@ -48,7 +48,7 @@ namespace im {
         }
         
         void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
-            if (num_bytes <= 0) { return ; }
+            if (num_bytes <= 0) { return; }
             jpeg_source_adaptor *adaptor = reinterpret_cast<jpeg_source_adaptor *>(cinfo->src);
             while (num_bytes > long(adaptor->mgr.bytes_in_buffer)) {
                 num_bytes -= adaptor->mgr.bytes_in_buffer;
@@ -75,25 +75,29 @@ namespace im {
                 adaptor->mgr.next_output_byte - adaptor->buf);
         }
         
-        jpeg_source_adaptor::jpeg_source_adaptor(byte_source *s) : s(s) {
-            buf = new byte[buffer_size];
-            mgr.next_input_byte = buf;
-            mgr.bytes_in_buffer = 0;
-            mgr.init_source = nop;
-            mgr.fill_input_buffer = fill_input_buffer;
-            mgr.skip_input_data = skip_input_data;
-            mgr.resync_to_restart = jpeg_resync_to_restart;
-            mgr.term_source = nop;
-        }
+        jpeg_source_adaptor::jpeg_source_adaptor(byte_source *s)
+            :s(s) 
+            {
+                buf = new byte[buffer_size];
+                mgr.next_input_byte = buf;
+                mgr.bytes_in_buffer = 0;
+                mgr.init_source = nop;
+                mgr.fill_input_buffer = fill_input_buffer;
+                mgr.skip_input_data = skip_input_data;
+                mgr.resync_to_restart = jpeg_resync_to_restart;
+                mgr.term_source = nop;
+            }
         
-        jpeg_dst_adaptor::jpeg_dst_adaptor(byte_sink *s) : s(s) {
-            buf = new byte[buffer_size];
-            mgr.next_output_byte = buf;
-            mgr.free_in_buffer = buffer_size;
-            mgr.init_destination = nop_dst;
-            mgr.empty_output_buffer = empty_output_buffer;
-            mgr.term_destination = flush_output_buffer;
-        }
+        jpeg_dst_adaptor::jpeg_dst_adaptor(byte_sink *s)
+            :s(s)
+            {
+                buf = new byte[buffer_size];
+                mgr.next_output_byte = buf;
+                mgr.free_in_buffer = buffer_size;
+                mgr.init_destination = nop_dst;
+                mgr.empty_output_buffer = empty_output_buffer;
+                mgr.term_destination = flush_output_buffer;
+            }
         
         struct jpeg_decompress_holder {
             jpeg_decompress_holder() { jpeg_create_decompress(&info); }
@@ -171,7 +175,8 @@ namespace im {
         return output;
     }
     
-    void JPEGFormat::write(Image *input, byte_sink *output,
+    void JPEGFormat::write(Image *input,
+                           byte_sink *output,
                            const options_map &opts) {
         if (input->nbits() != 8) {
             throw CannotWriteError("im::JPEGFormat::write(): Image must be 8 bits for JPEG saving");

@@ -13,42 +13,40 @@
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 
+#if PY_MAJOR_VERSION < 3
+#define PyBytes_FromString(string) PyString_FromString(string)
+#endif
+
 namespace im {
 
     class NumpyImage : public Image, public ImageWithMetadata {
         public:
-            NumpyImage(PyArrayObject* array = 0)
-                :array_(array)
+            NumpyImage(PyArrayObject *a = 0)
+                :array(a)
                 { }
             
-            ~NumpyImage() {
-                Py_XDECREF(array_);
-            }
+            ~NumpyImage() { Py_XDECREF(array); }
             
-            PyArrayObject* release() {
-                PyArrayObject* r = array_;
-                array_ = 0;
+            PyArrayObject *release() {
+                PyArrayObject* r = array;
+                array = 0;
                 return r;
             }
             
-            PyObject* releasePyObject() {
+            PyObject *releasePyObject() {
                 this->finalize();
                 return reinterpret_cast<PyObject*>(this->release());
             }
             
-            PyObject* metadataPyObject() {
-                std::string* s =  this->get_meta();
-    #if PY_MAJOR_VERSION < 3
-                if (s) return PyString_FromString(s->c_str());
-    #else
-                if (s) return PyBytes_FromString(s->c_str());
-    #endif
+            PyObject *metadataPyObject() {
+                std::string* s = this->get_meta();
+                if (s) { return PyBytes_FromString(s->c_str()); }
                 Py_RETURN_NONE;
             }
             
             virtual int nbits() const {
-                if (!array_) throw ProgrammingError();
-                switch (PyArray_TYPE(array_)) {
+                if (!array) { throw ProgrammingError(); }
+                switch (PyArray_TYPE(array)) {
                     case NPY_UINT8:
                     case NPY_INT8:
                         return 8;
@@ -67,23 +65,23 @@ namespace im {
             }
             
             virtual int ndims() const {
-                if (!array_) throw ProgrammingError();
-                return PyArray_NDIM(array_);
+                if (!array) { throw ProgrammingError(); }
+                return PyArray_NDIM(array);
             }
             
             virtual int dim(int d) const {
-                if (!array_ || d >= this->ndims()) throw ProgrammingError();
-                return PyArray_DIM(array_, d);
+                if (!array || d >= this->ndims()) { throw ProgrammingError(); }
+                return PyArray_DIM(array, d);
             }
             
-            virtual void* rowp(int r) {
-                if (!array_) throw ProgrammingError();
-                if (r >= PyArray_DIM(array_, 0)) throw ProgrammingError();
-                return PyArray_GETPTR1(array_, r);
+            virtual void *rowp(int r) {
+                if (!array) throw ProgrammingError();
+                if (r >= PyArray_DIM(array, 0)) { throw ProgrammingError(); }
+                return PyArray_GETPTR1(array, r);
             }
             
             void finalize();
-            PyArrayObject* array_;
+            PyArrayObject *array;
     };
     
     class NumpyFactory : public ImageFactory {
@@ -113,13 +111,16 @@ namespace im {
                     }
                 }
 
-                PyArrayObject* array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(nd, dims, dtype));
+                PyArrayObject *array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(nd, dims, dtype));
                 if (!array) { throw std::bad_alloc(); }
                 try {
                     return std::unique_ptr<Image>(new NumpyImage(array));
+                } catch (const std::exception &ex) {
+                    Py_DECREF(array);
+                    throw ex;
                 } catch (...) {
                     Py_DECREF(array);
-                    throw; /// ugh
+                    throw;
                 }
             }
     };

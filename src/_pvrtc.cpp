@@ -7,14 +7,12 @@
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/_pvrtc.hh>
-#include <libimread/tools.hh>
-
 #include <libimread/pvr.hh>
 
 namespace im {
     
-    std::unique_ptr<Image> PVRTCFormat::read(byte_source* src, ImageFactory* factory, const options_map& opts) {
-        std::vector<byte> data = full_data(*src);
+    std::unique_ptr<Image> PVRTCFormat::read(byte_source *src, ImageFactory *factory, const options_map &opts) {
+        std::vector<byte> data = src->full_data();
         PVRTexture pvr;
         
         ePVRLoadResult res = pvr.load(&data[0], data.size());
@@ -25,7 +23,7 @@ namespace im {
         std::unique_ptr<Image> output(factory->create(8, pvr.height, pvr.width, 4));
     
         if (pvr.data) {
-            byte* rowp = output->rowp_as<byte>(0);
+            byte *rowp = output->rowp_as<byte>(0);
             std::memcpy(rowp, &pvr.data[0], pvr.width*pvr.height*4);
         } else {
             throw CannotReadError("im::PVRTCFormat::read(): Error reading PVRTC file.");

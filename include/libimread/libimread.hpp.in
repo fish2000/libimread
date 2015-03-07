@@ -3,10 +3,10 @@
 #define LIBIMREAD_CMAKE_H_
 
 #include <cstdlib>
-/*#include <jemalloc/jemalloc.h>*/
+#include <type_traits>
+#include <jemalloc/jemalloc.h>
 
 #include <string>
-using namespace std;
 
 #define IM_VERSION_MAJOR @libimread_VERSION_MAJOR@
 #define IM_VERSION_MINOR @libimread_VERSION_MINOR@
@@ -14,7 +14,8 @@ using namespace std;
 #define IM_VERSION "@libimread_VERSION_MAJOR@.@libimread_VERSION_MINOR@.@libimread_VERSION_PATCH@"
 
 namespace im {
-    static const string kVERSION = IM_VERSION;
+    static const std::string kVERSION = IM_VERSION;
+    typedef uint8_t byte;
 }
 
 #endif /// LIBIMREAD_CMAKE_H_

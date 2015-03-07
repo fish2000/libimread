@@ -17,7 +17,7 @@
 #include <stdint.h>
 typedef struct buffer_t {
     uint64_t dev;
-    uint8_t* host;
+    uint8_t *host;
     int32_t extent[4];
     int32_t stride[4];
     int32_t min[4];
@@ -33,15 +33,18 @@ extern "C" int halide_dev_free(void *user_context, buffer_t *buf);
 template<typename T>
 class Image {
     struct Contents {
-        Contents(buffer_t b, uint8_t* a) : buf(b), ref_count(1), alloc(a) {}
+        Contents(buffer_t b, uint8_t *a)
+            :buf(b), ref_count(1), alloc(a)
+            {}
+        
         buffer_t buf;
         int ref_count;
         uint8_t *alloc;
-
+        
         void dev_free() {
             halide_dev_free(NULL, &buf);
         }
-
+        
         ~Contents() {
             if (buf.dev) {
                 dev_free();
@@ -49,9 +52,9 @@ class Image {
             delete[] alloc;
         }
     };
-
+    
     Contents *contents;
-
+    
     void initialize(int x, int y, int z, int w) {
         buffer_t buf = {0};
         buf.extent[0] = x;
@@ -78,20 +81,31 @@ class Image {
         while ((size_t)buf.host & 0x1f) buf.host++;
         contents = new Contents(buf, ptr);
     }
-
-public:
-    Image() : contents(NULL) {
+    
+    void initialize(buffer_t buf) {
+        contents = new Contents(buf, buf.host);
     }
-
+    
+public:
+    Image()
+        :contents(NULL)
+        {}
+    
     Image(int x, int y = 0, int z = 0, int w = 0) {
         initialize(x, y, z, w);
     }
-
-    Image(const Image &other) : contents(other.contents) {
-        if (contents) {
-            contents->ref_count++;
-        }
+    
+    Image(buffer_t b) {
+        initialize(b);
     }
+    
+    Image(const Image &other)
+        :contents(other.contents)
+        {
+            if (contents) {
+                contents->ref_count++;
+            }
+        }
 
     ~Image() {
         if (contents) {
@@ -105,9 +119,7 @@ public:
 
     Image &operator=(const Image &other) {
         Contents *p = other.contents;
-        if (p) {
-            p->ref_count++;
-        }
+        if (p) { p->ref_count++; }
         if (contents) {
             contents->ref_count--;
             if (contents->ref_count == 0) {
@@ -119,7 +131,7 @@ public:
         return *this;
     }
 
-    T *data() const {return (T*)contents->buf.host;}
+    T *data() const { return (T*)contents->buf.host; }
 
     void set_host_dirty(bool dirty = true) {
         // If you use data directly, you must also call this so that
@@ -148,7 +160,9 @@ public:
 
     Image(T vals[]) {
         initialize(sizeof(vals)/sizeof(T));
-        for (int i = 0; i < sizeof(vals); i++) (*this)(i) = vals[i];
+        for (int i = 0; i < sizeof(vals); i++) {
+            (*this)(i) = vals[i];
+        }
     }
 
     /** Make sure you've called copy_to_host before you start

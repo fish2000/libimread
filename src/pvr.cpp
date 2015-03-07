@@ -92,7 +92,7 @@ PVRTexture::~PVRTexture() {
     if (this->data) { free(this->data); }
 }
 
-bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
+bool PVRTexture::loadApplePVRTC(uint8_t *data, int size) {
     // additional heuristic
     if (size > sizeof(PVRHeader)) {
         PVRHeader *header = (PVRHeader *)data;
@@ -166,7 +166,7 @@ bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
     return true;
 }
 
-ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
+ePVRLoadResult PVRTexture::load(uint8_t *data, unsigned int length) {
 
     // use a heuristic to detect potential apple PVRTC formats
     if (countBits(length) == 1) {
@@ -179,7 +179,7 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
     }
 
     // parse the header
-    uint8_t* p = data;
+    uint8_t *p = data;
     PVRHeader *header = (PVRHeader *)p;
     p += sizeof(PVRHeader);
     

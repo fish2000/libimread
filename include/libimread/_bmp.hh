@@ -14,12 +14,19 @@ namespace im {
 
     class BMPFormat : public ImageFormat {
         public:
+            typedef std::true_type can_read;
+            /*
             bool can_read() const override { return true; }
             bool can_write() const override { return false; }
-
-            std::unique_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
+            */
+            
+            std::unique_ptr<Image> read(byte_source *src, ImageFactory *factory, const options_map &opts);
     };
-
+    
+    namespace format {
+        using BMP = BMPFormat;
+    }
+    
 }
 
 #endif // LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012

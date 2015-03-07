@@ -42,8 +42,8 @@ namespace im {
     }
     
     std::unique_ptr<Image> BMPFormat::read(byte_source *src,
-                                         ImageFactory *factory,
-                                         const options_map &opts) {
+                                           ImageFactory *factory,
+                                           const options_map &opts) {
         char magick[2];
         
         if (src->read(reinterpret_cast<byte *>(magick), 2) != 2) {

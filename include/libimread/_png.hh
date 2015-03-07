@@ -10,17 +10,31 @@ namespace im {
 
     class PNGFormat : public ImageFormat {
         public:
+            typedef std::true_type can_read;
+            typedef std::true_type can_write;
+            
+            /*
             bool can_read() const override { return true; }
             bool can_write() const override { return true; }
+            */
             
             /// NOT AN OVERRIDE:
-            static bool match_format(byte_source* src) { return match_magic(src, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8); }
+            static bool match_format(byte_source *src) {
+                return match_magic(src, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8);
+            }
 
-            std::unique_ptr<Image> read(byte_source* src, ImageFactory* factory, const options_map& opts) override;
-            void write(Image* input, byte_sink* output, const options_map& opts) override;
+            std::unique_ptr<Image> read(byte_source *src,
+                                        ImageFactory *factory,
+                                        const options_map &opts);
+            void write(Image *input,
+                       byte_sink *output,
+                       const options_map &opts);
     };
-
-
+    
+    namespace format {
+        using PNG = PNGFormat;
+    }
+    
 }
 
 

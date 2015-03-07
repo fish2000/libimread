@@ -12,27 +12,28 @@ namespace im {
 
     class memory_source : public byte_source {
         public:
-            memory_source(const byte* c, const int len)
-                :data_(c), len_(len), pos_(0)
+            memory_source(const byte *c, const int l)
+                :data(c), len(l), pos(0)
                 { }
             
             ~memory_source() { }
             
-            virtual size_t read(byte* buffer, size_t n) {
-                if (pos_ + n > len_) n = len_-pos_;
-                std::memmove(buffer, data_ + pos_, n);
-                pos_ += n;
+            virtual std::size_t read(byte *buffer, std::size_t n) {
+                if (pos + n > len) { n = len-pos; }
+                std::memmove(buffer, data + pos, n);
+                pos += n;
                 return n;
             }
+            
             virtual bool can_seek() const { return true; }
-            virtual size_t seek_absolute(size_t pos) { return pos_ = pos; }
-            virtual size_t seek_relative(int delta) { return pos_ += delta; }
-            virtual size_t seek_end(int delta) { return pos_ = (len_-delta-1); }
-
+            virtual std::size_t seek_absolute(std::size_t p) { return pos = p; }
+            virtual std::size_t seek_relative(int delta) { return pos += delta; }
+            virtual std::size_t seek_end(int delta) { return pos = (len-delta-1); }
+        
         private:
-            const byte* data_;
-            const size_t len_;
-            size_t pos_;
+            const byte *data;
+            const std::size_t len;
+            std::size_t pos;
     };
 
 }

@@ -22,18 +22,18 @@ namespace im {
     
     namespace {
         
-        void show_tiff_warning(const char* module, const char* fmt, va_list ap) {
+        void show_tiff_warning(const char *module, const char *fmt, va_list ap) {
             std::fprintf(stderr, "%s: ", module);
             std::vfprintf(stderr, fmt, ap);
             std::fprintf(stderr, "\n");
         }
         
-        tsize_t tiff_read(thandle_t handle, void* data, tsize_t n) {
+        tsize_t tiff_read(thandle_t handle, void *data, tsize_t n) {
             byte_source* s = static_cast<byte_source*>(handle);
             return s->read(static_cast<byte*>(data), n);
         }
         
-        tsize_t tiff_write(thandle_t handle, void* data, tsize_t n) {
+        tsize_t tiff_write(thandle_t handle, void *data, tsize_t n) {
             byte_sink* s = static_cast<byte_sink*>(handle);
             return s->write(static_cast<byte*>(data), n);
         }
@@ -62,21 +62,22 @@ namespace im {
         template<typename T>
         toff_t tiff_size(thandle_t handle) {
             T* s = static_cast<T*>(handle);
-            const size_t curpos = s->seek_relative(0);
-            const size_t size = s->seek_end(0);
+            const std::size_t curpos = s->seek_relative(0);
+            const std::size_t size = s->seek_end(0);
             s->seek_absolute(curpos);
             return size;
         }
         
-        void tiff_error(const char* module, const char* fmt, va_list ap) {
+        void tiff_error(const char *module, const char *fmt, va_list ap) {
             char buffer[4096];
             vsnprintf(buffer, sizeof(buffer), fmt, ap);
             std::string error_message(buffer);
-            throw CannotReadError(std::string("imread._tiff: libtiff error: `") + buffer + std::string("`"));
+            throw CannotReadError(
+                std::string("imread._tiff: libtiff error: `") + buffer + std::string("`"));
         }
         
         struct tif_holder {
-            tif_holder(TIFF* tif)
+            tif_holder(TIFF *tif)
                 :tif(tif)
                 { }
             
@@ -98,7 +99,7 @@ namespace im {
             }
             
             // Newer versions of TIFF seem to call this TIFFWarningHandler, but older versions do not have this type
-            typedef void (*tiff_handler_type)(const char* module, const char* fmt, va_list ap);
+            typedef void (*tiff_handler_type)(const char *module, const char *fmt, va_list ap);
             tiff_handler_type warning_handler_;
             tiff_handler_type error_handler_;
         };
@@ -156,34 +157,34 @@ namespace im {
             { UIC4Tag, -1,-1, TIFF_LONG, FIELD_CUSTOM, true, true,   const_cast<char*>("UIC4Tag") },
         };
         
-        void set_stk_tags(TIFF* tif) {
+        void set_stk_tags(TIFF *tif) {
             TIFFMergeFieldInfo(tif, stkTags, sizeof(stkTags)/sizeof(stkTags[0]));
         }
         
         class shift_source : public byte_source {
             public:
-                explicit shift_source(byte_source* s)
-                    :s(s)
-                    ,shift_(0)
-                    { }
+                explicit shift_source(byte_source *s)
+                    :s(s), shift_(0)
+                    {}
                 
-                virtual size_t read(byte* buf, size_t n) { return s->read(buf, n); }
-                virtual size_t seek_absolute(size_t pos) { return s->seek_absolute(pos + shift_)-shift_; }
-                virtual size_t seek_relative(int n) { return s->seek_relative(n)-shift_; }
-                virtual size_t seek_end(int n) { return s->seek_end(n+shift_)-shift_; }
+                virtual std::size_t read(byte *buf, std::size_t n) { return s->read(buf, n); }
+                virtual std::size_t seek_absolute(std::size_t pos) { return s->seek_absolute(pos + shift_)-shift_; }
+                virtual std::size_t seek_relative(int n) { return s->seek_relative(n)-shift_; }
+                virtual std::size_t seek_end(int n) { return s->seek_end(n+shift_)-shift_; }
                 
                 void shift(int nshift) {
                     s->seek_relative(nshift - shift_);
                     shift_ = nshift;
                 }
                 
-                byte_source* s;
+                byte_source *s;
                 int shift_;
         };
         
         struct stk_extend {
             stk_extend()
-                :proc(TIFFSetTagExtender(set_stk_tags)) { }
+                :proc(TIFFSetTagExtender(set_stk_tags))
+                {}
             ~stk_extend() {
                 TIFFSetTagExtender(proc);
             }
@@ -192,7 +193,9 @@ namespace im {
         
     } /// namespace
     
-    std::unique_ptr<image_list> STKFormat::read_multi(byte_source* src, ImageFactory* factory, const options_map& opts) {
+    std::unique_ptr<image_list> STKFormat::read_multi(byte_source *src,
+                                                      ImageFactory *factory,
+                                                      const options_map &opts) {
         shift_source moved(src);
         stk_extend ext;
         tiff_warn_error twe;
@@ -209,7 +212,7 @@ namespace im {
         const int strip_size = TIFFStripSize(t.tif);
         const int n_strips = TIFFNumberOfStrips(t.tif);
         int32_t n_planes;
-        void* data;
+        void *data;
         
         TIFFGetField(t.tif, UIC3Tag, &n_planes, &data);
         int raw_strip_size = 0;
@@ -223,7 +226,7 @@ namespace im {
             /// This is very hacky, but it seems to work!
             moved.shift(z * raw_strip_size);
             std::unique_ptr<Image> output(factory->create(bits_per_sample, h, w, depth));
-            uint8_t* start = output->rowp_as<uint8_t>(0);
+            byte *start = output->rowp_as<byte>(0);
             
             for (int st = 0; st != n_strips; ++st) {
                 const int offset = TIFFReadEncodedStrip(t.tif, st, start, strip_size);
@@ -268,7 +271,7 @@ namespace im {
         return images;
     }
 
-    void TIFFFormat::write(Image* input, byte_sink* output, const options_map& opts) {
+    void TIFFFormat::write(Image *input, byte_sink *output, const options_map &opts) {
         tiff_warn_error twe;
         tif_holder t = TIFFClientOpen(
                         "internal",
@@ -281,8 +284,8 @@ namespace im {
                         tiff_size<byte_sink>,
                         NULL,
                         NULL);
-        std::vector<uint8_t> bufdata;
-        void* bufp = 0;
+        std::vector<byte> bufdata;
+        void *bufp = 0;
         bool copy_data = false;
         const uint32 h = input->dim(0);
         const uint16 photometric = ((input->ndims() == 3 && input->dim(2)) ?
@@ -357,7 +360,7 @@ namespace im {
         }
         
         for (uint32 r = 0; r != h; ++r) {
-            void* rowp = input->rowp(r);
+            void *rowp = input->rowp(r);
             if (copy_data) {
                 std::memcpy(bufp, rowp, input->dim(1) * input->nbytes());
                 rowp = bufp;

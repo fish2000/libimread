@@ -11,37 +11,62 @@ namespace im {
 
     class TIFFFormat : public ImageFormat {
         public:
+            typedef std::true_type can_read;
+            typedef std::true_type can_read_multi;
+            typedef std::true_type can_write;
+            typedef std::true_type can_read_metadata;
+            
+            /*
             bool can_read() const override { return true; }
             bool can_read_multi() const override { return true; }
             bool can_write() const override { return true; }
             bool can_write_metadata() const override { return true; }
-
-            std::unique_ptr<Image> read(byte_source* s, ImageFactory* f, const options_map& opts) override {
+            */
+            
+            std::unique_ptr<Image> read(byte_source *s,
+                                        ImageFactory *f,
+                                        const options_map &opts) {
                 std::unique_ptr<image_list> pages = this->do_read(s, f, false);
-                if (pages->size() != 1) throw ProgrammingError();
+                if (pages->size() != 1) { throw ProgrammingError(); }
                 std::vector<Image*> ims = pages->release();
                 return std::unique_ptr<Image>(ims[0]);
             }
-
-            std::unique_ptr<image_list> read_multi(byte_source* s, ImageFactory* f, const options_map& opts) override {
+            
+            std::unique_ptr<image_list> read_multi(byte_source *s,
+                                                   ImageFactory *f,
+                                                   const options_map &opts) {
                 return this->do_read(s, f, true);
             }
-            void write(Image* input, byte_sink* output, const options_map& opts) override;
+            
+            void write(Image *input,
+                       byte_sink *output,
+                       const options_map &opts);
+            
         private:
-            std::unique_ptr<image_list> do_read(byte_source* s, ImageFactory* f, bool is_multi);
+            std::unique_ptr<image_list> do_read(byte_source *s,
+                                                ImageFactory *f,
+                                                bool is_multi);
     };
-
-
+    
     class STKFormat : public ImageFormat {
         public:
+            typedef std::true_type can_read_multi;
+            /*
             bool can_read() const override { return false; }
             bool can_read_multi() const override { return true; }
             bool can_write() const override { return false; }
-
-            std::unique_ptr<image_list> read_multi(byte_source* s, ImageFactory* f, const options_map& opts) override;
+            */
+            
+            std::unique_ptr<image_list> read_multi(byte_source *s,
+                                                   ImageFactory *f,
+                                                   const options_map &opts);
     };
-
-
+    
+    namespace format {
+        using TIFF = TIFFFormat;
+        using STK = STKFormat;
+    }
+    
 }
 
 
