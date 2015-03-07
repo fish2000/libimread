@@ -41,18 +41,6 @@ TEST_CASE("Check the dimensions of a new image", "[image-dims]") {
     U8Image halim = im::halide::read(
         "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
     
-    //WARN( "extent[0] = " << buf->extent[0] );
-    
-    // CAPTURE( halim.extent(0) );
-    // CAPTURE( halim.extent(1) );
-    // CAPTURE( halim.extent(2) );
-    // //CAPTURE( halim.extent(3) );
-    //
-    // CAPTURE( halim.stride(0) );
-    // CAPTURE( halim.stride(1) );
-    // CAPTURE( halim.stride(2) );
-    // //CAPTURE( halim.stride(3) );
-    
     WARN( "1.extent(0) = " << halim.extent(0) );
     WARN( "1.extent(1) = " << halim.extent(1) );
     WARN( "1.extent(2) = " << halim.extent(2) );
