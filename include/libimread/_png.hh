@@ -13,11 +13,6 @@ namespace im {
             typedef std::true_type can_read;
             typedef std::true_type can_write;
             
-            /*
-            bool can_read() const override { return true; }
-            bool can_write() const override { return true; }
-            */
-            
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {
                 return match_magic(src, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8);

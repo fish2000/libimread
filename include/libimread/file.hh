@@ -27,18 +27,10 @@ const int O_BINARY = 0;
 
 namespace im {
     
-    bool file_exists(char *path) {
-        return (::access(path, R_OK) != -1);
-    }
-    bool file_exists(const char *path) {
-        return file_exists(const_cast<char *>(path));
-    }
-    bool file_exists(std::string path) {
-        return file_exists(path.c_str());
-    }
-    bool file_exists(const std::string &path) {
-        return file_exists(path.c_str());
-    }
+    bool file_exists(char *path);
+    bool file_exists(const char *path);
+    bool file_exists(std::string path);
+    bool file_exists(const std::string &path);
     
     class fd_source_sink : public byte_source, public byte_sink {
         
@@ -128,7 +120,7 @@ namespace im {
                 {}
             
             char *path() const { return pth.get(); }
-            bool exists() const { return im::file_exists(path()); }
+            bool exists() const;
             
             Mode mode() { return md; }
             void mode(Mode m) { md = m; }

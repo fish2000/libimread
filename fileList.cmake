@@ -17,6 +17,7 @@ set(hdrs
     ${hdrs_dir}/private/image_io.h
     ${hdrs_dir}/private/spx_defines.h
     ${hdrs_dir}/private/static_image.h
+    ${hdrs_dir}/UTI/UTI.h
     ${hdrs_dir}/_apple.hh
     ${hdrs_dir}/_bmp.hh
     ${hdrs_dir}/_jpeg.hh
@@ -39,6 +40,7 @@ set(hdrs
 
 # Project source files
 set(srcs
+    ${srcs_dir}/UTI/UTI.mm
     ${srcs_dir}/_apple.mm
     ${srcs_dir}/_bmp.cpp
     ${srcs_dir}/_jpeg.cpp
@@ -47,6 +49,7 @@ set(srcs
     ${srcs_dir}/_pvrtc.cpp
     ${srcs_dir}/_tiff.cpp
     ${srcs_dir}/_webp.cpp
+    ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/lzw.cpp
     # ${srcs_dir}/numpy.cpp

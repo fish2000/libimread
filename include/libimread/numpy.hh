@@ -110,7 +110,7 @@ namespace im {
                         throw ProgrammingError(out.str());
                     }
                 }
-
+                
                 PyArrayObject *array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(nd, dims, dtype));
                 if (!array) { throw std::bad_alloc(); }
                 try {

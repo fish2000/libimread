@@ -140,7 +140,7 @@ namespace im {
     
     std::unique_ptr<Image> JPEGFormat::read(byte_source *src,
                                           ImageFactory *factory,
-                                          const options_map &opts) {
+                                          const options_map &opts)  {
         
         jpeg_source_adaptor adaptor(src);
         jpeg_decompress_holder c;

@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <list>
+#include <tuple>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
@@ -17,7 +18,6 @@ namespace im {
     namespace pre {
         
         /// based on variadic_capture by Scott Schurr
-        /*
         template <typename... Types>
         class Store {
             private:
@@ -31,15 +31,14 @@ namespace im {
                     return sizeof...(Types);
                 }
                 template <std::size_t idx>
-                auto get -> const typename std::tuple_element<idx, Storage>::type& {
+                auto get() -> const typename std::tuple_element<idx, Storage>::type& {
                     return (std::get<idx>(storage));
                 }
                 template <std::size_t idx>
-                static auto preget -> const typename std::tuple_element<idx, Storage>::type& {
+                constexpr auto preget() -> const typename std::tuple_element<idx, Storage>::type& {
                     return (std::get<idx>(storage));
                 }
         };
-        */
         
         /// based on str_const by Scott Schurr
         constexpr unsigned int inrange(unsigned int idx, unsigned int len) {
@@ -55,7 +54,6 @@ namespace im {
             return *a == *b && (*a == '\0' || static_compare(a + 1, b + 1));
         }
         
-        /*
         class String {
         private:
                 const char *cstr;
@@ -66,7 +64,7 @@ namespace im {
                     sizeof(std::size_t) == 8 ? 14695981039346656037u : 2166136261u);
             public:
                 template <std::size_t N>
-                constexpr String(const char(&a))
+                constexpr String(const char (&a)[N])
                     : cstr(a), csiz(N-1)
                     {}
                 constexpr String(const char* a, std::size_t Nn)
@@ -96,11 +94,11 @@ namespace im {
                 }
         };
         
+        /*
         template <typename T>
         struct format_suffixes {
             constexpr list<String> suffixes {String(".h"), String(".c")};
         };
-        
         */
     }
     

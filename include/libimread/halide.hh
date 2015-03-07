@@ -103,27 +103,31 @@ namespace im {
     template <typename T>
     class HalideFactory : public ImageFactory {
         private:
-            std::string *name;
+            std::string nm;
         
         public:
             typedef T pixel_type;
-        
+            
             HalideFactory()
-                :name(new std::string(""))
+                :nm(std::string(""))
                 {}
             HalideFactory(const std::string &n)
-                :name(new std::string(n))
+                :nm(std::string(n))
                 {}
             
-            virtual ~HalideFactory() { delete name; }
-        
+            virtual ~HalideFactory() {}
+            
+            std::string &name() { return nm; }
+            void name(std::string &nnm) { nm = nnm; }
+            
         protected:
             std::unique_ptr<Image> create(int nbits,
                                           int xHEIGHT, int xWIDTH, int xDEPTH,
                                           int d3, int d4) {
                 return std::unique_ptr<Image>(
                     new HybridImage<T>(
-                        xWIDTH, xHEIGHT, xDEPTH));
+                        xWIDTH, xHEIGHT, xDEPTH,
+                        name()));
             }
     };
 
@@ -138,10 +142,27 @@ namespace im {
         template <typename T = byte>
         Halide::Image<T> read(const std::string &filename) {
             HalideFactory<T> factory(filename);
-            std::unique_ptr<ImageFormat> format(format_for_filename(filename));
-            std::unique_ptr<byte_source> input(new FileSource(filename));
+            std::unique_ptr<ImageFormat> format(for_filename(filename));
+            std::unique_ptr<FileSource> input(new FileSource(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
-            return dynamic_cast<HybridImage<T>&>(*output);
+            HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));
+            return image;
+        }
+        
+    }
+
+    namespace apple {
+        
+        static const options_map opts; /// not currently used when reading
+        
+        template <typename T = byte>
+        Halide::Image<T> read(const std::string &filename) {
+            HalideFactory<T> factory(filename);
+            std::unique_ptr<ImageFormat> format(get_format("objc"));
+            std::unique_ptr<FileSource> input(new FileSource(filename));
+            std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
+            HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));
+            return image;
         }
         
     }

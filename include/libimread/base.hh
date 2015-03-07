@@ -23,18 +23,7 @@
 #include <libimread/errors.hh>
 #include <libimread/options.hh>
 
-#ifdef __GNUC__
-#define warn_if_return_not_used __attribute__ ((__warn_unused_result__))
-#endif
-
-#ifndef warn_if_return_not_used
-#define warn_if_return_not_used
-#endif
-
 namespace im {
-    
-    // struct number_or_string;
-    // typedef std::unordered_map<std::string, number_or_string> options_map;
     
     struct seekable {
         virtual ~seekable() { }
@@ -48,7 +37,7 @@ namespace im {
         
         public:
             virtual ~byte_source() { }
-            virtual std::size_t read(byte *buffer, std::size_t) warn_if_return_not_used = 0;
+            virtual std::size_t read(byte *buffer, std::size_t) xWARN_UNUSED = 0;
             
             template <std::size_t Nelems>
             std::size_t read(byte (&arr)[Nelems], size_t n) {
@@ -77,7 +66,7 @@ namespace im {
     class byte_sink : virtual public seekable {
         public:
             virtual ~byte_sink() { }
-            virtual std::size_t write(const byte *buffer, std::size_t n) warn_if_return_not_used = 0;
+            virtual std::size_t write(const byte *buffer, std::size_t n) xWARN_UNUSED = 0;
             
             template <std::size_t Nelems>
             std::size_t write(byte (&arr)[Nelems], size_t n) {
@@ -110,7 +99,7 @@ namespace im {
             virtual int dim(int) const = 0;
             
             virtual int dim_or(int dim, int def) const {
-                if (dim >= this->ndims()) return def;
+                if (dim >= this->ndims()) { return def; }
                 return this->dim(dim);
             }
             
@@ -198,17 +187,6 @@ namespace im {
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }
     
-    /*
-    template <typename T>
-    using uset = std::unordered_set<T>;
-    
-    uset<std::string> assemble(const std::initializer_list<std::string> &suffixes) {
-        uset<std::string> out;
-        for (auto suffix : suffixes) { out.insert(suffix); }
-        return out;
-    }
-    */
-    
     template <typename>
     struct sfinae_true : std::true_type{};
 
@@ -273,14 +251,7 @@ namespace im {
             typedef std::false_type can_write;
             typedef std::false_type can_read_metadata;
             
-            virtual ~ImageFormat() { }
-            
-            /*
-            virtual bool can_read() const { return false; }
-            virtual bool can_read_multi() const { return false; }
-            virtual bool can_write() const { return false; }
-            virtual bool can_write_metadata() const { return false; }
-            */
+            virtual ~ImageFormat() {}
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,

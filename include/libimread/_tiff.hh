@@ -16,16 +16,9 @@ namespace im {
             typedef std::true_type can_write;
             typedef std::true_type can_read_metadata;
             
-            /*
-            bool can_read() const override { return true; }
-            bool can_read_multi() const override { return true; }
-            bool can_write() const override { return true; }
-            bool can_write_metadata() const override { return true; }
-            */
-            
             std::unique_ptr<Image> read(byte_source *s,
                                         ImageFactory *f,
-                                        const options_map &opts) {
+                                        const options_map &opts)  {
                 std::unique_ptr<image_list> pages = this->do_read(s, f, false);
                 if (pages->size() != 1) { throw ProgrammingError(); }
                 std::vector<Image*> ims = pages->release();
@@ -34,7 +27,7 @@ namespace im {
             
             std::unique_ptr<image_list> read_multi(byte_source *s,
                                                    ImageFactory *f,
-                                                   const options_map &opts) {
+                                                   const options_map &opts)  {
                 return this->do_read(s, f, true);
             }
             
@@ -51,11 +44,6 @@ namespace im {
     class STKFormat : public ImageFormat {
         public:
             typedef std::true_type can_read_multi;
-            /*
-            bool can_read() const override { return false; }
-            bool can_read_multi() const override { return true; }
-            bool can_write() const override { return false; }
-            */
             
             std::unique_ptr<image_list> read_multi(byte_source *s,
                                                    ImageFactory *f,

@@ -3,48 +3,38 @@
 
 #ifndef LPC_APPLE_HH_INCLUDE_GUARD_
 #define LPC_APPLE_HH_INCLUDE_GUARD_
-#ifdef __OBJC__
 
+#ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
+#import <libimread/UTI/UTI.h>
+#endif
+
 #include <memory>
+#include <cstdio>
+#include <cstring>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 
-namespace cf {
-    //CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
-}
-
 namespace im {
-
-    namespace ns {
-    
-    }
     
     class NSImageFormat : public ImageFormat {
         
         public:
             typedef std::true_type can_read;
-            /*
-            bool can_read() const override { return true; }
-            bool can_write() const override { return true; }
-            */
             
             std::unique_ptr<Image> read(
                 byte_source *src,
                 ImageFactory *factory,
                 const options_map &opts);
-            
-            /*
-            void write(Image* input,
-                byte_sink* output,
-                const options_map& opts);
-                */
     };
+    
+    namespace format {
+        using NS = NSImageFormat;
+    }
 
 }
 
-#endif
 #endif // LPC_APPLE_HH_INCLUDE_GUARD_

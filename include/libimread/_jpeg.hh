@@ -13,10 +13,6 @@ namespace im {
         public:
             typedef std::true_type can_read;
             typedef std::true_type can_write;
-            /*
-            bool can_read() const override { return true; }
-            bool can_write() const override { return true; }
-            */
             
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {

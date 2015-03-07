@@ -11,7 +11,9 @@
 
 namespace im {
     
-    std::unique_ptr<Image> PVRTCFormat::read(byte_source *src, ImageFactory *factory, const options_map &opts) {
+    std::unique_ptr<Image> PVRTCFormat::read(byte_source *src,
+                                             ImageFactory *factory,
+                                             const options_map &opts)  {
         std::vector<byte> data = src->full_data();
         PVRTexture pvr;
         

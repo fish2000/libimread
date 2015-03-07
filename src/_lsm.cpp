@@ -1194,7 +1194,7 @@ namespace im {
 
     std::unique_ptr<Image> LSMFormat::read(byte_source *s,
                                            ImageFactory *factory,
-                                           const options_map &opts) {
+                                           const options_map &opts)  {
         LSMReader reader(s);
         return reader.read(factory, opts);
     }

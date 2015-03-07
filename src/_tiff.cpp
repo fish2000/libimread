@@ -195,7 +195,7 @@ namespace im {
     
     std::unique_ptr<image_list> STKFormat::read_multi(byte_source *src,
                                                       ImageFactory *factory,
-                                                      const options_map &opts) {
+                                                      const options_map &opts)  {
         shift_source moved(src);
         stk_extend ext;
         tiff_warn_error twe;
@@ -240,7 +240,9 @@ namespace im {
         return images;
     }
     
-    std::unique_ptr<image_list> TIFFFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi) {
+    std::unique_ptr<image_list> TIFFFormat::do_read(byte_source* src,
+                                                    ImageFactory* factory,
+                                                    bool is_multi)  {
         tiff_warn_error twe;
         tif_holder t = read_client(src);
         std::unique_ptr<image_list> images(new image_list);
@@ -271,7 +273,7 @@ namespace im {
         return images;
     }
 
-    void TIFFFormat::write(Image *input, byte_sink *output, const options_map &opts) {
+    void TIFFFormat::write(Image *input, byte_sink *output, const options_map &opts)  {
         tiff_warn_error twe;
         tif_holder t = TIFFClientOpen(
                         "internal",

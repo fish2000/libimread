@@ -34,16 +34,18 @@ namespace im {
         if (check(format, "lsm")) { return format_ptr(new format::LSM); }
         if (check(format, "stk")) { return format_ptr(new format::STK); }
         
+        if (check(format, "objc") || check(format, "ns")) { return format_ptr(new format::NS); }
+        
         return format_ptr(nullptr);
     }
     
-    std::unique_ptr<ImageFormat> format_for_filename(const char *cfilename) {
+    std::unique_ptr<ImageFormat> for_filename(const char *cfilename) {
         return get_format(split_filename(cfilename));
     }
-    std::unique_ptr<ImageFormat> format_for_filename(std::string &filename) {
+    std::unique_ptr<ImageFormat> for_filename(std::string &filename) {
         return get_format(split_filename(filename.c_str()));
     }
-    std::unique_ptr<ImageFormat> format_for_filename(const std::string &filename) {
+    std::unique_ptr<ImageFormat> for_filename(const std::string &filename) {
         return get_format(split_filename(filename.c_str()));
     }
     

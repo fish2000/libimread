@@ -109,7 +109,9 @@ namespace im {
         
         const int w = png_get_image_width (p.png_ptr, p.png_info);
         const int h = png_get_image_height(p.png_ptr, p.png_info);
+        int channels = png_get_channels(p.png_ptr, p.png_info);
         int bit_depth = png_get_bit_depth(p.png_ptr, p.png_info);
+        
         if (bit_depth != 1 && bit_depth != 8 && bit_depth != 16) {
             std::ostringstream out;
             out << "im::PNGFormat::read(): Cannot read this bit depth ("
@@ -117,9 +119,8 @@ namespace im {
                     << "). Only bit depths ∈ {1,8,16} are supported.";
             throw CannotReadError(out.str());
         }
-        
-        // PNGs are in "network" order (ie., big-endian)
         if (bit_depth == 16 && !is_big_endian()) { png_set_swap(p.png_ptr); }
+        if (bit_depth < 8) { png_set_packing(p.png_ptr); }
         
         int d = -1;
         switch (png_get_color_type(p.png_ptr, p.png_info)) {
@@ -142,6 +143,9 @@ namespace im {
                 throw CannotReadError(out.str());
             }
         }
+        
+        png_set_interlace_handling(p.png_ptr);
+        png_read_update_info(p.png_ptr, p.png_info);
         
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         std::vector<png_bytep> rowps = output->allrows<png_byte>();

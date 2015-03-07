@@ -67,8 +67,6 @@ include_directories(${JEMALLOC_INCLUDE_DIR})
 include(fileList.cmake)
 
 IF(APPLE)
-    set_source_files_properties(_apple.mm
-        PROPERTIES COMPILE_FLAGS -ObjC++)
     INCLUDE_DIRECTORIES (/Developer/Headers/FlatCarbon)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
@@ -79,7 +77,16 @@ IF(APPLE)
     MARK_AS_ADVANCED(COCOA_LIBRARY
                      FOUNDATION_LIBRARY
                      COREFOUNDATION_LIBRARY)
-   SET(EXTRA_LIBS ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY} ${COREFOUNDATION_LIBRARY})
+   SET(EXTRA_LIBS
+       ${EXTRA_LIBS}
+       ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
+       ${COREFOUNDATION_LIBRARY})
+   # set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.m"
+   #     PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
+   set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
+       PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
+   set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
+       PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -fobjc-arc)
 ENDIF (APPLE)
 
 add_definitions(-std=c++1y -stdlib=libc++ -O3)
