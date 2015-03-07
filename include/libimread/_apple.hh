@@ -17,11 +17,11 @@ namespace cf {
     //CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
 }
 
-namespace ns {
-    
-}
-
 namespace im {
+
+    namespace ns {
+    
+    }
     
     class NSImageFormat : public ImageFormat {
         
@@ -37,9 +37,11 @@ namespace im {
                 ImageFactory *factory,
                 const options_map &opts);
             
+            /*
             void write(Image* input,
                 byte_sink* output,
                 const options_map& opts);
+                */
     };
 
 }

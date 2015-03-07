@@ -66,13 +66,30 @@ include_directories(${JEMALLOC_INCLUDE_DIR})
 # Set the source files required to build the library
 include(fileList.cmake)
 
+IF(APPLE)
+    set_source_files_properties(_apple.mm
+        PROPERTIES COMPILE_FLAGS -ObjC++)
+    INCLUDE_DIRECTORIES (/Developer/Headers/FlatCarbon)
+    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
+    FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
+    FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
+    #FIND_LIBRARY(CARBON_LIBRARY Carbon)
+    #FIND_LIBRARY(QUICKTIME_LIBRARY QuickTime)
+    #FIND_LIBRARY(APP_SERVICES_LIBRARY ApplicationServices)
+    MARK_AS_ADVANCED(COCOA_LIBRARY
+                     FOUNDATION_LIBRARY
+                     COREFOUNDATION_LIBRARY)
+   SET(EXTRA_LIBS ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY} ${COREFOUNDATION_LIBRARY})
+ENDIF (APPLE)
+
 add_definitions(-std=c++1y -stdlib=libc++ -O3)
+# add_definitions(-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk)
 
 # Build the library
 #add_library(imread-static STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})
 target_link_libraries(imread
-    png z
+    png z ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}

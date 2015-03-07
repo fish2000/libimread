@@ -15,6 +15,7 @@ set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
+    ${hdrs_dir}/private/spx_defines.h
     ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/_apple.hh
     ${hdrs_dir}/_bmp.hh
@@ -38,6 +39,7 @@ set(hdrs
 
 # Project source files
 set(srcs
+    ${srcs_dir}/_apple.mm
     ${srcs_dir}/_bmp.cpp
     ${srcs_dir}/_jpeg.cpp
     ${srcs_dir}/_lsm.cpp

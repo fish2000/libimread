@@ -23,20 +23,20 @@ namespace im {
         
         void color_expand(const std::vector<byte> &color_table, byte *row,
                           const int w) {
-            // We are expanding in-place
-            // This means that we must process the row backwards, which is
-            // slightly
-            // awkward, but works correctly
+            // We are expanding in-place --
+            // This means that we must process the row backwards,
+            // which is slightly awkward, but works correctly
             std::vector<byte>::const_iterator pbegin = color_table.begin();
             for (int i = w - 1; i >= 0; --i) {
-                std::copy(pbegin + 4 * row[i], pbegin + 4 * row[i] + 3,
-                          row + 3 * i);
+                std::copy(
+                    pbegin + 4 * row[i],
+                    pbegin + 4 * row[i] + 3,
+                    row + 3 * i);
             }
         }
         
         uint32_t pow2(uint32_t n) {
-            if (n <= 0)
-                return 1;
+            if (n <= 0) { return 1; }
             return 2 * pow2(n - 1);
         }
     }
@@ -44,15 +44,15 @@ namespace im {
     std::unique_ptr<Image> BMPFormat::read(byte_source *src,
                                            ImageFactory *factory,
                                            const options_map &opts) {
-        char magick[2];
+        char magic[2];
         
-        if (src->read(reinterpret_cast<byte *>(magick), 2) != 2) {
-            throw CannotReadError("imread.bmp: File is empty");
+        if (src->read(reinterpret_cast<byte *>(magic), 2) != 2) {
+            throw CannotReadError("im::BMPFormat::read(): File is empty");
         }
         
-        if (magick[0] != 'B' || magick[1] != 'M') {
-            throw CannotReadError("imread.bmp: Magick number not matched (this "
-                                  "might not be a BMP file)");
+        if (magic[0] != 'B' || magic[1] != 'M') {
+            throw CannotReadError("im::BMPFormat::read(): Magic number not matched"
+                                  "(this might not be a BMP file)");
         }
         
         const uint32_t size = read32_le(*src);
@@ -107,8 +107,7 @@ namespace im {
         
         std::vector<byte> color_table;
         if (bitsppixel <= 8) {
-            const uint32_t table_size
-                = (n_colours == 0 ? pow2(bitsppixel) : n_colours);
+            const uint32_t table_size = (n_colours == 0 ? pow2(bitsppixel) : n_colours);
             color_table.resize(table_size * 4);
             src->read_check(&color_table[0], table_size * 4);
         }
@@ -130,7 +129,7 @@ namespace im {
             }
             
             if (src->read(buf, padding) != unsigned(padding) && r != (height - 1)) {
-                throw CannotReadError("File ended prematurely");
+                throw CannotReadError("im::BMPFormat::read(): File ended prematurely while reading");
             }
         }
         
