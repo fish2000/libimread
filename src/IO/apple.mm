@@ -1,7 +1,7 @@
 // Copyright 2012 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#include <libimread/_apple.hh>
+#include <libimread/IO/apple.hh>
 
 namespace im {
 

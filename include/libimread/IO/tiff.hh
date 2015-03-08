@@ -4,8 +4,15 @@
 #ifndef LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012
 #define LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012
 
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
+#include <libimread/tools.hh>
 
 namespace im {
 

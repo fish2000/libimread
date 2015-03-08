@@ -1,6 +1,6 @@
 /* Use funopen(3) to provide open_memstream(3) like functionality. */
 
-#include "libimread/fmemopen/open_memstream.hh"
+#include "libimread/ext/open_memstream.hh"
 
 namespace memory {
 
@@ -102,7 +102,7 @@ FILE *open_memstream(char **cp, std::size_t *lenp) {
     ms->cp = cp;
     ms->lenp = lenp;
     ms->offset = 0;
-    fp = std::funopen(ms, 
+    fp = ::funopen(ms, 
         memory::memstream_read, memory::memstream_write,
         memory::memstream_seek, memory::memstream_close);
     if (fp == NULL) {

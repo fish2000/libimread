@@ -3,7 +3,7 @@
  * 20081017 AF
  */
 
-#include "libimread/fmemopen/fmemopen.hh"
+#include "libimread/ext/fmemopen.hh"
 
 namespace memory {
     
@@ -68,7 +68,7 @@ namespace memory {
         
         std::memset(mem, 0, sizeof(fmem_t));
         mem->size = size, mem->buffer = (char *)buf;
-        return std::funopen(mem, readfn, writefn, seekfn, closefn);
+        return ::funopen(mem, readfn, writefn, seekfn, closefn);
     }
 
 } /// namespace memory

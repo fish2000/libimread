@@ -8,7 +8,7 @@
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
-#import <libimread/UTI/UTI.h>
+#import <libimread/ext/UTI.h>
 #endif
 
 #include <memory>

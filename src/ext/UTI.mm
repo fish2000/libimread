@@ -24,7 +24,7 @@
 
 /* $Id$ */
 
-#import "libimread/UTI/UTI.h"
+#import "libimread/ext/UTI.h"
 
 #ifndef __has_feature
 #define __has_feature( _x_ )    0

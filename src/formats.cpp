@@ -5,14 +5,14 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/formats.hh>
-#include <libimread/_apple.hh>
-#include <libimread/_bmp.hh>
-#include <libimread/_jpeg.hh>
-#include <libimread/_lsm.hh>
-#include <libimread/_png.hh>
-#include <libimread/_tiff.hh>
-#include <libimread/_pvrtc.hh>
-#include <libimread/_webp.hh>
+#include <libimread/IO/apple.hh>
+#include <libimread/IO/bmp.hh>
+#include <libimread/IO/jpeg.hh>
+#include <libimread/IO/lsm.hh>
+#include <libimread/IO/png.hh>
+#include <libimread/IO/tiff.hh>
+#include <libimread/IO/pvrtc.hh>
+#include <libimread/IO/webp.hh>
 
 namespace im {
     

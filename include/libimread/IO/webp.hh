@@ -4,7 +4,9 @@
 #ifndef LPC_WEBP_H_INCLUDE_GUARD_
 #define LPC_WEBP_H_INCLUDE_GUARD_
 
+#include <webp/decode.h>
 #include <libimread/libimread.hpp>
+#include <libimread/base.hh>
 
 namespace im {
     

@@ -1,7 +1,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
-#include <libimread/_png.hh>
+#include <libimread/IO/png.hh>
 using namespace im;
 
 #include "include/catch.hpp"

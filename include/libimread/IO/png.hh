@@ -4,7 +4,19 @@
 #ifndef LPC_PNG_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 #define LPC_PNG_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 
+#include <cstring>
+#include <vector>
+#include <sstream>
+
 #include <libimread/libimread.hpp>
+#include <libimread/base.hh>
+#include <libimread/tools.hh>
+
+#ifdef __APPLE__
+    #include <libpng16/png.h>   /* this is the Homebrew path */
+#else
+    #include <png.h>            /* this is the standard location */
+#endif
 
 namespace im {
 

@@ -1,13 +1,7 @@
 // Copyright 2012 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#include <cstdio>
-#include <cstring>
-
-#include <libimread/libimread.hpp>
-#include <libimread/base.hh>
-#include <libimread/_pvrtc.hh>
-#include <libimread/pvr.hh>
+#include <libimread/IO/pvrtc.hh>
 
 namespace im {
     

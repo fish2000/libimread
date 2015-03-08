@@ -3,16 +3,7 @@
 
 #define NO_IMPORT_ARRAY
 
-#include <utility>
-#include <sstream>
-#include <iostream>
-#include <cstdio>
-#include <cstring>
-
-#include <libimread/libimread.hpp>
-#include <libimread/base.hh>
-#include <libimread/_tiff.hh>
-#include <libimread/tools.hh>
+#include <libimread/IO/tiff.hh>
 
 extern "C" {
    #include <tiffio.h>

@@ -7,6 +7,8 @@
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
 
+#include <cstring>
+#include <vector>
 #include <memory>
 #include <sstream>
 

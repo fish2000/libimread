@@ -25,11 +25,11 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#include <libimread/pvr.hh>
-
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+
+#include <libimread/ext/pvr.h>
 
 unsigned int countBits(unsigned int x) {
     x  = x - ((x >> 1) & 0x55555555);

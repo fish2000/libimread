@@ -3,9 +3,7 @@
 // License: MIT
 
 #include <vector>
-
 #include <libimread/errors.hh>
-
 using namespace im;
 
 struct code_stream {

@@ -4,8 +4,12 @@
 #ifndef LPC_PVRTC_H_INCLUDE_GUARD_
 #define LPC_PVRTC_H_INCLUDE_GUARD_
 
+#include <cstdio>
+#include <cstring>
+
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
+#include <libimread/ext/pvr.h>
 
 namespace im {
     

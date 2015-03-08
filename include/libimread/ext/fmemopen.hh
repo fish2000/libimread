@@ -56,9 +56,10 @@ namespace memory {
         template <typename U> fcloser(const fcloser<U>&) noexcept {};
         void operator()(F *filehandle) { if (filehandle) std::fclose(filehandle); }
     };
-
+    
     using buffer = std::unique_ptr<typename std::decay<FILE>::type, fcloser<FILE>>;
-
+    
+    /*
     std::function<buffer(void*, std::size_t)> source = [](void *buf, std::size_t size) {
         return fmemopen(buf, size);
     };
@@ -66,6 +67,7 @@ namespace memory {
     std::function<buffer(void*, std::size_t)> sink = [](void *buf, std::size_t size) {
         return fmemopen(buf, size, "w");
     };
+    */
 
 }
 

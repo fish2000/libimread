@@ -23,7 +23,7 @@
     3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <libimread/pvr.hh>
+#include <libimread/ext/pvr.h>
 
 #include <cstdint>
 #include <cstring>

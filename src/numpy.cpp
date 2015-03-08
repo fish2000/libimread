@@ -1,10 +1,6 @@
 
 #define NO_IMPORT_ARRAY
 
-#include <cstring>
-#include <vector>
-
-#include <libimread/libimread.hpp>
 #include <libimread/numpy.hh>
 
 namespace im {
