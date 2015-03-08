@@ -6,6 +6,15 @@ cmake_minimum_required(VERSION 2.6)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       ${CMAKE_SOURCE_DIR}/cmake)
 
+SET(BREWED_CLANG_PATH /usr/local/opt/llvm)
+SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+                      ${BREWED_CLANG_PATH}
+                      /usr/local/opt/eigen)
+
+
+SET(CMAKE_C_COMPILER    ${BREWED_CLANG_PATH}/bin/clang)
+SET(CMAKE_CXX_COMPILER  ${BREWED_CLANG_PATH}/bin/clang++)
+
 # Set a new CMake project
 project(libimread)
 
@@ -44,11 +53,16 @@ find_package(JPEG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
 include_directories("${CMAKE_BINARY_DIR}/../include")
+include_directories("${BREWED_CLANG_PATH}/include")
 include_directories("${CMAKE_BINARY_DIR}")
+
+# Ugh
+link_directories("${BREWED_CLANG_PATH}/lib")
 link_directories(/usr/local/lib)
 
 include_directories(
@@ -56,12 +70,31 @@ include_directories(
     ${JPEG_INCLUDE_DIR}
     ${TIFF_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
-    ${WEBP_INCLUDE_DIR})
+    ${WEBP_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIR})
+
+#find_package(Iod REQUIRED)
+#find_package(Vpp REQUIRED)
+#include_directories(${IOD_INCLUDE_DIR})
+#include_directories(${VPP_INCLUDE_DIR})
+include_directories(/usr/local/opt/iod/include)
+include_directories(/usr/local/opt/vpp/include)
 
 find_package(Halide REQUIRED)
 find_package(JeMalloc REQUIRED)
 include_directories(${HALIDE_INCLUDE_DIR})
 include_directories(${JEMALLOC_INCLUDE_DIR})
+
+# Generate IOD symbol list
+file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
+add_custom_command(
+    OUTPUT ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
+    COMMAND iod_generate_symbols ${formats} ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+add_custom_target("iod_symbols"
+    DEPENDS ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+set_source_files_properties(
+    ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
+    PROPERTIES GENERATED TRUE)
 
 # Set the source files required to build the library
 include(fileList.cmake)
@@ -89,14 +122,16 @@ IF(APPLE)
        PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -fobjc-arc)
 ENDIF (APPLE)
 
-add_definitions(-std=c++1y -stdlib=libc++ -O3)
+add_definitions(-std=c++14 -stdlib=libc++ -O3)
 # add_definitions(-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk)
 
 # Build the library
 #add_library(imread-static STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})
+add_dependencies(imread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
 target_link_libraries(imread
     png z ${EXTRA_LIBS}
+    ${EIGEN3_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
@@ -106,9 +141,11 @@ target_link_libraries(imread
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
+add_dependencies("test_${PROJECT_NAME}" ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
-    png z imread
+    png z imread ${EXTRA_LIBS}
+    ${EIGEN3_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}

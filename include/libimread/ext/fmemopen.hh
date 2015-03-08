@@ -21,8 +21,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <memory>
-#include <functional>
 #include <libimread/libimread.hpp>
 
 /**

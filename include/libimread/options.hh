@@ -4,28 +4,38 @@
 
 #include <string>
 #include <cstring>
-#include <map>
+#include <tuple>
 #include <unordered_map>
+
+#include <type_traits>
+#include <iod/sio.hh>
+#include <iod/callable_traits.hh>
+#include <iod/tuple_utils.hh>
+#include <iod/utils.hh>
+#include <iod/bind_method.hh>
+#include <libimread/symbols.hh>
 
 namespace im {
     
     /*
-    enum class OptionType : byte {
-        EMPTY, STRING, INT, DOUBLE
+    using Symbolizer = iod::D_caller;
+    template <typename ...O>
+    struct Option : public Symbolizer {
+        auto out;
+        
+        Option() = delete;
+        Option(O... opts)
+            :Symbolizer()
+            { out = operator()(opts...); }
+        Option &operator=(const auto &whatevs) { return out; }
     };
-    
-    template <OptionType O>
-    auto option_type();
-    
-    template <>
-    static auto option_type<OptionType::EMPTY>() -> void;
-    template <>
-    static auto option_type<OptionType::STRING>() -> std::string;
-    template <>
-    static auto option_type<OptionType::INT>() -> int;
-    template <>
-    static auto option_type<OptionType::DOUBLE>() -> double;
     */
+    
+    using iod::D;
+    
+    // template <typename ...O>
+    // auto options(O&&... opts) { return D(opts...); }
+    // #define Options(...) auto options = D(__VA_ARGS__)
     
     /// number_or_string is a sort of typed union.
     /// We could have used boost::any here, but that would have brought in a big

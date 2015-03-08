@@ -2,7 +2,6 @@
 // License: MIT (see COPYING.MIT file)
 
 #include <cstring>
-
 #include <libimread/libimread.hpp>
 #include <libimread/formats.hh>
 #include <libimread/IO/apple.hh>

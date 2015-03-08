@@ -11,6 +11,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/tools.hh>
+#include <libimread/ext/io_png.hh>
 
 #ifdef __APPLE__
     #include <libpng16/png.h>   /* this is the Homebrew path */
@@ -19,7 +20,17 @@
 #endif
 
 namespace im {
-
+    
+    using namespace symbols::s;
+    
+    /*
+    auto options =
+    D(
+        _compression_level     = -1,
+        _backend               = "io_png"
+    );
+    */
+    
     class PNGFormat : public ImageFormat {
         public:
             typedef std::true_type can_read;

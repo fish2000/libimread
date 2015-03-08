@@ -21,6 +21,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/traits.hh>
+#include <libimread/symbols.hh>
 #include <libimread/options.hh>
 
 namespace im {

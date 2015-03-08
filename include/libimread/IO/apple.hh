@@ -33,6 +33,7 @@ namespace im {
     
     namespace format {
         using NS = NSImageFormat;
+        using Apple = NSImageFormat;
     }
 
 }

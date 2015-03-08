@@ -2,11 +2,10 @@
 #ifndef LIBIMREAD_CMAKE_H_
 #define LIBIMREAD_CMAKE_H_
 
-#include <cstdlib>
-#include <type_traits>
+//#include <cstdlib>
 #include <jemalloc/jemalloc.h>
-
 #include <string>
+#include <type_traits>
 
 #define IM_VERSION_MAJOR @libimread_VERSION_MAJOR@
 #define IM_VERSION_MINOR @libimread_VERSION_MINOR@
@@ -15,15 +14,18 @@
 
 namespace im {
 
+#define xWARN_UNUSED                __attribute__((__warn_unused_result__))
+
+    /*
 #define xALIAS(source)              __attribute__((weak, alias ( #source )))
 #define xREQUIRED(idx, ...)         __attribute__((__nonnull__(idx, ##__VA_ARGS__)))
-#define xWARN_UNUSED                __attribute__((__warn_unused_result__))
 #define xUNUSED                     __attribute__((__unused__))
 #define xINLINE                     __attribute__((__always_inline__))
 #define xOVEROADABLE                __attribute__((__overloadable__))
 #define xCONST                      __attribute__((__const__))
 #define xPURE                       __attribute__((__pure__))
-
+    */
+ 
     static const std::string kVERSION = IM_VERSION;
     typedef uint8_t byte;
 }
