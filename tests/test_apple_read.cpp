@@ -18,13 +18,15 @@ namespace  {
             "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
         ext::save(halim, "/tmp/apple_YO_DOGG222.png");
     }
-
+    
+    /*
     TEST_CASE("[apple] Read a PNG", "[apple-read-png]") {
         U8Image halim = im::apple::read(
             "../tests/data/roses_512_rrt_srgb.png");
         ext::save(halim, "/tmp/apple_OH_DAWG666.png");
     }
-
+    */
+    
     TEST_CASE("[apple] Read a TIFF", "[apple-read-tiff]") {
         U8Image halim = im::apple::read(
             "../tests/data/ptlobos.tif");

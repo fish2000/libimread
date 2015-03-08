@@ -93,13 +93,6 @@ namespace im {
                     return (i == 0 ? fnv_offset : ((fnv_1a_hash(i-1) ^ cstr[i]) * fnv_prime));
                 }
         };
-        
-        /*
-        template <typename T>
-        struct format_suffixes {
-            constexpr list<String> suffixes {String(".h"), String(".c")};
-        };
-        */
     }
     
     inline const char *split_filename(const char *const filename,
