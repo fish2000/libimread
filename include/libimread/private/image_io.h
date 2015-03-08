@@ -8,10 +8,10 @@
 #define STATIC_IMAGE_LOADER_H
 
 #include <png.h>
-#include <string>
 #include <cstdio>
-#include <algorithm>
 #include <cstring>
+#include <string>
+#include <algorithm>
 
 //#include <sys/time.h>
 

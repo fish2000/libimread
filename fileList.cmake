@@ -13,6 +13,8 @@ configure_file(
 # Project header files
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
+    ${hdrs_dir}/fmemopen/fmemopen.hh
+    ${hdrs_dir}/fmemopen/open_memstream.hh
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
     ${hdrs_dir}/private/spx_defines.h
@@ -40,6 +42,8 @@ set(hdrs
 
 # Project source files
 set(srcs
+    ${srcs_dir}/fmemopen/fmemopen.cpp
+    ${srcs_dir}/fmemopen/open_memstream.cpp
     ${srcs_dir}/UTI/UTI.mm
     ${srcs_dir}/_apple.mm
     ${srcs_dir}/_bmp.cpp

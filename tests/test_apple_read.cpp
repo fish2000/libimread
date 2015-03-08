@@ -4,7 +4,7 @@
 
 #include "include/catch.hpp"
 
-namespace {
+namespace  {
 
     using namespace Halide;
     using U8Image = Image<uint8_t>;

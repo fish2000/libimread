@@ -120,12 +120,12 @@ namespace im {
             throw CannotReadError(out.str());
         }
         if (bit_depth == 16 && !is_big_endian()) { png_set_swap(p.png_ptr); }
-        if (bit_depth < 8) { png_set_packing(p.png_ptr); }
+        //if (bit_depth < 8) { png_set_packing(p.png_ptr); } /// ?
         
         int d = -1;
         switch (png_get_color_type(p.png_ptr, p.png_info)) {
             case PNG_COLOR_TYPE_PALETTE:
-                png_set_palette_to_rgb(p.png_ptr);
+                png_set_palette_to_rgb(p.png_ptr); /// ??
             case PNG_COLOR_TYPE_RGB:
                 d = 3;
                 break;
@@ -133,7 +133,11 @@ namespace im {
                 d = 4;
                 break;
             case PNG_COLOR_TYPE_GRAY:
-                d = -1;
+                //d = -1;
+                d = 1;
+                if (bit_depth < 8) {
+                    png_set_gray_1_2_4_to_8(p.png_ptr);
+                }
                 break;
             default: {
                 std::ostringstream out;
@@ -144,13 +148,23 @@ namespace im {
             }
         }
         
+        /*
+        png_color_16 bg, *image_background;
+        if (png_get_bKGD(p.png_ptr, p.png_info, &image_background)) {
+            png_set_background(p.png_ptr, image_background,
+                                PNG_BACKGROUND_GAMMA_FILE, 1, 1.0);
+        } else {
+            png_set_background(p.png_ptr, &bg,
+                                PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
+        }
+        */
+        
         png_set_interlace_handling(p.png_ptr);
         png_read_update_info(p.png_ptr, p.png_info);
         
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         std::vector<png_bytep> rowps = output->allrows<png_byte>();
         png_read_image(p.png_ptr, &rowps[0]);
-        
         return output;
     }
 
