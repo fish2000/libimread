@@ -4,9 +4,10 @@
 #ifndef LIBIMREAD_HALIDE_H_
 #define LIBIMREAD_HALIDE_H_
 
-#include <cstring>
+#include <iostream>
 #include <memory>
 #include <utility>
+#include <cstring>
 #include <cstdio>
 #include <cstdint>
 
@@ -126,8 +127,7 @@ namespace im {
                                           int d3, int d4) {
                 return std::unique_ptr<Image>(
                     new HybridImage<T>(
-                        xWIDTH, xHEIGHT, xDEPTH,
-                        name()));
+                        xWIDTH, xHEIGHT, xDEPTH));
             }
     };
 
@@ -143,22 +143,6 @@ namespace im {
         Halide::Image<T> read(const std::string &filename) {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
-            std::unique_ptr<FileSource> input(new FileSource(filename));
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
-            HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));
-            return image;
-        }
-        
-    }
-
-    namespace apple {
-        
-        static const options_map opts; /// not currently used when reading
-        
-        template <typename T = byte>
-        Halide::Image<T> read(const std::string &filename) {
-            HalideFactory<T> factory(filename);
-            std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSource> input(new FileSource(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
             HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));

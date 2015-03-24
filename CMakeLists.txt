@@ -81,9 +81,7 @@ include_directories(/usr/local/opt/iod/include)
 include_directories(/usr/local/opt/vpp/include)
 
 find_package(Halide REQUIRED)
-find_package(JeMalloc REQUIRED)
 include_directories(${HALIDE_INCLUDE_DIR})
-include_directories(${JEMALLOC_INCLUDE_DIR})
 
 # Generate IOD symbol list
 file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
@@ -135,8 +133,7 @@ target_link_libraries(imread
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES}
-    ${JEMALLOC_LIBRARIES})
+    ${HALIDE_LIBRARIES})
 
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
@@ -149,8 +146,7 @@ target_link_libraries("test_${PROJECT_NAME}"
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES}
-    ${JEMALLOC_LIBRARIES})
+    ${HALIDE_LIBRARIES})
 
 #install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
