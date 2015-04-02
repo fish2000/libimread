@@ -88,13 +88,14 @@ namespace im {
                 return static_cast<void *>(host);
             }
             
+            /*
             template <typename T>
             T* rowp_as(const int r) {
                 T *host = (T *)this->data();
                 host += off_t(r * rowp_stride());
                 return host;
             }
-            
+            */
     };
     
 #define xWIDTH d1
