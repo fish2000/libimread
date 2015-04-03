@@ -6,14 +6,15 @@
 
 namespace {
     
-    using U8Image = im::apple::image_ptr<uint8_t>;
+    using U8ImagePtr = im::apple::image_ptr<uint8_t>;
+    using U8Image = im::apple::ImageType<uint8_t>;
     
     namespace ext {
         using namespace Halide;
         #include <libimread/private/image_io.h>
         
         template <typename T = uint8_t>
-        void save_ptr(U8Image &&im, std::string fname) {
+        void save_ptr(U8ImagePtr &&im, std::string fname) {
             ext::save(dynamic_cast<Image<T>>(*im), fname);
         }
     }
@@ -21,20 +22,23 @@ namespace {
     TEST_CASE("[apple] Read a JPEG and rewrite it as a PNG via image_io.h", "[apple-read-jpeg-write-png]") {
         U8Image halim = im::apple::read(
             "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
-        ext::save_ptr(std::move(halim), "/tmp/apple_YO_DOGG222.png");
+        // ext::save_ptr(std::move(halim), "/tmp/apple_YO_DOGG222.png");
+        ext::save(halim, "/tmp/apple_YO_DOGG222.png");
     }
     
     TEST_CASE("[apple] Read a PNG", "[apple-read-png]") {
         U8Image halim = im::apple::read(
             "../tests/data/IMG_7333.jpeg");
-        ext::save_ptr(std::move(halim), "/tmp/apple_OH_DAWG666.png");
+        // ext::save_ptr(std::move(halim), "/tmp/apple_OH_DAWG666.png");
+        ext::save(halim, "/tmp/apple_OH_DAWG666.png");
     }
     
     
     TEST_CASE("[apple] Read a TIFF", "[apple-read-tiff]") {
         U8Image halim = im::apple::read(
             "../tests/data/ptlobos.tif");
-        ext::save_ptr(std::move(halim), "/tmp/apple_TIFF_DUG986.png");
+        // ext::save_ptr(std::move(halim), "/tmp/apple_TIFF_DUG986.png");
+        ext::save(halim, "/tmp/apple_TIFF_DUG986.png");
     }
 
     TEST_CASE("[apple] Read a JPEG", "[apple-read-jpeg]") {

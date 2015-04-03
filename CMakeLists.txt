@@ -89,7 +89,7 @@ add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
     COMMAND iod_generate_symbols ${formats} ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
 add_custom_target("iod_symbols"
-    DEPENDS ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+    DEPENDS ${HALIDE_INCLUDE_DIR}/libimread/symbols.hpp)
 set_source_files_properties(
     ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
     PROPERTIES GENERATED TRUE)
@@ -98,7 +98,7 @@ set_source_files_properties(
 include(fileList.cmake)
 
 IF(APPLE)
-    INCLUDE_DIRECTORIES (/Developer/Headers/FlatCarbon)
+    INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
@@ -118,7 +118,7 @@ IF(APPLE)
        PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
    set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
        PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -fobjc-arc)
-ENDIF (APPLE)
+ENDIF(APPLE)
 
 add_definitions(-std=c++14 -stdlib=libc++ -O3)
 # add_definitions(-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk)
