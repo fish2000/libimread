@@ -14,24 +14,48 @@ namespace {
         #include <libimread/private/image_io.h>
     }
     
+    TEST_CASE("Read PNG files", "[read-png]") {
+        U8Image halim = im::halide::read(
+            "../tests/data/roses_512_rrt_srgb.png");
+        U8Image halim2 = im::halide::read(
+            "../tests/data/marci_512_srgb.png");
+        U8Image halim3 = im::halide::read(
+            "../tests/data/marci_512_srgb8.png");
+    }
+    
+    TEST_CASE("Read a PNG and rewrite it via image_io.h", "[read-jpeg-write-png]") {
+        U8Image halim = im::halide::read(
+            "../tests/data/roses_512_rrt_srgb.png");
+        ext::save(halim, "/tmp/YO_DOGG222.png");
+    }
+    
+    TEST_CASE("Read JPEG files", "[read-jpeg]") {
+        U8Image halim = im::halide::read(
+            "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
+        U8Image halim2 = im::halide::read(
+            "../tests/data/IMG_4332.jpg");
+        U8Image halim3 = im::halide::read(
+            "../tests/data/IMG_7333.jpeg");
+    }
+    
     TEST_CASE("Read a JPEG and rewrite it as a PNG via image_io.h", "[read-jpeg-write-png]") {
         U8Image halim = im::halide::read(
             "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
-        ext::save(halim, "/tmp/YO_DOGG222.png");
-    }
-
-    TEST_CASE("Read a PNG", "[read-png]") {
-        U8Image halim = im::halide::read(
-            "../tests/data/roses_512_rrt_srgb.png");
         ext::save(halim, "/tmp/OH_DAWG666.png");
     }
-
+    
+    /*
+    
     TEST_CASE("Read a TIFF", "[read-tiff]") {
         U8Image halim = im::halide::read(
             "../tests/data/ptlobos.tif");
         ext::save(halim, "/tmp/TIFF_DUG986.png");
     }
-
+    
+    */
+    
+    /*
+    
     TEST_CASE("Read a JPEG", "[read-jpeg]") {
         U8Image halim = im::halide::read(
             "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
@@ -39,7 +63,11 @@ namespace {
         CHECK( halim.data() != nullptr );
         CHECK( halim.data() != 0 );
     }
-
+    
+    */
+    
+    /*
+    
     TEST_CASE("Check the dimensions of a new image", "[image-dims]") {
         U8Image halim = im::halide::read(
             "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
@@ -64,4 +92,6 @@ namespace {
         WARN( "2.stride(2) = " << halim2.stride(2) );
     
     }
+    
+    */
 }

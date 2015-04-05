@@ -6,6 +6,6 @@ using namespace im;
 
 #include "include/catch.hpp"
 
-TEST_CASE("Check if PNG can read") {
+TEST_CASE("Check if PNG can read", "[sfinae-PNG-check]") {
     REQUIRE(has_read<format::PNG>());
 }

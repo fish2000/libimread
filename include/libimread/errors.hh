@@ -12,6 +12,8 @@
 
 namespace im {
 
+#define WTF(msg) std::cerr << "(WTF!!!) [__FILE__:__LINE__]: " msg << "\n"
+
 #ifndef _ASSERT
 #define _ASSERT(condition, ...)                                                 \
     if (!(condition)) {                                                         \

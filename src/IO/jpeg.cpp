@@ -134,39 +134,68 @@ namespace im {
     } /// namespace
     
     std::unique_ptr<Image> JPEGFormat::read(byte_source *src,
-                                          ImageFactory *factory,
-                                          const options_map &opts)  {
+                                            ImageFactory *factory,
+                                            const options_map &opts)  {
         
         jpeg_source_adaptor adaptor(src);
-        jpeg_decompress_holder c;
+        jpeg_decompress_holder decompressor;
         
         // error management
         error_mgr jerr;
-        c.info.err = &jerr.pub;
+        decompressor.info.err = &jerr.pub;
         
         // source
-        c.info.src = &adaptor.mgr;
+        decompressor.info.src = &adaptor.mgr;
         
         if (setjmp(jerr.setjmp_buffer)) {
             throw CannotReadError(jerr.error_message);
         }
         
         // now read the header & image data
-        jpeg_read_header(&c.info, TRUE);
-        jpeg_start_decompress(&c.info);
+        jpeg_read_header(&decompressor.info, TRUE);
+        jpeg_start_decompress(&decompressor.info);
         
-        const int h = c.info.output_height;
-        const int w = c.info.output_width;
-        const int d = c.info.output_components;
+        if (setjmp(jerr.setjmp_buffer)) {
+            throw CannotReadError(jerr.error_message);
+        }
+        
+        const int h = decompressor.info.output_height;
+        const int w = decompressor.info.output_width;
+        const int d = decompressor.info.output_components;
         
         std::unique_ptr<Image> output(factory->create(8, h, w, d));
         
-        for (int r = 0; r != h; ++r) {
-            byte *rowp = output->rowp_as<byte>(r);
-            jpeg_read_scanlines(&c.info, &rowp, 1);
+        // for (int r = 0; r != h; ++r) {
+        //     byte *rowp = output->rowp_as<byte>(r);
+        //     jpeg_read_scanlines(&c.info, &rowp, 1);
+        // }
+        
+        JSAMPARRAY samples = (*decompressor.info.mem->alloc_sarray)(
+             (j_common_ptr)&decompressor.info, JPOOL_IMAGE, w * d, 1);
+        
+        /// Hardcoding uint8_t as the type for now
+        int c_stride = (d == 1) ? 0 : output->stride(2);
+        uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+        
+        while (decompressor.info.output_scanline < decompressor.info.output_height) {
+            jpeg_read_scanlines(&decompressor.info, samples, 1);
+            JSAMPLE *srcPtr = samples[0];
+            for (int x = 0; x < w; x++) {
+                for (int c = 0; c < d; c++) {
+                    /// theoretically you would want to scale this next bit,
+                    /// depending on whatever the bit depth may be
+                    /// -- SOMEDAAAAAAAAAAAAAAY.....
+                    pix::convert(*srcPtr++, ptr[c*c_stride]);
+                }
+                ptr++;
+            }
         }
         
-        jpeg_finish_decompress(&c.info);
+        if (setjmp(jerr.setjmp_buffer)) {
+            throw CannotReadError(jerr.error_message);
+        }
+        
+        jpeg_finish_decompress(&decompressor.info);
         return output;
     }
     

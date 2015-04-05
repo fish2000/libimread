@@ -1,6 +1,7 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
+#include <iostream>
 #include <libimread/IO/png.hh>
 
 #define PP_CHECK(pp, msg) if (setjmp(png_jmpbuf(pp))) { throw CannotReadError(msg); }
@@ -178,7 +179,7 @@ namespace im {
                 uint8_t *srcPtr = (uint8_t *)(row_pointers[y]);
                 for (int x = 0; x < w; x++) {
                     for (int c = 0; c < d; c++) {
-                        png::convert(*srcPtr++, ptr[c*c_stride]);
+                        pix::convert(*srcPtr++, ptr[c*c_stride]);
                     }
                     ptr++;
                 }
@@ -190,7 +191,7 @@ namespace im {
                     for (int c = 0; c < d; c++) {
                         uint16_t hi = (*srcPtr++) << 8;
                         uint16_t lo = hi | (*srcPtr++);
-                        png::convert(lo, ptr[c*c_stride]);
+                        pix::convert(lo, ptr[c*c_stride]);
                     }
                     ptr++;
                 }

@@ -38,7 +38,6 @@ namespace im {
                     byte *rowp = output->rowp_as<byte>(0);
                     std::memcpy(rowp, (byte *)[rep bitmapData], siz*height*width*channels);
                 }
-                // NSLog(@"ABOUT TO RELEASE THEM.");
                 [rep release];
                 return output;
             };
@@ -50,8 +49,6 @@ namespace im {
                                                const options_map &opts)  {
         std::vector<byte> data = src->full_data();
         @autoreleasepool {
-            // NSLog(@"About To Start This Shit: %@",
-            //     [[NSString alloc] initWithUTF8String:dynamic_cast<FileSource*>(src)->path()]);
             return ns::IMDecodeDataVector(data, factory);
         };
     }
