@@ -83,7 +83,7 @@ namespace im {
             }
             virtual void flush() { }
     };
-
+    
     class Image {
         public:
             virtual ~Image() { }
@@ -98,6 +98,7 @@ namespace im {
             
             virtual int ndims() const = 0;
             virtual int dim(int) const = 0;
+            virtual int stride(int) const = 0;
             
             virtual int dim_or(int dim, int def) const {
                 if (dim >= this->ndims()) { return def; }
@@ -124,11 +125,26 @@ namespace im {
     class ImageFactory {
         public:
             virtual ~ImageFactory() { }
+            
             virtual std::unique_ptr<Image>
                 create(int nbits,
                     int d0, int d1, int d2,
                     int d3=-1, int d4=-1) = 0;
+            
+            virtual std::shared_ptr<Image>
+                shared(int nbits,
+                    int d0, int d1, int d2,
+                    int d3=-1, int d4=-1);
+        
         protected:
+            template <typename T>
+            std::shared_ptr<T>
+                specialized(int nbits,
+                    int d0, int d1, int d2,
+                    int d3=-1, int d4=-1) {
+                        return std::dynamic_pointer_cast<T>(
+                            shared(nbits, d0, d1, d2, d3, d4));
+                    };
     };
     
     class ImageWithMetadata {
@@ -172,6 +188,7 @@ namespace im {
                 r.swap(content);
                 return r;
             }
+        
         private:
             image_list(const image_list&);
             image_list &operator=(const image_list&);

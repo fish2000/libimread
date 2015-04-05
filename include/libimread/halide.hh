@@ -49,6 +49,12 @@ namespace im {
                 :HalImage<pT>(x, name), Image(), MetaImage(name)
                 {}
             
+            using HalImage<pT>::dimensions;
+            using HalImage<pT>::extent;
+            using HalImage<pT>::stride;
+            using HalImage<pT>::channels;
+            using HalImage<pT>::data;
+            
             virtual ~HybridImage() {}
             
             virtual int nbits() const override {
@@ -61,41 +67,28 @@ namespace im {
             }
             
             virtual int ndims() const override {
-                return this->dimensions();
+                return HalImage<pT>::dimensions();
             }
             
             virtual int dim(int d) const override {
-                return this->extent(d);
+                return HalImage<pT>::extent(d);
+            }
+            
+            virtual int stride(int s) const override {
+                return HalImage<pT>::stride(s);
             }
             
             inline off_t rowp_stride() const {
-                return this->channels() == 1 ? 0 : off_t(this->stride(1));
+                return HalImage<pT>::channels() == 1 ? 0 : off_t(HalImage<pT>::stride(1));
             }
-            
-            /*
-            virtual void *at(int r) {
-                return (void *)((pT *)this->data())[r*this->stride(1)];
-            }
-            virtual void *at(int x, int y=0, int z=0) {
-                return (void *)((pT *)this->data())[x*this->stride(0) + y*this->stride(1) + z*this->stride(2)];
-            }
-            */
             
             virtual void *rowp(int r) override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
-                pT *host = (pT *)this->data();
+                pT *host = (pT *)HalImage<pT>::data();
                 host += off_t(r * rowp_stride());
                 return static_cast<void *>(host);
             }
             
-            /*
-            template <typename T>
-            T* rowp_as(const int r) {
-                T *host = (T *)this->data();
-                host += off_t(r * rowp_stride());
-                return host;
-            }
-            */
     };
     
 #define xWIDTH d1
@@ -127,6 +120,14 @@ namespace im {
                                           int xHEIGHT, int xWIDTH, int xDEPTH,
                                           int d3, int d4) {
                 return std::unique_ptr<Image>(
+                    new HybridImage<T>(
+                        xWIDTH, xHEIGHT, xDEPTH));
+            }
+            
+            std::shared_ptr<Image> shared(int nbits,
+                                          int xHEIGHT, int xWIDTH, int xDEPTH,
+                                          int d3, int d4) {
+                return std::shared_ptr<Image>(
                     new HybridImage<T>(
                         xWIDTH, xHEIGHT, xDEPTH));
             }

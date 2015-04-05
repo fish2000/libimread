@@ -1,5 +1,6 @@
 
 #include <libimread/libimread.hpp>
+#include <libimread/base.hh>
 #include <libimread/halide.hh>
 
 #include "include/catch.hpp"

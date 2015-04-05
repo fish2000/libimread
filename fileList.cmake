@@ -66,6 +66,7 @@ set(srcs
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp
     
+    ${srcs_dir}/base.cpp
     ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/halide.cpp

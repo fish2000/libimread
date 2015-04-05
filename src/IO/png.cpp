@@ -3,6 +3,8 @@
 
 #include <libimread/IO/png.hh>
 
+#define PP_CHECK(pp, msg) if (setjmp(png_jmpbuf(pp))) { throw CannotReadError(msg); }
+
 namespace im {
     
     namespace {
@@ -25,15 +27,20 @@ namespace im {
                 
                 ~png_holder() {
                     png_infopp pp = (png_info ? &png_info : 0);
-                    if (mode == read_mode) png_destroy_read_struct(&png_ptr, pp, 0);
-                    else png_destroy_write_struct(&png_ptr, pp);
+                    if (mode == read_mode) {
+                        png_destroy_read_struct(&png_ptr, pp, 0);
+                    } else {
+                        png_destroy_write_struct(&png_ptr, pp);
+                    }
                 }
                 
                 void create_info() {
                     png_info = png_create_info_struct(png_ptr);
-                    if (!png_info) throw ProgrammingError(
-                        "_png.cpp: png_holder::create_info(): Error returned from png_create_info_struct"
-                    );
+                    if (!png_info) {
+                        throw ProgrammingError(
+                            "_png.cpp: png_holder::create_info(): Error returned from png_create_info_struct"
+                        ); 
+                    }
                 }
                 
                 png_structp png_ptr;
@@ -94,6 +101,9 @@ namespace im {
         p.create_info();
         png_read_info(p.png_ptr, p.png_info);
         
+        PP_CHECK(p.png_ptr, "PNG read struct setup failure");
+        //PP_CHECK(p.png_ptr, "PNG read I/O setup failure");
+        
         const int w = png_get_image_width (p.png_ptr, p.png_info);
         const int h = png_get_image_height(p.png_ptr, p.png_info);
         int channels = png_get_channels(p.png_ptr, p.png_info);
@@ -135,23 +145,58 @@ namespace im {
             }
         }
         
-        /*
-        png_color_16 bg, *image_background;
-        if (png_get_bKGD(p.png_ptr, p.png_info, &image_background)) {
-            png_set_background(p.png_ptr, image_background,
-                                PNG_BACKGROUND_GAMMA_FILE, 1, 1.0);
-        } else {
-            png_set_background(p.png_ptr, &bg,
-                                PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
-        }
-        */
+        PP_CHECK(p.png_ptr, "PNG read elaboration failure");
         
         png_set_interlace_handling(p.png_ptr);
         png_read_update_info(p.png_ptr, p.png_info);
         
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
-        std::vector<png_bytep> rowps = output->allrows<png_byte>();
-        png_read_image(p.png_ptr, &rowps[0]);
+        // std::vector<png_bytep> rowps = output->allrows<png_byte>();
+        // png_read_image(p.png_ptr, &rowps[0]);
+        // return output;
+        
+        int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
+        std::vector<png_bytep> row_pointers(h);
+        std::vector<png_byte> data(row_bytes * h); /// dim(0) should be height() ...
+        
+        PP_CHECK(p.png_ptr, "PNG read rowbytes failure");
+        
+        for (int y = 0; y < h; y++) {
+            row_pointers[y] = &data[y * row_bytes];
+        }
+        png_read_image(p.png_ptr, &row_pointers[0]);
+        
+        PP_CHECK(p.png_ptr, "PNG read image failure");
+        
+        /// convert the data to T (fake it for now with uint8_t)
+        //T *ptr = (T*)output->data();
+        int c_stride = (d == 1) ? 0 : output->stride(2);
+        uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+        
+        if (bit_depth == 8) {
+            for (int y = 0; y < h; y++) {
+                uint8_t *srcPtr = (uint8_t *)(row_pointers[y]);
+                for (int x = 0; x < w; x++) {
+                    for (int c = 0; c < d; c++) {
+                        png::convert(*srcPtr++, ptr[c*c_stride]);
+                    }
+                    ptr++;
+                }
+            }
+        } else if (bit_depth == 16) {
+            for (int y = 0; y < h; y++) {
+                uint8_t *srcPtr = (uint8_t *)(row_pointers[y]);
+                for (int x = 0; x < w; x++) {
+                    for (int c = 0; c < d; c++) {
+                        uint16_t hi = (*srcPtr++) << 8;
+                        uint16_t lo = hi | (*srcPtr++);
+                        png::convert(lo, ptr[c*c_stride]);
+                    }
+                    ptr++;
+                }
+            }
+        }
+        
         return output;
     }
 
