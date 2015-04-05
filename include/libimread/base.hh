@@ -134,8 +134,8 @@ namespace im {
             virtual std::shared_ptr<Image>
                 shared(int nbits,
                     int d0, int d1, int d2,
-                    int d3=-1, int d4=-1);
-        
+                    int d3=-1, int d4=-1) = 0;
+            
         protected:
             template <typename T>
             std::shared_ptr<T>

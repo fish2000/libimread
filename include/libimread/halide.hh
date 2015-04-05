@@ -116,17 +116,17 @@ namespace im {
             void name(std::string &nnm) { nm = nnm; }
             
         protected:
-            std::unique_ptr<Image> create(int nbits,
+            virtual std::unique_ptr<Image> create(int nbits,
                                           int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) {
+                                          int d3, int d4) override {
                 return std::unique_ptr<Image>(
                     new HybridImage<T>(
                         xWIDTH, xHEIGHT, xDEPTH));
             }
             
-            std::shared_ptr<Image> shared(int nbits,
+            virtual std::shared_ptr<Image> shared(int nbits,
                                           int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) {
+                                          int d3, int d4) override {
                 return std::shared_ptr<Image>(
                     new HybridImage<T>(
                         xWIDTH, xHEIGHT, xDEPTH));
