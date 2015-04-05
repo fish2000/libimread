@@ -7,6 +7,7 @@
 namespace im {
 
     namespace ns {
+        
         std::unique_ptr<Image> IMDecodeDataVector(std::vector<byte> data,
                                                   ImageFactory *factory) {
             @autoreleasepool {
@@ -25,11 +26,11 @@ namespace im {
                 NSInteger height = [rep pixelsHigh];
                 NSInteger width = [rep pixelsWide];
                 NSInteger channels = [rep samplesPerPixel];
-                int bpp = (int)[rep bitsPerSample];
+                int bps = (int)[rep bitsPerSample];
                 int siz = (bpp / 8) + bool(bpp % 8);
                 
                 std::unique_ptr<Image> output(factory->create(
-                    bpp, height, width, channels));
+                    bps, height, width, channels));
                 
                 if (format & NSFloatingPointSamplesBitmapFormat) {
                     float *frowp = output->rowp_as<float>(0);
@@ -42,6 +43,7 @@ namespace im {
                 return output;
             };
         }
+        
     }
     
     std::unique_ptr<Image> NSImageFormat::read(byte_source *src,

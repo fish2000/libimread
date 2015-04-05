@@ -42,7 +42,6 @@ set(hdrs
     ${hdrs_dir}/halide.hh
     ${hdrs_dir}/vpp.hh
     ${hdrs_dir}/memory.hh
-    # ${hdrs_dir}/numpy.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/tools.hh
 )
@@ -71,5 +70,4 @@ set(srcs
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/halide.cpp
     ${srcs_dir}/vpp.cpp
-    # ${srcs_dir}/numpy.cpp
 )

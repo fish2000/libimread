@@ -14,20 +14,124 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
+#include <libimread/halide.hh>
 
 #if PY_MAJOR_VERSION < 3
 #define PyBytes_FromString(string) PyString_FromString(string)
 #endif
 
 namespace im {
-
-    class NumpyImage : public Image, public ImageWithMetadata {
+    
+    namespace dtype {
+        
+        
+        using typecode = NPY_TYPES;
+        using Halide::Type;
+        
+        typecode from_typestruct(Type ts) {
+            switch (ts.code) {
+                
+                case Type::UInt:
+                    switch (ts.bits) {
+                        case 1: return NPY_BOOL;
+                        case 8: return NPY_UINT8;
+                        case 16: return NPY_UINT16;
+                        case 32: return NPY_UINT32;
+                        case 64: return NPY_UINT64;
+                    }
+                    return NPY_NOTYPE;
+            
+                case Type::Int:
+                switch (ts.bits) {
+                    case 1: return NPY_BOOL;
+                    case 8: return NPY_INT8;
+                    case 16: return NPY_INT16;
+                    case 32: return NPY_INT32;
+                    case 64: return NPY_INT64;
+                }
+                return NPY_NOTYPE;
+            
+                case Type::Float:
+                switch (ts.bits) {
+                    // case 1: return NPY_BOOL;
+                    // case 8: return NPY_UINT8;
+                    case 16: return NPY_HALF;
+                    case 32: return NPY_FLOAT32;
+                    case 64: return NPY_FLOAT64;
+                    // case WTF: return NPY_LONGDOUBLE ????
+                }
+                return NPY_NOTYPE;
+        
+                /// WELL FUCK
+                case Type::Handle: return NPY_VOID;
+            }
+            return NPY_NOTYPE;
+        }
+        
+        Type from_typecode(typecode tc) {
+            Type t;
+            if (PyArray_ValidType(tc) != NPY_TRUE) { return t; }
+            if (PyTypeNum_ISBOOL(tc)) { return Halide::Bool(); }
+            if (!PyTypeNum_ISNUMBER(tc)) { t.code = Type::Handle; }
+            if (PyTypeNum_ISFLOAT(tc)) { t.code = Type::Float; }
+            if (PyTypeNum_ISINTEGER(tc) && PyTypeNum_ISUNSIGNED(tc)) { t.code = Type::UInt; }
+            if (PyTypeNum_ISINTEGER(tc) && PyTypeNum_ISSIGNED(tc)) { t.code = Type::UInt; }
+            
+        }
+        
+        
+        switch (PyArray_TYPE(array)) {
+            case NPY_UINT8:
+            case NPY_INT8:
+                return 8;
+            case NPY_UINT16:
+            case NPY_INT16:
+                return 16;
+            case NPY_UINT32:
+            case NPY_INT32:
+                return 32;
+            case NPY_UINT64:
+            case NPY_INT64:
+                return 64;
+            default:
+                throw ProgrammingError();
+        }
+        
+        PyTypeNum_ISUNSIGNED(number);
+        PyDataType_ISUNSIGNED(dtypestruct);
+        PyArray_ISUNSIGNED(array);
+        
+        
+        PyTypeNum_ISINTEGER();
+        PyTypeNum_ISFLOAT();
+        PyTypeNum_ISBOOL();
+        PyTypeNum_ISNUMBER();
+        
+        PyArray_ValidType() == NPY_TRUE
+        
+    }
+    
+    /// We use Halide::ImageBase instead of Halide::Image here,
+    /// so that we don't have to muck around with templates when
+    /// working with arbitrary NumPy dtype values.
+    using HalBase = Halide::ImageBase;
+    using MetaImage = ImageWithMetadata;
+    
+    class HybridArray : public HalBase, public Image, public MetaImage {
         public:
-            NumpyImage(PyArrayObject *a = 0)
-                :array(a)
+            HybridArray(PyArrayObject *a = 0)
+                :HalBase(), Image(), MetaImage()
+                ,array(a)
                 { }
             
-            ~NumpyImage() { Py_XDECREF(array); }
+            using HalBase::dimensions;
+            using HalBase::extent;
+            using HalBase::stride;
+            using HalBase::channels;
+            using HalBase::raw_buffer;
+            using HalBase::buffer;
+            
+            ~HybridArray() { Py_XDECREF(array); }
             
             PyArrayObject *release() {
                 PyArrayObject* r = array;
@@ -44,6 +148,15 @@ namespace im {
                 std::string* s = this->get_meta();
                 if (s) { return PyBytes_FromString(s->c_str()); }
                 Py_RETURN_NONE;
+            }
+            
+            /// This returns the same type of data as buffer_t.host
+            virtual uint8_t data(int s) const {
+                return HalBase::buffer.host_ptr();
+            }
+            
+            virtual int stride(int s) const override {
+                return HalBase::stride(s);
             }
             
             virtual int nbits() const {
@@ -116,7 +229,7 @@ namespace im {
                 PyArrayObject *array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(nd, dims, dtype));
                 if (!array) { throw std::bad_alloc(); }
                 try {
-                    return std::unique_ptr<Image>(new NumpyImage(array));
+                    return std::unique_ptr<Image>(new HybridArray(array));
                 } catch (const std::exception &ex) {
                     Py_DECREF(array);
                     throw ex;
