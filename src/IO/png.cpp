@@ -103,7 +103,6 @@ namespace im {
         png_read_info(p.png_ptr, p.png_info);
         
         PP_CHECK(p.png_ptr, "PNG read struct setup failure");
-        //PP_CHECK(p.png_ptr, "PNG read I/O setup failure");
         
         const int w = png_get_image_width (p.png_ptr, p.png_info);
         const int h = png_get_image_height(p.png_ptr, p.png_info);
@@ -152,9 +151,6 @@ namespace im {
         png_read_update_info(p.png_ptr, p.png_info);
         
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
-        // std::vector<png_bytep> rowps = output->allrows<png_byte>();
-        // png_read_image(p.png_ptr, &rowps[0]);
-        // return output;
         
         int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
         std::vector<png_bytep> row_pointers(h);

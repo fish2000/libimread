@@ -165,11 +165,6 @@ namespace im {
         
         std::unique_ptr<Image> output(factory->create(8, h, w, d));
         
-        // for (int r = 0; r != h; ++r) {
-        //     byte *rowp = output->rowp_as<byte>(r);
-        //     jpeg_read_scanlines(&c.info, &rowp, 1);
-        // }
-        
         JSAMPARRAY samples = (*decompressor.info.mem->alloc_sarray)(
              (j_common_ptr)&decompressor.info, JPOOL_IMAGE, w * d, 1);
         

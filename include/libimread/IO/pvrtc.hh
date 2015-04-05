@@ -24,6 +24,7 @@ namespace im {
     
     namespace format {
         using PVR = PVRTCFormat;
+        using PVRTC = PVRTCFormat;
     }
     
 

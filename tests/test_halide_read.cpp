@@ -27,6 +27,12 @@ namespace {
         U8Image halim = im::halide::read(
             "../tests/data/roses_512_rrt_srgb.png");
         ext::save(halim, "/tmp/YO_DOGG222.png");
+        U8Image halim2 = im::halide::read(
+            "../tests/data/marci_512_srgb.png");
+        ext::save(halim2, "/tmp/marci_512_srgb_YO.png");
+        U8Image halim3 = im::halide::read(
+            "../tests/data/marci_512_srgb8.png");
+        ext::save(halim3, "/tmp/marci_512_srgb_YO_YO_YO.png");
     }
     
     TEST_CASE("Read JPEG files", "[read-jpeg]") {
@@ -42,6 +48,15 @@ namespace {
         U8Image halim = im::halide::read(
             "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
         ext::save(halim, "/tmp/OH_DAWG666.png");
+        U8Image halim2 = im::halide::read(
+            "../tests/data/IMG_4332.jpg");
+        ext::save(halim2, "/tmp/IMG_4332_JPG.png");
+        U8Image halim3 = im::halide::read(
+            "../tests/data/IMG_7333.jpeg");
+        ext::save(halim3, "/tmp/IMG_7333_JPG.png");
+        U8Image halim4 = im::halide::read(
+            "../tests/data/10954288_342637995941364_1354507656_n.jpg");
+        ext::save(halim4, "/tmp/HAY_GUISE.png");
     }
     
     /*
@@ -53,20 +68,6 @@ namespace {
     }
     
     */
-    
-    /*
-    
-    TEST_CASE("Read a JPEG", "[read-jpeg]") {
-        U8Image halim = im::halide::read(
-            "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
-    
-        CHECK( halim.data() != nullptr );
-        CHECK( halim.data() != 0 );
-    }
-    
-    */
-    
-    /*
     
     TEST_CASE("Check the dimensions of a new image", "[image-dims]") {
         U8Image halim = im::halide::read(
@@ -92,6 +93,4 @@ namespace {
         WARN( "2.stride(2) = " << halim2.stride(2) );
     
     }
-    
-    */
 }

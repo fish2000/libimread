@@ -33,6 +33,7 @@ namespace im {
     
     namespace format {
         using JPG = JPEGFormat;
+        using JPEG = JPEGFormat;
     }
     
 }
