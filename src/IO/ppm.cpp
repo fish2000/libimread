@@ -87,7 +87,6 @@ namespace im {
             }
             delete[] data;
         }
-        //im(0,0,0) = im(0,0,0);      /* Mark dirty inside read/write functions. */
         
         return im;
     }

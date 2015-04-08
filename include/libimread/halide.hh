@@ -149,6 +149,7 @@ namespace im {
             std::unique_ptr<FileSource> input(new FileSource(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
             HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));
+            image.set_host_dirty();
             return image;
         }
         
@@ -158,15 +159,6 @@ namespace im {
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write(dynamic_cast<Image&>(input), output.get(), opts);
         }
-        
-        /*
-        template <typename T = byte>
-        void write(Halide::Image<T> &image, const std::string &filename) {
-            std::unique_ptr<ImageFormat> format(for_filename(filename));
-            std::unique_ptr<FileSink> output(new FileSink(filename));
-            format->write(image, output.get(), opts);
-        }
-        */
         
     }
     

@@ -127,7 +127,7 @@ namespace im {
                 return this->dim(dim);
             }
             
-            template<typename T>
+            template <typename T>
             T *rowp_as(const int r) {
                 return static_cast<T*>(this->rowp(r));
             }

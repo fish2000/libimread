@@ -37,7 +37,7 @@ namespace im {
                     std::memcpy(frowp, (float *)[rep bitmapData], siz*height*width*channels);
                 } else {
                     byte *rowp = output->rowp_as<byte>(0);
-                    std::memcpy(rowp, (byte *)[rep bitmapData], siz*height*width*channels);
+                    std::memcpy(rowp, static_cast<byte*>([rep bitmapData]), siz*height*width*channels);
                 }
                 [rep release];
                 return output;
