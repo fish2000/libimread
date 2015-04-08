@@ -246,14 +246,28 @@ namespace im {
             
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
-            if (ImageWithMetadata *metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
-                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
-                metaout->set_meta(description);
-            }
+            // if (ImageWithMetadata *metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
+            //     std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
+            //     metaout->set_meta(description);
+            // }
+            
+            /// Hardcoding uint8_t as the type for now
+            int c_stride = (depth == 1) ? 0 : output->stride(2);
+            uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
             
             for (uint32_t r = 0; r != h; ++r) {
-                if(TIFFReadScanline(t.tif, output->rowp_as<byte>(r), r) == -1) {
+                byte *srcPtr = output->rowp_as<byte>(r);
+                if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
                     throw CannotReadError("im::TIFFFormat::do_read(): Error reading scanline");
+                }
+                for (int x = 0; x < w; x++) {
+                    for (int c = 0; c < depth; c++) {
+                        /// theoretically you would want to scale this next bit,
+                        /// depending on whatever the bit depth may be
+                        /// -- SOMEDAAAAAAAAAAAAAAY.....
+                        pix::convert(*srcPtr++, ptr[c*c_stride]);
+                    }
+                    ptr++;
                 }
             }
             

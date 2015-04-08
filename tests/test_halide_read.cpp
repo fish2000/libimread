@@ -59,15 +59,11 @@ namespace {
         ext::save(halim4, "/tmp/HAY_GUISE.png");
     }
     
-    /*
-    
     TEST_CASE("Read a TIFF", "[read-tiff]") {
         U8Image halim = im::halide::read(
             "../tests/data/ptlobos.tif");
         ext::save(halim, "/tmp/TIFF_DUG986.png");
     }
-    
-    */
     
     TEST_CASE("Check the dimensions of a new image", "[image-dims]") {
         U8Image halim = im::halide::read(
