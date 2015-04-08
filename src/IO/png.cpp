@@ -83,6 +83,11 @@ namespace im {
             throw CannotWriteError();
         }
         
+        static png_byte color_types[4] = {
+            PNG_COLOR_TYPE_GRAY, PNG_COLOR_TYPE_GRAY_ALPHA,
+            PNG_COLOR_TYPE_RGB,  PNG_COLOR_TYPE_RGB_ALPHA
+        };
+        
         void swap_bytes_inplace(std::vector<png_bytep> &data, const int ncols, stack_based_memory_pool &mem) {
             for (unsigned int r = 0; r != data.size(); ++r) {
                 png_bytep row = data[r];
@@ -201,33 +206,89 @@ namespace im {
     }
 
     void PNGFormat::write(Image &input, byte_sink *output, const options_map &opts) {
+        //stack_based_memory_pool alloc;
         png_holder p(png_holder::write_mode);
-        stack_based_memory_pool alloc;
-        //std::unique_ptr<Image> input_ptr(input);
         p.create_info();
         png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
-        const int height = input.dim(0);
-        const int width = input.dim(1);
+        
+        const int width = input.dim(0);
+        const int height = input.dim(1);
+        const int channels = input.dim(2);
         const int bit_depth = input.nbits();
         //const int color_type = color_type_of(input_ptr.get());
-        const int color_type = PNG_COLOR_TYPE_RGB;
+        //const int color_type = PNG_COLOR_TYPE_RGB;
         
-        png_set_IHDR(p.png_ptr, p.png_info, width, height,
-                         bit_depth, color_type, PNG_INTERLACE_NONE,
-                         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+        png_bytep *row_pointers;
+        png_byte color_type = color_types[channels - 1];
+        
+        png_set_IHDR(p.png_ptr, p.png_info, 
+                     width, height, bit_depth, color_type, 
+                     PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
+                     PNG_FILTER_TYPE_BASE);
+        
         int compression_level = get_optional_int(opts, "png:compression_level", -1);
         if (compression_level != -1) {
             png_set_compression_level(p.png_ptr, compression_level);
         }
         png_write_info(p.png_ptr, p.png_info);
         
-        std::vector<png_bytep> rowps = input.allrows<png_byte>();
-        if (bit_depth == 16 && !is_big_endian()) {
-            swap_bytes_inplace(rowps, width, alloc);
+        // std::vector<png_bytep> rowps = input.allrows<png_byte>();
+        // if (bit_depth == 16 && !is_big_endian()) {
+        //     swap_bytes_inplace(rowps, width, alloc);
+        // }
+        
+        row_pointers = new png_bytep[height];
+        
+        // im.copyToHost(); // in case the image is on the gpu
+        
+        int c_stride = (channels == 1) ? 0 : input.stride(2);
+        uint8_t *srcPtr = input.rowp_as<uint8_t>(0);
+        
+        for (int y = 0; y < height; y++) {
+            row_pointers[y] = new png_byte[png_get_rowbytes(p.png_ptr, p.png_info)];
+            uint8_t *dstPtr = static_cast<uint8_t *>(row_pointers[y]);
+            
+            if (bit_depth == 16) {
+                // convert to uint16_t
+                for (int x = 0; x < width; x++) {
+                    for (int c = 0; c < channels; c++) {
+                        uint16_t out;
+                        pix::convert(srcPtr[c*c_stride], out);
+                        *dstPtr++ = out >> 8;
+                        *dstPtr++ = out & 0xff;
+                    }
+                    srcPtr++;
+                }
+            } else if (bit_depth == 8) {
+                // convert to uint8_t
+                for (int x = 0; x < width; x++) {
+                    for (int c = 0; c < channels; c++) {
+                        uint8_t out;
+                        pix::convert(srcPtr[c*c_stride], out);
+                        *dstPtr++ = out;
+                    }
+                    srcPtr++;
+                }
+            } else {
+                _ASSERT(bit_depth == 8 || bit_depth == 16,
+                    "We only support saving 8- and 16-bit images.");
+            }
         }
         
-        png_write_image(p.png_ptr, &rowps[0]);
+        // write data
+        _ASSERT(!setjmp(png_jmpbuf(p.png_ptr)),
+            "[write_png_file] Error during writing bytes");
+        png_write_image(p.png_ptr, row_pointers);
+        
+        // finish write
+        _ASSERT(!setjmp(png_jmpbuf(p.png_ptr)),
+            "[write_png_file] Error during end of write");
         png_write_end(p.png_ptr, p.png_info);
+        
+        // clean up
+        for (int y = 0; y < height; y++) { delete[] row_pointers[y]; }
+        delete[] row_pointers;
+        
     }
 
 }

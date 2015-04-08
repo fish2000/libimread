@@ -25,13 +25,13 @@ namespace {
     
     TEST_CASE("Read a PNG and rewrite it via image_io.h", "[read-jpeg-write-png]") {
         U8Image halim = im::halide::read(D("roses_512_rrt_srgb.png"));
-        ext::save(halim, T("YO_DOGG222.png"));
+        im::halide::write(halim, T("YO_DOGG222.png"));
         
         U8Image halim2 = im::halide::read(D("marci_512_srgb.png"));
-        ext::save(halim2, T("marci_512_srgb_YO.png"));
+        im::halide::write(halim2, T("marci_512_srgb_YO.png"));
         
         U8Image halim3 = im::halide::read(D("marci_512_srgb8.png"));
-        ext::save(halim3, T("marci_512_srgb_YO_YO_YO.png"));
+        im::halide::write(halim3, T("marci_512_srgb_YO_YO_YO.png"));
     }
     
     TEST_CASE("Read JPEG files", "[read-jpeg]") {
@@ -42,28 +42,28 @@ namespace {
     
     TEST_CASE("Read a JPEG and rewrite it as a PNG via image_io.h", "[read-jpeg-write-png]") {
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
-        ext::save(halim, T("OH_DAWG666.png"));
+        im::halide::write(halim, T("OH_DAWG666.png"));
         
         U8Image halim2 = im::halide::read(D("IMG_4332.jpg"));
-        ext::save(halim2, T("IMG_4332_JPG.png"));
+        im::halide::write(halim2, T("IMG_4332_JPG.png"));
         
         U8Image halim3 = im::halide::read(D("IMG_7333.jpeg"));
-        ext::save(halim3, T("IMG_7333_JPG.png"));
+        im::halide::write(halim3, T("IMG_7333_JPG.png"));
         
         U8Image halim4 = im::halide::read(D("10954288_342637995941364_1354507656_n.jpg"));
-        ext::save(halim4, T("HAY_GUISE.png"));
+        im::halide::write(halim4, T("HAY_GUISE.png"));
     }
     
     TEST_CASE("Read a TIFF", "[read-tiff]") {
         U8Image halim = im::halide::read(D("ptlobos.tif"));
-        ext::save(halim, T("TIFF_DUG986.png"));
+        im::halide::write(halim, T("TIFF_DUG986.png"));
     }
     
     TEST_CASE("Write multiple formats as PPM", "[read-tiff-write-ppm]") {
         U8Image halim = im::halide::read(D("ptlobos.tif"));
         im::halide::write(halim, T("PPM_DUG986.ppm"));
         U8Image halim2 = im::halide::read(T("PPM_DUG986.ppm"));
-        ext::save(halim2, T("PPM_YO_DOGG222.png"));
+        im::halide::write(halim2, T("PPM_YO_DOGG222.png"));
         
         REQUIRE(halim.ndims() == halim2.ndims());
         REQUIRE(halim.stride(0) == halim2.stride(0));
@@ -76,7 +76,7 @@ namespace {
         U8Image halim3 = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         im::halide::write(halim3, T("PPM_OH_DOGGGGG.ppm"));
         U8Image halim4 = im::halide::read(T("PPM_OH_DOGGGGG.ppm"));
-        ext::save(halim4, T("PPM_IMG_DOGGGGGGGGG.png"));
+        im::halide::write(halim4, T("PPM_IMG_DOGGGGGGGGG.png"));
         
         REQUIRE(halim3.ndims() == halim4.ndims());
         REQUIRE(halim3.stride(0) == halim4.stride(0));
