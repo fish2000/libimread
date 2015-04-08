@@ -5,6 +5,7 @@
 
 namespace im {
     
+    /*
     void NumpyImage::finalize() {
         if (PyArray_TYPE(array) == NPY_BOOL) {
             // We need to expand this
@@ -24,5 +25,6 @@ namespace im {
             }
         }
     }
+    */
 
 }

@@ -11,7 +11,7 @@ namespace im {
 
     namespace {
         
-        const size_t buffer_size = 4096;
+        const std::size_t buffer_size = 4096;
         
         struct jpeg_source_adaptor {
             jpeg_source_mgr mgr;

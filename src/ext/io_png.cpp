@@ -90,7 +90,7 @@ char *io_png_info(void)
     } while (0);
 
 /** @brief safe malloc wrapper */
-static void *_io_png_safe_malloc(size_t size)
+static void *_io_png_safe_malloc(std::size_t size)
 {
     void *memptr;
 
@@ -101,10 +101,10 @@ static void *_io_png_safe_malloc(size_t size)
 
 /** @brief safe malloc wrapper macro with safe casting */
 #define _IO_PNG_SAFE_MALLOC(NB, TYPE)                                   \
-    ((TYPE *) _io_png_safe_malloc((size_t) (NB) * sizeof(TYPE)))
+    ((TYPE *) _io_png_safe_malloc((std::size_t) (NB) * sizeof(TYPE)))
 
 /** @brief safe realloc wrapper */
-static void *_io_png_safe_realloc(void *memptr, size_t size)
+static void *_io_png_safe_realloc(void *memptr, std::size_t size)
 {
     void *newptr;
 
@@ -115,7 +115,7 @@ static void *_io_png_safe_realloc(void *memptr, size_t size)
 
 /** @brief safe realloc wrapper macro with safe casting */
 #define _IO_PNG_SAFE_REALLOC(PTR, NB, TYPE)                             \
-    ((TYPE *) _io_png_safe_realloc((void *) (PTR), (size_t) (NB) * sizeof(TYPE)))
+    ((TYPE *) _io_png_safe_realloc((void *) (PTR), (std::size_t) (NB) * sizeof(TYPE)))
 
 /**
  * @brief local error structure
@@ -160,10 +160,10 @@ typedef enum _io_png_inter_e {
  * @param nc number of channels to interlace
  * @return new array
  */
-static float *_io_png_inter(const float *data, size_t csize, size_t nc,
+static float *_io_png_inter(const float *data, std::size_t csize, std::size_t nc,
                             _io_png_inter_t option)
 {
-    size_t i, size;
+    std::size_t i, size;
     float *tmp;
 
     assert(NULL != data && 0 != csize && 0 != nc);
@@ -202,7 +202,7 @@ static float *_io_png_inter(const float *data, size_t csize, size_t nc,
 
 /** type-generic any2flt array conversion code */
 #define _IO_PNG_ANY2FLT(MAX) do {                       \
-        size_t i;                                       \
+        std::size_t i;                                       \
         float *flt_data;                                \
         float max;                                      \
         assert(NULL != data && 0 != size);              \
@@ -222,7 +222,7 @@ static float *_io_png_inter(const float *data, size_t csize, size_t nc,
  *
  * @todo use lookup table instead of division?
  */
-static float *_io_png_byte2flt(const png_byte * data, size_t size)
+static float *_io_png_byte2flt(const png_byte * data, std::size_t size)
 {
     /* png_byte is 8bit data unsigned, [0..255] */
     _IO_PNG_ANY2FLT(255);
@@ -233,7 +233,7 @@ static float *_io_png_byte2flt(const png_byte * data, size_t size)
  *
  * See _io_png_byte2flt()
  */
-static float *_io_png_uchar2flt(const unsigned char *data, size_t size)
+static float *_io_png_uchar2flt(const unsigned char *data, std::size_t size)
 {
     _IO_PNG_ANY2FLT(UCHAR_MAX);
 }
@@ -243,14 +243,14 @@ static float *_io_png_uchar2flt(const unsigned char *data, size_t size)
  *
  * See _io_png_byte2flt()
  */
-static float *_io_png_ushrt2flt(const unsigned short *data, size_t size)
+static float *_io_png_ushrt2flt(const unsigned short *data, std::size_t size)
 {
     _IO_PNG_ANY2FLT(USHRT_MAX);
 }
 
 /** type-generic flt2any array conversion code */
 #define _IO_PNG_FLT2ANY(TYPE, MAX) do {                         \
-        size_t i;                                               \
+        std::size_t i;                                               \
         TYPE *data;                                             \
         float tmp, max;                                         \
         assert(NULL != flt_data && 0 != size);                  \
@@ -273,7 +273,7 @@ static float *_io_png_ushrt2flt(const unsigned short *data, size_t size)
  *
  * @todo bit twiddling instead of (?:) branching?
  */
-static png_byte *_io_png_flt2byte(const float *flt_data, size_t size)
+static png_byte *_io_png_flt2byte(const float *flt_data, std::size_t size)
 {
     /* png_byte is 8bit data unsigned, [0..255] */
     _IO_PNG_FLT2ANY(png_byte, 255);
@@ -284,7 +284,7 @@ static png_byte *_io_png_flt2byte(const float *flt_data, size_t size)
  *
  * See _io_png_flt2byte()
  */
-static unsigned char *_io_png_flt2uchar(const float *flt_data, size_t size)
+static unsigned char *_io_png_flt2uchar(const float *flt_data, std::size_t size)
 {
     _IO_PNG_FLT2ANY(unsigned char, UCHAR_MAX);
 }
@@ -294,7 +294,7 @@ static unsigned char *_io_png_flt2uchar(const float *flt_data, size_t size)
  *
  * See _io_png_flt2byte()
  */
-static unsigned short *_io_png_flt2ushrt(const float *flt_data, size_t size)
+static unsigned short *_io_png_flt2ushrt(const float *flt_data, std::size_t size)
 {
     _IO_PNG_FLT2ANY(unsigned short, USHRT_MAX);
 }
@@ -306,7 +306,7 @@ static unsigned short *_io_png_flt2ushrt(const float *flt_data, size_t size)
  * @param size array size
  * @return converted array (via realloc())
  */
-static float *_io_png_gray2rgb(float *data, size_t size)
+static float *_io_png_gray2rgb(float *data, std::size_t size)
 {
     assert(NULL != data && 0 != size);
 
@@ -334,9 +334,9 @@ static float *_io_png_gray2rgb(float *data, size_t size)
  *
  * @todo restrict keyword?
  */
-static float *_io_png_rgb2gray(float *data, size_t size)
+static float *_io_png_rgb2gray(float *data, std::size_t size)
 {
-    size_t i;
+    std::size_t i;
     float *r, *g, *b;
 
     assert(NULL != data && 0 != size);
@@ -376,22 +376,22 @@ static float *_io_png_rgb2gray(float *data, size_t size)
  * @todo use enums?
  */
 static float *_io_png_read(const char *fname,
-                           size_t * nxp, size_t * nyp, size_t * ncp,
+                           std::size_t * nxp, std::size_t * nyp, std::size_t * ncp,
                            io_png_opt_t opt)
 {
     png_byte png_sig[PNG_SIG_LEN];
     png_structp png_ptr;
     png_infop info_ptr;
     png_bytepp row_pointers;
-    size_t rowbytes;
+    std::size_t rowbytes;
     png_byte *png_data;
     float *data, *tmp;
     int png_transform;
     /* volatile: because of setjmp/longjmp */
     FILE *volatile fp = NULL;
-    size_t nx, ny, nc;
-    size_t size;
-    size_t i;
+    std::size_t nx, ny, nc;
+    std::size_t size;
+    std::size_t i;
     /* local error structure */
     _io_png_err_t err;
 
@@ -456,12 +456,12 @@ static float *_io_png_read(const char *fname,
      * then collect the image informations
      */
     png_read_png(png_ptr, info_ptr, png_transform, NULL);
-    nx = (size_t) png_get_image_width(png_ptr, info_ptr);
-    ny = (size_t) png_get_image_height(png_ptr, info_ptr);
-    nc = (size_t) png_get_channels(png_ptr, info_ptr);
+    nx = (std::size_t) png_get_image_width(png_ptr, info_ptr);
+    ny = (std::size_t) png_get_image_height(png_ptr, info_ptr);
+    nc = (std::size_t) png_get_channels(png_ptr, info_ptr);
     size = nx * ny * nc;
     row_pointers = png_get_rows(png_ptr, info_ptr);
-    rowbytes = (size_t) png_get_rowbytes(png_ptr, info_ptr);
+    rowbytes = (std::size_t) png_get_rowbytes(png_ptr, info_ptr);
 
     /* dump the rows in a continuous array */
     /* todo: first check if the data is continuous via row_pointers */
@@ -538,11 +538,11 @@ static float *_io_png_read(const char *fname,
  * @return pointer to an array of pixels, abort() on error
  */
 float *io_png_read_flt_opt(const char *fname,
-                           size_t * nxp, size_t * nyp, size_t * ncp,
+                           std::size_t * nxp, std::size_t * nyp, std::size_t * ncp,
                            io_png_opt_t opt)
 {
     float *flt_data;
-    size_t nx, ny, nc;
+    std::size_t nx, ny, nc;
 
     if (NULL == fname)
         _IO_PNG_ABORT("bad parameters");
@@ -570,7 +570,7 @@ float *io_png_read_flt_opt(const char *fname,
  * @return pointer to an array of pixels, abort() on error
  */
 float *io_png_read_flt(const char *fname,
-                       size_t * nxp, size_t * nyp, size_t * ncp)
+                       std::size_t * nxp, std::size_t * nyp, std::size_t * ncp)
 {
     return io_png_read_flt_opt(fname, nxp, nyp, ncp, IO_PNG_OPT_NONE);
 }
@@ -583,12 +583,12 @@ float *io_png_read_flt(const char *fname,
  * details.
  */
 unsigned char *io_png_read_uchar_opt(const char *fname,
-                                     size_t * nxp, size_t * nyp, size_t * ncp,
+                                     std::size_t * nxp, std::size_t * nyp, std::size_t * ncp,
                                      io_png_opt_t opt)
 {
     float *flt_data;
     unsigned char *data;
-    size_t nx, ny, nc;
+    std::size_t nx, ny, nc;
 
     if (NULL == fname)
         _IO_PNG_ABORT("bad parameters");
@@ -618,7 +618,7 @@ unsigned char *io_png_read_uchar_opt(const char *fname,
  * @return pointer to an array of pixels, abort() on error
  */
 unsigned char *io_png_read_uchar(const char *fname,
-                                 size_t * nxp, size_t * nyp, size_t * ncp)
+                                 std::size_t * nxp, std::size_t * nyp, std::size_t * ncp)
 {
     return io_png_read_uchar_opt(fname, nxp, nyp, ncp, IO_PNG_OPT_NONE);
 }
@@ -631,12 +631,12 @@ unsigned char *io_png_read_uchar(const char *fname,
  * details.
  */
 unsigned short *io_png_read_ushrt_opt(const char *fname,
-                                      size_t * nxp, size_t * nyp,
-                                      size_t * ncp, io_png_opt_t opt)
+                                      std::size_t * nxp, std::size_t * nyp,
+                                      std::size_t * ncp, io_png_opt_t opt)
 {
     float *flt_data;
     unsigned short *data;
-    size_t nx, ny, nc;
+    std::size_t nx, ny, nc;
 
     if (NULL == fname)
         _IO_PNG_ABORT("bad parameters");
@@ -666,7 +666,7 @@ unsigned short *io_png_read_ushrt_opt(const char *fname,
  * @return pointer to an array of pixels, abort() on error
  */
 unsigned short *io_png_read_ushrt(const char *fname,
-                                  size_t * nxp, size_t * nyp, size_t * ncp)
+                                  std::size_t * nxp, std::size_t * nyp, std::size_t * ncp)
 {
     return io_png_read_ushrt_opt(fname, nxp, nyp, ncp, IO_PNG_OPT_NONE);
 }
@@ -693,7 +693,7 @@ unsigned short *io_png_read_ushrt(const char *fname,
  * @todo handle 16bit
  */
 static void _io_png_write(const char *fname, const float *data,
-                          size_t nx, size_t ny, size_t nc, io_png_opt_t opt)
+                          std::size_t nx, std::size_t ny, std::size_t nc, io_png_opt_t opt)
 {
     png_structp png_ptr;
     png_infop info_ptr;
@@ -704,7 +704,7 @@ static void _io_png_write(const char *fname, const float *data,
     /* volatile: because of setjmp/longjmp */
     FILE *volatile fp;
     int color_type, interlace, compression, compression_level, filter;
-    size_t i;
+    std::size_t i;
     /* error structure */
     _io_png_err_t err;
 
@@ -791,7 +791,7 @@ static void _io_png_write(const char *fname, const float *data,
 
     /* set row pointers */
     for (i = 0; i < ny; i++)
-        row_pointers[i] = (png_bytep) png_data + (size_t) (nc * nx * i);
+        row_pointers[i] = (png_bytep) png_data + (std::size_t) (nc * nx * i);
 
     /* write out the entire image and end it */
     png_write_image(png_ptr, row_pointers);
@@ -824,7 +824,7 @@ static void _io_png_write(const char *fname, const float *data,
  * @return void, abort() on error
  */
 void io_png_write_flt_opt(const char *fname, const float *data,
-                          size_t nx, size_t ny, size_t nc, io_png_opt_t opt)
+                          std::size_t nx, std::size_t ny, std::size_t nc, io_png_opt_t opt)
 {
     _io_png_write(fname, data, nx, ny, nc, opt);
     return;
@@ -841,7 +841,7 @@ void io_png_write_flt_opt(const char *fname, const float *data,
  * @param nx, ny, nc number of columns, lines and channels of the image
  */
 void io_png_write_flt(const char *fname, const float *data,
-                      size_t nx, size_t ny, size_t nc)
+                      std::size_t nx, std::size_t ny, std::size_t nc)
 {
     io_png_write_flt_opt(fname, data, nx, ny, nc, IO_PNG_OPT_NONE);
     return;
@@ -855,7 +855,7 @@ void io_png_write_flt(const char *fname, const float *data,
  * fixed-point data. See io_png_write_flt_opt() for details.
  */
 void io_png_write_uchar_opt(const char *fname, const unsigned char *data,
-                            size_t nx, size_t ny, size_t nc, io_png_opt_t opt)
+                            std::size_t nx, std::size_t ny, std::size_t nc, io_png_opt_t opt)
 {
     float *flt_data;
 
@@ -878,7 +878,7 @@ void io_png_write_uchar_opt(const char *fname, const unsigned char *data,
  * @return void, abort() on error
  */
 void io_png_write_uchar(const char *fname, const unsigned char *data,
-                        size_t nx, size_t ny, size_t nc)
+                        std::size_t nx, std::size_t ny, std::size_t nc)
 {
     io_png_write_uchar_opt(fname, data, nx, ny, nc, IO_PNG_OPT_NONE);
     return;
@@ -892,7 +892,7 @@ void io_png_write_uchar(const char *fname, const unsigned char *data,
  * fixed-point data. See io_png_write_flt_opt() for details.
  */
 void io_png_write_ushrt_opt(const char *fname, const unsigned short *data,
-                            size_t nx, size_t ny, size_t nc, io_png_opt_t opt)
+                            std::size_t nx, std::size_t ny, std::size_t nc, io_png_opt_t opt)
 {
     float *flt_data;
 
@@ -917,7 +917,7 @@ void io_png_write_ushrt_opt(const char *fname, const unsigned short *data,
  * @todo save in 16bits
  */
 void io_png_write_ushrt(const char *fname, const unsigned short *data,
-                        size_t nx, size_t ny, size_t nc)
+                        std::size_t nx, std::size_t ny, std::size_t nc)
 {
     io_png_write_ushrt_opt(fname, data, nx, ny, nc, IO_PNG_OPT_NONE);
     return;

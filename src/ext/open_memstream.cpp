@@ -29,7 +29,7 @@ namespace memory {
         memstream_grow(ms, ms->offset + len);
         tocopy = *ms->lenp - ms->offset;
         if (len < tocopy) { tocopy = len; }
-        memcpy(buf, *ms->cp + ms->offset, tocopy);
+        std::memcpy(buf, *ms->cp + ms->offset, tocopy);
         ms->offset += tocopy;
 
 #ifdef DEBUG

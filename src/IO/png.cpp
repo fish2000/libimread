@@ -153,15 +153,14 @@ namespace im {
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         
         int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
-        std::vector<png_bytep> row_pointers(h);
-        std::vector<png_byte> data(row_bytes * h); /// dim(0) should be height() ...
+        png_bytep *row_pointers = new png_bytep[h];
+        for (int y = 0; y < h; y++) {
+            row_pointers[y] = new png_byte[row_bytes];
+        }
         
         PP_CHECK(p.png_ptr, "PNG read rowbytes failure");
         
-        for (int y = 0; y < h; y++) {
-            row_pointers[y] = &data[y * row_bytes];
-        }
-        png_read_image(p.png_ptr, &row_pointers[0]);
+        png_read_image(p.png_ptr, row_pointers);
         
         PP_CHECK(p.png_ptr, "PNG read image failure");
         
@@ -172,7 +171,7 @@ namespace im {
         
         if (bit_depth == 8) {
             for (int y = 0; y < h; y++) {
-                uint8_t *srcPtr = (uint8_t *)(row_pointers[y]);
+                uint8_t *srcPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (int x = 0; x < w; x++) {
                     for (int c = 0; c < d; c++) {
                         pix::convert(*srcPtr++, ptr[c*c_stride]);
@@ -182,7 +181,7 @@ namespace im {
             }
         } else if (bit_depth == 16) {
             for (int y = 0; y < h; y++) {
-                uint8_t *srcPtr = (uint8_t *)(row_pointers[y]);
+                uint8_t *srcPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (int x = 0; x < w; x++) {
                     for (int c = 0; c < d; c++) {
                         uint16_t hi = (*srcPtr++) << 8;
@@ -193,6 +192,10 @@ namespace im {
                 }
             }
         }
+        
+        /// clean up
+        for (int y = 0; y < h; y++) { delete[] row_pointers[y]; }
+        delete[] row_pointers;
         
         return output;
     }

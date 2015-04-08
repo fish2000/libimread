@@ -27,7 +27,7 @@ namespace im {
                 NSInteger width = [rep pixelsWide];
                 NSInteger channels = [rep samplesPerPixel];
                 int bps = (int)[rep bitsPerSample];
-                int siz = (bpp / 8) + bool(bpp % 8);
+                int siz = (bps / 8) + bool(bps % 8);
                 
                 std::unique_ptr<Image> output(factory->create(
                     bps, height, width, channels));

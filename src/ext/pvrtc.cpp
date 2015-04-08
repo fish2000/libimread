@@ -616,7 +616,7 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData, const int Do2bitMode,
             previous values
             // have changed.
             */
-            if (memcmp(pPrevious, pBlocks, 4 * sizeof(void *)) != 0) {
+            if (std::memcmp(pPrevious, pBlocks, 4 * sizeof(void *)) != 0) {
                 StartY = 0;
                 for (i = 0; i < 2; i++) {
                     StartX = 0;
@@ -636,7 +636,7 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData, const int Do2bitMode,
                 /*
                 // make a copy of the new pointers
                 */
-                memcpy(pPrevious, pBlocks, 4 * sizeof(void *));
+                std::memcpy(pPrevious, pBlocks, 4 * sizeof(void *));
             } /*end if the blocks have changed*/
 
             /*

@@ -94,7 +94,7 @@ namespace im {
                     }
                     if (_fd < 0) {
                         std::ostringstream out;
-                        out << "ERROR: im::file_source_sink() file read failure:\n"
+                        out << "ERROR: im::file_source_sink(): file read failure:\n"
                             << "\t::open(\"" << cpath 
                             << "\"\n," << ((md == Mode::READ) ? "O_RDONLY | O_BINARY"
                                                               : "O_CREAT | O_WRONLY | O_BINARY | O_TRUNC")

@@ -40,6 +40,24 @@ namespace im {
         return p;
     }
     
+    class MultiEnableShared : public std::enable_shared_from_this<MultiEnableShared> {
+        public:
+            virtual ~MultiEnableShared() {}
+    };
+    
+    template <typename T>
+    class EnableShared : virtual public MultiEnableShared {
+        public:
+            std::shared_ptr<T> shared_from_this() {
+                return std::dynamic_pointer_cast<T>(MultiEnableShared::shared_from_this());
+            }
+            
+            template <typename Down>
+            std::shared_ptr<Down> downcast_from_this() {
+                return std::dynamic_pointer_cast<Down>(MultiEnableShared::shared_from_this());
+            }
+    };
+    
     template <typename T, typename pT>
     std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT> &&src) {
         /// Force a dynamic_cast upon a unique_ptr via interim swap
@@ -82,7 +100,7 @@ namespace im {
     inline uint8_t read8(byte_source &s) {
         byte out;
         if (s.read(&out, 1) != 1) {
-            throw CannotReadError("File ended prematurely");
+            throw CannotReadError("im::read8(): File ended prematurely");
         }
         return out;
     }

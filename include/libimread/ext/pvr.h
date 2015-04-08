@@ -28,7 +28,7 @@
 #define PVR_H
 
 #include <cstdint>
-#include <jemalloc/jemalloc.h>
+//#include <jemalloc/jemalloc.h>
 
 enum ePVRPixelType
 {

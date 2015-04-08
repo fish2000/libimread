@@ -24,6 +24,38 @@
 
 namespace im {
     
+    /*
+    constexpr Halide::Type for_nbits(int nbits) {
+        switch (nbits) {
+            case 1: return Halide::Bool();
+            case 8: return Halide::UInt(8);
+            case 16: return Halide::UInt(16);
+            case 32: return Halide::UInt(32);
+        }
+        return Halide::Handle();
+    }
+    */
+    
+    constexpr Halide::Type for_dtype(NPY_TYPES dtype) {
+        switch (dtype) {
+            case NPY_BOOL: return Halide::Bool();
+            case NPY_UINT8: return Halide::UInt(8);
+            case NPY_UINT16: return Halide::UInt(16);
+            case NPY_UINT32: return Halide::UInt(32);
+        }
+        return Halide::Handle();
+    }
+    
+    constexpr NPY_TYPES for_nbits(int nbits) {
+        switch (nbits) {
+            case 1: return NPY_BOOL;
+            case 8: return NPY_UINT8;
+            case 16: return NPY_UINT16;
+            case 32: return NPY_UINT32;
+        }
+        return NPY_USERDEF;
+    }
+    
     /// We use Halide::ImageBase instead of Halide::Image here,
     /// so that we don't have to muck around with templates when
     /// working with arbitrary NumPy dtype values.
@@ -32,33 +64,42 @@ namespace im {
     
     class HybridArray : public HalBase, public Image, public MetaImage {
         public:
-            HybridArray(PyArrayObject *a = 0)
+            HybridArray()
                 :HalBase(), Image(), MetaImage()
-                ,array(a)
-                { }
+                ;dtype_(NPY_UINT8)
+                {}
+            
+            HybridArray(NPY_TYPES d, int x, int y, int z, int w, const std::string &name="")
+                :HalBase(for_dtype(d), x, y, z, w, name), Image(), MetaImage(name)
+                ;dtype_(d)
+                {}
+            
+            HybridArray(NPY_TYPES d, int x, int y, int z, const std::string &name="")
+                :HalBase(for_dtype(d), x, y, z, name), Image(), MetaImage(name)
+                ;dtype_(d)
+                {}
+            
+            HybridArray(NPY_TYPES d, int x, int y, const std::string &name="")
+                :HalBase(for_dtype(d), x, y, name), Image(), MetaImage(name)
+                ;dtype_(d)
+                {}
+            
+            HybridArray(NPY_TYPES d, int x, const std::string &name="")
+                :HalBase(for_dtype(d), x, name), Image(), MetaImage(name)
+                ;dtype_(d)
+                {}
             
             using HalBase::dimensions;
             using HalBase::extent;
             using HalBase::stride;
             using HalBase::channels;
-            using HalBase::raw_buffer;
             using HalBase::buffer;
+            using HalBase::raw_buffer;
             
-            ~HybridArray() { Py_XDECREF(array); }
-            
-            PyArrayObject *release() {
-                PyArrayObject* r = array;
-                array = 0;
-                return r;
-            }
-            
-            PyObject *releasePyObject() {
-                this->finalize();
-                return reinterpret_cast<PyObject*>(this->release());
-            }
+            virtual ~HybridArray() {}
             
             PyObject *metadataPyObject() {
-                std::string* s = this->get_meta();
+                std::string *s = MetaImage::get_meta();
                 if (s) { return PyBytes_FromString(s->c_str()); }
                 Py_RETURN_NONE;
             }
@@ -68,90 +109,95 @@ namespace im {
                 return HalBase::buffer.host_ptr();
             }
             
+            inline constexpr Halide::Type type() const {
+                return for_dtype(dtype_);
+            }
+            
+            virtual int nbits() const override {
+                return for_dtype(dtype_).bits;
+            }
+            
+            virtual int nbytes() const override {
+                const int bits = for_dtype(dtype_).bits;
+                return (bits / 8) + bool(bits % 8);
+            }
+            
+            virtual int ndims() const override {
+                return HalBase::dimensions();
+            }
+            
+            virtual int dim(int d) const override {
+                return HalBase::extent(d);
+            }
+            
             virtual int stride(int s) const override {
                 return HalBase::stride(s);
             }
             
-            virtual int nbits() const {
-                if (!array) { throw ProgrammingError(); }
-                switch (PyArray_TYPE(array)) {
-                    case NPY_UINT8:
-                    case NPY_INT8:
-                        return 8;
-                    case NPY_UINT16:
-                    case NPY_INT16:
-                        return 16;
-                    case NPY_UINT32:
-                    case NPY_INT32:
-                        return 32;
-                    case NPY_UINT64:
-                    case NPY_INT64:
-                        return 64;
-                    default:
-                        throw ProgrammingError();
-                }
+            inline off_t rowp_stride() const {
+                return HalBase::channels() == 1 ? 0 : off_t(HalBase::stride(1));
             }
             
-            virtual int ndims() const {
-                if (!array) { throw ProgrammingError(); }
-                return PyArray_NDIM(array);
+            virtual void *rowp(int r) override {
+                uint8_t *host = data();
+                host += off_t(r * rowp_stride());
+                return static_cast<void *>(host);
             }
             
-            virtual int dim(int d) const {
-                if (!array || d >= this->ndims()) { throw ProgrammingError(); }
-                return PyArray_DIM(array, d);
-            }
+            /// extent, stride, min
+            virtual NPY_TYPES dtype()  { return dtype_; }
+            virtual int32_t *dims()    { return HalBase::raw_buffer()->extent; }
+            virtual int32_t *strides() { return HalBase::raw_buffer()->stride; }
+            virtual int32_t *offsets() { return HalBase::raw_buffer()->min; }
             
-            virtual void *rowp(int r) {
-                if (!array) throw ProgrammingError();
-                if (r >= PyArray_DIM(array, 0)) { throw ProgrammingError(); }
-                return PyArray_GETPTR1(array, r);
-            }
-            
-            void finalize();
-            PyArrayObject *array;
+        private:
+            NPY_TYPES dtype_;
     };
     
-    class NumpyFactory : public ImageFactory {
+#define xWIDTH d1
+#define xHEIGHT d0
+#define xDEPTH d2
+    
+    class ArrayFactory : public ImageFactory {
+        private:
+            std::string nm;
+        
+        public:
+            ArrayFactory()
+                :nm(std::string(""))
+                {}
+            ArrayFactory(const std::string &n)
+                :nm(std::string(n))
+                {}
+            
+            virtual ~ArrayFactory() {}
+            
+            std::string &name() { return nm; }
+            void name(std::string &nnm) { nm = nnm; }
+        
         protected:
-            std::unique_ptr<Image> create(int nbits, int d0, int d1, int d2, int d3, int d4) {
-                npy_intp dims[5];
-                dims[0] = d0;
-                dims[1] = d1;
-                dims[2] = d2;
-                dims[3] = d3;
-                dims[4] = d4;
-                npy_intp nd = 5;
-                
-                if (d2 == -1) nd = 2;
-                else if (d3 == -1) nd = 3;
-                else if (d4 == -1) nd = 4;
-                int dtype = -1;
-                switch (nbits) {
-                    case 1: dtype = NPY_BOOL; break;
-                    case 8: dtype = NPY_UINT8; break;
-                    case 16: dtype = NPY_UINT16; break;
-                    case 32: dtype = NPY_UINT32; break;
-                    default: {
-                        std::ostringstream out;
-                        out << "im::NumpyFactory::create(): Cannot handle " << nbits << "-bit images.";
-                        throw ProgrammingError(out.str());
-                    }
-                }
-                
-                PyArrayObject *array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(nd, dims, dtype));
-                if (!array) { throw std::bad_alloc(); }
-                try {
-                    return std::unique_ptr<Image>(new HybridArray(array));
-                } catch (const std::exception &ex) {
-                    Py_DECREF(array);
-                    throw ex;
-                } catch (...) {
-                    Py_DECREF(array);
-                    throw;
-                }
+            virtual std::unique_ptr<Image> create(int nbits,
+                                          int xHEIGHT, int xWIDTH, int xDEPTH,
+                                          int d3, int d4) override {
+                return std::unique_ptr<Image>(
+                    new HybridArray(
+                        for_nbits(nbits),
+                        xWIDTH, xHEIGHT, xDEPTH));
+            }
+            
+            virtual std::shared_ptr<Image> shared(int nbits,
+                                          int xHEIGHT, int xWIDTH, int xDEPTH,
+                                          int d3, int d4) override {
+                return std::shared_ptr<Image>(
+                    new HybridArray(
+                        for_nbits(nbits),
+                        xWIDTH, xHEIGHT, xDEPTH));
             }
     };
+
+#undef xWIDTH
+#undef xHEIGHT
+#undef xDEPTH
 
 }
 

@@ -155,20 +155,20 @@ namespace im {
           public:
             LSMReader(byte_source *s);
             ~LSMReader();
-
+            
             void PrintSelf(std::ostream &os, const char *indent = "");
             std::unique_ptr<Image> read(ImageFactory *factory,
-                                      const options_map &);
+                                      const options_map&);
             void readHeader();
-
+            
             int GetChannelColorComponent(int, int);
             std::string GetChannelName(int);
-
+            
             void SetDataByteOrderToBigEndian();
             void SetDataByteOrderToLittleEndian();
-
+            
             int GetDataTypeForChannel(unsigned int channel);
-
+            
           private:
             unsigned long ReadImageDirectory(byte_source *, unsigned long);
             void SetChannelName(const char *, int);
@@ -192,10 +192,10 @@ namespace im {
                                            unsigned int slice);
             unsigned int GetSliceOffset(unsigned int timepoint,
                                         unsigned int slice);
-
+            
             byte_source *src;
             bool swap_bytes_;
-
+            
             unsigned long OffsetToLastAccessedImage;
             int NumberOfLastAccessedImage;
             double VoxelSizes[3];
@@ -215,13 +215,13 @@ namespace im {
             unsigned short PlanarConfiguration;
             unsigned short Predictor;
             unsigned short scan_type_;
-
+            
             std::vector<unsigned int> image_offsets_;
             std::vector<unsigned int> read_sizes_;
             std::vector<double> detector_offset_first_image_;
             std::vector<double> detector_offset_last_image_;
             std::vector<std::string> laser_names_;
-
+            
             double DataSpacing[3];
             int DataExtent[6];
             int data_type_;
@@ -234,7 +234,7 @@ namespace im {
             std::string description_;
             double TimeInterval;
         };
-
+        
         int ReadFile(byte_source *s, unsigned long *pos, int size, void *buf,
                      bool swap = false) {
             s->seek_absolute(*pos);
@@ -247,11 +247,11 @@ namespace im {
             *pos += ret;
             return ret;
         }
-
+        
         int ReadData(byte_source *s, unsigned long *pos, int size, char *buf) {
             return ReadFile(s, pos, size, buf, 1);
         }
-
+        
         std::string read_str(byte_source *s, unsigned long *pos,
                              const unsigned long len) {
             char *buf = new char[len];
@@ -260,25 +260,25 @@ namespace im {
             delete[] buf;
             return res;
         }
-
+        
         unsigned char CharPointerToUnsignedChar(char *buf) {
             return *((unsigned char *)(buf));
         }
-
+        
         int CharPointerToInt(char *buf) { return *((int *)(buf)); }
-
+        
         unsigned int CharPointerToUnsignedInt(char *buf) {
             return *((unsigned int *)(buf));
         }
-
+        
         short CharPointerToShort(char *buf) { return *((short *)(buf)); }
-
+        
         unsigned short CharPointerToUnsignedShort(char *buf) {
             return *((unsigned short *)(buf));
         }
-
+        
         double CharPointerToDouble(char *buf) { return *((double *)(buf)); }
-
+        
         int ReadInt(byte_source *s, unsigned long *pos) {
             char buff[4];
             ReadFile(s, pos, 4, buff);
@@ -287,7 +287,7 @@ namespace im {
 #endif
             return CharPointerToInt(buff);
         }
-
+        
         unsigned int ReadUnsignedInt(byte_source *s, unsigned long *pos) {
             char buff[4];
             ReadFile(s, pos, 4, buff);
@@ -296,7 +296,7 @@ namespace im {
 #endif
             return CharPointerToUnsignedInt(buff);
         }
-
+        
         short ReadShort(byte_source *s, unsigned long *pos) {
             char buff[2];
             ReadFile(s, pos, 2, buff);
@@ -305,7 +305,7 @@ namespace im {
 #endif
             return CharPointerToShort(buff);
         }
-
+        
         unsigned short ReadUnsignedShort(byte_source *s, unsigned long *pos) {
             char buff[2];
             ReadFile(s, pos, 2, buff);
@@ -314,7 +314,7 @@ namespace im {
 #endif
             return CharPointerToUnsignedShort(buff);
         }
-
+        
         double ReadDouble(byte_source *s, unsigned long *pos) {
             char buff[8];
             ReadFile(s, pos, 8, buff);
@@ -323,7 +323,7 @@ namespace im {
 #endif
             return CharPointerToDouble(buff);
         }
-
+        
         int BYTES_BY_DATA_TYPE(int type) {
             switch (type) {
             case 1:
@@ -350,7 +350,7 @@ namespace im {
             }
             return 1;
         }
-
+        
         LSMReader::LSMReader(byte_source *s)
             : src(s),
               swap_bytes_(false),
@@ -359,18 +359,13 @@ namespace im {
               scan_type_(0),
               data_type_(0) {
             std::fill(this->dimensions_, this->dimensions_ + 5, 0);
-
-            this->DataExtent[0] = this->DataExtent[1] = this->DataExtent[2]
-                = this->DataExtent[4] = 0;
+            
+            this->DataExtent[0] = this->DataExtent[1] = this->DataExtent[2] = this->DataExtent[4] = 0;
             this->DataExtent[3] = this->DataExtent[5] = 0;
             this->OffsetToLastAccessedImage = 0;
             this->NumberOfLastAccessedImage = 0;
-            this->VoxelSizes[0] = this->VoxelSizes[1] = this->VoxelSizes[2]
-                = 0.0;
-
-            this->DataSpacing[0] = this->DataSpacing[1] = this->DataSpacing[2]
-                = 1.0f;
-
+            this->VoxelSizes[0] = this->VoxelSizes[1] = this->VoxelSizes[2] = 0.0;
+            this->DataSpacing[0] = this->DataSpacing[1] = this->DataSpacing[2] = 1.0f;
             this->NewSubFileType = 0;
             this->bits_per_sample_.resize(4);
             this->strip_offset_.resize(4);
@@ -397,7 +392,7 @@ namespace im {
             this->image_offsets_.clear();
             this->read_sizes_.clear();
         }
-
+        
         void LSMReader::SetDataByteOrderToBigEndian() {
 #ifndef VTK_WORDS_BIGENDIAN
             this->swap_bytes_ = false;
@@ -405,7 +400,7 @@ namespace im {
             this->swap_bytes_ = true;
 #endif
         }
-
+        
         void LSMReader::SetDataByteOrderToLittleEndian() {
 #ifdef VTK_WORDS_BIGENDIAN
             this->swap_bytes_ = true;
@@ -413,53 +408,48 @@ namespace im {
             this->swap_bytes_ = false;
 #endif
         }
-
+        
         std::string LSMReader::GetChannelName(int chNum) {
-            if (chNum < 0 || unsigned(chNum) >= this->channel_names_.size())
-                return "";
+            if (chNum < 0 || unsigned(chNum) >= this->channel_names_.size()) { return ""; }
             return this->channel_names_[chNum];
         }
-
+        
         void LSMReader::SetChannelName(const char *name, const int chNum) {
             const int n_channels = this->dimensions_[4];
-            if (!name || chNum > n_channels)
-                return;
+            if (!name || chNum > n_channels) { return; }
             this->channel_names_.resize(n_channels);
             this->channel_names_[chNum] = std::string(name);
         }
-
+        
         int LSMReader::FindChannelNameStart(const char *buf, const int length) {
             for (int i = 0; i < length; ++i) {
                 char ch = buf[i];
-                if (ch > 32)
-                    return i;
+                if (ch > 32) { return i; }
             }
             return length;
         }
-
+        
         int LSMReader::ReadChannelName(const char *nameBuff,
                                        const int length,
                                        char *buffer) {
             for (int i = 0; i < length; ++i) {
                 buffer[i] = nameBuff[i];
-                if (!buffer[i])
-                    return i;
+                if (!buffer[i]) { return i; }
             }
             return length;
         }
-
+        
         int LSMReader::ReadChannelDataTypes(byte_source *s,
                                             unsigned long start) {
             const unsigned int numOfChls = this->dimensions_[4];
             this->channel_data_types_.resize(numOfChls);
-
             unsigned long pos = start;
             for (unsigned int i = 0; i < numOfChls; i++) {
                 this->channel_data_types_[i] = ReadUnsignedInt(s, &pos);
             }
             return 0;
         }
-
+        
         int LSMReader::ReadChannelColorsAndNames(byte_source *s,
                                                  unsigned long start) {
             int colNum, nameNum, sizeOfStructure, sizeOfNames, nameLength,
@@ -467,7 +457,7 @@ namespace im {
             unsigned long colorOffset, nameOffset, pos;
             char *nameBuff, *name, *tempBuff;
             unsigned char component;
-
+            
             pos = start;
             // Read size of structure
             sizeOfStructure = ReadInt(s, &pos);
@@ -476,10 +466,10 @@ namespace im {
             // Read number of names
             nameNum = ReadInt(s, &pos);
             sizeOfNames = sizeOfStructure - ((10 * 4) + (colNum * 4));
-
+            
             nameBuff = new char[sizeOfNames + 1];
             name = new char[sizeOfNames + 1];
-
+            
             if (colNum != this->dimensions_[4]) {
                 // not great
             }
@@ -491,9 +481,9 @@ namespace im {
             colorOffset = ReadInt(s, &pos) + start;
             // Read offset to name info
             nameOffset = ReadInt(s, &pos) + start;
-
+            
             this->channel_colors_.resize(3 * (colNum + 1));
-
+            
             // Read the colors
             for (int j = 0; j < this->dimensions_[4]; ++j) {
                 char colorBuff[5];
@@ -503,17 +493,15 @@ namespace im {
                     this->channel_colors_[i + 3 * j] = component;
                 }
             }
-
+            
             ReadFile(s, &nameOffset, sizeOfNames, nameBuff, 1);
-
+            
             nameLength = nameSkip = 0;
             tempBuff = nameBuff;
             for (int i = 0; i < this->dimensions_[4]; i++) {
-                nameSkip = this->FindChannelNameStart(tempBuff,
-                                                      sizeOfNames - nameSkip);
-                nameLength = this->ReadChannelName(
-                    tempBuff + nameSkip, sizeOfNames - nameSkip, name);
-
+                nameSkip = this->FindChannelNameStart(tempBuff, sizeOfNames - nameSkip);
+                nameLength = this->ReadChannelName(tempBuff + nameSkip, sizeOfNames - nameSkip, name);
+                
                 tempBuff += nameSkip + nameLength;
                 this->SetChannelName(name, i);
             }
@@ -521,23 +509,22 @@ namespace im {
             delete[] name;
             return 0;
         }
-
+        
         int LSMReader::ReadTimeStampInformation(byte_source *s,
                                                 unsigned long offset) {
             // position is 0 for non-timeseries files!
-            if (offset == 0)
-                return 0;
-
+            if (offset == 0) { return 0; }
+            
             offset += 4;
             int numOffStamps = ReadInt(s, &offset);
-
+            
             this->time_stamp_info_.resize(numOffStamps);
             for (int i = 0; i < numOffStamps; i++) {
                 this->time_stamp_info_[i] = ReadDouble(s, &offset);
             }
             return 0;
         }
-
+        
         /* Read the TIF_CZ_LSMINFO entry described in Table 17 of the LSM file
          *format specification
          *
@@ -545,14 +532,14 @@ namespace im {
          */
         int LSMReader::ReadLSMSpecificInfo(byte_source *s, unsigned long pos) {
             unsigned long offset;
-
+            
             pos += 2 * 4; // skip over the start of the LSMInfo
                           // first 4 byte entry if magic number
                           // second is number of bytes in this structure
-
+            
             // Then we read X
             this->NumberOfIntensityValues[0] = ReadInt(s, &pos);
-
+            
             // vtkByteSwap::Swap4LE((int*)&this->NumberOfIntensityValues[0]);
             this->dimensions_[0] = this->NumberOfIntensityValues[0];
             // Y
@@ -563,11 +550,11 @@ namespace im {
             this->dimensions_[2] = this->NumberOfIntensityValues[2];
             // Read number of channels
             this->dimensions_[4] = ReadInt(s, &pos);
-
+            
             // Read number of timepoints
             this->NumberOfIntensityValues[3] = ReadInt(s, &pos);
             this->dimensions_[3] = this->NumberOfIntensityValues[3];
-
+            
             // Read datatype, 1 for 8-bit unsigned int
             //                2 for 12-bit unsigned int
             //                5 for 32-bit float (timeseries mean of ROIs)
@@ -575,18 +562,18 @@ namespace im {
             //                In that case, u32OffsetChannelDataTypes
             //                has further info
             this->data_type_ = ReadInt(s, &pos);
-
+            
             // Skip the width and height of thumbnails
             pos += 2 * 4;
-
+            
             // Read voxel sizes
             this->VoxelSizes[0] = ReadDouble(s, &pos);
             this->VoxelSizes[1] = ReadDouble(s, &pos);
             this->VoxelSizes[2] = ReadDouble(s, &pos);
-
+            
             // Skip over OriginX,OriginY,OriginZ which are not used
             pos += 3 * 8;
-
+            
             // Read scan type which is
             // 0 for normal x-y-z scan
             // 1 for z-scan (x-z plane)
@@ -600,30 +587,30 @@ namespace im {
             // 9 time series spline plane
             // 10 point mode
             this->scan_type_ = ReadShort(s, &pos);
-
+            
             if (this->scan_type_ == 1) {
                 int tmp = this->dimensions_[1];
                 this->dimensions_[1] = this->dimensions_[2];
                 this->dimensions_[2] = tmp;
             }
-
+            
             // skip over SpectralScan flag
             // if 0, no spectral scan
             // if 1, image has been acquired with spectral scan mode with a
             // "meta" detector
             // skip over DataType, Offset to vector overlay, Offset to input LUT
             pos += 1 * 2 + 4 * 4; // + 1*8 + 3*4;
-
+            
             // Read OffsetChannelColors, which is an offset to channel colors
             // and names
             this->ChannelInfoOffset = ReadUnsignedInt(s, &pos);
             if (this->ChannelInfoOffset != 0)
                 this->ReadChannelColorsAndNames(s, this->ChannelInfoOffset);
-
+            
             // Skip time interval in seconds (8 bytes)
             // pos += 1*8;
             this->TimeInterval = ReadDouble(s, &pos);
-
+            
             // If each channel has different datatype (meaning DataType == 0),
             // then
             // read the offset to more information and read the info
@@ -632,7 +619,7 @@ namespace im {
             if (this->data_type_ == 0) {
                 this->ReadChannelDataTypes(s, this->ChannelDataTypesOffset);
             }
-
+            
             // Read scan information
             this->ReadScanInformation(s, scanInformationOffset);
             // SKip Zeiss Vision KS-3D speific data
@@ -640,7 +627,7 @@ namespace im {
             // Read timestamp information
             offset = ReadUnsignedInt(s, &pos);
             this->ReadTimeStampInformation(s, offset);
-
+            
             return 1;
         }
         int LSMReader::ReadScanInformation(byte_source *s, unsigned long pos) {
@@ -651,14 +638,14 @@ namespace im {
                 const unsigned int entry = ReadUnsignedInt(s, &pos);
                 const unsigned int type = ReadUnsignedInt(s, &pos);
                 const unsigned int size = ReadUnsignedInt(s, &pos);
-
+                
                 if (type == TYPE_SUBBLOCK) {
                     if (entry == SUBBLOCK_END)
                         --subblocksOpen;
                     else
                         ++subblocksOpen;
                 }
-
+                
                 switch (entry) {
                 case DETCHANNEL_ENTRY_DETECTOR_GAIN_FIRST:
                     (void)ReadDouble(s, &pos);
@@ -678,7 +665,6 @@ namespace im {
                     break;
                 case ILLUMCHANNEL_ENTRY_WAVELENGTH:
                     wavelength = ReadDouble(s, &pos);
-
                     continue;
                     break;
                 case ILLUMCHANNEL_DETCHANNEL_NAME:
@@ -687,7 +673,6 @@ namespace im {
                     break;
                 case TRACK_ENTRY_ACQUIRE:
                     (void)ReadInt(s, &pos);
-
                     continue;
                     break;
                 case TRACK_ENTRY_NAME:
@@ -702,7 +687,6 @@ namespace im {
                     (void)ReadInt(s, &pos);
                     continue;
                     break;
-
                 case ILLUMCHANNEL_ENTRY_AQUIRE:
                     isOn = ReadInt(s, &pos);
                     if (isOn) {
@@ -717,7 +701,6 @@ namespace im {
                 case RECORDING_ENTRY_OBJETIVE:
                     this->objective_ = read_str(s, &pos, size);
                     continue;
-
                 case SUBBLOCK_RECORDING:
                     break;
                 case SUBBLOCK_LASERS:
@@ -767,8 +750,7 @@ namespace im {
 
             ReadFile(s, &startPos, 4, tempValue);
 
-            for (int i = 0; i < 4; i++)
-                tempValue2[i] = tempValue[i];
+            for (int i = 0; i < 4; i++) { tempValue2[i] = tempValue[i]; }
 #ifdef VTK_WORDS_BIGENDIAN
             vtkByteSwap::Swap4LE((unsigned int *)tempValue2);
 #endif
@@ -788,14 +770,13 @@ namespace im {
                 }
             } else {
                 actualValue = new char[4];
-                for (int o = 0; o < 4; o++)
-                    actualValue[o] = tempValue[o];
+                for (int o = 0; o < 4; o++) { actualValue[o] = tempValue[o]; }
             }
             switch (tag) {
             case TIF_NEWSUBFILETYPE:
                 this->NewSubFileType = value;
                 break;
-
+            
             case TIF_IMAGEWIDTH:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap4LE((unsigned int *)actualValue);
@@ -804,7 +785,7 @@ namespace im {
                 // this->CharPointerToUnsignedInt(actualValue);
                 // this->dimensions_[0] = value;
                 break;
-
+            
             case TIF_IMAGELENGTH:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap4LE((unsigned int *)actualValue);
@@ -812,7 +793,7 @@ namespace im {
 #endif
                 // this->dimensions_[1] = value;
                 break;
-
+            
             case TIF_BITSPERSAMPLE:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap2LE((unsigned short *)actualValue);
@@ -825,14 +806,14 @@ namespace im {
                     this->bits_per_sample_[i] = bits_per_sample_;
                 }
                 break;
-
+            
             case TIF_COMPRESSION:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap2LE((unsigned short *)actualValue);
 #endif
                 this->compression_ = CharPointerToUnsignedShort(actualValue);
                 break;
-
+            
             case TIF_PHOTOMETRICINTERPRETATION:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap2LE((unsigned short *)actualValue);
@@ -840,7 +821,7 @@ namespace im {
                 this->PhotometricInterpretation
                     = CharPointerToUnsignedShort(actualValue);
                 break;
-
+            
             case TIF_STRIPOFFSETS:
                 this->strip_offset_.resize(length);
 #ifdef VTK_WORDS_BIGENDIAN
@@ -855,14 +836,14 @@ namespace im {
                     this->strip_offset_[0] = value;
                 }
                 break;
-
+            
             case TIF_SAMPLESPERPIXEL:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap4LE((unsigned int *)actualValue);
 #endif
                 this->sample_per_pixel_ = CharPointerToUnsignedInt(actualValue);
                 break;
-
+            
             case TIF_STRIPBYTECOUNTS:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap4LERange((unsigned int *)actualValue, length);
@@ -877,6 +858,7 @@ namespace im {
                     this->strip_byte_count_[0] = value;
                 }
                 break;
+            
             case TIF_PLANARCONFIGURATION:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap2LE((unsigned short *)actualValue);
@@ -884,47 +866,44 @@ namespace im {
                 this->PlanarConfiguration
                     = CharPointerToUnsignedShort(actualValue);
                 break;
+            
             case TIF_PREDICTOR:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap2LE((unsigned short *)actualValue);
 #endif
                 this->Predictor = CharPointerToUnsignedShort(actualValue);
                 break;
+            
             case TIF_COLORMAP:
 #ifdef VTK_WORDS_BIGENDIAN
                 vtkByteSwap::Swap4LE((unsigned int *)actualValue);
 #endif
                 // this->ColorMapOffset = CharPointerToUnsignedInt(actualValue);
                 break;
+            
             case TIF_CZ_LSMINFO:
-
                 this->LSMSpecificInfoOffset = value;
                 break;
             }
-
-            if (actualValue) {
-                delete[] actualValue;
-            }
+            
+            if (actualValue) { delete[] actualValue; }
             return 0;
         }
-
+        
         unsigned int LSMReader::GetStripByteCount(unsigned int timepoint,
                                                   unsigned int slice) {
             return this->read_sizes_[timepoint * this->dimensions_[2] + slice];
         }
-
+        
         unsigned int LSMReader::GetSliceOffset(unsigned int timepoint,
                                                unsigned int slice) {
-            return this
-                ->image_offsets_[timepoint * this->dimensions_[2] + slice];
+            return this->image_offsets_[timepoint * this->dimensions_[2] + slice];
         }
-
+        
         void LSMReader::ConstructSliceOffsets(int channel) {
-            this->image_offsets_.resize(this->dimensions_[2]
-                                        * this->dimensions_[3]);
-            this->read_sizes_.resize(this->dimensions_[2]
-                                     * this->dimensions_[3]);
-
+            this->image_offsets_.resize(this->dimensions_[2] * this->dimensions_[3]);
+            this->read_sizes_.resize(this->dimensions_[2] * this->dimensions_[3]);
+            
             for (int tp = 0; tp < this->dimensions_[3]; tp++) {
                 for (int slice = 0; slice < this->dimensions_[2]; slice++) {
                     this->GetOffsetToImage(slice, tp);
@@ -935,125 +914,105 @@ namespace im {
                 }
             }
         }
-
+        
         unsigned long LSMReader::GetOffsetToImage(int slice, int timepoint) {
             const int image = slice + (timepoint * this->dimensions_[2]);
             unsigned long offset = 4, finalOffset;
             int i = 0;
             int imageCount = image + 1;
-
-            if (this->OffsetToLastAccessedImage
-                && (this->NumberOfLastAccessedImage < image)) {
+            
+            if (this->OffsetToLastAccessedImage && (this->NumberOfLastAccessedImage < image)) {
                 offset = this->OffsetToLastAccessedImage;
                 imageCount = image - this->NumberOfLastAccessedImage;
             } else {
                 offset = (unsigned long)ReadInt(this->src, &offset);
             }
-
+            
             offset = this->ReadImageDirectory(this->src, offset);
             do {
                 // we count only image directories and not thumbnail images
                 // subfiletype 0 = images
                 // subfiletype 1 = thumbnails
-                if (this->NewSubFileType == 0) {
-                    i++;
-                }
+                if (this->NewSubFileType == 0) { i++; }
                 finalOffset = offset;
                 offset = this->ReadImageDirectory(this->src, offset);
             } while (i < imageCount && offset != 0);
-
+            
             this->OffsetToLastAccessedImage = finalOffset;
             this->NumberOfLastAccessedImage = image;
-
+            
             return finalOffset;
         }
-
-        unsigned long LSMReader::ReadImageDirectory(byte_source *s,
-                                                    unsigned long offset) {
+        
+        unsigned long LSMReader::ReadImageDirectory(byte_source *s, unsigned long offset) {
             unsigned short numberOfTags = 0;
             unsigned long nextOffset = offset;
-
+            
             numberOfTags = ReadUnsignedShort(s, &offset);
             for (int i = 0; i < numberOfTags; i++) {
                 this->AnalyzeTag(s, offset);
-                if (this->NewSubFileType == 1) {
-                    break; // thumbnail image
-                }
+                if (this->NewSubFileType == 1) { break; } // thumbnail image
                 offset = offset + 12;
             }
             nextOffset += 2 + numberOfTags * 12;
             return ReadUnsignedInt(s, &nextOffset);
         }
-
-        void LSMReader::DecodeHorizontalDifferencing(unsigned char *buffer,
-                                                     int size) {
+        
+        void LSMReader::DecodeHorizontalDifferencing(unsigned char *buffer, int size) {
             for (int i = 1; i < size; i++) {
                 *(buffer + i) = *(buffer + i) + *(buffer + i - 1);
             }
         }
-
-        void LSMReader::DecodeHorizontalDifferencingUnsignedShort(
-            unsigned short *buffer, int size) {
+        
+        void LSMReader::DecodeHorizontalDifferencingUnsignedShort(unsigned short *buffer, int size) {
             for (int i = 1; i < size; i++) {
                 *(buffer + i) = *(buffer + i) + *(buffer + i - 1);
             }
         }
-
+        
         void LSMReader::DecodeLZWCompression(unsigned char *buffer,
                                              int size,
                                              int bytes) {
-            throw ProgrammingError("Not tested");
+            //throw ProgrammingError("Not tested");
             std::vector<unsigned char> decoded = lzw_decode(buffer, size);
             unsigned char *outbufp = &decoded[0];
-
             int width = this->dimensions_[0];
             int lines = size / (width * bytes);
-
+            
             for (int line = 0; line < lines; line++) {
                 if (this->Predictor == 2) {
-                    if (bytes == 1)
-                        this->DecodeHorizontalDifferencing(outbufp,
-                                                           width * bytes);
-                    else {
-                        this->DecodeHorizontalDifferencingUnsignedShort(
-                            (unsigned short *)outbufp, width);
+                    if (bytes == 1) {
+                        this->DecodeHorizontalDifferencing(outbufp, width * bytes);
+                    } else {
+                        this->DecodeHorizontalDifferencingUnsignedShort((unsigned short *)outbufp, width);
                     }
                 }
                 outbufp += width * bytes;
             }
-            for (int i = 0; i < size; i++) {
-                buffer[i] = decoded[i];
-            }
+            for (int i = 0; i < size; i++) { buffer[i] = decoded[i]; }
         }
-
+        
         int LSMReader::GetDataTypeForChannel(unsigned int channel) {
-            if (this->data_type_)
-                return this->data_type_;
-            if (this->channel_data_types_.empty())
-                return 1;
+            if (this->data_type_) { return this->data_type_; }
+            if (this->channel_data_types_.empty()) { return 1; }
             return this->channel_data_types_.at(channel);
         }
-
+        
         void LSMReader::readHeader() {
             this->SetDataByteOrderToLittleEndian();
-
             unsigned long startPos = 2; // header identifier
-
-            const unsigned short identifier
-                = ReadUnsignedShort(this->src, &startPos);
+            const unsigned short identifier = ReadUnsignedShort(this->src, &startPos);
             if (identifier != LSM_MAGIC_NUMBER) {
                 throw CannotReadError("Given file is not a valid LSM-file "
                                       "(magic number mismatch).");
             }
-
-            const unsigned int imageDirOffset
-                = ReadUnsignedInt(this->src, &startPos);
-
+            
+            const unsigned int imageDirOffset = ReadUnsignedInt(this->src, &startPos);
+            
             this->ReadImageDirectory(this->src, imageDirOffset);
-
+            
             if (this->LSMSpecificInfoOffset) {
-                ReadLSMSpecificInfo(this->src,
-                                    (unsigned long)this->LSMSpecificInfoOffset);
+                ReadLSMSpecificInfo(this->src, (unsigned long)this->LSMSpecificInfoOffset);
             } else {
                 throw CannotReadError("Did not found LSM specific info!");
             }
@@ -1065,35 +1024,31 @@ namespace im {
                     "or type 0 (normal x-y-z) or type 3 (2D + time) or type 1 "
                     "(x-z scan). Type of this File is " /* % this->scan_type_ */);
             }
-
-            this->CalculateExtentAndSpacing(this->DataExtent,
-                                            this->DataSpacing);
+            
+            this->CalculateExtentAndSpacing(this->DataExtent, this->DataSpacing);
         }
-
-        void LSMReader::CalculateExtentAndSpacing(int extent[6],
-                                                  double spacing[3]) {
+        
+        void LSMReader::CalculateExtentAndSpacing(int extent[6], double spacing[3]) {
             extent[0] = extent[2] = extent[4] = 0;
             extent[1] = this->dimensions_[0] - 1;
             extent[3] = this->dimensions_[1] - 1;
             extent[5] = this->dimensions_[2] - 1;
-
+            
             spacing[0] = int(this->VoxelSizes[0] * 1000000);
-            if (spacing[0] < 1.0)
-                spacing[0] = 1.0;
+            if (spacing[0] < 1.0) { spacing[0] = 1.0; }
             spacing[1] = this->VoxelSizes[1] / this->VoxelSizes[0];
             spacing[2] = this->VoxelSizes[2] / this->VoxelSizes[0];
         }
-
+        
         //----------------------------------------------------------------------------
-
+        
         int LSMReader::GetChannelColorComponent(int ch, int component) {
             if (ch < 0 || component < 0 || component > 2
                 || unsigned(ch) > unsigned(this->dimensions_[4] - 1)
-                || unsigned(ch) >= this->channel_colors_.size())
-                return 0;
+                || unsigned(ch) >= this->channel_colors_.size()) { return 0; }
             return this->channel_colors_[(ch * 3) + component];
         }
-
+        
         void LSMReader::PrintSelf(std::ostream &os, const char *indent) {
             os << indent << "dimensions_: " << this->dimensions_[0] << ","
                << this->dimensions_[1] << "," << this->dimensions_[2] << "\n";
@@ -1128,7 +1083,7 @@ namespace im {
                << this->PhotometricInterpretation << "\n";
             os << indent << "Predictor: " << this->Predictor << "\n";
             os << indent << "Channel info:\n";
-
+            
             for (int i = 0; i < this->dimensions_[4]; i++) {
                 os << indent << indent << this->GetChannelName(i) << ",("
                    << this->GetChannelColorComponent(i, 0) << ","
@@ -1136,28 +1091,26 @@ namespace im {
                    << this->GetChannelColorComponent(i, 2) << ")\n";
             }
             os << indent << "Strip byte counts:\n";
-
+            
             for (int i = 0; i < this->dimensions_[4]; i++) {
                 os << indent << indent << this->strip_byte_count_[i] << "\n";
             }
         }
-
+        
         std::unique_ptr<Image> LSMReader::read(ImageFactory *factory,
                                                const options_map &) {
             this->readHeader();
-
-            const int dataType
-                = this->GetDataTypeForChannel(0); // This could vary by channel!
-
+            
+            const int dataType = this->GetDataTypeForChannel(0); // This could vary by channel!
+            
             std::unique_ptr<Image> output = factory->create(
                 BYTES_BY_DATA_TYPE(dataType) * 8, this->dimensions_[2],
                 this->dimensions_[3], this->dimensions_[4],
                 this->dimensions_[0], this->dimensions_[1]);
-
+            
             byte *imstart = output->rowp_as<byte>(0);
             for (int z = 0; z < this->dimensions_[2]; ++z) {
-                for (int timepoint = 0; timepoint < this->dimensions_[3];
-                     ++timepoint) {
+                for (int timepoint = 0; timepoint < this->dimensions_[3]; ++timepoint) {
                     for (int ch = 0; ch < this->dimensions_[4]; ++ch) {
                         this->ConstructSliceOffsets(ch);
                         byte *imdata
@@ -1167,10 +1120,8 @@ namespace im {
                                  + timepoint * this->dimensions_[4] + ch)
                                 * this->dimensions_[0] * this->dimensions_[1]
                                 * BYTES_BY_DATA_TYPE(dataType);
-                        unsigned long offset
-                            = this->GetSliceOffset(timepoint, z);
-                        const int readSize
-                            = this->GetStripByteCount(timepoint, z);
+                        unsigned long offset = this->GetSliceOffset(timepoint, z);
+                        const int readSize = this->GetStripByteCount(timepoint, z);
                         std::fill(imdata, imdata + readSize, 0);
 
                         int bytes = ReadFile(this->src, &offset, readSize,
@@ -1188,9 +1139,9 @@ namespace im {
             }
             return output;
         }
-
+        
     } // namespace
-
+    
     std::unique_ptr<Image> LSMFormat::read(byte_source *s,
                                            ImageFactory *factory,
                                            const options_map &opts)  {

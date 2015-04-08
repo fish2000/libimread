@@ -49,7 +49,7 @@ namespace im {
             
             void read_check(byte *buffer, std::size_t n) {
                 if (this->read(buffer, n) != n) {
-                    throw CannotReadError("File ended prematurely");
+                    throw CannotReadError("im::byte_source::read_check(): File ended prematurely");
                 }
             }
             
@@ -78,7 +78,7 @@ namespace im {
             
             void write_check(const byte *buffer, std::size_t n) {
                 if (this->write(buffer, n) != n) {
-                    throw CannotWriteError("Writing failed");
+                    throw CannotWriteError("im::byte_sink::write_check(): Writing failed");
                 }
             }
             virtual void flush() { }
