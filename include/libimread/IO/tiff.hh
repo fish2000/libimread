@@ -39,7 +39,7 @@ namespace im {
                 return this->do_read(s, f, true);
             }
             
-            void write(Image *input,
+            void write(Image &input,
                        byte_sink *output,
                        const options_map &opts);
             

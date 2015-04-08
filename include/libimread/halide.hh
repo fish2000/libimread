@@ -54,6 +54,7 @@ namespace im {
             using HalImage<pT>::stride;
             using HalImage<pT>::channels;
             using HalImage<pT>::data;
+            using HalImage<pT>::operator();
             
             virtual ~HybridImage() {}
             
@@ -142,7 +143,7 @@ namespace im {
         static const options_map opts; /// not currently used when reading
         
         template <typename T = byte>
-        Halide::Image<T> read(const std::string &filename) {
+        HybridImage<T> read(const std::string &filename) {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
@@ -150,6 +151,22 @@ namespace im {
             HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));
             return image;
         }
+        
+        template <typename T = byte>
+        void write(HybridImage<T> &input, const std::string &filename) {
+            std::unique_ptr<ImageFormat> format(for_filename(filename));
+            std::unique_ptr<FileSink> output(new FileSink(filename));
+            format->write(dynamic_cast<Image&>(input), output.get(), opts);
+        }
+        
+        /*
+        template <typename T = byte>
+        void write(Halide::Image<T> &image, const std::string &filename) {
+            std::unique_ptr<ImageFormat> format(for_filename(filename));
+            std::unique_ptr<FileSink> output(new FileSink(filename));
+            format->write(image, output.get(), opts);
+        }
+        */
         
     }
     

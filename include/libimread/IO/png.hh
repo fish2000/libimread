@@ -46,7 +46,7 @@ namespace im {
             std::unique_ptr<Image> read(byte_source *src,
                                         ImageFactory *factory,
                                         const options_map &opts);
-            void write(Image *input,
+            void write(Image &input,
                        byte_sink *output,
                        const options_map &opts);
     };

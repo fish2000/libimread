@@ -194,10 +194,10 @@ namespace im {
         return output;
     }
     
-    void JPEGFormat::write(Image *input,
+    void JPEGFormat::write(Image &input,
                            byte_sink *output,
                            const options_map &opts) {
-        if (input->nbits() != 8) {
+        if (input.nbits() != 8) {
             throw CannotWriteError("im::JPEGFormat::write(): Image must be 8 bits for JPEG saving");
         }
         
@@ -213,9 +213,9 @@ namespace im {
             throw CannotWriteError(jerr.error_message);
         }
         
-        c.info.image_height = input->dim(0);
-        c.info.image_width = input->dim(1);
-        c.info.input_components = (input->ndims() > 2 ? input->dim(2) : 1);
+        c.info.image_height = input.dim(0);
+        c.info.image_width = input.dim(1);
+        c.info.input_components = (input.ndims() > 2 ? input.dim(2) : 1);
         c.info.in_color_space = color_space(c.info.input_components);
         
         jpeg_set_defaults(&c.info);
@@ -244,7 +244,7 @@ namespace im {
         
         while (c.info.next_scanline < c.info.image_height) {
             JSAMPROW rowp = static_cast<JSAMPROW>(
-                input->rowp_as<void>(c.info.next_scanline));
+                input.rowp_as<void>(c.info.next_scanline));
             
             (void)jpeg_write_scanlines(&c.info, &rowp, 1);
         }

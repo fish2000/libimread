@@ -31,6 +31,7 @@ set(hdrs
     ${hdrs_dir}/IO/jpeg.hh
     ${hdrs_dir}/IO/lsm.hh
     ${hdrs_dir}/IO/png.hh
+    ${hdrs_dir}/IO/ppm.hh
     ${hdrs_dir}/IO/pvrtc.hh
     ${hdrs_dir}/IO/tiff.hh
     ${hdrs_dir}/IO/webp.hh
@@ -61,6 +62,7 @@ set(srcs
     ${srcs_dir}/IO/lsm.cpp
     ${srcs_dir}/IO/lzw.cpp
     ${srcs_dir}/IO/png.cpp
+    ${srcs_dir}/IO/ppm.cpp
     ${srcs_dir}/IO/pvrtc.cpp
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp

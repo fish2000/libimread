@@ -40,7 +40,6 @@
 #include <climits>
 #include <cassert>
 #include <cstring>
-#include <libimread/ext/fmemopen.hh>
 
 #ifdef __APPLE__
     #include <libpng16/png.h>   /* this is the Homebrew path */

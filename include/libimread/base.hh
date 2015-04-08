@@ -10,6 +10,8 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <cstdio>
+#include <cstdarg>
 
 #if defined(_MSC_VER)
  #include <io.h>
@@ -67,7 +69,7 @@ namespace im {
     class byte_sink : virtual public seekable {
         public:
             virtual ~byte_sink() { }
-            virtual std::size_t write(const byte *buffer, std::size_t n) xWARN_UNUSED = 0;
+            virtual std::size_t write(const void *buffer, std::size_t n) xWARN_UNUSED = 0;
             
             template <std::size_t Nelems>
             std::size_t write(byte (&arr)[Nelems], size_t n) {
@@ -82,6 +84,26 @@ namespace im {
                 }
             }
             virtual void flush() { }
+            
+            template <typename ...Args>
+            std::size_t writef(const char *fmt, Args... args) {
+                char buffer[1024];
+                std::snprintf(buffer, 1024, fmt, args...);
+                return this->write(buffer, std::strlen(static_cast<const char*>(buffer)));
+            }
+            
+            byte_sink& operator<<(const std::string &w) {
+                std::size_t s = this->write(static_cast<const char*>(w.c_str()), std::size_t(w.length()));
+                return *this;
+            }
+            byte_sink& operator<<(const char *w) {
+                std::size_t s = this->write(w, std::strlen(w));
+                return *this;
+            }
+            byte_sink& operator<<(const std::vector<byte> &w) {
+                std::size_t s = this->write(&w[0], w.size());
+                return *this;
+            }
     };
     
     class Image {
@@ -226,7 +248,7 @@ namespace im {
                 throw NotImplementedError();
             }
             
-            virtual void write(Image *input,
+            virtual void write(Image &input,
                                byte_sink *output,
                                const options_map &opts) {
                 throw NotImplementedError();

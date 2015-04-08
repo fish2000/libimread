@@ -18,6 +18,9 @@
 #ifndef FMEMOPEN_H_
 #define FMEMOPEN_H_
 
+#include <memory>
+#include <functional>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -45,9 +48,9 @@
  */
 
 namespace memory {
-
+    
     FILE *fmemopen(void *buf, std::size_t size, const char *mode = "r");
-
+    
     template <typename F>
     struct fcloser {
         constexpr fcloser() noexcept = default;
@@ -57,16 +60,9 @@ namespace memory {
     
     using buffer = std::unique_ptr<typename std::decay<FILE>::type, fcloser<FILE>>;
     
-    /*
-    std::function<buffer(void*, std::size_t)> source = [](void *buf, std::size_t size) {
-        return fmemopen(buf, size);
-    };
+    buffer source(void *buf, std::size_t size);
+    buffer sink(void *buf, std::size_t size);
     
-    std::function<buffer(void*, std::size_t)> sink = [](void *buf, std::size_t size) {
-        return fmemopen(buf, size, "w");
-    };
-    */
-
 }
 
 #endif // #ifndef FMEMOPEN_H_

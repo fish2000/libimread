@@ -3,9 +3,6 @@
  * 20081017 AF
  */
 
-#include <memory>
-#include <functional>
-
 #include "libimread/ext/fmemopen.hh"
 
 namespace memory {
@@ -67,6 +64,15 @@ namespace memory {
         mem->size = size, mem->buffer = (char *)buf;
         return ::funopen(mem, readfn, writefn, seekfn, closefn);
     }
+    
+    buffer source(void *buf, std::size_t size) {
+        return buffer(fmemopen(buf, size, "rb"));
+    }
+    
+    buffer sink(void *buf, std::size_t size) {
+        return buffer(fmemopen(buf, size, "wb"));
+    }
+    
 
 } /// namespace memory
     

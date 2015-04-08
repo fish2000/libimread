@@ -200,15 +200,17 @@ namespace im {
         return output;
     }
 
-    void PNGFormat::write(Image *input, byte_sink *output, const options_map &opts) {
+    void PNGFormat::write(Image &input, byte_sink *output, const options_map &opts) {
         png_holder p(png_holder::write_mode);
         stack_based_memory_pool alloc;
+        //std::unique_ptr<Image> input_ptr(input);
         p.create_info();
         png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
-        const int height = input->dim(0);
-        const int width = input->dim(1);
-        const int bit_depth = input->nbits();
-        const int color_type = color_type_of(input);
+        const int height = input.dim(0);
+        const int width = input.dim(1);
+        const int bit_depth = input.nbits();
+        //const int color_type = color_type_of(input_ptr.get());
+        const int color_type = PNG_COLOR_TYPE_RGB;
         
         png_set_IHDR(p.png_ptr, p.png_info, width, height,
                          bit_depth, color_type, PNG_INTERLACE_NONE,
@@ -219,7 +221,7 @@ namespace im {
         }
         png_write_info(p.png_ptr, p.png_info);
         
-        std::vector<png_bytep> rowps = input->allrows<png_byte>();
+        std::vector<png_bytep> rowps = input.allrows<png_byte>();
         if (bit_depth == 16 && !is_big_endian()) {
             swap_bytes_inplace(rowps, width, alloc);
         }

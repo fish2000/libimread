@@ -53,8 +53,22 @@ namespace im {
             virtual std::size_t seek_relative(int delta) { return ::lseek(fd_, delta, SEEK_CUR); }
             virtual std::size_t seek_end(int delta) { return ::lseek(fd_, delta, SEEK_END); }
             
-            virtual std::size_t write(const byte *buffer, std::size_t n) {
+            virtual std::size_t write(const void *buffer, std::size_t n) {
                 return ::write(fd_, buffer, n);
+            }
+            
+            virtual std::vector<byte> full_data() {
+                std::size_t orig = this->seek_relative(0);
+                
+                struct stat info;
+                int result = ::fstat(fd_, &info);
+                if (result == -1) { throw CannotReadError("fstat() returned -1"); }
+                
+                std::vector<byte> res(info.st_size * sizeof(byte));
+                this->seek_absolute(0);
+                this->read(&res[0], res.size());
+                this->seek_absolute(orig);
+                return res;
             }
             
             virtual int fd() { return fd_; }

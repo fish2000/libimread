@@ -9,6 +9,7 @@
 #include <libimread/IO/jpeg.hh>
 #include <libimread/IO/lsm.hh>
 #include <libimread/IO/png.hh>
+#include <libimread/IO/ppm.hh>
 #include <libimread/IO/tiff.hh>
 #include <libimread/IO/pvrtc.hh>
 #include <libimread/IO/webp.hh>
@@ -29,6 +30,7 @@ namespace im {
         if (check(format, "tif") || check(format, "tiff")) { return format_ptr(new format::TIFF); }
         if (check(format, "pvr") || check(format, "pvrtc")) { return format_ptr(new format::PVR); }
         if (check(format, "webp")) { return format_ptr(new format::WebP); }
+        if (check(format, "ppm")) { return format_ptr(new format::PPM); }
         if (check(format, "bmp")) { return format_ptr(new format::BMP); }
         if (check(format, "lsm")) { return format_ptr(new format::LSM); }
         if (check(format, "stk")) { return format_ptr(new format::STK); }

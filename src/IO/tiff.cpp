@@ -278,7 +278,7 @@ namespace im {
         return images;
     }
 
-    void TIFFFormat::write(Image *input, byte_sink *output, const options_map &opts)  {
+    void TIFFFormat::write(Image &input, byte_sink *output, const options_map &opts)  {
         tiff_warn_error twe;
         tif_holder t = TIFFClientOpen(
                         "internal",
@@ -294,16 +294,16 @@ namespace im {
         std::vector<byte> bufdata;
         void *bufp = 0;
         bool copy_data = false;
-        const uint32_t h = input->dim(0);
-        const uint16_t photometric = ((input->ndims() == 3 && input->dim(2)) ?
+        const uint32_t h = input.dim(0);
+        const uint16_t photometric = ((input.ndims() == 3 && input.dim(2)) ?
                                                         PHOTOMETRIC_RGB :
                                                         PHOTOMETRIC_MINISBLACK);
         
         TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH, uint32_t(h));
-        TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH, uint32_t(input->dim(1)));
+        TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH, uint32_t(input.dim(1)));
         
-        TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE, uint16_t(input->nbits()));
-        TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL, uint16_t(input->dim_or(2, 1)));
+        TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE, uint16_t(input.nbits()));
+        TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL, uint16_t(input.dim_or(2, 1)));
         
         TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC, uint16_t(photometric));
         TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -314,11 +314,11 @@ namespace im {
             // it defaults to true. This is because compression of raw 16 bit
             // images is often counter-productive without this flag. See the
             // discusssion at http://www.asmail.be/msg0055176395.html
-            const bool prediction_default = input->nbits() != 8;
+            const bool prediction_default = input.nbits() != 8;
             if (get_optional_bool(opts, "tiff:horizontal-predictor", prediction_default)) {
                 TIFFSetField(t.tif, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
                 if (!copy_data) {
-                    bufdata.resize(input->dim(1) * input->nbytes());
+                    bufdata.resize(input.dim(1) * input.nbytes());
                     bufp = &bufdata[0];
                     copy_data = true;
                 }
@@ -367,9 +367,9 @@ namespace im {
         }
         
         for (uint32_t r = 0; r != h; ++r) {
-            void *rowp = input->rowp(r);
+            void *rowp = input.rowp(r);
             if (copy_data) {
-                std::memcpy(bufp, rowp, input->dim(1) * input->nbytes());
+                std::memcpy(bufp, rowp, input.dim(1) * input.nbytes());
                 rowp = bufp;
             }
             if (TIFFWriteScanline(t.tif, rowp, r) == -1) {

@@ -7,6 +7,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
+#include <libimread/ext/fmemopen.hh>
 
 namespace im {
 
@@ -16,7 +17,7 @@ namespace im {
                 :data(c), len(l), pos(0)
                 { }
             
-            ~memory_source() { }
+            virtual ~memory_source() { }
             
             virtual std::size_t read(byte *buffer, std::size_t n) {
                 if (pos + n > len) { n = len-pos; }
@@ -34,6 +35,38 @@ namespace im {
             const byte *data;
             const std::size_t len;
             std::size_t pos;
+    };
+    
+    class memory_sink : public byte_sink {
+        public:
+            memory_sink(byte *c, std::size_t l)
+                :data(c), membuf(memory::sink(data, l)), len(l)
+                {}
+            
+            virtual ~memory_sink() {}
+            
+            virtual bool can_seek() const { return true; }
+            virtual std::size_t seek_absolute(std::size_t pos) { return ::fseek(membuf, pos, SEEK_SET); }
+            virtual std::size_t seek_relative(int delta) { return ::fseek(membuf, delta, SEEK_CUR); }
+            virtual std::size_t seek_end(int delta) { return ::fseek(membuf, delta, SEEK_END); }
+            
+            virtual std::size_t write(const void *buffer, std::size_t n) {
+                return ::fwrite(buffer, sizeof(byte), n, membuf);
+            }
+            
+            virtual void flush() { ::fflush(membuf); }
+            
+            virtual vector<byte> contents() {
+                vector<byte> out(len);
+                std::memcpy(&out[0], data, out.size());
+                return out;
+            }
+            
+        private:
+            byte *data;
+            memory::buffer membuf;
+            const std::size_t len;
+            
     };
 
 }
