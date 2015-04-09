@@ -1,9 +1,6 @@
-#include "neuquant.h"
 
 #include <cmath>
-
-
-
+#include <libimread/ext/neuquant.h>
 
 /*
 #define FILENAME "t.raw"

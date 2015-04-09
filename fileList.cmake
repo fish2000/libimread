@@ -1,5 +1,5 @@
-# Author: Félix C. Morency
-# 2011.10
+# Author: Alexander Böhn (with Félix C. Morency)
+# © 2011.10 -- GPL, Motherfuckers
 
 # To keep the file list clean
 set(hdrs_dir ${${PROJECT_NAME}_include_dir})
@@ -14,15 +14,12 @@ configure_file(
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     # ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
-    ${hdrs_dir}/private/buffer_t.h
-    ${hdrs_dir}/private/image_io.h
-    ${hdrs_dir}/private/spx_defines.h
-    ${hdrs_dir}/private/static_image.h
-    ${hdrs_dir}/private/vpp_symbols.hh
     
-    ${hdrs_dir}/ext/io_png.hh
-    ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/fmemopen.hh
+    ${hdrs_dir}/ext/io_png.hh
+    ${hdrs_dir}/ext/neuquant.h
+    ${hdrs_dir}/ext/neuquant.inl
+    ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
     ${hdrs_dir}/ext/UTI.h
     
@@ -36,21 +33,32 @@ set(hdrs
     ${hdrs_dir}/IO/tiff.hh
     ${hdrs_dir}/IO/webp.hh
     
+    ${hdrs_dir}/private/buffer_t.h
+    ${hdrs_dir}/private/image_io.h
+    ${hdrs_dir}/private/spx_defines.h
+    ${hdrs_dir}/private/static_image.h
+    ${hdrs_dir}/private/vpp_symbols.hh
+    
     ${hdrs_dir}/base.hh
+    ${hdrs_dir}/coregraphics.hh
     ${hdrs_dir}/errors.hh
     ${hdrs_dir}/file.hh
     ${hdrs_dir}/formats.hh
     ${hdrs_dir}/halide.hh
-    ${hdrs_dir}/vpp.hh
     ${hdrs_dir}/memory.hh
     ${hdrs_dir}/options.hh
+    ${hdrs_dir}/pixels.hh
+    ${hdrs_dir}/symbols.hh
     ${hdrs_dir}/tools.hh
+    ${hdrs_dir}/traits.hh
+    # ${hdrs_dir}/vpp.hh
 )
 
 # Project source files
 set(srcs
-    ${srcs_dir}/ext/io_png.cpp
     ${srcs_dir}/ext/fmemopen.cpp
+    ${srcs_dir}/ext/io_png.cpp
+    ${srcs_dir}/ext/neuquant.cpp
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
@@ -71,5 +79,5 @@ set(srcs
     ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/halide.cpp
-    ${srcs_dir}/vpp.cpp
+    # ${srcs_dir}/vpp.cpp
 )
