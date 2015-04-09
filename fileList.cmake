@@ -13,7 +13,7 @@ configure_file(
 # Project header files
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
-    ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
+    # ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
     ${hdrs_dir}/private/spx_defines.h

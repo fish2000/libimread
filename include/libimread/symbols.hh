@@ -9,7 +9,7 @@
 #include <iod/utils.hh>
 #include <iod/bind_method.hh>
 #include <libimread/libimread.hpp>
-#include <libimread/symbols.hpp>
+// #include <libimread/symbols.hpp>
 using namespace iod;
 
 /// IOD symbols for all possible options

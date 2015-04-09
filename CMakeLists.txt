@@ -84,15 +84,15 @@ find_package(Halide REQUIRED)
 include_directories(${HALIDE_INCLUDE_DIR})
 
 # Generate IOD symbol list
-file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
-add_custom_command(
-    OUTPUT ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
-    COMMAND iod_generate_symbols ${formats} ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
-add_custom_target("iod_symbols"
-    DEPENDS ${HALIDE_INCLUDE_DIR}/libimread/symbols.hpp)
-set_source_files_properties(
-    ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
-    PROPERTIES GENERATED TRUE)
+# file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
+# add_custom_command(
+#     OUTPUT ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
+#     COMMAND iod_generate_symbols ${formats} ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+# add_custom_target("iod_symbols"
+#     DEPENDS ${HALIDE_INCLUDE_DIR}/libimread/symbols.hpp)
+# set_source_files_properties(
+#     ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
+#     PROPERTIES GENERATED TRUE)
 
 # Set the source files required to build the library
 include(fileList.cmake)
@@ -126,7 +126,7 @@ add_definitions(-std=c++14 -stdlib=libc++ -O3)
 # Build the library
 #add_library(imread-static STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})
-add_dependencies(imread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+# add_dependencies(imread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
 target_link_libraries(imread
     png z ${EXTRA_LIBS}
     ${EIGEN3_LIBRARIES}
@@ -138,7 +138,7 @@ target_link_libraries(imread
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
-add_dependencies("test_${PROJECT_NAME}" ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+# add_dependencies("test_${PROJECT_NAME}" ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     png z imread ${EXTRA_LIBS}
