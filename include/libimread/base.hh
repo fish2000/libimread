@@ -58,7 +58,7 @@ namespace im {
             virtual std::vector<byte> full_data() {
                 std::vector<byte> res;
                 byte buffer[4096];
-                while (int n = this->read(buffer, sizeof(buffer))) {
+                while (std::size_t n = this->read(buffer, sizeof(buffer))) {
                     res.insert(res.end(), buffer, buffer + n);
                 }
                 return res;
@@ -69,7 +69,7 @@ namespace im {
     class byte_sink : virtual public seekable {
         public:
             virtual ~byte_sink() { }
-            virtual std::size_t write(const void *buffer, std::size_t n) xWARN_UNUSED = 0;
+            virtual std::size_t write(const void *buffer, std::size_t n) = 0;
             
             template <std::size_t Nelems>
             std::size_t write(byte (&arr)[Nelems], size_t n) {
@@ -93,15 +93,15 @@ namespace im {
             }
             
             byte_sink& operator<<(const std::string &w) {
-                std::size_t s = this->write(static_cast<const char*>(w.c_str()), std::size_t(w.length()));
+                this->write(static_cast<const char*>(w.c_str()), std::size_t(w.length()));
                 return *this;
             }
             byte_sink& operator<<(const char *w) {
-                std::size_t s = this->write(w, std::strlen(w));
+                this->write(w, std::strlen(w));
                 return *this;
             }
             byte_sink& operator<<(const std::vector<byte> &w) {
-                std::size_t s = this->write(&w[0], w.size());
+                this->write(&w[0], w.size());
                 return *this;
             }
     };
@@ -221,7 +221,7 @@ namespace im {
         if (!src->can_seek()) { return false; }
         std::vector<byte> buf;
         buf.resize(n);
-        const std::size_t n_read = src->read(&buf.front(), n);
+        const int n_read = src->read(&buf.front(), n);
         src->seek_relative(-n_read);
     
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);

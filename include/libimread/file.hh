@@ -100,7 +100,7 @@ namespace im {
             file_source_sink(char *cpath, Mode fmode = Mode::READ)
                 :fd_source_sink(), md(fmode)
                 {
-                    int _fd;
+                    int _fd = -1;
                     if (md == Mode::READ) {
                         _fd = open_read(cpath);
                     } else if (md == Mode::WRITE) {

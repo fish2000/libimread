@@ -91,7 +91,7 @@ namespace im {
     inline std::vector<byte> full_data(byte_source &s) {
         std::vector<byte> res;
         byte buffer[4096];
-        while (int n = s.read(buffer, sizeof(buffer))) {
+        while (std::size_t n = s.read(buffer, sizeof(buffer))) {
             res.insert(res.end(), buffer, buffer + n);
         }
         return res;
