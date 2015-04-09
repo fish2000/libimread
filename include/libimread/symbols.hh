@@ -2,6 +2,8 @@
 #ifndef IMREAD_SYMBOLS_HH
 #define IMREAD_SYMBOLS_HH
 
+/*
+
 #include <iod/callable_traits.hh>
 #include <iod/sio.hh>
 #include <iod/symbol.hh>
@@ -79,5 +81,7 @@ namespace symbols {
     iod_define_symbol(framerate);
     
 }
+
+*/
 
 #endif /// IMREAD_SYMBOLS_HH
