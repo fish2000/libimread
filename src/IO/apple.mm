@@ -8,8 +8,8 @@ namespace im {
 
     namespace ns {
         
-        std::unique_ptr<Image> IMDecodeDataVector(std::vector<byte> data,
-                                                  ImageFactory *factory) {
+        Image IMDecodeDataVector(std::vector<byte> data,
+                                 ImageFactory *factory) {
             @autoreleasepool {
                 NSData *datum;
                 NSBitmapImageRep *rep;
@@ -29,14 +29,13 @@ namespace im {
                 int bps = (int)[rep bitsPerSample];
                 int siz = (bps / 8) + bool(bps % 8);
                 
-                std::unique_ptr<Image> output(factory->create(
-                    bps, height, width, channels));
+                Image output(factory->create(bps, height, width, channels));
                 
                 if (format & NSFloatingPointSamplesBitmapFormat) {
-                    float *frowp = output->rowp_as<float>(0);
+                    float *frowp = output.rowp_as<float>(0);
                     std::memcpy(frowp, (float *)[rep bitmapData], siz*height*width*channels);
                 } else {
-                    byte *rowp = output->rowp_as<byte>(0);
+                    byte *rowp = output.rowp_as<byte>(0);
                     std::memcpy(rowp, static_cast<byte*>([rep bitmapData]), siz*height*width*channels);
                 }
                 [rep release];
@@ -46,9 +45,8 @@ namespace im {
         
     }
     
-    std::unique_ptr<Image> NSImageFormat::read(byte_source *src,
-                                               ImageFactory *factory,
-                                               const options_map &opts)  {
+    Image NSImageFormat::read(byte_source *src,
+                              ImageFactory *factory, const options_map &opts)  {
         std::vector<byte> data = src->full_data();
         @autoreleasepool {
             return ns::IMDecodeDataVector(data, factory);

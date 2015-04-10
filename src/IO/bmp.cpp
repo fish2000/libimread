@@ -40,12 +40,12 @@ namespace im {
         }
     }
     
-    std::unique_ptr<Image> BMPFormat::read(byte_source *src,
-                                           ImageFactory *factory,
-                                           const options_map &opts)  {
+    Image BMPFormat::read(byte_source *src,
+                          ImageFactory *factory,
+                          const options_map &opts)  {
         char magic[2];
         
-        if (src->read(reinterpret_cast<byte *>(magic), 2) != 2) {
+        if (src->read(reinterpret_cast<byte*>(magic), 2) != 2) {
             throw CannotReadError("im::BMPFormat::read(): File is empty");
         }
         
@@ -101,8 +101,7 @@ namespace im {
         
         const int depth = (bitsppixel == 16 ? -1 : 3);
         const int nbits = (bitsppixel == 16 ? 16 : 8);
-        std::unique_ptr<Image> output(
-            factory->create(nbits, height, width, depth));
+        Image output(factory->create(nbits, height, width, depth));
         
         std::vector<byte> color_table;
         if (bitsppixel <= 8) {
@@ -118,7 +117,7 @@ namespace im {
         byte buf[4];
         
         for (unsigned int r = 0; r != height; ++r) {
-            byte *rowp = output->rowp_as<byte>(height - r - 1);
+            byte *rowp = output.rowp_as<byte>(height - r - 1);
             src->read_check(rowp, bytes_per_row);
             
             if (bitsppixel == 24) {

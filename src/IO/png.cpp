@@ -101,7 +101,7 @@ namespace im {
         }
     }
     
-    std::unique_ptr<Image> PNGFormat::read(byte_source *src, ImageFactory *factory, const options_map &opts) {
+    Image PNGFormat::read(byte_source *src, ImageFactory *factory, const options_map &opts) {
         png_holder p(png_holder::read_mode);
         png_set_read_fn(p.png_ptr, src, read_from_source);
         p.create_info();
@@ -155,7 +155,7 @@ namespace im {
         png_set_interlace_handling(p.png_ptr);
         png_read_update_info(p.png_ptr, p.png_info);
         
-        std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
+        Image output(factory->create(bit_depth, h, w, d));
         
         int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
         png_bytep *row_pointers = new png_bytep[h];
@@ -170,9 +170,9 @@ namespace im {
         PP_CHECK(p.png_ptr, "PNG read image failure");
         
         /// convert the data to T (fake it for now with uint8_t)
-        //T *ptr = (T*)output->data();
-        int c_stride = (d == 1) ? 0 : output->stride(2);
-        uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+        //T *ptr = (T*)output.data();
+        int c_stride = (d == 1) ? 0 : output.stride(2);
+        uint8_t *ptr = output.rowp_as<uint8_t>(0);
         
         if (bit_depth == 8) {
             for (int y = 0; y < h; y++) {

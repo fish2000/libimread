@@ -157,8 +157,7 @@ namespace im {
             ~LSMReader();
             
             void PrintSelf(std::ostream &os, const char *indent = "");
-            std::unique_ptr<Image> read(ImageFactory *factory,
-                                      const options_map&);
+            Image read(ImageFactory *factory, const options_map&);
             void readHeader();
             
             int GetChannelColorComponent(int, int);
@@ -1097,18 +1096,17 @@ namespace im {
             }
         }
         
-        std::unique_ptr<Image> LSMReader::read(ImageFactory *factory,
-                                               const options_map &) {
+        Image LSMReader::read(ImageFactory *factory, const options_map &) {
             this->readHeader();
             
             const int dataType = this->GetDataTypeForChannel(0); // This could vary by channel!
             
-            std::unique_ptr<Image> output = factory->create(
+            Image output = factory->create(
                 BYTES_BY_DATA_TYPE(dataType) * 8, this->dimensions_[2],
                 this->dimensions_[3], this->dimensions_[4],
                 this->dimensions_[0], this->dimensions_[1]);
             
-            byte *imstart = output->rowp_as<byte>(0);
+            byte *imstart = output.rowp_as<byte>(0);
             for (int z = 0; z < this->dimensions_[2]; ++z) {
                 for (int timepoint = 0; timepoint < this->dimensions_[3]; ++timepoint) {
                     for (int ch = 0; ch < this->dimensions_[4]; ++ch) {
@@ -1142,9 +1140,9 @@ namespace im {
         
     } // namespace
     
-    std::unique_ptr<Image> LSMFormat::read(byte_source *s,
-                                           ImageFactory *factory,
-                                           const options_map &opts)  {
+    Image LSMFormat::read(byte_source *s,
+                          ImageFactory *factory,
+                          const options_map &opts)  {
         LSMReader reader(s);
         return reader.read(factory, opts);
     }

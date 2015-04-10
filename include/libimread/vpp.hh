@@ -79,13 +79,6 @@ namespace im {
                 return static_cast<void *>(host);
             }
             
-            template <typename T>
-            T* rowp_as(const int r) {
-                T *host = (T *)this->data();
-                host += off_t(r * rowp_stride());
-                return host;
-            }
-            
     };
     
 #define xWIDTH d1
@@ -113,9 +106,9 @@ namespace im {
             void name(std::string &nnm) { nm = nnm; }
             
         protected:
-            std::unique_ptr<Image> create(int nbits,
-                                          int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) {
+            virtual Image create(int nbits,
+                                 int xHEIGHT, int xWIDTH, int xDEPTH,
+                                 int d3, int d4) {
                 return std::unique_ptr<Image>(
                     new HybridImage<T>(
                         xWIDTH, xHEIGHT, xDEPTH));

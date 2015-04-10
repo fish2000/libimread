@@ -133,9 +133,9 @@ namespace im {
         
     } /// namespace
     
-    std::unique_ptr<Image> JPEGFormat::read(byte_source *src,
-                                            ImageFactory *factory,
-                                            const options_map &opts)  {
+    Image JPEGFormat::read(byte_source *src,
+                           ImageFactory *factory,
+                           const options_map &opts)  {
         
         jpeg_source_adaptor adaptor(src);
         jpeg_decompress_holder decompressor;
@@ -163,14 +163,14 @@ namespace im {
         const int w = decompressor.info.output_width;
         const int d = decompressor.info.output_components;
         
-        std::unique_ptr<Image> output(factory->create(8, h, w, d));
+        Image output(factory->create(8, h, w, d));
         
         JSAMPARRAY samples = (*decompressor.info.mem->alloc_sarray)(
              (j_common_ptr)&decompressor.info, JPOOL_IMAGE, w * d, 1);
         
         /// Hardcoding uint8_t as the type for now
-        int c_stride = (d == 1) ? 0 : output->stride(2);
-        uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+        int c_stride = (d == 1) ? 0 : output.stride(2);
+        uint8_t *ptr = output.rowp_as<uint8_t>(0);
         
         while (decompressor.info.output_scanline < decompressor.info.output_height) {
             jpeg_read_scanlines(&decompressor.info, samples, 1);
@@ -202,37 +202,33 @@ namespace im {
         }
         
         jpeg_dst_adaptor adaptor(output);
-        jpeg_compress_holder c;
+        jpeg_compress_holder compressor;
         
         // error management
         error_mgr jerr;
-        c.info.err = &jerr.pub;
-        c.info.dest = &adaptor.mgr;
+        compressor.info.err = &jerr.pub;
+        compressor.info.dest = &adaptor.mgr;
         
-        if (setjmp(jerr.setjmp_buffer)) {
-            throw CannotWriteError(jerr.error_message);
-        }
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
         
-        c.info.image_height = input.dim(0);
-        c.info.image_width = input.dim(1);
-        c.info.input_components = (input.ndims() > 2 ? input.dim(2) : 1);
-        c.info.in_color_space = color_space(c.info.input_components);
+        compressor.info.image_height = input.dim(0);
+        compressor.info.image_width = input.dim(1);
+        compressor.info.input_components = (input.ndims() > 2 ? input.dim(2) : 1);
+        compressor.info.in_color_space = color_space(compressor.info.input_components);
         
-        jpeg_set_defaults(&c.info);
+        jpeg_set_defaults(&compressor.info);
+        
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
         
         options_map::const_iterator qiter = opts.find("jpeg:quality");
         if (qiter != opts.end()) {
-            int q;
-            if (qiter->second.get_int(q)) {
-                if (q > 100) {
-                    q = 100;
-                }
-                if (q < 0) {
-                    q = 0;
-                }
-                
-                jpeg_set_quality(&c.info, q, FALSE);
-                
+            int quality;
+            if (qiter->second.get_int(quality)) {
+                if (quality > 100) { quality = 100; }
+                if (quality < 0) { quality = 0; }
+                jpeg_set_quality(&compressor.info, quality, FALSE);
             } else {
                 throw WriteOptionsError(
                     "im::JPEGFormat::write(): jpeg:quality must be an integer"
@@ -240,15 +236,20 @@ namespace im {
             }
         }
         
-        jpeg_start_compress(&c.info, TRUE);
+        jpeg_start_compress(&compressor.info, TRUE);
         
-        while (c.info.next_scanline < c.info.image_height) {
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
+        
+        while (compressor.info.next_scanline < compressor.info.image_height) {
             JSAMPROW rowp = static_cast<JSAMPROW>(
-                input.rowp_as<void>(c.info.next_scanline));
-            
-            (void)jpeg_write_scanlines(&c.info, &rowp, 1);
+                input.rowp_as<void>(compressor.info.next_scanline));
+            jpeg_write_scanlines(&compressor.info, &rowp, 1);
         }
         
-        jpeg_finish_compress(&c.info);
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
+        
+        jpeg_finish_compress(&compressor.info);
     }
 }
