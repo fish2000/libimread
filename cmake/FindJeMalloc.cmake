@@ -1,3 +1,5 @@
+# Author: Alexander Böhn
+# © 2011.10 -- GPL, Motherfuckers
 # - Try to find jemalloc headers and libraries.
 # 
 # THIS PACKAGE-FINDER COURTESY OF BRO:

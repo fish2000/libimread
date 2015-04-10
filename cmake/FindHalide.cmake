@@ -1,5 +1,7 @@
-
-# shamelessly based on FindJeMalloc.cmake
+# Author: Alexander Böhn
+# © 2011.10 -- GPL, Motherfuckers
+# FindHalide.cmake
+#  -- shamelessly based on FindJeMalloc.cmake
 
 find_path(HALIDE_ROOT_DIR
     NAMES include/Halide.h include/HalideRuntime.h

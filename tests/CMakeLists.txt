@@ -1,3 +1,5 @@
+# Author: Alexander Böhn
+# © 2011.10 -- GPL, Motherfuckers
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 

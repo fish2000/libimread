@@ -1,3 +1,5 @@
+# Author: Alexander Böhn
+# © 2011.10 -- GPL, Motherfuckers
 # Fetch the Catch source. Taken from:
 #   https://github.com/philsquared/Catch/blob/master/docs/build-systems.md
 
