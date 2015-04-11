@@ -12,9 +12,21 @@
 
 namespace im {
 
+#ifndef WTF
+#define WTF(msg) std::cerr << "(WTF!!!) [" << __FILE__ << ":" << __LINE__ "]: " << msg << "\n"
+#endif
+
+#ifndef _ASSERT
+#define _ASSERT(condition, ...)                                                 \
+    if (!(condition)) {                                                         \
+        fprintf(stderr, __VA_ARGS__);                                           \
+        exit(-1);                                                               \
+    }
+#endif /// _ASSERT
+
 #define xWARN_UNUSED                __attribute__((__warn_unused_result__))
 
-    /*
+/*
 #define xALIAS(source)              __attribute__((weak, alias ( #source )))
 #define xREQUIRED(idx, ...)         __attribute__((__nonnull__(idx, ##__VA_ARGS__)))
 #define xUNUSED                     __attribute__((__unused__))
@@ -22,7 +34,7 @@ namespace im {
 #define xOVEROADABLE                __attribute__((__overloadable__))
 #define xCONST                      __attribute__((__const__))
 #define xPURE                       __attribute__((__pure__))
-    */
+*/
  
     static const std::string kVERSION = IM_VERSION;
     typedef uint8_t byte;
