@@ -128,23 +128,37 @@ namespace im {
         inline J_COLOR_SPACE color_space(int components) {
             if (components == 1) { return JCS_GRAYSCALE; }
             if (components == 3) { return JCS_RGB; }
-            throw CannotWriteError("J_COLOR_SPACE::color_space(): unsupported image dimensions");
+            std::ostringstream out;
+            out << "ERROR:\n"
+                << "\tim::(anon)::color_space() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"\n"
+                << "\tim::(anon)::color_space() got:    `components` = (int)" << components << "\n"
+                << "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3 }\n";
+            throw CannotReadError(out.str());
         }
+        
+        /// pixel accessor shortcut
+        template <typename T = uint8_t>
+        inline T *at(Image &im, int x, int y, int z) {
+            return &im.rowp_as<T>(0)[x*im.stride(0) +
+                                     y*im.stride(1) +
+                                     z*im.stride(2)];
+        }
+        
         
     } /// namespace
     
     std::unique_ptr<Image> JPEGFormat::read(byte_source *src,
-                                            ImageFactory *factory,
-                                            const options_map &opts)  {
+                           ImageFactory *factory,
+                           const options_map &opts)  {
         
         jpeg_source_adaptor adaptor(src);
         jpeg_decompress_holder decompressor;
         
-        // error management
+        /// error management
         error_mgr jerr;
         decompressor.info.err = &jerr.pub;
         
-        // source
+        /// source
         decompressor.info.src = &adaptor.mgr;
         
         if (setjmp(jerr.setjmp_buffer)) {
@@ -170,7 +184,7 @@ namespace im {
         
         /// Hardcoding uint8_t as the type for now
         int c_stride = (d == 1) ? 0 : output->stride(2);
-        uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+        uint8_t *ptr = output->rowp_as<uint8_t>(0);
         
         while (decompressor.info.output_scanline < decompressor.info.output_height) {
             jpeg_read_scanlines(&decompressor.info, samples, 1);
@@ -202,37 +216,40 @@ namespace im {
         }
         
         jpeg_dst_adaptor adaptor(output);
-        jpeg_compress_holder c;
+        jpeg_compress_holder compressor;
         
-        // error management
+        /// error management
         error_mgr jerr;
-        c.info.err = &jerr.pub;
-        c.info.dest = &adaptor.mgr;
+        compressor.info.err = &jerr.pub;
         
-        if (setjmp(jerr.setjmp_buffer)) {
-            throw CannotWriteError(jerr.error_message);
-        }
+        /// destination
+        compressor.info.dest = &adaptor.mgr;
         
-        c.info.image_height = input.dim(0);
-        c.info.image_width = input.dim(1);
-        c.info.input_components = (input.ndims() > 2 ? input.dim(2) : 1);
-        c.info.in_color_space = color_space(c.info.input_components);
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
         
-        jpeg_set_defaults(&c.info);
+        const int w = input.dim(0);
+        const int h = input.dim(1);
+        const int d = input.dim(2);
+        const int dims = input.ndims();
+        
+        compressor.info.image_width = w;
+        compressor.info.image_height = h;
+        compressor.info.input_components = (dims > 2 ? input.dim(2) : 1);
+        compressor.info.in_color_space = color_space(compressor.info.input_components);
+        
+        jpeg_set_defaults(&compressor.info);
+        
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
         
         options_map::const_iterator qiter = opts.find("jpeg:quality");
         if (qiter != opts.end()) {
-            int q;
-            if (qiter->second.get_int(q)) {
-                if (q > 100) {
-                    q = 100;
-                }
-                if (q < 0) {
-                    q = 0;
-                }
-                
-                jpeg_set_quality(&c.info, q, FALSE);
-                
+            int quality;
+            if (qiter->second.get_int(quality)) {
+                if (quality > 100) { quality = 100; }
+                if (quality < 0) { quality = 0; }
+                jpeg_set_quality(&compressor.info, quality, FALSE);
             } else {
                 throw WriteOptionsError(
                     "im::JPEGFormat::write(): jpeg:quality must be an integer"
@@ -240,15 +257,28 @@ namespace im {
             }
         }
         
-        jpeg_start_compress(&c.info, TRUE);
+        JSAMPLE *rowbuf = new JSAMPLE[w * d]; /// width * channels
         
-        while (c.info.next_scanline < c.info.image_height) {
-            JSAMPROW rowp = static_cast<JSAMPROW>(
-                input.rowp_as<void>(c.info.next_scanline));
-            
-            (void)jpeg_write_scanlines(&c.info, &rowp, 1);
+        jpeg_start_compress(&compressor.info, TRUE);
+        
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
+        
+        while (compressor.info.next_scanline < compressor.info.image_height) {
+            JSAMPLE *dstPtr = rowbuf;
+            for (int x = 0; x < w; x++) {
+                for (int c = 0; c < d; c++) {
+                    pix::convert(*dstPtr++, at<JSAMPLE>(input,
+                        x, compressor.info.next_scanline, c)[0]);
+                }
+            }
+            jpeg_write_scanlines(&compressor.info, &rowbuf, 1);
         }
         
-        jpeg_finish_compress(&c.info);
+        if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
+            std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
+        
+        delete[] rowbuf;
+        jpeg_finish_compress(&compressor.info);
     }
 }

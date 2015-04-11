@@ -14,6 +14,7 @@
 #include <Halide.h>
 
 #include <libimread/libimread.hpp>
+#include <libimread/private/buffer_t.h>
 #include <libimread/errors.hh>
 #include <libimread/base.hh>
 #include <libimread/file.hh>
@@ -25,6 +26,14 @@ namespace im {
     template <typename T>
     using HalImage = Halide::Image<typename std::decay<T>::type>;
     using MetaImage = ImageWithMetadata;
+    
+    using Halide::Expr;
+    using Halide::Buffer;
+    using Halide::Realization;
+    using Halide::Argument;
+    using Halide::ExternFuncArgument;
+    
+    //using HalUnderscore = Halide::_; /// OMG GUYS THATS MY UNDERSCORE
     
     template <typename pT>
     class HybridImage : public HalImage<pT>, public Image, public MetaImage {
@@ -49,14 +58,40 @@ namespace im {
                 :HalImage<pT>(x, name), Image(), MetaImage(name)
                 {}
             
+            HybridImage(const Buffer &buf)
+                :HalImage<pT>(buf), Image(), MetaImage()
+                {}
+            HybridImage(const Realization &r)
+                :HalImage<pT>(r), Image(), MetaImage()
+                {}
+            HybridImage(const buffer_t *b, const std::string &name="")
+                :HalImage<pT>(b, name), Image(), MetaImage(name)
+                {}
+            
+            using HalImage<pT>::operator();
+            using HalImage<pT>::defined;
             using HalImage<pT>::dimensions;
             using HalImage<pT>::extent;
             using HalImage<pT>::stride;
             using HalImage<pT>::channels;
             using HalImage<pT>::data;
-            using HalImage<pT>::operator();
+            using HalImage<pT>::buffer;
             
             virtual ~HybridImage() {}
+            
+            operator Buffer() const { return HalImage<pT>::buffer; }
+            
+            operator Argument() const {
+                return Argument(HalImage<pT>::buffer);
+            }
+            
+            operator ExternFuncArgument() const {
+                return ExternFuncArgument(HalImage<pT>::buffer);
+            }
+            
+            operator Expr() const {
+                return (*this)(Halide::_);
+            }
             
             virtual int nbits() const override {
                 /// elem_size is in BYTES, so:
@@ -153,11 +188,65 @@ namespace im {
             return image;
         }
         
+        using Halide::Func;
+        using Halide::Var;
+        using Halide::Target;
+        using Halide::UInt;
+        
         template <typename T = byte>
-        void write(HybridImage<T> &input, const std::string &filename) {
+        void write(HybridImage<T> &input, const std::string &filename, bool GPU = false) {
+            
+            HybridImage<T> nim;
+            if (input.dim(2) > 3) {
+                
+                WTF("IMAGE WITH: dim(2) > 3 OHHHH SHIT");
+                
+                Var x, y, c;
+                Func f("f");
+                
+                f(x, y, c) = input(x, y, c);
+                
+                if (GPU) {
+                    
+                    WTF("Running GPU schedule USING INTERMEDIATE Buffer() OBJECT");
+                    
+                    Buffer outbuf(UInt(8),
+                        input.width(), input.height(), 3);
+                    f.reorder(c, x, y)
+                     .bound(c, 0, 3)
+                     .unroll(c);
+                    f.gpu_tile(x, y, 8, 8);
+                    
+                    Target t = Halide::get_host_target();
+                    t.set_feature(Target::OpenCL);
+                    f.compile_jit(t);
+                    
+                    /// EXPLICITLY ONLY DO UP TO THREE:
+                    f.realize(outbuf);
+                    outbuf.copy_to_host();
+                    nim = outbuf;
+                } else {
+                    
+                    WTF("Running CPU schedule");
+                    
+                    f.reorder(c, x, y)
+                     .bound(c, 0, 3)
+                     .unroll(c);
+                    f.vectorize(x, 8);
+                    f.compile_jit();
+                    
+                    //f.trace_stores();
+                    //f.parallel(y);
+                    nim = f.realize(input.width(), input.height(), 3);
+                }
+            } else {
+                WTF("Assigning input to nim");
+                nim = input;
+            }
+            
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            format->write(dynamic_cast<Image&>(input), output.get(), opts);
+            format->write(dynamic_cast<Image&>(nim), output.get(), opts);
         }
         
     }

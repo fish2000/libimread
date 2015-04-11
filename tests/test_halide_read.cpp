@@ -23,15 +23,15 @@ namespace {
         U8Image halim3 = im::halide::read(D("marci_512_srgb8.png"));
     }
     
-    TEST_CASE("Read a PNG and rewrite it via image_io.h", "[read-jpeg-write-png]") {
+    TEST_CASE("Read a PNG and rewrite it as a JPEG", "[read-jpeg-write-png]") {
         U8Image halim = im::halide::read(D("roses_512_rrt_srgb.png"));
-        im::halide::write(halim, T("YO_DOGG222.png"));
+        im::halide::write(halim, T("jpgg_YO_DOGG222.jpg"));
         
         U8Image halim2 = im::halide::read(D("marci_512_srgb.png"));
-        im::halide::write(halim2, T("marci_512_srgb_YO.png"));
+        im::halide::write(halim2, T("jpgg_marci_512_srgb_YO.jpg"));
         
         U8Image halim3 = im::halide::read(D("marci_512_srgb8.png"));
-        im::halide::write(halim3, T("marci_512_srgb_YO_YO_YO.png"));
+        im::halide::write(halim3, T("jpgg_marci_512_srgb_YO_YO_YO.jpg"));
     }
     
     TEST_CASE("Read JPEG files", "[read-jpeg]") {
@@ -40,7 +40,7 @@ namespace {
         U8Image halim3 = im::halide::read(D("IMG_7333.jpeg"));
     }
     
-    TEST_CASE("Read a JPEG and rewrite it as a PNG via image_io.h", "[read-jpeg-write-png]") {
+    TEST_CASE("Read a JPEG and rewrite it as a PNG", "[read-jpeg-write-png]") {
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         im::halide::write(halim, T("OH_DAWG666.png"));
         

@@ -122,7 +122,6 @@ namespace im {
             throw CannotReadError(out.str());
         }
         if (bit_depth == 16 && !is_big_endian()) { png_set_swap(p.png_ptr); }
-        //if (bit_depth < 8) { png_set_packing(p.png_ptr); } /// ?
         
         int d = -1;
         switch (png_get_color_type(p.png_ptr, p.png_info)) {
@@ -206,7 +205,6 @@ namespace im {
     }
 
     void PNGFormat::write(Image &input, byte_sink *output, const options_map &opts) {
-        //stack_based_memory_pool alloc;
         png_holder p(png_holder::write_mode);
         p.create_info();
         png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
@@ -215,8 +213,6 @@ namespace im {
         const int height = input.dim(1);
         const int channels = input.dim(2);
         const int bit_depth = input.nbits();
-        //const int color_type = color_type_of(input_ptr.get());
-        //const int color_type = PNG_COLOR_TYPE_RGB;
         
         png_bytep *row_pointers;
         png_byte color_type = color_types[channels - 1];
@@ -232,14 +228,7 @@ namespace im {
         }
         png_write_info(p.png_ptr, p.png_info);
         
-        // std::vector<png_bytep> rowps = input.allrows<png_byte>();
-        // if (bit_depth == 16 && !is_big_endian()) {
-        //     swap_bytes_inplace(rowps, width, alloc);
-        // }
-        
         row_pointers = new png_bytep[height];
-        
-        // im.copyToHost(); // in case the image is on the gpu
         
         int c_stride = (channels == 1) ? 0 : input.stride(2);
         uint8_t *srcPtr = input.rowp_as<uint8_t>(0);
