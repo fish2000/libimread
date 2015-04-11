@@ -11,7 +11,6 @@
 #endif
 
 #include <memory>
-#include <functional>
 #include <cstdio>
 #include <cstring>
 

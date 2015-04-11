@@ -2,7 +2,6 @@
 // License: MIT (see COPYING.MIT file)
 
 #include <libimread/IO/apple.hh>
-#include <libimread/file.hh>
 
 namespace im {
 
