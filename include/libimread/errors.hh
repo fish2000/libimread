@@ -11,56 +11,50 @@
 #include <exception>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ansicolor.hh>
 
-    
 #ifndef WTF
-#define WTF(...) wtf(__FILE__, __LINE__, #__VA_ARGS__)
+#define WTF(...) im::srsly("(WTF!!!)", ansi::color::idx.at("lightred"), __FILE__, __LINE__, __VA_ARGS__)
 #endif
 
 namespace im {
     
+    enum class Output {
+        DEFAULT, WTF, OMG, SRSLY
+    };
+    
     template <bool B, typename T = void>
     using disable_if = std::enable_if<!B, T>;
+    
     template <bool B, typename T = void>
     using disable_if_t = std::enable_if_t<!B, T>;
     
-    template <typename S>
+    template <typename S> inline
     typename std::enable_if_t<std::is_arithmetic<S>::value, std::string>
         stringify(S s) { return std::to_string(s); }
     
-    // template <typename S,
-    //           typename std::enable_if_t<std::is_convertible<S, std::string>::value>* = nullptr>
-    // std::string stringify(S s) { return s; }
-    
-    // template <typename S,
-    //           typename std::enable_if<std::is_convertible<S, std::string>::value>::type* = nullptr>
-    // const std::string &stringify(const S &s) { return s; }
-    
-    // template <typename S>
-    // typename std::enable_if_t<std::is_constructible<std::string, S>::value, std::string>
-    //     stringify(S s) { return std::string(const_cast<S>(s)); }
-    
-    template <typename S>
+    template <typename S> inline
     typename std::enable_if_t<std::is_constructible<std::string, S>::value, const std::string>
         stringify(S const& s) { return std::string(s); }
     
-    template <typename ...Args>
+    template <typename ...Args> inline
     std::string stringmerge(const Args& ...args) {
         /// adapted from http://stackoverflow.com/a/21806609/298171
         std::string out;
-        int unpack[]{ 0, (out += "\t" + im::stringify<Args>(args) + "\n", 0)... };
-        static_cast<void>(unpack); /// avoid "unused variable" warnings
+        int unpack[] __attribute__ { 0, (out += "\t" + im::stringify<Args>(args) + "\n", 0)... };
+        //static_cast<void>(unpack); /// avoid "unused variable" warnings
         return out;
     }
     
-    template <typename ...Args>
-    void wtf(const char *file, int line, Args&& ...args) {
+    template <typename ...Args> inline
+    void srsly(const char *title, const ansi::ANSI color, const char *file, int line, Args&& ...args) {
         
-        std::cerr  << "(WTF!!!) [ "
-                   << im::stringify(file)
-                   << " : " << im::stringify(line) << " ]:\n"
+        std::cerr  << color << im::stringify(title) << ansi::reset
+          << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
+          << " : " << ansi::red << im::stringify(line) << ansi::reset
+          << " ]:" << std::endl
                    << im::stringmerge(std::forward<Args>(args)...)
-                   << "\n ";
+                   << std::endl;
     }
 
 #ifndef _ASSERT

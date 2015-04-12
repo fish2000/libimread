@@ -39,6 +39,7 @@ set(hdrs
     ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/private/vpp_symbols.hh
     
+    ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
     ${hdrs_dir}/coregraphics.hh
     ${hdrs_dir}/errors.hh
@@ -75,6 +76,7 @@ set(srcs
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp
     
+    ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp
     ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
