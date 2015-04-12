@@ -41,14 +41,15 @@ namespace im {
     std::string stringmerge(const Args& ...args) {
         /// adapted from http://stackoverflow.com/a/21806609/298171
         std::string out;
-        int unpack[] __attribute__ { 0, (out += "\t" + im::stringify<Args>(args) + "\n", 0)... };
-        //static_cast<void>(unpack); /// avoid "unused variable" warnings
+        int unpack[] __attribute__((unused)) { 0, 
+            (out += "\t" + im::stringify<Args>(args) + "\n", 0)...
+        };
         return out;
     }
     
     template <typename ...Args> inline
-    void srsly(const char *title, const ansi::ANSI color, const char *file, int line, Args&& ...args) {
-        
+    void srsly(const char *title, const ansi::ANSI color, const char *file, int line, Args&& ...args)
+        __attribute__((nonnull (1, 3))) {
         std::cerr  << color << im::stringify(title) << ansi::reset
           << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
           << " : " << ansi::red << im::stringify(line) << ansi::reset
