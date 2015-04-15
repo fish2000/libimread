@@ -48,8 +48,9 @@ namespace im {
     }
     
     template <typename ...Args> inline
-    void srsly(const char *title, const ansi::ANSI color, const char *file, int line, Args&& ...args)
-        __attribute__((nonnull (1, 3))) {
+    void __attribute__((nonnull (1, 3)))
+         srsly(const char *title, const ansi::ANSI color,
+               const char *file, int line, Args&& ...args) {
         std::cerr  << color << im::stringify(title) << ansi::reset
           << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
           << " : " << ansi::red << im::stringify(line) << ansi::reset
