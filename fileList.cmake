@@ -16,7 +16,6 @@ set(hdrs
     # ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
     
     ${hdrs_dir}/ext/fmemopen.hh
-    ${hdrs_dir}/ext/io_png.hh
     ${hdrs_dir}/ext/neuquant.h
     ${hdrs_dir}/ext/neuquant.inl
     ${hdrs_dir}/ext/open_memstream.hh
@@ -32,6 +31,7 @@ set(hdrs
     ${hdrs_dir}/IO/pvrtc.hh
     ${hdrs_dir}/IO/tiff.hh
     ${hdrs_dir}/IO/webp.hh
+    ${hdrs_dir}/IO/xcassets.hh
     
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
@@ -58,7 +58,6 @@ set(hdrs
 # Project source files
 set(srcs
     ${srcs_dir}/ext/fmemopen.cpp
-    ${srcs_dir}/ext/io_png.cpp
     ${srcs_dir}/ext/neuquant.cpp
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
@@ -75,6 +74,7 @@ set(srcs
     ${srcs_dir}/IO/pvrtc.cpp
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp
+    ${srcs_dir}/IO/xcassets.cpp
     
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp

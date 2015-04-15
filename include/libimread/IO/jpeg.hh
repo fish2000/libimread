@@ -24,12 +24,13 @@ namespace im {
                 return match_magic(src, "\xff\xd8\xff", 3);
             }
             
-            std::unique_ptr<Image> read(byte_source *src,
-                                        ImageFactory *factory,
-                                        const options_map &opts);
-            void write(Image &input,
-                       byte_sink *output,
-                       const options_map &opts);
+            virtual std::unique_ptr<Image> read(byte_source *src,
+                                                ImageFactory *factory,
+                                                const options_map &opts) override;
+            
+            virtual void write(Image &input,
+                               byte_sink *output,
+                               const options_map &opts) override;
     };
     
     namespace format {

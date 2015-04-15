@@ -195,11 +195,10 @@ namespace im {
         
         template <typename T = byte>
         void write(HybridImage<T> &input, const std::string &filename, bool GPU = false) {
-            
-            HybridImage<T> nim;
+            HybridImage<T> nim(1);
             if (input.dim(2) > 3) {
-                
                 WTF("IMAGE WITH: dim(2) > 3 OHHHH SHIT");
+                nim = HybridImage<T>(input.width(), input.height(), 3);
                 
                 Var x, y, c;
                 Func f("f");
@@ -207,11 +206,11 @@ namespace im {
                 f(x, y, c) = input(x, y, c);
                 
                 if (GPU) {
-                    
                     WTF("Running GPU schedule USING INTERMEDIATE Buffer() OBJECT");
                     
                     Buffer outbuf(UInt(8),
                         input.width(), input.height(), 3);
+                    
                     f.reorder(c, x, y)
                      .bound(c, 0, 3)
                      .unroll(c);
@@ -232,12 +231,14 @@ namespace im {
                     f.reorder(c, x, y)
                      .bound(c, 0, 3)
                      .unroll(c);
-                    f.vectorize(x, 8);
-                    f.compile_jit();
+                    //f.vectorize(x, 8);
+                    
+                    Target t = Halide::get_jit_target_from_environment();
+                    f.compile_jit(t);
                     
                     //f.trace_stores();
                     //f.parallel(y);
-                    nim = f.realize(input.width(), input.height(), 3);
+                    f.realize(nim);
                 }
             } else {
                 WTF("Assigning input to nim");

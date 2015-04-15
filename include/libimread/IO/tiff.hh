@@ -24,24 +24,26 @@ namespace im {
             typedef std::true_type can_write;
             typedef std::true_type can_read_metadata;
             
-            std::unique_ptr<Image> read(byte_source *s,
-                                        ImageFactory *f,
-                                        const options_map &opts)  {
+            virtual std::unique_ptr<Image> read(
+                    byte_source *s,
+                    ImageFactory *f,
+                    const options_map &opts) override {
                 std::unique_ptr<image_list> pages = this->do_read(s, f, false);
                 if (pages->size() != 1) { throw ProgrammingError(); }
                 std::vector<Image*> ims = pages->release();
                 return std::unique_ptr<Image>(ims[0]);
             }
             
-            std::unique_ptr<image_list> read_multi(byte_source *s,
-                                                   ImageFactory *f,
-                                                   const options_map &opts)  {
+            virtual std::unique_ptr<image_list> read_multi(
+                    byte_source *s,
+                    ImageFactory *f,
+                    const options_map &opts) override {
                 return this->do_read(s, f, true);
             }
             
-            void write(Image &input,
-                       byte_sink *output,
-                       const options_map &opts);
+            virtual void write(Image &input,
+                               byte_sink *output,
+                               const options_map &opts) override;
             
         private:
             std::unique_ptr<image_list> do_read(byte_source *s,
@@ -53,9 +55,10 @@ namespace im {
         public:
             typedef std::true_type can_read_multi;
             
-            std::unique_ptr<image_list> read_multi(byte_source *s,
-                                                   ImageFactory *f,
-                                                   const options_map &opts);
+            virtual std::unique_ptr<image_list> read_multi(
+                byte_source *s,
+                ImageFactory *f,
+                const options_map &opts) override;
     };
     
     namespace format {

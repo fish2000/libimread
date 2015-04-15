@@ -42,13 +42,13 @@ namespace im {
             static bool match_format(byte_source *src) {
                 return match_magic(src, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8);
             }
-
-            std::unique_ptr<Image> read(byte_source *src,
-                                        ImageFactory *factory,
-                                        const options_map &opts);
-            void write(Image &input,
-                       byte_sink *output,
-                       const options_map &opts);
+            
+            virtual std::unique_ptr<Image> read(byte_source *src,
+                                                ImageFactory *factory,
+                                                const options_map &opts) override;
+            virtual void write(Image &input,
+                               byte_sink *output,
+                               const options_map &opts) override;
     };
     
     namespace format {

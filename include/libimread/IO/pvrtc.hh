@@ -17,9 +17,9 @@ namespace im {
         public:
             typedef std::true_type can_read;
             
-            std::unique_ptr<Image> read(byte_source *src,
-                                        ImageFactory *factory,
-                                        const options_map &opts);
+            virtual std::unique_ptr<Image> read(byte_source *src,
+                                                ImageFactory *factory,
+                                                const options_map &opts) override;
     };
     
     namespace format {

@@ -19,13 +19,13 @@ namespace im {
             typedef std::true_type can_read;
             typedef std::true_type can_write;
             
-            std::unique_ptr<Image> read(byte_source *src,
-                                        ImageFactory *factory,
-                                        const options_map &opts);
+            virtual std::unique_ptr<Image> read(byte_source *src,
+                                                ImageFactory *factory,
+                                                const options_map &opts) override;
             
-            void write(Image &input,
-                       byte_sink *output,
-                       const options_map &opts);
+            virtual void write(Image &input,
+                               byte_sink *output,
+                               const options_map &opts) override;
     };
     
     namespace format {
