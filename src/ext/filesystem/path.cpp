@@ -1,5 +1,4 @@
 
-#include <dirent.h>
 #include <glob.h>
 #include <cerrno>
 #include <algorithm>
@@ -8,6 +7,16 @@
 #include <libimread/errors.hh>
 
 namespace filesystem {
+    
+    directory ddopen(const char *c) {
+        return filesystem::directory(opendir(path::absolute(c)));
+    }
+    directory ddopen(const std::string &s) {
+        return filesystem::directory(opendir(path::absolute(s)));
+    }
+    directory ddopen(const path &p) {
+        return filesystem::directory(opendir(p.make_absolute().c_str()));
+    }
     
     bool path::match(const std::regex &pattern, bool case_sensitive) {
         return std::regex_match(str(), pattern);
@@ -24,7 +33,7 @@ namespace filesystem {
                 "Can't list files from a non-directory:", str());
         }
         path abspath = make_absolute();
-        DIR *dirp = opendir(abspath.str().c_str());
+        DIR *dirp = opendir(abspath.c_str());
         if (dirp == NULL) {
             throw im::FileSystemError("ERROR:",
                 "Internal error in opendir():", strerror(errno));
@@ -60,7 +69,7 @@ namespace filesystem {
         path abspath = make_absolute();
         glob_t g = {0};
         {
-            switchdir s(abspath);
+            filesystem::switchdir s(abspath);
             glob(pattern, glob_pattern_flags, NULL, &g);
         }
         std::vector<path> out;

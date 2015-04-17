@@ -2,7 +2,7 @@
 # © 2011.10 -- GPL, Motherfuckers
 
 # The minimum CMake version required to build this project
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -42,6 +42,13 @@ include(build_config)
 # overwritting the variable.
 if_defined_set(${PROJECT_NAME}_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 SET(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+SET(TEST_SCRIPT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/scripts")
+SET(TEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
+
+execute_process(
+    WORKING_DIRECTORY ${TEST_INCLUDE_DIR}
+    COMMAND rm -f ./test_data.hpp
+    COMMENT "Deleting generated test data header")
 
 # Load the project configuration file. CMake will search in the directory setted
 # above for a module file named libimreadConfig.cmake. The configuration
@@ -137,8 +144,17 @@ target_link_libraries(imread
 
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
+add_custom_command(
+    OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
+    COMMAND ${TEST_SCRIPT_DIR}/scan-test-data.py > ${TEST_INCLUDE_DIR}/test_data.hpp)
+add_custom_target("test_data_header"
+    DEPENDS ${TEST_INCLUDE_DIR}/test_data.hpp)
+set_source_files_properties(
+    ${TEST_INCLUDE_DIR}/test_data.hpp
+    PROPERTIES GENERATED TRUE)
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 # add_dependencies("test_${PROJECT_NAME}" ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     png z imread ${EXTRA_LIBS}

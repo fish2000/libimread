@@ -5,7 +5,7 @@
 
 #include "include/catch.hpp"
 
-#define D(pth) "../tests/data/" pth
+#define D(pth) "/Users/fish/Dropbox/libimread/tests/data/" pth
 #define T(pth) "/tmp/" pth
 
 namespace {

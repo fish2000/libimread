@@ -41,7 +41,7 @@ set(hdrs
     ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/private/vpp_symbols.hh
     
-    # ${hdrs_dir}/process/jitresize.hh
+    ${hdrs_dir}/process/jitresize.hh
     ${hdrs_dir}/process/neuquant.h
     ${hdrs_dir}/process/neuquant.inl
     
@@ -51,6 +51,7 @@ set(hdrs
     ${hdrs_dir}/errors.hh
     ${hdrs_dir}/file.hh
     ${hdrs_dir}/formats.hh
+    ${hdrs_dir}/fs.hh
     ${hdrs_dir}/halide.hh
     ${hdrs_dir}/memory.hh
     ${hdrs_dir}/options.hh
@@ -84,13 +85,14 @@ set(srcs
     ${srcs_dir}/IO/webp.cpp
     ${srcs_dir}/IO/xcassets.cpp
     
-    # ${srcs_dir}/process/jitresize.cpp
+    ${srcs_dir}/process/jitresize.cpp
     ${srcs_dir}/process/neuquant.cpp
     
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp
     ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
+    ${srcs_dir}/fs.cpp
     ${srcs_dir}/halide.cpp
     # ${srcs_dir}/vpp.cpp
 )
