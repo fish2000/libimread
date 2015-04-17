@@ -16,14 +16,14 @@ set(hdrs
     # ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
     
     ${hdrs_dir}/ext/fmemopen.hh
-    ${hdrs_dir}/ext/neuquant.h
-    ${hdrs_dir}/ext/neuquant.inl
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
     ${hdrs_dir}/ext/UTI.h
+    ${hdrs_dir}/ext/WriteGIF.h
     
     ${hdrs_dir}/IO/apple.hh
     ${hdrs_dir}/IO/bmp.hh
+    ${hdrs_dir}/IO/gif.hh
     ${hdrs_dir}/IO/jpeg.hh
     ${hdrs_dir}/IO/lsm.hh
     ${hdrs_dir}/IO/png.hh
@@ -38,6 +38,10 @@ set(hdrs
     ${hdrs_dir}/private/spx_defines.h
     ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/private/vpp_symbols.hh
+    
+    # ${hdrs_dir}/process/jitresize.hh
+    ${hdrs_dir}/process/neuquant.h
+    ${hdrs_dir}/process/neuquant.inl
     
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
@@ -58,14 +62,15 @@ set(hdrs
 # Project source files
 set(srcs
     ${srcs_dir}/ext/fmemopen.cpp
-    ${srcs_dir}/ext/neuquant.cpp
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
     ${srcs_dir}/ext/UTI.mm
+    ${srcs_dir}/ext/WriteGIF.cpp
     
     ${srcs_dir}/IO/apple.mm
     ${srcs_dir}/IO/bmp.cpp
+    ${srcs_dir}/IO/gif.cpp
     ${srcs_dir}/IO/jpeg.cpp
     ${srcs_dir}/IO/lsm.cpp
     ${srcs_dir}/IO/lzw.cpp
@@ -75,6 +80,9 @@ set(srcs
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp
     ${srcs_dir}/IO/xcassets.cpp
+    
+    # ${srcs_dir}/process/jitresize.cpp
+    ${srcs_dir}/process/neuquant.cpp
     
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp

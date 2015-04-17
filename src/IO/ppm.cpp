@@ -4,7 +4,6 @@
 #include <libimread/IO/ppm.hh>
 #include <libimread/ext/fmemopen.hh>
 
-
 #define SWAP_ENDIAN16(little_endian, value) \
     if (little_endian) { (value) = (((value) & 0xff)<<8)|(((value) & 0xff00)>>8); }
 

@@ -92,15 +92,15 @@ namespace im {
                 return this->write(buffer, std::strlen(static_cast<const char*>(buffer)));
             }
             
-            byte_sink& operator<<(const std::string &w) {
-                this->write(static_cast<const char*>(w.c_str()), std::size_t(w.length()));
+            virtual byte_sink& operator<<(const std::string &w) {
+                this->write(static_cast<const char*>(w.c_str()), static_cast<std::size_t>(w.length()));
                 return *this;
             }
-            byte_sink& operator<<(const char *w) {
+            virtual byte_sink& operator<<(const char *w) {
                 this->write(w, std::strlen(w));
                 return *this;
             }
-            byte_sink& operator<<(const std::vector<byte> &w) {
+            virtual byte_sink& operator<<(const std::vector<byte> &w) {
                 this->write(&w[0], w.size());
                 return *this;
             }
@@ -223,7 +223,6 @@ namespace im {
         buf.resize(n);
         const int n_read = src->read(&buf.front(), n);
         src->seek_relative(-n_read);
-    
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }
     
@@ -231,8 +230,10 @@ namespace im {
         public:
             typedef std::false_type can_read;
             typedef std::false_type can_read_multi;
-            typedef std::false_type can_write;
             typedef std::false_type can_read_metadata;
+            typedef std::false_type can_write;
+            typedef std::false_type can_write_multi;
+            typedef std::false_type can_write_metadata;
             
             virtual ~ImageFormat() {}
             
@@ -251,6 +252,12 @@ namespace im {
             virtual void write(Image &input,
                                byte_sink *output,
                                const options_map &opts) {
+                throw NotImplementedError();
+            }
+            
+            virtual void write_multi(image_list &input,
+                                     std::vector<byte_sink*> output,
+                                     const options_map &opts) {
                 throw NotImplementedError();
             }
             

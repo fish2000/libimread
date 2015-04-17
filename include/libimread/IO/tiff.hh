@@ -21,8 +21,8 @@ namespace im {
         public:
             typedef std::true_type can_read;
             typedef std::true_type can_read_multi;
-            typedef std::true_type can_write;
             typedef std::true_type can_read_metadata;
+            typedef std::true_type can_write;
             
             virtual std::unique_ptr<Image> read(
                     byte_source *s,

@@ -1,4 +1,4 @@
-// Copyright 2012 Luis Pedro Coelho <luis@luispedro.org>
+// Copyright 2015 Alexander Bohn <fish2000@gmail.com>
 // License: MIT (see COPYING.MIT file)
 
 #include <libimread/IO/xcassets.hh>
