@@ -59,7 +59,7 @@ namespace im {
         }
     
     struct stringifier {
-        template <typename S, typename ...Args>
+        template <typename S, typename ...Args> inline
         const std::string operator()(S&& s, Args&& ...args) const {
             return im::stringify(
                 std::forward<S>(s),
@@ -130,7 +130,7 @@ namespace im {
             { }                                                                 \
         ~TypeName() throw() { }                                                 \
                                                                                 \
-        const char* what() const throw() { return w.c_str(); }                  \
+        const char *what() const throw() { return w.c_str(); }                  \
         std::string w;                                                          \
     };
 #endif /// DECLARE_IMREAD_ERROR_TYPE
@@ -141,6 +141,7 @@ DECLARE_IMREAD_ERROR_TYPE(NotImplementedError, "Not Implemented");
 DECLARE_IMREAD_ERROR_TYPE(ProgrammingError, "Programming Error");
 DECLARE_IMREAD_ERROR_TYPE(OptionsError, "Options Error");
 DECLARE_IMREAD_ERROR_TYPE(WriteOptionsError, "Write Options Error");
+DECLARE_IMREAD_ERROR_TYPE(FileSystemError, "File System Error");
 
 }
 

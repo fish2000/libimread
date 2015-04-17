@@ -5,6 +5,7 @@
 #define FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/base.hh>
 #include <libimread/pixels.hh>
 #include <libimread/ext/fmemopen.hh>

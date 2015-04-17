@@ -81,24 +81,22 @@ namespace im {
         gif_buffer gbuf(width, height);
         
         /// Check what we got
-        /*
         if (bit_depth != 8) {
-            std::ostringstream out;
-            out << "ERROR:\n"
-                << "\tim::GIFFormat::write() says:   \"UNSUPPORTED IMAGE BIT DEPTH\"\n"
-                << "\tim::GIFFormat::write() got:    `bit_depth` = (int){ " << bit_depth << " }\n"
-                << "\tim::GIFFormat::write() needs:  `bit_depth` = (int){ 8 }\n";
-            throw CannotWriteError(out.str());
+            throw CannotWriteError(
+                "ERROR:",
+                    "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE BIT DEPTH\"",
+                 FF("im::GIFFormat::write() got:    `bit_depth` = (int){ %d }", bit_depth),
+                    "im::GIFFormat::write() needs:  `bit_depth` = (int){ 8 }"
+            );
         }
         if (channels != 3) {
-            std::ostringstream out;
-            out << "ERROR:\n"
-                << "\tim::GIFFormat::write() says:   \"UNSUPPORTED IMAGE COLOR MODE\"\n"
-                << "\tim::GIFFormat::write() got:    `channels` = (int){ " << channels << " }\n"
-                << "\tim::GIFFormat::write() needs:  `channels` = (int){ 3 }\n";
-            throw CannotWriteError(out.str());
+            throw CannotWriteError(
+                "ERROR:",
+                    "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE COLOR MODE\"",
+                 FF("im::GIFFormat::write() got:    `channels` = (int){ %d }", channels),
+                    "im::GIFFormat::write() needs:  `channels` = (int){ 3 }"
+            );
         }
-        */
         
         /// Do the pixel loop to interleave RGB data
         byte *data = gbuf.data();

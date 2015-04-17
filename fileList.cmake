@@ -15,6 +15,8 @@ set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     # ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
     
+    ${hdrs_dir}/ext/filesystem/path.h
+    ${hdrs_dir}/ext/filesystem/resolver.h
     ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
@@ -61,6 +63,7 @@ set(hdrs
 
 # Project source files
 set(srcs
+    ${srcs_dir}/ext/filesystem/path.cpp
     ${srcs_dir}/ext/fmemopen.cpp
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
