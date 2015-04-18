@@ -47,11 +47,11 @@ SET(TEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
 
 execute_process(
     WORKING_DIRECTORY ${TEST_INCLUDE_DIR}
-    COMMAND rm -f ./test_data.hpp
+    COMMAND "rm -f ./test_data.hpp"
     COMMENT "Deleting generated test data header")
 execute_process(
-    WORKING_DIRECTORY /tmp
-    COMMAND rm -f /tmp/*.gif
+    WORKING_DIRECTORY "/tmp"
+    COMMAND "rm -f /tmp/*.gif"
     COMMENT "Deleting generated temporary GIF files")
 
 # Load the project configuration file. CMake will search in the directory setted

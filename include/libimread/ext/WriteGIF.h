@@ -15,6 +15,5 @@ namespace gif {
     GIF *newGIF(int delay = 3);
     void dispose(GIF *gif);
     void addFrame(GIF *gif, int W, int H, unsigned char *rgbImage, int delay = -1);
-    //void write(GIF *gif, const char *filename);
     std::vector<byte> write(GIF *gif);
 }

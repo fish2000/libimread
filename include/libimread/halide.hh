@@ -202,6 +202,13 @@ namespace im {
         }
         
         template <typename T = byte>
+        void write_multi(std::vector<HybridImage<T>> &input, const std::string &filename) {
+            std::unique_ptr<ImageFormat> format(for_filename(filename));
+            std::unique_ptr<FileSink> output(new FileSink(filename));
+            format->write_multi(dynamic_cast<std::vector<Image>&>(input), output.get(), opts);
+        }
+        
+        template <typename T = byte>
         void WACK(HybridImage<T> &input, const std::string &filename, bool GPU = false) {
             HybridImage<T> nim(1);
             if (input.dim(2) > 3) {

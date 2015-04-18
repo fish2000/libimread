@@ -25,6 +25,16 @@ using im::byte;
         trailer
 **************************************************/
 
+#define VERBOSE 0
+
+#if (VERBOSE > 0)
+#define MAYBE(...) YES(__VA_ARGS__)
+#else
+#define MAYBE(...)
+#endif
+
+
+
 namespace {
     
     void swap(unsigned char *a, unsigned char *b) {
@@ -92,7 +102,7 @@ namespace {
                 outImage[i] = thisImage[i];
             }
         }
-        YES(FF(" - %d%% transparent", count * 100 / (ImageWidth*ImageHeight)));
+        MAYBE(FF(" - %d%% transparent", count * 100 / (ImageWidth*ImageHeight)));
     }
 
     void calculatePossibleCrop(int width, int height,
@@ -312,7 +322,7 @@ namespace gif {
     }
     
     void calculatePaletteByMedianCut(GIF *gif) {
-        YES("Caculating palette by median cut");
+        MAYBE("Caculating palette by median cut");
         unsigned char *uniqueColorArray = NULL;
         int uniqueColorCount = 0, idx = 0;
         
@@ -335,7 +345,7 @@ namespace gif {
             //printf("]\nUnique color count %d\n", uniqueColorCount);
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
-            YES(
+            MAYBE(
                 FF("Calculating unique color count [%s]", asterisks.get()),
                 FF("Unique color count: %d", uniqueColorCount)
             );
@@ -365,7 +375,7 @@ namespace gif {
             //printf("]\n");
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
-            YES(
+            MAYBE(
                 FF("Filling unique color array [%s]", asterisks.get())
             );
             
@@ -469,7 +479,7 @@ namespace gif {
             //printf("Total box count %d, leaf box count %d\n", colorBoxCount, leafBoxCount);
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
-            YES(
+            MAYBE(
                 FF("Creating color boxes [%s]", asterisks.get()),
                 FF("Total box count: %d", colorBoxCount),
                 FF(" Leaf box count: %d", leafBoxCount)
@@ -477,7 +487,7 @@ namespace gif {
             
             
             {
-                YES("Calculating palette from boxes");
+                MAYBE("Calculating palette from boxes");
                 gif->paletteSize = leafBoxCount;
                 gif->palette = new unsigned char[256*3];
                 unsigned char *rgbPal = gif->palette;
@@ -498,7 +508,7 @@ namespace gif {
                 //printf("]\n");
                 std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
                 std::memset(asterisks.get(), '*', idx);
-                YES(
+                MAYBE(
                     FF("Indexizing frames [%s]", asterisks.get())
                 );
                 
@@ -622,7 +632,7 @@ namespace gif {
         for (Frame *frame = gif->frames, *prevFrame = NULL;
              frame != NULL;
              prevFrame = frame, frame = frame->next, ++frameNumber) {
-            YES(FF("frame %d", frameNumber));
+            MAYBE(FF("frame %d", frameNumber));
             {
                 /// graphic control extension
                 fputc(ExtensionIntroducer, f);
@@ -693,7 +703,7 @@ namespace gif {
                                 
                                 delete[] image;
                                 image = cImage;
-                                YES(FF(" - cropped to %d%% area",
+                                MAYBE(FF(" - cropped to %d%% area",
                                        100 * (fWidth*fHeight) / (gif->width*gif->height)));
                         }
                     } /// end if (1)
@@ -716,7 +726,7 @@ namespace gif {
                     BlockWriter blockWriter(f);
                     encode(blockWriter, image, fWidth*fHeight, CodeSize, MaxCodeSize);
                     blockWriter.finish();
-                    YES(FF(" - %d bytes", blockWriter.totalBytesWritten));
+                    MAYBE(FF(" - %d bytes", blockWriter.totalBytesWritten));
                 } else {
                     WTF("Using uncompressed method");
                     int codeSize = 8;
@@ -760,7 +770,7 @@ namespace gif {
         overflow.resize(datasize);
         std::memcpy(&overflow[0], membufstore.get(), datasize);
         
-        YES("Done.",
+        MAYBE("Done.",
             "About to call overflow.shrink_to_fit()",
          FF("Current byte vector size: %d", overflow.size()));
         

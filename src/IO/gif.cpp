@@ -110,9 +110,6 @@ namespace im {
         
         _ASSERT(out.size() > 0,
             "gif::write() returned a size-zero byte vector!");
-        
-        _ASSERT(g.get() != nullptr,
-            "gifholder (std::shared_ptr specialization) failed to make it through!");
     }
     
     void GIFFormat::write_multi(std::vector<Image> &input,
@@ -130,9 +127,6 @@ namespace im {
         
         _ASSERT(out.size() > 0,
             "gif::write() returned a size-zero byte vector!");
-        
-        _ASSERT(g.get() != nullptr,
-            "gifholder (std::shared_ptr specialization) failed to make it through!");
     }
     
 }
