@@ -4,6 +4,9 @@
 
 #include "include/catch.hpp"
 
+#define D(pth) "/Users/fish/Dropbox/libimread/tests/data/" pth
+#define T(pth) "/tmp/" pth
+
 namespace {
     
     using U8ImagePtr = im::apple::image_ptr<uint8_t>;
@@ -18,40 +21,33 @@ namespace {
             ext::save(dynamic_cast<Image<T>>(*im), fname);
         }
     }
-
+    
     TEST_CASE("[apple] Read a JPEG and rewrite it as a PNG via image_io.h", "[apple-read-jpeg-write-png]") {
-        U8Image halim = im::apple::read(
-            "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
+        U8Image halim = im::apple::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         // ext::save_ptr(std::move(halim), "/tmp/apple_YO_DOGG222.png");
-        ext::save(halim, "/tmp/apple_YO_DOGG222.png");
+        ext::save(halim, T("apple_YO_DOGG222.png"));
     }
     
     TEST_CASE("[apple] Read a PNG", "[apple-read-png]") {
-        U8Image halim = im::apple::read(
-            "../tests/data/IMG_7333.jpeg");
+        U8Image halim = im::apple::read(D("IMG_7333.jpeg"));
         // ext::save_ptr(std::move(halim), "/tmp/apple_OH_DAWG666.png");
-        ext::save(halim, "/tmp/apple_OH_DAWG666.png");
+        ext::save(halim, T("apple_OH_DAWG666.png"));
     }
-    
     
     TEST_CASE("[apple] Read a TIFF", "[apple-read-tiff]") {
-        U8Image halim = im::apple::read(
-            "../tests/data/ptlobos.tif");
+        U8Image halim = im::apple::read(D("ptlobos.tif"));
         // ext::save_ptr(std::move(halim), "/tmp/apple_TIFF_DUG986.png");
-        ext::save(halim, "/tmp/apple_TIFF_DUG986.png");
+        ext::save(halim, T("apple_TIFF_DUG986.png"));
     }
-
-    TEST_CASE("[apple] Read a JPEG", "[apple-read-jpeg]") {
-        U8Image halim = im::apple::read(
-            "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
     
+    TEST_CASE("[apple] Read a JPEG", "[apple-read-jpeg]") {
+        U8Image halim = im::apple::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         CHECK( halim.data() != nullptr );
         CHECK( halim.data() != 0 );
     }
-
+    
     TEST_CASE("[apple] Check the dimensions of a new image", "[apple-image-dims]") {
-        U8Image halim = im::apple::read(
-            "../tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg");
+        U8Image halim = im::apple::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         
         WARN( "1.extent(0) = " << halim.extent(0) );
         WARN( "1.extent(1) = " << halim.extent(1) );
@@ -61,12 +57,7 @@ namespace {
         WARN( "1.stride(1) = " << halim.stride(1) );
         WARN( "1.stride(2) = " << halim.stride(2) );
         
-        // U8Image halim2 = im::apple::read(
-        //     "../tests/data/marci_512_srgb8.png");
-        // U8Image halim2 = im::apple::read(
-        //     "../tests/data/marci_512_srgb8.png");
-        U8Image halim2 = im::apple::read(
-            "../tests/data/IMG_4332.jpg");
+        U8Image halim2 = im::apple::read(D("IMG_4332.jpg"));
         
         WARN( "2.extent(0) = " << halim2.extent(0) );
         WARN( "2.extent(1) = " << halim2.extent(1) );

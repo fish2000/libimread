@@ -1,10 +1,7 @@
 
 #include <glob.h>
-#include <cerrno>
 #include <algorithm>
-#include <regex>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/errors.hh>
 
 namespace filesystem {
     
@@ -33,24 +30,21 @@ namespace filesystem {
                 "Can't list files from a non-directory:", str());
         }
         path abspath = make_absolute();
-        DIR *dirp = opendir(abspath.c_str());
-        if (dirp == NULL) {
-            throw im::FileSystemError("ERROR:",
-                "Internal error in opendir():", strerror(errno));
-        }
-        struct dirent *entp;
         std::vector<path> out;
-        while ((entp = readdir(dirp)) != NULL) {
-            if (entp->d_type == DT_DIR || entp->d_type == DT_REG || entp->d_type == DT_LNK) {
-                /// ... it's either a directory, a regular file, or a symbolic link
-                out.push_back(full_paths ? abspath/entp->d_name : path(entp->d_name));
+        {
+            directory d = ddopen(abspath);
+            if (!d.get()) {
+                throw im::FileSystemError("ERROR:",
+                    "Internal error in opendir():", strerror(errno));
             }
-        }
-        int closed = closedir(dirp);
-        if (closed != 0) {
-            throw im::FileSystemError("ERROR:",
-                "Internal error in closedir():", strerror(errno));
-        }
+            struct dirent *entp;
+            while ((entp = readdir(d.get())) != NULL) {
+                if (entp->d_type == DT_DIR || entp->d_type == DT_REG || entp->d_type == DT_LNK) {
+                    /// ... it's either a directory, a regular file, or a symbolic link
+                    out.push_back(full_paths ? abspath/entp->d_name : path(entp->d_name));
+                }
+            }
+        } /// scope exit for d
         return out;
     }
     
@@ -84,8 +78,8 @@ namespace filesystem {
         return list(pattern.c_str());
     }
     
-    static const int regex_flags        = std::regex::ECMAScript;
-    static const int regex_flags_icase  = std::regex::ECMAScript | std::regex::icase;
+    static const int regex_flags        = std::regex::extended;
+    static const int regex_flags_icase  = std::regex::extended | std::regex::icase;
     
     std::vector<path> path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) {
         /// list files with regex object

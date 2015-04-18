@@ -7,8 +7,8 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <regex>
-#include <stdexcept>
 #include <sstream>
 #include <cctype>
 #include <cstdlib>
@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <libimread/errors.hh>
 
 namespace filesystem {
     
@@ -80,7 +81,8 @@ namespace filesystem {
             path make_absolute() const {
                 char temp[PATH_MAX];
                 if (realpath(c_str(), temp) == NULL) {
-                    throw std::runtime_error("Internal error in realpath(): " + std::string(strerror(errno)));
+                    throw im::FileSystemError("ERROR:",
+                        "Internal error in realpath():", strerror(errno));
                 }
                 return path(temp);
             }
@@ -134,6 +136,9 @@ namespace filesystem {
                 return last.substr(pos+1);
             }
             
+            template <typename P> inline
+            static std::string extension(P p) { return path(p).extension(); }
+            
             path parent_path() const {
                 path result;
                 result.m_absolute = m_absolute;
@@ -151,10 +156,12 @@ namespace filesystem {
             
             path join(const path &other) const {
                 if (other.m_absolute) {
-                    throw std::runtime_error("path::operator/(): expected a relative path!");
+                    throw im::FileSystemError("ERROR:",
+                        "path::operator/(): Expected a relative path!");
                 }
                 if (other.m_type != other.m_type) {
-                    throw std::runtime_error("path::operator/(): expected a path of the same type!");
+                    throw im::FileSystemError("ERROR:",
+                        "path::operator/(): Expected a path of the same type!");
                 }
                 
                 path result(*this);
@@ -195,12 +202,11 @@ namespace filesystem {
             static path getcwd() {
                 char temp[PATH_MAX];
                 if (::getcwd(temp, PATH_MAX) == NULL) {
-                    throw std::runtime_error("Internal error in getcwd(): " + std::string(strerror(errno)));
+                    throw im::FileSystemError("ERROR:",
+                        "Internal error in getcwd():", strerror(errno));
                 }
                 return path(temp);
             }
-            
-            /* static path cwd() __attribute__ ((weakref("getcwd"))); */
             
             static path cwd()               { return path::getcwd(); }
             
