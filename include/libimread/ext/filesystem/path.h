@@ -81,8 +81,11 @@ namespace filesystem {
             path make_absolute() const {
                 char temp[PATH_MAX];
                 if (realpath(c_str(), temp) == NULL) {
-                    throw im::FileSystemError("ERROR:",
-                        "Internal error in realpath():", strerror(errno));
+                    throw im::FileSystemError("FATAL ERROR:\n",
+                        "Internal error raised during path::make_absolute() call to realpath():",
+                     FF("\t%s (%d)", std::strerror(errno), errno),
+                        "In reference to path value:",
+                     FF("\t%s", c_str()));
                 }
                 return path(temp);
             }
@@ -120,7 +123,7 @@ namespace filesystem {
             std::vector<path> list(const std::regex &pattern, bool case_sensitive=false,    bool full_paths=false);
             
             template <typename P, typename G> inline
-            static std::vector<path> list(P p, G g) { return path(p).list(g); }
+            static std::vector<path> list(P p, G g, bool full_paths=false) { return path(p).list(g, full_paths); }
             
             bool is_file() const {
                 struct stat sb;

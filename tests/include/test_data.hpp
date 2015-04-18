@@ -34,11 +34,20 @@ namespace im { namespace test {
         "IMG_7333.jpeg"
     };
     
-    static const int num_png = 4;
+    static const int num_png = 13;
     static const std::string png[] = {
         "grad_32_rrt_srgb.png",
         "marci_512_srgb.png",
         "marci_512_srgb8.png",
+        "output_00100.png",
+        "output_00200.png",
+        "output_00300.png",
+        "output_00400.png",
+        "output_00500.png",
+        "output_00600.png",
+        "output_00700.png",
+        "output_00800.png",
+        "output_00900.png",
         "roses_512_rrt_srgb.png"
     };
     

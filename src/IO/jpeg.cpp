@@ -2,6 +2,7 @@
 // License: MIT (see COPYING.MIT file)
 
 #include <libimread/IO/jpeg.hh>
+#include <libimread/pixels.hh>
 
 extern "C" {
     #include <jpeglib.h>

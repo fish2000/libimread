@@ -6,13 +6,15 @@
 #include <libimread/formats.hh>
 #include <libimread/IO/apple.hh>
 #include <libimread/IO/bmp.hh>
+#include <libimread/IO/gif.hh>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/IO/lsm.hh>
 #include <libimread/IO/png.hh>
 #include <libimread/IO/ppm.hh>
-#include <libimread/IO/tiff.hh>
 #include <libimread/IO/pvrtc.hh>
+#include <libimread/IO/tiff.hh>
 #include <libimread/IO/webp.hh>
+//#include <libimread/IO/xcassets.hh>
 
 namespace im {
     
@@ -34,10 +36,12 @@ namespace im {
         if (check(format, "bmp")) { return format_ptr(new format::BMP); }
         if (check(format, "lsm")) { return format_ptr(new format::LSM); }
         if (check(format, "stk")) { return format_ptr(new format::STK); }
+        if (check(format, "gif")) { return format_ptr(new format::GIF); }
         
         if (check(format, "objc") || check(format, "ns")) { return format_ptr(new format::NS); }
         
-        return format_ptr(nullptr);
+        throw FormatNotFound("ERROR:",
+            FF("File format not found for suffix %s", format));
     }
     
     std::unique_ptr<ImageFormat> for_filename(const char *cfilename) {
@@ -51,8 +55,11 @@ namespace im {
     }
     
     const char *magic_format(byte_source *src) {
+        if (format::BMP::match_format(src)) { return "bmp"; }
+        if (format::GIF::match_format(src)) { return "gif"; }
+        if (format::JPG::match_format(src)) { return "jpg"; }
         if (format::PNG::match_format(src)) { return "png"; }
-        if (format::JPG::match_format(src)) { return "jpeg"; }
+        if (format::TIFF::match_format(src)) { return "tif"; }
         return 0;
     }
 

@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cstring>
 #include <vector>
+#include <memory>
 
 #include <libimread/libimread.hpp>
 

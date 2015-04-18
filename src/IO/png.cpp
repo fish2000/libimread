@@ -3,6 +3,14 @@
 
 #include <iostream>
 #include <libimread/IO/png.hh>
+#include <libimread/pixels.hh>
+#include <libimread/tools.hh>
+
+#ifdef __APPLE__
+    #include <libpng16/png.h>   /* this is the Homebrew path */
+#else
+    #include <png.h>            /* this is the standard location */
+#endif
 
 #define PP_CHECK(pp, msg) if (setjmp(png_jmpbuf(pp))) { throw CannotReadError(msg); }
 

@@ -1,11 +1,14 @@
 // Copyright 2015 Alexander Bohn <fish2000@gmail.com>
 // License: MIT (see COPYING.MIT file)
 
+#include <algorithm>
+#include <memory>
 #include <libimread/IO/gif.hh>
+#include <libimread/pixels.hh>
 
 namespace im {
     
-    namespace {
+    namespace detail {
         
         inline void __attribute__((unused)) setPixel(unsigned char *rgb, int r, int g, int b) {
             rgb[0] = r; rgb[1] = g; rgb[2] = b;
@@ -18,57 +21,35 @@ namespace im {
                                      z*im.stride(2)];
         }
         
-        struct gif_buffer {
+        gifholder gifsink(int delay=3) {
+            return gifholder(gif::newGIF(delay), gifdisposer<gif::GIF>());
+        }
+        
+        struct gifbuffer {
+            int width;
+            int height;
+            
             public:
-                gif_buffer(int w, int h)
-                    :data_ptr(new byte[width * height * 3])
+                gifbuffer(int w, int h)
+                    :data_ptr(std::make_unique<byte[]>(w * h * 3))
                     ,width(w), height(h)
                     {}
-            
-                virtual ~gif_buffer() {
-                    delete[] data_ptr;
-                }
-            
-                byte *data() const { return data_ptr; }
+                
+                virtual ~gifbuffer() { data_ptr.release(); }
+                
+                byte *data() const { return data_ptr.get(); }
                 operator unsigned char *() const { return data(); }
-            
-                void add_to(gif::GIF *g, int delay=-1) {
-                    gif::addFrame(g, width, height, data(), delay);
-                }
-            
-                const int width;
-                const int height;
-            
-            private:
-                byte *data_ptr;
-        };
-        
-        struct gif_holder {
-            public:
-                gif_holder(int delay=3)
-                    :gif_struct(gif::newGIF(delay))
-                    {}
-                
-                virtual ~gif_holder() {
-                    gif::dispose(gif_struct);
-                    gif_struct = NULL;
-                }
-                
-                void add_frame(gif_buffer gbuf, int delay=-1) {
-                    gif::addFrame(gif_struct, gbuf.width, gbuf.height, gbuf.data(), delay);
-                }
-                
-                std::vector<byte> write() { return gif::write(gif_struct); }
                 
             private:
-                gif::GIF *gif_struct;
+                std::unique_ptr<byte[]> data_ptr;
+                gifbuffer(const gifbuffer&);
+                gifbuffer(gifbuffer&&);
+                gifbuffer &operator=(const gifbuffer&);
+                gifbuffer &operator=(gifbuffer&&);
         };
-    
     }
     
-    void GIFFormat::write(Image &input,
-            byte_sink *output,
-            const options_map &opts) {
+    void GIFFormat::write_impl(Image &input, detail::gifholder &g) {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
@@ -76,9 +57,8 @@ namespace im {
         const int bit_depth = input.nbits();
         const int full_size = width * height * 3;
         
-        /// Do some GIF stuff
-        gif_holder g;
-        gif_buffer gbuf(width, height);
+        /// Allocate buffer
+        detail::gifbuffer gbuf(width, height);
         
         /// Check what we got
         if (bit_depth != 8) {
@@ -105,14 +85,54 @@ namespace im {
             for (int x = 0; x < width; x++) {
                 rgb = data + 3 * (width * y + x);
                 for (int c = 0; c < channels; c++) {
-                    pix::convert(at(input, x, y, c)[0], rgb[c]);
+                    pix::convert(detail::at(input, x, y, c)[0], rgb[c]);
                 }
             }
         }
         
         /// DO IT DOUG
-        g.add_frame(gbuf);
-        (*output) << g.write();
+        gif::addFrame(
+            g.get(),
+            gbuf.width, gbuf.height,
+            gbuf.data(), -1); /// delay=-1
+    }
+    
+    void GIFFormat::write(Image &input,
+                          byte_sink *output,
+                          const options_map &opts) {
+        
+        /// Do some GIF stuff
+        detail::gifholder g = detail::gifsink(3);
+        write_impl(input, g);
+        
+        std::vector<byte> out = gif::write(g.get());
+        output->write(&out[0], out.size());
+        
+        _ASSERT(out.size() > 0,
+            "gif::write() returned a size-zero byte vector!");
+        
+        _ASSERT(g.get() != nullptr,
+            "gifholder (std::shared_ptr specialization) failed to make it through!");
+    }
+    
+    void GIFFormat::write_multi(std::vector<Image> &input,
+                                byte_sink *output,
+                                const options_map &opts) {
+        
+        /// Do some GIF stuff
+        detail::gifholder g = detail::gifsink(3);
+        std::for_each(input.begin(), input.end(), [&](Image &image) {
+            write_impl(image, g);
+        });
+        
+        std::vector<byte> out = gif::write(g.get());
+        output->write(&out[0], out.size());
+        
+        _ASSERT(out.size() > 0,
+            "gif::write() returned a size-zero byte vector!");
+        
+        _ASSERT(g.get() != nullptr,
+            "gifholder (std::shared_ptr specialization) failed to make it through!");
     }
     
 }

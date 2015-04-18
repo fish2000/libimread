@@ -4,14 +4,26 @@
 #ifndef FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 #define FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 
+#include <memory>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/base.hh>
-#include <libimread/pixels.hh>
-#include <libimread/ext/fmemopen.hh>
 #include <libimread/ext/WriteGIF.h>
 
 namespace im {
+    
+    namespace detail {
+        
+        template <typename G>
+        struct gifdisposer {
+            constexpr gifdisposer() noexcept = default;
+            template <typename U> gifdisposer(const gifdisposer<U>&) noexcept {};
+            void operator()(G *gp) { if (gp) { gif::dispose(gp); gp = NULL; }}
+        };
+        
+        using gifholder = std::shared_ptr<gif::GIF>;
+        
+    }
     
     class GIFFormat : public ImageFormat {
         public:
@@ -27,6 +39,13 @@ namespace im {
             virtual void write(Image &input,
                                byte_sink *output,
                                const options_map &opts) override;
+            
+            virtual void write_multi(std::vector<Image> &input,
+                                     byte_sink* output,
+                                     const options_map &opts) override;
+        
+        private:
+            void write_impl(Image &input, detail::gifholder &g);
     };
     
     namespace format {

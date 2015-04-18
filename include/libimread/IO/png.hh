@@ -11,15 +11,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
-#include <libimread/tools.hh>
-#include <libimread/pixels.hh>
-//#include <libimread/ext/io_png.hh>
-
-#ifdef __APPLE__
-    #include <libpng16/png.h>   /* this is the Homebrew path */
-#else
-    #include <png.h>            /* this is the standard location */
-#endif
 
 namespace im {
     

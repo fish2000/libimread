@@ -49,6 +49,10 @@ execute_process(
     WORKING_DIRECTORY ${TEST_INCLUDE_DIR}
     COMMAND rm -f ./test_data.hpp
     COMMENT "Deleting generated test data header")
+execute_process(
+    WORKING_DIRECTORY /tmp
+    COMMAND rm -f /tmp/*.gif
+    COMMENT "Deleting generated temporary GIF files")
 
 # Load the project configuration file. CMake will search in the directory setted
 # above for a module file named libimreadConfig.cmake. The configuration

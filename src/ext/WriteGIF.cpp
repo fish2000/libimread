@@ -92,7 +92,7 @@ namespace {
                 outImage[i] = thisImage[i];
             }
         }
-        WTF(FF(" - %d%% transparent", count * 100 / (ImageWidth*ImageHeight)));
+        YES(FF(" - %d%% transparent", count * 100 / (ImageWidth*ImageHeight)));
     }
 
     void calculatePossibleCrop(int width, int height,
@@ -112,7 +112,7 @@ namespace {
             }
         }
     }
-
+    
     struct BlockWriter {
         FILE *f;
         char bytes[255];
@@ -123,19 +123,16 @@ namespace {
     
         BlockWriter(FILE *f)
             :f(f)
-        {
-            curBits = 0;
-            byteCount = 0;
-            curBitMask = 1;
-            totalBytesWritten = 0;
-        }
-    
+            ,curBits(0), byteCount(0)
+            ,curBitMask(1), totalBytesWritten(0)
+            {}
+        
         void finish() {
             if (curBitMask > 1) { writeByte(); }
             if (byteCount > 0) { writeBlock(); }
             fputc(0, f); /// block terminator
         }
-    
+        
         void writeBlock() {
             if (f) {
                 fputc(byteCount, f);
@@ -143,7 +140,7 @@ namespace {
             }
             byteCount = 0;
         }
-    
+        
         void writeByte() {
             totalBytesWritten++;
             bytes[byteCount] = curBits;
@@ -152,7 +149,7 @@ namespace {
             curBitMask = 1;
             curBits = 0;
         }
-    
+        
         void writeBit(int bit) {
             if (bit & 1) {
                 curBits |= curBitMask;
@@ -315,7 +312,7 @@ namespace gif {
     }
     
     void calculatePaletteByMedianCut(GIF *gif) {
-        WTF("Caculating palette by median cut");
+        YES("Caculating palette by median cut");
         unsigned char *uniqueColorArray = NULL;
         int uniqueColorCount = 0, idx = 0;
         
@@ -338,7 +335,7 @@ namespace gif {
             //printf("]\nUnique color count %d\n", uniqueColorCount);
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
-            WTF(
+            YES(
                 FF("Calculating unique color count [%s]", asterisks.get()),
                 FF("Unique color count: %d", uniqueColorCount)
             );
@@ -368,7 +365,7 @@ namespace gif {
             //printf("]\n");
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
-            WTF(
+            YES(
                 FF("Filling unique color array [%s]", asterisks.get())
             );
             
@@ -472,7 +469,7 @@ namespace gif {
             //printf("Total box count %d, leaf box count %d\n", colorBoxCount, leafBoxCount);
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
-            WTF(
+            YES(
                 FF("Creating color boxes [%s]", asterisks.get()),
                 FF("Total box count: %d", colorBoxCount),
                 FF(" Leaf box count: %d", leafBoxCount)
@@ -480,7 +477,7 @@ namespace gif {
             
             
             {
-                WTF("Calculating palette from boxes");
+                YES("Calculating palette from boxes");
                 gif->paletteSize = leafBoxCount;
                 gif->palette = new unsigned char[256*3];
                 unsigned char *rgbPal = gif->palette;
@@ -501,7 +498,7 @@ namespace gif {
                 //printf("]\n");
                 std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
                 std::memset(asterisks.get(), '*', idx);
-                WTF(
+                YES(
                     FF("Indexizing frames [%s]", asterisks.get())
                 );
                 
@@ -515,7 +512,7 @@ namespace gif {
         f->delay = (delay < 0) ? gif->frameDelay : delay;
         f->indexImage = NULL;
         f->rgbImage = new unsigned char[W*H*3];
-        memcpy(f->rgbImage, rgbImage, W*H*3);
+        std::memcpy(f->rgbImage, rgbImage, W*H*3);
         f->next = NULL;
         if (gif->lastFrame) {
             gif->lastFrame->next = f;
@@ -564,9 +561,10 @@ namespace gif {
              prevFrame = frame, frame = frame->next, ++framecount) {}
         
         /// allocate way-too-large buffer vector (which we resize before returning)
-        std::vector<byte> overflow;
-        overflow.reserve(gif->width * gif->height * 3 * framecount);
-        memory::buffer membuf = memory::sink(&overflow[0], overflow.size());
+        int membufsize = gif->width * gif->height * 3 * framecount;
+        std::vector<byte> overflow(membufsize);
+        std::unique_ptr<byte[]> membufstore = std::make_unique<byte[]>(membufsize);
+        memory::buffer membuf = memory::sink(membufstore.get(), membufsize);
         FILE *f = membuf.get();
         
         const int ExtensionIntroducer = 0x21;
@@ -624,7 +622,7 @@ namespace gif {
         for (Frame *frame = gif->frames, *prevFrame = NULL;
              frame != NULL;
              prevFrame = frame, frame = frame->next, ++frameNumber) {
-            WTF(FF("frame %d", frameNumber));
+            YES(FF("frame %d", frameNumber));
             {
                 /// graphic control extension
                 fputc(ExtensionIntroducer, f);
@@ -695,7 +693,7 @@ namespace gif {
                                 
                                 delete[] image;
                                 image = cImage;
-                                WTF(FF(" - cropped to %d%% area",
+                                YES(FF(" - cropped to %d%% area",
                                        100 * (fWidth*fHeight) / (gif->width*gif->height)));
                         }
                     } /// end if (1)
@@ -718,7 +716,7 @@ namespace gif {
                     BlockWriter blockWriter(f);
                     encode(blockWriter, image, fWidth*fHeight, CodeSize, MaxCodeSize);
                     blockWriter.finish();
-                    WTF(FF(" - %d bytes", blockWriter.totalBytesWritten));
+                    YES(FF(" - %d bytes", blockWriter.totalBytesWritten));
                 } else {
                     WTF("Using uncompressed method");
                     int codeSize = 8;
@@ -755,9 +753,16 @@ namespace gif {
             fputc(0, f); /// block terminator
         }
         fputc(Trailer, f);
-        //fclose(f);
-        fflush(f);
-        WTF("Done.");
+        
+        /// get current position
+        std::fflush(f);
+        long datasize = std::ftell(f);
+        overflow.resize(datasize);
+        std::memcpy(&overflow[0], membufstore.get(), datasize);
+        
+        YES("Done.",
+            "About to call overflow.shrink_to_fit()",
+         FF("Current byte vector size: %d", overflow.size()));
         
         overflow.shrink_to_fit();
         return overflow;

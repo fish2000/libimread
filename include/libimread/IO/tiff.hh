@@ -24,6 +24,12 @@ namespace im {
             typedef std::true_type can_read_metadata;
             typedef std::true_type can_write;
             
+            static bool match_format(byte_source *src) {
+                return match_magic(src, "\x4d\x4d\x00\x2a", 4) ||
+                       match_magic(src, "\x4d\x4d\x00\x2b", 4) ||
+                       match_magic(src, "\x49\x49\x2a\x00", 4);
+            }
+            
             virtual std::unique_ptr<Image> read(
                     byte_source *s,
                     ImageFactory *f,

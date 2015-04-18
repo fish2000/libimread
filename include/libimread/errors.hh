@@ -92,6 +92,13 @@ namespace im {
                    << im::stringmerge(std::forward<Args>(args)...)
                    << std::endl;
     }
+    
+    template <typename ...Args> inline
+    void norly(const ansi::ANSI color, Args&& ...args) {
+        std::cerr  << color 
+                   << im::stringmerge(std::forward<Args>(args)...)
+                   << ansi::reset;
+    }
 
 #ifndef FF
 #define FF(...) std::forward_as_tuple(__VA_ARGS__)
@@ -100,15 +107,19 @@ namespace im {
 #ifndef WTF
 #define WTF(...)                                                                \
     im::srsly("(WTF!!!)",                                                       \
-        ansi::color::idx.at("lightred"),                                        \
+        ansi::lightred,                                                         \
         __FILE__, __LINE__, __VA_ARGS__)
 #endif /// WTF
+
+#ifndef YES
+#define YES(...) im::norly(ansi::white, __VA_ARGS__)
+#endif /// YES
 
 #ifndef _ASSERT
 #define _ASSERT(condition, ...)                                                 \
     if (!(condition)) {                                                         \
         im::srsly("(ASSERT FAILURE) [ " #condition " ]",                        \
-            ansi::color::idx.at("lightyellow"),                                 \
+            ansi::lightyellow,                                                  \
             __FILE__, __LINE__, __VA_ARGS__);                                   \
         exit(-1);                                                               \
     }
@@ -142,6 +153,7 @@ DECLARE_IMREAD_ERROR_TYPE(ProgrammingError, "Programming Error");
 DECLARE_IMREAD_ERROR_TYPE(OptionsError, "Options Error");
 DECLARE_IMREAD_ERROR_TYPE(WriteOptionsError, "Write Options Error");
 DECLARE_IMREAD_ERROR_TYPE(FileSystemError, "File System Error");
+DECLARE_IMREAD_ERROR_TYPE(FormatNotFound, "File Format Not Found");
 
 }
 

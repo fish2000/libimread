@@ -62,7 +62,10 @@ namespace im {
                 
                 struct stat info;
                 int result = ::fstat(fd_, &info);
-                if (result == -1) { throw CannotReadError("fstat() returned -1"); }
+                if (result == -1) {
+                    throw CannotReadError("ERROR:",
+                        "fstat() returned -1", std::strerror(errno));
+                }
                 
                 std::vector<byte> res(info.st_size * sizeof(byte));
                 this->seek_absolute(0);
@@ -87,8 +90,8 @@ namespace im {
             std::unique_ptr<char[]> pth;
             Mode md;
             
-            static constexpr int READ_FLAGS = O_RDONLY | O_BINARY;
-            static constexpr int WRITE_FLAGS = O_CREAT | O_WRONLY | O_BINARY | O_TRUNC;
+            static constexpr int READ_FLAGS = O_RDONLY | O_NONBLOCK;
+            static constexpr int WRITE_FLAGS = O_CREAT | O_WRONLY | O_TRUNC | O_EXLOCK | O_SYMLINK;
             int open_read(char *p) { return ::open(p, READ_FLAGS); }
             int open_write(char *p, int m=0644) { return ::open(p, WRITE_FLAGS, m); }
         
@@ -110,10 +113,10 @@ namespace im {
                         std::ostringstream out;
                         out << "ERROR: im::file_source_sink(): file read failure:\n"
                             << "\t::open(\"" << cpath 
-                            << "\"\n," << ((md == Mode::READ) ? "O_RDONLY | O_BINARY"
-                                                              : "O_CREAT | O_WRONLY | O_BINARY | O_TRUNC")
+                            << "\"\n," << ((md == Mode::READ) ? "O_RDONLY | O_NONBLOCK"
+                                                              : "O_CREAT | O_WRONLY | O_TRUNC | O_EXLOCK | O_SYMLINK")
                             << ") returned negative: " << _fd << "\n"
-                            << "ERROR MESSAGE: " << std::strerror(_fd) << "\n";
+                            << "ERROR MESSAGE: " << std::strerror(errno) << "\n";
                         throw CannotReadError(out.str());
                     }
                     this->fd(_fd);

@@ -194,7 +194,15 @@ namespace im {
         using Halide::UInt;
         
         template <typename T = byte>
-        void write(HybridImage<T> &input, const std::string &filename, bool GPU = false) {
+        void write(HybridImage<T> &input, const std::string &filename) {
+            if (input.dim(2) > 3) { return; }
+            std::unique_ptr<ImageFormat> format(for_filename(filename));
+            std::unique_ptr<FileSink> output(new FileSink(filename));
+            format->write(dynamic_cast<Image&>(input), output.get(), opts);
+        }
+        
+        template <typename T = byte>
+        void WACK(HybridImage<T> &input, const std::string &filename, bool GPU = false) {
             HybridImage<T> nim(1);
             if (input.dim(2) > 3) {
                 WTF("IMAGE WITH: dim(2) > 3 OHHHH SHIT");

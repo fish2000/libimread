@@ -172,22 +172,19 @@ namespace im {
     class ImageWithMetadata {
         public:
             ImageWithMetadata()
-                :meta(0)
+                :meta("")
                 {}
             ImageWithMetadata(const std::string &m)
-                :meta(m == "" ? 0 : new std::string(m))
+                :meta(std::string(m))
                 {}
             
-            virtual ~ImageWithMetadata() { delete meta; };
-            std::string *get_meta() { return meta; }
+            virtual ~ImageWithMetadata() {}
             
-            void set_meta(const std::string &m) {
-                if (meta) { delete meta; }
-                meta = new std::string(m);
-            }
+            std::string get_meta() { return meta; }
+            void set_meta(const std::string &m) { meta = std::string(m); }
             
         private:
-            std::string *meta;
+            std::string meta;
     };
     
     /// This class *owns* its members and will delete them if destroyed
@@ -255,8 +252,8 @@ namespace im {
                 throw NotImplementedError();
             }
             
-            virtual void write_multi(image_list &input,
-                                     std::vector<byte_sink*> output,
+            virtual void write_multi(std::vector<Image> &input,
+                                     byte_sink* output,
                                      const options_map &opts) {
                 throw NotImplementedError();
             }

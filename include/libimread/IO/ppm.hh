@@ -2,15 +2,8 @@
 #ifndef LPC_PPM_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
 #define LPC_PPM_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
 
-#include <sstream>
-#include <cstdio>
-#include <cstring>
-
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
 #include <libimread/base.hh>
-#include <libimread/tools.hh>
-#include <libimread/pixels.hh>
 
 namespace im {
 

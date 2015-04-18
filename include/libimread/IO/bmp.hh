@@ -16,6 +16,11 @@ namespace im {
         public:
             typedef std::true_type can_read;
             
+            static bool match_format(byte_source *src) {
+                return match_magic(src, "\x42\x4d", 2);
+            }
+            
+            
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,
                                                 const options_map &opts) override;

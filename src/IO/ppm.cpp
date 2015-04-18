@@ -1,8 +1,15 @@
 
 #define NO_IMPORT_ARRAY
 
+#include <sstream>
+#include <cstdio>
+#include <cstring>
+
 #include <libimread/IO/ppm.hh>
 #include <libimread/ext/fmemopen.hh>
+#include <libimread/errors.hh>
+#include <libimread/tools.hh>
+#include <libimread/pixels.hh>
 
 #define SWAP_ENDIAN16(little_endian, value) \
     if (little_endian) { (value) = (((value) & 0xff)<<8)|(((value) & 0xff00)>>8); }

@@ -2,6 +2,7 @@
 // License: MIT (see COPYING.MIT file)
 
 #include <libimread/IO/webp.hh>
+#include <webp/decode.h>
 
 namespace im {
 
