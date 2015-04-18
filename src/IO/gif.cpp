@@ -30,7 +30,7 @@ namespace im {
             int height;
             
             public:
-                gifbuffer(int w, int h)
+                explicit gifbuffer(int w, int h)
                     :data_ptr(std::make_unique<byte[]>(w * h * 3))
                     ,width(w), height(h)
                     {}

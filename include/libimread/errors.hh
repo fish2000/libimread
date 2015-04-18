@@ -139,9 +139,9 @@ namespace im {
         TypeName()                                                              \
             :w(DefaultMsg)                                                      \
             { }                                                                 \
-        ~TypeName() throw() { }                                                 \
+        ~TypeName() noexcept { }                                                \
                                                                                 \
-        const char *what() const throw() { return w.c_str(); }                  \
+        const char *what() const noexcept { return w.c_str(); }                 \
         std::string w;                                                          \
     };
 #endif /// DECLARE_IMREAD_ERROR_TYPE

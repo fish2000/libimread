@@ -3,27 +3,19 @@
 #ifndef LPC_FILE_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 #define LPC_FILE_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 
-#if defined(_MSC_VER)
-    #include <io.h>
-#else
-    #include <fcntl.h>
-    #include <unistd.h>
-    #include <sys/types.h>
-    #include <sys/stat.h>
-#endif
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <cerrno>
-#ifndef O_BINARY
-const int O_BINARY = 0;
-#endif
-
 #include <sstream>
 #include <cstring>
 #include <string>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/base.hh>
+#include <libimread/seekable.hh>
 
 namespace im {
     

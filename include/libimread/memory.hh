@@ -4,13 +4,18 @@
 #define LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
 
 #include <cstring>
+#include <cstdio>
+#include <cstdarg>
+#include <vector>
+#include <memory>
+#include <unistd.h>
 
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
+#include <libimread/seekable.hh>
 #include <libimread/ext/fmemopen.hh>
 
 namespace im {
-
+    
     class memory_source : public byte_source {
         public:
             memory_source(const byte *c, const int l)
@@ -56,8 +61,8 @@ namespace im {
             
             virtual void flush() { ::fflush(membuf); }
             
-            virtual vector<byte> contents() {
-                vector<byte> out(len);
+            virtual std::vector<byte> contents() {
+                std::vector<byte> out(len);
                 std::memcpy(&out[0], data, out.size());
                 return out;
             }

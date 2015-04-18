@@ -56,6 +56,7 @@ set(hdrs
     ${hdrs_dir}/memory.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/pixels.hh
+    ${hdrs_dir}/seekable.hh
     ${hdrs_dir}/symbols.hh
     ${hdrs_dir}/tools.hh
     ${hdrs_dir}/traits.hh
@@ -90,9 +91,12 @@ set(srcs
     
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp
+    ${srcs_dir}/coregraphics.mm
     ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/fs.cpp
     ${srcs_dir}/halide.cpp
+    ${srcs_dir}/options.cpp
+    ${srcs_dir}/symbols.cpp
     # ${srcs_dir}/vpp.cpp
 )

@@ -11,7 +11,7 @@
 #include <tuple>
 
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
+#include <libimread/seekable.hh>
 
 namespace im {
     

@@ -6,14 +6,26 @@
 namespace filesystem {
     
     directory ddopen(const char *c) {
-        return filesystem::directory(opendir(path::absolute(c)));
+        return directory(opendir(path::absolute(c)));
     }
     directory ddopen(const std::string &s) {
-        return filesystem::directory(opendir(path::absolute(s)));
+        return directory(opendir(path::absolute(s)));
     }
     directory ddopen(const path &p) {
-        return filesystem::directory(opendir(p.make_absolute().c_str()));
+        return directory(opendir(p.make_absolute().c_str()));
     }
+    
+    inline const char *fm(mode m) { return m == mode::READ ? "r+b" : "w+x"; }
+    
+    // file ffopen(const char *c, mode m) {
+    //     return file(fopen(c, fm(m)));
+    // }
+    file ffopen(const std::string &s, mode m) {
+        return file(fopen(s.c_str(), fm(m)));
+    }
+    // file ffopen(const path &p, mode m) {
+    //     return file(fopen(p.c_str(), fm(m)));
+    // }
     
     bool path::match(const std::regex &pattern, bool case_sensitive) {
         return std::regex_match(str(), pattern);
