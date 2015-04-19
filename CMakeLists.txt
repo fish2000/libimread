@@ -45,6 +45,9 @@ SET(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 SET(TEST_SCRIPT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/scripts")
 SET(TEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
 
+SET(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
+add_subdirectory(${DEPS_DIR})
+
 execute_process(
     WORKING_DIRECTORY ${TEST_INCLUDE_DIR}
     COMMAND "rm -f ./test_data.hpp"
@@ -67,10 +70,10 @@ find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-SET(ENV{PKG_CONFIG_PATH}
-    "/usr/local/opt/libarchive/lib/pkgconfig")
-find_package(PKGCONFIG)
-pkg_check_modules(LIBARCHIVE libarchive)
+# SET(ENV{PKG_CONFIG_PATH}
+#     "/usr/local/opt/libarchive/lib/pkgconfig")
+# find_package(PKGCONFIG)
+# pkg_check_modules(LIBARCHIVE libarchive)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
@@ -89,9 +92,9 @@ include_directories(
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
     ${HALIDE_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
-    ${LIBARCHIVE_INCLUDE_DIR})
+    ${EIGEN3_INCLUDE_DIR})
 
+# ${LIBARCHIVE_INCLUDE_DIR}
 # find_package(Iod REQUIRED)
 # find_package(Vpp REQUIRED)
 # include_directories(${IOD_INCLUDE_DIR})
@@ -143,15 +146,17 @@ add_definitions(-std=c++14 -stdlib=libc++ -O3)
 #add_library(imread-static STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})
 # add_dependencies(imread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+add_dependencies(imread "libsszip")
 target_link_libraries(imread
+    sszip
     png z ${EXTRA_LIBS}
     ${EIGEN3_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES}
-    /usr/local/opt/libarchive/lib/libarchive.dylib)
+    ${HALIDE_LIBRARIES})
 
+# /usr/local/opt/libarchive/lib/libarchive.dylib
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
 add_custom_command(
@@ -165,6 +170,7 @@ set_source_files_properties(
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 # add_dependencies("test_${PROJECT_NAME}" ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
+add_dependencies("test_${PROJECT_NAME}" "libsszip")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     png z imread ${EXTRA_LIBS}
@@ -172,8 +178,7 @@ target_link_libraries("test_${PROJECT_NAME}"
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES}
-    /usr/local/opt/libarchive/lib/libarchive.dylib)
+    ${HALIDE_LIBRARIES})
 
 #install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
