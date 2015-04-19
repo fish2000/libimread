@@ -15,6 +15,7 @@
 #include <libimread/IO/tiff.hh>
 #include <libimread/IO/webp.hh>
 //#include <libimread/IO/xcassets.hh>
+#include <libimread/tools.hh>
 
 namespace im {
     

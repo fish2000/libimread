@@ -1,5 +1,5 @@
-// Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #ifndef LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
 #define LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
@@ -8,7 +8,6 @@
 #include <string>
 #include <memory>
 #include <list>
-#include <tuple>
 
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
@@ -78,6 +77,7 @@ namespace im {
         T* oT = oA; oA = oB; oB = oT;
     }
     
+    /*
     template <typename T>
     inline std::vector<T*> allrows(Image &im) {
         std::vector<T*> res;
@@ -87,6 +87,7 @@ namespace im {
         }
         return res;
     }
+    */
     
     inline std::vector<byte> full_data(byte_source &s) {
         std::vector<byte> res;

@@ -1,3 +1,5 @@
+/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_ANSICOLORS_HH_
 #define LIBIMREAD_ANSICOLORS_HH_
@@ -8,8 +10,6 @@
 
 namespace ansi {
 
-    // template <typename M, typename N>
-    // using map = std::unordered_map<M, N>;
     using std::map;
     
     enum ANSICode {
@@ -105,7 +105,6 @@ namespace ansi {
     const ANSI darkgray = ANSI(FG_DARKGRAY);
     const ANSI white = ANSI(FG_WHITE);
     
-
 }
 
 #endif /// LIBIMREAD_ANSICOLORS_HH_

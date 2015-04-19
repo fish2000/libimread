@@ -14,13 +14,6 @@ namespace im {
             rgb[0] = r; rgb[1] = g; rgb[2] = b;
         }
         
-        template <typename T = byte>
-        inline T *at(Image &im, int x, int y, int z) {
-            return &im.rowp_as<T>(0)[x*im.stride(0) +
-                                     y*im.stride(1) +
-                                     z*im.stride(2)];
-        }
-        
         gifholder gifsink(int delay=3) {
             return gifholder(gif::newGIF(delay), gifdisposer<gif::GIF>());
         }
@@ -80,12 +73,15 @@ namespace im {
         
         /// Do the pixel loop to interleave RGB data
         byte *data = gbuf.data();
+        pix::accessor<byte> at(input.rowp_as<byte>(0), input.stride(0),
+                                                       input.stride(1),
+                                                       input.stride(2));
         unsigned char *rgb;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 rgb = data + 3 * (width * y + x);
                 for (int c = 0; c < channels; c++) {
-                    pix::convert(detail::at(input, x, y, c)[0], rgb[c]);
+                    pix::convert(at(x, y, c)[0], rgb[c]);
                 }
             }
         }

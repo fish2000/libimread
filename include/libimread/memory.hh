@@ -1,5 +1,6 @@
-// Copyright 2013 Luis Pedro Coelho <luis@luispedro.org>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
+
 #ifndef LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
 #define LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
 

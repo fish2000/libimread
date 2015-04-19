@@ -53,6 +53,8 @@ set(hdrs
     ${hdrs_dir}/formats.hh
     ${hdrs_dir}/fs.hh
     ${hdrs_dir}/halide.hh
+    ${hdrs_dir}/image.hh
+    ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/memory.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/pixels.hh

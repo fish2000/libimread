@@ -64,12 +64,18 @@ find_package(JPEG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(Halide REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+SET(ENV{PKG_CONFIG_PATH}
+    "/usr/local/opt/libarchive/lib/pkgconfig")
+find_package(PKGCONFIG)
+pkg_check_modules(LIBARCHIVE libarchive)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
-include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${BREWED_CLANG_PATH}/include")
+include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${CMAKE_BINARY_DIR}")
 
 # Ugh
@@ -82,17 +88,16 @@ include_directories(
     ${TIFF_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR})
+    ${HALIDE_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIR}
+    ${LIBARCHIVE_INCLUDE_DIR})
 
-#find_package(Iod REQUIRED)
-#find_package(Vpp REQUIRED)
-#include_directories(${IOD_INCLUDE_DIR})
-#include_directories(${VPP_INCLUDE_DIR})
-include_directories(/usr/local/opt/iod/include)
-include_directories(/usr/local/opt/vpp/include)
-
-find_package(Halide REQUIRED)
-include_directories(${HALIDE_INCLUDE_DIR})
+# find_package(Iod REQUIRED)
+# find_package(Vpp REQUIRED)
+# include_directories(${IOD_INCLUDE_DIR})
+# include_directories(${VPP_INCLUDE_DIR})
+# include_directories(/usr/local/opt/iod/include)
+# include_directories(/usr/local/opt/vpp/include)
 
 # Generate IOD symbol list
 # file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
@@ -144,7 +149,8 @@ target_link_libraries(imread
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES})
+    ${HALIDE_LIBRARIES}
+    /usr/local/opt/libarchive/lib/libarchive.dylib)
 
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
@@ -166,7 +172,8 @@ target_link_libraries("test_${PROJECT_NAME}"
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES})
+    ${HALIDE_LIBRARIES}
+    /usr/local/opt/libarchive/lib/libarchive.dylib)
 
 #install(TARGETS imread-static DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
