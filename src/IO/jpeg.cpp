@@ -1,6 +1,7 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
+#include <algorithm>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/pixels.hh>
 
@@ -137,6 +138,7 @@ namespace im {
             throw CannotReadError(out.str());
         }
         
+        /*
         /// pixel accessor shortcut
         template <typename T = uint8_t>
         inline T *at(Image &im, int x, int y, int z) {
@@ -144,6 +146,7 @@ namespace im {
                                      y*im.stride(1) +
                                      z*im.stride(2)];
         }
+        */
         
         
     } /// namespace
@@ -231,7 +234,7 @@ namespace im {
         
         const int w = input.dim(0);
         const int h = input.dim(1);
-        const int d = input.dim(2);
+        const int d = std::min(3, input.dim(2));
         const int dims = input.ndims();
         
         compressor.info.image_width = w;
@@ -258,19 +261,23 @@ namespace im {
             }
         }
         
-        JSAMPLE *rowbuf = new JSAMPLE[w * d]; /// width * channels
-        
         jpeg_start_compress(&compressor.info, TRUE);
         
         if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
             std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
         
+        JSAMPLE *rowbuf = new JSAMPLE[w * d]; /// width * channels
+        pix::accessor<JSAMPLE> at(input.rowp_as<JSAMPLE>(0), input.stride(0),
+                                                             input.stride(1),
+                                                             input.stride(2));
+        
         while (compressor.info.next_scanline < compressor.info.image_height) {
             JSAMPLE *dstPtr = rowbuf;
             for (int x = 0; x < w; x++) {
                 for (int c = 0; c < d; c++) {
-                    pix::convert(*dstPtr++, at<JSAMPLE>(input,
-                        x, compressor.info.next_scanline, c)[0]);
+                    pix::convert(
+                        at(x, compressor.info.next_scanline, c)[0],
+                        *dstPtr++);
                 }
             }
             jpeg_write_scanlines(&compressor.info, &rowbuf, 1);
