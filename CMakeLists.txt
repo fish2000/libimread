@@ -94,7 +94,6 @@ include_directories(
     ${HALIDE_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR})
 
-# ${LIBARCHIVE_INCLUDE_DIR}
 # find_package(Iod REQUIRED)
 # find_package(Vpp REQUIRED)
 # include_directories(${IOD_INCLUDE_DIR})
@@ -121,9 +120,6 @@ IF(APPLE)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
-    #FIND_LIBRARY(CARBON_LIBRARY Carbon)
-    #FIND_LIBRARY(QUICKTIME_LIBRARY QuickTime)
-    #FIND_LIBRARY(APP_SERVICES_LIBRARY ApplicationServices)
     MARK_AS_ADVANCED(COCOA_LIBRARY
                      FOUNDATION_LIBRARY
                      COREFOUNDATION_LIBRARY)
@@ -131,8 +127,6 @@ IF(APPLE)
        ${EXTRA_LIBS}
        ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
        ${COREFOUNDATION_LIBRARY})
-   # set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.m"
-   #     PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
    set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
        PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
    set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
@@ -140,13 +134,26 @@ IF(APPLE)
 ENDIF(APPLE)
 
 add_definitions(-std=c++14 -stdlib=libc++ -O3)
-# add_definitions(-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk)
 
 # Build the library
-#add_library(imread-static STATIC ${srcs} ${hdrs})
+add_library(libimread STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})
+set_target_properties(libimread
+    PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
+set_target_properties(imread
+    PROPERTIES LIBRARY_OUTPUT_NAME "imread")
+# add_dependencies(libimread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
 # add_dependencies(imread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+add_dependencies(libimread "libsszip")
 add_dependencies(imread "libsszip")
+target_link_libraries(libimread
+    sszip
+    png z ${EXTRA_LIBS}
+    ${EIGEN3_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    ${JPEG_LIBRARIES}
+    ${WEBP_LIBRARIES}
+    ${HALIDE_LIBRARIES})
 target_link_libraries(imread
     sszip
     png z ${EXTRA_LIBS}
@@ -156,7 +163,6 @@ target_link_libraries(imread
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES})
 
-# /usr/local/opt/libarchive/lib/libarchive.dylib
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
 add_custom_command(
@@ -173,14 +179,15 @@ add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 add_dependencies("test_${PROJECT_NAME}" "libsszip")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
-    png z imread ${EXTRA_LIBS}
+    png z imread sszip
+    ${EXTRA_LIBS}
     ${EIGEN3_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES})
 
-#install(TARGETS imread-static DESTINATION lib)
+install(TARGETS libimread DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
 install(DIRECTORY ${PROJECT_BINARY_DIR}/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "libimread.hpp")
