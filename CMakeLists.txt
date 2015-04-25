@@ -3,13 +3,13 @@
 
 # The minimum CMake version required to build this project
 cmake_minimum_required(VERSION 3.0)
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                      ${CMAKE_SOURCE_DIR}/cmake)
+# SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+#                       ${CMAKE_SOURCE_DIR}/cmake)
 
 SET(BREWED_CLANG_PATH /usr/local/opt/llvm)
-SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
-                      ${BREWED_CLANG_PATH}
-                      /usr/local/opt/eigen)
+# SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+#                       ${BREWED_CLANG_PATH}
+#                       /usr/local/opt/eigen)
 
 
 SET(CMAKE_C_COMPILER    ${BREWED_CLANG_PATH}/bin/clang)
@@ -61,12 +61,18 @@ execute_process(
 # above for a module file named libimreadConfig.cmake. The configuration
 # file will set the different directories and libraries required by the library
 find_package(${PROJECT_NAME} REQUIRED)
-
 find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(Iod REQUIRED
+    PATHS /usr/local/opt/iod /usr/local
+    NO_CMAKE_PATH
+    NO_DEFAULT_PATH
+    NO_CMAKE_SYSTEM_PATH
+    NO_CMAKE_FIND_ROOT_PATH
+    NO_CMAKE_ENVIRONMENT_PATH)
 find_package(Halide REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -91,6 +97,7 @@ include_directories(
     ${TIFF_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
+    ${IOD_INCLUDE_DIR}
     ${HALIDE_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR})
 
@@ -102,15 +109,15 @@ include_directories(
 # include_directories(/usr/local/opt/vpp/include)
 
 # Generate IOD symbol list
-# file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
-# add_custom_command(
-#     OUTPUT ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
-#     COMMAND iod_generate_symbols ${formats} ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
-# add_custom_target("iod_symbols"
-#     DEPENDS ${HALIDE_INCLUDE_DIR}/libimread/symbols.hpp)
-# set_source_files_properties(
-#     ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
-#     PROPERTIES GENERATED TRUE)
+file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
+set(${SYMBOLS_OUTPUT} "${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/generated_symbols.hpp")
+add_custom_command(
+    OUTPUT "${SYMBOLS_OUTPUT}"
+    COMMAND "iod_generate_symbols ${formats} ${SYMBOLS_OUTPUT}")
+add_custom_target("iod_symbols"
+    DEPENDS ${SYMBOLS_OUTPUT})
+set_source_files_properties(${SYMBOLS_OUTPUT}
+    PROPERTIES GENERATED TRUE)
 
 # Set the source files required to build the library
 include(fileList.cmake)
@@ -142,12 +149,12 @@ set_target_properties(libimread
     PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
-# add_dependencies(libimread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
-# add_dependencies(imread ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+add_dependencies(libimread "iod_symbols")
+add_dependencies(imread "iod_symbols")
 add_dependencies(libimread "libsszip")
 add_dependencies(imread "libsszip")
 target_link_libraries(libimread
-    sszip
+    libsszip
     png z ${EXTRA_LIBS}
     ${EIGEN3_LIBRARIES}
     ${TIFF_LIBRARIES}
@@ -174,7 +181,7 @@ set_source_files_properties(
     ${TEST_INCLUDE_DIR}/test_data.hpp
     PROPERTIES GENERATED TRUE)
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
-# add_dependencies("test_${PROJECT_NAME}" ${PROJECT_BINARY_DIR}/libimread/symbols.hpp)
+add_dependencies("test_${PROJECT_NAME}" "iod_symbols")
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 add_dependencies("test_${PROJECT_NAME}" "libsszip")
 link_directories(${CMAKE_BINARY_DIR})
