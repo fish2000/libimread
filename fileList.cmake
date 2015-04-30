@@ -87,7 +87,7 @@ set(hdrs
     ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
-    ${hdrs_dir}/ext/UTI.h
+    # ${hdrs_dir}/ext/UTI.h
     ${hdrs_dir}/ext/WriteGIF.h
     
     ${hdrs_dir}/IO/apple.hh
@@ -139,7 +139,7 @@ set(srcs
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
-    ${srcs_dir}/ext/UTI.mm
+    # ${srcs_dir}/ext/UTI.mm
     ${srcs_dir}/ext/WriteGIF.cpp
     
     ${srcs_dir}/IO/apple.mm

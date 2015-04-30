@@ -6,10 +6,17 @@
 
 #include <memory>
 #include <string>
+#include <cstring>
 #include <libimread/libimread.hpp>
 #include <libimread/imageformat.hh>
 
 namespace im {
+    
+    namespace detail {
+        inline bool ext(const char *format, const char *suffix) {
+            return !std::strcmp(format, suffix);
+        }
+    }
     
     std::unique_ptr<ImageFormat> get_format(const char*);
     std::unique_ptr<ImageFormat> for_filename(const char*);

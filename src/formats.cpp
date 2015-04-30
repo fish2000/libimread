@@ -1,7 +1,6 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#include <cstring>
 #include <libimread/libimread.hpp>
 #include <libimread/formats.hh>
 #include <libimread/IO/apple.hh>
@@ -18,12 +17,6 @@
 #include <libimread/tools.hh>
 
 namespace im {
-    
-    namespace detail {
-        inline bool ext(const char *format, const char *suffix) {
-            return !std::strcmp(format, suffix);
-        }
-    }
     
     std::unique_ptr<ImageFormat> get_format(const char *format) {
         using format_ptr = std::unique_ptr<ImageFormat>;
