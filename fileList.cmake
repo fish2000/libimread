@@ -5,6 +5,73 @@
 set(hdrs_dir ${${PROJECT_NAME}_include_dir})
 set(srcs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${source_dir})
 
+# common link flags
+SET(COMMON_LINK_FLAGS
+    -m64 -mmacosx-version-min=10.9
+    -fobjc-link-runtime
+    -Wl,-dead_strip -Wl,-dead_strip_dylibs
+    -rpath @executable_path/../Frameworks)
+
+# language-specific compile options
+SET(C_OPTIONS
+    -std=c99 -Wno-incompatible-pointer-types -Wno-char-subscripts)
+
+SET(CXX_OPTIONS
+    -std=c++14 -stdlib=libc++)
+
+SET(OBJC_OPTIONS
+    -fobjc-link-runtime
+    -fobjc-abi-version=3 -fobjc-arc -std=c99 -ObjC)
+
+SET(OBJCXX_OPTIONS
+    -fobjc-abi-version=3 -std=c++14 -stdlib=libc++
+    -ObjC++ -fobjc-arc -fobjc-call-cxx-cdtors)
+
+# Extra options for Image IO code
+SET(IO_EXTRA_OPTIONS
+    -ffast-math)
+
+# SET(C_FILES "" PARENT_SCOPE)
+# SET(CC_FILES "" PARENT_SCOPE)
+# SET(M_FILES "" PARENT_SCOPE)
+# SET(MM_FILES "" PARENT_SCOPE)
+# SET(IO_FILES "" PARENT_SCOPE)
+SET(C_FILES "")
+SET(CC_FILES "")
+SET(M_FILES "")
+SET(MM_FILES "")
+SET(IO_FILES "")
+
+FILE(
+    GLOB_RECURSE C_FILES
+    "${srcs_dir}/*.c")
+FILE(
+    GLOB_RECURSE CC_FILES
+    "${srcs_dir}/*.cpp")
+FILE(
+    GLOB_RECURSE M_FILES
+    "${srcs_dir}/*.m")
+FILE(
+    GLOB_RECURSE MM_FILES
+    "${srcs_dir}/*.mm")
+FILE(
+    GLOB_RECURSE IO_FILES
+    "${srcs_dir}/IO/*.*")
+
+SEPARATE_ARGUMENTS(COMMON_LINK_FLAGS)
+
+SEPARATE_ARGUMENTS(C_FILES)
+SEPARATE_ARGUMENTS(CC_FILES)
+SEPARATE_ARGUMENTS(M_FILES)
+SEPARATE_ARGUMENTS(MM_FILES)
+SEPARATE_ARGUMENTS(IO_FILES)
+
+SEPARATE_ARGUMENTS(C_OPTIONS)
+SEPARATE_ARGUMENTS(CXX_OPTIONS)
+SEPARATE_ARGUMENTS(OBJC_OPTIONS)
+SEPARATE_ARGUMENTS(OBJCXX_OPTIONS)
+SEPARATE_ARGUMENTS(IO_EXTRA_OPTIONS)
+
 # Configure the project-settings header file
 configure_file(
     "${hdrs_dir}/libimread.hpp.in"
@@ -102,3 +169,67 @@ set(srcs
     ${srcs_dir}/symbols.cpp
     # ${srcs_dir}/vpp.cpp
 )
+
+# set common link flags
+foreach(FLAG IN LISTS ${COMMON_LINK_FLAGS})
+    
+    set_source_files_properties(
+        ${srcs}
+        PROPERTIES LINK_FLAGS ${LINK_FLAGS} ${FLAG})
+    
+endforeach()
+
+# set source properties,
+# using /((?P<objc>(ObjC|Objective-C))|(?P<c>(C)))?(?P<plus>(C|\+\+|PP|XX))?/ language-specific stuff
+foreach(src_file IN LISTS ${srcs})
+    if(${src_file} MATCHES "\.c$")
+        set(opts ${C_OPTIONS})
+    elseif(${src_file} MATCHES "\.cpp$")
+        set(opts ${CXX_OPTIONS})
+    elseif(${src_file} MATCHES "\.m$")
+        set(opts ${OBJC_OPTIONS})
+    elseif(${src_file} MATCHES "\.mm$")
+        set(opts ${OBJCXX_OPTIONS})
+    else()
+        set(opts "")
+    endif()
+    separate_arguments(${opts})
+    if(${src_file} MATCHES "(.*)IO/(.*)")
+        # Extra source file props specific to Image IO code compilation
+        foreach(extra_opt IN LISTS ${IO_EXTRA_OPTIONS})
+            list(APPEND opts ${extra_opt})
+        endforeach()
+    endif()
+    separate_arguments(${opts})
+    foreach(opt IN LISTS ${opts})
+        get_source_file_property(existant_compile_flags ${src_file} COMPILE_FLAGS)
+        set_source_files_properties(${src_file}
+            PROPERTIES COMPILE_FLAGS ${existant_compile_flags} ${opt})
+    endforeach()
+endforeach()
+
+IF(APPLE)
+    # Right now there are no non-Apple options that work
+    INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
+    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
+    FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
+    FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
+    MARK_AS_ADVANCED(COCOA_LIBRARY
+                     FOUNDATION_LIBRARY
+                     COREFOUNDATION_LIBRARY)
+    SET(EXTRA_LIBS
+        ${EXTRA_LIBS}
+        ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
+        ${COREFOUNDATION_LIBRARY})
+    
+    # set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
+    #     PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
+    # set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
+    #     PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -fobjc-arc)
+    
+ENDIF(APPLE)
+
+add_definitions(
+    ${OBJCXX_OPTIONS}
+    -O3 -mtune=native -fstrict-aliasing)
+

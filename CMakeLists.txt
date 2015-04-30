@@ -119,28 +119,8 @@ add_custom_target("iod_symbols"
 set_source_files_properties(${SYMBOLS_OUTPUT}
     PROPERTIES GENERATED TRUE)
 
-# Set the source files required to build the library
+# Set the files and options required to build the library
 include(fileList.cmake)
-
-IF(APPLE)
-    INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
-    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
-    FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
-    FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
-    MARK_AS_ADVANCED(COCOA_LIBRARY
-                     FOUNDATION_LIBRARY
-                     COREFOUNDATION_LIBRARY)
-   SET(EXTRA_LIBS
-       ${EXTRA_LIBS}
-       ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
-       ${COREFOUNDATION_LIBRARY})
-   set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
-       PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
-   set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
-       PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -fobjc-arc)
-ENDIF(APPLE)
-
-add_definitions(-std=c++14 -stdlib=libc++ -O3)
 
 # Build the library
 add_library(libimread STATIC ${srcs} ${hdrs})
@@ -149,6 +129,10 @@ set_target_properties(libimread
     PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
+set_target_properties(libimread
+    PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
+set_target_properties(imread
+    PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 add_dependencies(libimread "iod_symbols")
 add_dependencies(imread "iod_symbols")
 add_dependencies(libimread "libsszip")

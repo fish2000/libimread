@@ -20,7 +20,9 @@ namespace im {
                     rep = [[NSBitmapImageRep alloc] initWithData:datum];
                     format = [rep bitmapFormat];
                 };
-                [datum release];
+                #if !__has_feature(objc_arc)
+                    [datum release];
+                #endif
                 
                 NSInteger height = [rep pixelsHigh];
                 NSInteger width = [rep pixelsWide];
@@ -38,7 +40,9 @@ namespace im {
                     byte *rowp = output->rowp_as<byte>(0);
                     std::memcpy(rowp, static_cast<byte*>([rep bitmapData]), siz*height*width*channels);
                 }
-                [rep release];
+                #if !__has_feature(objc_arc)
+                    [rep release];
+                #endif
                 return output;
             };
         }
