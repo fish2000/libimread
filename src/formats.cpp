@@ -20,7 +20,7 @@
 namespace im {
     
     namespace detail {
-        inline bool check(const char *format, const char *suffix) {
+        inline bool ext(const char *format, const char *suffix) {
             return !std::strcmp(format, suffix);
         }
     }
@@ -28,18 +28,18 @@ namespace im {
     std::unique_ptr<ImageFormat> get_format(const char *format) {
         using format_ptr = std::unique_ptr<ImageFormat>;
         
-        if (detail::check(format, "png")) { return format_ptr(new format::PNG); }
-        if (detail::check(format, "jpg") || detail::check(format, "jpeg")) { return format_ptr(new format::JPG); }
-        if (detail::check(format, "tif") || detail::check(format, "tiff")) { return format_ptr(new format::TIFF); }
-        if (detail::check(format, "pvr") || detail::check(format, "pvrtc")) { return format_ptr(new format::PVR); }
-        if (detail::check(format, "webp")) { return format_ptr(new format::WebP); }
-        if (detail::check(format, "ppm")) { return format_ptr(new format::PPM); }
-        if (detail::check(format, "bmp")) { return format_ptr(new format::BMP); }
-        if (detail::check(format, "lsm")) { return format_ptr(new format::LSM); }
-        if (detail::check(format, "stk")) { return format_ptr(new format::STK); }
-        if (detail::check(format, "gif")) { return format_ptr(new format::GIF); }
+        if (detail::ext(format, "png")) { return format_ptr(new format::PNG); }
+        if (detail::ext(format, "jpg") || detail::ext(format, "jpeg")) { return format_ptr(new format::JPG); }
+        if (detail::ext(format, "tif") || detail::ext(format, "tiff")) { return format_ptr(new format::TIFF); }
+        if (detail::ext(format, "pvr") || detail::ext(format, "pvrtc")) { return format_ptr(new format::PVR); }
+        if (detail::ext(format, "webp")) { return format_ptr(new format::WebP); }
+        if (detail::ext(format, "ppm")) { return format_ptr(new format::PPM); }
+        if (detail::ext(format, "bmp")) { return format_ptr(new format::BMP); }
+        if (detail::ext(format, "lsm")) { return format_ptr(new format::LSM); }
+        if (detail::ext(format, "stk")) { return format_ptr(new format::STK); }
+        if (detail::ext(format, "gif")) { return format_ptr(new format::GIF); }
         
-        if (detail::check(format, "objc") || detail::check(format, "ns")) { return format_ptr(new format::NS); }
+        if (detail::ext(format, "objc") || detail::ext(format, "ns")) { return format_ptr(new format::NS); }
         
         throw FormatNotFound("ERROR:",
             FF("File format not found for suffix %s", format));
