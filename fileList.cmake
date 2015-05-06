@@ -84,6 +84,7 @@ set(hdrs
     
     ${hdrs_dir}/ext/filesystem/path.h
     ${hdrs_dir}/ext/filesystem/resolver.h
+    ${hdrs_dir}/ext/JSON/json11.h
     ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
@@ -135,6 +136,8 @@ set(hdrs
 # Project source files
 set(srcs
     ${srcs_dir}/ext/filesystem/path.cpp
+    ${srcs_dir}/ext/JSON/json11.cpp
+    ${srcs_dir}/ext/JSON/schema.cpp
     ${srcs_dir}/ext/fmemopen.cpp
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
@@ -231,5 +234,6 @@ ENDIF(APPLE)
 
 add_definitions(
     ${OBJCXX_OPTIONS}
+    -DWITH_SCHEMA
     -O3 -mtune=native -fstrict-aliasing)
 

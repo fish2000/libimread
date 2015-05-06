@@ -247,19 +247,10 @@ namespace im {
         if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
             std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
         
-        options_map::const_iterator qiter = opts.find("jpeg:quality");
-        if (qiter != opts.end()) {
-            int quality;
-            if (qiter->second.get_int(quality)) {
-                if (quality > 100) { quality = 100; }
-                if (quality < 0) { quality = 0; }
-                jpeg_set_quality(&compressor.info, quality, FALSE);
-            } else {
-                throw WriteOptionsError(
-                    "im::JPEGFormat::write(): jpeg:quality must be an integer"
-                );
-            }
-        }
+        uint8_t quality = opts.cast<uint8_t>("jpeg:quality");
+        if (quality > 100) { quality = 100; }
+        if (quality < 0) { quality = 0; }
+        jpeg_set_quality(&compressor.info, quality, FALSE);
         
         jpeg_start_compress(&compressor.info, TRUE);
         

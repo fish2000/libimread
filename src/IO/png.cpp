@@ -230,8 +230,8 @@ namespace im {
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                      PNG_FILTER_TYPE_BASE);
         
-        int compression_level = get_optional_int(opts, "png:compression_level", -1);
-        if (compression_level != -1) {
+        int compression_level = opts.cast<int>("png:compression_level");
+        if (compression_level && compression_level != -1) {
             png_set_compression_level(p.png_ptr, compression_level);
         }
         png_write_info(p.png_ptr, p.png_info);

@@ -277,7 +277,7 @@ namespace im {
         
         return images;
     }
-
+    
     void TIFFFormat::write(Image &input, byte_sink *output, const options_map &opts)  {
         tiff_warn_error twe;
         tif_holder t = TIFFClientOpen(
@@ -327,44 +327,10 @@ namespace im {
         
         TIFFSetField(t.tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
         const char *meta = get_optional_cstring(opts, "metadata");
-        if (meta) {
-            TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta);
-        }
-        options_map::const_iterator x_iter = opts.find("tiff:XResolution");
-        if (x_iter != opts.end()) {
-            double d;
-            int i;
-            float value;
-            if (x_iter->second.get_int(i)) {
-                value = i;
-            } else if (x_iter->second.get_double(d)) {
-                value = d;
-            } else {
-                throw WriteOptionsError("im::TIFFFormat::write(): XResolution must be an integer or floating point value.");
-            }
-            TIFFSetField(t.tif, TIFFTAG_XRESOLUTION, value);
-        }
-
-        options_map::const_iterator y_iter = opts.find("tiff:YResolution");
-        if (y_iter != opts.end()) {
-            double d;
-            int i;
-            float value;
-            if (y_iter->second.get_int(i)) {
-                value = i;
-            } else if (y_iter->second.get_double(d)) {
-                value = d;
-            } else {
-                throw WriteOptionsError("im::TIFFFormat::write(): YResolution must be an integer or floating point value.");
-            }
-            
-            TIFFSetField(t.tif, TIFFTAG_YRESOLUTION, value);
-        }
-        
-        const uint16_t resolution_unit = get_optional_int(opts, "tiff:XResolutionUnit", uint16_t(-1));
-        if (resolution_unit != uint16_t(-1)) {
-            TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT, resolution_unit);
-        }
+        if (meta) { TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta); }
+        TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,    opts.cast<int>("tiff:XResolution"));
+        TIFFSetField(t.tif, TIFFTAG_YRESOLUTION,    opts.cast<int>("tiff:YResolution"));
+        TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT, opts.cast<uint16_t>("tiff:XResolutionUnit"));
         
         for (uint32_t r = 0; r != h; ++r) {
             void *rowp = input.rowp(r);

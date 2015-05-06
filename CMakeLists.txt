@@ -66,20 +66,8 @@ find_package(JPEG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(Iod REQUIRED
-    PATHS /usr/local/opt/iod /usr/local
-    NO_CMAKE_PATH
-    NO_DEFAULT_PATH
-    NO_CMAKE_SYSTEM_PATH
-    NO_CMAKE_FIND_ROOT_PATH
-    NO_CMAKE_ENVIRONMENT_PATH)
 find_package(Halide REQUIRED)
 find_package(Eigen3 REQUIRED)
-
-# SET(ENV{PKG_CONFIG_PATH}
-#     "/usr/local/opt/libarchive/lib/pkgconfig")
-# find_package(PKGCONFIG)
-# pkg_check_modules(LIBARCHIVE libarchive)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
@@ -97,27 +85,8 @@ include_directories(
     ${TIFF_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
-    ${IOD_INCLUDE_DIR}
     ${HALIDE_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR})
-
-# find_package(Iod REQUIRED)
-# find_package(Vpp REQUIRED)
-# include_directories(${IOD_INCLUDE_DIR})
-# include_directories(${VPP_INCLUDE_DIR})
-# include_directories(/usr/local/opt/iod/include)
-# include_directories(/usr/local/opt/vpp/include)
-
-# Generate IOD symbol list
-file(GLOB formats ${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/IO *.hh)
-set(${SYMBOLS_OUTPUT} "${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/generated_symbols.hpp")
-add_custom_command(
-    OUTPUT "${SYMBOLS_OUTPUT}"
-    COMMAND "iod_generate_symbols ${formats} ${SYMBOLS_OUTPUT}")
-add_custom_target("iod_symbols"
-    DEPENDS ${SYMBOLS_OUTPUT})
-set_source_files_properties(${SYMBOLS_OUTPUT}
-    PROPERTIES GENERATED TRUE)
 
 # Set the files and options required to build the library
 include(fileList.cmake)
@@ -133,8 +102,6 @@ set_target_properties(libimread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 set_target_properties(imread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
-add_dependencies(libimread "iod_symbols")
-add_dependencies(imread "iod_symbols")
 add_dependencies(libimread "libsszip")
 add_dependencies(imread "libsszip")
 target_link_libraries(libimread
@@ -165,7 +132,6 @@ set_source_files_properties(
     ${TEST_INCLUDE_DIR}/test_data.hpp
     PROPERTIES GENERATED TRUE)
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
-add_dependencies("test_${PROJECT_NAME}" "iod_symbols")
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 add_dependencies("test_${PROJECT_NAME}" "libsszip")
 link_directories(${CMAKE_BINARY_DIR})
