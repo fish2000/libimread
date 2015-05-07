@@ -46,7 +46,13 @@ SET(TEST_SCRIPT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/scripts")
 SET(TEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
 
 SET(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
+SET(IOD_DIR "${DEPS_DIR}/iod")
+SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 add_subdirectory(${DEPS_DIR})
+set_property(DIRECTORY ${IOD_TEST_DIR}
+             PROPERTY EXCLUDE_FROM_ALL TRUE)
+set_property(DIRECTORY ${IOD_TEST_DIR}
+             PROPERTY TEST)
 
 execute_process(
     WORKING_DIRECTORY ${TEST_INCLUDE_DIR}
@@ -104,6 +110,8 @@ set_target_properties(imread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 add_dependencies(libimread "libsszip")
 add_dependencies(imread "libsszip")
+add_dependencies(libimread "iod_generate_symbols")
+add_dependencies(imread "iod_generate_symbols")
 target_link_libraries(libimread
     libsszip
     png z ${EXTRA_LIBS}
@@ -134,6 +142,7 @@ set_source_files_properties(
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 add_dependencies("test_${PROJECT_NAME}" "libsszip")
+add_dependencies("test_${PROJECT_NAME}" "iod_generate_symbols")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     png z imread sszip
