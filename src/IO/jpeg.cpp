@@ -247,7 +247,8 @@ namespace im {
         if (setjmp(jerr.setjmp_buffer)) { throw CannotWriteError(
             std::string("im::JPEGFormat::write(): ") + std::string(jerr.error_message)); }
         
-        uint8_t quality = opts.cast<uint8_t>("jpeg:quality");
+        auto quality = opts.cast<uint8_t>("jpeg:quality");
+        //auto quality = opts.cast<Type::NUMBER>["jpeg:quality"];
         if (quality > 100) { quality = 100; }
         if (quality < 0) { quality = 0; }
         jpeg_set_quality(&compressor.info, quality, FALSE);

@@ -19,20 +19,6 @@
 
 using namespace std;
 
-#ifdef TEST
-
-vector<Json::Node*> Json::Node::nodes;
-void Json::Node::test() {
-    if (nodes.size() == 0) {
-        cout << "nodes ok\n";
-        return;
-    }
-    for (Node* it : nodes) {
-        cout << it->refcnt << ' ' << (int)it->type() << '\n';
-    }
-}
-#endif
-
 Json::Node Json::Node::null(1);
 Json::Node Json::Node::undefined(1);
 Json Json::null;
@@ -71,21 +57,10 @@ Json::parse_error::parse_error(const char* msg, std::istream& in) : std::runtime
 
 Json::Node::Node(unsigned init) {
     refcnt = init;
-#ifdef TEST
-    if (this != &null && this != &undefined && this != &Bool::T && this != &Bool::F)
-        nodes.push_back(this);
-#endif
 }
 
 Json::Node::~Node() {
     assert(this == &null || this == &undefined || this == &Bool::T || this == &Bool::F || refcnt == 0);
-#ifdef TEST
-    if (this == &null || this == &undefined || this == &Bool::T || this == &Bool::F)
-        return;
-    auto it = find(nodes.begin(), nodes.end(), this);
-    assert(it != nodes.end());
-    nodes.erase(it);
-#endif
 }
 
 void Json::Node::unref() {
@@ -734,8 +709,43 @@ Json::operator long long() const {
     throw bad_cast();
 }
 
+// Json::operator uint8_t() const {
+//     if (root->type() == Type::NUMBER)
+//         return uint8_t(((Number*)root)->value);
+//     throw bad_cast();
+// }
+//
+// Json::operator uint16_t() const {
+//     if (root->type() == Type::NUMBER)
+//         return uint16_t(((Number*)root)->value);
+//     throw bad_cast();
+// }
+//
+// Json::operator int8_t() const {
+//     if (root->type() == Type::NUMBER)
+//         return int8_t(((Number*)root)->value);
+//     throw bad_cast();
+// }
+//
+// Json::operator int16_t() const {
+//     if (root->type() == Type::NUMBER)
+//         return int16_t(((Number*)root)->value);
+//     throw bad_cast();
+// }
+
+Json::operator unsigned char() const {
+    if (root->type() == Type::NUMBER)
+        return (unsigned char)((Number*)root)->value;
+    throw bad_cast();
+}
+Json::operator char() const {
+    if (root->type() == Type::NUMBER)
+        return char(((Number*)root)->value);
+    throw bad_cast();
+}
+
 Json::operator bool() const {
-    if (root->type() == Type::BOOL)
+    if (root->type() == Type::BOOLEAN)
         return root == &Bool::T;
     throw bad_cast();
 }

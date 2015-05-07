@@ -125,26 +125,39 @@ namespace im {
     }
 #endif /// _ASSERT
 
+#ifndef DECLARE_IMREAD_ERROR_INNARDS
+#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)                  \
+    template <typename S>                                                   \
+    TypeName(S s)                                                           \
+        :w(im::stringify(s))                                                \
+        { }                                                                 \
+    template <typename S, typename ...Args>                                 \
+    TypeName(S s, Args&& ...args)                                           \
+        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...)) \
+        { }                                                                 \
+    TypeName()                                                              \
+        :w(DefaultMsg)                                                      \
+        { }                                                                 \
+    ~TypeName() noexcept { }                                                \
+                                                                            \
+    const char *what() const noexcept { return w.c_str(); }                 \
+    std::string w;                                                          \
+#endif /// DECLARE_IMREAD_ERROR_INNARDS
+
 #ifndef DECLARE_IMREAD_ERROR_TYPE
-#define DECLARE_IMREAD_ERROR_TYPE(TypeName, DefaultMsg)                         \
-    struct TypeName : std::exception {                                          \
-        template <typename S>                                                   \
-        TypeName(S s)                                                           \
-            :w(im::stringify(s))                                                \
-            { }                                                                 \
-        template <typename S, typename ...Args>                                 \
-        TypeName(S s, Args&& ...args)                                           \
-            :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...)) \
-            { }                                                                 \
-        TypeName()                                                              \
-            :w(DefaultMsg)                                                      \
-            { }                                                                 \
-        ~TypeName() noexcept { }                                                \
-                                                                                \
-        const char *what() const noexcept { return w.c_str(); }                 \
-        std::string w;                                                          \
+#define DECLARE_IMREAD_ERROR_TYPE(TypeName, DefaultMsg)                     \
+    struct TypeName : std::exception {                                      \
+        DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)                  \
     };
 #endif /// DECLARE_IMREAD_ERROR_TYPE
+
+#ifndef DECLARE_IMREAD_ERROR_SUBTYPE
+#define DECLARE_IMREAD_ERROR_SUBTYPE(TypeName, BaseTypeName, DefaultMsg)    \
+    struct TypeName : BaseTypeName {                                        \
+        DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)
+    };
+#endif /// DECLARE_IMREAD_ERROR_SUBTYPE
+
 
 DECLARE_IMREAD_ERROR_TYPE(CannotReadError, "Read Error");
 DECLARE_IMREAD_ERROR_TYPE(CannotWriteError, "Write Error");

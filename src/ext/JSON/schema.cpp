@@ -23,24 +23,24 @@ struct invalid : exception {
 };
 
 Json::Schema::Schema(Node* node) {
-    if (node->type() != OBJECT)
+    if (node->type() != Type::OBJECT)
         throw use_error("not an object");
     Object* obj = (Object*)node;
     Node* nptr = obj->get("$schema");
     if (nptr != nullptr) {
-        if (nptr->type() != STRING)
+        if (nptr->type() != Type::STRING)
             throw use_error("$schema: not a string");
         uri = ((String*)nptr)->value;
     }
     // TODO $ref
     nptr = obj->get("type");
-    if (nptr == nullptr || nptr->type() != STRING)
+    if (nptr == nullptr || nptr->type() != Type::STRING)
         throw use_error("type: not a string");
     s_type = ((String*)nptr)->value;
     //
     nptr = obj->get("enum");
     if (nptr != nullptr) {
-        if (nptr->type() != ARRAY)
+        if (nptr->type() != Type::ARRAY)
             throw use_error("enum: not an array");
         s_enum = (Array*)nptr;
         s_enum->refcnt++;
@@ -48,7 +48,7 @@ Json::Schema::Schema(Node* node) {
     //
     nptr = obj->get("allOf");
     if (nptr != nullptr) {
-        if (nptr->type() != ARRAY)
+        if (nptr->type() != Type::ARRAY)
             throw use_error("allOf: not an array");
         auto src = ((Array*)nptr)->list;
         for (unsigned i = 0; i < src.size(); i++) {
@@ -58,7 +58,7 @@ Json::Schema::Schema(Node* node) {
     }
     nptr = obj->get("anyOf");
     if (nptr != nullptr) {
-        if (nptr->type() != ARRAY)
+        if (nptr->type() != Type::ARRAY)
             throw use_error("anyOf: not an array");
         auto list = ((Array*)nptr)->list;
         for (unsigned i = 0; i < list.size(); i++) {
@@ -68,7 +68,7 @@ Json::Schema::Schema(Node* node) {
     }
     nptr = obj->get("oneOf");
     if (nptr != nullptr) {
-        if (nptr->type() != ARRAY)
+        if (nptr->type() != Type::ARRAY)
             throw use_error("oneOf: not an array");
         auto list = ((Array*)nptr)->list;
         for (unsigned i = 0; i < list.size(); i++) {
@@ -78,13 +78,13 @@ Json::Schema::Schema(Node* node) {
     }
     nptr = obj->get("not");
     if (nptr != nullptr) {
-        if (nptr->type() != OBJECT)
+        if (nptr->type() != Type::OBJECT)
             throw use_error("not: not an object");
         s_not = new Schema(nptr);
     }
     nptr = obj->get("definitions");
     if (nptr != nullptr) {
-        if (nptr->type() != OBJECT)
+        if (nptr->type() != Type::OBJECT)
             throw use_error("definitions: not an object");
         Object* src = (Object*)nptr;
         defs = new Object();
@@ -102,13 +102,13 @@ Json::Schema::Schema(Node* node) {
     if (s_type == "number" || s_type == "integer") {
         nptr = obj->get("maximum");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("maximum: not a number");
             max_num = ((Number*)nptr)->value;
         }
         nptr = obj->get("exclusiveMaximum");
         if (nptr != nullptr) {
-            if (nptr->type() != BOOL)
+            if (nptr->type() != Type::BOOLEAN)
                 throw use_error("exclusiveMaximum: not a bool");
             if (max_num == UINT32_MAX)
                 throw use_error("exclusiveMaximum: no maximum");
@@ -116,13 +116,13 @@ Json::Schema::Schema(Node* node) {
         }
         nptr = obj->get("minimum");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("minimum: not a number");
             min_num = ((Number*)nptr)->value;
         }
         nptr = obj->get("exclusiveMinimum");
         if (nptr != nullptr) {
-            if (nptr->type() != BOOL)
+            if (nptr->type() != Type::BOOLEAN)
                 throw use_error("exclusiveMinimum: not a bool");
             if (min_num == -UINT32_MAX)
                 throw use_error("exclusiveMinimum: no minimum");
@@ -130,7 +130,7 @@ Json::Schema::Schema(Node* node) {
         }
         nptr = obj->get("multipleOf");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("multipleOf: not a number");
             mult_of = ((Number*)nptr)->value;
             if (mult_of <= 0)
@@ -139,21 +139,25 @@ Json::Schema::Schema(Node* node) {
     } else if (s_type == "string") {
         nptr = obj->get("maxLength");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("maxLength: not a number");
             max_len = ((Number*)nptr)->value;
+            /*
             if (max_len < 0)
                 throw use_error("maxLength: is negative");
+            */
             if (max_len != ((Number*)nptr)->value)
                 throw use_error("maxLength: not an integer");
         }
         nptr = obj->get("minLength");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("minLength: not a number");
             min_len = ((Number*)nptr)->value;
+            /*
             if (min_len < 0)
                 throw use_error("minLength: is negative");
+            */
             if (min_len != ((Number*)nptr)->value)
                 throw use_error("minLength: not an integer");
             if (max_len < min_len)
@@ -162,7 +166,7 @@ Json::Schema::Schema(Node* node) {
         nptr = obj->get("pattern");
         if (nptr != nullptr) {
             try {
-                if (nptr->type() != STRING)
+                if (nptr->type() != Type::STRING)
                     throw use_error("pattern: not a string");
                 pattern = new regex(((String*)nptr)->value, regex_constants::ECMAScript);
             } catch (regex_error& ex) {
@@ -172,9 +176,9 @@ Json::Schema::Schema(Node* node) {
     } else if (s_type == "array") {
         nptr = obj->get("items");
         if (nptr != nullptr) {
-            if (nptr->type() == OBJECT) {
+            if (nptr->type() == Type::OBJECT) {
                 item = new Schema(nptr);
-            } else if (nptr->type() == ARRAY) {
+            } else if (nptr->type() == Type::ARRAY) {
                 for (Node* n : ((Array*)nptr)->list) {
                     Schema* sp = new Schema(n);
                     items.push_back(sp);
@@ -184,30 +188,34 @@ Json::Schema::Schema(Node* node) {
         }
         nptr = obj->get("additionalItems");
         if (nptr != nullptr) {
-            if (nptr->type() == OBJECT)
+            if (nptr->type() == Type::OBJECT)
                 add_items = new Schema(nptr);
-            else if (nptr->type() == BOOL)
+            else if (nptr->type() == Type::BOOLEAN)
                 add_items_bool = (Bool*)nptr == &Bool::T;
             else
                 throw use_error("additionalItems: not an object or bool");
         }
         nptr = obj->get("maxItems");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("maxItems: not a number");
             max_len = ((Number*)nptr)->value;
+            /*
             if (max_len < 0)
                 throw use_error("maxItems: is negative");
+            */
             if (max_len != ((Number*)nptr)->value)
                 throw use_error("maxItems: not an integer");
         }
         nptr = obj->get("minItems");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("minItems: not a number");
             min_len = ((Number*)nptr)->value;
+            /*
             if (min_len < 0)
                 throw use_error("minItems: is negative");
+            */
             if (min_len != ((Number*)nptr)->value)
                 throw use_error("minItems: not an integer");
             if (max_len < min_len)
@@ -215,14 +223,14 @@ Json::Schema::Schema(Node* node) {
         }
         nptr = obj->get("uniqueItems");
         if (nptr != nullptr) {
-            if (nptr->type() != BOOL)
+            if (nptr->type() != Type::BOOLEAN)
                 throw use_error("uniqueItems: not a bool");
             unique_items = (Bool*)nptr == &Bool::T;
         }
     } else if (s_type == "object") {
         nptr = obj->get("properties");
         if (nptr != nullptr) {
-            if (nptr->type() != OBJECT)
+            if (nptr->type() != Type::OBJECT)
                 throw use_error("properties: not an object");
             Object* src = (Object*)nptr;
             props = new Object();
@@ -234,7 +242,7 @@ Json::Schema::Schema(Node* node) {
         }
         nptr = obj->get("patternProperties");
         if (nptr != nullptr) {
-            if (nptr->type() != OBJECT)
+            if (nptr->type() != Type::OBJECT)
                 throw use_error("patternProperties: not an object");
             Object* src = (Object*)nptr;
             pat_props = new Object();
@@ -247,30 +255,34 @@ Json::Schema::Schema(Node* node) {
         }
         nptr = obj->get("additionalProperties");
         if (nptr != nullptr) {
-            if (nptr->type() == OBJECT)
+            if (nptr->type() == Type::OBJECT)
                 add_props = new Schema(nptr);
-            else if (nptr->type() == BOOL)
+            else if (nptr->type() == Type::BOOLEAN)
                 add_props_bool = (Bool*)nptr == &Bool::T;
             else
                 throw use_error("additionalProperties: not an object or bool");
         }
         nptr = obj->get("maxProperties");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("maxProperties: not a number");
             max_len = ((Number*)nptr)->value;
+            /*
             if (max_len < 0)
                 throw use_error("maxProperties: is negative");
+            */
             if (max_len != ((Number*)nptr)->value)
                 throw use_error("maxProperties: not an integer");
         }
         nptr = obj->get("minProperties");
         if (nptr != nullptr) {
-            if (nptr->type() != NUMBER)
+            if (nptr->type() != Type::NUMBER)
                 throw use_error("minProperties: not a number");
             min_len = ((Number*)nptr)->value;
+            /*
             if (min_len < 0)
                 throw use_error("minProperties: is negative");
+            */
             if (min_len != ((Number*)nptr)->value)
                 throw use_error("minProperties: not an integer");
             if (max_len < min_len)
@@ -278,12 +290,12 @@ Json::Schema::Schema(Node* node) {
         }
         nptr = obj->get("required");
         if (nptr != nullptr) {
-            if (nptr->type() != ARRAY)
+            if (nptr->type() != Type::ARRAY)
                 throw use_error("required: not an array");
             required = (Array*)nptr;
             required->refcnt++;
             for (Node* n : required->list) {
-                if (n->type() != STRING)
+                if (n->type() != Type::STRING)
                     throw use_error("required: not an array of strings");
             }
         }
@@ -521,11 +533,11 @@ bool Json::valid(Json& schema, string* reason) {
         for (unsigned i = 1; i < path.size(); i++) {
             const Node* super = path[i-1];
             const Node* curr = path[i];
-            if (super->type() == ARRAY) {
+            if (super->type() == Type::ARRAY) {
                 auto list = ((Array*)super)->list;
                 auto it = find(list.begin(), list.end(), curr);
                 pref += "[" + to_string(it - list.begin()) + "]";
-            } else if (super->type() == OBJECT) {
+            } else if (super->type() == Type::OBJECT) {
                 auto map = ((Object*)super)->map;
                 for (auto kv : map) {
                     if (kv.second == curr) {

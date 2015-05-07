@@ -330,7 +330,7 @@ namespace im {
         if (meta) { TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta); }
         TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,    opts.cast<int>("tiff:XResolution"));
         TIFFSetField(t.tif, TIFFTAG_YRESOLUTION,    opts.cast<int>("tiff:YResolution"));
-        TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT, opts.cast<uint16_t>("tiff:XResolutionUnit"));
+        TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT, opts.cast<int>("tiff:XResolutionUnit"));
         
         for (uint32_t r = 0; r != h; ++r) {
             void *rowp = input.rowp(r);

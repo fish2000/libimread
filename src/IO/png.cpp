@@ -225,12 +225,12 @@ namespace im {
         png_bytep *row_pointers;
         png_byte color_type = color_types[channels - 1];
         
-        png_set_IHDR(p.png_ptr, p.png_info, 
-                     width, height, bit_depth, color_type, 
+        png_set_IHDR(p.png_ptr, p.png_info,
+                     width, height, bit_depth, color_type,
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                      PNG_FILTER_TYPE_BASE);
         
-        int compression_level = opts.cast<int>("png:compression_level");
+        auto compression_level = opts.cast<int>("png:compression_level");
         if (compression_level && compression_level != -1) {
             png_set_compression_level(p.png_ptr, compression_level);
         }
