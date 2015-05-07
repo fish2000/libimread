@@ -118,7 +118,7 @@ namespace im {
     
     /// string length at compile time -- http://stackoverflow.com/a/26082447/298171
     template <std::size_t N> inline
-    constexpr std::size_t static_strlen(char const (&)[N]) { return N - 1; }
+    constexpr std::size_t static_strlen(char const (&)[N]) { return N; }
 
 
 #ifndef FF
@@ -150,58 +150,62 @@ namespace im {
 
 #define DO_COLOR_EXCEPTIONS 1
 
+#ifndef PP_TOSTRING
+#define PP_TOSTRING(s) "" #s 
+#endif /// PP_TOSTRING
+
 #ifndef imread_raise
-#define imread_raise(Exception)                                             \
-    throw im::Exception("[ERROR:" # im::Exception # " ]",                   \
-        im::emerg(ansi::magenta,                                            \
-            __FILE__, __LINE__,                                             \
+#define imread_raise(Exception)                                                         \
+    throw im::Exception("[ERROR:" PP_TOSTRING(im::Exception) " ]",                      \
+        im::emerg(ansi::magenta,                                                        \
+            __FILE__, __LINE__,                                                         \
             im::Exception::default_message));
 #endif /// imread_raise
 
 #ifndef imread_raise_msg
-#define imread_raise_msg(Exception, Msg)                                    \
-    throw im::Exception("[ERROR:" # im::Exception # " ]",                   \
-        im::emerg(ansi::magenta,                                            \
+#define imread_raise_msg(Exception, Msg)                                                \
+    throw im::Exception("[ERROR:" PP_TOSTRING(im::Exception) " ]",                      \
+        im::emerg(ansi::magenta,                                                        \
             __FILE__, __LINE__, Msg));
 #endif /// imread_raise_msg
 
 #ifndef DECLARE_IMREAD_ERROR_INNARDS
 #ifdef DO_COLOR_EXCEPTIONS
-#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg, DefaultMsgLen)   \
-    static constexpr char[DefaultMsgLen] default_message = #DefaultMsg;     \
-    template <typename S>                                                   \
-    TypeName(S s)                                                           \
-        :w(im::stringify(s))                                                \
-        { }                                                                 \
-    template <typename S, typename ...Args>                                 \
-    TypeName(S s, Args&& ...args)                                           \
-        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...)) \
-        { }                                                                 \
-    TypeName()                                                              \
-        :w(DefaultMsg)                                                      \
-        { }                                                                 \
-    ~TypeName() noexcept { }                                                \
-                                                                            \
-    const char *what() const noexcept { return w.c_str(); }                 \
-    std::string w;                                                          \
+#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg, DefaultMsgLen)               \
+    static constexpr char default_message[DefaultMsgLen] = PP_TOSTRING(DefaultMsg);     \
+    template <typename S>                                                               \
+    TypeName(S s)                                                                       \
+        :w(im::stringify(s))                                                            \
+        { }                                                                             \
+    template <typename S, typename ...Args>                                             \
+    TypeName(S s, Args&& ...args)                                                       \
+        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...))             \
+        { }                                                                             \
+    TypeName()                                                                          \
+        :w(DefaultMsg)                                                                  \
+        { }                                                                             \
+    ~TypeName() noexcept { }                                                            \
+                                                                                        \
+    const char *what() const noexcept { return w.c_str(); }                             \
+    std::string w;
 #else
-#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)                  \
-    static constexpr char[DefaultMsgLen] default_message = #DefaultMsg;     \
-    template <typename S>                                                   \
-    TypeName(S s)                                                           \
-        :w(im::stringify(s))                                                \
-        { }                                                                 \
-    template <typename S, typename ...Args>                                 \
-    TypeName(S s, Args&& ...args)                                           \
-        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...)) \
-        { }                                                                 \
-    TypeName()                                                              \
-        :w(DefaultMsg)                                                      \
-        { }                                                                 \
-    ~TypeName() noexcept { }                                                \
-                                                                            \
-    const char *what() const noexcept { return w.c_str(); }                 \
-    std::string w;                                                          \
+#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)                              \
+    static constexpr char default_message[DefaultMsgLen] = #DefaultMsg;                 \
+    template <typename S>                                                               \
+    TypeName(S s)                                                                       \
+        :w(im::stringify(s))                                                            \
+        { }                                                                             \
+    template <typename S, typename ...Args>                                             \
+    TypeName(S s, Args&& ...args)                                                       \
+        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...))             \
+        { }                                                                             \
+    TypeName()                                                                          \
+        :w(DefaultMsg)                                                                  \
+        { }                                                                             \
+    ~TypeName() noexcept { }                                                            \
+                                                                                        \
+    const char *what() const noexcept { return w.c_str(); }                             \
+    std::string w;
 #endif /// DO_COLOR_EXCEPTIONS
 #endif /// DECLARE_IMREAD_ERROR_INNARDS
 

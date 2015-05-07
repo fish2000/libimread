@@ -1,0 +1,34 @@
+//  Convert the symbol file into a C++ header using sed, or another text processing tool
+//  with the equivalent command:
+//  sed -e 's/^\([a-zA-Z1-9_]\)\([a-zA-Z1-9_]*\)/#ifndef IOD_SYMBOL__\U\1\L\2\n\#define IOD_SYMBOL__\U\1\L\2\n    iod_define_symbol(\1\2, _\U\1\L\2)\n#endif/' symbols.sb > symbol_definitions.hh
+
+select
+update
+insert
+delete_
+where
+order_by
+from
+table
+order
+set
+into
+values
+join
+inner_join
+group_by
+on
+condition
+else_
+elt
+cpt
+as
+criteria
+sum
+avg
+stddev
+
+optional
+
+json_key
+json_skip

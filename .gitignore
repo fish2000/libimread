@@ -1,5 +1,9 @@
 /build/
+/dist/
+/deps/*/build/
 *.dylib
 *.a
 *.so
 *.o
+*.db
+*.bii
