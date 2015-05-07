@@ -5,12 +5,14 @@
 #define LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <functional>
 #include <type_traits>
 #include <iostream>
+#include <sstream>
 #include <exception>
 
 #include <libimread/libimread.hpp>
@@ -94,11 +96,30 @@ namespace im {
     }
     
     template <typename ...Args> inline
+    std::string __attribute__((nonnull (1, 3)))
+         emerg(const char *title, const ansi::ANSI color,
+               const char *file, int line, Args&& ...args) {
+        std::ostringstream errstream;
+        errstream  << color << im::stringify(title) << ansi::reset
+          << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
+          << " : " << ansi::red << im::stringify(line) << ansi::reset
+          << " ]:" << std::endl
+                   << im::stringmerge(std::forward<Args>(args)...)
+                   << std::endl;
+        return errstream.str();
+    }
+    
+    template <typename ...Args> inline
     void norly(const ansi::ANSI color, Args&& ...args) {
         std::cerr  << color 
                    << im::stringmerge(std::forward<Args>(args)...)
                    << ansi::reset;
     }
+    
+    /// string length at compile time -- http://stackoverflow.com/a/26082447/298171
+    template <std::size_t N> inline
+    constexpr std::size_t static_strlen(char const (&)[N]) { return N - 1; }
+
 
 #ifndef FF
 #define FF(...) std::forward_as_tuple(__VA_ARGS__)
@@ -121,12 +142,33 @@ namespace im {
         im::srsly("(ASSERT FAILURE) [ " #condition " ]",                        \
             ansi::lightyellow,                                                  \
             __FILE__, __LINE__, __VA_ARGS__);                                   \
-        exit(-1);                                                               \
+        std::exit(-1);                                                          \
     }
 #endif /// _ASSERT
 
+
+
+#define DO_COLOR_EXCEPTIONS 1
+
+#ifndef imread_raise
+#define imread_raise(Exception)                                             \
+    throw im::Exception("[ERROR:" # im::Exception # " ]",                   \
+        im::emerg(ansi::magenta,                                            \
+            __FILE__, __LINE__,                                             \
+            im::Exception::default_message));
+#endif /// imread_raise
+
+#ifndef imread_raise_msg
+#define imread_raise_msg(Exception, Msg)                                    \
+    throw im::Exception("[ERROR:" # im::Exception # " ]",                   \
+        im::emerg(ansi::magenta,                                            \
+            __FILE__, __LINE__, Msg));
+#endif /// imread_raise_msg
+
 #ifndef DECLARE_IMREAD_ERROR_INNARDS
-#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)                  \
+#ifdef DO_COLOR_EXCEPTIONS
+#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg, DefaultMsgLen)   \
+    static constexpr char[DefaultMsgLen] default_message = #DefaultMsg;     \
     template <typename S>                                                   \
     TypeName(S s)                                                           \
         :w(im::stringify(s))                                                \
@@ -142,31 +184,52 @@ namespace im {
                                                                             \
     const char *what() const noexcept { return w.c_str(); }                 \
     std::string w;                                                          \
+#else
+#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)                  \
+    static constexpr char[DefaultMsgLen] default_message = #DefaultMsg;     \
+    template <typename S>                                                   \
+    TypeName(S s)                                                           \
+        :w(im::stringify(s))                                                \
+        { }                                                                 \
+    template <typename S, typename ...Args>                                 \
+    TypeName(S s, Args&& ...args)                                           \
+        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...)) \
+        { }                                                                 \
+    TypeName()                                                              \
+        :w(DefaultMsg)                                                      \
+        { }                                                                 \
+    ~TypeName() noexcept { }                                                \
+                                                                            \
+    const char *what() const noexcept { return w.c_str(); }                 \
+    std::string w;                                                          \
+#endif /// DO_COLOR_EXCEPTIONS
 #endif /// DECLARE_IMREAD_ERROR_INNARDS
 
 #ifndef DECLARE_IMREAD_ERROR_TYPE
 #define DECLARE_IMREAD_ERROR_TYPE(TypeName, DefaultMsg)                     \
     struct TypeName : std::exception {                                      \
-        DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)                  \
+        DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg,                  \
+            static_strlen(#DefaultMsg));                                    \
     };
 #endif /// DECLARE_IMREAD_ERROR_TYPE
 
 #ifndef DECLARE_IMREAD_ERROR_SUBTYPE
 #define DECLARE_IMREAD_ERROR_SUBTYPE(TypeName, BaseTypeName, DefaultMsg)    \
     struct TypeName : BaseTypeName {                                        \
-        DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg)
+        DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg,                  \
+            static_strlen(#DefaultMsg));                                    \
     };
 #endif /// DECLARE_IMREAD_ERROR_SUBTYPE
 
 
-DECLARE_IMREAD_ERROR_TYPE(CannotReadError, "Read Error");
-DECLARE_IMREAD_ERROR_TYPE(CannotWriteError, "Write Error");
-DECLARE_IMREAD_ERROR_TYPE(NotImplementedError, "Not Implemented");
-DECLARE_IMREAD_ERROR_TYPE(ProgrammingError, "Programming Error");
-DECLARE_IMREAD_ERROR_TYPE(OptionsError, "Options Error");
-DECLARE_IMREAD_ERROR_TYPE(WriteOptionsError, "Write Options Error");
-DECLARE_IMREAD_ERROR_TYPE(FileSystemError, "File System Error");
-DECLARE_IMREAD_ERROR_TYPE(FormatNotFound, "File Format Not Found");
+DECLARE_IMREAD_ERROR_TYPE(CannotReadError,          "Read Error");
+DECLARE_IMREAD_ERROR_TYPE(CannotWriteError,         "Write Error");
+DECLARE_IMREAD_ERROR_TYPE(NotImplementedError,      "Not Implemented");
+DECLARE_IMREAD_ERROR_TYPE(ProgrammingError,         "Programming Error");
+DECLARE_IMREAD_ERROR_TYPE(OptionsError,             "Options Error");
+DECLARE_IMREAD_ERROR_TYPE(WriteOptionsError,        "Write Options Error");
+DECLARE_IMREAD_ERROR_TYPE(FileSystemError,          "File System Error");
+DECLARE_IMREAD_ERROR_TYPE(FormatNotFound,           "File Format Not Found");
 
 }
 
