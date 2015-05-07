@@ -1,6 +1,6 @@
 # Author: Alexander Böhn (with Félix C. Morency)
 # © 2011.10 -- GPL, Motherfuckers
-
+cmake_minimum_required(VERSION 3.0)
 project(libsszip LANGUAGES C CXX)
 
 set(libsszip_VERSION_MAJOR "0")
@@ -21,11 +21,9 @@ include_directories(
 
 add_definitions(
     -Wall -Werror -fstack-protector-all
+    -fobjc-abi-version=3
+    -fobjc-arc -std=c99 -ObjC
     -DHAVE_BZIP2 -DHAS_STDINT_H)
-set_source_files_properties(GLOB_RECURSE "*.m"
-    PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS}
-    -fobjc-link-runtime -fobjc-abi-version=3
-    -fobjc-arc -std=c99 -ObjC)
 
 set(EXTRA_LIBS ${EXTRA_LIBS}
     ${FOUNDATION_LIBRARY}
