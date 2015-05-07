@@ -267,18 +267,18 @@ namespace im {
                     srcPtr++;
                 }
             } else {
-                _ASSERT(bit_depth == 8 || bit_depth == 16,
+                imread_assert(bit_depth == 8 || bit_depth == 16,
                     "We only support saving 8- and 16-bit images.");
             }
         }
         
         // write data
-        _ASSERT(!setjmp(png_jmpbuf(p.png_ptr)),
+        imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
             "[write_png_file] Error during writing bytes");
         png_write_image(p.png_ptr, row_pointers);
         
         // finish write
-        _ASSERT(!setjmp(png_jmpbuf(p.png_ptr)),
+        imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
             "[write_png_file] Error during end of write");
         png_write_end(p.png_ptr, p.png_info);
         

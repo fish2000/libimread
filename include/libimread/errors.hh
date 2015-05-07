@@ -137,7 +137,7 @@ namespace im {
 #endif /// YES
 
 #ifndef _ASSERT
-#define _ASSERT(condition, ...)                                                 \
+#define imread_assert(condition, ...)                                                 \
     if (!(condition)) {                                                         \
         im::srsly("(ASSERT FAILURE) [ " #condition " ]",                        \
             ansi::lightyellow,                                                  \

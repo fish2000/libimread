@@ -44,11 +44,11 @@ namespace tc {
         struct helper;
         
         template <>
-        struct helper<JSNULL> {
+        struct helper<Type::JSNULL> {
             typedef Json value_type;
         };
         template <>
-        struct helper<BOOLEAN> {
+        struct helper<Type::BOOLEAN> {
             typedef bool value_type;
         };
         template <>

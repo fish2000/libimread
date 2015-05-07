@@ -41,17 +41,17 @@ namespace im {
         
         int width, height, maxval;
         char header[256];
-        _ASSERT(fscanf(membuf.get(), "%255s", header) == 1, "Could not read PPM header\n");
-        _ASSERT(fscanf(membuf.get(), "%d %d\n", &width, &height) == 2, "Could not read PPM width and height\n");
-        _ASSERT(fscanf(membuf.get(), "%d", &maxval) == 1, "Could not read PPM max value\n");
-        _ASSERT(fgetc(membuf.get()) != EOF, "Could not read char from PPM\n");
+        imread_assert(fscanf(membuf.get(), "%255s", header) == 1, "Could not read PPM header\n");
+        imread_assert(fscanf(membuf.get(), "%d %d\n", &width, &height) == 2, "Could not read PPM width and height\n");
+        imread_assert(fscanf(membuf.get(), "%d", &maxval) == 1, "Could not read PPM max value\n");
+        imread_assert(fgetc(membuf.get()) != EOF, "Could not read char from PPM\n");
         
         int bit_depth = 0;
         if (maxval == 255) { bit_depth = 8; }
         else if (maxval == 65535) { bit_depth = 16; }
-        else { _ASSERT(false, "Invalid bit depth in PPM\n"); }
+        else { imread_assert(false, "Invalid bit depth in PPM\n"); }
         
-        _ASSERT(strcmp(header, "P6") == 0 || strcmp(header, "p6") == 0, "Input is not binary PPM\n");
+        imread_assert(strcmp(header, "P6") == 0 || strcmp(header, "p6") == 0, "Input is not binary PPM\n");
         
         const int channels = 3;
         std::unique_ptr<Image> im = factory->create(bit_depth, height, width, channels);
@@ -60,7 +60,7 @@ namespace im {
         // convert the data to T
         if (bit_depth == 8) {
             uint8_t *data = new uint8_t[full_size];
-            _ASSERT(fread(static_cast<void*>(data),
+            imread_assert(fread(static_cast<void*>(data),
                           sizeof(uint8_t), full_size, membuf.get()) == static_cast<size_t>(full_size),
                     "Could not read PPM 8-bit data\n");
             
@@ -79,7 +79,7 @@ namespace im {
         } else if (bit_depth == 16) {
             int little_endian = is_little_endian();
             uint16_t *data = new uint16_t[full_size];
-            _ASSERT(fread(static_cast<void*>(data),
+            imread_assert(fread(static_cast<void*>(data),
                           sizeof(uint16_t), full_size, membuf.get()) == static_cast<size_t>(full_size),
                 "Could not read PPM 16-bit data\n");
             
@@ -124,7 +124,7 @@ namespace im {
                     }
                 }
             }
-            _ASSERT(output->write(data, full_size) == static_cast<size_t>(full_size),
+            imread_assert(output->write(data, full_size) == static_cast<size_t>(full_size),
                 "Could not write PPM 8-bit data\n");
             delete[] data;
         } else if (bit_depth == 16) {
@@ -141,7 +141,7 @@ namespace im {
                     }
                 }
             }
-            _ASSERT(output->write(data, full_size) == static_cast<size_t>(full_size),
+            imread_assert(output->write(data, full_size) == static_cast<size_t>(full_size),
                 "Could not write PPM 16-bit data\n");
             delete[] data;
         }

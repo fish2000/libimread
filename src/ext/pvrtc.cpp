@@ -39,7 +39,7 @@ typedef struct { uint32_t PackedData[2]; } AMTC_BLOCK_STRUCT;
 #define BLK_X_2BPP 8
 #define BLK_X_4BPP 4
 
-#define _ASSERT(X) assert(X)
+#define imread_assert(X) assert(X)
 #define POWER_OF_2(X) util_number_is_power_2(X)
 #define CLAMP(X, lower, upper) (_MIN(_MAX((X), (lower)), (upper)))
 
@@ -235,7 +235,7 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
     /*
     // make sure nothing is left over
     */
-    _ASSERT(ModulationBits == 0);
+    imread_assert(ModulationBits == 0);
 }
 
 /***********************************************************/
@@ -325,7 +325,7 @@ static void InterpolateColours(const int ColourP[4], const int ColourQ[4],
     // sanity check
     */
     for (k = 0; k < 4; k++) {
-        _ASSERT(Result[k] < 256);
+        imread_assert(Result[k] < 256);
     }
 
     /*
@@ -342,7 +342,7 @@ static void InterpolateColours(const int ColourP[4], const int ColourQ[4],
     // 2nd sanity check
     */
     for (k = 0; k < 4; k++) {
-        _ASSERT(Result[k] < 256);
+        imread_assert(Result[k] < 256);
     }
 }
 
@@ -454,11 +454,11 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos,
 
     int ShiftCount;
 
-    _ASSERT(YPos < YSize);
-    _ASSERT(XPos < XSize);
+    imread_assert(YPos < YSize);
+    imread_assert(XPos < XSize);
 
-    _ASSERT(POWER_OF_2(YSize));
-    _ASSERT(POWER_OF_2(XSize));
+    imread_assert(POWER_OF_2(YSize));
+    imread_assert(POWER_OF_2(XSize));
 
     if (YSize < XSize) {
         MinDimension = YSize;
