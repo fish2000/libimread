@@ -4,13 +4,15 @@ echo "*** TEST RUN COMMENCING"
 
 PROJECT_PATH="/Users/fish/Dropbox/libimread"
 
-cd $PROJECT_PATH && \
+pushd $PROJECT_PATH && \
     rm -rf ./build ./dist && \
     mkdir -p ./build ./dist && \
-    cd ./build && \
+    pushd ./build && \
     cmake .. -Wno-dev -DCMAKE_INSTALL_PREFIX=./dist && \
     make install && \
         ./test_libimread --success --durations yes --abortx 10
 
-cd $PROJECT_PATH
+# cd $PROJECT_PATH
+popd
+popd
 echo "*** TEST RUN COMPLETE"

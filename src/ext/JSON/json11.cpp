@@ -17,19 +17,17 @@
 #include <iomanip>
 #include <algorithm>
 
-using namespace std;
-
 Json::Node Json::Node::null(1);
 Json::Node Json::Node::undefined(1);
 Json Json::null;
 Json Json::undefined(&Node::undefined);
 Json::Bool Json::Bool::T(true);
 Json::Bool Json::Bool::F(false);
-set<string> Json::keyset;
+std::set<std::string> Json::keyset;
 int Json::indent;
 int Json::level;
 
-static unsigned currpos(istream& in, unsigned* pos) {
+static unsigned currpos(std::istream& in, unsigned* pos) {
     unsigned curr = in.tellg();
     if (pos != nullptr)
         *pos = 0;
@@ -49,9 +47,11 @@ static unsigned currpos(istream& in, unsigned* pos) {
     return line;
 }
 
-Json::parse_error::parse_error(const char* msg, std::istream& in) : std::runtime_error(msg) {
-    line = currpos(in, &col);
-}
+Json::parse_error::parse_error(const char* msg, std::istream& in)
+    :im::JSONParseError(msg)
+    {
+        line = currpos(in, &col);
+    }
 
 // Node and helper classes
 
@@ -76,8 +76,8 @@ bool Json::Array::operator == (const Node& that) const {
         return true;
     if (that.type() != Type::ARRAY)
         return false;
-    vector<Node*>& that_list = ((Array*)&that)->list;
-    return equal(list.begin(), list.end(), that_list.begin(),
+    std::vector<Node*>& that_list = ((Array*)&that)->list;
+    return std::equal(list.begin(), list.end(), that_list.begin(),
             [](Node* n1, Node* n2){ return *n1 == *n2; });
 }
 
@@ -86,9 +86,9 @@ bool Json::Object::operator == (const Node& that) const {
         return true;
     if (that.type() != Type::OBJECT)
         return false;
-    std::map<const string*, Node*>& that_map = ((Object*)&that)->map;
-    typedef pair<const string*, Node*> kv;
-    return equal(map.begin(), map.end(), that_map.begin(),
+    std::map<const std::string*, Node*>& that_map = ((Object*)&that)->map;
+    typedef std::pair<const std::string*, Node*> kv;
+    return std::equal(map.begin(), map.end(), that_map.begin(),
             [](kv p, kv q){ return *p.first == *q.first && *p.second == *q.second; });
 }
 
@@ -98,11 +98,11 @@ bool Json::Number::operator == (const Node& that) const {
     if (that.type() != Type::NUMBER)
         return false;
     Number& numb = *(Number*)&that;
-    if (fabs(value) < LDBL_EPSILON)
-        return fabs(numb.value) < LDBL_EPSILON;
-    long double delta = fabs((value - numb.value)/value);
-    int digs = max(prec, numb.prec);
-    return delta < pow(10, -digs);
+    if (std::fabs(value) < LDBL_EPSILON)
+        return std::fabs(numb.value) < LDBL_EPSILON;
+    long double delta = std::fabs((value - numb.value)/value);
+    int digs = std::max(prec, numb.prec);
+    return delta < std::pow(10, -digs);
 }
 
 bool Json::Array::contains(const Node* that) const {
@@ -172,7 +172,7 @@ Json::Object* Json::mkobject() {
     return (Object*)root;
 }
 
-Json& Json::set(string key, const Json& val) {
+Json& Json::set(std::string key, const Json& val) {
     assert(val.root != nullptr);
     if (val.root->contains(root))
         throw use_error("cyclic dependency");
@@ -220,7 +220,7 @@ Json Json::Property::operator = (const Json& that) {
     else if (host->type() == Type::ARRAY)
         ((Array*)host)->repl(index, that.root);
     else
-        throw logic_error("Property::operator =");
+        throw std::logic_error("Property::operator =");
     return target();
 }
 
@@ -232,11 +232,11 @@ Json::Property Json::operator [] (int index) {
     return Property(mkarray(), index);
 }
 
-Json::Property Json::operator [] (const string& key) {
+Json::Property Json::operator [] (const std::string& key) {
     return Property(mkobject(), key);
 }
 
-size_t Json::size() const {
+std::size_t Json::size() const {
     if (root->type() == Type::ARRAY)
         return ((Array*)root)->list.size();
     if (root->type() == Type::OBJECT)
@@ -244,14 +244,14 @@ size_t Json::size() const {
     throw use_error("method not applicable");
 }
 
-Json Json::get(const string& key) const {
+Json Json::get(const std::string& key) const {
     if (root->type() != Type::OBJECT)
         throw use_error("method not applicable");
     Node* n = ((Object*)root)->get(key);
     return n == nullptr ? undefined : Json(n);
 }
 
-bool Json::has(const string& key) const {
+bool Json::has(const std::string& key) const {
     if (root->type() != Type::OBJECT)
         throw use_error("method not applicable");
     auto kp = keyset.find(key);
@@ -262,7 +262,7 @@ bool Json::has(const string& key) const {
     return it != obj->map.end();
 }
 
-Json::Property::Property(Node* node, const string& key) : host(node) {
+Json::Property::Property(Node* node, const std::string& key) : host(node) {
     if (node->type() != Type::OBJECT)
         throw use_error("method not applicable");
     this->key = key;
@@ -281,14 +281,14 @@ Json Json::Property::target() const {
         return ((Object*)host)->get(key);
     if (host->type() == Type::ARRAY)
         return ((Array*)host)->list.at(index);
-    throw logic_error("Property::operator Json()");
+    throw std::logic_error("Property::operator Json()");
 }
 
-vector<string> Json::keys() {
+std::vector<std::string> Json::keys() {
     if (root->type() != Type::OBJECT)
         throw use_error("method not applicable");
     Object* op = (Object*)root;
-    vector<string> ret;
+    std::vector<std::string> ret;
     for (auto it : op->map)
         ret.push_back(*it.first);
     return ret;
@@ -299,17 +299,17 @@ bool Json::String::operator == (const Node& that) const {
             (that.type() == Type::STRING && value == ((String*)&that)->value);
 }
 
-void Json::Bool::print(ostream& out) const {
+void Json::Bool::print(std::ostream& out) const {
     out << (this == &Bool::T ? "true" : "false");
 }
 
-void Json::Number::print(ostream& out) const {
+void Json::Number::print(std::ostream& out) const {
     if (prec >= 0)
-        out << setprecision(prec);
+        out << std::setprecision(prec);
     out << value;
 }
 
-static void escape(ostream& out, const string& str) {
+static void escape(std::ostream& out, const std::string& str) {
     out << '"';
     for (char c : str) {
         switch (c) {
@@ -341,7 +341,7 @@ static void escape(ostream& out, const string& str) {
     out << '"';
 }
 
-void Json::String::print(ostream& out) const {
+void Json::String::print(std::ostream& out) const {
     escape(out, value);
 }
 
@@ -355,7 +355,7 @@ void Json::Array::traverse(void (*f)(const Node*)) const {
         f(it);
 }
 
-void Json::Object::print(ostream& out) const {
+void Json::Object::print(std::ostream& out) const {
     out << '{';
     ++level;
     bool comma = false;
@@ -363,7 +363,7 @@ void Json::Object::print(ostream& out) const {
         if (comma)
             out << ',';
         if (indent)
-            out << '\n' << string(indent*level, ' ');
+            out << '\n' << std::string(indent*level, ' ');
         escape(out, *it.first);
         out << ':';
         if (indent)
@@ -375,7 +375,7 @@ void Json::Object::print(ostream& out) const {
     out << '}';
 }
 
-void Json::Array::print(ostream& out) const {
+void Json::Array::print(std::ostream& out) const {
     out << '[';
     ++level;
     bool comma = false;
@@ -383,7 +383,7 @@ void Json::Array::print(ostream& out) const {
         if (comma)
             out << ',';
         if (indent)
-            out << '\n' << string(indent*level, ' ');
+            out << '\n' << std::string(indent*level, ' ');
        	it->print(out);
         comma = true;
     }
@@ -399,7 +399,7 @@ Json::Object::~Object() {
     map.clear();
 }
 
-Json::Node* Json::Object::get(const string& key) const {
+Json::Node* Json::Object::get(const std::string& key) const {
     auto kp = keyset.find(key);
     if (kp == keyset.end())
         return nullptr;
@@ -410,7 +410,7 @@ Json::Node* Json::Object::get(const string& key) const {
 
 }
 
-void Json::Object::set(const string& k, Node* v) {
+void Json::Object::set(const std::string& k, Node* v) {
     assert(v != nullptr);
     auto kit = keyset.insert(keyset.begin(), k);
     auto it = map.find(&*kit);
@@ -441,7 +441,7 @@ void Json::Array::ins(int index, Node* v) {
     if (index < 0)
         index += list.size();
     if (index < 0 || index > (int)list.size())
-        throw out_of_range("index out of range");
+        throw std::out_of_range("index out of range");
     list.insert(list.begin() + index, v);
     v->refcnt++;
 }
@@ -463,12 +463,12 @@ void Json::Array::repl(int index, Node* v) {
     v->refcnt++;
 }
 
-ostream& operator << (ostream& out, const Json& json) {
+std::ostream& operator << (std::ostream& out, const Json& json) {
     json.root->print(out);
     return out;
 }
 
-istream& operator >> (istream& in, Json& json) {
+std::istream& operator >> (std::istream& in, Json& json) {
     json.root->unref();
     Json temp(in);
     json.root = temp.root;
@@ -476,12 +476,12 @@ istream& operator >> (istream& in, Json& json) {
     return in;
 }
 
-Json::String::String(istream& in) {
+Json::String::String(std::istream& in) {
     int quote = in.get();
     while (!in.eof()) {
         int c = in.get();
-        if (c == char_traits<char>::eof())
-            throw parse_error("unterminated string", in);
+        if (c == std::char_traits<char>::eof())
+            throw parse_error("unterminated std::string", in);
         if (c == quote)
             return;
         if (c == '\\') {
@@ -501,9 +501,9 @@ Json::String::String(istream& in) {
             else if (c == 'u') {
                 unsigned w = 0;
                 for (int i = 0; i < 4; i++) {
-                    if (!isxdigit(c = toupper(in.get())))
+                    if (!std::isxdigit(c = std::toupper(in.get())))
                         throw parse_error("not a hex digit", in);
-                    w = (w << 4) | (isdigit(c) ? c - '0' : c - 'A' + 10);
+                    w = (w << 4) | (std::isdigit(c) ? c - '0' : c - 'A' + 10);
                 }
                 // garbage in, garbage out
                 if (w <= 0x7f)
@@ -521,33 +521,33 @@ Json::String::String(istream& in) {
                 throw parse_error("illegal backslash escape", in);
             continue;
         }
-        if (iscntrl(c))
-            throw parse_error("control character in string", in);
+        if (std::iscntrl(c))
+            throw parse_error("control character in std::string", in);
         value.push_back(c);
     }
 }
 
-Json::Number::Number(istream& in) {
+Json::Number::Number(std::istream& in) {
     char buf[128];
     const char* end = buf+126;
     char* p = buf;
     char c;
     bool leading = true;
-    while ((isdigit(c = in.get()) || (leading && c == '-')) && p < end) {
+    while ((std::isdigit(c = in.get()) || (leading && c == '-')) && p < end) {
         *p++ = c;
         leading = false;
     }
     prec = p - buf;
     if (c == '.' && p < end) {
         *p++ = c;
-        while (isdigit(c = in.get()) && p < end)
+        while (std::isdigit(c = in.get()) && p < end)
             *p++ = c;
         prec = p - buf - 1;
     }
     if ((c == 'e' || c == 'E') && p < end) {
         *p++ = c;
         leading = true;
-        while ((isdigit(c = in.get()) || (leading && (c == '-' || c == '+'))) && p < end) {
+        while ((std::isdigit(c = in.get()) || (leading && (c == '-' || c == '+'))) && p < end) {
             *p++ = c;
             leading = false;
         }
@@ -555,15 +555,15 @@ Json::Number::Number(istream& in) {
     *p = 0;
     in.putback(c);
     char* eptr = nullptr;
-    long double num = strtold(buf, &eptr);
+    long double num = std::strtold(buf, &eptr);
     if (eptr != p)
         throw parse_error("illegal number format", in);
     value = num;
 }
 
-Json::Json(istream& in, bool full) {
+Json::Json(std::istream& in, bool full) {
     char c;
-    string word;
+    std::string word;
     root = nullptr;
     if (!(in >> c))
         goto out;
@@ -592,7 +592,7 @@ Json::Json(istream& in, bool full) {
             in.putback(c);
             Json key(in, false);
             if (key.root->type() != Type::STRING)
-                throw parse_error("a string expected", in);
+                throw parse_error("a std::string expected", in);
             in >> c;
             if (c != ':')
                 throw parse_error("a colon expected", in);
@@ -605,7 +605,7 @@ Json::Json(istream& in, bool full) {
         }
         throw parse_error("comma or closing bracket expected", in);
     }
-    if (isdigit(c) || c == '-') {
+    if (std::isdigit(c) || c == '-') {
         in.putback(c);
         root = new Number(in);
         root->refcnt++;
@@ -638,9 +638,9 @@ Json::Json(istream& in, bool full) {
     throw parse_error("json format error", in);
 out:
     if (full) {
-        if (in.peek() == char_traits<char>::eof())
+        if (in.peek() == std::char_traits<char>::eof())
             return;
-        while (isspace(in.get()))
+        while (std::isspace(in.get()))
             /* skip */;
         if (in.eof())
             return;
@@ -648,18 +648,18 @@ out:
     }
 }
 
-string Json::format() {
-    ostringstream is("");
+std::string Json::format() {
+    std::ostringstream is("");
     is << *this;
     return is.str();
 }
 
-Json Json::parse(const string& str) {
-    istringstream is(str);
+Json Json::parse(const std::string& str) {
+    std::istringstream is(str);
     Json parsed(is);
-    if (is.peek() == char_traits<char>::eof())
+    if (is.peek() == std::char_traits<char>::eof())
         return parsed;
-    while (isspace(is.get()))
+    while (std::isspace(is.get()))
         /* skip */;
     if (is.eof())
         return parsed;
@@ -669,85 +669,85 @@ Json Json::parse(const string& str) {
 Json::operator std::string() const {
     if (root->type() == Type::STRING)
         return ((String*)root)->value;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 Json::operator long double() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 Json::operator double() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 Json::operator float() const {
     if (root->type() == Type::NUMBER) {
         return ((Number*)root)->value;
     }
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 Json::operator int() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 Json::operator long() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 Json::operator long long() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 // Json::operator uint8_t() const {
 //     if (root->type() == Type::NUMBER)
 //         return uint8_t(((Number*)root)->value);
-//     throw bad_cast();
+//     throw std::bad_cast();
 // }
 //
 // Json::operator uint16_t() const {
 //     if (root->type() == Type::NUMBER)
 //         return uint16_t(((Number*)root)->value);
-//     throw bad_cast();
+//     throw std::bad_cast();
 // }
 //
 // Json::operator int8_t() const {
 //     if (root->type() == Type::NUMBER)
 //         return int8_t(((Number*)root)->value);
-//     throw bad_cast();
+//     throw std::bad_cast();
 // }
 //
 // Json::operator int16_t() const {
 //     if (root->type() == Type::NUMBER)
 //         return int16_t(((Number*)root)->value);
-//     throw bad_cast();
+//     throw std::bad_cast();
 // }
 
 Json::operator unsigned char() const {
     if (root->type() == Type::NUMBER)
         return (unsigned char)((Number*)root)->value;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 Json::operator char() const {
     if (root->type() == Type::NUMBER)
         return char(((Number*)root)->value);
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 Json::operator bool() const {
     if (root->type() == Type::BOOLEAN)
         return root == &Bool::T;
-    throw bad_cast();
+    throw std::bad_cast();
 }
 
 bool Json::operator == (const Json& that) const {

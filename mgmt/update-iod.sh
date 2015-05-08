@@ -34,9 +34,10 @@ pushd $deps
     
     pushd $iod_dst
         mkdir "build" && pushd "build"
-        cmake .. -Wno-dev -DCMAKE_INSTALL_PREFIX=/tmp
-        make -j4
-
+            cmake .. -Wno-dev -DCMAKE_INSTALL_PREFIX=/tmp
+            make -j4
+        popd # build
+        
     popd # iod_dst
 
 popd # deps
