@@ -102,8 +102,6 @@ namespace im {
     
     namespace apple {
         
-        static const options_map opts; /// NOT IN USE
-        
         template <typename T>
         using ImageType = HybridImage<typename std::decay<T>::type>;
         template <typename T>
@@ -111,6 +109,7 @@ namespace im {
         
         template <typename T = byte>
         image_ptr<T> read_unique(const std::string &filename) {
+            options_map opts;
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSource> input(new FileSource(filename));
@@ -121,6 +120,7 @@ namespace im {
         
         template <typename T = byte>
         ImageType<T> read(const std::string &filename) {
+            options_map opts;
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSource> input(new FileSource(filename));

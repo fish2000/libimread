@@ -9,7 +9,8 @@
 // Version 0.6.5, 2013-11-07
 
 #include <libimread/ext/JSON/json11.h>
-#include <assert.h>
+#include <libimread/errors.hh>
+#include <cassert>
 #include <cmath>
 #include <cfloat>
 #include <climits>
@@ -27,32 +28,73 @@ std::set<std::string> Json::keyset;
 int Json::indent;
 int Json::level;
 
-static unsigned currpos(std::istream& in, unsigned* pos) {
-    unsigned curr = in.tellg();
-    if (pos != nullptr)
-        *pos = 0;
-    in.seekg(0);   // rewind
-    if (in.bad())
-        return 0;
-    unsigned count = 0, line = 1, col = 1;
-    while (!in.eof() && !in.fail() && ++count < curr) {
-        if (in.get() == '\n') {
-            ++line;
-            col = 1;
-        } else
-            ++col;
+namespace detail {
+    
+    unsigned currpos(std::istream& in, unsigned* pos) {
+        unsigned curr = in.tellg();
+        if (pos != nullptr)
+            *pos = 0;
+        in.seekg(0);   // rewind
+        if (in.bad())
+            return 0;
+        unsigned count = 0, line = 1, col = 1;
+        while (!in.eof() && !in.fail() && ++count < curr) {
+            if (in.get() == '\n') {
+                ++line;
+                col = 1;
+            } else
+                ++col;
+        }
+        if (pos != nullptr)
+            *pos = col;
+        return line;
     }
-    if (pos != nullptr)
-        *pos = col;
-    return line;
+    
+    void escape(std::ostream& out, const std::string& str) {
+        out << '"';
+        for (char c : str) {
+            switch (c) {
+            case '"':
+                out << '\\' << '"';
+                break;
+            case '\\':
+                out << c << c;
+                break;
+            case '\b':
+                out << '\\' << 'b';
+                break;
+            case '\f':
+                out << '\\' << 'f';
+                break;
+            case '\n':
+                out << '\\' << 'n';
+                break;
+            case '\r':
+                out << '\\' << 'r';
+                break;
+            case '\t':
+                out << '\\' << 't';
+                break;
+            default:
+                out << c;
+            }
+        }
+        out << '"';
+    }
+    
 }
 
-Json::parse_error::parse_error(const char* msg, std::istream& in)
+Json::parse_error::parse_error(const char *msg, std::istream &in)
     :im::JSONParseError(msg)
     {
-        line = currpos(in, &col);
+        line = detail::currpos(in, &col);
     }
 
+Json::parse_error::parse_error(const std::string &msg, std::istream &in)
+    :im::JSONParseError(msg)
+    {
+        line = detail::currpos(in, &col);
+    }
 // Node and helper classes
 
 Json::Node::Node(unsigned init) {
@@ -127,19 +169,19 @@ bool Json::Object::contains(const Node* that) const {
 
 /** Copy constructor. */
 Json::Json(const Json& that) {
-	(root = that.root)->refcnt++;
+    (root = that.root)->refcnt++;
 }
 
 /** Move constructor. */
 Json::Json(Json&& that) {
-	root = that.root;
-	that.root = nullptr;
+    root = that.root;
+    that.root = nullptr;
 }
 
 Json::Json(std::initializer_list<Json> args) {
     (root = new Array())->refcnt++;
-	for (auto arg : args)
-		*this << arg;
+    for (auto arg : args)
+        *this << arg;
 }
 
 /** Copy assignment */
@@ -168,14 +210,16 @@ Json::Object* Json::mkobject() {
         root->refcnt++;
     }
     if (root->type() != Type::OBJECT)
-        throw use_error("method not applicable");
+        imread_raise(JSONUseError,
+            "Json::mkobject() method not applicable",
+         FF("\troot->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
     return (Object*)root;
 }
 
 Json& Json::set(std::string key, const Json& val) {
     assert(val.root != nullptr);
     if (val.root->contains(root))
-        throw use_error("cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     mkobject()->set(key, val.root);
     return *this;
 }
@@ -186,26 +230,28 @@ Json::Array* Json::mkarray() {
         root->refcnt++;
     }
     if (root->type() != Type::ARRAY)
-        throw use_error("method not applicable");
+        imread_raise(JSONUseError,
+            "Json::mkarray() method not applicable",
+         FF("\troot->type() == Type::%s (Requires Type::ARRAY)", root->typestr()));
     return (Array*)root;
 }
 
 Json& Json::operator << (const Json& that) {
     if (that.root->contains(root))
-        throw use_error("cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     mkarray()->add(that.root);
     return *this;
 }
 
 void Json::insert(int index, const Json& that) {
     if (that.root->contains(root))
-        throw use_error("cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     mkarray()->ins(index, that.root);
 }
 
 Json& Json::replace(int index, const Json& that) {
     if (that.root->contains(root))
-        throw use_error("cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     mkarray()->repl(index, that.root);
     return *this;
 }
@@ -214,13 +260,16 @@ void Json::erase(int index) {
     mkarray()->del(index);
 }
 
-Json Json::Property::operator = (const Json& that) {
+Json Json::Property::operator=(const Json& that) {
     if (host->type() == Type::OBJECT)
         ((Object*)host)->set(key, that.root);
     else if (host->type() == Type::ARRAY)
         ((Array*)host)->repl(index, that.root);
     else
-        throw std::logic_error("Property::operator =");
+        imread_raise(JSONLogicError,
+            "Property::operator=() assignment logic error:",
+         FF("\tAssignment attempt made on LHS object of Type::%s", host->typestr()),
+            "\tJson LHS object (assignee) should be Type::OBJECT or Type::ARRAY");
     return target();
 }
 
@@ -241,19 +290,25 @@ std::size_t Json::size() const {
         return ((Array*)root)->list.size();
     if (root->type() == Type::OBJECT)
         return ((Object*)root)->map.size();
-    throw use_error("method not applicable");
+    imread_raise(JSONUseError,
+        "Json::size() method not applicable",
+     FF("root->type() == Type::%s (Requires {Type::OBJECT | Type::ARRAY})", root->typestr()));
 }
 
 Json Json::get(const std::string& key) const {
     if (root->type() != Type::OBJECT)
-        throw use_error("method not applicable");
+        imread_raise(JSONUseError,
+            "Json::get() method not applicable",
+         FF("root->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
     Node* n = ((Object*)root)->get(key);
     return n == nullptr ? undefined : Json(n);
 }
 
 bool Json::has(const std::string& key) const {
     if (root->type() != Type::OBJECT)
-        throw use_error("method not applicable");
+        imread_raise(JSONUseError,
+            "Json::has() method not applicable",
+         FF("root->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
     auto kp = keyset.find(key);
     if (kp == keyset.end())
         return false;
@@ -264,14 +319,18 @@ bool Json::has(const std::string& key) const {
 
 Json::Property::Property(Node* node, const std::string& key) : host(node) {
     if (node->type() != Type::OBJECT)
-        throw use_error("method not applicable");
+        imread_raise(JSONUseError,
+            "Json::size() method not applicable",
+         FF("node->type() == Type::%s (Requires Type::OBJECT)", node->typestr()));
     this->key = key;
     index = -1;
 }
 
 Json::Property::Property(Node* node, int index) : host(node) {
     if (node->type() != Type::ARRAY)
-        throw use_error("method not applicable");
+        imread_raise(JSONUseError,
+            "Json::size() method not applicable",
+         FF("\tnode->type() == Type::%s (Requires Type::ARRAY)", node->typestr()));
     key = "";
     this->index = index;
 }
@@ -281,12 +340,17 @@ Json Json::Property::target() const {
         return ((Object*)host)->get(key);
     if (host->type() == Type::ARRAY)
         return ((Array*)host)->list.at(index);
-    throw std::logic_error("Property::operator Json()");
+    imread_raise(JSONLogicError,
+        "Property::operator Json() conversion-operator logic error:",
+     FF("\tConverstion attempt made on Property object of Type::%s", host->typestr()),
+        "\tConverted Property object should be Type::OBJECT or Type::ARRAY");
 }
 
 std::vector<std::string> Json::keys() {
     if (root->type() != Type::OBJECT)
-        throw use_error("method not applicable");
+        imread_raise(JSONUseError,
+            "Json::size() method not applicable",
+         FF("\troot->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
     Object* op = (Object*)root;
     std::vector<std::string> ret;
     for (auto it : op->map)
@@ -309,40 +373,8 @@ void Json::Number::print(std::ostream& out) const {
     out << value;
 }
 
-static void escape(std::ostream& out, const std::string& str) {
-    out << '"';
-    for (char c : str) {
-        switch (c) {
-        case '"':
-            out << '\\' << '"';
-            break;
-        case '\\':
-            out << c << c;
-            break;
-        case '\b':
-            out << '\\' << 'b';
-            break;
-        case '\f':
-            out << '\\' << 'f';
-            break;
-        case '\n':
-            out << '\\' << 'n';
-            break;
-        case '\r':
-            out << '\\' << 'r';
-            break;
-        case '\t':
-            out << '\\' << 't';
-            break;
-        default:
-            out << c;
-        }
-    }
-    out << '"';
-}
-
 void Json::String::print(std::ostream& out) const {
-    escape(out, value);
+    detail::escape(out, value);
 }
 
 void Json::Object::traverse(void (*f)(const Node*)) const {
@@ -364,7 +396,7 @@ void Json::Object::print(std::ostream& out) const {
             out << ',';
         if (indent)
             out << '\n' << std::string(indent*level, ' ');
-        escape(out, *it.first);
+        detail::escape(out, *it.first);
         out << ':';
         if (indent)
             out << ' ';
@@ -384,7 +416,7 @@ void Json::Array::print(std::ostream& out) const {
             out << ',';
         if (indent)
             out << '\n' << std::string(indent*level, ' ');
-       	it->print(out);
+        it->print(out);
         comma = true;
     }
     --level;
@@ -441,7 +473,7 @@ void Json::Array::ins(int index, Node* v) {
     if (index < 0)
         index += list.size();
     if (index < 0 || index > (int)list.size())
-        throw std::out_of_range("index out of range");
+        imread_raise_default(JSONOutOfRange);
     list.insert(list.begin() + index, v);
     v->refcnt++;
 }
@@ -669,85 +701,74 @@ Json Json::parse(const std::string& str) {
 Json::operator std::string() const {
     if (root->type() == Type::STRING)
         return ((String*)root)->value;
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
 Json::operator long double() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
 Json::operator double() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
 Json::operator float() const {
     if (root->type() == Type::NUMBER) {
         return ((Number*)root)->value;
     }
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
 Json::operator int() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
 Json::operator long() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
 Json::operator long long() const {
     if (root->type() == Type::NUMBER)
         return ((Number*)root)->value;
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
-// Json::operator uint8_t() const {
-//     if (root->type() == Type::NUMBER)
-//         return uint8_t(((Number*)root)->value);
-//     throw std::bad_cast();
-// }
-//
-// Json::operator uint16_t() const {
-//     if (root->type() == Type::NUMBER)
-//         return uint16_t(((Number*)root)->value);
-//     throw std::bad_cast();
-// }
-//
-// Json::operator int8_t() const {
-//     if (root->type() == Type::NUMBER)
-//         return int8_t(((Number*)root)->value);
-//     throw std::bad_cast();
-// }
-//
-// Json::operator int16_t() const {
-//     if (root->type() == Type::NUMBER)
-//         return int16_t(((Number*)root)->value);
-//     throw std::bad_cast();
-// }
-
-Json::operator unsigned char() const {
+Json::operator uint8_t() const {
     if (root->type() == Type::NUMBER)
-        return (unsigned char)((Number*)root)->value;
-    throw std::bad_cast();
+        return uint8_t(((Number*)root)->value);
+    imread_raise_default(JSONBadCast);
 }
-Json::operator char() const {
+
+Json::operator uint16_t() const {
     if (root->type() == Type::NUMBER)
-        return char(((Number*)root)->value);
-    throw std::bad_cast();
+        return uint16_t(((Number*)root)->value);
+    imread_raise_default(JSONBadCast);
+}
+
+Json::operator int8_t() const {
+    if (root->type() == Type::NUMBER)
+        return int8_t(((Number*)root)->value);
+    imread_raise_default(JSONBadCast);
+}
+
+Json::operator int16_t() const {
+    if (root->type() == Type::NUMBER)
+        return int16_t(((Number*)root)->value);
+    imread_raise_default(JSONBadCast);
 }
 
 Json::operator bool() const {
     if (root->type() == Type::BOOLEAN)
         return root == &Bool::T;
-    throw std::bad_cast();
+    imread_raise_default(JSONBadCast);
 }
 
 bool Json::operator == (const Json& that) const {

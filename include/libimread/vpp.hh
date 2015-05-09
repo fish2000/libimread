@@ -128,10 +128,9 @@ namespace im {
     
     namespace vpp {
         
-        static const options_map opts; /// not currently used when reading
-        
         template <typename V = byte, unsigned N = 3>
         VppImage<V, N> read(const std::string &filename) {
+            options_map opts;
             VppFactory<V> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));

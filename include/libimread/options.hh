@@ -4,38 +4,29 @@
 #ifndef IMREAD_OPTIONS_HH
 #define IMREAD_OPTIONS_HH
 
-#include <libimread/ext/JSON/json11.h>
 #include <string>
-#include <cstring>
-#include <tuple>
-#include <unordered_map>
-#include <type_traits>
+#include <libimread/ext/JSON/json11.h>
 
 namespace im {
     
-    using options_map = Json;
+    //using options_map = Json;
     
-    inline std::string           get_optional_string(const options_map &opts,
-                                                     const std::string key) {
-        return opts.has(key) ? std::string(opts.get(key)) : std::string("");
-    }
+    struct options_map : public Json {
+        public:
+            using Json::set;
+            
+            options_map()
+                :Json()
+                { set("metadata", ""); }
+    };
     
-    inline const char           *get_optional_cstring(const options_map &opts,
-                                                      const std::string key) {
-        return get_optional_string(opts, key).c_str();
-    }
+    std::string get_optional_string(const options_map &opts,  const std::string key);
+    const char *get_optional_cstring(const options_map &opts, const std::string key);
     
-    inline int                   get_optional_int(const options_map &opts,
-                                                  const std::string key,
-                                                  const int def) {
-        return opts.has(key) ? int(opts.get(key)) : def;
-    }
-    
-    inline bool                  get_optional_bool(const options_map &opts,
-                                                   const std::string key,
-                                                   const int def) {
-        return get_optional_int(opts, key, def);
-    }
+    int get_optional_int(const options_map &opts,   const std::string key,
+                                                    const int def);
+    bool get_optional_bool(const options_map &opts, const std::string key,
+                                                    const int def);
     
 }
 

@@ -176,10 +176,9 @@ namespace im {
 
     namespace halide {
         
-        static const options_map opts; /// not currently used when reading
-        
         template <typename T = byte>
         HybridImage<T> read(const std::string &filename) {
+            options_map opts;
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
@@ -197,6 +196,7 @@ namespace im {
         template <typename T = byte>
         void write(HybridImage<T> &input, const std::string &filename) {
             if (input.dim(2) > 3) { return; }
+            options_map opts;
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write(dynamic_cast<Image&>(input), output.get(), opts);
@@ -204,6 +204,7 @@ namespace im {
         
         template <typename T = byte>
         void write_multi(std::vector<HybridImage<T>> &input, const std::string &filename) {
+            options_map opts;
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write_multi(dynamic_cast<std::vector<Image>&>(input), output.get(), opts);
@@ -211,6 +212,7 @@ namespace im {
         
         template <typename T = byte>
         void WACK(HybridImage<T> &input, const std::string &filename, bool GPU = false) {
+            options_map opts;
             HybridImage<T> nim(1);
             if (input.dim(2) > 3) {
                 WTF("IMAGE WITH: dim(2) > 3 OHHHH SHIT");

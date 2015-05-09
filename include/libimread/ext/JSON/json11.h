@@ -34,6 +34,18 @@ enum Type : BaseType { JSNULL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT };
 
 namespace tc {
     
+    inline const char* typestr(Type t) {
+        switch (t) {
+            case Type::JSNULL:          return "NULL";
+            case Type::BOOLEAN:         return "BOOLEAN";
+            case Type::NUMBER:          return "NUMBER";
+            case Type::STRING:          return "STRING";
+            case Type::ARRAY:           return "ARRAY";
+            case Type::OBJECT:          return "OBJECT";
+        }
+        imread_raise_default(JSONOutOfRange);
+    }
+    
     namespace idx {
         template <Type t>
         struct helper;
@@ -88,14 +100,6 @@ namespace tc {
         constexpr operator value_type() const noexcept { return value; }
         constexpr value_type operator()() const noexcept { return value; }
     };
-    
-    // template <typename Sig>
-    // struct caster;
-    
-    /// I will never think this kind of syntax is normal
-    //typedef Json (Json::*JsonFP)(const std::string &key);
-    // template <typename T>
-    // using JsonFp = std::decay_t<T>::
     
     template <typename F>
     struct caster {
@@ -156,6 +160,7 @@ class Json {
             }
             virtual bool is_schema() const { return false; }
             void unref();
+            const char *typestr() const { return tc::typestr(this->type()); }
             virtual void validate(const Schema &schema,
                                   std::vector<const Node *> &) const;
             static Node null, undefined;
@@ -172,53 +177,45 @@ class Json {
         struct Number : Node {
             long double value;
             int prec;
-            Number(long double x) {
-                prec = LDBL_DIG;
-                value = x;
-            }
-            Number(double x) {
-                prec = DBL_DIG;
+            Number(int x) {
+                prec = -1;
                 value = x;
             }
             Number(float x) {
                 prec = FLT_DIG;
                 value = x;
             }
-            Number(long long x) {
+            explicit Number(long double x) {
+                prec = LDBL_DIG;
+                value = x;
+            }
+            explicit Number(double x) {
                 prec = DBL_DIG;
                 value = x;
             }
-            Number(long x) {
+            explicit Number(long long x) {
+                prec = DBL_DIG;
+                value = x;
+            }
+            explicit Number(long x) {
                 prec = -1;
                 value = x;
             }
-            Number(int x) {
+            explicit Number(uint8_t x) {
                 prec = -1;
-                value = x;
+                value = static_cast<int>(x);
             }
-            // Number(uint8_t x) {
-            //     prec = -1;
-            //     value = int(x);
-            // }
-            // Number(uint16_t x) {
-            //     prec = -1;
-            //     value = int(x);
-            // }
-            // Number(int8_t x) {
-            //     prec = -1;
-            //     value = int(x);
-            // }
-            // Number(int16_t x) {
-            //     prec = -1;
-            //     value = int(x);
-            // }
-            Number(unsigned char x) {
+            explicit Number(uint16_t x) {
                 prec = -1;
-                value = int(x);
+                value = static_cast<int>(x);
             }
-            Number(char x) {
+            explicit Number(int8_t x) {
                 prec = -1;
-                value = int(x);
+                value = static_cast<int>(x);
+            }
+            explicit Number(int16_t x) {
+                prec = -1;
+                value = static_cast<int>(x);
             }
             Number(std::istream &);
             Type type() const override { return Type::NUMBER; }
@@ -231,6 +228,7 @@ class Json {
         struct String : Node {
             std::string value;
             String(std::string s) { value = s; }
+            String(const char *cs) { value = std::string(cs); }
             String(std::istream &);
             Type type() const override { return Type::STRING; }
             void print(std::ostream &out) const override;
@@ -311,15 +309,22 @@ class Json {
             public:
                 Property(Node *, const std::string &);
                 Property(Node *, int);
-                operator Json() const { return target(); }
-                operator bool() { return target(); }
-                operator int() { return target(); }
-                operator long() { return target(); }
-                operator long long() { return target(); }
-                operator float() { return target(); }
-                operator double() { return target(); }
-                operator long double() { return target(); }
-                operator std::string() const { return target(); }
+                explicit Property(Node *n, const char *c)
+                    :Property(n, std::string(c))
+                    {}
+                operator Json() const           { return target(); }
+                operator int()                  { return target(); }
+                operator float()                { return target(); }
+                operator std::string() const    { return target(); }
+                explicit operator bool()        { return static_cast<bool>(target()); }
+                explicit operator long()        { return static_cast<long>(target()); }
+                explicit operator long long()   { return static_cast<long long>(target()); }
+                explicit operator double()      { return static_cast<double>(target()); }
+                explicit operator long double() { return static_cast<long double>(target()); }
+                // explicit operator uint8_t()     { return target(); }
+                // explicit operator uint16_t()    { return target(); }
+                // explicit operator int8_t()      { return target(); }
+                // explicit operator int16_t()     { return target(); }
                 Property operator[](const std::string &k) { return target()[k]; }
                 Property operator[](const char *k) { return (*this)[std::string(k)]; }
                 Property operator[](int i) { return target()[i]; }
@@ -329,6 +334,7 @@ class Json {
                 bool operator!=(const Json &js) const { return !(*this == js); }
                 std::vector<std::string> keys() { return target().keys(); }
                 bool has(const std::string &key) const { return target().has(key); }
+                bool has(const char *key) const { return target().has(std::string(key)); }
             
             friend std::ostream &operator<<(std::ostream &out, const Property &p) {
                 return out << (Json)p;
@@ -353,55 +359,76 @@ class Json {
         Json(Json &&that);
         Json(std::istream &, bool full = true); // parse
         virtual ~Json();
-    
+        
         // initializers
         Json &operator=(const Json &);
         Json &operator=(Json &&);
-    
+        
         // more constructors
-        Json(bool x) { (root = (x ? &Bool::T : &Bool::F))->refcnt++; }
-        Json(int x) { (root = new Number(x))->refcnt++; }
-        Json(long x) { (root = new Number(x))->refcnt++; }
-        Json(long long x) { (root = new Number(x))->refcnt++; }
-        Json(float x) { (root = new Number(x))->refcnt++; }
-        Json(double x) { (root = new Number(x))->refcnt++; }
-        Json(long double x) { (root = new Number(x))->refcnt++; }
-        Json(const std::string &s) { (root = new String(s))->refcnt++; }
-        Json(const char *s) { (root = new String(s))->refcnt++; }
+        Json(int x)                 { (root = new Number(x))->refcnt++; }
+        Json(float x)               { (root = new Number(x))->refcnt++; }
+        Json(const std::string &s)  { (root = new String(s))->refcnt++; }
+        Json(bool x)                { (root = (x ? &Bool::T : &Bool::F))->refcnt++; }
+        Json(long x)                { (root = new Number(x))->refcnt++; }
+        Json(long long x)           { (root = new Number(x))->refcnt++; }
+        Json(double x)              { (root = new Number(x))->refcnt++; }
+        Json(long double x)         { (root = new Number(x))->refcnt++; }
+        Json(const char *s)         { (root = new String(s))->refcnt++; }
+        Json(const Property &p)     { (root = p.target().root)->refcnt++; }
         Json(std::initializer_list<Json>);
-        Json(const Property &p) { (root = p.target().root)->refcnt++; }
-    
+        
+        explicit Json(uint8_t x)    { (root = new Number(x))->refcnt++; }
+        explicit Json(uint16_t x)   { (root = new Number(x))->refcnt++; }
+        explicit Json(int8_t x)     { (root = new Number(x))->refcnt++; }
+        explicit Json(int16_t x)    { (root = new Number(x))->refcnt++; }
+        
         // casts
-        Type type() const { return root->type(); }
-        operator bool() const;
+        Type type() const                   { return root->type(); }
+        const char* typestr() const         { return root->typestr(); }
+        std::string typestring() const      { return std::string(root->typestr()); }
+        
         operator int() const;
-        // operator uint8_t const;
-        // operator uint16_t const;
-        // operator int8_t const;
-        // operator int16_t const;
-        operator unsigned char() const;
-        operator char() const;
-        operator long() const;
-        operator long long() const;
         operator float() const;
-        operator double() const;
-        operator long double() const;
         operator std::string() const;
+        explicit operator bool() const;
+        explicit operator uint8_t() const;
+        explicit operator uint16_t() const;
+        explicit operator int8_t() const;
+        explicit operator int16_t() const;
+        explicit operator long() const;
+        explicit operator long long() const;
+        explicit operator double() const;
+        explicit operator long double() const;
         
         // object
         Json &set(std::string key, const Json &val);
         Json get(const std::string &key) const;
         bool has(const std::string &key) const;
+        Json &set(const char *key, const Json &val) { return set(std::string(key), val); }
+        Json get(const char *key) const             { return get(std::string(key)); }
+        bool has(const char *key) const             { return has(std::string(key)); }
         std::vector<std::string> keys();
-        
-        /// explicit cast functor
-        // typedef decltype(std::mem_fn(&Json::get)) getref_t;
-        // typedef tc::caster<getref_t> JsonElementCaster;
-        // static JsonElementCaster cast;
         
         template <typename T> inline
         decltype(auto) cast(const std::string &key) const {
             return static_cast<std::remove_reference_t<T>>(get(key));
+        }
+        
+        template <typename T> inline
+        decltype(auto) cast(const std::string &key, T default_value) const {
+            if (!has(key)) { return static_cast<std::remove_reference_t<T>>(default_value); }
+            return cast<T>(key);
+        }
+        
+        template <Type t = Type::STRING> inline
+        decltype(auto) json_cast(const std::string &key) const {
+            return static_cast<tc::idx::helper_t<t>>(get(key));
+        }
+        
+        template <Type t = Type::STRING> inline
+        decltype(auto) json_cast(const std::string &key, tc::idx::helper_t<t> default_value) const {
+            if (!has(key)) { return default_value; }
+            return json_cast<t>(key);
         }
         
         // array
@@ -410,7 +437,7 @@ class Json {
         void erase(int index);
         Json &replace(int index, const Json &);
         // subscript
-        size_t size() const;
+        std::size_t size() const;
         Json::Property operator[](const std::string &);
         Json::Property operator[](const char *k) { return (*this)[std::string(k)]; }
         Json::Property operator[](int);
@@ -429,6 +456,7 @@ class Json {
         
         static Json null, undefined;
         static Json parse(const std::string &);
+        static Json parse(const char *json) { return parse(std::string(json)); }
         static Json array() { return new Array(); }   // returns empty array
         static Json object() { return new Object(); } // returns empty object
         static int indent;                            // for pretty printing
@@ -436,6 +464,7 @@ class Json {
         struct parse_error : im::JSONParseError {
             unsigned line = 0, col = 0;
             parse_error(const char *msg, std::istream &in);
+            parse_error(const std::string &msg, std::istream &in);
         };
         
         struct use_error : im::JSONUseError {

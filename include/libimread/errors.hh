@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#ifndef LIBIMREAD_ERRORS_HH_
+#define LIBIMREAD_ERRORS_HH_
 
 #include <cstdio>
 #include <cstdlib>
@@ -53,10 +53,10 @@ namespace im {
     typename std::enable_if_t<std::is_constructible<std::string, S>::value && (sizeof...(Args) != 0), const std::string>
         stringify(S const& s, Args ...args) {
             /// adapted from http://stackoverflow.com/a/26197300/298171
-            char b; std::string fmt(s);
-            unsigned required = std::snprintf(&b, 0, fmt.c_str(), args...) + 1;
+            char b; const char *fmt(std::string(s).c_str());
+            unsigned required = std::snprintf(&b, 0, fmt, args...) + 1;
             char bytes[required];
-            std::snprintf(bytes, required, fmt.c_str(), args...);
+            std::snprintf(bytes, required, fmt, args...);
             return std::string(bytes);
         }
     
@@ -121,9 +121,19 @@ namespace im {
     constexpr std::size_t static_strlen(char const (&)[N]) { return N; }
 
 
+#define DO_COLOR_EXCEPTIONS 1
+
+#ifndef ST
+#define ST(s) "" #s 
+#endif /// ST
+
 #ifndef FF
 #define FF(...) std::forward_as_tuple(__VA_ARGS__)
 #endif /// FF
+
+#ifndef YES
+#define YES(...) im::norly(ansi::white, __VA_ARGS__)
+#endif /// YES
 
 #ifndef WTF
 #define WTF(...)                                                                        \
@@ -132,44 +142,39 @@ namespace im {
         __FILE__, __LINE__, __VA_ARGS__)
 #endif /// WTF
 
-#ifndef YES
-#define YES(...) im::norly(ansi::white, __VA_ARGS__)
-#endif /// YES
-
-#ifndef _ASSERT
+#ifndef imread_assert
 #define imread_assert(condition, ...)                                                   \
     if (!(condition)) {                                                                 \
-        im::srsly("(ASSERT FAILURE) [ " #condition " ]",                                \
-            ansi::lightyellow,                                                          \
-            __FILE__, __LINE__, __VA_ARGS__);                                           \
+        im::srsly("(ASSERT FAILURE) [ " ST(condition) " ]\n",                           \
+            ansi::lightyellow, __FILE__, __LINE__,                                      \
+                FF("\tIn function: %s%s%s",                                             \
+                    ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),      \
+                __VA_ARGS__);                                                           \
         std::exit(-1);                                                                  \
     }
-#endif /// _ASSERT
+#endif /// imread_assert
 
-#define DO_COLOR_EXCEPTIONS 1
-
-#ifndef PP_TOSTRING
-#define PP_TOSTRING(s) "" #s 
-#endif /// PP_TOSTRING
+#ifndef imread_raise_default
+#define imread_raise_default(Exception)                                                 \
+    throw im::Exception(im::emerg("[ ERROR > " ST(Exception) " ]\n",                    \
+        ansi::lightred, __FILE__, __LINE__,                                             \
+            FF("\tIn function: %s%s%s",                                                 \
+                ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),          \
+            FF("\t%s", im::Exception::default_message)));
+#endif /// imread_raise_default
 
 #ifndef imread_raise
-#define imread_raise(Exception)                                                         \
-    throw im::Exception("[ERROR:" PP_TOSTRING(im::Exception) " ]",                      \
-        im::emerg(ansi::magenta,                                                        \
-            __FILE__, __LINE__,                                                         \
-            im::Exception::default_message));
+#define imread_raise(Exception, ...)                                                    \
+    throw im::Exception(im::emerg("[ ERROR > " ST(Exception) " ]\n",                    \
+        ansi::lightred, __FILE__, __LINE__,                                             \
+            FF("\tIn function: %s%s%s",                                                 \
+                ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),          \
+            __VA_ARGS__));
 #endif /// imread_raise
 
-#ifndef imread_raise_msg
-#define imread_raise_msg(Exception, Msg)                                                \
-    throw im::Exception("[ERROR:" PP_TOSTRING(im::Exception) " ]",                      \
-        im::emerg(ansi::magenta,                                                        \
-            __FILE__, __LINE__, Msg));
-#endif /// imread_raise_msg
-
 #ifndef DECLARE_IMREAD_ERROR_INNARDS
-#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg, DefaultMsgLen)               \
-    static constexpr char default_message[DefaultMsgLen] = PP_TOSTRING(DefaultMsg);     \
+#define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg, MsgLen)                      \
+    constexpr static const char default_message[MsgLen] = ST(DefaultMsg);               \
     template <typename S>                                                               \
     TypeName(S s)                                                                       \
         :w(im::stringify(s))                                                            \
@@ -188,17 +193,17 @@ namespace im {
 #endif /// DECLARE_IMREAD_ERROR_INNARDS
 
 #ifndef DECLARE_IMREAD_ERROR_SUBTYPE_INNARDS
-#define DECLARE_IMREAD_ERROR_SUBTYPE_INNARDS(TypeName, BaseTypeName, DefaultMsg, DefaultMsgLen) \
-    static constexpr char default_message[DefaultMsgLen] = #DefaultMsg;                 \
+#define DECLARE_IMREAD_ERROR_SUBTYPE_INNARDS(TypeName, BaseTypeName, DefaultMsg, MsgLen)\
+    static constexpr char default_message[MsgLen] = ST(DefaultMsg);                     \
     template <typename S>                                                               \
     TypeName(S s)                                                                       \
-        :BaseTypeName(s)                                                                \
-        ,w(im::stringify(s))                                                            \
+        :w(im::stringify(s))                                                            \
+        ,BaseTypeName(w)                                                                \
         { }                                                                             \
     template <typename S, typename ...Args>                                             \
     TypeName(S s, Args&& ...args)                                                       \
-        :BaseTypeName(s)                                                                \
-        ,w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...))             \
+        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...))             \
+        ,BaseTypeName(w)                                                                \
         { }                                                                             \
     TypeName()                                                                          \
         :BaseTypeName(DefaultMsg), w(DefaultMsg)                                        \
@@ -211,17 +216,19 @@ namespace im {
 
 #ifndef DECLARE_IMREAD_ERROR_TYPE
 #define DECLARE_IMREAD_ERROR_TYPE(TypeName, DefaultMsg)                                 \
-    struct TypeName : std::exception {                                                  \
+    struct TypeName : public std::exception {                                           \
+        public:                                                                         \
         DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg,                              \
-            static_strlen(#DefaultMsg));                                                \
+            static_strlen(ST(DefaultMsg)));                                             \
     };
 #endif /// DECLARE_IMREAD_ERROR_TYPE
 
 #ifndef DECLARE_IMREAD_ERROR_SUBTYPE
 #define DECLARE_IMREAD_ERROR_SUBTYPE(TypeName, BaseTypeName, DefaultMsg)                \
-    struct TypeName : BaseTypeName {                                                    \
+    struct TypeName : public BaseTypeName {                                             \
+        public:                                                                         \
         DECLARE_IMREAD_ERROR_SUBTYPE_INNARDS(TypeName, BaseTypeName, DefaultMsg,        \
-            static_strlen(#DefaultMsg));                                                \
+            static_strlen(ST(DefaultMsg)));                                             \
     };
 #endif /// DECLARE_IMREAD_ERROR_SUBTYPE
 
@@ -236,9 +243,14 @@ DECLARE_IMREAD_ERROR_TYPE(FileSystemError,          "File System Error");
 DECLARE_IMREAD_ERROR_TYPE(FormatNotFound,           "File Format Not Found");
 
 DECLARE_IMREAD_ERROR_SUBTYPE(JSONParseError,
-                             std::runtime_error,    "Error parsing JSON");
-DECLARE_IMREAD_ERROR_TYPE(JSONUseError,             "Error in JSON library");
+                             std::runtime_error,    "JSON parsing error");
+DECLARE_IMREAD_ERROR_SUBTYPE(JSONLogicError,
+                            std::logic_error,       "JSON operator logic error");
+DECLARE_IMREAD_ERROR_TYPE(JSONUseError,             "JSON library internal error");
+DECLARE_IMREAD_ERROR_TYPE(JSONInvalidSchema,        "JSON schema parsing error");
+DECLARE_IMREAD_ERROR_TYPE(JSONOutOfRange,           "JSON index value out of range");
+DECLARE_IMREAD_ERROR_TYPE(JSONBadCast,              "Error casting JSON value");
 
 }
 
-#endif // LPC_ERRORS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif // LIBIMREAD_ERRORS_HH_

@@ -25,17 +25,17 @@ set(hdrs
     "docopt_util.h"
     "docopt_value.h")
 
-add_library(libdocopt STATIC ${srcs} ${hdrs})
+# add_library(libdocopt STATIC ${srcs} ${hdrs})
 add_library(docopt SHARED ${srcs} ${hdrs})
 
-set_target_properties(libdocopt
-    PROPERTIES ARCHIVE_OUTPUT_NAME "docopt")
+# set_target_properties(libdocopt
+#     PROPERTIES ARCHIVE_OUTPUT_NAME "docopt")
 set_target_properties(docopt
     PROPERTIES LIBRARY_OUTPUT_NAME "docopt")
-target_link_libraries(libdocopt)
+# target_link_libraries(libdocopt)
 target_link_libraries(docopt)
 
-install(TARGETS libdocopt DESTINATION lib)
+# install(TARGETS libdocopt DESTINATION lib)
 install(TARGETS docopt DESTINATION lib)
 install(DIRECTORY ./ DESTINATION include/libdocopt
     FILES_MATCHING PATTERN "*.h")

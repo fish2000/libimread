@@ -111,8 +111,8 @@ namespace filesystem {
             path make_absolute() const {
                 char temp[PATH_MAX];
                 if (realpath(c_str(), temp) == NULL) {
-                    throw im::FileSystemError("FATAL ERROR:\n",
-                        "Internal error raised during path::make_absolute() call to realpath():",
+                    throw im::FileSystemError(
+                        "FATAL internal error raised during path::make_absolute() call to realpath():",
                      FF("\t%s (%d)", std::strerror(errno), errno),
                         "In reference to path value:",
                      FF("\t%s", c_str()));
@@ -189,11 +189,11 @@ namespace filesystem {
             
             path join(const path &other) const {
                 if (other.m_absolute) {
-                    throw im::FileSystemError("ERROR:",
+                    throw im::FileSystemError(
                         "path::operator/(): Expected a relative path!");
                 }
                 if (other.m_type != other.m_type) {
-                    throw im::FileSystemError("ERROR:",
+                    throw im::FileSystemError(
                         "path::operator/(): Expected a path of the same type!");
                 }
                 
@@ -235,7 +235,7 @@ namespace filesystem {
             static path getcwd() {
                 char temp[PATH_MAX];
                 if (::getcwd(temp, PATH_MAX) == NULL) {
-                    throw im::FileSystemError("ERROR:",
+                    throw im::FileSystemError(
                         "Internal error in getcwd():", strerror(errno));
                 }
                 return path(temp);
@@ -343,9 +343,9 @@ namespace filesystem {
                                         }
         
         void create() {
-            int out = mkstemps(strdup(tf.c_str()), strlen(suffix));
+            int out = mkstemps(strdup(tf.c_str()), std::strlen(suffix));
             if (out == -1) {
-                throw im::FileSystemError("ERROR:",
+                throw im::FileSystemError(
                     "Internal error in mktemps():",
                     std::strerror(errno));
             }
@@ -356,7 +356,7 @@ namespace filesystem {
         
         void remove() {
             if (::unlink(tf.c_str()) == -1) {
-                throw im::FileSystemError("ERROR:",
+                throw im::FileSystemError(
                     "Internal error in unlink():",
                     std::strerror(errno));
             }
@@ -370,7 +370,6 @@ namespace filesystem {
     
     struct TemporaryDirectory {
         
-        //constexpr char NamedTemporaryFile::tfp[];
         static constexpr char tdp[] = "libimread-XXXXXXX";
         
         char *tpl;

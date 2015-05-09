@@ -38,7 +38,7 @@ namespace filesystem {
     std::vector<path> path::list(bool full_paths) {
         /// list all files
         if (!is_directory()) {
-            throw im::FileSystemError("ERROR:",
+            throw im::FileSystemError(
                 "Can't list files from a non-directory:", str());
         }
         path abspath = make_absolute();
@@ -46,7 +46,7 @@ namespace filesystem {
         {
             directory d = ddopen(abspath);
             if (!d.get()) {
-                throw im::FileSystemError("ERROR:",
+                throw im::FileSystemError(
                     "Internal error in opendir():", strerror(errno));
             }
             struct dirent *entp;
@@ -65,11 +65,11 @@ namespace filesystem {
     std::vector<path> path::list(const char *pattern, bool full_paths) {
         /// list files with glob
         if (!pattern) {
-            throw im::FileSystemError("ERROR:",
+            throw im::FileSystemError(
                 "No pattern provided for listing:", str());
         }
         if (!is_directory()) {
-            throw im::FileSystemError("ERROR:",
+            throw im::FileSystemError(
                 "Can't list files from a non-directory:", str());
         }
         path abspath = make_absolute();
@@ -96,7 +96,7 @@ namespace filesystem {
     std::vector<path> path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) {
         /// list files with regex object
         if (!is_directory()) {
-            throw im::FileSystemError("ERROR:",
+            throw im::FileSystemError(
                 "Can't list files from a non-directory:", str());
         }
         path abspath = make_absolute();

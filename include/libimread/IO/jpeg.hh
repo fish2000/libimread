@@ -1,12 +1,12 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_JPEG_H_INCLUDE_GUARD_THU_FEB__2_18_14_07_WET_2012
-#define LPC_JPEG_H_INCLUDE_GUARD_THU_FEB__2_18_14_07_WET_2012
+#ifndef LIBIMREAD_IO_JPEG_HH_
+#define LIBIMREAD_IO_JPEG_HH_
 
 #include <cstdio>
 #include <csetjmp>
-#include <sstream>
+//#include <sstream>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
@@ -40,4 +40,4 @@ namespace im {
 }
 
 
-#endif // LPC_JPEG_H_INCLUDE_GUARD_THU_FEB__2_18_14_07_WET_2012
+#endif /// LIBIMREAD_IO_JPEG_HH_

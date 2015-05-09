@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_ANSICOLORS_HH_
 #define LIBIMREAD_ANSICOLORS_HH_
 
+#include <cstring>
 #include <string>
 #include <iostream>
 #include <map>
@@ -17,9 +18,9 @@ namespace ansi {
         FM_BOLD             = 1,
         FM_DIM              = 2,
         FM_UNDERLINE        = 4,
-        FM_BOLD_OFF         = 1,
-        FM_DIM_OFF          = 2,
-        FM_UNDERLINE_OFF    = 4,
+        // FM_BOLD_OFF         = 1,
+        // FM_DIM_OFF          = 2,
+        // FM_UNDERLINE_OFF    = 4,
         
         FG_BLACK            = 30,
         FG_RED              = 31,
@@ -48,13 +49,24 @@ namespace ansi {
         private:
             ANSICode code;
         public:
-            ANSI(ANSICode c)
+            explicit ANSI(ANSICode c)
                 :code(c)
                 {}
             friend std::ostream&
             operator<<(std::ostream& os, const ANSI& ansi) {
                 return os << "\033[" << ansi.code << "m";
             }
+            std::string str() const {
+                return "\033[" + std::to_string(code) + "m";
+            }
+            char *c_str() const {
+                int numbytes = code < 10 ? 6 : 7;
+                char printbuf[numbytes];
+                std::snprintf(printbuf, numbytes, "\033[%im", code);
+                return strdup(printbuf);
+            }
+            operator std::string() const { return str(); }
+            operator char*() const { return c_str(); }
     };
     
     struct color {
@@ -86,6 +98,14 @@ namespace ansi {
     
     const ANSI reset = ANSI(FM_RESET);
     const ANSI termdefault = ANSI(FG_DEFAULT_COLOR);
+    
+    const ANSI bold = ANSI(FM_BOLD);
+    const ANSI dim = ANSI(FM_DIM);
+    const ANSI underline = ANSI(FM_UNDERLINE);
+    
+    // const ANSI bold_off = ANSI(FM_BOLD);
+    // const ANSI dim_off = ANSI(FM_DIM);
+    // const ANSI underline_off = ANSI(FM_UNDERLINE);
     
     const ANSI red = ANSI(FG_RED);
     const ANSI green = ANSI(FG_GREEN);

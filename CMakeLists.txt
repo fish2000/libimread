@@ -98,30 +98,30 @@ include_directories(
 include(fileList.cmake)
 
 # Build the library
-add_library(libimread STATIC ${srcs} ${hdrs})
+# add_library(libimread STATIC ${srcs} ${hdrs})
 add_library(imread SHARED ${srcs} ${hdrs})
-set_target_properties(libimread
-    PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
+# set_target_properties(libimread
+#     PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
-set_target_properties(libimread
-    PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
+# set_target_properties(libimread
+#     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 set_target_properties(imread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
-add_dependencies(libimread "libdocopt")
+# add_dependencies(libimread "libdocopt")
 add_dependencies(imread "docopt")
-add_dependencies(libimread "libsszip")
+# add_dependencies(libimread "libsszip")
 add_dependencies(imread "sszip")
-add_dependencies(libimread "iod_generate_symbols")
+# add_dependencies(libimread "iod_generate_symbols")
 add_dependencies(imread "iod_generate_symbols")
-target_link_libraries(libimread
-    libsszip
-    png z ${EXTRA_LIBS}
-    ${EIGEN3_LIBRARIES}
-    ${TIFF_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES})
+# target_link_libraries(libimread
+#     libsszip
+#     png z ${EXTRA_LIBS}
+#     ${EIGEN3_LIBRARIES}
+#     ${TIFF_LIBRARIES}
+#     ${JPEG_LIBRARIES}
+#     ${WEBP_LIBRARIES}
+#     ${HALIDE_LIBRARIES})
 target_link_libraries(imread
     sszip docopt
     png z ${EXTRA_LIBS}
@@ -144,8 +144,8 @@ set_source_files_properties(
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 add_dependencies("test_${PROJECT_NAME}" "iod_generate_symbols")
-add_dependencies("test_${PROJECT_NAME}" "libdocopt")
-add_dependencies("test_${PROJECT_NAME}" "libsszip")
+add_dependencies("test_${PROJECT_NAME}" "docopt")
+add_dependencies("test_${PROJECT_NAME}" "sszip")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     png z imread sszip docopt
@@ -156,7 +156,7 @@ target_link_libraries("test_${PROJECT_NAME}"
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES})
 
-install(TARGETS libimread DESTINATION lib)
+# install(TARGETS libimread DESTINATION lib)
 install(TARGETS imread DESTINATION lib)
 install(DIRECTORY ${PROJECT_BINARY_DIR}/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "libimread.hpp")

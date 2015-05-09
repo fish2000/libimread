@@ -77,18 +77,6 @@ namespace im {
         T* oT = oA; oA = oB; oB = oT;
     }
     
-    /*
-    template <typename T>
-    inline std::vector<T*> allrows(Image &im) {
-        std::vector<T*> res;
-        const int h = im.dim(0);
-        for (int r = 0; r != h; ++r) {
-            res.push_back(im.rowp_as<T>(r));
-        }
-        return res;
-    }
-    */
-    
     inline std::vector<byte> full_data(byte_source &s) {
         std::vector<byte> res;
         byte buffer[4096];

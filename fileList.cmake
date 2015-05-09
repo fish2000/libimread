@@ -164,6 +164,7 @@ set(srcs
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp
     ${srcs_dir}/coregraphics.mm
+    ${srcs_dir}/errors.cpp
     ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/fs.cpp
