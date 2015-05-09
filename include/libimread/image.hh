@@ -9,6 +9,7 @@
 #include <string>
 #include <libimread/libimread.hpp>
 #include <libimread/tools.hh>
+#include <libimread/pixels.hh>
 
 namespace im {
     class Image {
@@ -32,13 +33,20 @@ namespace im {
                 return this->dim(dim);
             }
             
-            template <typename T>
+            template <typename T> inline
             T *rowp_as(const int r) {
                 return static_cast<T*>(this->rowp(r));
             }
             
-            template <typename T>
-            inline std::vector<T*> allrows() {
+            template <typename T = byte> inline
+            pix::accessor<T> access() {
+                return pix::accessor<T>(rowp_as<T>(0), stride(0),
+                                                       stride(1),
+                                                       stride(2));
+            }
+            
+            template <typename T> inline
+            std::vector<T*> allrows() {
                 std::vector<T*> res;
                 const int h = this->dim(0);
                 for (int r = 0; r != h; ++r) {

@@ -5,6 +5,14 @@
 #define IMREAD_OPTIONS_HH
 
 #include <string>
+
+#include <iod/callable_traits.hh>
+#include <iod/sio.hh>
+#include <iod/symbol.hh>
+#include <iod/tuple_utils.hh>
+#include <iod/utils.hh>
+#include <iod/bind_method.hh>
+
 #include <libimread/ext/JSON/json11.h>
 
 namespace im {

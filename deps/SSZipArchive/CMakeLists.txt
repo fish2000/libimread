@@ -16,8 +16,9 @@ include_directories(
     ${ZLIB_INCLUDE_DIR}
     ${BZIP2_INCLUDE_DIR}
     ${FOUNDATION_INCLUDE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/minizip)
+    ${CMAKE_CURRENT_SOURCE_DIR})
+
+# ${CMAKE_CURRENT_SOURCE_DIR}/minizip
 
 add_definitions(
     -Wall -Werror -fstack-protector-all

@@ -10,7 +10,7 @@
 #define _SSZIPARCHIVE_H
 
 #import <Foundation/Foundation.h>
-#include "unzip.h"
+#include "minizip/unzip.h"
 
 @protocol SSZipArchiveDelegate;
 

@@ -16,6 +16,10 @@
 
 namespace im {
     
+    namespace PNG {
+        const format::options_type format::options = format::opts_init();
+    }
+    
     namespace {
         
         void throw_error(png_structp png_ptr, png_const_charp msg) { imread_raise(CannotReadError, msg); }
@@ -113,16 +117,20 @@ namespace im {
             return 1;
         }
         
-        void __attribute__((unused)) swap_and_premultiply_alpha_transform(png_structp ptr,
-                                                                          png_row_infop row_info,
-                                                                          png_bytep data) {
-            for (unsigned int x = 0; x < row_info->width * 4; x += 4) {
+        void swap_and_premultiply_alpha_transform(png_structp ptr,
+                                                  png_row_infop row_info,
+                                                  png_bytep data) {
+            
+            auto row_width = row_info->width;
+            
+            for (unsigned int x = 0; x < row_width * 4; x += 4) {
                 png_byte r, g, b, a;
                 r = data[x+0]; g = data[x+1]; b = data[x+2]; a = data[x+3];
                 data[x+0] = (b*a) / 0xff;
                 data[x+1] = (g*a) / 0xff;
                 data[x+2] = (r*a) / 0xff;
             }
+            
         }
         
         
@@ -226,7 +234,7 @@ namespace im {
         
         return output;
     }
-
+    
     void PNGFormat::write(Image &input, byte_sink *output, const options_map &opts) {
         png_holder p(png_holder::write_mode);
         p.create_info();
@@ -251,42 +259,49 @@ namespace im {
                 png_set_compression_level(p.png_ptr, compression_level);
             }
         }
-        png_write_info(p.png_ptr, p.png_info);
         
+        png_write_info(p.png_ptr, p.png_info);
         row_pointers = new png_bytep[height];
         
         int c_stride = (channels == 1) ? 0 : input.stride(2);
-        uint8_t *srcPtr = input.rowp_as<uint8_t>(0);
+        int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
+        int x = 0, y = 0, c = 0;
+        uint8_t *dstPtr;
+        uint8_t out;
         
-        for (int y = 0; y < height; y++) {
-            row_pointers[y] = new png_byte[png_get_rowbytes(p.png_ptr, p.png_info)];
-            uint8_t *dstPtr = static_cast<uint8_t *>(row_pointers[y]);
+        if (bit_depth == 16) {
+            // downconvert to uint8_t from uint16_t-ish data
+            uint16_t *srcPtr = input.rowp_as<uint16_t>(0);
             
-            if (bit_depth == 16) {
-                // convert to uint16_t
-                for (int x = 0; x < width; x++) {
-                    for (int c = 0; c < channels; c++) {
-                        uint16_t out;
-                        pix::convert(srcPtr[c*c_stride], out);
-                        *dstPtr++ = out >> 8;
-                        *dstPtr++ = out & 0xff;
-                    }
-                    srcPtr++;
-                }
-            } else if (bit_depth == 8) {
-                // convert to uint8_t
-                for (int x = 0; x < width; x++) {
-                    for (int c = 0; c < channels; c++) {
-                        uint8_t out;
+            for (y = 0; y < height; y++) {
+                row_pointers[y] = new png_byte[rowbytes];
+                dstPtr = static_cast<uint8_t*>(row_pointers[y]);
+                for (x = 0; x < width; x++) {
+                    for (c = 0; c < channels; c++) {
                         pix::convert(srcPtr[c*c_stride], out);
                         *dstPtr++ = out;
                     }
                     srcPtr++;
                 }
-            } else {
-                imread_assert(bit_depth == 8 || bit_depth == 16,
-                    "We only support saving 8- and 16-bit images.");
             }
+        } else if (bit_depth == 8) {
+            // stick with uint8_t
+            uint8_t *srcPtr = input.rowp_as<uint8_t>(0);
+            
+            for (y = 0; y < height; y++) {
+                row_pointers[y] = new png_byte[rowbytes];
+                dstPtr = static_cast<uint8_t*>(row_pointers[y]);
+                for (x = 0; x < width; x++) {
+                    for (c = 0; c < channels; c++) {
+                        pix::convert(srcPtr[c*c_stride], out);
+                        *dstPtr++ = out;
+                    }
+                    srcPtr++;
+                }
+            }
+        } else {
+            imread_assert(bit_depth == 8 || bit_depth == 16,
+                "We only support saving 8- and 16-bit images.");
         }
         
         // write data
@@ -302,7 +317,136 @@ namespace im {
         // clean up
         for (int y = 0; y < height; y++) { delete[] row_pointers[y]; }
         delete[] row_pointers;
-        
     }
-
+    
+    
+    /// ADAPTED FROM PINCRUSH - FREAKY REFORMATTED PNG FOR IOS
+    void write_ios(Image &input, byte_sink *output, const options_map &opts) {
+        /// immediately write the header, 
+        /// before initializing the holder
+        output->write(PNG_SIGNATURE, 8);
+        
+        png_holder p(png_holder::write_mode);
+        p.create_info();
+        png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
+        png_set_sig_bytes(p.png_ptr, 8);
+        
+        /// not sure we need this
+        png_set_filter(p.png_ptr, 0, PNG_FILTER_NONE);
+        
+        /// from the pincrush source:
+        ///     "The default window size is 15 bits. Setting it to -15
+        ///      causes zlib to discard the header and crc information.
+        ///      This is critical to making a proper CgBI PNG"
+        png_set_compression_window_bits(p.png_ptr, -15);
+        
+        const int width = input.dim(0);
+        const int height = input.dim(1);
+        const int channels = input.dim(2);
+        const int bit_depth = input.nbits();
+        
+        png_bytep *row_pointers;
+        png_byte color_type = color_types[channels - 1];
+        
+        if (!(color_type & PNG_COLOR_MASK_ALPHA)) {
+            // Expand, adding an opaque alpha channel.
+            YES("[apple-png] Adding opaque alpha channel");
+            png_set_add_alpha(p.png_ptr, 0xff, PNG_FILLER_AFTER);
+        }
+        
+        png_set_read_user_transform_fn(p.png_ptr,
+            swap_and_premultiply_alpha_transform);
+        
+        png_set_IHDR(p.png_ptr, p.png_info,
+                     width, height, bit_depth, color_type,
+                     PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
+                     PNG_FILTER_TYPE_BASE);
+        
+        // Standard Gamma
+        png_set_gAMA(p.png_ptr, p.png_info, 0.45455);
+        
+        // Primary Chromaticities white_xy, red_xy, blue_xy, green_xy, in that order.
+        png_set_cHRM(p.png_ptr, p.png_info,
+            0.312700, 0.329000, 0.640000, 0.330000,
+            0.300000, 0.600000, 0.150000, 0.060000);
+        
+        // Apple's PNGs have an sRGB intent of 0.
+        png_set_sRGB(p.png_ptr, p.png_info, 0);
+        
+        /// This is the freaky custom Apple chunk
+        static const png_byte cname[] = {  'C',  'g',  'B',  'I',  '\0' };
+        static const png_byte cdata_solid[] = { 0x50, 0x00, 0x20, 0x06 };
+        static const png_byte cdata_alpha[] = { 0x50, 0x00, 0x20, 0x02 };
+        if (color_type & PNG_COLOR_MASK_ALPHA || color_type == PNG_COLOR_TYPE_PALETTE) {
+            // I'm not sure, but if the input colortype is alpha anything, CgBI[3] is 0x02 instead of 0x06.
+            // Strange, because 0x06 means RGBA and 0x02 does not.
+            // But, Mimick this behaviour. Otherwise, our alpha channel is ignored.
+            // cdata[3] = 0x02;
+            png_write_chunk(p.png_ptr, cname, cdata_alpha, 4);
+        } else {
+            png_write_chunk(p.png_ptr, cname, cdata_solid, 4);
+        }
+        
+        /// WRITE THE INFO STRUCT GAAAAH
+        png_write_info(p.png_ptr, p.png_info);
+        
+        row_pointers = new png_bytep[height];
+        
+        /// NEED TO STOP HARDCODING IN UNSIGNED FUCKING CHAR FOR THE PIXEL TYPES SOMETIME
+        int c_stride = (channels == 1) ? 0 : input.stride(2);
+        int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
+        int x = 0, y = 0, c = 0;
+        uint8_t *dstPtr;
+        uint8_t out;
+        
+        if (bit_depth == 16) {
+            // downconvert to uint8_t from uint16_t-ish data
+            uint16_t *srcPtr = input.rowp_as<uint16_t>(0);
+            
+            for (y = 0; y < height; y++) {
+                row_pointers[y] = new png_byte[rowbytes];
+                dstPtr = static_cast<uint8_t*>(row_pointers[y]);
+                for (x = 0; x < width; x++) {
+                    for (c = 0; c < channels; c++) {
+                        pix::convert(srcPtr[c*c_stride], out);
+                        *dstPtr++ = out;
+                    }
+                    srcPtr++;
+                }
+            }
+        } else if (bit_depth == 8) {
+            // stick with uint8_t
+            uint8_t *srcPtr = input.rowp_as<uint8_t>(0);
+            
+            for (y = 0; y < height; y++) {
+                row_pointers[y] = new png_byte[rowbytes];
+                dstPtr = static_cast<uint8_t*>(row_pointers[y]);
+                for (x = 0; x < width; x++) {
+                    for (c = 0; c < channels; c++) {
+                        pix::convert(srcPtr[c*c_stride], out);
+                        *dstPtr++ = out;
+                    }
+                    srcPtr++;
+                }
+            }
+        } else {
+            imread_assert(bit_depth == 8 || bit_depth == 16,
+                "We only support saving 8- and 16-bit images.");
+        }
+        
+        // write data
+        imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
+            "[write_png_file] Error during writing bytes");
+        png_write_image(p.png_ptr, row_pointers);
+        
+        // finish write
+        imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
+            "[write_png_file] Error during end of write");
+        png_write_end(p.png_ptr, p.png_info);
+        
+        // clean up
+        for (int y = 0; y < height; y++) { delete[] row_pointers[y]; }
+        delete[] row_pointers;
+    }
+    
 }

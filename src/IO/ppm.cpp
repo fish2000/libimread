@@ -23,12 +23,12 @@ namespace im {
             return ((char *) &value)[0] == 1;
         }
         
-        template <typename T = uint8_t>
-        inline T *at(Image &im, int x, int y, int z) {
-            return &im.rowp_as<T>(0)[x*im.stride(0) +
-                                     y*im.stride(1) +
-                                     z*im.stride(2)];
-        }
+        // template <typename T = uint8_t>
+        // inline T *at(Image &im, int x, int y, int z) {
+        //     return &im.rowp_as<T>(0)[x*im.stride(0) +
+        //                              y*im.stride(1) +
+        //                              z*im.stride(2)];
+        // }
         
     }
     
@@ -116,11 +116,12 @@ namespace im {
         
         if (bit_depth == 8) {
             uint8_t *data = new uint8_t[full_size];
+            pix::accessor<byte> at = input.access();
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     uint8_t *p = static_cast<uint8_t *>(&data[(y*width+x)*channels]);
                     for (int c = 0; c < channels; c++) {
-                        pix::convert(at(input, x, y, c)[0], p[c]);
+                        pix::convert(at(x, y, c)[0], p[c]);
                     }
                 }
             }
@@ -128,14 +129,15 @@ namespace im {
                 "Could not write PPM 8-bit data\n");
             delete[] data;
         } else if (bit_depth == 16) {
+            pix::accessor<uint16_t> at = input.access<uint16_t>();
             int little_endian = is_little_endian();
             uint16_t *data = new uint16_t[full_size];
+            uint16_t value;
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     uint16_t *p = static_cast<uint16_t *>(&data[(y*width+x)*channels]);
                     for (int c = 0; c < channels; c++) {
-                        uint16_t value;
-                        pix::convert(at<uint16_t>(input, x, y, c)[0], value);
+                        pix::convert(at(x, y, c)[0], value);
                         SWAP_ENDIAN16(little_endian, value);
                         p[c] = value;
                     }

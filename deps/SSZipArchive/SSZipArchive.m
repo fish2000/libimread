@@ -7,7 +7,7 @@
 //
 
 #import "SSZipArchive.h"
-#include "zip.h"
+#include "minizip/zip.h"
 #import "zlib.h"
 #import "zconf.h"
 
