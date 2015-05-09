@@ -55,20 +55,16 @@ namespace im {
         
         /// Check what we got
         if (bit_depth != 8) {
-            throw CannotWriteError(
-                "ERROR:",
+            imread_raise(CannotWriteError,
                     "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE BIT DEPTH\"",
                  FF("im::GIFFormat::write() got:    `bit_depth` = (int){ %d }", bit_depth),
-                    "im::GIFFormat::write() needs:  `bit_depth` = (int){ 8 }"
-            );
+                    "im::GIFFormat::write() needs:  `bit_depth` = (int){ 8 }");
         }
         if (channels != 3) {
-            throw CannotWriteError(
-                "ERROR:",
+            imread_raise(CannotWriteError,
                     "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE COLOR MODE\"",
                  FF("im::GIFFormat::write() got:    `channels` = (int){ %d }", channels),
-                    "im::GIFFormat::write() needs:  `channels` = (int){ 3 }"
-            );
+                    "im::GIFFormat::write() needs:  `channels` = (int){ 3 }");
         }
         
         /// Do the pixel loop to interleave RGB data

@@ -9,8 +9,6 @@
 
 namespace im {
     
-    //using options_map = Json;
-    
     struct options_map : public Json {
         public:
             using Json::set;

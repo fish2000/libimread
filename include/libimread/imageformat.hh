@@ -36,25 +36,25 @@ namespace im {
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,
                                                 const options_map &opts) {
-                throw NotImplementedError();
+                imread_raise_default(NotImplementedError);
             }
             
             virtual std::unique_ptr<image_list> read_multi(byte_source *src,
                                                            ImageFactory *factory,
                                                            const options_map &opts) {
-                throw NotImplementedError();
+                imread_raise_default(NotImplementedError);
             }
             
             virtual void write(Image &input,
                                byte_sink *output,
                                const options_map &opts) {
-                throw NotImplementedError();
+                imread_raise_default(NotImplementedError);
             }
             
             virtual void write_multi(std::vector<Image> &input,
                                      byte_sink* output,
                                      const options_map &opts) {
-                throw NotImplementedError();
+                imread_raise_default(NotImplementedError);
             }
             
     };

@@ -17,7 +17,7 @@ namespace im {
         
         ePVRLoadResult res = pvr.load(&data[0], data.size());
         if (res) {
-            throw CannotReadError("im::PVRTCFormat::read(): File isn't a valid PVRTC texture.");
+            imread_raise(CannotReadError, "File isn't a valid PVRTC texture.");
         }
     
         std::unique_ptr<Image> output(factory->create(8, pvr.height, pvr.width, 4));
@@ -26,7 +26,7 @@ namespace im {
             byte *rowp = output->rowp_as<byte>(0);
             std::memcpy(rowp, &pvr.data[0], pvr.width*pvr.height*4);
         } else {
-            throw CannotReadError("im::PVRTCFormat::read(): Error reading PVRTC file.");
+            imread_raise(CannotReadError, "Error copying PVRTC post-decompress data");
         }
     
         return output;

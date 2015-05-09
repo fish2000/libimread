@@ -12,13 +12,13 @@
     #include <png.h>            /* this is the standard location */
 #endif
 
-#define PP_CHECK(pp, msg) if (setjmp(png_jmpbuf(pp))) { throw CannotReadError(msg); }
+#define PP_CHECK(pp, msg) if (setjmp(png_jmpbuf(pp))) { imread_raise(CannotReadError, msg); }
 
 namespace im {
     
     namespace {
         
-        void throw_error(png_structp png_ptr, png_const_charp msg) { throw CannotReadError(msg); }
+        void throw_error(png_structp png_ptr, png_const_charp msg) { imread_raise(CannotReadError, msg); }
         
         // This checks how 16-bit uints are stored in the current platform.
         inline bool is_big_endian() {
@@ -46,9 +46,8 @@ namespace im {
                 void create_info() {
                     png_info = png_create_info_struct(png_ptr);
                     if (!png_info) {
-                        throw ProgrammingError(
-                            "_png.cpp: png_holder::create_info(): Error returned from png_create_info_struct"
-                        ); 
+                        imread_raise(ProgrammingError,
+                            "Error returned from png_create_info_struct");
                     }
                 }
                 
@@ -60,17 +59,13 @@ namespace im {
         void read_from_source(png_structp png_ptr, png_byte *buffer, size_t n) {
             byte_source *s = static_cast<byte_source*>(png_get_io_ptr(png_ptr));
             const size_t actual = s->read(reinterpret_cast<byte*>(buffer), n);
-            if (actual != n) {
-                throw CannotReadError();
-            }
+            if (actual != n) { imread_raise_default(CannotReadError); }
         }
         
         void write_to_source(png_structp png_ptr, png_byte *buffer, size_t n) {
             byte_sink *s = static_cast<byte_sink*>(png_get_io_ptr(png_ptr));
             const size_t actual = s->write(reinterpret_cast<byte*>(buffer), n);
-            if (actual != n) {
-                throw CannotReadError();
-            }
+            if (actual != n) { imread_raise_default(CannotReadError); }
         }
         
         void flush_source(png_structp png_ptr) {
@@ -79,16 +74,18 @@ namespace im {
         }
         
         int color_type_of(Image *im) {
-            if (im->nbits() != 8 && im->nbits() != 16) throw CannotWriteError(
-                "_png.cpp: color_type_of(): Image must be 8 or 16 bits for saving in PNG format"
-            );
-            if (im->ndims() == 2) return PNG_COLOR_TYPE_GRAY;
-            if (im->ndims() != 3) throw CannotWriteError(
-                "_png.cpp: color_type_of(): Image must be either 2 or 3 dimensional"
-            );
-            if (im->dim(2) == 3) return PNG_COLOR_TYPE_RGB;
-            if (im->dim(2) == 4) return PNG_COLOR_TYPE_RGBA;
-            throw CannotWriteError();
+            if (im->nbits() != 8 && im->nbits() != 16) {
+                imread_raise(CannotWriteError,
+                    "Image must be 8 or 16 bits for saving in PNG format");
+            }
+            if (im->ndims() == 2) { return PNG_COLOR_TYPE_GRAY; }
+            if (im->ndims() != 3) {
+                imread_raise(CannotWriteError,
+                    "Image must be either 2 or 3 dimensional");
+            }
+            if (im->dim(2) == 3) { return PNG_COLOR_TYPE_RGB; }
+            if (im->dim(2) == 4) { return PNG_COLOR_TYPE_RGBA; }
+            imread_raise_default(CannotWriteError);
         }
         
         static png_byte color_types[4] = {
@@ -107,6 +104,28 @@ namespace im {
                 data[r] = newbf;
             }
         }
+        
+        int __attribute__((unused)) unknown_chunk_read_cb(png_structp ptr, png_unknown_chunkp chunk) {
+            if (!strncmp(reinterpret_cast<char*>(chunk->name), "CgBI", 4)) {
+                WTF("This file is already crushed and how the hell did you get here?");
+                // std::exit(1);
+            }
+            return 1;
+        }
+        
+        void __attribute__((unused)) swap_and_premultiply_alpha_transform(png_structp ptr,
+                                                                          png_row_infop row_info,
+                                                                          png_bytep data) {
+            for (unsigned int x = 0; x < row_info->width * 4; x += 4) {
+                png_byte r, g, b, a;
+                r = data[x+0]; g = data[x+1]; b = data[x+2]; a = data[x+3];
+                data[x+0] = (b*a) / 0xff;
+                data[x+1] = (g*a) / 0xff;
+                data[x+2] = (r*a) / 0xff;
+            }
+        }
+        
+        
     }
     
     std::unique_ptr<Image> PNGFormat::read(byte_source *src, ImageFactory *factory, const options_map &opts) {
@@ -123,11 +142,9 @@ namespace im {
         int bit_depth = png_get_bit_depth(p.png_ptr, p.png_info);
         
         if (bit_depth != 1 && bit_depth != 8 && bit_depth != 16) {
-            std::ostringstream out;
-            out << "im::PNGFormat::read(): Cannot read this bit depth ("
-                    << bit_depth
-                    << "). Only bit depths ∈ {1,8,16} are supported.";
-            throw CannotReadError(out.str());
+            imread_raise(CannotReadError,
+                FF("Cannot read this bit depth ( %i ).", bit_depth),
+                   "Only bit depths ∈ {1,8,16} are supported.");
         }
         if (bit_depth == 16 && !is_big_endian()) { png_set_swap(p.png_ptr); }
         
@@ -149,11 +166,9 @@ namespace im {
                 }
                 break;
             default: {
-                std::ostringstream out;
-                out << "im::PNGFormat::read(): Color type ("
-                    << int(png_get_color_type(p.png_ptr, p.png_info))
-                    << ") cannot be handled";
-                throw CannotReadError(out.str());
+                imread_raise(CannotReadError,
+                    FF("Color type ( %i ) cannot be handled",
+                        int(png_get_color_type(p.png_ptr, p.png_info))));
             }
         }
         

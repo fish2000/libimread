@@ -34,8 +34,8 @@ namespace im {
         
         if (detail::ext(format, "objc") || detail::ext(format, "ns")) { return format_ptr(new format::NS); }
         
-        throw FormatNotFound("ERROR:",
-            FF("File format not found for suffix %s", format));
+        imread_raise(FormatNotFound, "Format Error:",
+            FF("\tFile format not found for suffix %s", format));
     }
     
     std::unique_ptr<ImageFormat> for_filename(const char *cfilename) {

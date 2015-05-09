@@ -46,12 +46,12 @@ namespace im {
         char magic[2];
         
         if (src->read(reinterpret_cast<byte *>(magic), 2) != 2) {
-            throw CannotReadError("im::BMPFormat::read(): File is empty");
+            imread_raise(CannotReadError, "File is empty");
         }
         
         if (magic[0] != 'B' || magic[1] != 'M') {
-            throw CannotReadError("im::BMPFormat::read(): Magic number not matched"
-                                  "(this might not be a BMP file)");
+            imread_raise(CannotReadError,
+                "Magic number not matched", "(this might not be a BMP file)");
         }
         
         const uint32_t size = read32_le(*src);
@@ -68,18 +68,14 @@ namespace im {
         const uint16_t planes = read16_le(*src);
         
         if (planes != 1) {
-            throw NotImplementedError(
-                "im::BMPFormat::read(): planes should be 1"
-            );
+            imread_raise(NotImplementedError, "planes should be 1");
         }
         
         const uint16_t bitsppixel = read16_le(*src);
         const uint32_t compression = read32_le(*src);
         
         if (compression != 0) {
-            throw NotImplementedError(
-                "im::BMPFormat::read(): Only uncompressed bitmaps are supported"
-            );
+            imread_raise(NotImplementedError, "Only uncompressed bitmaps are supported");
         }
         
         const uint32_t imsize = read32_le(*src);
@@ -93,10 +89,9 @@ namespace im {
         (void)importantcolours;
         
         if (bitsppixel != 8 && bitsppixel != 16 && bitsppixel != 24) {
-            std::ostringstream out;
-            out << "im::BMPFormat::read(): Bits per pixel is " << bitsppixel
-                << " -- only bpp values of 8, 16, or 24 are supported";
-            throw CannotReadError(out.str());
+            imread_raise(CannotReadError,
+                FF("Bits per pixel is %i", bitsppixel),
+                   " -- only bpp values of 8, 16, or 24 are supported");
         }
         
         const int depth = (bitsppixel == 16 ? -1 : 3);
@@ -128,7 +123,7 @@ namespace im {
             }
             
             if (src->read(buf, padding) != unsigned(padding) && r != (height - 1)) {
-                throw CannotReadError("im::BMPFormat::read(): File ended prematurely while reading");
+                imread_raise(CannotReadError, "File ended prematurely while reading");
             }
         }
         

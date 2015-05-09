@@ -55,8 +55,7 @@ namespace im {
                 struct stat info;
                 int result = ::fstat(fd_, &info);
                 if (result == -1) {
-                    throw CannotReadError("ERROR:",
-                        "fstat() returned -1", std::strerror(errno));
+                    imread_raise(CannotReadError, "fstat() returned -1", std::strerror(errno));
                 }
                 
                 std::vector<byte> res(info.st_size * sizeof(byte));
@@ -103,13 +102,12 @@ namespace im {
                     }
                     if (_fd < 0) {
                         std::ostringstream out;
-                        out << "ERROR: im::file_source_sink(): file read failure:\n"
-                            << "\t::open(\"" << cpath 
-                            << "\"\n," << ((md == Mode::READ) ? "O_RDONLY | O_NONBLOCK"
-                                                              : "O_CREAT | O_WRONLY | O_TRUNC | O_EXLOCK | O_SYMLINK")
-                            << ") returned negative: " << _fd << "\n"
-                            << "ERROR MESSAGE: " << std::strerror(errno) << "\n";
-                        throw CannotReadError(out.str());
+                        imread_raise(CannotReadError, "file read failure:",
+                            FF("\t::open(\"%s\", %s)", cpath, ((md == Mode::READ)
+                                        ? "O_RDONLY | O_NONBLOCK"
+                                        : "O_CREAT | O_WRONLY | O_TRUNC | O_EXLOCK | O_SYMLINK")),
+                            FF("\treturned negative value: %i", _fd),
+                               "\tERROR MESSAGE IS: ", std::strerror(errno));
                     }
                     this->fd(_fd);
                     pth = std::make_unique<char[]>(std::strlen(cpath)+1);

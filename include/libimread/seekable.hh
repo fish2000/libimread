@@ -22,9 +22,9 @@ namespace im {
     struct seekable {
         virtual ~seekable() { }
         virtual bool can_seek() const { return false; }
-        virtual std::size_t seek_absolute(std::size_t) { throw NotImplementedError(); }
-        virtual std::size_t seek_relative(int) { throw NotImplementedError(); }
-        virtual std::size_t seek_end(int) { throw NotImplementedError(); }
+        virtual std::size_t seek_absolute(std::size_t) { imread_raise_default(NotImplementedError); }
+        virtual std::size_t seek_relative(int) { imread_raise_default(NotImplementedError); }
+        virtual std::size_t seek_end(int) { imread_raise_default(NotImplementedError); }
     };
     
     class byte_source : virtual public seekable {
@@ -42,8 +42,7 @@ namespace im {
             
             void read_check(byte *buffer, std::size_t n) {
                 if (this->read(buffer, n) != n) {
-                    throw CannotReadError("SOURCE READ ERROR:",
-                        "im::byte_source::read_check(): File ended prematurely");
+                    imread_raise(CannotReadError, "File ended prematurely");
                 }
             }
             
@@ -72,8 +71,7 @@ namespace im {
             
             void write_check(const byte *buffer, std::size_t n) {
                 if (this->write(buffer, n) != n) {
-                    throw CannotWriteError("SINK WRITE ERROR:",
-                        "im::byte_sink::write_check(): Writing failed");
+                    imread_raise(CannotWriteError, "Writing failed");
                 }
             }
             virtual void flush() { }

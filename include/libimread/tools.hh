@@ -89,7 +89,8 @@ namespace im {
     inline uint8_t read8(byte_source &s) {
         byte out;
         if (s.read(&out, 1) != 1) {
-            throw CannotReadError("im::read8(): File ended prematurely");
+            imread_raise(CannotReadError,
+                "im::read8(): File ended prematurely");
         }
         return out;
     }

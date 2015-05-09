@@ -28,15 +28,15 @@ namespace im {
             byte_sink* s = static_cast<byte_sink*>(handle);
             return s->write(static_cast<byte*>(data), n);
         }
-
+        
         tsize_t tiff_no_read(thandle_t, void*, tsize_t) {
             return 0;
         }
-
+        
         tsize_t tiff_no_write(thandle_t, void*, tsize_t) {
-            throw ProgrammingError("im::TIFFFormat::tiff_no_write(): tiff_write called when reading");
+            imread_raise(ProgrammingError, "tiff_write called when reading");
         }
-
+        
         template <typename T>
         toff_t tiff_seek(thandle_t handle, toff_t off, int whence) {
             T *s = static_cast<T*>(handle);
@@ -62,9 +62,7 @@ namespace im {
         void tiff_error(const char *module, const char *fmt, va_list ap) {
             char buffer[4096];
             vsnprintf(buffer, sizeof(buffer), fmt, ap);
-            std::string error_message(buffer);
-            throw CannotReadError(
-                std::string("im::TIFFFormat::tiff_error(): `") + buffer + std::string("`"));
+            imread_raise(CannotReadError, "TIFF library error:", buffer);
         }
         
         struct tif_holder {
@@ -99,9 +97,9 @@ namespace im {
         inline T tiff_get(const tif_holder &t, const int tag) {
             T val;
             if (!TIFFGetField(t.tif, tag, &val)) {
-                std::stringstream out;
-                out << "im::TIFFFormat::tiff_get(): Cannot find necessary tag (" << tag << ")";
-                throw CannotReadError(out.str());
+                imread_raise(CannotReadError,
+                    "Cannot find necessary tag:",
+                 FF("\t>>> %s", tag));
             }
             return val;
         }
@@ -222,7 +220,7 @@ namespace im {
             for (int st = 0; st != n_strips; ++st) {
                 const int offset = TIFFReadEncodedStrip(t.tif, st, start, strip_size);
                 if (offset == -1) {
-                    throw CannotReadError("im::STKFormat::read_multi(): Error reading strip");
+                    imread_raise(CannotReadError, "Error reading strip");
                 }
                 start += offset;
             }
@@ -258,7 +256,7 @@ namespace im {
             for (uint32_t r = 0; r != h; ++r) {
                 byte *srcPtr = output->rowp_as<byte>(r);
                 if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
-                    throw CannotReadError("im::TIFFFormat::do_read(): Error reading scanline");
+                    imread_raise(CannotReadError, "Error reading scanline");
                 }
                 for (int x = 0; x < w; x++) {
                     for (int c = 0; c < depth; c++) {
@@ -348,7 +346,7 @@ namespace im {
                 rowp = bufp;
             }
             if (TIFFWriteScanline(t.tif, rowp, r) == -1) {
-                throw CannotWriteError("im::TIFFFormat::write(): Error writing TIFF file");
+                imread_raise(CannotWriteError, "Error writing TIFF file");
             }
         }
         TIFFFlush(t.tif);

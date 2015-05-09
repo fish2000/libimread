@@ -20,7 +20,7 @@ struct code_stream {
                 bit_pos_ = 0;
                 ++byte_pos_;
                 if (byte_pos_ > len_) {
-                    throw CannotReadError("code_stream::getbit(): Unexpected End of File");
+                    imread_raise(CannotReadError, "Unexpected End of File");
                 }
             }
             return res;

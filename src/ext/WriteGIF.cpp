@@ -545,24 +545,13 @@ namespace gif {
     /// and captures the results using memory::sink for return
     std::vector<byte> write(GIF *gif) {
         if (!gif->frames) {
-            //WTF("GIF incomplete\n"); return;
-            throw im::CannotWriteError("Incomplete GIF passed to gif::write()");
+            imread_raise(CannotWriteError, "Incomplete GIF passed to gif::write()");
         }
         
         {
             /// calculate global palette
             calculatePaletteByMedianCut(gif);
         }
-        
-        // const char *filename
-        // if (!filename) {
-        //     static char defaultFilename[256] = "test.gif";
-        //     snprintf(defaultFilename, 256, "%d.gif", int(time(0)));
-        //     filename = defaultFilename;
-        // }
-        // FILE *f = fopen(filename, "wb");
-        // if (!f) { printf("Failed open for writing %s\n", filename); return; }
-        // printf("Writing %s...\n", filename);
         
         /// count frames
         int framecount = 0;

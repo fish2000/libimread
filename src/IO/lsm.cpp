@@ -765,7 +765,7 @@ namespace im {
                 startPos = value;
                 if (tag == TIF_STRIPOFFSETS || tag == TIF_STRIPBYTECOUNTS) {
                     if (!ReadFile(s, &startPos, readSize, actualValue)) {
-                        throw CannotReadError("Failed to get strip offsets\n");
+                        imread_raise(CannotReadError, "Failed to get strip offsets");
                     }
                 }
             } else {
@@ -1003,8 +1003,9 @@ namespace im {
             unsigned long startPos = 2; // header identifier
             const unsigned short identifier = ReadUnsignedShort(this->src, &startPos);
             if (identifier != LSM_MAGIC_NUMBER) {
-                throw CannotReadError("Given file is not a valid LSM-file "
-                                      "(magic number mismatch).");
+                imread_raise(CannotReadError,
+                    "Given file is not a valid LSM-file",
+                    "(magic number mismatch).");
             }
             
             const unsigned int imageDirOffset = ReadUnsignedInt(this->src, &startPos);
@@ -1014,15 +1015,17 @@ namespace im {
             if (this->LSMSpecificInfoOffset) {
                 ReadLSMSpecificInfo(this->src, (unsigned long)this->LSMSpecificInfoOffset);
             } else {
-                throw CannotReadError("Did not found LSM specific info!");
+                imread_raise(CannotReadError, "Did not found LSM specific info!");
             }
             if (!(this->scan_type_ == 6 || this->scan_type_ == 0
                   || this->scan_type_ == 3 || this->scan_type_ == 1)) {
-                throw CannotReadError(
-                    "Sorry! Your LSM-file must be of type 6 LSM-file (time "
-                    "series x-y-z) "
-                    "or type 0 (normal x-y-z) or type 3 (2D + time) or type 1 "
-                    "(x-z scan). Type of this File is " /* % this->scan_type_ */);
+                imread_raise(CannotReadError,
+                    "Sorry! LSM file type must be one of the following:",
+                    "\t* Type 6 (time series x-y-z)",
+                    "\t* Type 0 (normal x-y-z)",
+                    "\t* Type 3 (2D + time)",
+                    "\t* Type 1 (x-z scan)",
+                 FF("The type of this file is %i", this->scan_type_));
             }
             
             this->CalculateExtentAndSpacing(this->DataExtent, this->DataSpacing);
@@ -1123,12 +1126,12 @@ namespace im {
                         unsigned long offset = this->GetSliceOffset(timepoint, z);
                         const int readSize = this->GetStripByteCount(timepoint, z);
                         std::fill(imdata, imdata + readSize, 0);
-
+                        
                         int bytes = ReadFile(this->src, &offset, readSize,
                                              imdata, true);
-
+                        
                         if (bytes != readSize) {
-                            throw ProgrammingError("Could not read data");
+                            imread_raise(ProgrammingError, "Could not read data");
                         }
                         if (this->compression_ == LSM_COMPRESSED) {
                             this->DecodeLZWCompression(
