@@ -85,17 +85,13 @@ print(red(""" %(s)s DEBUGGG LEVEL: %(lv)s %(s)s """ % dict(s='*' * 65, lv=DEBUG)
 include_dirs = [
     numpy.get_include(),
     get_python_inc(plat_specific=1),
-    os.path.join(os.getcwd(), '..', 'include'),                 # FOR DEVELOPMENT
-    os.path.join(os.getcwd(), '..', 'include', 'libimread'),    # ALSO FOR DEVELOPMENT
-    os.path.join(os.getcwd(), 'im', 'include')]
+    os.path.join(os.path.dirname(__file__), '..', 'include'),                 # FOR DEVELOPMENT
+    os.path.join(os.path.dirname(__file__), '..', 'include', 'libimread'),    # ALSO FOR DEVELOPMENT
+    os.path.join(os.path.dirname(__file__), 'im', 'include')]
 
 library_dirs = [
     '/usr/local/opt/halide/lib',                                # EERRRRRR WELLL
-    '/usr/local/opt/llvm/lib',
-    '/usr/local/opt/opencv/lib',
-    '/usr/local/opt/dige/lib',
-    '/usr/local/opt/iod/lib',
-    '/usr/local/opt/vpp/lib']
+    '/usr/local/opt/llvm/lib']
 
 other_flags = []
 
@@ -236,22 +232,19 @@ for key, sources in extensions.iteritems():
         undef_macros=undef_macros,
         define_macros=define_macros,
         extra_link_args=[
-            '-framework', 'AppKit',
-            '-framework', 'Accelerate',
             '-framework', 'Quartz',
             '-framework', 'CoreFoundation',
             '-framework', 'Foundation'],
         extra_compile_args=[
             '-O3',
             '-ObjC++',
-            '-std=c++1y',
+            '-std=c++11',
             '-stdlib=libc++',
             '-Werror=unused-command-line-argument',
             '-Wno-unused-function',
             '-Wno-delete-non-virtual-dtor',
             '-Wno-overloaded-virtual', # WARNING WARNING WARNING
             '-Wno-dynamic-class-memaccess', # WARNING WARNING etc
-            '-Wno-deprecated-register', # CImg w/OpenEXR throws these
             '-Wno-deprecated-writable-strings',
             '-Qunused-arguments',
         ] + other_flags))

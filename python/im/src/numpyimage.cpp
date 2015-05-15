@@ -111,21 +111,21 @@ static PyGetSetDef NumpyImage_getset[] = {
     SENTINEL
 };
 
-static PyMethodDef NumpyImage_methods[] = {
-    {
-        "as_array",
-            (PyCFunction)NumpyImage_AsArray,
-            METH_VARARGS | METH_KEYWORDS,
-            "Get an ndarray for a NumpyImage" },
-    SENTINEL
-};
+// static PyMethodDef NumpyImage_methods[] = {
+//     {
+//         "as_array",
+//             (PyCFunction)NumpyImage_AsArray,
+//             METH_VARARGS | METH_KEYWORDS,
+//             "Get an ndarray for a NumpyImage" },
+//     SENTINEL
+// };
 
 static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
 
 static PyTypeObject NumpyImage_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                          /* ob_size */
-    "im.NumpyImage",                                            /* tp_name */
+    "_im.NumpyImage",                                            /* tp_name */
     sizeof(NumpyImage),                                         /* tp_basicsize */
     0,                                                          /* tp_itemsize */
     (destructor)NumpyImage_dealloc,                             /* tp_dealloc */
@@ -151,7 +151,7 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                          /* tp_weaklistoffset */
     0,                                                          /* tp_iter */
     0,                                                          /* tp_iternext */
-    NumpyImage_methods,                                         /* tp_methods */
+    0, /*NumpyImage_methods*/,                                  /* tp_methods */
     0,                                                          /* tp_members */
     NumpyImage_getset,                                          /* tp_getset */
     0,                                                          /* tp_base */
@@ -163,4 +163,27 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                          /* tp_alloc */
     NumpyImage_new,                                             /* tp_new */
 };
+
+
+PyMODINIT_FUNC init_im(void) {
+    PyObject *module;
+    
+    PyEval_InitThreads();
+    if (PyType_Ready(&NumpyImage_Type) < 0) { return; }
+
+    module = Py_InitModule3(
+        "im._im", NULL,
+        "libimread python bindings");
+    if (module == None) { return; }
+    
+    /// Bring in NumPy
+    import_array();
+
+    /// Set up PyCImage object
+    Py_INCREF(&NumpyImage_Type);
+    PyModule_AddObject(module,
+        "NumpyImage",
+        (PyObject *)&NumpyImage_Type);
+}
+
 

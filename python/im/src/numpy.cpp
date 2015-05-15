@@ -1,7 +1,7 @@
 
 #define NO_IMPORT_ARRAY
 
-#include <libimread/numpy.hh>
+#include "numpy.hh"
 
 namespace im {
     

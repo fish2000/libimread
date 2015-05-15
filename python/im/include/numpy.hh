@@ -1,8 +1,8 @@
 // Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_NUMPY_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define LPC_NUMPY_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#ifndef LIBIMREAD_PYTHON_NUMPY_HH_
+#define LIBIMREAD_PYTHON_NUMPY_HH_
 
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
@@ -201,4 +201,4 @@ namespace im {
 
 }
 
-#endif // LPC_NUMPY_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif /// LIBIMREAD_PYTHON_NUMPY_HH_
