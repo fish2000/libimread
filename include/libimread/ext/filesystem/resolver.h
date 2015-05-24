@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(__FILESYSTEM_RESOLVER_H)
-#define __FILESYSTEM_RESOLVER_H
+#if !defined(LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_)
+#define LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_
 
 #include <libimread/ext/filesystem/path.h>
 
@@ -54,4 +54,4 @@ private:
 
 }; /* namespace filesystem */
 
-#endif /* __FILESYSTEM_RESOLVER_H */
+#endif /// LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_

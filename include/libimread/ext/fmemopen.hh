@@ -15,8 +15,8 @@
 // limitations under the License.
 //
 
-#ifndef FMEMOPEN_H_
-#define FMEMOPEN_H_
+#ifndef LIBIMREAD_EXT_FMEMOPEN_HH_
+#define LIBIMREAD_EXT_FMEMOPEN_HH_
 
 #include <memory>
 #include <functional>
@@ -65,4 +65,4 @@ namespace memory {
     
 }
 
-#endif // #ifndef FMEMOPEN_H_
+#endif /// LIBIMREAD_EXT_FMEMOPEN_HH_

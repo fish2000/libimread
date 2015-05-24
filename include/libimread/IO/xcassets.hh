@@ -1,4 +1,4 @@
-// Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
+// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 // License: MIT (see COPYING.MIT file)
 
 #ifndef LPC_XCASSETS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012

@@ -40,8 +40,8 @@
 
 =========================================================================
 */
-#ifndef __vtkLSMReader_h
-#define __vtkLSMReader_h
+#ifndef LIBIMREAD_IO_LSM_HH_
+#define LIBIMREAD_IO_LSM_HH_
 
 // .NAME LSMFormat - read LSM files
 // .SECTION Description
@@ -81,4 +81,4 @@ namespace im {
     
 }
 
-#endif
+#endif /// LIBIMREAD_IO_LSM_HH_

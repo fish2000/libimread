@@ -1,6 +1,6 @@
 
-#ifndef LIBIMREAD_JSON11_H_
-#define LIBIMREAD_JSON11_H_
+#ifndef LIBIMREAD_EXT_JSON_JSON11_H_
+#define LIBIMREAD_EXT_JSON_JSON11_H_
 
 /// This file is part of json11 project (https://github.com/borisgontar/json11).
 /// 
@@ -486,4 +486,4 @@ decltype(auto) Json::cast<char*>(const std::string &key) const {
     return const_cast<char*>(static_cast<std::string>(get(key)).c_str());
 }
 
-#endif /// LIBIMREAD_JSON11_H_
+#endif /// LIBIMREAD_EXT_JSON_JSON11_H_

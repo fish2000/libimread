@@ -1,5 +1,5 @@
-#ifndef OPEN_MEMSTREAM_H_
-#define OPEN_MEMSTREAM_H_
+#ifndef LIBIMREAD_EXT_OPEN_MEMSTREAM_HH_
+#define LIBIMREAD_EXT_OPEN_MEMSTREAM_HH_
 
 #include <cstdio>
 #include <cstdlib>
@@ -20,4 +20,4 @@ namespace memory {
 
 FILE *open_memstream(char **cp, std::size_t *lenp);
 
-#endif // #ifndef FMEMOPEN_H_
+#endif /// LIBIMREAD_EXT_OPEN_MEMSTREAM_HH_

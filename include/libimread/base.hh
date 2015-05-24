@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_IMREAD_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define LPC_IMREAD_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#ifndef LIBIMREAD_BASE_HH_
+#define LIBIMREAD_BASE_HH_
 
 #include <inttypes.h>
 #include <cassert>
@@ -25,4 +25,4 @@
 
 namespace im {}
 
-#endif // LPC_IMREAD_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif /// LIBIMREAD_BASE_HH_

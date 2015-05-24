@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(__FILESYSTEM_PATH_H)
-#define __FILESYSTEM_PATH_H
+#if !defined(LIBIMREAD_EXT_FILESYSTEM_PATH_H_)
+#define LIBIMREAD_EXT_FILESYSTEM_PATH_H_
 
 #include <string>
 #include <vector>
@@ -439,4 +439,4 @@ namespace filesystem {
     
 }; /* namespace filesystem */
 
-#endif /* __FILESYSTEM_PATH_H */
+#endif /// LIBIMREAD_EXT_FILESYSTEM_PATH_H_

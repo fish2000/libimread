@@ -1,7 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
-#ifndef LPC_FILE_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define LPC_FILE_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+
+#ifndef LIBIMREAD_FILE_HH_
+#define LIBIMREAD_FILE_HH_
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -174,4 +175,4 @@ namespace im {
 
 }
 
-#endif // LPC_FILE_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif /// LIBIMREAD_FILE_HH_

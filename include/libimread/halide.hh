@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LIBIMREAD_HALIDE_H_
-#define LIBIMREAD_HALIDE_H_
+#ifndef LIBIMREAD_HALIDE_HH_
+#define LIBIMREAD_HALIDE_HH_
 
 #include <iostream>
 #include <memory>
@@ -272,4 +272,4 @@ namespace im {
     
 }
 
-#endif // LIBIMREAD_HALIDE_H_
+#endif /// LIBIMREAD_HALIDE_HH_

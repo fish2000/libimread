@@ -59,7 +59,6 @@ SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
 SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
-# SET(SSZIP_MINIZIP_DIR "${SSZIP_DIR}/minizip")
 add_subdirectory(${DEPS_DIR})
 set_property(DIRECTORY ${IOD_TEST_DIR}
              PROPERTY EXCLUDE_FROM_ALL TRUE)
@@ -95,7 +94,6 @@ include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${DOCOPT_DIR}")
 include_directories("${IOD_DIR}")
 include_directories("${SSZIP_DIR}")
-# include_directories("${SSZIP_MINIZIP_DIR}")
 
 # Ugh
 link_directories("${BREWED_CLANG_PATH}/lib")
@@ -128,8 +126,6 @@ set_target_properties(imread
 add_dependencies(imread "docopt")
 # add_dependencies(libimread "libsszip")
 add_dependencies(imread "sszip")
-# add_dependencies(libimread "iod_generate_symbols")
-# add_dependencies(imread "iod_generate_symbols")
 # add_dependencies(libimread  "iod_symbolize")
 add_dependencies(imread     "iod_symbolize")
 
@@ -162,7 +158,6 @@ set_source_files_properties(
     PROPERTIES GENERATED TRUE)
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
-# add_dependencies("test_${PROJECT_NAME}" "iod_generate_symbols")
 add_dependencies("test_${PROJECT_NAME}" "iod_symbolize")
 add_dependencies("test_${PROJECT_NAME}" "docopt")
 add_dependencies("test_${PROJECT_NAME}" "sszip")

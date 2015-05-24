@@ -1,4 +1,4 @@
-// Copyright 2012 Luis Pedro Coelho <luis@luispedro.org>
+// Copyright 2012 Luis Pedro Coelho <luis@Copyright 2014 Alexander Böhn <fish2000@gmail.com>.org>
 // License: MIT (see COPYING.MIT file)
 
 #ifndef LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012

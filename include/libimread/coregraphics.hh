@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LIBIMREAD_COREGRAPHICS_H_
-#define LIBIMREAD_COREGRAPHICS_H_
+#ifndef LIBIMREAD_COREGRAPHICS_HH_
+#define LIBIMREAD_COREGRAPHICS_HH_
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
@@ -49,4 +49,4 @@ namespace im {
     
 }
 
-#endif // LIBIMREAD_COREGRAPHICS_H_
+#endif /// LIBIMREAD_COREGRAPHICS_HH_

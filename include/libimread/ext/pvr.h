@@ -24,8 +24,8 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-#ifndef PVR_H
-#define PVR_H
+#ifndef LIBIMREAD_EXT_PVR_H_
+#define LIBIMREAD_EXT_PVR_H_
 
 #include <cstdint>
 //#include <jemalloc/jemalloc.h>
@@ -74,4 +74,4 @@ struct PVRTexture
     uint8_t *data;
 };
 
-#endif /// PVR_H
+#endif /// LIBIMREAD_EXT_PVR_H_

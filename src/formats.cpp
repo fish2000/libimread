@@ -1,4 +1,4 @@
-// Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
+// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 // License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>

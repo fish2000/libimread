@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_FORMATS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define LPC_FORMATS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#ifndef LIBIMREAD_FORMATS_HH_
+#define LIBIMREAD_FORMATS_HH_
 
 #include <memory>
 #include <string>
@@ -26,4 +26,4 @@ namespace im {
 
 }
 
-#endif // LPC_FORMATS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif /// LIBIMREAD_FORMATS_HH_

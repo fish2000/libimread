@@ -1,6 +1,6 @@
 
-#ifndef LPC_PPM_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
-#define LPC_PPM_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
+#ifndef LIBIMREAD_IO_PPM_HH_
+#define LIBIMREAD_IO_PPM_HH_
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
@@ -27,5 +27,4 @@ namespace im {
     
 }
 
-#endif /// LPC_PPM_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
-
+#endif /// LIBIMREAD_IO_PNG_HH_

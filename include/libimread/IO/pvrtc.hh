@@ -1,4 +1,4 @@
-// Copyright 2012 Luis Pedro Coelho <luis@luispedro.org>
+// Copyright 2012 Luis Pedro Coelho <luis@Copyright 2014 Alexander Böhn <fish2000@gmail.com>.org>
 // License: MIT (see COPYING.MIT file)
 
 #ifndef LPC_PVRTC_H_INCLUDE_GUARD_

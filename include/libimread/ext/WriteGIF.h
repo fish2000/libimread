@@ -1,4 +1,7 @@
 
+#ifndef LIBIMREAD_EXT_WRITEGIF_H_
+#define LIBIMREAD_EXT_WRITEGIF_H_
+
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
@@ -17,3 +20,5 @@ namespace gif {
     void addFrame(GIF *gif, int W, int H, unsigned char *rgbImage, int delay = -1);
     std::vector<byte> write(GIF *gif);
 }
+
+#endif /// LIBIMREAD_EXT_WRITEGIF_H_

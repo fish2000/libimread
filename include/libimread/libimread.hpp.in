@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LIBIMREAD_CMAKE_H_
-#define LIBIMREAD_CMAKE_H_
+#ifndef LIBIMREAD_CMAKE_HPP_IN_
+#define LIBIMREAD_CMAKE_HPP_IN_
 
 #include <cstdint>
 
@@ -29,4 +29,4 @@ namespace im {
      
 }
 
-#endif /// LIBIMREAD_CMAKE_H_
+#endif /// LIBIMREAD_CMAKE_HPP_IN_

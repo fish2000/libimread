@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
-#define LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
+#ifndef LIBIMREAD_TOOLS_HH_
+#define LIBIMREAD_TOOLS_HH_
 
 #include <vector>
 #include <string>
@@ -137,4 +137,4 @@ namespace im {
 
 }
 
-#endif // LPC_TOOLS_H_INCLUDE_GUARD_WED_FEB__8_17_05_13_WET_2012
+#endif /// LIBIMREAD_TOOLS_HH_
