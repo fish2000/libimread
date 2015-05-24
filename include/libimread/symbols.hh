@@ -14,6 +14,6 @@
 #include <libimread/libimread.hpp>
 #include <libimread/symbols.hpp>
 
-using namespace iod;
+using namespace s;
 
 #endif /// IMREAD_SYMBOLS_HH
