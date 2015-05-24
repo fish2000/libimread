@@ -1,8 +1,8 @@
-// Copyright 2012-2014 Luis Pedro Coelho <luis@luispedro.org>
+// Copyright 2012-2014 Alexander Böhn <luis@luispedro.org>
 // License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_PNG_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define LPC_PNG_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#ifndef LIBIMREAD_IO_PNG_HH_
+#define LIBIMREAD_IO_PNG_HH_
 
 #include <cstring>
 #include <csetjmp>
@@ -76,4 +76,4 @@ namespace im {
 }
 
 
-#endif // LPC_PNG_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif /// LIBIMREAD_IO_PNG_HH_
