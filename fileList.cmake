@@ -129,6 +129,7 @@ set(hdrs
     ${hdrs_dir}/pixels.hh
     ${hdrs_dir}/seekable.hh
     ${hdrs_dir}/symbols.hh
+    ${IOD_SYMBOLS_HEADER}
     ${hdrs_dir}/tools.hh
     ${hdrs_dir}/traits.hh
     # ${hdrs_dir}/vpp.hh

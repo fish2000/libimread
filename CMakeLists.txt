@@ -45,6 +45,15 @@ SET(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 SET(TEST_SCRIPT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/scripts")
 SET(TEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
 
+include(IodSymbolize)
+SET(IOD_SYMBOLS_HEADER  "${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/symbols.hpp")
+SET(IOD_SYMBOLIZE_DIR0  "${CMAKE_CURRENT_SOURCE_DIR}/include/libimread")
+SET(IOD_SYMBOLIZE_DIR1  "${CMAKE_CURRENT_SOURCE_DIR}/src")
+IOD_SYMBOLIZE(
+    ${IOD_SYMBOLIZE_DIR0}
+    ${IOD_SYMBOLIZE_DIR1}
+    ${IOD_SYMBOLS_HEADER})
+
 SET(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
@@ -120,7 +129,10 @@ add_dependencies(imread "docopt")
 # add_dependencies(libimread "libsszip")
 add_dependencies(imread "sszip")
 # add_dependencies(libimread "iod_generate_symbols")
-add_dependencies(imread "iod_generate_symbols")
+# add_dependencies(imread "iod_generate_symbols")
+# add_dependencies(libimread  "iod_symbolize")
+add_dependencies(imread     "iod_symbolize")
+
 # target_link_libraries(libimread
 #     libsszip
 #     png z ${EXTRA_LIBS}
@@ -150,7 +162,8 @@ set_source_files_properties(
     PROPERTIES GENERATED TRUE)
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
-add_dependencies("test_${PROJECT_NAME}" "iod_generate_symbols")
+# add_dependencies("test_${PROJECT_NAME}" "iod_generate_symbols")
+add_dependencies("test_${PROJECT_NAME}" "iod_symbolize")
 add_dependencies("test_${PROJECT_NAME}" "docopt")
 add_dependencies("test_${PROJECT_NAME}" "sszip")
 link_directories(${CMAKE_BINARY_DIR})
