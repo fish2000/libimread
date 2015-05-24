@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
-#define LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
+#ifndef LIBIMREAD_MEMORY_HH_
+#define LIBIMREAD_MEMORY_HH_
 
 #include <cstring>
 #include <cstdio>
@@ -76,4 +76,4 @@ namespace im {
 
 }
 
-#endif // LPC_MEMORY_H_INCLUDE_GUARD_MON_JUL__8_15_49_46_UTC_2013
+#endif /// LIBIMREAD_MEMORY_HH_

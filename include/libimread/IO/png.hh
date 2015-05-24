@@ -35,7 +35,7 @@ namespace im {
                 );
             }
             
-            using options_type = typename decltype(format::opts_init());
+            using options_type = decltype(format::opts_init());
             static const options_type options;
         };
         
