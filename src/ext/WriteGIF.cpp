@@ -33,8 +33,6 @@ using im::byte;
 #define MAYBE(...)
 #endif
 
-
-
 namespace {
     
     void swap(unsigned char *a, unsigned char *b) {
@@ -328,11 +326,9 @@ namespace gif {
         
         static char colorBitSet[256*256*256/8];
         {
-            //printf("Calculating unique color count [");
             idx = 0;
             std::memset(colorBitSet, 0, 256*256*256/8);
             for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
-                //printf("*");
                 idx++;
                 unsigned char *end = frame->rgbImage + gif->width * gif->height * 3;
                 for (unsigned char *rgb = frame->rgbImage; rgb < end; rgb += 3) {
@@ -342,7 +338,6 @@ namespace gif {
                     }
                 }
             }
-            //printf("]\nUnique color count %d\n", uniqueColorCount);
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
             MAYBE(
@@ -353,13 +348,11 @@ namespace gif {
         
         uniqueColorArray = new unsigned char[uniqueColorCount * 3];
         {
-            //printf("Filling unique color array [");
             idx = 0;
             memset(colorBitSet, 0, 256*256*256/8);
             unsigned char *afterLastUnique = uniqueColorArray + uniqueColorCount * 3;
             unsigned char *u = uniqueColorArray;
             for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
-                //printf("*");
                 idx++;
                 if (u >= afterLastUnique) { break; }
                 unsigned char *end = frame->rgbImage + gif->width * gif->height * 3;
@@ -372,7 +365,6 @@ namespace gif {
                     }
                 }
             }
-            //printf("]\n");
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
             MAYBE(
@@ -401,7 +393,6 @@ namespace gif {
                     }
                 }
                 for (int a = 0; a < 3; a++) { dim[a] = maxDim[a] - minDim[a]; }
-                //printf("minDim(%d,%d,%d), maxDim(%d,%d,%d), dim(%d,%d,%d)\n", minDim[0],minDim[1],minDim[2], maxDim[0],maxDim[1],maxDim[2], dim[0], dim[1], dim[2]);
             }
             
             void calcColor(unsigned char *rgbOut) {
@@ -423,7 +414,6 @@ namespace gif {
         int leafBoxCount = 0;
         
         {
-            //printf("Creating color boxes [");
             memset(&colorBoxArray, 0, sizeof(ColorBox) * 512);
             colorBoxArray[0].colors = uniqueColorArray;
             colorBoxArray[0].colorCount = uniqueColorCount;
@@ -433,7 +423,6 @@ namespace gif {
             
             idx = 0;
             while (leafBoxCount < 255) {
-                //printf("*");
                 idx++;
                 int maxDimAxis = 0;
                 int maxDim = 0;
@@ -452,7 +441,6 @@ namespace gif {
                     }
                 }
                 if (maxDim < 2) { break; }
-                //printf("maxDim %d, maxDimAxis %d\n", maxDim, maxDimAxis);
                 
                 if (colorBoxCount + 2 <= ColorBoxArraySize) {
                     maxDimBox->splitAxis = maxDimAxis;
@@ -460,7 +448,6 @@ namespace gif {
                     sortColorsByAxis(maxDimBox->colors, maxDimBox->colorCount, maxDimAxis);
                     ColorBox *L = maxDimBox->child[0] = &colorBoxArray[colorBoxCount++];
                     ColorBox *R = maxDimBox->child[1] = &colorBoxArray[colorBoxCount++];
-                    //printf("Sorted array by axis\n"); for (int i = 0; i <maxDimBox->colorCount; i++) printf("%d, ", (maxDimBox->colors+i*3)[maxDimAxis]); printf("\n");
                     
                     L->colors = maxDimBox->colors;
                     L->colorCount = maxDimBox->colorCount / 2;
@@ -475,8 +462,6 @@ namespace gif {
                 }
             }
             
-            //printf("]\n");
-            //printf("Total box count %d, leaf box count %d\n", colorBoxCount, leafBoxCount);
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
             std::memset(asterisks.get(), '*', idx);
             MAYBE(
@@ -484,7 +469,6 @@ namespace gif {
                 FF("Total box count: %d", colorBoxCount),
                 FF(" Leaf box count: %d", leafBoxCount)
             );
-            
             
             {
                 MAYBE("Calculating palette from boxes");
@@ -497,15 +481,15 @@ namespace gif {
                         rgbPal += 3;
                     }
                 }
-                //printf("Indexizing frames [");
                 idx = 0;
                 for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
-                    //printf("*");
                     idx++;
                     frame->indexImage = new unsigned char[gif->width * gif->height];
-                    indexizeImageFromPaletteFuzzy(gif->width, gif->height, frame->rgbImage, frame->indexImage, gif->palette, gif->paletteSize);
+                    indexizeImageFromPaletteFuzzy(
+                        gif->width, gif->height,
+                        frame->rgbImage, frame->indexImage,
+                        gif->palette, gif->paletteSize);
                 }
-                //printf("]\n");
                 std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
                 std::memset(asterisks.get(), '*', idx);
                 MAYBE(
@@ -662,8 +646,9 @@ namespace gif {
                 if (prevFrame) {
                     image = new unsigned char[gif->width * gif->height];
                     writeTransparentPixelsWhereNotDifferent(
-                        prevFrame->indexImage, frame->indexImage, image,
-                        gif->width, gif->height, TranspColorIndex);
+                        prevFrame->indexImage, frame->indexImage,
+                        image, gif->width, gif->height,
+                        TranspColorIndex);
                     if (1) {
                         /// crop if borders are transparent
                         int cLeft, cRight, cTop, cBottom;
@@ -736,7 +721,6 @@ namespace gif {
                 }
                 if (image != frame->indexImage) { delete[] image; }
             }
-            //printf("\n");
         }
         
         {

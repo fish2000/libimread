@@ -69,10 +69,6 @@ namespace im {
         
         /// Do the pixel loop to interleave RGB data
         byte *data = gbuf.data();
-        // pix::accessor<byte> at(input.rowp_as<byte>(0), input.stride(0),
-        //                                                input.stride(1),
-        //                                                input.stride(2));
-        
         pix::accessor<byte> at = input.access();
         
         unsigned char *rgb;

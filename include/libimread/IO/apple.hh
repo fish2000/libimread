@@ -22,10 +22,8 @@ namespace im {
     #ifdef __OBJC__
     namespace cf {
         
-        // using Releaser = std::function<void(CFTypeRef)>;
-        // Releaser basic =      [](CFTypeRef cf)        { CFRelease(cf); };
-        // Releaser image =      [](CGImageRef cg)       { CFRelease(cf); };
-        // Releaser context =    [](CGContextRef cgc)    { CGContextRelease(cgc); };
+        /// NOTE TO SELF:
+        /// replace this with CF++ and the like
         
         template <typename C = CFTypeRef>
         struct unref {
@@ -36,11 +34,6 @@ namespace im {
         
         template <typename Ref>
         using REF = std::unique_ptr<typename std::decay<Ref>::type, unref<Ref>>;
-        
-        /// cf::REF<CGColorSpaceRef> colorSpace(CGColorSpaceCreateDeviceRGB());
-        /// cf::REF<CGContextRef> ctx(CGBitmapContextCreate((NULL, width * imageScale, height * imageScale,
-        ///     8, 0, colorSpace, kCGImageAlphaPremultipliedLast))
-        /// cf::REF<CGImageRef> image(CGBitmapContextCreateImage(ctx));
         
     }
     #endif

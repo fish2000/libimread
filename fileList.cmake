@@ -124,6 +124,7 @@ set(hdrs
     ${hdrs_dir}/image.hh
     ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/memory.hh
+    ${hdrs_dir}/objc-rt.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/pixels.hh
     ${hdrs_dir}/seekable.hh

@@ -16,20 +16,11 @@
 
 namespace im {
     
-    namespace {
-        
+    namespace detail {
         inline int is_little_endian() {
             int value = 1;
             return ((char *) &value)[0] == 1;
         }
-        
-        // template <typename T = uint8_t>
-        // inline T *at(Image &im, int x, int y, int z) {
-        //     return &im.rowp_as<T>(0)[x*im.stride(0) +
-        //                              y*im.stride(1) +
-        //                              z*im.stride(2)];
-        // }
-        
     }
     
     std::unique_ptr<Image> PPMFormat::read(byte_source *src,
@@ -77,7 +68,7 @@ namespace im {
             delete[] data;
         
         } else if (bit_depth == 16) {
-            int little_endian = is_little_endian();
+            int little_endian = detail::is_little_endian();
             uint16_t *data = new uint16_t[full_size];
             imread_assert(fread(static_cast<void*>(data),
                           sizeof(uint16_t), full_size, membuf.get()) == static_cast<size_t>(full_size),
@@ -130,7 +121,7 @@ namespace im {
             delete[] data;
         } else if (bit_depth == 16) {
             pix::accessor<uint16_t> at = input.access<uint16_t>();
-            int little_endian = is_little_endian();
+            int little_endian = detail::is_little_endian();
             uint16_t *data = new uint16_t[full_size];
             uint16_t value;
             for (int y = 0; y < height; y++) {
