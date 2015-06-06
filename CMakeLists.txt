@@ -8,12 +8,12 @@ cmake_minimum_required(VERSION 3.0)
 
 SET(BREWED_CLANG_PATH /usr/local/opt/llvm)
 # SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
-#                       ${BREWED_CLANG_PATH}
-#                       /usr/local/opt/eigen)
+#                       ${BREWED_CLANG_PATH})
 
+# -Wl,-dead_strip -Wl,-dead_strip_dylibs
 
-SET(CMAKE_C_COMPILER    ${BREWED_CLANG_PATH}/bin/clang)
-SET(CMAKE_CXX_COMPILER  ${BREWED_CLANG_PATH}/bin/clang++)
+# SET(CMAKE_C_COMPILER    ${BREWED_CLANG_PATH}/bin/clang)
+# SET(CMAKE_CXX_COMPILER  ${BREWED_CLANG_PATH}/bin/clang++)
 
 # Set a new CMake project
 project(libimread)
@@ -84,11 +84,11 @@ find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
-find_package(Eigen3 REQUIRED)
+# find_package(Eigen3 REQUIRED)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
-include_directories("${BREWED_CLANG_PATH}/include")
+# include_directories("${BREWED_CLANG_PATH}/include")
 include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${DOCOPT_DIR}")
@@ -96,7 +96,8 @@ include_directories("${IOD_DIR}")
 include_directories("${SSZIP_DIR}")
 
 # Ugh
-link_directories("${BREWED_CLANG_PATH}/lib")
+# link_directories("${BREWED_CLANG_PATH}/lib")
+link_directories(/usr/lib)
 link_directories(/usr/local/lib)
 
 include_directories(
@@ -105,8 +106,7 @@ include_directories(
     ${TIFF_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
-    ${HALIDE_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR})
+    ${HALIDE_INCLUDE_DIR})
 
 # Set the files and options required to build the library
 include(fileList.cmake)
@@ -132,7 +132,6 @@ add_dependencies(imread     "iod_symbolize")
 # target_link_libraries(libimread
 #     libsszip
 #     png z ${EXTRA_LIBS}
-#     ${EIGEN3_LIBRARIES}
 #     ${TIFF_LIBRARIES}
 #     ${JPEG_LIBRARIES}
 #     ${WEBP_LIBRARIES}
@@ -140,7 +139,6 @@ add_dependencies(imread     "iod_symbolize")
 target_link_libraries(imread
     sszip docopt
     png z ${EXTRA_LIBS}
-    ${EIGEN3_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
@@ -165,7 +163,6 @@ link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     png z imread sszip docopt
     ${EXTRA_LIBS}
-    ${EIGEN3_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}

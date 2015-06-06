@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <stdexcept>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ansicolor.hh>
@@ -186,7 +187,7 @@ namespace im {
     TypeName()                                                                          \
         :w(DefaultMsg)                                                                  \
         { }                                                                             \
-    ~TypeName() noexcept { }                                                            \
+    virtual ~TypeName() { }                                                    \
                                                                                         \
     const char *what() const noexcept { return w.c_str(); }                             \
     std::string w;
@@ -208,7 +209,7 @@ namespace im {
     TypeName()                                                                          \
         :BaseTypeName(DefaultMsg), w(DefaultMsg)                                        \
         { }                                                                             \
-    ~TypeName() noexcept { }                                                            \
+    virtual ~TypeName() { }                                                    \
                                                                                         \
     const char *what() const noexcept { return w.c_str(); }                             \
     std::string w;
@@ -246,6 +247,7 @@ DECLARE_IMREAD_ERROR_SUBTYPE(JSONParseError,
                              std::runtime_error,    "JSON parsing error");
 DECLARE_IMREAD_ERROR_SUBTYPE(JSONLogicError,
                             std::logic_error,       "JSON operator logic error");
+
 DECLARE_IMREAD_ERROR_TYPE(JSONUseError,             "JSON library internal error");
 DECLARE_IMREAD_ERROR_TYPE(JSONInvalidSchema,        "JSON schema parsing error");
 DECLARE_IMREAD_ERROR_TYPE(JSONOutOfRange,           "JSON index value out of range");

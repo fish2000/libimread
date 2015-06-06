@@ -4,9 +4,9 @@
 #ifndef IMREAD_SYMBOLS_HH
 #define IMREAD_SYMBOLS_HH
 
-#include <iod/callable_traits.hh>
-#include <iod/sio.hh>
 #include <iod/symbol.hh>
+#include <iod/sio.hh>
+#include <iod/callable_traits.hh>
 #include <iod/tuple_utils.hh>
 #include <iod/utils.hh>
 #include <iod/bind_method.hh>

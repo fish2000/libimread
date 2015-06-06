@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_OBJC_RT_HH
 #define LIBIMREAD_OBJC_RT_HH
 
+#include <string>
 #include <tuple>
 
 #ifdef __OBJC__
@@ -22,14 +23,13 @@ namespace objc {
         
         operator ::id() { return iid; }
         
-        struct cls {
-            std::string name() {
-                return std::string(::object_getClassName(iid));
-            }
-            ::Class lookup() {
-                return ::objc_lookUpClass(::object_getClassName(iid));
-            }
-        };
+        std::string classname() {
+            return std::string(::object_getClassName(iid));
+        }
+        
+        ::Class lookup() {
+            return ::objc_lookUpClass(::object_getClassName(iid));
+        }
     
     };
     
@@ -60,10 +60,10 @@ namespace objc {
             return std::string(::sel_getName(sel));
         }
         
-        static objc::selector register(const std::string &name) {
+        static objc::selector register_name(const std::string &name) {
             return objc::selector(::sel_registerName(name.c_str()));
         }
-        static objc::selector register(const char *name) {
+        static objc::selector register_name(const char *name) {
             return objc::selector(::sel_registerName(name));
         }
         
@@ -75,9 +75,9 @@ namespace objc {
     
     template <typename ...Args>
     struct arguments {
-        using N = sizeof...(Args);
+        static constexpr std::size_t N = sizeof...(Args);
         using make_index = std::index_sequence_for<Args...>;
-        using index_type = std::index_sequence<I...>;
+        using index_type = std::make_index_sequence<N>;
         using tuple_type = std::tuple<Args&&...>;
         
         const std::size_t argc;
@@ -91,7 +91,7 @@ namespace objc {
         private:
             template <std::size_t ...I>
             ::id send_impl(::id self, ::SEL op, index_type idx) {
-                return ::objc_msgSend(self, op,
+                return objc_msgSend(self, op,
                     std::get<I>(std::forward<Args>(args))...);
             }
         
@@ -118,13 +118,13 @@ namespace objc {
         
         template <typename ...Args>
         ::id send(Args&& ...args) {
-            objc::arguments ARGS(args...);
+            arguments<Args...> ARGS(args...);
             return ARGS.send(self, op);
         }
         
         template <typename ...Args>
         static ::id send(::id self, ::SEL op, Args&& ...args) {
-            objc::arguments ARGS(args...);
+            arguments<Args...> ARGS(args...);
             return ARGS.send(self, op);
         }
         

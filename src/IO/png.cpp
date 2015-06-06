@@ -16,9 +16,6 @@
 
 namespace im {
     
-    namespace PNG {
-        const format::options_type format::options = format::opts_init();
-    }
     
     namespace {
         
@@ -324,7 +321,7 @@ namespace im {
     void write_ios(Image &input, byte_sink *output, const options_map &opts) {
         /// immediately write the header, 
         /// before initializing the holder
-        output->write(PNG_SIGNATURE, 8);
+        output->write(PNGFormat::OPTS().signature.c_str(), 8);
         
         png_holder p(png_holder::write_mode);
         p.create_info();

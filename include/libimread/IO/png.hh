@@ -15,50 +15,23 @@
 
 namespace im {
     
-    /*
-    using namespace symbols::s;
-    
-    auto options =
-    D(
-        _compression_level     = -1,
-        _backend               = "io_png"
-    );
-    */
-    
-    namespace PNG {
-        
-        struct format {
-            
-            static auto opts_init() {
-                return D(
-                    _signature = "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
-                );
-            }
-            
-            using options_type = decltype(format::opts_init());
-            static const options_type options;
-        };
-        
-    }
-    
-    #define PNG_SIGNATURE "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
-    
-    // namespace signature {
-    //     struct PNGSignature {
-    //         PNGSignature() {}
-    //         operator char const*() { return "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"; }
-    //     };
-    //     static const PNGSignature PNG;
-    // }
-    
     class PNGFormat : public ImageFormat {
         public:
             typedef std::true_type can_read;
             typedef std::true_type can_write;
+            typedef decltype(D(
+                _signature = std::string()
+            ))
+                options;
+            
+            static const options OPTS() {
+                const options O("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A");
+                return O;
+            }
             
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {
-                return match_magic(src, PNG_SIGNATURE, 8);
+                return match_magic(src, OPTS().signature, 8);
             }
             
             virtual std::unique_ptr<Image> read(byte_source *src,

@@ -1,7 +1,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/coregraphics.hh>
-#include <libimread/objc-rt.hh>
 
 namespace im {
         

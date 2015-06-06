@@ -1,4 +1,6 @@
 
+#include <string>
+
 #include <libimread/libimread.hpp>
 #include <libimread/options.hh>
 

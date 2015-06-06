@@ -4,28 +4,35 @@
 # To keep the file list clean
 set(hdrs_dir ${${PROJECT_NAME}_include_dir})
 set(srcs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${source_dir})
+# set(sdk_root "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk")
 
 # common link flags
+# SET(COMMON_LINK_FLAGS
+#     -m64 -mmacosx-version-min=10.9
+#     -fobjc-link-runtime
+#     -rpath @executable_path/../Frameworks)
+# -isysroot ${sdk_root}
+# -syslibroot ${sdk_root}
 SET(COMMON_LINK_FLAGS
     -m64 -mmacosx-version-min=10.9
-    -fobjc-link-runtime
-    -Wl,-dead_strip -Wl,-dead_strip_dylibs
-    -rpath @executable_path/../Frameworks)
+    -fobjc-link-runtime)
 
 # language-specific compile options
 SET(C_OPTIONS
     -std=c99 -Wno-incompatible-pointer-types -Wno-char-subscripts)
 
 SET(CXX_OPTIONS
-    -std=c++14 -stdlib=libc++)
+    -std=c++14 -stdlib=libc++ -x c++)
 
 SET(OBJC_OPTIONS
     -fobjc-link-runtime
     -fobjc-abi-version=3 -fobjc-arc -std=c99 -ObjC)
 
 SET(OBJCXX_OPTIONS
-    -fobjc-abi-version=3 -std=c++14 -stdlib=libc++
-    -ObjC++ -fobjc-arc -fobjc-call-cxx-cdtors)
+    -ObjC++ 
+    -fobjc-abi-version=3 -fobjc-arc -fobjc-call-cxx-cdtors
+    -std=c++14 -stdlib=libc++
+    -x objective-c++)
 
 # Extra options for Image IO code
 SET(IO_EXTRA_OPTIONS
@@ -216,7 +223,7 @@ endforeach()
 
 IF(APPLE)
     # Right now there are no non-Apple options that work
-    INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
+    # INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
@@ -238,5 +245,6 @@ ENDIF(APPLE)
 add_definitions(
     ${OBJCXX_OPTIONS}
     -DWITH_SCHEMA
+    --verbose -v
     -O3 -mtune=native -fstrict-aliasing)
 

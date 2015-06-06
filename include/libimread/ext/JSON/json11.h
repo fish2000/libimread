@@ -19,6 +19,7 @@
 #include <cfloat>
 #include <cstdint>
 #include <utility>
+#include <exception>
 #include <stdexcept>
 #include <type_traits>
 #include <initializer_list>

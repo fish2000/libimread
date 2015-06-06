@@ -21,6 +21,10 @@ namespace im {
         src->seek_relative(-n_read);
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }
+    inline bool match_magic(byte_source *src, const std::string &magic, const std::size_t n) {
+        return match_magic(src, magic.c_str(), n);
+    }
+    
     
     class ImageFormat {
         public:
