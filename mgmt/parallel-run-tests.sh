@@ -12,7 +12,6 @@ pushd $PROJECT_PATH && \
     pushd ./build && \
         cmake .. \
             -Wno-dev \
-            -DCMAKE_VERBOSE_MAKEFILE=TRUE \
             -DCMAKE_INSTALL_PREFIX=./dist && \
         make -j4 install && \
             ./test_libimread --success --durations yes --abortx 10

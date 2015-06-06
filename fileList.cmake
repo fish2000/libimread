@@ -19,17 +19,21 @@ SET(COMMON_LINK_FLAGS
 
 # language-specific compile options
 SET(C_OPTIONS
-    -std=c99 -Wno-incompatible-pointer-types -Wno-char-subscripts)
+    -std=c99 -Wno-incompatible-pointer-types -Wno-char-subscripts
+    -x c)
 
 SET(CXX_OPTIONS
-    -std=c++14 -stdlib=libc++ -x c++)
+    -std=c++14 -stdlib=libc++
+    -x c++)
 
 SET(OBJC_OPTIONS
     -fobjc-link-runtime
-    -fobjc-abi-version=3 -fobjc-arc -std=c99 -ObjC)
+    -fobjc-abi-version=3 -fobjc-arc -std=c99
+    -ObjC
+    -x objective-c)
 
+# -ObjC++
 SET(OBJCXX_OPTIONS
-    -ObjC++ 
     -fobjc-abi-version=3 -fobjc-arc -fobjc-call-cxx-cdtors
     -std=c++14 -stdlib=libc++
     -x objective-c++)
@@ -245,6 +249,5 @@ ENDIF(APPLE)
 add_definitions(
     ${OBJCXX_OPTIONS}
     -DWITH_SCHEMA
-    --verbose -v
     -O3 -mtune=native -fstrict-aliasing)
 
