@@ -3,17 +3,8 @@
 
 # The minimum CMake version required to build this project
 cmake_minimum_required(VERSION 3.0)
-# SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-#                       ${CMAKE_SOURCE_DIR}/cmake)
 
-SET(BREWED_CLANG_PATH /usr/local/opt/llvm)
-# SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
-#                       ${BREWED_CLANG_PATH})
-
-# -Wl,-dead_strip -Wl,-dead_strip_dylibs
-
-# SET(CMAKE_C_COMPILER    ${BREWED_CLANG_PATH}/bin/clang)
-# SET(CMAKE_CXX_COMPILER  ${BREWED_CLANG_PATH}/bin/clang++)
+# SET(BREWED_CLANG_PATH /usr/local/opt/llvm)
 
 # Set a new CMake project
 project(libimread)
@@ -84,11 +75,9 @@ find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
-# find_package(Eigen3 REQUIRED)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
-# include_directories("${BREWED_CLANG_PATH}/include")
 include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${DOCOPT_DIR}")
@@ -96,7 +85,6 @@ include_directories("${IOD_DIR}")
 include_directories("${SSZIP_DIR}")
 
 # Ugh
-# link_directories("${BREWED_CLANG_PATH}/lib")
 link_directories(/usr/lib)
 link_directories(/usr/local/lib)
 

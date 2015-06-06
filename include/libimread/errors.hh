@@ -187,7 +187,7 @@ namespace im {
     TypeName()                                                                          \
         :w(DefaultMsg)                                                                  \
         { }                                                                             \
-    virtual ~TypeName() { }                                                    \
+    virtual ~TypeName() { }                                                             \
                                                                                         \
     const char *what() const noexcept { return w.c_str(); }                             \
     std::string w;
@@ -209,7 +209,7 @@ namespace im {
     TypeName()                                                                          \
         :BaseTypeName(DefaultMsg), w(DefaultMsg)                                        \
         { }                                                                             \
-    virtual ~TypeName() { }                                                    \
+    virtual ~TypeName() { }                                                             \
                                                                                         \
     const char *what() const noexcept { return w.c_str(); }                             \
     std::string w;

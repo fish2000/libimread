@@ -1,5 +1,5 @@
-// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_PYTHON_NUMPY_HH_
 #define LIBIMREAD_PYTHON_NUMPY_HH_

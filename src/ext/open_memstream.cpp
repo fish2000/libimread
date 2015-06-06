@@ -1,4 +1,6 @@
-/* Use funopen(3) to provide open_memstream(3) like functionality. */
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
+/// Use funopen(3) to provide open_memstream(3) like functionality.
 
 #include "libimread/ext/open_memstream.hh"
 

@@ -1,8 +1,8 @@
-// Copyright 2012 Luis Pedro Coelho <luis@Copyright 2014 Alexander Böhn <fish2000@gmail.com>.org>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_WEBP_H_INCLUDE_GUARD_
-#define LPC_WEBP_H_INCLUDE_GUARD_
+#ifndef LIBIMREAD_IO_WEBP_HH_
+#define LIBIMREAD_IO_WEBP_HH_
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
@@ -25,4 +25,4 @@ namespace im {
 }
 
 
-#endif // LPC_WEBP_H_INCLUDE_GUARD_
+#endif /// LIBIMREAD_IO_WEBP_HH_

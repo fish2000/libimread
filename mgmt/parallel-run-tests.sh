@@ -16,7 +16,6 @@ pushd $PROJECT_PATH && \
         make -j4 install && \
             ./test_libimread --success --durations yes --abortx 10
 
-# cd $PROJECT_PATH
 pushd
 pushd
 echo "*** TEST RUN COMPLETE"

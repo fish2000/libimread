@@ -49,13 +49,6 @@ namespace im {
         inline void convert(uint16_t in, float &out) { out = in / 65535.0f; }
         inline void convert(uint16_t in, double &out) { out = in / 65535.0f; }
         
-        // template <typename T = byte>
-        // inline T *at(Image &im, int x, int y, int z) {
-        //     return &im.rowp_as<T>(0)[x*im.stride(0) +
-        //                              y*im.stride(1) +
-        //                              z*im.stride(2)];
-        // }
-        
         template <typename P = byte, typename O = std::ptrdiff_t>
         struct alignas(alignof(P) * 16) accessor {
             /// Pointer difference type

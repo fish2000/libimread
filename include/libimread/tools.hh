@@ -108,8 +108,8 @@ namespace im {
     }
     
     struct stack_based_memory_pool {
-        // This class manages an allocator which releases all allocated memory on
-        // stack exit
+        /// An allocator-ish RAII object,
+        /// on stack exit it frees its allocations
         stack_based_memory_pool() { }
         
         ~stack_based_memory_pool() {

@@ -1,3 +1,5 @@
+// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+// License: MIT (see COPYING.MIT file)
 
 #include <libimread/ext/WriteGIF.h>
 #include <libimread/ext/fmemopen.hh>

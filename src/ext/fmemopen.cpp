@@ -1,6 +1,7 @@
 /*
  * fmem.c : fmemopen() on top of BSD's funopen()
- * 20081017 AF
+ * 20081017 AF (orig)
+ * 20150115 Alexander Fucking Bohn (this totally awesome c++11'd iteration)
  */
 
 #include "libimread/ext/fmemopen.hh"

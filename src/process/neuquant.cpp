@@ -1,3 +1,6 @@
+// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+// ... Only not really (release-ready attribution TBD)
+// License: MIT (see COPYING.MIT file)
 
 #include <cmath>
 #include <libimread/process/neuquant.h>

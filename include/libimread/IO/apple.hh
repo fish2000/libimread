@@ -22,8 +22,8 @@ namespace im {
     #ifdef __OBJC__
     namespace cf {
         
-        /// NOTE TO SELF:
-        /// replace this with CF++ and the like
+        /// NOTE TO SELF: replace this with CF++ and the like;
+        /// see also objc-rt.hh
         
         template <typename C = CFTypeRef>
         struct unref {

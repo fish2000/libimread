@@ -1,5 +1,5 @@
-// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #include <iostream>
 #include <libimread/IO/png.hh>

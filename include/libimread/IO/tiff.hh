@@ -1,8 +1,8 @@
-// Copyright 2012 Luis Pedro Coelho <luis@Copyright 2014 Alexander Böhn <fish2000@gmail.com>.org>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012
-#define LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012
+#ifndef LIBIMREAD_IO_TIFF_HH_
+#define LIBIMREAD_IO_TIFF_HH_
 
 #include <utility>
 #include <sstream>
@@ -76,4 +76,4 @@ namespace im {
 
 
 
-#endif // LPC_TIFF_INCLUDE_GUARD_Wed_Feb__8_19_02_16_WET_2012
+#endif /// LIBIMREAD_IO_TIFF_HH_

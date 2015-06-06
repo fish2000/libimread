@@ -1,8 +1,8 @@
-// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_XCASSETS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define LPC_XCASSETS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#ifndef LIBIMREAD_IO_XCASSETS_HH_
+#define LIBIMREAD_IO_XCASSETS_HH_
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
@@ -34,4 +34,4 @@ namespace im {
 }
 
 
-#endif // LPC_XCASSETS_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif /// LIBIMREAD_IO_XCASSETS_HH_

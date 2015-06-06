@@ -1,5 +1,5 @@
-// Copyright 2012-2014 Alexander Böhn <fish2000@gmail.com>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_IO_PNG_HH_
 #define LIBIMREAD_IO_PNG_HH_

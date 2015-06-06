@@ -4,15 +4,7 @@
 # To keep the file list clean
 set(hdrs_dir ${${PROJECT_NAME}_include_dir})
 set(srcs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${source_dir})
-# set(sdk_root "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk")
 
-# common link flags
-# SET(COMMON_LINK_FLAGS
-#     -m64 -mmacosx-version-min=10.9
-#     -fobjc-link-runtime
-#     -rpath @executable_path/../Frameworks)
-# -isysroot ${sdk_root}
-# -syslibroot ${sdk_root}
 SET(COMMON_LINK_FLAGS
     -m64 -mmacosx-version-min=10.9
     -fobjc-link-runtime)
@@ -32,7 +24,6 @@ SET(OBJC_OPTIONS
     -ObjC
     -x objective-c)
 
-# -ObjC++
 SET(OBJCXX_OPTIONS
     -fobjc-abi-version=3 -fobjc-arc -fobjc-call-cxx-cdtors
     -std=c++14 -stdlib=libc++
@@ -42,11 +33,6 @@ SET(OBJCXX_OPTIONS
 SET(IO_EXTRA_OPTIONS
     -ffast-math)
 
-# SET(C_FILES "" PARENT_SCOPE)
-# SET(CC_FILES "" PARENT_SCOPE)
-# SET(M_FILES "" PARENT_SCOPE)
-# SET(MM_FILES "" PARENT_SCOPE)
-# SET(IO_FILES "" PARENT_SCOPE)
 SET(C_FILES "")
 SET(CC_FILES "")
 SET(M_FILES "")
@@ -91,7 +77,6 @@ configure_file(
 # Project header files
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
-    # ${PROJECT_BINARY_DIR}/libimread/symbols.hpp
     
     ${hdrs_dir}/ext/filesystem/path.h
     ${hdrs_dir}/ext/filesystem/resolver.h
@@ -99,7 +84,6 @@ set(hdrs
     ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
-    # ${hdrs_dir}/ext/UTI.h
     ${hdrs_dir}/ext/WriteGIF.h
     
     ${hdrs_dir}/IO/apple.hh
@@ -143,7 +127,6 @@ set(hdrs
     ${IOD_SYMBOLS_HEADER}
     ${hdrs_dir}/tools.hh
     ${hdrs_dir}/traits.hh
-    # ${hdrs_dir}/vpp.hh
 )
 
 # Project source files
@@ -155,7 +138,6 @@ set(srcs
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
-    # ${srcs_dir}/ext/UTI.mm
     ${srcs_dir}/ext/WriteGIF.cpp
     
     ${srcs_dir}/IO/apple.mm
@@ -184,7 +166,6 @@ set(srcs
     ${srcs_dir}/halide.cpp
     ${srcs_dir}/options.cpp
     ${srcs_dir}/symbols.cpp
-    # ${srcs_dir}/vpp.cpp
 )
 
 # set common link flags
@@ -227,7 +208,6 @@ endforeach()
 
 IF(APPLE)
     # Right now there are no non-Apple options that work
-    # INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
@@ -238,11 +218,6 @@ IF(APPLE)
         ${EXTRA_LIBS}
         ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
         ${COREFOUNDATION_LIBRARY})
-    
-    # set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
-    #     PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -ObjC++)
-    # set_source_files_properties(GLOB_RECURSE "${srcs_dir}/*.mm"
-    #     PROPERTIES COMPILE_FLAGS ${COMPILE_FLAGS} -fobjc-arc)
     
 ENDIF(APPLE)
 

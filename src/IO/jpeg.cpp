@@ -1,5 +1,5 @@
-// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #include <algorithm>
 #include <libimread/IO/jpeg.hh>
@@ -251,9 +251,6 @@ namespace im {
         }
         
         JSAMPLE *rowbuf = new JSAMPLE[w * d]; /// width * channels
-        // pix::accessor<JSAMPLE> at(input.rowp_as<JSAMPLE>(0), input.stride(0),
-        //                                                      input.stride(1),
-        //                                                      input.stride(2));
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
         while (compressor.info.next_scanline < compressor.info.image_height) {

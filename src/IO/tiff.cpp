@@ -1,5 +1,5 @@
-// Copyright 2012-2013 Luis Pedro Coelho <luis@Copyright 2014 Alexander Böhn <fish2000@gmail.com>.org>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #define NO_IMPORT_ARRAY
 

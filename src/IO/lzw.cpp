@@ -1,6 +1,6 @@
-// Copyright 2012 Luis Pedro Coelho
-// This is an implementation of TIFF LZW compression coded from the spec.
-// License: MIT
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
+// This is Luis Pedro's implementation of TIFF LZW compression, coded from the spec.
 
 #include <vector>
 #include <libimread/errors.hh>

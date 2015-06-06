@@ -28,7 +28,6 @@
 #define LIBIMREAD_EXT_PVR_H_
 
 #include <cstdint>
-//#include <jemalloc/jemalloc.h>
 
 enum ePVRPixelType
 {

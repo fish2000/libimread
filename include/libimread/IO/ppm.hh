@@ -1,3 +1,5 @@
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_IO_PPM_HH_
 #define LIBIMREAD_IO_PPM_HH_

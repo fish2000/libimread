@@ -1,8 +1,8 @@
 // Copyright 2014 Alexander Böhn <fish2000@gmail.com>.org>
 // License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
-#define LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
+#ifndef LIBIMREAD_IO_BMP_HH_
+#define LIBIMREAD_IO_BMP_HH_
 
 #include <sstream>
 
@@ -32,5 +32,4 @@ namespace im {
     
 }
 
-#endif // LPC_BMP_H_INCLUDE_GUARD_THU_OCT_25_20_16_30_WEST_2012
-
+#endif /// LIBIMREAD_IO_BMP_HH_

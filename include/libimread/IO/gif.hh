@@ -1,5 +1,5 @@
-// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #ifndef FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
 #define FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
