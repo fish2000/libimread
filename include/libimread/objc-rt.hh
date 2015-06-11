@@ -76,7 +76,6 @@ namespace objc {
     template <typename ...Args>
     struct arguments {
         static constexpr std::size_t N = sizeof...(Args);
-        using make_index = std::index_sequence_for<Args...>;
         using index_type = std::make_index_sequence<N>;
         using tuple_type = std::tuple<Args&&...>;
         
