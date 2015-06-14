@@ -6,6 +6,7 @@
 
 #include <string>
 #include <tuple>
+#include <type_traits>
 
 #ifdef __OBJC__
 #import <objc/runtime.h>
@@ -30,6 +31,20 @@ namespace objc {
         ::Class lookup() {
             return ::objc_lookUpClass(::object_getClassName(iid));
         }
+        
+        static std::string classname(::id ii) {
+            return std::string(::object_getClassName(ii));
+        }
+        
+        static ::Class lookup(::id ii) {
+            return ::objc_lookUpClass(::object_getClassName(ii));
+        }
+        static ::Class lookup(const std::string &s) {
+            return ::objc_lookUpClass(s.c_str());
+        }
+        static ::Class lookup(const char *s) {
+            return ::objc_lookUpClass(s);
+        }
     
     };
     
@@ -47,8 +62,6 @@ namespace objc {
             :sel(::sel_registerName(name))
             {}
         
-        operator ::SEL() { return sel; }
-        
         bool operator==(const objc::selector &s) {
             return ::sel_isEqual(sel, s.sel) == YES;
         }
@@ -60,11 +73,16 @@ namespace objc {
             return std::string(::sel_getName(sel));
         }
         
+        operator ::SEL() { return sel; }
+        operator std::string() { return name(); }
+        operator const char*() { return ::sel_getName(sel); }
+        operator char*() { return const_cast<char*>(::sel_getName(sel)); }
+        
         static objc::selector register_name(const std::string &name) {
-            return objc::selector(::sel_registerName(name.c_str()));
+            return objc::selector(name);
         }
         static objc::selector register_name(const char *name) {
-            return objc::selector(::sel_registerName(name));
+            return objc::selector(name);
         }
         
     };
@@ -76,6 +94,7 @@ namespace objc {
     template <typename ...Args>
     struct arguments {
         static constexpr std::size_t N = sizeof...(Args);
+        using is_argument_list = std::true_type;
         using index_type = std::make_index_sequence<N>;
         using tuple_type = std::tuple<Args&&...>;
         
@@ -106,6 +125,30 @@ namespace objc {
             arguments &operator=(arguments&&);
     };
     
+    namespace traits {
+    
+        namespace detail {
+            
+            template <typename T, typename ...Args>
+            static auto test_is_argument_list(int) -> typename T::is_argument_list;
+            template <typename, typename ...Args>
+            static auto test_is_argument_list(long) -> std::false_type;
+            
+        }
+        
+        #define TEST_ARGS T
+        
+        template <typename T>
+        struct is_argument_list : decltype(detail::test_is_argument_list<T, TEST_ARGS>(0)) {
+            template <typename X = std::enable_if<decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value>>
+            static constexpr bool value() { return true; }
+            static constexpr bool value() { return detail::test_is_argument_list<T, TEST_ARGS>(0); }
+        };
+        
+        #undef TEST_ARGS
+    
+    }
+    
     struct msg {
         
         ::id self;
@@ -121,10 +164,22 @@ namespace objc {
             return ARGS.send(self, op);
         }
         
+        template <typename M,
+                  typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
+        ::id sendv(M arg_list) {
+            return arg_list.send(self, op);
+        }
+        
         template <typename ...Args>
         static ::id send(::id self, ::SEL op, Args&& ...args) {
             arguments<Args...> ARGS(args...);
             return ARGS.send(self, op);
+        }
+        
+        template <typename M,
+                  typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
+        static ::id sendv(::id self, ::SEL op, M arg_list) {
+            return arg_list.send(self, op);
         }
         
         private:
