@@ -17,7 +17,7 @@ namespace {
             arc4random_buf(static_cast<void*>(randos), nbytes);
             datum = [[NSData alloc] initWithBytes:(const void *)&randos[0]
                                            length:(NSInteger)nbytes];
-            objc::msg::send(datum,
+            objc::msg::send((id)datum,
                 objc::selector("writeToURL:atomically:"),
                 url, YES);
         };

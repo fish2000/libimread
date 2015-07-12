@@ -114,7 +114,7 @@ namespace objc {
             }
         
         public:
-            ::id send(::id self, ::SEL op) {
+            ::id send(::id self, ::SEL op) const {
                 return send_impl(self, op, index_type());
             }
         
@@ -123,6 +123,31 @@ namespace objc {
             arguments(arguments&&);
             arguments &operator=(const arguments&);
             arguments &operator=(arguments&&);
+    };
+    
+    template <typename ...Args>
+    struct message : public arguments<Args...> {
+        using arguments_type = arguments<Args...>;
+        using arguments_type::argc;
+        using arguments_type::args;
+        ::id self;
+        ::SEL op;
+        
+        explicit message(::id s, ::SEL o, Args&&... a)
+            :arguments_type(a...)
+            ,self(s), op(o)
+            {}
+        
+        ::id send() const {
+            return send(self, op);
+        }
+        
+        private:
+            message(const message&);
+            message(message&&);
+            message &operator=(const message&);
+            message &operator=(message&&);
+            
     };
     
     namespace traits {
@@ -142,7 +167,11 @@ namespace objc {
         struct is_argument_list : decltype(detail::test_is_argument_list<T, TEST_ARGS>(0)) {
             template <typename X = std::enable_if<decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value>>
             static constexpr bool value() { return true; }
-            static constexpr bool value() { return detail::test_is_argument_list<T, TEST_ARGS>(0); }
+            static constexpr bool value() {
+                // static_assert(decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value,
+                //               "Type does not conform to objc::arguments<Args...>");
+                return detail::test_is_argument_list<T, TEST_ARGS>(0);
+            }
         };
         
         #undef TEST_ARGS
