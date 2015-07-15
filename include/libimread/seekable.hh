@@ -82,20 +82,6 @@ namespace im {
                 std::snprintf(buffer, 1024, fmt, args...);
                 return this->write(buffer, std::strlen(static_cast<const char*>(buffer)));
             }
-            
-            virtual byte_sink& operator<<(const std::string &w) {
-                this->write(static_cast<const char*>(w.c_str()),
-                            static_cast<std::size_t>(w.length()));
-                return *this;
-            }
-            virtual byte_sink& operator<<(const char *w) {
-                this->write(w, std::strlen(w));
-                return *this;
-            }
-            virtual byte_sink& operator<<(const std::vector<byte> &w) {
-                this->write(&w[0], w.size());
-                return *this;
-            }
     };
 
 }

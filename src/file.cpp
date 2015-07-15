@@ -19,6 +19,9 @@ namespace im {
         return file_exists(path.c_str());
     }
     
+    constexpr int file_source_sink::READ_FLAGS;
+    constexpr int file_source_sink::WRITE_FLAGS;
+    
     bool file_source_sink::exists() const { return im::file_exists(path()); }
     
 }
