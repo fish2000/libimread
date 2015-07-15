@@ -6,10 +6,12 @@
 
 #include <cstdint>
 
-#define IM_VERSION_MAJOR @libimread_VERSION_MAJOR@
-#define IM_VERSION_MINOR @libimread_VERSION_MINOR@
-#define IM_VERSION_PATCH @libimread_VERSION_PATCH@
-#define IM_VERSION "@libimread_VERSION_MAJOR@.@libimread_VERSION_MINOR@.@libimread_VERSION_PATCH@"
+#define IM_VERSION_MAJOR                @libimread_VERSION_MAJOR@
+#define IM_VERSION_MINOR                @libimread_VERSION_MINOR@
+#define IM_VERSION_PATCH                @libimread_VERSION_PATCH@
+#define IM_VERSION                      "@libimread_VERSION_MAJOR@.@libimread_VERSION_MINOR@.@libimread_VERSION_PATCH@"
+
+#define IM_COLOR_TRACE                  1
 
 #define FILESYSTEM_TEMP_SUFFIX          ".imdata"
 #define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"

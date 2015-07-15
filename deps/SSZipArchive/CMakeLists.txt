@@ -18,12 +18,11 @@ include_directories(
     ${FOUNDATION_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR})
 
-# ${CMAKE_CURRENT_SOURCE_DIR}/minizip
-
 add_definitions(
     -Wall -Werror -fstack-protector-all
     -fobjc-abi-version=3
-    -fobjc-arc -std=c99 -ObjC
+    -fobjc-arc -std=c99
+    -x objective-c
     -DHAVE_BZIP2 -DHAS_STDINT_H)
 
 set(EXTRA_LIBS ${EXTRA_LIBS}

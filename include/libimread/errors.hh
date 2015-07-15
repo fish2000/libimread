@@ -122,8 +122,6 @@ namespace im {
     constexpr std::size_t static_strlen(char const (&)[N]) { return N; }
 
 
-#define DO_COLOR_EXCEPTIONS 1
-
 #ifndef ST
 #define ST(s) "" #s 
 #endif /// ST

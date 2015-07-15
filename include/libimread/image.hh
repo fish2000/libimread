@@ -15,7 +15,7 @@
 namespace im {
     class Image {
         public:
-            virtual ~Image() { }
+            virtual ~Image() {}
             
             virtual void *rowp(int r) = 0;
             virtual int nbits() const = 0;
@@ -103,15 +103,16 @@ namespace im {
     /// This class *owns* its members and will delete them if destroyed
     struct image_list {
         public:
-            image_list() { }
-            ~image_list() {
-                for (unsigned i = 0; i != content.size(); ++i) {
-                    delete content[i];
-                }
-            }
+            image_list() {}
             
             std::vector<Image*>::size_type size() const { return content.size(); }
             void push_back(std::unique_ptr<Image> p) { content.push_back(p.release()); }
+            
+            ~image_list() {
+                unsigned i = 0,
+                         x = static_cast<unsigned>(content.size());
+                for (; i != x; ++i) { delete content[i]; }
+            }
             
             /// After release(), all of the pointers will be owned by the caller
             /// who must figure out how to delete them. Note that release() resets the list.
@@ -122,7 +123,9 @@ namespace im {
             }
         
         private:
+            image_list(image_list&&);
             image_list(const image_list&);
+            image_list &operator=(image_list&&);
             image_list &operator=(const image_list&);
             std::vector<Image*> content;
     };
