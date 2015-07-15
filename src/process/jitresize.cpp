@@ -12,12 +12,16 @@ namespace im {
         
         Expr kernel_box(Expr x) {
             Expr xx = abs(x);
-            return select(xx <= 0.5f, 1.0f, 0.0f);
+            return select(xx <= 0.5f,
+                1.0f,
+                0.0f);
         }
         
         Expr kernel_linear(Expr x) {
             Expr xx = abs(x);
-            return select(xx < 1.0f, 1.0f - xx, 0.0f);
+            return select(xx < 1.0f,
+                1.0f - xx,
+                0.0f);
         }
         
         Expr kernel_cubic(Expr x) {
@@ -26,9 +30,12 @@ namespace im {
             Expr xx3 = xx2 * xx;
             float a = -0.5f;
             
-            return select(xx < 1.0f, (a + 2.0f) * xx3 - (a + 3.0f) * xx2 + 1,
-                          select (xx < 2.0f, a * xx3 - 5 * a * xx2 + 8 * a * xx - 4.0f * a,
-                                  0.0f));
+            return select(xx < 1.0f,
+                (a + 2.0f) * xx3 - (a + 3.0f) * xx2 + 1,
+                select(xx < 2.0f,
+                    a * xx3 - 5 * a * xx2 + 8 * a * xx - 4.0f * a,
+                    0.0f)
+                );
         }
         
         Expr sinc(Expr x) {
@@ -37,8 +44,17 @@ namespace im {
         
         Expr kernel_lanczos(Expr x) {
             Expr value = sinc(x) * sinc(x/3);
-            value = select(x == 0.0f, 1.0f, value); // Take care of singularity at zero
-            value = select(x > 3 || x < -3, 0.0f, value); // Clamp to zero out of bounds
+            
+            // Take care of singularity at zero
+            value = select(x == 0.0f,
+                1.0f,
+                value);
+            
+            // Clamp to zero out of bounds
+            value = select(x > 3 || x < -3,
+                0.0f,
+                value);
+            
             return value;
         }
         

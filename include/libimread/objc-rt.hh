@@ -186,7 +186,7 @@ namespace objc {
             {}
         
         template <typename ...Args>
-        ::id zend(Args&& ...args) {
+        ::id send(::BOOL dispatch, Args&& ...args) {
             arguments<Args...> ARGS(args...);
             return ARGS.send(self, op);
         }

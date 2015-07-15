@@ -210,64 +210,6 @@ namespace im {
             format->write_multi(dynamic_cast<std::vector<Image>&>(input), output.get(), opts);
         }
         
-        template <typename T = byte>
-        void WACK(HybridImage<T> &input, const std::string &filename, bool GPU = false) {
-            options_map opts;
-            HybridImage<T> nim(1);
-            if (input.dim(2) > 3) {
-                WTF("IMAGE WITH: dim(2) > 3 OHHHH SHIT");
-                nim = HybridImage<T>(input.width(), input.height(), 3);
-                
-                Var x, y, c;
-                Func f("f");
-                
-                f(x, y, c) = input(x, y, c);
-                
-                if (GPU) {
-                    WTF("Running GPU schedule USING INTERMEDIATE Buffer() OBJECT");
-                    
-                    Buffer outbuf(UInt(8),
-                        input.width(), input.height(), 3);
-                    
-                    f.reorder(c, x, y)
-                     .bound(c, 0, 3)
-                     .unroll(c);
-                    f.gpu_tile(x, y, 8, 8);
-                    
-                    Target t = Halide::get_host_target();
-                    t.set_feature(Target::OpenCL);
-                    f.compile_jit(t);
-                    
-                    /// EXPLICITLY ONLY DO UP TO THREE:
-                    f.realize(outbuf);
-                    outbuf.copy_to_host();
-                    nim = outbuf;
-                } else {
-                    
-                    WTF("Running CPU schedule");
-                    
-                    f.reorder(c, x, y)
-                     .bound(c, 0, 3)
-                     .unroll(c);
-                    //f.vectorize(x, 8);
-                    
-                    Target t = Halide::get_jit_target_from_environment();
-                    f.compile_jit(t);
-                    
-                    //f.trace_stores();
-                    //f.parallel(y);
-                    f.realize(nim);
-                }
-            } else {
-                WTF("Assigning input to nim");
-                nim = input;
-            }
-            
-            std::unique_ptr<ImageFormat> format(for_filename(filename));
-            std::unique_ptr<FileSink> output(new FileSink(filename));
-            format->write(dynamic_cast<Image&>(nim), output.get(), opts);
-        }
-        
     }
     
 }
