@@ -132,9 +132,9 @@ namespace im {
 #define FF(...) std::forward_as_tuple(__VA_ARGS__)
 #endif /// FF
 
-#ifndef YES
-#define YES(...) im::norly(ansi::white, __VA_ARGS__)
-#endif /// YES
+#ifndef FORSURE
+#define FORSURE(...) im::norly(ansi::white, __VA_ARGS__)
+#endif /// FORSURE
 
 #ifndef WTF
 #define WTF(...)                                                                        \

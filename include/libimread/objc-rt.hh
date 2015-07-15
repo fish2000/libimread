@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_OBJC_RT_HH
 #define LIBIMREAD_OBJC_RT_HH
 
+#include <cstdlib>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -87,10 +88,6 @@ namespace objc {
         }
         
     };
-    
-    inline objc::selector operator"" _SEL(const char *name) {
-        return objc::selector(name);
-    }
     
     template <typename ...Args>
     struct arguments {
@@ -220,6 +217,10 @@ namespace objc {
         
     };
     
+}
+
+inline objc::selector operator"" _SEL(const char *name) {
+    return objc::selector(name);
 }
 
 #endif /// LIBIMREAD_OBJC_RT_HH

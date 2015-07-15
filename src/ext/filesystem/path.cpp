@@ -115,12 +115,5 @@ namespace filesystem {
         });
         return out;
     }
-    
-    constexpr char NamedTemporaryFile::tfp[im::static_strlen(FILESYSTEM_TEMP_FILENAME)];
-    constexpr char NamedTemporaryFile::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
-    
-    constexpr char TemporaryDirectory::tdp[im::static_strlen(FILESYSTEM_TEMP_DIRECTORYNAME)];
-    constexpr char TemporaryDirectory::tfp[im::static_strlen(FILESYSTEM_TEMP_FILENAME)];
-    constexpr char TemporaryDirectory::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
 
 }

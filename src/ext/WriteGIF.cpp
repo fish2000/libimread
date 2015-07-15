@@ -30,7 +30,7 @@ using im::byte;
 #define VERBOSE 0
 
 #if (VERBOSE > 0)
-#define MAYBE(...) YES(__VA_ARGS__)
+#define MAYBE(...) FORSURE(__VA_ARGS__)
 #else
 #define MAYBE(...)
 #endif

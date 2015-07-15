@@ -80,6 +80,7 @@ set(hdrs
     
     ${hdrs_dir}/ext/filesystem/path.h
     ${hdrs_dir}/ext/filesystem/resolver.h
+    ${hdrs_dir}/ext/filesystem/temporary.h
     ${hdrs_dir}/ext/JSON/json11.h
     ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/open_memstream.hh
@@ -132,6 +133,7 @@ set(hdrs
 # Project source files
 set(srcs
     ${srcs_dir}/ext/filesystem/path.cpp
+    ${srcs_dir}/ext/filesystem/temporary.cpp
     ${srcs_dir}/ext/JSON/json11.cpp
     ${srcs_dir}/ext/JSON/schema.cpp
     ${srcs_dir}/ext/fmemopen.cpp
@@ -164,6 +166,7 @@ set(srcs
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/fs.cpp
     ${srcs_dir}/halide.cpp
+    ${srcs_dir}/objc-rt.mm
     ${srcs_dir}/options.cpp
     ${srcs_dir}/symbols.cpp
 )

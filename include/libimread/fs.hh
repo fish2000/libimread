@@ -6,6 +6,7 @@
 
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/resolver.h>
+#include <libimread/ext/filesystem/temporary.h>
 
 namespace im {
 

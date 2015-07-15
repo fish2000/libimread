@@ -347,7 +347,7 @@ namespace im {
         
         if (!(color_type & PNG_COLOR_MASK_ALPHA)) {
             // Expand, adding an opaque alpha channel.
-            YES("[apple-png] Adding opaque alpha channel");
+            FORSURE("[apple-png] Adding opaque alpha channel");
             png_set_add_alpha(p.png_ptr, 0xff, PNG_FILLER_AFTER);
         }
         
