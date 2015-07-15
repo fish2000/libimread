@@ -11,6 +11,11 @@
 #define IM_VERSION_PATCH @libimread_VERSION_PATCH@
 #define IM_VERSION "@libimread_VERSION_MAJOR@.@libimread_VERSION_MINOR@.@libimread_VERSION_PATCH@"
 
+#define FILESYSTEM_TEMP_SUFFIX          ".imdata"
+#define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"
+#define FILESYSTEM_TEMP_DIRECTORYNAME   "libimread-XXXXXXX"
+
+
 namespace im {
     
     typedef uint8_t byte;

@@ -12,7 +12,7 @@ namespace im {
         
         /// Write the image as a PNG into a new byte_sink
         // byte_sink png_sink()
-        PNGFormat::write(input, output, opts);
+        PNGFormat::write_ios(input, output, opts);
         
     }
     

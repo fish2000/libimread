@@ -71,6 +71,7 @@ namespace im {
                                  y*stride1 +
                                  z*stride2];
             }
+            
         };
         
         

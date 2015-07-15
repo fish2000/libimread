@@ -318,7 +318,7 @@ namespace im {
     
     
     /// ADAPTED FROM PINCRUSH - FREAKY REFORMATTED PNG FOR IOS
-    void write_ios(Image &input, byte_sink *output, const options_map &opts) {
+    void PNGFormat::write_ios(Image &input, byte_sink *output, const options_map &opts) {
         /// immediately write the header, 
         /// before initializing the holder
         output->write(PNGFormat::OPTS().signature.c_str(), 8);

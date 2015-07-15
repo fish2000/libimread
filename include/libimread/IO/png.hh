@@ -40,6 +40,11 @@ namespace im {
             virtual void write(Image &input,
                                byte_sink *output,
                                const options_map &opts) override;
+            
+            /// ALSO NOT AN OVERRIDE:
+            virtual void write_ios(Image &input,
+                                   byte_sink *output,
+                                   const options_map &opts);
     };
     
     namespace format {

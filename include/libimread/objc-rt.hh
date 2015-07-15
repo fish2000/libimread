@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #ifdef __OBJC__
+#import <objc/message.h>
 #import <objc/runtime.h>
 #endif
 
@@ -87,7 +88,7 @@ namespace objc {
         
     };
     
-    objc::selector operator"" _SEL(const char *name) {
+    inline objc::selector operator"" _SEL(const char *name) {
         return objc::selector(name);
     }
     
@@ -96,7 +97,7 @@ namespace objc {
         static constexpr std::size_t N = sizeof...(Args);
         using is_argument_list = std::true_type;
         using index_type = std::make_index_sequence<N>;
-        using tuple_type = std::tuple<Args&&...>;
+        using tuple_type = std::tuple<Args...>;
         
         const std::size_t argc;
         tuple_type args;
@@ -108,14 +109,14 @@ namespace objc {
         
         private:
             template <std::size_t ...I>
-            ::id send_impl(::id self, ::SEL op, index_type idx) {
+            ::id send_impl(::id self, ::SEL op, tuple_type&& t, index_type idx) {
                 return objc_msgSend(self, op,
-                    std::get<I>(std::forward<Args>(args))...);
+                    std::get<I>(std::forward<tuple_type>(t))...);
             }
         
         public:
-            ::id send(::id self, ::SEL op) const {
-                return send_impl(self, op, index_type());
+            ::id send(::id self, ::SEL op) {
+                return send_impl(self, op, std::move(args), index_type());
             }
         
         private:
@@ -188,20 +189,20 @@ namespace objc {
             {}
         
         template <typename ...Args>
-        ::id send(Args&& ...args) {
+        ::id zend(Args&& ...args) {
             arguments<Args...> ARGS(args...);
             return ARGS.send(self, op);
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
-        ::id sendv(M arg_list) {
+        ::id sendv(M arg_list) const {
             return arg_list.send(self, op);
         }
         
         template <typename ...Args>
         static ::id send(::id self, ::SEL op, Args&& ...args) {
-            arguments<Args...> ARGS(args...);
+            arguments<Args...> ARGS(std::forward<Args>(args)...);
             return ARGS.send(self, op);
         }
         

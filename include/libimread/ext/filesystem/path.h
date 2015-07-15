@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 
 using namespace std::placeholders;
@@ -30,42 +31,48 @@ namespace filesystem {
     /// forward declaration for these next few prototypes/templates
     class path;
     
-    /// Deleter structures to close directory and file handles
-    template <typename D>
-    struct dircloser {
-        constexpr dircloser() noexcept = default;
-        template <typename U> dircloser(const dircloser<U>&) noexcept {};
-        void operator()(D *dirhandle) { if (dirhandle) closedir(dirhandle); }
-    };
+    namespace detail {
+        
+        /// Deleter structures to close directory and file handles
+        template <typename D>
+        struct dircloser {
+            constexpr dircloser() noexcept = default;
+            template <typename U> dircloser(const dircloser<U>&) noexcept {};
+            void operator()(D *dirhandle) { if (dirhandle) ::closedir(dirhandle); }
+        };
     
-    template <typename F>
-    struct filecloser {
-        constexpr filecloser() noexcept = default;
-        template <typename U> filecloser(const filecloser<U>&) noexcept {};
-        void operator()(F *filehandle) { if (filehandle) fclose(filehandle); }
-    };
+        template <typename F>
+        struct filecloser {
+            constexpr filecloser() noexcept = default;
+            template <typename U> filecloser(const filecloser<U>&) noexcept {};
+            void operator()(F *filehandle) { if (filehandle) ::fclose(filehandle); }
+        };
+    }
     
-    using directory = std::unique_ptr<typename std::decay<DIR>::type, dircloser<DIR>>;
-    using file = std::unique_ptr<typename std::decay<FILE>::type, filecloser<FILE>>;
+    using directory = std::unique_ptr<typename std::decay<DIR>::type, detail::dircloser<DIR>>;
+    using file = std::unique_ptr<typename std::decay<FILE>::type, detail::filecloser<FILE>>;
     
-    directory ddopen(const char *c);
-    directory ddopen(const std::string &s);
-    directory ddopen(const path &p);
-    // file ffopen(const char *c, mode m = mode::READ);
-    file ffopen(const std::string &s, mode m = mode::READ);
-    // file ffopen(const path &p, mode m = mode::READ);
+    namespace detail {
+        filesystem::directory ddopen(const char *c);
+        filesystem::directory ddopen(const std::string &s);
+        filesystem::directory ddopen(const path &p);
+        // filesystem::file ffopen(const char *c, mode m = mode::READ);
+        filesystem::file ffopen(const std::string &s, mode m = mode::READ);
+        // filesystem::file ffopen(const path &p, mode m = mode::READ);
     
-    // auto source = std::bind(ffopen, _1, mode::READ);
-    // auto sink   = std::bind(ffopen, _1, mode::WRITE);
-    
-    inline const char *tmpdir() {
-        /// cribbed/tweaked from boost
-        const char *dirname;
-        dirname = std::getenv("TMPDIR");
-        if (NULL == dirname) { dirname = std::getenv("TMP"); }
-        if (NULL == dirname) { dirname = std::getenv("TEMP"); }
-        if (NULL == dirname) { dirname = "/tmp"; }
-        return dirname;
+        // auto source = std::bind(ffopen, _1, mode::READ);
+        // auto sink   = std::bind(ffopen, _1, mode::WRITE);
+        
+        inline const char *tmpdir() {
+            /// cribbed/tweaked from boost
+            const char *dirname;
+            dirname = std::getenv("TMPDIR");
+            if (NULL == dirname) { dirname = std::getenv("TMP"); }
+            if (NULL == dirname) { dirname = std::getenv("TEMP"); }
+            if (NULL == dirname) { dirname = "/tmp"; }
+            return dirname;
+        }
+        
     }
     
     /**
@@ -101,11 +108,11 @@ namespace filesystem {
                 ,m_absolute(path.m_absolute)
                 {}
             
-            path(const char *string) { set(string); }
+            path(const char *string)        { set(string); }
             path(const std::string &string) { set(string); }
             
             inline std::size_t size() const { return m_path.size(); }
-            inline bool empty() const { return m_path.empty(); }
+            inline bool empty() const       { return m_path.empty(); }
             inline bool is_absolute() const { return m_absolute; }
             
             path make_absolute() const {
@@ -134,23 +141,23 @@ namespace filesystem {
                 return S_ISDIR(sb.st_mode);
             }
             
-            bool match(const std::regex &pattern,           bool case_sensitive=false);
-            bool search(const std::regex &pattern,          bool case_sensitive=false);
+            bool match(const std::regex &pattern,               bool case_sensitive=false);
+            bool search(const std::regex &pattern,              bool case_sensitive=false);
             
             template <typename P> inline
-            static bool match(P p, const std::regex &pattern, bool case_sensitive=false) {
+            static bool match(P p, const std::regex &pattern,   bool case_sensitive=false) {
                 return path(p).match(pattern);
             }
             
             template <typename P> inline
-            static bool search(P p, const std::regex &pattern, bool case_sensitive=false) {
+            static bool search(P p, const std::regex &pattern,  bool case_sensitive=false) {
                 return path(p).search(pattern);
             }
             
             std::vector<path> list(                                                         bool full_paths=false);
             std::vector<path> list(const char *pattern,                                     bool full_paths=false);
             std::vector<path> list(const std::string &pattern,                              bool full_paths=false);
-            std::vector<path> list(const std::regex &pattern, bool case_sensitive=false,    bool full_paths=false);
+            std::vector<path> list(const std::regex &pattern,   bool case_sensitive=false,  bool full_paths=false);
             
             template <typename P, typename G> inline
             static std::vector<path> list(P p, G g, bool full_paths=false) { return path(p).list(g, full_paths); }
@@ -202,7 +209,6 @@ namespace filesystem {
                 for (std::size_t i = 0; i < other.m_path.size(); ++i) {
                     result.m_path.push_back(other.m_path[i]);
                 }
-                
                 return result;
             }
             
@@ -215,10 +221,7 @@ namespace filesystem {
             
             std::string str(path_type type = native_path) const {
                 std::ostringstream oss;
-                
-                if (m_type == posix_path && m_absolute)
-                    oss << "/";
-                
+                if (m_type == posix_path && m_absolute) { oss << "/"; }
                 for (std::size_t i = 0; i < m_path.size(); ++i) {
                     oss << m_path[i];
                     if (i + 1 < m_path.size()) {
@@ -226,7 +229,6 @@ namespace filesystem {
                         else { oss << '\\'; }
                     }
                 }
-                
                 return oss.str();
             }
             
@@ -242,8 +244,8 @@ namespace filesystem {
             }
             
             static path cwd()               { return path::getcwd(); }
-            static path gettmp()            { return path(tmpdir()); }
-            static path tmp()               { return path(tmpdir()); }
+            static path gettmp()            { return path(detail::tmpdir()); }
+            static path tmp()               { return path(detail::tmpdir()); }
             
             operator std::string()          { return str(); }
             operator const char*()          { return c_str(); }
@@ -281,17 +283,18 @@ namespace filesystem {
             }
             
         protected:
-            static std::vector<std::string> tokenize(const std::string &string, const std::string &delim) {
-                std::string::size_type lastPos = 0, pos = string.find_first_of(delim, lastPos);
+            static std::vector<std::string> tokenize(const std::string &source, const std::string &delim) {
                 std::vector<std::string> tokens;
-            
+                std::string::size_type lastPos = 0,
+                                       pos = source.find_first_of(delim, lastPos);
+                
                 while (lastPos != std::string::npos) {
-                    if (pos != lastPos)
-                        tokens.push_back(string.substr(lastPos, pos - lastPos));
+                    if (pos != lastPos) {
+                        tokens.push_back(source.substr(lastPos, pos - lastPos));
+                    }
                     lastPos = pos;
-                    if (lastPos == std::string::npos || lastPos + 1 == string.length())
-                        break;
-                    pos = string.find_first_of(delim, ++lastPos);
+                    if (lastPos == std::string::npos || lastPos + 1 == source.length()) { break; }
+                    pos = source.find_first_of(delim, ++lastPos);
                 }
                 
                 return tokens;
@@ -315,11 +318,11 @@ namespace filesystem {
     };
     
     struct NamedTemporaryFile {
-        
         /// As per the eponymous tempfile.NamedTemporaryFile,
         /// of the Python standard library. NOW WITH RAII!!
         
-        static constexpr char tfp[] = "tmpXXXXXXXX";
+        static constexpr char tfp[] = FILESYSTEM_TEMP_FILENAME;
+        static constexpr char tfs[] = FILESYSTEM_TEMP_SUFFIX;
         
         mode mm;
         char *suffix;
@@ -327,7 +330,7 @@ namespace filesystem {
         bool cleanup;
         path tf;
         
-        explicit NamedTemporaryFile(const char *s = ".tmp", const char *p = tfp,
+        explicit NamedTemporaryFile(const char *s = tfs, const char *p = tfp,
                                     const path &td = path::tmp(), bool c = true, mode m = mode::WRITE)
                                         :mm(m), cleanup(c), suffix(strdup(s)), prefix(strdup(p))
                                         ,tf(td/strcat(strdup(p), s))
@@ -351,8 +354,10 @@ namespace filesystem {
             }
         }
         
-        operator std::string() { return tf.str(); }
-        operator const char*() { return tf.c_str(); }
+        inline std::string   str()  { return tf.str(); }
+        inline const char *c_str()  { return tf.c_str(); }
+        operator std::string()      { return str(); }
+        operator const char*()      { return c_str(); }
         
         void remove() {
             if (::unlink(tf.c_str()) == -1) {
@@ -370,7 +375,9 @@ namespace filesystem {
     
     struct TemporaryDirectory {
         
-        static constexpr char tdp[] = "libimread-XXXXXXX";
+        static constexpr char tdp[] = FILESYSTEM_TEMP_DIRECTORYNAME;
+        static constexpr char tfp[] = FILESYSTEM_TEMP_FILENAME;
+        static constexpr char tfs[] = FILESYSTEM_TEMP_SUFFIX;
         
         char *tpl;
         bool cleanup;
@@ -380,7 +387,7 @@ namespace filesystem {
             :tpl(strdup(t)), cleanup(c)
             ,td(mkdtemp(strdup((path::tmp()/tpl).c_str())))
             {}
-        explicit TemporaryDirectory(const std::string &t = tdp, bool c = true)
+        explicit TemporaryDirectory(const std::string &t, bool c = true)
             :tpl(strdup(t.c_str())), cleanup(c)
             ,td(mkdtemp(strdup((path::tmp()/tpl).c_str())))
             {}
@@ -388,15 +395,15 @@ namespace filesystem {
         operator std::string() { return td.str(); }
         operator const char*() { return td.c_str(); }
         
-        NamedTemporaryFile get(const std::string &suffix = ".tmp",
-                               const std::string &prefix = NamedTemporaryFile::tfp,
+        NamedTemporaryFile get(const std::string &suffix = tfs,
+                               const std::string &prefix = tfp,
                                mode m = mode::WRITE) { return NamedTemporaryFile(
                                                           suffix, prefix, td, cleanup, m); }
         
         void clean() {
             /// scrub all files
             /// N.B. this will not recurse -- keep yr structures FLAAAT
-            directory cleand = ddopen(td);
+            directory cleand = detail::ddopen(td);
             if (!cleand.get()) {
                 imread_raise(FileSystemError,
                     "Internal error in opendir():",

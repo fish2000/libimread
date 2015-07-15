@@ -7,27 +7,31 @@
 
 namespace filesystem {
     
-    directory ddopen(const char *c) {
-        return directory(opendir(path::absolute(c)));
+    namespace detail {
+        
+        filesystem::directory ddopen(const char *c) {
+            return filesystem::directory(opendir(path::absolute(c)));
+        }
+        filesystem::directory ddopen(const std::string &s) {
+            return filesystem::directory(opendir(path::absolute(s)));
+        }
+        filesystem::directory ddopen(const path &p) {
+            return filesystem::directory(opendir(p.make_absolute().c_str()));
+        }
+        
+        inline const char *fm(mode m) { return m == mode::READ ? "r+b" : "w+x"; }
+        
+        // filesystem::file ffopen(const char *c, mode m) {
+        //     return filesystem::file(fopen(c, fm(m)));
+        // }
+        filesystem::file ffopen(const std::string &s, mode m) {
+            return filesystem::file(fopen(s.c_str(), fm(m)));
+        }
+        // filesystem::file ffopen(const path &p, mode m) {
+        //     return filesystem::file(fopen(p.c_str(), fm(m)));
+        // }
+        
     }
-    directory ddopen(const std::string &s) {
-        return directory(opendir(path::absolute(s)));
-    }
-    directory ddopen(const path &p) {
-        return directory(opendir(p.make_absolute().c_str()));
-    }
-    
-    inline const char *fm(mode m) { return m == mode::READ ? "r+b" : "w+x"; }
-    
-    // file ffopen(const char *c, mode m) {
-    //     return file(fopen(c, fm(m)));
-    // }
-    file ffopen(const std::string &s, mode m) {
-        return file(fopen(s.c_str(), fm(m)));
-    }
-    // file ffopen(const path &p, mode m) {
-    //     return file(fopen(p.c_str(), fm(m)));
-    // }
     
     bool path::match(const std::regex &pattern, bool case_sensitive) {
         return std::regex_match(str(), pattern);
@@ -46,7 +50,7 @@ namespace filesystem {
         path abspath = make_absolute();
         std::vector<path> out;
         {
-            directory d = ddopen(abspath);
+            directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
                     "Internal error in opendir():", strerror(errno));
@@ -111,5 +115,12 @@ namespace filesystem {
         });
         return out;
     }
+    
+    constexpr char NamedTemporaryFile::tfp[im::static_strlen(FILESYSTEM_TEMP_FILENAME)];
+    constexpr char NamedTemporaryFile::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
+    
+    constexpr char TemporaryDirectory::tdp[im::static_strlen(FILESYSTEM_TEMP_DIRECTORYNAME)];
+    constexpr char TemporaryDirectory::tfp[im::static_strlen(FILESYSTEM_TEMP_FILENAME)];
+    constexpr char TemporaryDirectory::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
 
 }
