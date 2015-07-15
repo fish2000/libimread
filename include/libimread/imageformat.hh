@@ -5,7 +5,11 @@
 #define LIBIMREAD_IMAGEFORMAT_HH_
 
 #include <cstdint>
+#include <string>
 #include <vector>
+#include <memory>
+#include <type_traits>
+
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
 #include <libimread/image.hh>
@@ -25,8 +29,8 @@ namespace im {
         return match_magic(src, magic.c_str(), n);
     }
     
-    
     class ImageFormat {
+        
         public:
             typedef std::false_type can_read;
             typedef std::false_type can_read_multi;

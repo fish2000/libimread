@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+
 #include <libimread/libimread.hpp>
 #include <libimread/tools.hh>
 #include <libimread/pixels.hh>

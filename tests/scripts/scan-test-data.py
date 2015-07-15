@@ -84,11 +84,11 @@ if __name__ == '__main__':
     
     filetpls = dict()
     filemap = dict(
-        jpg    =[f for f in files if f.endswith('jpg')],
-        jpeg   =[f for f in files if f.endswith('jpeg')],
-        png    =[f for f in files if f.endswith('png')],
-        tif    =[f for f in files if f.endswith('tif')],
-        tiff   =[f for f in files if f.endswith('tiff')])
+        jpg    = [f for f in files if f.endswith('jpg')],
+        jpeg   = [f for f in files if f.endswith('jpeg')],
+        png    = [f for f in files if f.endswith('png')],
+        tif    = [f for f in files if f.endswith('tif')],
+        tiff   = [f for f in files if f.endswith('tiff')])
     
     for suffix, filelist in filemap.iteritems():
         filetpls.update({ suffix: filetype(suffix, filelist) })
