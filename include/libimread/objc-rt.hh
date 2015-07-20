@@ -89,15 +89,17 @@ namespace objc {
         
     };
     
-    template <typename ...Args>
+    template <typename Return, typename ...Args>
     struct arguments {
         static constexpr std::size_t N = sizeof...(Args);
         using is_argument_list = std::true_type;
         using index_type = std::make_index_sequence<N>;
         using tuple_type = std::tuple<Args...>;
+        using sender_signature_type = typename std::add_pointer<Return(::id, ::SEL, Args...)>::type;
         
         const std::size_t argc;
         tuple_type args;
+        sender_signature_type dispatcher = (sender_signature_type)objc_msgSend;
         
         explicit arguments(Args&&... a)
             :args(std::forward_as_tuple(a...))
@@ -106,13 +108,12 @@ namespace objc {
         
         private:
             template <std::size_t ...I>
-            ::id send_impl(::id self, ::SEL op, tuple_type&& t, index_type idx) {
-                return objc_msgSend(self, op,
-                    std::get<I>(std::forward<tuple_type>(t))...);
+            Return send_impl(::id self, ::SEL op, tuple_type&& t, std::index_sequence<I...>) {
+                return dispatcher(self, op, std::get<I>(std::forward<tuple_type>(t))...);
             }
         
         public:
-            ::id send(::id self, ::SEL op) {
+            Return send(::id self, ::SEL op) {
                 return send_impl(self, op, std::move(args), index_type());
             }
         
@@ -123,9 +124,9 @@ namespace objc {
             arguments &operator=(arguments&&);
     };
     
-    template <typename ...Args>
-    struct message : public arguments<Args...> {
-        using arguments_type = arguments<Args...>;
+    template <typename Return, typename ...Args>
+    struct message : public arguments<Return, Args...> {
+        using arguments_type = arguments<Return, Args...>;
         using arguments_type::argc;
         using arguments_type::args;
         ::id self;
@@ -136,8 +137,8 @@ namespace objc {
             ,self(s), op(o)
             {}
         
-        ::id send() const {
-            return send(self, op);
+        Return send() const {
+            return arguments_type::send(self, op);
         }
         
         private:
@@ -187,7 +188,7 @@ namespace objc {
         
         template <typename ...Args>
         ::id send(::BOOL dispatch, Args&& ...args) {
-            arguments<Args...> ARGS(args...);
+            arguments<::id, Args...> ARGS(args...);
             return ARGS.send(self, op);
         }
         
@@ -197,10 +198,15 @@ namespace objc {
             return arg_list.send(self, op);
         }
         
+        template <typename Return, typename ...Args>
+        static Return get(::id self, ::SEL op, Args&& ...args) {
+            arguments<Return, Args...> ARGS(std::forward<Args>(args)...);
+            return ARGS.send(self, op);
+        }
+        
         template <typename ...Args>
         static ::id send(::id self, ::SEL op, Args&& ...args) {
-            arguments<Args...> ARGS(std::forward<Args>(args)...);
-            return ARGS.send(self, op);
+            return objc::msg::get<::id, Args...>(self, op, std::forward<Args>(args)...);
         }
         
         template <typename M,

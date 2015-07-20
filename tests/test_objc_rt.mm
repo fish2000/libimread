@@ -31,7 +31,9 @@ namespace {
             urlpath = [[NSString alloc] initWithUTF8String:path.c_str()];
             url = [[NSURL alloc] initWithString:urlpath];
             
-            objc::msg::send((id)datum,
+            //[datum writeToFile:urlpath atomically:YES];
+            
+            objc::msg::get<void>((id)datum,
                 objc::selector("writeToFile:atomically:"),
                 urlpath, YES);
             
