@@ -15,48 +15,46 @@
 #include <string>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/filesystem/path.h>
 #include <libimread/errors.hh>
 #include <libimread/seekable.hh>
 
 namespace im {
-    
-    bool file_exists(char *path);
-    bool file_exists(const char *path);
-    bool file_exists(std::string path);
-    bool file_exists(const std::string &path);
     
     class fd_source_sink : public byte_source, public byte_sink {
         
         public:
             fd_source_sink() {}
             fd_source_sink(int fd)
-                :fd_(fd)
+                :descriptor(fd)
                 { }
             
             virtual ~fd_source_sink() {
-                ::close(fd_);
+                ::close(descriptor);
             }
             
             virtual std::size_t read(byte *buffer, std::size_t n) {
-                return ::read(fd_, buffer, n);
+                return ::read(descriptor, buffer, n);
             }
             
             virtual bool can_seek() const { return true; }
-            virtual std::size_t seek_absolute(std::size_t pos) { return ::lseek(fd_, pos, SEEK_SET); }
-            virtual std::size_t seek_relative(int delta) { return ::lseek(fd_, delta, SEEK_CUR); }
-            virtual std::size_t seek_end(int delta) { return ::lseek(fd_, delta, SEEK_END); }
+            virtual std::size_t seek_absolute(std::size_t pos) { return ::lseek(descriptor, pos, SEEK_SET); }
+            virtual std::size_t seek_relative(int delta) { return ::lseek(descriptor, delta, SEEK_CUR); }
+            virtual std::size_t seek_end(int delta) { return ::lseek(descriptor, delta, SEEK_END); }
             
             virtual std::size_t write(const void *buffer, std::size_t n) {
-                return ::write(fd_, buffer, n);
+                return ::write(descriptor, buffer, n);
             }
             
             virtual std::vector<byte> full_data() {
                 std::size_t orig = this->seek_relative(0);
                 
                 struct stat info;
-                int result = ::fstat(fd_, &info);
+                int result = ::fstat(descriptor, &info);
                 if (result == -1) {
-                    imread_raise(CannotReadError, "fstat() returned -1", std::strerror(errno));
+                    imread_raise(CannotReadError,
+                        "fstat() returned -1",
+                        std::strerror(errno));
                 }
                 
                 std::vector<byte> res(info.st_size * sizeof(byte));
@@ -66,72 +64,69 @@ namespace im {
                 return res;
             }
             
-            virtual int fd() { return fd_; }
-            virtual void fd(int fd) { fd_ = fd; }
+            virtual int fd() const { return descriptor; }
+            virtual void fd(int fd) { descriptor = fd; }
             
         private:
-            int fd_;
-    };
-    
-    enum class Mode {
-        READ, WRITE
+            int descriptor;
     };
     
     class file_source_sink : public fd_source_sink {
         private:
-            std::unique_ptr<char[]> pth;
-            Mode md;
+            filesystem::path pth;
+            filesystem::mode md;
             
             static constexpr int READ_FLAGS = O_RDONLY | O_NONBLOCK;
             static constexpr int WRITE_FLAGS = O_CREAT | O_WRONLY | O_TRUNC | O_EXLOCK | O_SYMLINK;
-            int open_read(char *p) { return ::open(p, READ_FLAGS); }
-            int open_write(char *p, int m=0644) { return ::open(p, WRITE_FLAGS, m); }
+            int open_read(char *p) const { return ::open(p, READ_FLAGS); }
+            int open_write(char *p, int m=0644) const { return ::open(p, WRITE_FLAGS, m); }
         
         public:
-            file_source_sink(Mode fmode = Mode::READ)
+            file_source_sink(filesystem::mode fmode = filesystem::mode::READ)
                 :fd_source_sink(), md(fmode)
                 {}
             
-            file_source_sink(char *cpath, Mode fmode = Mode::READ)
-                :fd_source_sink(), md(fmode)
+            file_source_sink(char *cpath, filesystem::mode fmode = filesystem::mode::READ)
+                :fd_source_sink(), pth(cpath), md(fmode)
                 {
-                    int _fd = -1;
-                    if (md == Mode::READ) {
-                        _fd = open_read(cpath);
-                    } else if (md == Mode::WRITE) {
-                        _fd = open_write(cpath);
+                    int descriptor = -1;
+                    if (md == filesystem::mode::READ) {
+                        descriptor = open_read(cpath);
+                    } else if (md == filesystem::mode::WRITE) {
+                        descriptor = open_write(cpath);
                     }
-                    if (_fd < 0) {
-                        std::ostringstream out;
+                    if (descriptor < 0) {
                         imread_raise(CannotReadError, "file read failure:",
-                            FF("\t::open(\"%s\", %s)", cpath, ((md == Mode::READ)
+                            FF("\t::open(\"%s\", %s)", cpath, ((md == filesystem::mode::READ)
                                         ? "O_RDONLY | O_NONBLOCK"
                                         : "O_CREAT | O_WRONLY | O_TRUNC | O_EXLOCK | O_SYMLINK")),
-                            FF("\treturned negative value: %i", _fd),
+                            FF("\treturned negative value: %i", descriptor),
                                "\tERROR MESSAGE IS: ", std::strerror(errno));
                     }
-                    this->fd(_fd);
-                    pth = std::make_unique<char[]>(std::strlen(cpath)+1);
-                    std::strcpy(pth.get(), cpath);
+                    this->fd(descriptor);
                 }
             
-            file_source_sink(const char *ccpath, Mode fmode = Mode::READ)
+            file_source_sink(const char *ccpath, filesystem::mode fmode = filesystem::mode::READ)
                 :file_source_sink(const_cast<char *>(ccpath), fmode)
                 {}
             
-            file_source_sink(std::string &spath, Mode fmode = Mode::READ)
+            file_source_sink(std::string &spath, filesystem::mode fmode = filesystem::mode::READ)
                 :file_source_sink(spath.c_str(), fmode)
                 {}
             
-            file_source_sink(const std::string &cspath, Mode fmode = Mode::READ)
+            file_source_sink(const std::string &cspath, filesystem::mode fmode = filesystem::mode::READ)
                 :file_source_sink(cspath.c_str(), fmode)
                 {}
             
-            char *path() const { return pth.get(); }
+            file_source_sink(const filesystem::path &ppath, filesystem::mode fmode = filesystem::mode::READ)
+                :file_source_sink(ppath.c_str(), fmode)
+                {}
+            
+            filesystem::path &path() { return pth; }
             bool exists() const;
             
-            Mode mode() { return md; }
-            void mode(Mode m) { md = m; }
+            filesystem::mode mode() { return md; }
+            void mode(filesystem::mode m) { md = m; }
     };
     
     class FileSource : public file_source_sink {
@@ -151,24 +146,30 @@ namespace im {
             FileSource(const std::string &cspath)
                 :file_source_sink(cspath)
                 {}
+            FileSource(const filesystem::path &ppath)
+                :file_source_sink(ppath)
+                {}
     };
     
     class FileSink : public file_source_sink {
         public:
             FileSink()
-                :file_source_sink(Mode::WRITE)
+                :file_source_sink(filesystem::mode::WRITE)
                 {}
             FileSink(char *cpath)
-                :file_source_sink(cpath, Mode::WRITE)
+                :file_source_sink(cpath, filesystem::mode::WRITE)
                 {}
             FileSink(const char *ccpath)
-                :file_source_sink(ccpath, Mode::WRITE)
+                :file_source_sink(ccpath, filesystem::mode::WRITE)
                 {}
             FileSink(std::string &spath)
-                :file_source_sink(spath, Mode::WRITE)
+                :file_source_sink(spath, filesystem::mode::WRITE)
                 {}
             FileSink(const std::string &cspath)
-                :file_source_sink(cspath, Mode::WRITE)
+                :file_source_sink(cspath, filesystem::mode::WRITE)
+                {}
+            FileSink(const filesystem::path &ppath)
+                :file_source_sink(ppath, filesystem::mode::WRITE)
                 {}
     };
     

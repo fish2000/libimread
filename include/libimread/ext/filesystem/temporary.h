@@ -31,14 +31,14 @@ namespace filesystem {
         
         explicit NamedTemporaryFile(const char *s = tfs, const char *p = tfp,
                                     const path &td = path::tmp(), bool c = true, mode m = mode::WRITE)
-                                        :mm(m), cleanup(c), suffix(strdup(s)), prefix(strdup(p))
+                                        :mm(m), cleanup(c), suffix(::strdup(s)), prefix(::strdup(p))
                                         ,tf(td/strcat(strdup(p), s))
                                         {
                                             create();
                                         }
         explicit NamedTemporaryFile(const std::string &s, const std::string &p = tfp,
                                     const path &td = path::tmp(), bool c = true, mode m = mode::WRITE)
-                                        :mm(m), cleanup(c), suffix(strdup(s.c_str())), prefix(strdup(p.c_str()))
+                                        :mm(m), cleanup(c), suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
                                         ,tf(td/(p+s))
                                         {
                                             create();
@@ -70,11 +70,11 @@ namespace filesystem {
         
         explicit TemporaryDirectory(const char *t = tdp, bool c = true)
             :tpl(strdup(t)), cleanup(c)
-            ,td(mkdtemp(strdup((path::tmp()/tpl).c_str())))
+            ,td(::mkdtemp(::strdup((path::tmp()/tpl).c_str())))
             {}
         explicit TemporaryDirectory(const std::string &t, bool c = true)
-            :tpl(strdup(t.c_str())), cleanup(c)
-            ,td(mkdtemp(strdup((path::tmp()/tpl).c_str())))
+            :tpl(::strdup(t.c_str())), cleanup(c)
+            ,td(::mkdtemp(::strdup((path::tmp()/tpl).c_str())))
             {}
         
         operator std::string() { return td.str(); }

@@ -4,7 +4,7 @@
 #import <Cocoa/Cocoa.h>
 
 #include <libimread/libimread.hpp>
-#include <libimread/ext/filesystem/temporary.h>
+#include <libimread/fs.hh>
 #include <libimread/objc-rt.hh>
 
 #include "include/catch.hpp"
@@ -12,7 +12,7 @@
 namespace {
     
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
-        filesystem::NamedTemporaryFile temporary;
+        im::fs::NamedTemporaryFile temporary;
         NSData *datum;
         NSURL *url;
         NSString *urlpath;

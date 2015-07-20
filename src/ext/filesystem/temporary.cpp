@@ -11,7 +11,7 @@ namespace filesystem {
     constexpr char NamedTemporaryFile::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
     
     void NamedTemporaryFile::create() {
-        int out = mkstemps(strdup(tf.c_str()), std::strlen(suffix));
+        int out = ::mkstemps(strdup(tf.c_str()), std::strlen(suffix));
         if (out == -1) {
             imread_raise(FileSystemError,
                 "Internal error in mktemps():",
@@ -42,7 +42,7 @@ namespace filesystem {
         }
         struct dirent *entry;
         while ((entry = ::readdir(cleand.get())) != NULL) {
-            if (std::strncmp(entry->d_name, ".", 1) != 0 && strncmp(entry->d_name, "..", 2) != 0) {
+            if (std::strncmp(entry->d_name, ".", 1) != 0 && std::strncmp(entry->d_name, "..", 2) != 0) {
                 const char *ep = (td/entry->d_name).c_str();
                 if (::access(ep, R_OK) != -1) {
                     if (::unlink(ep) == -1) {
