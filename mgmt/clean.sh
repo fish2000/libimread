@@ -4,8 +4,9 @@ echo "*** CLEANUP IS NIGH"
 
 PROJECT_PATH="/Users/fish/Dropbox/libimread"
 
-#rm -f ./tests/data/include/test_data.hpp
-rm -f ./include/libimread/symbols.hpp
-pushd $PROJECT_PATH && \
+pushd $PROJECT_PATH &> /dev/null
+    #rm -f ./tests/data/include/test_data.hpp
+    rm -f ./include/libimread/symbols.hpp
     rm -rf ./build ./dist
-popd
+
+popd &> /dev/null

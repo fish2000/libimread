@@ -41,8 +41,8 @@ namespace im {
             typedef std::false_type can_write_metadata;
             
             typedef decltype(D(
-                _signature = std::string(),
-                _suffix = std::string()
+                _signature(_optional, _json_key = _signature)  = std::string(),
+                _suffix(_optional, _json_key = _suffix)        = std::string()
             ))
                 options;
             

@@ -1,4 +1,6 @@
 
+all: clean multi
+
 multi:
 		mgmt/parallel-run-tests.sh
 
@@ -11,7 +13,5 @@ re:
 
 clean:
 		mgmt/clean.sh
-
-all: multi
 
 .PHONY: all multi solo clean

@@ -8,15 +8,15 @@
 #include <iod/symbol.hh>
 
 
-#ifndef IOD_SYMBOL_color_map
-    #define IOD_SYMBOL_color_map
-    iod_define_symbol(color_map)
+#ifndef IOD_SYMBOL_json_key
+    #define IOD_SYMBOL_json_key
+    iod_define_symbol(json_key)
 #endif
 
 
-#ifndef IOD_SYMBOL_x_
-    #define IOD_SYMBOL_x_
-    iod_define_symbol(x_)
+#ifndef IOD_SYMBOL_color_map
+    #define IOD_SYMBOL_color_map
+    iod_define_symbol(color_map)
 #endif
 
 
@@ -29,5 +29,17 @@
 #ifndef IOD_SYMBOL_signature
     #define IOD_SYMBOL_signature
     iod_define_symbol(signature)
+#endif
+
+
+#ifndef IOD_SYMBOL_optional
+    #define IOD_SYMBOL_optional
+    iod_define_symbol(optional)
+#endif
+
+
+#ifndef IOD_SYMBOL_x_
+    #define IOD_SYMBOL_x_
+    iod_define_symbol(x_)
 #endif
 
