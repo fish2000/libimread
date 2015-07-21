@@ -49,23 +49,23 @@ namespace {
     TEST_CASE("[apple] Check the dimensions of a new image", "[apple-image-dims]") {
         U8Image halim = im::apple::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         
-        WARN( "1.extent(0) = " << halim.extent(0) );
-        WARN( "1.extent(1) = " << halim.extent(1) );
-        WARN( "1.extent(2) = " << halim.extent(2) );
-        
-        WARN( "1.stride(0) = " << halim.stride(0) );
-        WARN( "1.stride(1) = " << halim.stride(1) );
-        WARN( "1.stride(2) = " << halim.stride(2) );
+        // WARN( "1.extent(0) = " << halim.extent(0) );
+        // WARN( "1.extent(1) = " << halim.extent(1) );
+        // WARN( "1.extent(2) = " << halim.extent(2) );
+        //
+        // WARN( "1.stride(0) = " << halim.stride(0) );
+        // WARN( "1.stride(1) = " << halim.stride(1) );
+        // WARN( "1.stride(2) = " << halim.stride(2) );
         
         U8Image halim2 = im::apple::read(D("IMG_4332.jpg"));
         
-        WARN( "2.extent(0) = " << halim2.extent(0) );
-        WARN( "2.extent(1) = " << halim2.extent(1) );
-        WARN( "2.extent(2) = " << halim2.extent(2) );
-        
-        WARN( "2.stride(0) = " << halim2.stride(0) );
-        WARN( "2.stride(1) = " << halim2.stride(1) );
-        WARN( "2.stride(2) = " << halim2.stride(2) );
+        // WARN( "2.extent(0) = " << halim2.extent(0) );
+        // WARN( "2.extent(1) = " << halim2.extent(1) );
+        // WARN( "2.extent(2) = " << halim2.extent(2) );
+        //
+        // WARN( "2.stride(0) = " << halim2.stride(0) );
+        // WARN( "2.stride(1) = " << halim2.stride(1) );
+        // WARN( "2.stride(2) = " << halim2.stride(2) );
     
     }
 }

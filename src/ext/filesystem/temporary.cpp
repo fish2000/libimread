@@ -11,8 +11,7 @@ namespace filesystem {
     constexpr char NamedTemporaryFile::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
     
     void NamedTemporaryFile::create() {
-        int out = ::mkstemps(strdup(tf.c_str()), std::strlen(suffix));
-        if (out == -1) {
+        if (::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix)) == -1) {
             imread_raise(FileSystemError,
                 "Internal error in mktemps():",
                 std::strerror(errno));
@@ -20,7 +19,7 @@ namespace filesystem {
     }
     
     void NamedTemporaryFile::remove() {
-        if (::unlink(tf.c_str()) == -1) {
+        if (::unlink(filepath.c_str()) == -1) {
             imread_raise(FileSystemError,
                 "Internal error in unlink():",
                 std::strerror(errno));
@@ -34,7 +33,7 @@ namespace filesystem {
     void TemporaryDirectory::clean() {
         /// scrub all files
         /// N.B. this will not recurse -- keep yr structures FLAAAT
-        directory cleand = detail::ddopen(td);
+        directory cleand = detail::ddopen(dirpath);
         if (!cleand.get()) {
             imread_raise(FileSystemError,
                 "Internal error in opendir():",
@@ -43,7 +42,7 @@ namespace filesystem {
         struct dirent *entry;
         while ((entry = ::readdir(cleand.get())) != NULL) {
             if (std::strncmp(entry->d_name, ".", 1) != 0 && std::strncmp(entry->d_name, "..", 2) != 0) {
-                const char *ep = (td/entry->d_name).c_str();
+                const char *ep = (dirpath/entry->d_name).c_str();
                 if (::access(ep, R_OK) != -1) {
                     if (::unlink(ep) == -1) {
                         imread_raise(FileSystemError,
@@ -61,7 +60,7 @@ namespace filesystem {
     
     void TemporaryDirectory::remove() {
         /// unlink the directory itself
-        if (::rmdir(td.c_str()) == -1) {
+        if (::rmdir(dirpath.c_str()) == -1) {
             imread_raise(FileSystemError,
                 "Internal error in rmdir():",
                 std::strerror(errno));

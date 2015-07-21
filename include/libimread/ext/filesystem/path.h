@@ -118,7 +118,7 @@ namespace filesystem {
             
             path make_absolute() const {
                 char temp[PATH_MAX];
-                if (realpath(c_str(), temp) == NULL) {
+                if (::realpath(c_str(), temp) == NULL) {
                     imread_raise(FileSystemError,
                         "FATAL internal error raised during path::make_absolute() call to realpath():",
                      FF("\t%s (%d)", std::strerror(errno), errno),
@@ -133,12 +133,12 @@ namespace filesystem {
             
             bool exists() const {
                 struct stat sb;
-                return stat(c_str(), &sb) == 0;
+                return ::stat(c_str(), &sb) == 0;
             }
             
             bool is_directory() const {
                 struct stat sb;
-                if (stat(c_str(), &sb)) { return false; }
+                if (::stat(c_str(), &sb)) { return false; }
                 return S_ISDIR(sb.st_mode);
             }
             
@@ -165,7 +165,7 @@ namespace filesystem {
             
             bool is_file() const {
                 struct stat sb;
-                if (stat(c_str(), &sb)) { return false; }
+                if (::stat(c_str(), &sb)) { return false; }
                 return S_ISREG(sb.st_mode);
             }
             
