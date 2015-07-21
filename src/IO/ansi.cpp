@@ -9,10 +9,13 @@
 #include <Halide.h>
 
 #include <libimread/IO/ansi.hh>
+#include <libimread/process/jitresize.hh>
 #include <libimread/image.hh>
 #include <libimread/pixels.hh>
 
+#ifdef __GCC__
 #pragma STDC FENV_ACCESS ON
+#endif
 
 #define XTERM_GRAY_OFFSET       232
 #define ADJUST_FACTOR           1.5
@@ -21,10 +24,11 @@
 
 namespace im {
     
-    //using Octet = std::array<uint8_t, 8>;
-    using ByteImage = Halide::Image<uint8_t>;
-    
     namespace detail {
+        
+        //using Octet = std::array<byte, 8>;
+        using ByteImage = Halide::Image<byte>;
+        using BaseImage = im::Image;
         
         template <typename T, typename T0 = T> inline
         T distance(T v, T0 v0) {
@@ -45,63 +49,66 @@ namespace im {
                 static_cast<float>(value - XTERM_GRAY_OFFSET) * XTERM_GRAY_OFFSET);
         }
         
-        std::wchar_t dot(long long bits) {
+        wchar_t dot(long long bits) {
             return (((bits & 0b111) |
                      (bits & 0b1110000) >> 0b1 |
                      (bits & 0b1000) << 0b11 |
                      (bits & 0b10000000)) + 0x2800);
         }
         
+    
+        class UnicodeByteArray : public ByteImage, public BaseImage {
+        
+            public:
+                UnicodeByteArray()
+                    :ByteImage(), BaseImage()
+                    {}
+            
+                UnicodeByteArray(int x, int y, int z=8)
+                    :ByteImage(x/2, y/4, z), BaseImage()
+                    {}
+            
+                virtual ~UnicodeByteArray() {}
+            
+                virtual int nbits() const override {
+                    /// elem_size is in BYTES, so:
+                    return sizeof(uint8_t) * 8;
+                }
+            
+                virtual int nbytes() const override {
+                    return sizeof(uint8_t);
+                }
+            
+                virtual int ndims() const override {
+                    return ByteImage::dimensions();
+                }
+            
+                virtual int dim(int d) const override {
+                    return ByteImage::extent(d);
+                }
+            
+                virtual int stride(int s) const override {
+                    return ByteImage::stride(s);
+                }
+            
+                inline off_t rowp_stride() const {
+                    return ByteImage::channels() == 1 ? 0 : off_t(ByteImage::stride(1));
+                }
+            
+                virtual void *rowp(int r) override {
+                    /// WARNING: FREAKY POINTERMATH FOLLOWS
+                    uint8_t *host = (uint8_t *)ByteImage::data();
+                    host += off_t(r * rowp_stride());
+                    return static_cast<void *>(host);
+                }
+        };
+        
     }
     
-    class UnicodeByteArray : public ByteImage, public Image {
-        
-        public:
-            UnicodeByteArray()
-                :ByteImage(), Image()
-                {}
-            
-            UnicodeByteArray(int x, int y, int z=8)
-                :ByteImage(x/2, y/4, z), Image()
-                {}
-            
-            virtual ~UnicodeByteArray() {}
-            
-            virtual int nbits() const override {
-                /// elem_size is in BYTES, so:
-                return sizeof(uint8_t) * 8;
-            }
-            
-            virtual int nbytes() const override {
-                return sizeof(uint8_t);
-            }
-            
-            virtual int ndims() const override {
-                return ByteImage::dimensions();
-            }
-            
-            virtual int dim(int d) const override {
-                return ByteImage::extent(d);
-            }
-            
-            virtual int stride(int s) const override {
-                return ByteImage::stride(s);
-            }
-            
-            inline off_t rowp_stride() const {
-                return ByteImage::channels() == 1 ? 0 : off_t(ByteImage::stride(1));
-            }
-            
-            virtual void *rowp(int r) override {
-                /// WARNING: FREAKY POINTERMATH FOLLOWS
-                uint8_t *host = (uint8_t *)ByteImage::data();
-                host += off_t(r * rowp_stride());
-                return static_cast<void *>(host);
-            }
-    };
+    using detail::UnicodeByteArray;
     
-    UnicodeByteArray as_array(Image &input) {
-        
+    UnicodeByteArray as_array(im::Image &input) {
+        return UnicodeByteArray();
     }
     
     

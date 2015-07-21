@@ -31,11 +31,11 @@ namespace {
             urlpath = [[NSString alloc] initWithUTF8String:path.c_str()];
             url = [[NSURL alloc] initWithString:urlpath];
             
-            //[datum writeToFile:urlpath atomically:YES];
+            [datum writeToFile:urlpath atomically:YES];
             
-            objc::msg::get<void>((id)datum,
-                objc::selector("writeToFile:atomically:"),
-                urlpath, YES);
+            // objc::msg::get<void>((id)datum,
+            //     objc::selector("writeToFile:atomically:"),
+            //     urlpath, YES);
             
             #if !__has_feature(objc_arc)
                 [datum release];

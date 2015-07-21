@@ -39,14 +39,14 @@ namespace filesystem {
         struct dircloser {
             constexpr dircloser() noexcept = default;
             template <typename U> dircloser(const dircloser<U>&) noexcept {};
-            void operator()(D *dirhandle) { if (dirhandle) ::closedir(dirhandle); }
+            void operator()(D *dirhandle) { ::closedir(dirhandle); }
         };
     
         template <typename F>
         struct filecloser {
             constexpr filecloser() noexcept = default;
             template <typename U> filecloser(const filecloser<U>&) noexcept {};
-            void operator()(F *filehandle) { if (filehandle) ::fclose(filehandle); }
+            void operator()(F *filehandle) { ::fclose(filehandle); }
         };
     }
     
@@ -109,8 +109,9 @@ namespace filesystem {
                 ,m_absolute(path.m_absolute)
                 {}
             
-            path(const char *string)        { set(string); }
-            path(const std::string &string) { set(string); }
+            path(char *st)              { set(st); }
+            path(const char *st)        { set(st); }
+            path(const std::string &st) { set(st); }
             
             inline std::size_t size() const { return m_path.size(); }
             inline bool empty() const       { return m_path.empty(); }
@@ -222,13 +223,12 @@ namespace filesystem {
             
             std::string str(path_type type = native_path) const {
                 std::ostringstream oss;
-                if (m_type == posix_path && m_absolute) { oss << "/"; }
-                for (std::size_t i = 0; i < m_path.size(); ++i) {
-                    oss << m_path[i];
-                    if (i + 1 < m_path.size()) {
-                        if (type == posix_path) { oss << '/'; }
-                        else { oss << '\\'; }
-                    }
+                char sep = (type == posix_path) ? '/' : '\\';
+                if (type == posix_path && m_absolute) { oss << sep; }
+                int siz = m_path.size();
+                for (int idx = 0; idx < siz; ++idx) {
+                    oss << m_path[idx];
+                    if (idx + 1 < siz) { oss << sep; }
                 }
                 return oss.str();
             }
@@ -270,10 +270,12 @@ namespace filesystem {
                 return *this;
             }
             path &operator=(path &&path) {
+                m_type = path.m_type;
+                m_absolute = path.m_absolute;
                 if (this != &path) {
-                    m_type = path.m_type;
                     m_path = std::move(path.m_path);
-                    m_absolute = path.m_absolute;
+                } else {
+                    m_path = path.m_path;
                 }
                 return *this;
             }

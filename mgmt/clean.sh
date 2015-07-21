@@ -10,3 +10,7 @@ pushd $PROJECT_PATH &> /dev/null
     rm -rf ./build ./dist
 
 popd &> /dev/null
+
+pushd $TMPDIR
+    rm -rf ./test-* ./write-* *.imdata
+popd

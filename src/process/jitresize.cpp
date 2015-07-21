@@ -2,56 +2,54 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <Halide.h>
-using namespace Halide;
-
 #include <libimread/process/jitresize.hh>
 
 namespace im {
 
     namespace process {
         
-        Expr kernel_box(Expr x) {
-            Expr xx = abs(x);
-            return select(xx <= 0.5f,
+        Halide::Expr kernel_box(Halide::Expr x) {
+            Halide::Expr xx = abs(x);
+            return Halide::select(xx <= 0.5f,
                 1.0f,
                 0.0f);
         }
         
-        Expr kernel_linear(Expr x) {
-            Expr xx = abs(x);
-            return select(xx < 1.0f,
+        Halide::Expr kernel_linear(Halide::Expr x) {
+            Halide::Expr xx = abs(x);
+            return Halide::select(xx < 1.0f,
                 1.0f - xx,
                 0.0f);
         }
         
-        Expr kernel_cubic(Expr x) {
-            Expr xx = abs(x);
-            Expr xx2 = xx * xx;
-            Expr xx3 = xx2 * xx;
+        Halide::Expr kernel_cubic(Halide::Expr x) {
+            Halide::Expr xx = abs(x);
+            Halide::Expr xx2 = xx * xx;
+            Halide::Expr xx3 = xx2 * xx;
             float a = -0.5f;
             
-            return select(xx < 1.0f,
+            return Halide::select(xx < 1.0f,
                 (a + 2.0f) * xx3 - (a + 3.0f) * xx2 + 1,
-                select(xx < 2.0f,
+                Halide::select(xx < 2.0f,
                     a * xx3 - 5 * a * xx2 + 8 * a * xx - 4.0f * a,
                     0.0f)
                 );
         }
         
-        Expr sinc(Expr x) {
+        Halide::Expr sinc(Halide::Expr x) {
             return sin(float(M_PI) * x) / x;
         }
         
-        Expr kernel_lanczos(Expr x) {
-            Expr value = sinc(x) * sinc(x/3);
+        Halide::Expr kernel_lanczos(Halide::Expr x) {
+            Halide::Expr value = sinc(x) * sinc(x/3);
             
             // Take care of singularity at zero
-            value = select(x == 0.0f,
+            value = Halide::select(x == 0.0f,
                 1.0f,
                 value);
             
             // Clamp to zero out of bounds
-            value = select(x > 3 || x < -3,
+            value = Halide::select(x > 3 || x < -3,
                 0.0f,
                 value);
             
@@ -61,7 +59,7 @@ namespace im {
         struct KernelInfo {
             const char *name;
             float size;
-            Expr (*kernel)(Expr);
+            Halide::Expr (*kernel)(Halide::Expr);
         };
         
         static KernelInfo kernelInfo[] = {
@@ -72,11 +70,12 @@ namespace im {
         };
         
         void Resizer::compile() {
+            if (compiled) { return; }
             
             /// Start with a param to configure the processing pipeline
             //ImageParam input(Float(32), 3);
-            Var x("x"), y("y"), c("c"), k("k");
-            Func clamped = BoundaryConditions::repeat_edge(input);
+            Halide::Var x("x"), y("y"), c("c"), k("k");
+            Halide::Func clamped = Halide::BoundaryConditions::repeat_edge(input);
             
             /// For downscaling, widen the interpolation kernel to perform lowpass
             /// filtering.
@@ -84,21 +83,21 @@ namespace im {
             float kernelSize = kernelInfo[interpolation].size / kernelScaling;
             
             /// source[xy] are the (non-integer) coordinates inside the source image
-            Expr sourcex = (x + 0.5f) / scaleFactor;
-            Expr sourcey = (y + 0.5f) / scaleFactor;
+            Halide::Expr sourcex = (x + 0.5f) / scaleFactor;
+            Halide::Expr sourcey = (y + 0.5f) / scaleFactor;
             
             /// Initialize interpolation kernels. Since we allow an arbitrary
             /// scaling factor, the filter coefficients are different for each x
             /// and y coordinate.
-            Func kernelx("kernelx"), kernely("kernely");
-            Expr beginx = cast<int>(sourcex - kernelSize + 0.5f);
-            Expr beginy = cast<int>(sourcey - kernelSize + 0.5f);
-            RDom domx(0, static_cast<int>(2.0f * kernelSize) + 1, "domx");
-            RDom domy(0, static_cast<int>(2.0f * kernelSize) + 1, "domy");
+            Halide::Func kernelx("kernelx"), kernely("kernely");
+            Halide::Expr beginx = Halide::cast<int>(sourcex - kernelSize + 0.5f);
+            Halide::Expr beginy = Halide::cast<int>(sourcey - kernelSize + 0.5f);
+            Halide::RDom domx(0, static_cast<int>(2.0f * kernelSize) + 1, "domx");
+            Halide::RDom domy(0, static_cast<int>(2.0f * kernelSize) + 1, "domy");
             
             {
                 const KernelInfo &info = kernelInfo[interpolation];
-                Func kx, ky;
+                Halide::Func kx, ky;
                 kx(x, k) = info.kernel((k + beginx - sourcex) * kernelScaling);
                 ky(y, k) = info.kernel((k + beginy - sourcey) * kernelScaling);
                 kernelx(x, k) = kx(x, k) / sum(kx(x, domx));
@@ -106,12 +105,11 @@ namespace im {
             }
             
             /// Perform separable resizing
-            Func resized_x("resized_x");
-            Func resized_y("resized_y");
-            resized_x(x, y, c) = sum(kernelx(x, domx) * cast<float>(clamped(domx + beginx, y, c)));
+            Halide::Func resized_x("resized_x");
+            Halide::Func resized_y("resized_y");
+            resized_x(x, y, c) = sum(kernelx(x, domx) * Halide::cast<float>(clamped(domx + beginx, y, c)));
             resized_y(x, y, c) = sum(kernely(y, domy) * resized_x(x, domy + beginy, c));
             
-            //Func final("final");
             final(x, y, c) = clamp(resized_y(x, y, c), 0.0f, 1.0f);
             
             /// Scheduling
@@ -127,29 +125,30 @@ namespace im {
             }
             
             if (parallelize) {
-                Var yo, yi;
+                Halide::Var yo, yi;
                 final.split(y, yo, y, 32).parallel(yo);
                 resized_x.store_at(final, yo).compute_at(final, y);
             } else {
                 resized_x.store_at(final, c).compute_at(final, y);
             }
             
-            Target target = get_jit_target_from_environment();
+            Halide::Target target = Halide::get_jit_target_from_environment();
             final.compile_jit(target);
             compiled = true;
         }
         
-        Image<float> Resizer::process_impl(Image<float> in) {
+        HalImage<float> Resizer::process_impl(HalImage<float> in) {
             int out_width = in.width() * scaleFactor;
             int out_height = in.width() * scaleFactor;
-            Image<float> out(out_width, out_height, 3);
+            HalImage<float> out(out_width, out_height, 3);
             input.set(in);
             
-            printf("Resampling from %dx%d to %dx%d using %s interpolation\n",
+            WTF(FF("Resampling from %dx%d to %dx%d using %s interpolation\n",
                    in.width(), in.height(),
                    out_width, out_height,
-                   kernelInfo[interpolation].name);
+                   kernelInfo[interpolation].name));
             
+            compile();
             final.realize(out);
             return out;
         }

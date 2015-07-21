@@ -54,7 +54,7 @@ namespace im {
     typename std::enable_if_t<std::is_constructible<std::string, S>::value && (sizeof...(Args) != 0), const std::string>
         stringify(S const& s, Args ...args) {
             /// adapted from http://stackoverflow.com/a/26197300/298171
-            char b; const char *fmt(std::string(s).c_str());
+            char b; const char *fmt(s);
             unsigned required = std::snprintf(&b, 0, fmt, args...) + 1;
             char bytes[required];
             std::snprintf(bytes, required, fmt, args...);
@@ -136,7 +136,7 @@ namespace im {
 
 #ifndef WTF
 #define WTF(...)                                                                        \
-    im::srsly("(WTF!!!)",                                                               \
+    im::srsly("\n(WTF!!!)",                                                             \
         ansi::lightred,                                                                 \
         __FILE__, __LINE__, __VA_ARGS__)
 #endif /// WTF
@@ -144,7 +144,7 @@ namespace im {
 #ifndef imread_assert
 #define imread_assert(condition, ...)                                                   \
     if (!(condition)) {                                                                 \
-        im::srsly("(ASSERT FAILURE) [ " ST(condition) " ]\n",                           \
+        im::srsly("\n(ASSERT FAILURE) [ " ST(condition) " ]\n",                         \
             ansi::lightyellow, __FILE__, __LINE__,                                      \
                 FF("\tIn function: %s%s%s",                                             \
                     ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),      \
@@ -155,7 +155,7 @@ namespace im {
 
 #ifndef imread_raise_default
 #define imread_raise_default(Exception)                                                 \
-    throw im::Exception(im::emerg("[ ERROR > " ST(Exception) " ]\n",                    \
+    throw im::Exception(im::emerg("\n[ ERROR > " ST(Exception) " ]\n",                  \
         ansi::lightred, __FILE__, __LINE__,                                             \
             FF("\tIn function: %s%s%s",                                                 \
                 ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),          \
@@ -164,7 +164,7 @@ namespace im {
 
 #ifndef imread_raise
 #define imread_raise(Exception, ...)                                                    \
-    throw im::Exception(im::emerg("[ ERROR > " ST(Exception) " ]\n",                    \
+    throw im::Exception(im::emerg("\n[ ERROR > " ST(Exception) " ]\n",                  \
         ansi::lightred, __FILE__, __LINE__,                                             \
             FF("\tIn function: %s%s%s",                                                 \
                 ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),          \

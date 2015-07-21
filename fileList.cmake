@@ -87,6 +87,7 @@ set(hdrs
     ${hdrs_dir}/ext/pvr.h
     ${hdrs_dir}/ext/WriteGIF.h
     
+    ${hdrs_dir}/IO/ansi.hh
     ${hdrs_dir}/IO/apple.hh
     ${hdrs_dir}/IO/bmp.hh
     ${hdrs_dir}/IO/gif.hh
@@ -142,6 +143,7 @@ set(srcs
     ${srcs_dir}/ext/pvrtc.cpp
     ${srcs_dir}/ext/WriteGIF.cpp
     
+    ${srcs_dir}/IO/ansi.cpp
     ${srcs_dir}/IO/apple.mm
     ${srcs_dir}/IO/bmp.cpp
     ${srcs_dir}/IO/gif.cpp

@@ -17,13 +17,14 @@ namespace {
     using namespace im::fs;
     using U8Image = im::HybridImage<uint8_t>;
     
+    TemporaryDirectory td("write-individual-gifs-XXXXX");
+    
     TEST_CASE("Read PNG files and write as individual GIF files", "[write-individual-gifs]") {
         path basedir(im::test::basedir);
-        path tmpdir("/tmp");
         std::vector<path> sequence = basedir.list("output_*.png");
         std::for_each(sequence.begin(), sequence.end(), [&](path &p){
             path fullpath = basedir/p;
-            path newpath((tmpdir/p).str() + ".gif");
+            path newpath((td.dirpath/p).str() + ".gif");
             U8Image halim = im::halide::read(fullpath.str());
             im::halide::write(halim, newpath.str());
         });

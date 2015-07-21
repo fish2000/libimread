@@ -1,6 +1,7 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <cstdio>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/temporary.h>
@@ -12,7 +13,7 @@ namespace filesystem {
     
     void NamedTemporaryFile::create() {
         if (::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix)) == -1) {
-            imread_raise(FileSystemError,
+            imread_raise(FileSystemError, "[ERROR]",
                 "Internal error in mktemps():",
                 std::strerror(errno));
         }
@@ -20,8 +21,8 @@ namespace filesystem {
     
     void NamedTemporaryFile::remove() {
         if (::unlink(filepath.c_str()) == -1) {
-            imread_raise(FileSystemError,
-                "Internal error in unlink():",
+            imread_raise(FileSystemError, "[ERROR]",
+                FF("Internal error in ::unlink(%s):", filepath.c_str()),
                 std::strerror(errno));
         }
     }
@@ -33,27 +34,28 @@ namespace filesystem {
     void TemporaryDirectory::clean() {
         /// scrub all files
         /// N.B. this will not recurse -- keep yr structures FLAAAT
-        directory cleand = detail::ddopen(dirpath);
+        directory cleand = detail::ddopen(dirpath.make_absolute().c_str());
         if (!cleand.get()) {
-            imread_raise(FileSystemError,
-                "Internal error in opendir():",
+            imread_raise(FileSystemError, "[ERROR]",
+                FF("Internal error in detail::ddopen(%s):", dirpath.c_str()),
                 std::strerror(errno));
         }
+        
+        // WTF("About to enter readdir() loop...");
         struct dirent *entry;
         while ((entry = ::readdir(cleand.get())) != NULL) {
-            if (std::strncmp(entry->d_name, ".", 1) != 0 && std::strncmp(entry->d_name, "..", 2) != 0) {
-                const char *ep = (dirpath/entry->d_name).c_str();
-                if (::access(ep, R_OK) != -1) {
-                    if (::unlink(ep) == -1) {
-                        imread_raise(FileSystemError,
-                            "Internal error in unlink():",
-                            std::strerror(errno));
-                    }
-                } else {
-                    imread_raise(FileSystemError,
-                        "Internal error in access():",
-                        std::strerror(errno));
-                }
+            // WTF("In readdir() loop with entry:", entry->d_name);
+            // if (std::strlen(entry->d_name) < 1)                         { continue; }
+            std::string dname(::strdup(entry->d_name));
+            // if (std::strlen(dname.c_str()) < 1)                         { continue; }
+            if (std::strncmp(dname.c_str(), ".", 1) == 0)               { continue; }
+            if (std::strncmp(dname.c_str(), "..", 2) != 0)              { continue; }
+            path epp = dirpath.join(path(dname));
+            const char *ep = epp.make_absolute().c_str();
+            if (::remove(ep) == -1) {
+                imread_raise(FileSystemError, "[ERROR]",
+                    FF("Internal error in ::remove(%s):", ep),
+                    std::strerror(errno));
             }
         }
     }
@@ -61,9 +63,9 @@ namespace filesystem {
     void TemporaryDirectory::remove() {
         /// unlink the directory itself
         if (::rmdir(dirpath.c_str()) == -1) {
-            imread_raise(FileSystemError,
-                "Internal error in rmdir():",
-                std::strerror(errno));
+            // imread_raise(FileSystemError,
+            //     "Internal error in rmdir():\n\t", dirpath.str(),
+            //     std::strerror(errno));
         }
     }
     

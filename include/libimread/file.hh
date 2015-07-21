@@ -109,6 +109,8 @@ namespace im {
                 :file_source_sink(ppath.c_str(), fmode)
                 {}
             
+            virtual ~file_source_sink() { fd_source_sink::close(); }
+            
             const filesystem::path &path() const { return pth; }
             virtual bool exists() const noexcept override;
             

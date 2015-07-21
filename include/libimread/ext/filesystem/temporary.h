@@ -7,6 +7,7 @@
 #include <string>
 #include <cstring>
 #include <cerrno>
+#include <cstdlib>
 #include <cstddef>
 #include <dirent.h>
 
@@ -66,16 +67,40 @@ namespace filesystem {
         
         char *tpl;
         bool cleanup;
+        path tplpath;
         path dirpath;
         
-        explicit TemporaryDirectory(const char *t = tdp, bool c = true)
-            :tpl(::strdup(t)), cleanup(c)
-            ,dirpath(::mkdtemp(::strdup((path::tmp()/tpl).c_str())))
-            {}
+        explicit TemporaryDirectory(const char *t, bool c = true)
+            :tpl(::strdup(t))
+            ,cleanup(c)
+            ,tplpath(path::join(path::gettmp(), path(t)))
+            {
+                dirpath = path(::mkdtemp(::strdup(tplpath.c_str())));
+                // WTF("Creating TemporaryDirectory with params:",
+                //     FF("\tt = (const char *)%s", t),
+                //     FF("\tc = %s", c ? "true" : "false"),
+                //     FF("\ttpl = %s", tpl),
+                //     FF("\tcleanup = %s", cleanup ? "true" : "false"),
+                //     FF("\tdirpath = %s", dirpath.c_str()),
+                //     FF("\ttplpath = %s", tplpath.c_str())
+                // );
+            }
+        
         explicit TemporaryDirectory(const std::string &t, bool c = true)
-            :tpl(::strdup(t.c_str())), cleanup(c)
-            ,dirpath(::mkdtemp(::strdup((path::tmp()/tpl).c_str())))
-            {}
+            :tpl(::strdup(t.c_str()))
+            ,cleanup(c)
+            ,tplpath(path::join(path::gettmp(), path(t)))
+            {
+                dirpath = path(::mkdtemp(::strdup(tplpath.c_str())));
+                // WTF("Creating TemporaryDirectory with params:",
+                //     FF("\tt = (const std::string &)%s", t.c_str()),
+                //     FF("\tc = %s", c ? "true" : "false"),
+                //     FF("\ttpl = %s", tpl),
+                //     FF("\tcleanup = %s", cleanup ? "true" : "false"),
+                //     FF("\tdirpath = %s", dirpath.c_str()),
+                //     FF("\ttplpath = %s", tplpath.c_str())
+                // );
+            }
         
         operator std::string() { return dirpath.str(); }
         operator const char*() { return dirpath.c_str(); }
