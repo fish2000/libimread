@@ -21,8 +21,8 @@ namespace im {
             typedef std::true_type can_read;
             typedef std::true_type can_write;
             
-            static const options OPTS() {
-                const options O(
+            static const options_type OPTS() {
+                const options_type O(
                     "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
                     "png"
                 );

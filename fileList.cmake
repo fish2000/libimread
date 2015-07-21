@@ -166,6 +166,7 @@ set(srcs
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/fs.cpp
     ${srcs_dir}/halide.cpp
+    ${srcs_dir}/imageformat.cpp
     ${srcs_dir}/objc-rt.mm
     ${srcs_dir}/options.cpp
     ${srcs_dir}/symbols.cpp

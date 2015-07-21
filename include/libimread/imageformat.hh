@@ -44,23 +44,25 @@ namespace im {
                 _signature(_optional, _json_key = _signature)  = std::string(),
                 _suffix(_optional, _json_key = _suffix)        = std::string()
             ))
-                options;
+                options_type;
             
-            static const options OPTS() {
-                const options O(
-                    "xxxxxxxx",
-                    "image"
+            static const options_type OPTS() {
+                const options_type O(
+                    "xxxxxxxx",         /// signature
+                    "image"             /// suffix
                 );
                 return O;
             }
             
+            static const options_type options;
+            
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {
-                return match_magic(src, OPTS().signature, 8);
+                return match_magic(src, options.signature, 8);
             }
             
             static std::string get_suffix() {
-                return std::string(OPTS().signature);
+                return std::string(options.suffix);
             }
             
             virtual ~ImageFormat() {}
