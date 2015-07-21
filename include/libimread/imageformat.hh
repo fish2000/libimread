@@ -13,6 +13,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
 #include <libimread/image.hh>
+#include <libimread/symbols.hh>
 #include <libimread/options.hh>
 
 namespace im {
@@ -38,6 +39,29 @@ namespace im {
             typedef std::false_type can_write;
             typedef std::false_type can_write_multi;
             typedef std::false_type can_write_metadata;
+            
+            typedef decltype(D(
+                _signature = std::string(),
+                _suffix = std::string()
+            ))
+                options;
+            
+            static const options OPTS() {
+                const options O(
+                    "xxxxxxxx",
+                    "image"
+                );
+                return O;
+            }
+            
+            /// NOT AN OVERRIDE:
+            static bool match_format(byte_source *src) {
+                return match_magic(src, OPTS().signature, 8);
+            }
+            
+            static std::string get_suffix() {
+                return std::string(OPTS().signature);
+            }
             
             virtual ~ImageFormat() {}
             

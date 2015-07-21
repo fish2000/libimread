@@ -14,15 +14,15 @@
 #endif
 
 
-#ifndef IOD_SYMBOL_fd
-    #define IOD_SYMBOL_fd
-    iod_define_symbol(fd)
-#endif
-
-
 #ifndef IOD_SYMBOL_x_
     #define IOD_SYMBOL_x_
     iod_define_symbol(x_)
+#endif
+
+
+#ifndef IOD_SYMBOL_suffix
+    #define IOD_SYMBOL_suffix
+    iod_define_symbol(suffix)
 #endif
 
 

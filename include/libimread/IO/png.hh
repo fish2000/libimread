@@ -16,22 +16,17 @@
 namespace im {
     
     class PNGFormat : public ImageFormat {
+        
         public:
             typedef std::true_type can_read;
             typedef std::true_type can_write;
-            typedef decltype(D(
-                _signature = std::string()
-            ))
-                options;
             
             static const options OPTS() {
-                const options O("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A");
+                const options O(
+                    "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
+                    "png"
+                );
                 return O;
-            }
-            
-            /// NOT AN OVERRIDE:
-            static bool match_format(byte_source *src) {
-                return match_magic(src, OPTS().signature, 8);
             }
             
             virtual std::unique_ptr<Image> read(byte_source *src,

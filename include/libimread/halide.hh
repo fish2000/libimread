@@ -16,8 +16,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/private/buffer_t.h>
 #include <libimread/errors.hh>
-// #include <libimread/base.hh>
-#include <libimread/file.hh>
+#include <libimread/fs.hh>
 #include <libimread/image.hh>
 #include <libimread/formats.hh>
 #include <libimread/tools.hh>
@@ -188,11 +187,6 @@ namespace im {
             return image;
         }
         
-        using Halide::Func;
-        using Halide::Var;
-        using Halide::Target;
-        using Halide::UInt;
-        
         template <typename T = byte>
         void write(HybridImage<T> &input, const std::string &filename) {
             if (input.dim(2) > 3) { return; }
@@ -208,6 +202,17 @@ namespace im {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write_multi(dynamic_cast<std::vector<Image>&>(input), output.get(), opts);
+        }
+        
+        template <typename Format, typename T = byte>
+        std::string tmpwrite(HybridImage<T> &input) {
+            if (input.dim(2) > 3) { return ""; }
+            options_map opts;
+            im::fs::NamedTemporaryFile tf(Format::get_suffix());
+            std::unique_ptr<ImageFormat> format(new Format);
+            std::unique_ptr<FileSink> output(new FileSink(tf.str()));
+            format->write(dynamic_cast<Image&>(input), output.get(), opts);
+            return tf.str();
         }
         
     }

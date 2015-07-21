@@ -7,11 +7,12 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/resolver.h>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/file.hh>
 
 namespace im {
-
+    
     namespace fs = filesystem;
-
+    
 }
 
 #endif /// LIBIMREAD_INCLUDE_FS_HH_

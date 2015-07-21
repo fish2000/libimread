@@ -4,6 +4,8 @@
 #ifndef IMREAD_SYMBOLS_HH
 #define IMREAD_SYMBOLS_HH
 
+#include <string>
+
 #include <iod/symbol.hh>
 #include <iod/sio.hh>
 #include <iod/callable_traits.hh>

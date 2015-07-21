@@ -15,7 +15,8 @@
 #include <cstring>
 
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
+#include <libimread/image.hh>
+#include <libimread/imageformat.hh>
 
 namespace im {
     
