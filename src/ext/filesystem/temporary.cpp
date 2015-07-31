@@ -8,8 +8,8 @@
 
 namespace filesystem {
     
-    constexpr char NamedTemporaryFile::tfp[im::static_strlen(FILESYSTEM_TEMP_FILENAME)];
-    constexpr char NamedTemporaryFile::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
+    DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfp, FILESYSTEM_TEMP_FILENAME);
+    DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfs, FILESYSTEM_TEMP_SUFFIX);
     
     void NamedTemporaryFile::create() {
         if (::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix)) == -1) {
@@ -27,9 +27,9 @@ namespace filesystem {
         }
     }
     
-    constexpr char TemporaryDirectory::tdp[im::static_strlen(FILESYSTEM_TEMP_DIRECTORYNAME)];
-    constexpr char TemporaryDirectory::tfp[im::static_strlen(FILESYSTEM_TEMP_FILENAME)];
-    constexpr char TemporaryDirectory::tfs[im::static_strlen(FILESYSTEM_TEMP_SUFFIX)];
+    DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tdp, FILESYSTEM_TEMP_DIRECTORYNAME);
+    DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfp, FILESYSTEM_TEMP_FILENAME);
+    DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfs, FILESYSTEM_TEMP_SUFFIX);
     
     void TemporaryDirectory::clean() {
         /// scrub all files

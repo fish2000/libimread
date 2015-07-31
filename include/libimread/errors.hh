@@ -122,6 +122,10 @@ namespace im {
     constexpr std::size_t static_strlen(char const (&)[N]) { return N; }
 
 
+#ifndef DECLARE_CONSTEXPR_CHAR
+#define DECLARE_CONSTEXPR_CHAR(decl, token) constexpr char decl[im::static_strlen(token)]
+#endif
+
 #ifndef ST
 #define ST(s) "" #s 
 #endif /// ST
