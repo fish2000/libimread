@@ -79,7 +79,7 @@ namespace im {
         /// adapted from http://stackoverflow.com/a/21806609/298171
         std::string out;
         int unpack[] __attribute__((unused)) { 0, 
-            (out += "\t" + im::stringify<Args>(args) + std::endl, 0)...
+            (out += "\t" + im::stringify<Args>(args) + "\n", 0)...
         };
         return out;
     }
