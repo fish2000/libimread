@@ -26,20 +26,26 @@ namespace objc {
         
         operator ::id() { return iid; }
         
+        inline const char * __cls_name() const          { return ::object_getClassName(iid); }
+        inline const char * __cls_name(::id ii) const   { return ::object_getClassName(ii); }
+        
         std::string classname() {
-            return std::string(::object_getClassName(iid));
+            return std::string(__cls_name());
         }
         
-        ::Class lookup() {
-            return ::objc_lookUpClass(::object_getClassName(iid));
+        ::Class lookupclass() {
+            return ::objc_lookUpClass(__cls_name());
+        }
+        ::Class getclass() {
+            return ::objc_getClass(__cls_name());
         }
         
         static std::string classname(::id ii) {
-            return std::string(::object_getClassName(ii));
+            return std::string(__cls_name(ii));
         }
         
         static ::Class lookup(::id ii) {
-            return ::objc_lookUpClass(::object_getClassName(ii));
+            return ::objc_lookUpClass(__cls_name(ii));
         }
         static ::Class lookup(const std::string &s) {
             return ::objc_lookUpClass(s.c_str());
@@ -70,15 +76,24 @@ namespace objc {
         bool operator!=(const objc::selector &s) {
             return ::sel_isEqual(sel, s.sel) == NO;
         }
+        bool operator==(const ::SEL &s) {
+            return ::sel_isEqual(sel, s) == YES;
+        }
+        bool operator!=(const ::SEL &s) {
+            return ::sel_isEqual(sel, s) == NO;
+        }
         
-        std::string name() {
-            return std::string(::sel_getName(sel));
+        inline const char *c_str() const {
+            return ::sel_getName(sel);
+        }
+        inline std::string str() const {
+            return std::string(c_str());
         }
         
         operator ::SEL() { return sel; }
-        operator std::string() { return name(); }
-        operator const char*() { return ::sel_getName(sel); }
-        operator char*() { return const_cast<char*>(::sel_getName(sel)); }
+        operator std::string() { return str(); }
+        operator const char*() { return c_str(); }
+        operator char*() { return const_cast<char*>(c_str()); }
         
         static objc::selector register_name(const std::string &name) {
             return objc::selector(name);
@@ -87,34 +102,35 @@ namespace objc {
             return objc::selector(name);
         }
         
+        private:
+            selector(void);
+        
     };
     
     template <typename Return, typename ...Args>
     struct arguments {
-        static constexpr std::size_t N = sizeof...(Args);
+        static constexpr std::size_t argc = sizeof...(Args);
         using is_argument_list = std::true_type;
-        using index_type = std::make_index_sequence<N>;
+        using index_type = std::make_index_sequence<argc>;
         using tuple_type = std::tuple<Args...>;
-        using sender_signature_type = typename std::add_pointer<Return(::id, ::SEL, Args...)>::type;
+        using send_function = typename std::add_pointer<Return(::id, ::SEL, Args...)>::type;
         
-        const std::size_t argc;
         tuple_type args;
-        sender_signature_type dispatcher = (sender_signature_type)objc_msgSend;
+        send_function dispatcher = (send_function)objc_msgSend;
         
         explicit arguments(Args&&... a)
             :args(std::forward_as_tuple(a...))
-            ,argc(N)
             {}
         
         private:
             template <std::size_t ...I>
-            Return send_impl(::id self, ::SEL op, tuple_type&& t, std::index_sequence<I...>) {
-                return dispatcher(self, op, std::get<I>(std::forward<tuple_type>(t))...);
+            Return send_impl(::id self, ::SEL op, std::index_sequence<I...>) {
+                return dispatcher(self, op, std::get<I>(std::forward<tuple_type>(args))...);
             }
         
         public:
             Return send(::id self, ::SEL op) {
-                return send_impl(self, op, std::move(args), index_type());
+                return send_impl(self, op, index_type());
             }
         
         private:
