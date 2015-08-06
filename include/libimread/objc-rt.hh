@@ -38,7 +38,7 @@
 - (std::wstring) STLWideString;
 @end
 
-#endif /// __OBJC___
+#endif /// __OBJC__
 
 namespace objc {
     
