@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <string>
 #include <tuple>
+#include <functional>
 #include <type_traits>
 
 #ifdef __OBJC__
@@ -15,6 +16,32 @@
 #endif
 
 namespace objc {
+    
+    namespace types {
+        
+        using rID = std::add_rvalue_reference_t<__strong ::id>;
+        using rSEL = std::add_rvalue_reference_t<::SEL>;
+        using xID = std::add_lvalue_reference_t<__strong ::id>;
+        using xSEL = std::add_lvalue_reference_t<::SEL>;
+        using tID = std::remove_reference_t<rID>;
+        using tSEL = std::remove_reference_t<rSEL>;
+        
+        inline decltype(auto) pass_id(rID r)          { return std::forward<tID>(r); }
+        inline decltype(auto) pass_selector(rSEL r)   { return std::forward<tSEL>(r); }
+        inline decltype(auto) pass_id(xID r)          { return std::forward<tID>(r); }
+        inline decltype(auto) pass_selector(xSEL r)   { return std::forward<tSEL>(r); }
+        
+    }
+    
+    /// function-pointer templates for wrapping objc_msgSend() with a bunch of possible sigs
+    template <typename Return, typename ...Args>
+    using return_sender_t = std::add_pointer_t<Return(types::tID, types::tSEL, Args...)>;
+    
+    template <typename ...Args>
+    using void_sender_t = std::add_pointer_t<void(types::tID, types::tSEL, Args...)>;
+    
+    template <typename ...Args>
+    using object_sender_t = std::add_pointer_t<::id(types::tID, types::tSEL, Args...)>;
     
     struct id {
     
@@ -26,8 +53,8 @@ namespace objc {
         
         operator ::id() { return iid; }
         
-        inline const char * __cls_name() const          { return ::object_getClassName(iid); }
-        inline const char * __cls_name(::id ii) const   { return ::object_getClassName(ii); }
+        inline const char * __cls_name() const      { return ::object_getClassName(iid); }
+        static const char * __cls_name(::id ii)     { return ::object_getClassName(ii); }
         
         std::string classname() {
             return std::string(__cls_name());
@@ -111,26 +138,35 @@ namespace objc {
     struct arguments {
         static constexpr std::size_t argc = sizeof...(Args);
         using is_argument_list = std::true_type;
-        using index_type = std::make_index_sequence<argc>;
-        using tuple_type = std::tuple<Args...>;
-        using send_function = typename std::add_pointer<Return(::id, ::SEL, Args...)>::type;
+        using index_t = std::make_index_sequence<argc>;
+        using tuple_t = std::tuple<Args...>;
+        using sender_t = return_sender_t<Return, Args...>;
+        using prebound_t = std::function<Return(types::tID, types::tSEL, Args...)>;
         
-        tuple_type args;
-        send_function dispatcher = (send_function)objc_msgSend;
+        tuple_t args;
+        prebound_t dispatcher;
+        sender_t dispatch_with = (sender_t)objc_msgSend;
         
         explicit arguments(Args&&... a)
             :args(std::forward_as_tuple(a...))
             {}
         
         private:
-            template <std::size_t ...I>
-            Return send_impl(::id self, ::SEL op, std::index_sequence<I...>) {
-                return dispatcher(self, op, std::get<I>(std::forward<tuple_type>(args))...);
+            template <std::size_t ...I> inline
+            Return send_impl(types::rID self, types::rSEL op, std::index_sequence<I...>) {
+                return dispatcher(types::pass_id(self),
+                                  types::pass_selector(op),
+                                  std::forward<Args>(
+                                      std::get<I>(std::forward<tuple_t>(args)))...);
             }
         
         public:
-            Return send(::id self, ::SEL op) {
-                return send_impl(self, op, index_type());
+            Return send(types::rID self, types::rSEL op) {
+                //dispatcher = (prebound_t(*))std::bind(dispatch_with, self, op);
+                dispatcher = (prebound_t)dispatch_with;
+                return send_impl(types::pass_id(self),
+                                 types::pass_selector(op),
+                                 index_t());
             }
         
         private:
@@ -183,8 +219,8 @@ namespace objc {
             template <typename X = std::enable_if<decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value>>
             static constexpr bool value() { return true; }
             static constexpr bool value() {
-                // static_assert(decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value,
-                //               "Type does not conform to objc::arguments<Args...>");
+                static_assert(decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value,
+                              "Type does not conform to objc::arguments<Args...>");
                 return detail::test_is_argument_list<T, TEST_ARGS>(0);
             }
         };
@@ -195,39 +231,46 @@ namespace objc {
     
     struct msg {
         
-        ::id self;
-        ::SEL op;
+        using rID = types::rID;
+        using rSEL = types::rSEL;
         
-        explicit msg(::id s, ::SEL o)
-            :self(s), op(o)
+        rID self;
+        rSEL op;
+        
+        explicit msg(rID s, rSEL o)
+            :self(types::pass_id(s))
+            ,op(types::pass_selector(o))
             {}
         
         template <typename ...Args>
         ::id send(::BOOL dispatch, Args&& ...args) {
             arguments<::id, Args...> ARGS(args...);
-            return ARGS.send(self, op);
+            return ARGS.send(types::pass_id(self), types::pass_selector(op));
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
-        ::id sendv(M arg_list) const {
+        ::id sendv(M&& arg_list) const {
             return arg_list.send(self, op);
         }
         
         template <typename Return, typename ...Args>
-        static Return get(::id self, ::SEL op, Args&& ...args) {
+        static Return get(rID self, rSEL op, Args&& ...args) {
             arguments<Return, Args...> ARGS(std::forward<Args>(args)...);
-            return ARGS.send(self, op);
+            return ARGS.send(types::pass_id(self),
+                             types::pass_selector(op));
         }
         
         template <typename ...Args>
-        static ::id send(::id self, ::SEL op, Args&& ...args) {
-            return objc::msg::get<::id, Args...>(self, op, std::forward<Args>(args)...);
+        static ::id send(rID self, rSEL op, Args&& ...args) {
+            return objc::msg::get<types::tID, Args...>(types::pass_id(self),
+                                                       types::pass_selector(op),
+                                                       std::forward<Args>(args)...);
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
-        static ::id sendv(::id self, ::SEL op, M arg_list) {
+        static ::id sendv(rID self, rSEL op, M&& arg_list) {
             return arg_list.send(self, op);
         }
         

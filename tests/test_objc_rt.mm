@@ -33,7 +33,7 @@ namespace {
             
             // [datum writeToFile:urlpath atomically:YES];
             
-            objc::msg::get<void>((id)datum,
+            objc::msg::send((id)datum,
                 objc::selector("writeToFile:atomically:"),
                 urlpath, YES);
             
