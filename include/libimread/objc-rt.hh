@@ -370,4 +370,8 @@ namespace im {
     
 }
 
+#ifdef FUNC_NAME_WTF
+#undef FUNC_NAME_WTF
+#endif /// FUNC_NAME_WTF
+
 #endif /// LIBIMREAD_OBJC_RT_HH

@@ -48,7 +48,11 @@ namespace im {
     
     template <typename S> inline
     typename std::enable_if_t<std::is_constructible<std::string, S>::value, const std::string>
-        stringify(S const& s) { return std::string(s); }
+        stringify(S&& s) { return std::string(std::forward<S>(s)); }
+    
+    template <typename S> inline
+    typename std::enable_if_t<std::is_convertible<S, std::string>::value, const std::string>
+        stringify(S const& s) { std::string out = s; return out; }
     
     template <typename S, typename ...Args> inline
     typename std::enable_if_t<std::is_constructible<std::string, S>::value && (sizeof...(Args) != 0), const std::string>
