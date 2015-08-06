@@ -328,6 +328,9 @@ namespace im {
     
     namespace {
         
+        /// these functions are so terrible,
+        /// they don't even deserve a name for their namespace.
+        /// ... OOH BURN
         static constexpr unsigned int len = 3;
         static const std::array<std::string, len> stringnames{
             "nsstring",
@@ -346,6 +349,14 @@ namespace im {
         
     }
     
+    /// q.v. libimread/errors.hh, lines 45-90 (aprox., subject to change) --
+    ///      ... The other overload-resolution-phase versions of `stringify()` are
+    ///      defined therein. This one gets enable-if'ed when anyone tries to use the 
+    ///      debug output funcs and macros from errors.hh to print an NSObject subclass.
+    ///      ... the current laughable implementation can just* get extended at any time
+    ///      with more dynamic whatever-the-fuck type serialization provisions as needed.
+    ///
+    ///      *) See also http://bit.ly/1P8d8va for in-depth analysis of this pivotal term
     template <typename S> inline
     typename std::enable_if_t<objc::traits::is_class<S>::value, std::string>
         stringify(S *s) {
