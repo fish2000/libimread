@@ -99,7 +99,7 @@ include_directories(
     ${HALIDE_INCLUDE_DIR})
 
 # Set the files and options required to build the library
-include(fileList.cmake)
+include(CMakeProjectFiles.cmake)
 
 # Build the library
 # add_library(libimread STATIC ${srcs} ${hdrs})
