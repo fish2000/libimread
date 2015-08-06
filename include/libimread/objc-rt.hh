@@ -244,30 +244,24 @@ namespace objc {
             
         }
         
-        #define TEST_ARGS T
-        
         template <typename T>
-        struct is_argument_list : decltype(detail::test_is_argument_list<T, TEST_ARGS>(0)) {
-            template <typename X = std::enable_if<decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value>>
+        struct is_argument_list : decltype(detail::test_is_argument_list<T>(0)) {
+            template <typename X = std::enable_if<decltype(detail::test_is_argument_list<T>(0))::value>>
             static constexpr bool value() { return true; }
             static constexpr bool value() {
-                static_assert(decltype(detail::test_is_argument_list<T, TEST_ARGS>(0))::value,
+                static_assert(decltype(detail::test_is_argument_list<T>(0))::value,
                               "Type does not conform to objc::arguments<Args...>");
-                return detail::test_is_argument_list<T, TEST_ARGS>(0);
+                return detail::test_is_argument_list<T>(0);
             }
         };
         
-        #undef TEST_ARGS
-        
         template <typename T, typename V = bool>
-        struct is_class
-           : std::false_type {};
-        
+        struct is_class : std::false_type {};
         template <typename T>
-        struct is_class<T, typename std::enable_if_t<
-            std::is_convertible<T, objc::types::tID>::value, bool
-            >
-         > : std::true_type {};
+        struct is_class<T,
+            typename std::enable_if_t<
+                 std::is_convertible<T, objc::types::tID>::value,
+                 bool>> : std::true_type {};
         
     }
     
