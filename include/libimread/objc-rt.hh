@@ -5,19 +5,47 @@
 #define LIBIMREAD_OBJC_RT_HH
 
 #include <cstdlib>
+#include <algorithm>
 #include <string>
 #include <tuple>
+#include <array>
 #include <functional>
 #include <type_traits>
 
+#include <libimread/ext/pystring.hh>
+
 #ifdef __OBJC__
+#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
-#endif
+
+#ifndef FUNC_NAME_WTF
+#define FUNC_NAME_WTF(stuff) CFStringConvertEncodingToNSStringEncoding(stuff)
+#endif /// FUNC_NAME_WTF
+
+#if TARGET_RT_BIG_ENDIAN
+    const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32BE);
+#else
+    const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32LE);
+#endif /// TARGET_RT_BIG_ENDIAN
+
+@interface NSString (IMStringAdditions)
++ (NSString *)   stringWithSTLString:(const std::string&)str;
++ (NSString *)   stringWithSTLWideString:(const std::wstring&)wstr;
+- (std::string)  STLString;
+- (std::string)  STLStringUsingEncoding:(NSStringEncoding)encoding;
+- (std::wstring) STLWideString;
+@end
+
+#endif /// __OBJC___
 
 namespace objc {
     
     namespace types {
+        
+        using baseID = ::id;
+        using baseSEL = ::SEL;
         
         using rID = std::add_rvalue_reference_t<__strong ::id>;
         using rSEL = std::add_rvalue_reference_t<::SEL>;
@@ -51,13 +79,13 @@ namespace objc {
             :iid(ii)
             {}
         
-        operator ::id() { return iid; }
+        operator ::id() const { return iid; }
         
         inline const char * __cls_name() const      { return ::object_getClassName(iid); }
         static const char * __cls_name(::id ii)     { return ::object_getClassName(ii); }
         
-        std::string classname() {
-            return std::string(__cls_name());
+        std::string classname() const {
+            return std::string(__cls_name(iid));
         }
         
         ::Class lookupclass() {
@@ -205,6 +233,10 @@ namespace objc {
     
         namespace detail {
             
+            template <typename From, typename To>
+            using is_convertible_t = std::conditional_t<std::is_convertible<From, To>::value,
+                                                        std::true_type, std::false_type>;
+            
             template <typename T, typename ...Args>
             static auto test_is_argument_list(int) -> typename T::is_argument_list;
             template <typename, typename ...Args>
@@ -226,7 +258,17 @@ namespace objc {
         };
         
         #undef TEST_ARGS
-    
+        
+        template <typename T, typename V = bool>
+        struct is_class
+           : std::false_type {};
+        
+        template <typename T>
+        struct is_class<T, typename std::enable_if_t<
+            std::is_convertible<T, objc::types::tID>::value, bool
+            >
+         > : std::true_type {};
+        
     }
     
     struct msg {
@@ -286,6 +328,41 @@ namespace objc {
 
 inline objc::selector operator"" _SEL(const char *name) {
     return objc::selector(name);
+}
+
+namespace im {
+    
+    namespace {
+        
+        static constexpr unsigned int len = 3;
+        static const std::array<std::string, len> stringnames{
+            "nsstring",
+            "nsmutablestring",
+            "nsattributedstring"
+        };
+        
+        bool is_stringishly_named(const std::string &name) {
+            bool out = false;
+            std::string lowername = pystring::lower(name);
+            std::for_each(stringnames.begin(), stringnames.end(), [&](std::string nm) {
+                out = out || nm == lowername;
+            });
+            return out;
+        }
+        
+    }
+    
+    template <typename S> inline
+    typename std::enable_if_t<objc::traits::is_class<S>::value, std::string>
+        stringify(S *s) {
+            const objc::id self(s);
+            if (is_stringishly_named(self.classname())) {
+                return [(objc::types::baseID)self STLString];
+            }
+            return [[(objc::types::baseID)self description] STLString];
+        }
+    
+    
 }
 
 #endif /// LIBIMREAD_OBJC_RT_HH

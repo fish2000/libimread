@@ -3,6 +3,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/objc-rt.hh>
 
 namespace im {
 

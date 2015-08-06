@@ -1,13 +1,51 @@
 
 #include <cstdlib>
 #include <string>
+
 #import <Cocoa/Cocoa.h>
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/fs.hh>
 #include <libimread/objc-rt.hh>
 
 #include "include/catch.hpp"
+
+
+namespace {
+}
+
+
+@interface IMTestReceiver : NSObject {}
++ (void) callStatic;
++ (void) callStaticWithInt:(int)arg;
++ (void) callStaticWithInt:(int)arg andObjCString:(NSString*)anotherArg;
+- (void) callMethod;
+- (void) callMethodWithInt:(int)arg;
+- (void) callMethodWithInt:(int)arg andObjCString:(NSString*)anotherArg;
+@end
+
+@implementation IMTestReceiver
++ (void) callStatic {
+    
+}
++ (void) callStaticWithInt:(int)arg {
+
+}
++ (void) callStaticWithInt:(int)arg andObjCString:(NSString*)anotherArg {
+
+}
+- (void) callMethod {
+    
+}
+- (void) callMethodWithInt:(int)arg {
+
+}
+- (void) callMethodWithInt:(int)arg andObjCString:(NSString*)anotherArg {
+
+}
+@end
+
 
 namespace {
     
@@ -51,3 +89,7 @@ namespace {
     }
     
 }
+
+#ifdef FUNC_NAME_WTF
+#undef FUNC_NAME_WTF
+#endif /// FUNC_NAME_WTF

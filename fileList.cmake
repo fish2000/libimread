@@ -85,6 +85,7 @@ set(hdrs
     ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
+    ${hdrs_dir}/ext/pystring.hh
     ${hdrs_dir}/ext/WriteGIF.h
     
     ${hdrs_dir}/IO/ansi.hh
@@ -141,6 +142,7 @@ set(srcs
     ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
+    ${srcs_dir}/ext/pystring.cpp
     ${srcs_dir}/ext/WriteGIF.cpp
     
     ${srcs_dir}/IO/ansi.cpp
