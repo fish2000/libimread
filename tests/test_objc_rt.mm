@@ -68,23 +68,29 @@ namespace {
     TEST_CASE("[objc-rt] Call an instance method via objc::msg::send()",
               "[objc-rt-call-instance-method]")
     {
-        IMTestReceiver *imts = [[IMTestReceiver alloc] init];
-        objc::msg::send(imts, objc::selector("callMethod"));
+        @autoreleasepool {
+            IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+            objc::msg::send(imts, objc::selector("callMethod"));
+        }
     }
     
     TEST_CASE("[objc-rt] Call an instance method with an integer argument via objc::msg::send()",
               "[objc-rt-call-instance-method-one-arg-integer-value]")
     {
-        IMTestReceiver *imts = [[IMTestReceiver alloc] init];
-        objc::msg::send(imts, objc::selector("callMethodWithInt:"), 42);
+        @autoreleasepool {
+            IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+            objc::msg::send(imts, objc::selector("callMethodWithInt:"), 42);
+        }
     }
     
     TEST_CASE("[objc-rt] Call an instance method with int and NSString arguments via objc::msg::send()",
               "[objc-rt-call-instance-method-multiple-args-int-and-pointer-to-nsstring]")
     {
-        IMTestReceiver *imts = [[IMTestReceiver alloc] init];
-        NSString *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
-        objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, stringArg);
+        @autoreleasepool {
+            IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+            NSString __autoreleasing *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
+            objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, stringArg);
+        }
     }
     
     // BLEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {

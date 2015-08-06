@@ -44,14 +44,15 @@ namespace objc {
     
     namespace types {
         
-        using baseID = ::id;
+        using baseID = __unsafe_unretained ::id;
         using baseSEL = ::SEL;
         
-        using rID = std::add_rvalue_reference_t<__strong ::id>;
-        using rSEL = std::add_rvalue_reference_t<::SEL>;
-        using xID = std::add_lvalue_reference_t<__strong ::id>;
-        using xSEL = std::add_lvalue_reference_t<::SEL>;
+        using rID = std::add_rvalue_reference_t<__unsafe_unretained ::id>;
+        using xID = std::add_lvalue_reference_t<__unsafe_unretained ::id>;
         using tID = std::remove_reference_t<rID>;
+        
+        using rSEL = std::add_rvalue_reference_t<::SEL>;
+        using xSEL = std::add_lvalue_reference_t<::SEL>;
         using tSEL = std::remove_reference_t<rSEL>;
         
         inline decltype(auto) pass_id(rID r)          { return std::forward<tID>(r); }
@@ -73,13 +74,16 @@ namespace objc {
     
     struct id {
     
-        ::id iid;
+        __unsafe_unretained ::id iid;
         
-        explicit id(::id ii)
-            :iid(ii)
+        explicit id(types::rID ii)
+            :iid(std::forward<types::tID>(ii))
             {}
         
-        operator ::id() const { return iid; }
+        operator                        ::id() const { return iid; }
+        // operator __weak                 ::id() const { return iid; }
+        // operator __strong               ::id() const { return iid; }
+        // operator __unsafe_unretained    ::id() const { return iid; }
         
         inline const char * __cls_name() const      { return ::object_getClassName(iid); }
         static const char * __cls_name(::id ii)     { return ::object_getClassName(ii); }
@@ -95,12 +99,13 @@ namespace objc {
             return ::objc_getClass(__cls_name());
         }
         
-        static std::string classname(::id ii) {
+        static std::string classname(__unsafe_unretained ::id ii) {
             return std::string(__cls_name(ii));
         }
         
-        static ::Class lookup(::id ii) {
-            return ::objc_lookUpClass(__cls_name(ii));
+        static ::Class lookup(types::rID ii) {
+            return ::objc_lookUpClass(
+                __cls_name(std::forward<types::tID>(ii)));
         }
         static ::Class lookup(const std::string &s) {
             return ::objc_lookUpClass(s.c_str());
@@ -362,9 +367,9 @@ namespace im {
         stringify(S *s) {
             const objc::id self(s);
             if (is_stringishly_named(self.classname())) {
-                return [(objc::types::baseID)self STLString];
+                return [(objc::types::tID)self STLString];
             }
-            return [[(objc::types::baseID)self description] STLString];
+            return [[(objc::types::tID)self description] STLString];
         }
     
     

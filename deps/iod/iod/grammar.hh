@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <vector>
 #include <initializer_list>
 #include <iod/foreach.hh>
