@@ -86,48 +86,6 @@ namespace im {
                             return resizer.process(im);
                         }
         
-        // Image<float> resize(Image<float> im, float scaleFactor = 1.0f,
-        //                     InterpolationType interpolationType = LINEAR,
-        //                     int schedule = 0) {
-        //
-        //     std::cout << "Finished function setup." << std::endl;
-        //     // printf("Loading '%s'\n", infile.c_str());
-        //     // Image<float> in_png = load<float>(infile);
-        //     // int out_width = in_png.width() * scaleFactor;
-        //     // int out_height = in_png.height() * scaleFactor;
-        //     // Image<float> out(out_width, out_height, 3);
-        //     // input.set(in_png);
-        //
-        //     int out_width = im.width() * scaleFactor;
-        //     int out_height = im.width() * scaleFactor;
-        //     Image<float> out(out_width, out_height, 3);
-        //     input.set(im);
-        //
-        //     printf("Resampling from %dx%d to %dx%d using %s interpolation\n",
-        //            im.width(), im.height(),
-        //            out_width, out_height,
-        //            kernelInfo[interpolationType].name);
-        //
-        //     /// DOUBLE INFINITY!!!!!!!!!
-        //     double min = std::numeric_limits<double>::infinity();
-        //     double avg = 0.0;
-        //     const unsigned int iters = 10;
-        //
-        //     for (unsigned int i = 0; i < iters; ++i) {
-        //         double before = now();
-        //         final.realize(out);
-        //         double after = now();
-        //         double timediff = after - before;
-        //
-        //         min = (timediff < min) ? timediff : min;
-        //         avg = avg + (timediff - avg) / (i + 1);
-        //         std::cout << "   " << timediff * 1000 << " (avg=" << avg * 1000 << ")\n";
-        //     }
-        //     std::cout << " took min=" << min * 1000 << ", avg=" << avg * 1000 << " msec." << std::endl;
-        //
-        //     return out;
-        // }
-        
     }
     
 }

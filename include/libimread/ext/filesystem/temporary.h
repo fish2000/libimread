@@ -76,14 +76,6 @@ namespace filesystem {
             ,tplpath(path::join(path::gettmp(), path(t)))
             {
                 dirpath = path(::mkdtemp(::strdup(tplpath.c_str())));
-                // WTF("Creating TemporaryDirectory with params:",
-                //     FF("\tt = (const char *)%s", t),
-                //     FF("\tc = %s", c ? "true" : "false"),
-                //     FF("\ttpl = %s", tpl),
-                //     FF("\tcleanup = %s", cleanup ? "true" : "false"),
-                //     FF("\tdirpath = %s", dirpath.c_str()),
-                //     FF("\ttplpath = %s", tplpath.c_str())
-                // );
             }
         
         explicit TemporaryDirectory(const std::string &t, bool c = true)
@@ -92,14 +84,6 @@ namespace filesystem {
             ,tplpath(path::join(path::gettmp(), path(t)))
             {
                 dirpath = path(::mkdtemp(::strdup(tplpath.c_str())));
-                // WTF("Creating TemporaryDirectory with params:",
-                //     FF("\tt = (const std::string &)%s", t.c_str()),
-                //     FF("\tc = %s", c ? "true" : "false"),
-                //     FF("\ttpl = %s", tpl),
-                //     FF("\tcleanup = %s", cleanup ? "true" : "false"),
-                //     FF("\tdirpath = %s", dirpath.c_str()),
-                //     FF("\ttplpath = %s", tplpath.c_str())
-                // );
             }
         
         operator std::string() { return dirpath.str(); }

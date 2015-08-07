@@ -21,15 +21,9 @@ namespace filesystem {
         
         inline const char *fm(mode m) { return m == mode::READ ? "r+b" : "w+x"; }
         
-        // filesystem::file ffopen(const char *c, mode m) {
-        //     return filesystem::file(fopen(c, fm(m)));
-        // }
         filesystem::file ffopen(const std::string &s, mode m) {
             return filesystem::file(fopen(s.c_str(), fm(m)));
         }
-        // filesystem::file ffopen(const path &p, mode m) {
-        //     return filesystem::file(fopen(p.c_str(), fm(m)));
-        // }
         
     }
     

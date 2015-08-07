@@ -8,13 +8,13 @@
 #include <libimread/libimread.hpp>
 
 namespace memory {
-
+    
     struct memstream {
         char **cp;
         std::size_t *lenp;
         std::size_t offset;
     };
-
+    
     typedef struct memstream mstream;
 }
 

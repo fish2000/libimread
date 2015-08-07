@@ -67,49 +67,15 @@ namespace {
         U8Image halim2 = im::halide::read(td.dirpath/"PPM_DUG986.ppm");
         im::halide::write(halim2, td.dirpath/"PPM_YO_DOGG222.png");
         
-        // REQUIRE(halim.ndims() == halim2.ndims());
-        // REQUIRE(halim.stride(0) == halim2.stride(0));
-        // REQUIRE(halim.stride(1) == halim2.stride(1));
-        // REQUIRE(halim.stride(2) == halim2.stride(2));
-        // REQUIRE(halim.extent(0) == halim2.extent(0));
-        // REQUIRE(halim.extent(1) == halim2.extent(1));
-        // REQUIRE(halim.extent(2) == halim2.extent(2));
-        
         U8Image halim3 = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         im::halide::write(halim3, td.dirpath/"PPM_OH_DOGGGGG.ppm");
         U8Image halim4 = im::halide::read(td.dirpath/"PPM_OH_DOGGGGG.ppm");
         im::halide::write(halim4, td.dirpath/"PPM_IMG_DOGGGGGGGGG.png");
         
-        // REQUIRE(halim3.ndims() == halim4.ndims());
-        // REQUIRE(halim3.stride(0) == halim4.stride(0));
-        // REQUIRE(halim3.stride(1) == halim4.stride(1));
-        // REQUIRE(halim3.stride(2) == halim4.stride(2));
-        // REQUIRE(halim3.extent(0) == halim4.extent(0));
-        // REQUIRE(halim3.extent(1) == halim4.extent(1));
-        // REQUIRE(halim3.extent(2) == halim4.extent(2));
-        
     }
     
     TEST_CASE("Check the dimensions of a new image", "[image-dims]") {
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
-        
-        // WARN( "1.extent(0) = " << halim.extent(0) );
-        // WARN( "1.extent(1) = " << halim.extent(1) );
-        // WARN( "1.extent(2) = " << halim.extent(2) );
-        
-        // WARN( "1.stride(0) = " << halim.stride(0) );
-        // WARN( "1.stride(1) = " << halim.stride(1) );
-        // WARN( "1.stride(2) = " << halim.stride(2) );
-        
         U8Image halim2 = im::halide::read(D("marci_512_srgb8.png"));
-        
-        // WARN( "2.extent(0) = " << halim2.extent(0) );
-        // WARN( "2.extent(1) = " << halim2.extent(1) );
-        // WARN( "2.extent(2) = " << halim2.extent(2) );
-        
-        // WARN( "2.stride(0) = " << halim2.stride(0) );
-        // WARN( "2.stride(1) = " << halim2.stride(1) );
-        // WARN( "2.stride(2) = " << halim2.stride(2) );
-        
     }
 }

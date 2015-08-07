@@ -14,6 +14,9 @@
 
 namespace im {
     
+    /// XXX: fuck this function. It’s ported originally from CImg.h, which
+    /// if I never open that file again it will be too soon.
+    /// PyString.cpp has this shit covered.
     inline const char *split_filename(const char *const filename,
                                       char *const body = 0) {
         if (!filename) {
@@ -39,6 +42,7 @@ namespace im {
         return p;
     }
     
+    /// XXX: this is currently unused
     class MultiEnableShared : public std::enable_shared_from_this<MultiEnableShared> {
         public:
             virtual ~MultiEnableShared() {}
@@ -57,6 +61,7 @@ namespace im {
             }
     };
     
+    /// XXX: remind me why in fuck did I write this shit originally
     template <typename T, typename pT>
     std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT> &&src) {
         /// Force a dynamic_cast upon a unique_ptr via interim swap
@@ -72,11 +77,13 @@ namespace im {
         return ret;
     }
     
+    /// XXX: This isn't really necessary now is it
     template <typename T>
     void ptr_swap(T*& oA, T*& oB) {
         T* oT = oA; oA = oB; oB = oT;
     }
     
+    /// XXX: I believe this is now a struct member method, where necessary
     inline std::vector<byte> full_data(byte_source &s) {
         std::vector<byte> res;
         byte buffer[4096];
@@ -86,6 +93,10 @@ namespace im {
         return res;
     }
     
+    /// XXX: While these read***() funcs look generic,
+    /// they are primarily only of use in exactly one codec
+    /// (which I think is bmp.cpp but I could be wrong,
+    /// fuck opening another buffer to check dogg I am lazy)
     inline uint8_t read8(byte_source &s) {
         byte out;
         if (s.read(&out, 1) != 1) {
@@ -107,6 +118,8 @@ namespace im {
         return (uint32_t(s1) << 16) | uint32_t(s0);
     }
     
+    /// XXX: I kind of hate this thing, for not being
+    /// a real allocator (which means I am an allocatorist, right?)
     struct stack_based_memory_pool {
         /// An allocator-ish RAII object,
         /// on stack exit it frees its allocations

@@ -69,6 +69,7 @@ namespace ansi {
             operator char*() const { return c_str(); }
     };
     
+    /// XXX: fuck this map, it’s slow and redundant
     struct color {
         static map<std::string, ANSI> init() {
             map<std::string, ANSI> _color_map = {
