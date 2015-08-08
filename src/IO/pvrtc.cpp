@@ -5,7 +5,7 @@
 #include <cstring>
 #include <libimread/IO/pvrtc.hh>
 #include <libimread/errors.hh>
-#include <libimread/ext/pvr.h>
+#include <libimread/ext/pvr.hh>
 
 namespace im {
     

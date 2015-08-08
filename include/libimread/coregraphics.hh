@@ -24,16 +24,36 @@ namespace im {
         template <typename T>
         using image_ptr = std::unique_ptr<ImageType<T>>;
         
+        /*
+        namespace detail {
+            /// XXX: remind me why in fuck did I write this shit originally
+            template <typename T, typename pT>
+            std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT> &&src) {
+                /// Force a dynamic_cast upon a unique_ptr via interim swap
+                /// ... danger, will robinson: DELETERS/ALLOCATORS NOT WELCOME
+                /// ... from http://stackoverflow.com/a/14777419/298171
+                if (!src) { return std::unique_ptr<T>(); }
+                
+                /// Throws a std::bad_cast() if this doesn't work out
+                T *dst = &dynamic_cast<T&>(*src.get());
+                
+                src.release();
+                std::unique_ptr<T> ret(dst);
+                return ret;
+            }
+        }
+        
         template <typename T = byte>
         image_ptr<T> read_unique(const std::string &filename) {
             options_map opts;
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            image_ptr<T> output = dynamic_cast_unique<ImageType<T>>(
+            image_ptr<T> output = detail::dynamic_cast_unique<ImageType<T>>(
                     format->read(input.get(), &factory, opts));
             return output;
         }
+        */
         
         template <typename T = byte>
         ImageType<T> read(const std::string &filename) {

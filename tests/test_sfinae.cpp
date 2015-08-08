@@ -1,10 +1,12 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
+
 #include <libimread/IO/png.hh>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/IO/webp.hh>
 #include <libimread/IO/pvrtc.hh>
+
 using namespace im;
 
 #include "include/catch.hpp"

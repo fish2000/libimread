@@ -10,7 +10,6 @@
 #include <libimread/IO/ppm.hh>
 #include <libimread/ext/fmemopen.hh>
 #include <libimread/errors.hh>
-#include <libimread/tools.hh>
 #include <libimread/pixels.hh>
 
 #define SWAP_ENDIAN16(little_endian, value) \

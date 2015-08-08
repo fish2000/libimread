@@ -85,7 +85,7 @@ set(hdrs
     ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/iod.hh
     ${hdrs_dir}/ext/open_memstream.hh
-    ${hdrs_dir}/ext/pvr.h
+    ${hdrs_dir}/ext/pvr.hh
     ${hdrs_dir}/ext/pystring.hh
     ${hdrs_dir}/ext/WriteGIF.h
     
@@ -108,7 +108,7 @@ set(hdrs
     ${hdrs_dir}/private/vpp_symbols.hh
     
     ${hdrs_dir}/process/jitresize.hh
-    ${hdrs_dir}/process/neuquant.h
+    ${hdrs_dir}/process/neuquant.hh
     ${hdrs_dir}/process/neuquant.inl
     
     ${hdrs_dir}/ansicolor.hh
@@ -128,7 +128,6 @@ set(hdrs
     ${hdrs_dir}/seekable.hh
     ${hdrs_dir}/symbols.hh
     ${IOD_SYMBOLS_HEADER}
-    ${hdrs_dir}/tools.hh
     ${hdrs_dir}/traits.hh
 )
 

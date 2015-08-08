@@ -94,6 +94,36 @@ namespace im {
             PNG_COLOR_TYPE_RGB,  PNG_COLOR_TYPE_RGB_ALPHA
         };
         
+        /// XXX: I kind of hate this thing, for not being
+        /// a real allocator (which means I am an allocatorist, right?)
+        struct stack_based_memory_pool {
+            /// An allocator-ish RAII object,
+            /// on stack exit it frees its allocations
+            stack_based_memory_pool() { }
+            
+            ~stack_based_memory_pool() {
+                for (unsigned i = 0; i != data.size(); ++i) {
+                    operator delete(data[i]);
+                    data[i] = 0;
+                }
+            }
+            
+            void *allocate(const int n) {
+                data.reserve(data.size() + 1);
+                void *d = operator new(n);
+                data.push_back(d);
+                return d;
+            }
+            
+            template <typename T>
+            T allocate_as(const int n) {
+                return static_cast<T>(this->allocate(n));
+            }
+            
+            private:
+                std::vector<void*> data;
+        };
+        
         void swap_bytes_inplace(std::vector<png_bytep> &data, const int ncols, stack_based_memory_pool &mem) {
             for (unsigned int r = 0; r != data.size(); ++r) {
                 png_bytep row = data[r];

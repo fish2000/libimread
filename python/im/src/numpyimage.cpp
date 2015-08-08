@@ -6,7 +6,31 @@
 #include <structmember.h>
 
 #include "numpy.hh"
-#include <libimread/tools.hh>
+
+namespace im {
+    
+    namespace detail {
+        
+        /// XXX: remind me why in fuck did I write this shit originally
+        template <typename T, typename pT>
+        std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT> &&src) {
+            /// Force a dynamic_cast upon a unique_ptr via interim swap
+            /// ... danger, will robinson: DELETERS/ALLOCATORS NOT WELCOME
+            /// ... from http://stackoverflow.com/a/14777419/298171
+            if (!src) { return std::unique_ptr<T>(); }
+        
+            /// Throws a std::bad_cast() if this doesn't work out
+            T *dst = &dynamic_cast<T&>(*src.get());
+        
+            src.release();
+            std::unique_ptr<T> ret(dst);
+            return ret;
+        }
+        
+    }
+    
+}
+
 
 using ImagePtr = std::unique_ptr<im::HybridArray>;
 
@@ -70,7 +94,7 @@ static int NumpyImage_init(NumpyImage *self, PyObject *args, PyObject *kwargs) {
     std::unique_ptr<im::ImageFormat> format(im::for_filename(filename));
     std::unique_ptr<im::FileSource> input(new im::FileSource(filename));
     std::unique_ptr<im::Image> output = format->read(input.get(), &factory, opts);
-    self->image = im::dynamic_cast_unique<im::HybridArray>(output);
+    self->image = im::detail::dynamic_cast_unique<im::HybridArray>(output);
     
     return 0;
 }

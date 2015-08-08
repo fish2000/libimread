@@ -6,14 +6,8 @@
 
 #include <string>
 
-#include <iod/symbol.hh>
-#include <iod/sio.hh>
-#include <iod/callable_traits.hh>
-#include <iod/tuple_utils.hh>
-#include <iod/utils.hh>
-#include <iod/bind_method.hh>
-
 #include <libimread/libimread.hpp>
+#include <libimread/ext/iod.hh>
 #include <libimread/symbols.hpp>
 
 using namespace s;

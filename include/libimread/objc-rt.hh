@@ -42,6 +42,11 @@
 
 namespace objc {
     
+    template <typename T>
+    void ptr_swap(T*& oA, T*& oB) {
+        T* oT = oA; oA = oB; oB = oT;
+    }
+    
     namespace types {
         
         using baseID = __unsafe_unretained ::id;

@@ -2,7 +2,7 @@
 #define __neuquant_inl__
 
 #ifndef __neuquant_h__
-#error "neuquant.inl should only be included by neuquant.h"
+#error "neuquant.inl should only be included by neuquant.hh"
 #endif
 
 // *********************************

@@ -1,7 +1,6 @@
 
 #include <cstdlib>
 #include <string>
-
 #import <Cocoa/Cocoa.h>
 
 #include <libimread/libimread.hpp>

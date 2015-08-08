@@ -39,13 +39,13 @@ namespace im {
     }
     
     std::unique_ptr<ImageFormat> for_filename(const char *cfilename) {
-        return get_format(split_filename(cfilename));
+        return get_format(detail::split_filename(cfilename));
     }
     std::unique_ptr<ImageFormat> for_filename(std::string &filename) {
-        return get_format(split_filename(filename.c_str()));
+        return get_format(detail::split_filename(filename.c_str()));
     }
     std::unique_ptr<ImageFormat> for_filename(const std::string &filename) {
-        return get_format(split_filename(filename.c_str()));
+        return get_format(detail::split_filename(filename.c_str()));
     }
     
     const char *magic_format(byte_source *src) {

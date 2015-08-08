@@ -19,7 +19,6 @@
 #include <libimread/fs.hh>
 #include <libimread/image.hh>
 #include <libimread/formats.hh>
-#include <libimread/tools.hh>
 
 namespace im {
     

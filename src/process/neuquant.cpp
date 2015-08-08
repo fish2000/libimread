@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <libimread/process/neuquant.h>
+#include <libimread/process/neuquant.hh>
 
 /*
 #define FILENAME "t.raw"
