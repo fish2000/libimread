@@ -9,7 +9,7 @@
 #include <string>
 
 #include <libimread/libimread.hpp>
-#include <libimread/tools.hh>
+#include <libimread/seekable.hh>
 #include <libimread/pixels.hh>
 
 namespace im {

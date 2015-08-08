@@ -4,16 +4,13 @@
 #ifndef LIBIMREAD_MEMORY_HH_
 #define LIBIMREAD_MEMORY_HH_
 
-#include <cstring>
 #include <cstdio>
-#include <cstdarg>
 #include <vector>
 #include <memory>
-#include <unistd.h>
 
 #include <libimread/libimread.hpp>
-#include <libimread/seekable.hh>
 #include <libimread/ext/fmemopen.hh>
+#include <libimread/seekable.hh>
 
 namespace im {
     

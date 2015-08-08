@@ -83,6 +83,7 @@ set(hdrs
     ${hdrs_dir}/ext/filesystem/temporary.h
     ${hdrs_dir}/ext/JSON/json11.h
     ${hdrs_dir}/ext/fmemopen.hh
+    ${hdrs_dir}/ext/iod.hh
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.h
     ${hdrs_dir}/ext/pystring.hh
@@ -103,7 +104,6 @@ set(hdrs
     
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
-    ${hdrs_dir}/private/spx_defines.h
     ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/private/vpp_symbols.hh
     

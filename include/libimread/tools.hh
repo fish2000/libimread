@@ -10,12 +10,8 @@
 #include <list>
 
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
 
 namespace im {
-    
-    /// forward-declare byte_source for read*() funcs
-    class byte_source;
     
     /// XXX: fuck this function. It’s ported originally from CImg.h, which
     /// if I never open that file again it will be too soon.
@@ -55,12 +51,14 @@ namespace im {
     class EnableShared : virtual public MultiEnableShared {
         public:
             std::shared_ptr<T> shared_from_this() {
-                return std::dynamic_pointer_cast<T>(MultiEnableShared::shared_from_this());
+                return std::dynamic_pointer_cast<T>(
+                    MultiEnableShared::shared_from_this());
             }
             
             template <typename Down>
             std::shared_ptr<Down> downcast_from_this() {
-                return std::dynamic_pointer_cast<Down>(MultiEnableShared::shared_from_this());
+                return std::dynamic_pointer_cast<Down>(
+                    MultiEnableShared::shared_from_this());
             }
     };
     
@@ -93,31 +91,6 @@ namespace im {
             res.insert(res.end(), buffer, buffer + n);
         }
         return res;
-    }
-    
-    /// XXX: While these read***() funcs look generic,
-    /// they are primarily only of use in exactly one codec
-    /// (which I think is bmp.cpp but I could be wrong,
-    /// fuck opening another buffer to check dogg I am lazy)
-    inline uint8_t read8(byte_source &s) {
-        byte out;
-        if (s.read(&out, 1) != 1) {
-            imread_raise(CannotReadError,
-                "im::read8(): File ended prematurely");
-        }
-        return out;
-    }
-    
-    inline uint16_t read16_le(byte_source &s) {
-        uint8_t b0 = read8(s);
-        uint8_t b1 = read8(s);
-        return (uint16_t(b1) << 8) | uint16_t(b0);
-    }
-    
-    inline uint32_t read32_le(byte_source &s) {
-        uint16_t s0 = read16_le(s);
-        uint16_t s1 = read16_le(s);
-        return (uint32_t(s1) << 16) | uint32_t(s0);
     }
     
     /// XXX: I kind of hate this thing, for not being

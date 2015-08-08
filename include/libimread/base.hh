@@ -4,7 +4,6 @@
 #ifndef LIBIMREAD_BASE_HH_
 #define LIBIMREAD_BASE_HH_
 
-#include <inttypes.h>
 #include <cassert>
 #include <memory>
 #include <vector>

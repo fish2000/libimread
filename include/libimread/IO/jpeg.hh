@@ -6,7 +6,6 @@
 
 #include <cstdio>
 #include <csetjmp>
-//#include <sstream>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>

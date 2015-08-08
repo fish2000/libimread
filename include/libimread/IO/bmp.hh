@@ -4,11 +4,8 @@
 #ifndef LIBIMREAD_IO_BMP_HH_
 #define LIBIMREAD_IO_BMP_HH_
 
-#include <sstream>
-
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
-#include <libimread/tools.hh>
 
 namespace im {
 
