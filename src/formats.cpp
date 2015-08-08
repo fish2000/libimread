@@ -2,6 +2,9 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/filesystem/path.h>
+#include <libimread/errors.hh>
+
 #include <libimread/formats.hh>
 #include <libimread/IO/apple.hh>
 #include <libimread/IO/bmp.hh>
@@ -14,7 +17,6 @@
 #include <libimread/IO/tiff.hh>
 #include <libimread/IO/webp.hh>
 //#include <libimread/IO/xcassets.hh>
-#include <libimread/tools.hh>
 
 namespace im {
     
@@ -36,16 +38,6 @@ namespace im {
         
         imread_raise(FormatNotFound, "Format Error:",
             FF("\tFile format not found for suffix %s", format));
-    }
-    
-    std::unique_ptr<ImageFormat> for_filename(const char *cfilename) {
-        return get_format(detail::split_filename(cfilename));
-    }
-    std::unique_ptr<ImageFormat> for_filename(std::string &filename) {
-        return get_format(detail::split_filename(filename.c_str()));
-    }
-    std::unique_ptr<ImageFormat> for_filename(const std::string &filename) {
-        return get_format(detail::split_filename(filename.c_str()));
     }
     
     const char *magic_format(byte_source *src) {

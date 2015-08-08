@@ -4,7 +4,6 @@
 #include <iostream>
 #include <libimread/IO/png.hh>
 #include <libimread/pixels.hh>
-#include <libimread/tools.hh>
 
 #ifdef __APPLE__
     #include <libpng16/png.h>   /* this is the Homebrew path */

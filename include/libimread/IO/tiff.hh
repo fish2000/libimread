@@ -12,7 +12,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
-#include <libimread/tools.hh>
 #include <libimread/pixels.hh>
 
 namespace im {
