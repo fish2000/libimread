@@ -14,6 +14,7 @@
 #include <libimread/errors.hh>
 #include <algorithm>
 #include <limits>
+#include <regex>
 
 using im::JSONInvalidSchema;
 
@@ -56,17 +57,20 @@ Json::Schema::Schema(Node* node) {
         throw use_error("not an object");
     Object* obj = (Object*)node;
     Node* nptr = obj->get("$schema");
+    
     if (nptr != nullptr) {
         if (nptr->type() != Type::STRING)
             throw use_error("$schema: not a string");
         uri = ((String*)nptr)->value;
     }
-    // TODO $ref
+    
+    /// type (TODO $ref)
     nptr = obj->get("type");
     if (nptr == nullptr || nptr->type() != Type::STRING)
         throw use_error("type: not a string");
     s_type = ((String*)nptr)->value;
-    //
+    
+    /// enum
     nptr = obj->get("enum");
     if (nptr != nullptr) {
         if (nptr->type() != Type::ARRAY)
@@ -74,7 +78,8 @@ Json::Schema::Schema(Node* node) {
         s_enum = (Array*)nptr;
         s_enum->refcnt++;
     }
-    //
+    
+    /// allOf / anyOf / oneOf / not
     nptr = obj->get("allOf");
     if (nptr != nullptr) {
         if (nptr->type() != Type::ARRAY)
@@ -111,6 +116,8 @@ Json::Schema::Schema(Node* node) {
             throw use_error("not: not an object");
         s_not = new Schema(nptr);
     }
+    
+    /// definitions, default
     nptr = obj->get("definitions");
     if (nptr != nullptr) {
         if (nptr->type() != Type::OBJECT)
@@ -127,8 +134,9 @@ Json::Schema::Schema(Node* node) {
     if (nptr != nullptr) {
         (deflt = nptr)->refcnt++;
     }
-    //
+    
     if (s_type == "number" || s_type == "integer") {
+        /// check number type properties
         nptr = obj->get("maximum");
         if (nptr != nullptr) {
             if (nptr->type() != Type::NUMBER)
@@ -166,6 +174,7 @@ Json::Schema::Schema(Node* node) {
                 throw use_error("multipleOf: not positive");
         }
     } else if (s_type == "string") {
+        /// check string type properties
         nptr = obj->get("maxLength");
         if (nptr != nullptr) {
             if (nptr->type() != Type::NUMBER)
@@ -195,6 +204,7 @@ Json::Schema::Schema(Node* node) {
             }
         }
     } else if (s_type == "array") {
+        /// check array (list) type properties
         nptr = obj->get("items");
         if (nptr != nullptr) {
             if (nptr->type() == Type::OBJECT) {
@@ -241,6 +251,7 @@ Json::Schema::Schema(Node* node) {
             unique_items = (Bool*)nptr == &Bool::T;
         }
     } else if (s_type == "object") {
+        /// check object (dictionary) type properties
         nptr = obj->get("properties");
         if (nptr != nullptr) {
             if (nptr->type() != Type::OBJECT)
@@ -304,7 +315,7 @@ Json::Schema::Schema(Node* node) {
                     throw use_error("required: not an array of strings");
             }
         }
-        // TODO dependencies
+        /// TODO: dependencies
     } else if (s_type != "boolean" && s_type != "null")
         throw use_error("type: illegal value");
 }
@@ -340,7 +351,7 @@ Json::Schema::~Schema() {
         defs->unref();
     if (deflt != nullptr)
         deflt->unref();
-    // TODO the rest
+    /// TODO: the rest
 }
 
 void Json::Node::validate(const Schema& schema, std::vector<const Node*>& path) const {
@@ -365,13 +376,13 @@ void Json::Node::validate(const Schema& schema, std::vector<const Node*>& path) 
                 ok = true;
                 break;
             } catch (JSONInvalidSchema &ex) {
-                path.pop_back();  // TODO ???
+                path.pop_back();  /// TODO: ???!
             }
         }
         if (!ok)
             throw JSONInvalidSchema("all anyOf validations failed");
     }
-    // TODO oneof, not, definitions
+    /// TODO: oneof, not, definitions
 }
 
 void Json::Array::validate(const Schema& schema, std::vector<const Node*>& path) const {
@@ -382,7 +393,7 @@ void Json::Array::validate(const Schema& schema, std::vector<const Node*>& path)
         throw JSONInvalidSchema("array length below minItems");
     if (list.size() > schema.max_len)
         throw JSONInvalidSchema("array length above maxItems");
-    // TODO uniqueItems
+    /// TODO: uniqueItems
     if (schema.add_items == nullptr) {
         if (!schema.add_items_bool) {
             if (schema.item == nullptr && list.size() > schema.items.size())
@@ -432,13 +443,13 @@ void Json::Object::validate(const Schema& schema, std::vector<const Node*>& path
                 continue;  // allowed not to validate
             if (schema.add_props != nullptr)
                 kv.second->validate(*schema.add_props, path);
-            // TODO find in patpr
+            /// TODO: find with pattern ptr
         } else {
             Schema* sub = (Schema*)schema.props->map[k];
             kv.second->validate(*sub, path);
         }
     }
-    // TODO dependencies
+    /// TODO: dependencies
     path.pop_back();
 }
 
@@ -470,20 +481,12 @@ void Json::String::validate(const Schema& schema, std::vector<const Node*>& path
         throw JSONInvalidSchema("string length below minLength");
     if (detail::u8size(value) > schema.max_len)
         throw JSONInvalidSchema("string length above maxLength");
-    /*
-    const String* pattern = schema->getstr("pattern", false);
-    if (pattern != nullptr) {
-        try {
-            std::regex rex(pattern->value, std::regex_constants::ECMAScript);
-            if (!std::regex_search(value, rex))
-                throw JSONInvalidSchema("pattern mismatch");
-        } catch (std::regex_error& ex) {
-            cout << ex.what() << ' ' << ex.code() << '\n';
-            cout << "pattern :'" << pattern->value << "'\n";
-            throw use_error(ex.what());
-        }
-    } */
-    // TODO pattern
+    
+    if (schema.pattern != nullptr) {
+        if (!std::regex_match(im::stringify(value), *schema.pattern))
+            throw JSONInvalidSchema("pattern mismatch");
+    }
+    
     path.pop_back();
 }
 

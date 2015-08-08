@@ -41,13 +41,9 @@ namespace filesystem {
                 std::strerror(errno));
         }
         
-        // WTF("About to enter readdir() loop...");
         struct dirent *entry;
         while ((entry = ::readdir(cleand.get())) != NULL) {
-            // WTF("In readdir() loop with entry:", entry->d_name);
-            // if (std::strlen(entry->d_name) < 1)                         { continue; }
             std::string dname(::strdup(entry->d_name));
-            // if (std::strlen(dname.c_str()) < 1)                         { continue; }
             if (std::strncmp(dname.c_str(), ".", 1) == 0)               { continue; }
             if (std::strncmp(dname.c_str(), "..", 2) != 0)              { continue; }
             path epp = dirpath.join(path(dname));

@@ -48,6 +48,13 @@ namespace tc {
     }
     
     namespace idx {
+        
+        /// namespaced compile-time type mapping,
+        /// in support of enum-based cast ops
+        /// e.g. node.json_cast<Type::SOMETHING>();
+        /// ... the whole idea is basically a cheap knockoff
+        /// of the similar scheme in Halide/src/Type.h
+        
         template <Type t>
         struct helper;
         
@@ -78,76 +85,15 @@ namespace tc {
         
         template <Type t>
         using helper_t = typename helper<t>::value_type;
-        using c_str_t = decltype(std::declval<std::string>().c_str());
     }
-    
-    template <typename T>
-    struct is_json_type {
-        typedef std::decay_t<T> decayed_t;
-        struct helper_t : std::is_same<decayed_t, Base::value_type> {};
-        typedef typename helper_t::value_type value_type;
-        static constexpr value_type value = helper_t::value;
-        constexpr operator value_type() const noexcept { return value; }
-        constexpr value_type operator()() const noexcept { return value; }
-    };
-    
-    template <typename S>
-    struct is_c_str {
-        typedef std::remove_pointer_t<std::decay_t<S>> underlying_t;
-        typedef std::remove_pointer_t<std::decay_t<idx::c_str_t>> underlying_return_t;
-        struct helper_t : std::is_same<underlying_t, underlying_return_t> {};
-        typedef typename helper_t::value_type value_type;
-        static constexpr value_type value = helper_t::value;
-        constexpr operator value_type() const noexcept { return value; }
-        constexpr value_type operator()() const noexcept { return value; }
-    };
-    
-    template <typename F>
-    struct caster {
-        
-        private:
-            F&& func;
-            
-        public:
-            explicit caster(F&& f)
-                :func(std::forward<F>(f))
-                {}
-            
-            /// Most everything (but NOT C-style strings)
-            template <typename T, typename dT = std::decay_t<T>>
-            typename std::enable_if_t<!is_c_str<T>::value, dT>
-            operator()(const std::string &key) const {
-                return static_cast<dT>(std::forward<F>(func)(key));
-            }
-            
-            /// C strings (const char *, char[], etcetc)
-            template <typename T>
-            typename std::enable_if_t<is_c_str<T>::value, idx::c_str_t>
-            operator()(const std::string &key) const {
-                return static_cast<std::string>(std::forward<F>(func)(key)).c_str();
-            }
-            
-            /// JSON Type enum values (see above)
-            template <Type t = Type::STRING>
-            auto operator[](const std::string &key) const ->
-            decltype(idx::helper_t<t>()) {
-                return static_cast<idx::helper_t<t>>(std::forward<F>(func)(key));
-            }
-        
-        private:
-            caster(const caster&);
-            caster(caster&&);
-            caster &operator=(const caster&);
-            caster &operator=(caster&&);
-            
-    };
     
 }
 
 
 class Json {
     private:
-        struct Schema; // forward dcl
+        /// schema is forward-declared:
+        struct Schema;
         struct Node {
             unsigned refcnt;
             Node(unsigned init = 0);
@@ -322,10 +268,6 @@ class Json {
                 explicit operator long long()   { return static_cast<long long>(target()); }
                 explicit operator double()      { return static_cast<double>(target()); }
                 explicit operator long double() { return static_cast<long double>(target()); }
-                // explicit operator uint8_t()     { return target(); }
-                // explicit operator uint16_t()    { return target(); }
-                // explicit operator int8_t()      { return target(); }
-                // explicit operator int16_t()     { return target(); }
                 Property operator[](const std::string &k) { return target()[k]; }
                 Property operator[](const char *k) { return (*this)[std::string(k)]; }
                 Property operator[](int i) { return target()[i]; }
@@ -343,29 +285,32 @@ class Json {
             
             friend Json;
         };
+        
         Array *mkarray();
         Object *mkobject();
-        static std::set<std::string> keyset; // all propery names
-        static int level;                    // for pretty printing
+        
+        static std::set<std::string> keyset; /// all propery names
+        static int level;                    /// for pretty printing
         
         Json(Node *node) {
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
         }
+        
         Node *root;
         
     public:
-        // constructors
+        /// constructors
         Json() { (root = &Node::null)->refcnt++; }
         Json(const Json &that);
         Json(Json &&that);
         Json(std::istream &, bool full = true); // parse
         virtual ~Json();
         
-        // initializers
+        /// assignment
         Json &operator=(const Json &);
         Json &operator=(Json &&);
         
-        // more constructors
+        /// more constructors
         Json(int x)                 { (root = new Number(x))->refcnt++; }
         Json(float x)               { (root = new Number(x))->refcnt++; }
         Json(const std::string &s)  { (root = new String(s))->refcnt++; }
@@ -383,11 +328,12 @@ class Json {
         explicit Json(int8_t x)     { (root = new Number(x))->refcnt++; }
         explicit Json(int16_t x)    { (root = new Number(x))->refcnt++; }
         
-        // casts
+        /// dynamic type info
         Type type() const                   { return root->type(); }
         const char* typestr() const         { return root->typestr(); }
         std::string typestring() const      { return std::string(root->typestr()); }
         
+        /// conversion operators
         operator int() const;
         operator float() const;
         operator std::string() const;
@@ -401,7 +347,7 @@ class Json {
         explicit operator double() const;
         explicit operator long double() const;
         
-        // object
+        /// dictionary operations (or "object properties" in JS-Ville)
         Json &set(std::string key, const Json &val);
         Json get(const std::string &key) const;
         bool has(const std::string &key) const;
@@ -410,54 +356,65 @@ class Json {
         bool has(const char *key) const             { return has(std::string(key)); }
         std::vector<std::string> keys();
         
+        /// cast operations
         template <typename T> inline
         decltype(auto) cast(const std::string &key) const {
-            return static_cast<std::remove_reference_t<T>>(get(key));
+            using rT = std::remove_reference_t<T>;
+            return static_cast<rT>(get(key));
         }
         
         template <typename T> inline
-        decltype(auto) cast(const std::string &key, T default_value) const {
-            if (!has(key)) { return static_cast<std::remove_reference_t<T>>(default_value); }
+        decltype(auto) cast(const std::string &key,
+                            T default_value) const {
+            using rT = std::remove_reference_t<T>;
+            if (!has(key)) { return static_cast<rT>(default_value); }
             return cast<T>(key);
         }
         
         template <Type t = Type::STRING> inline
         decltype(auto) json_cast(const std::string &key) const {
-            return static_cast<tc::idx::helper_t<t>>(get(key));
+            using rT = tc::idx::helper_t<t>;
+            return static_cast<rT>(get(key));
         }
         
         template <Type t = Type::STRING> inline
-        decltype(auto) json_cast(const std::string &key, tc::idx::helper_t<t> default_value) const {
+        decltype(auto) json_cast(const std::string &key,
+                                 tc::idx::helper_t<t> default_value) const {
             if (!has(key)) { return default_value; }
             return json_cast<t>(key);
         }
         
-        // array
+        /// array operations
         Json &operator<<(const Json &);
         void insert(int index, const Json &);
         void erase(int index);
         Json &replace(int index, const Json &);
-        // subscript
+        
+        /// subscripting
         std::size_t size() const;
         Json::Property operator[](const std::string &);
         Json::Property operator[](const char *k) { return (*this)[std::string(k)]; }
         Json::Property operator[](int);
-        // stringify
+        
+        /// stringification
         std::string stringify() { return format(); }
         std::string format();
         friend std::ostream &operator<<(std::ostream &, const Json &);
         friend std::istream &operator>>(std::istream &, Json &);
-        // compare
+        
+        /// boolean comparison
         bool operator==(const Json &) const;
         bool operator!=(const Json &that) const { return !(*this == that); }
     
-        // schema
+        /// schema hooks
         bool to_schema(std::string *reason);
         bool valid(Json &schema, std::string *reason = nullptr);
         
+        /// input parsing
         static Json null, undefined;
         static Json parse(const std::string &);
         static Json parse(const char *json) { return parse(std::string(json)); }
+        
         static Json array() { return new Array(); }   // returns empty array
         static Json object() { return new Object(); } // returns empty object
         static int indent;                            // for pretty printing

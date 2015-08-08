@@ -58,12 +58,8 @@ namespace filesystem {
         filesystem::directory ddopen(const char *c);
         filesystem::directory ddopen(const std::string &s);
         filesystem::directory ddopen(const path &p);
-        // filesystem::file ffopen(const char *c, mode m = mode::READ);
+        
         filesystem::file ffopen(const std::string &s, mode m = mode::READ);
-        // filesystem::file ffopen(const path &p, mode m = mode::READ);
-    
-        // auto source = std::bind(ffopen, _1, mode::READ);
-        // auto sink   = std::bind(ffopen, _1, mode::WRITE);
         
         inline const char *tmpdir() {
             /// cribbed/tweaked from boost
@@ -113,7 +109,7 @@ namespace filesystem {
             path(const char *st)        { set(st); }
             path(const std::string &st) { set(st); }
             
-            inline std::size_t size() const { return m_path.size(); }
+            inline std::size_t size() const { return static_cast<std::size_t>(m_path.size()); }
             inline bool empty() const       { return m_path.empty(); }
             inline bool is_absolute() const { return m_absolute; }
             
@@ -177,7 +173,7 @@ namespace filesystem {
             std::string extension() const {
                 if (empty()) { return ""; }
                 const std::string &last = m_path[m_path.size()-1];
-                std::size_t pos = last.find_last_of(".");
+                std::string::size_type pos = last.find_last_of(".");
                 if (pos == std::string::npos) { return ""; }
                 return last.substr(pos+1);
             }
@@ -194,9 +190,10 @@ namespace filesystem {
                 if (m_path.empty()) {
                     if (!m_absolute) { result.m_path.push_back(".."); }
                 } else {
-                    std::size_t until = m_path.size() - 1;
-                    for (std::size_t i = 0; i < until; ++i) {
-                        result.m_path.push_back(m_path[i]);
+                    std::string::size_type idx = 0,
+                                           until = m_path.size() - 1;
+                    for (; idx < until; ++idx) {
+                        result.m_path.push_back(m_path[idx]);
                     }
                 }
                 return result;
@@ -213,9 +210,11 @@ namespace filesystem {
                 }
                 
                 path result(*this);
+                std::string::size_type idx = 0,
+                                       max = other.m_path.size();
                 
-                for (std::size_t i = 0; i < other.m_path.size(); ++i) {
-                    result.m_path.push_back(other.m_path[i]);
+                for (; idx < max; ++idx) {
+                    result.m_path.push_back(other.m_path[idx]);
                 }
                 return result;
             }
@@ -233,8 +232,9 @@ namespace filesystem {
                 std::ostringstream oss;
                 char sep = (type == posix_path) ? '/' : '\\';
                 if (type == posix_path && m_absolute) { oss << sep; }
-                int siz = m_path.size();
-                for (int idx = 0; idx < siz; ++idx) {
+                std::string::size_type idx = 0,
+                                       siz = m_path.size();
+                for (; idx < siz; ++idx) {
                     oss << m_path[idx];
                     if (idx + 1 < siz) { oss << sep; }
                 }
