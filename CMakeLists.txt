@@ -4,10 +4,24 @@
 # The minimum CMake version required to build this project
 cmake_minimum_required(VERSION 3.0)
 
-# SET(BREWED_CLANG_PATH /usr/local/opt/llvm)
-
 # Set a new CMake project
 project(libimread)
+
+option(IM_USE_GCC           "Compile using GCC"                             OFF)
+option(IM_RESYMBOLIZE       "Regenerate include/libimread/symbols.hpp"      OFF)
+
+if(IM_USE_GCC)
+    # hardcode homebrew path for now
+    set(CMAKE_C_COMPILER    "/usr/local/opt/gcc/bin/gcc-5")
+    set(CMAKE_CXX_COMPILER  "/usr/local/opt/gcc/bin/g++-5")
+endif()
+
+if(IM_RESYMBOLIZE)
+    execute_process(
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/"
+        COMMAND "rm symbols.hpp"
+        COMMENT "Deleting generated IOD symbol header file")
+endif()
 
 # Go through some stuff
 set(libimread_VERSION_MAJOR "0")

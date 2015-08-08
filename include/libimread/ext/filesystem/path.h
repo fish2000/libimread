@@ -48,6 +48,7 @@ namespace filesystem {
             template <typename U> filecloser(const filecloser<U>&) noexcept {};
             void operator()(F *filehandle) { ::fclose(filehandle); }
         };
+        
     }
     
     using directory = std::unique_ptr<typename std::decay<DIR>::type, detail::dircloser<DIR>>;

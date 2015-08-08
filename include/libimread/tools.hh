@@ -10,9 +10,12 @@
 #include <list>
 
 #include <libimread/libimread.hpp>
-#include <libimread/seekable.hh>
+#include <libimread/errors.hh>
 
 namespace im {
+    
+    /// forward-declare byte_source for read*() funcs
+    class byte_source;
     
     /// XXX: fuck this function. It’s ported originally from CImg.h, which
     /// if I never open that file again it will be too soon.
@@ -77,7 +80,6 @@ namespace im {
         return ret;
     }
     
-    /// XXX: This isn't really necessary now is it
     template <typename T>
     void ptr_swap(T*& oA, T*& oB) {
         T* oT = oA; oA = oB; oB = oT;

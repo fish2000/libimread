@@ -73,17 +73,16 @@ namespace objc {
     using object_sender_t = std::add_pointer_t<::id(types::tID, types::tSEL, Args...)>;
     
     struct id {
-    
+        
         __unsafe_unretained ::id iid;
         
         explicit id(types::rID ii)
             :iid(std::forward<types::tID>(ii))
             {}
         
-        operator                        ::id() const { return iid; }
-        // operator __weak                 ::id() const { return iid; }
-        // operator __strong               ::id() const { return iid; }
-        // operator __unsafe_unretained    ::id() const { return iid; }
+        operator ::id()     const { return iid; }
+        ::id operator*()    const { return iid; }
+        ::id operator->()   const { return iid; }
         
         inline const char * __cls_name() const      { return ::object_getClassName(iid); }
         static const char * __cls_name(::id ii)     { return ::object_getClassName(ii); }
@@ -367,9 +366,9 @@ namespace im {
         stringify(S *s) {
             const objc::id self(s);
             if (is_stringishly_named(self.classname())) {
-                return [(objc::types::tID)self STLString];
+                return [*self STLString];
             }
-            return [[(objc::types::tID)self description] STLString];
+            return [[*self description] STLString];
         }
     
     
