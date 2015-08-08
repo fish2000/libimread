@@ -2,7 +2,6 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
-#include <libimread/ext/filesystem/path.h>
 #include <libimread/errors.hh>
 
 #include <libimread/formats.hh>

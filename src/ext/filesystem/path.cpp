@@ -27,11 +27,11 @@ namespace filesystem {
         
     }
     
-    bool path::match(const std::regex &pattern, bool case_sensitive) {
+    bool path::match(const std::regex &pattern, bool) {
         return std::regex_match(str(), pattern);
     }
     
-    bool path::search(const std::regex &pattern, bool case_sensitive) {
+    bool path::search(const std::regex &pattern, bool) {
         return std::regex_search(str(), pattern);
     }
     

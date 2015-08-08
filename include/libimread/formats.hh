@@ -9,6 +9,7 @@
 #include <cstring>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/filesystem/path.h>
 #include <libimread/imageformat.hh>
 
 namespace im {

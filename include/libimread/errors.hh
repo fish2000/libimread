@@ -21,10 +21,6 @@
 
 namespace im {
     
-    enum class Output {
-        DEFAULT, WTF, OMG, SRSLY
-    };
-    
     template <bool B, typename T = void>
     using disable_if = std::enable_if<!B, T>;
     
@@ -43,19 +39,23 @@ namespace im {
     }
     
     template <typename S> inline
-    typename std::enable_if_t<std::is_arithmetic<S>::value, std::string>
+    typename std::enable_if_t<std::is_arithmetic<S>::value,
+        const std::string>
         stringify(S s) { return std::to_string(s); }
     
     template <typename S> inline
-    typename std::enable_if_t<std::is_constructible<std::string, S>::value, const std::string>
+    typename std::enable_if_t<std::is_constructible<std::string, S>::value,
+        const std::string>
         stringify(S&& s) { return std::string(std::forward<S>(s)); }
     
     template <typename S> inline
-    typename std::enable_if_t<std::is_convertible<S, std::string>::value, const std::string>
+    typename std::enable_if_t<std::is_convertible<S, std::string>::value,
+        const std::string>
         stringify(S const& s) { std::string out = s; return out; }
     
     template <typename S, typename ...Args> inline
-    typename std::enable_if_t<std::is_constructible<std::string, S>::value && (sizeof...(Args) != 0), const std::string>
+    typename std::enable_if_t<std::is_constructible<std::string, S>::value && (sizeof...(Args) != 0),
+        const std::string>
         stringify(S const& s, Args ...args) {
             /// adapted from http://stackoverflow.com/a/26197300/298171
             char b; const char *fmt(s);
@@ -66,16 +66,18 @@ namespace im {
         }
     
     struct stringifier {
+        constexpr stringifier() noexcept = default;
+        stringifier(const stringifier&) noexcept {};
         template <typename S, typename ...Args> inline
         const std::string operator()(S&& s, Args&& ...args) const {
-            return im::stringify(
-                std::forward<S>(s),
-                std::forward<Args>(args)...);
+            return im::stringify(std::forward<S>(s),
+                                 std::forward<Args>(args)...);
         }
     };
     
     template <typename S> inline
-    typename std::enable_if_t<std::tuple_size<S>::value != 0, const std::string>
+    typename std::enable_if_t<std::tuple_size<S>::value != 0,
+        const std::string>
         stringify(S const& s) { return im::apply(im::stringifier(), s); }
     
     template <typename ...Args> inline
@@ -118,7 +120,7 @@ namespace im {
     void norly(const ansi::ANSI color, Args&& ...args) {
         std::cerr  << color 
                    << im::stringmerge(std::forward<Args>(args)...)
-                   << ansi::reset;
+                   << ansi::reset << std::endl;
     }
     
     /// string length at compile time -- http://stackoverflow.com/a/26082447/298171

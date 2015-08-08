@@ -88,8 +88,7 @@ namespace filesystem {
         
         public:
             enum path_type {
-                windows_path = 0,
-                posix_path = 1,
+                windows_path = 0, posix_path = 1,
                 native_path = posix_path
             };
             
@@ -131,7 +130,7 @@ namespace filesystem {
             }
             
             template <typename P> inline
-            static path absolute(P p) { return path(p).make_absolute(); }
+            static path absolute(P&& p) { return path(std::forward<P>(p)).make_absolute(); }
             
             bool exists() const {
                 struct stat sb;
@@ -144,17 +143,19 @@ namespace filesystem {
                 return S_ISDIR(sb.st_mode);
             }
             
-            bool match(const std::regex &pattern,               bool case_sensitive=false);
-            bool search(const std::regex &pattern,              bool case_sensitive=false);
+            bool match(const std::regex &pattern,           bool case_sensitive=false);
+            bool search(const std::regex &pattern,          bool case_sensitive=false);
             
             template <typename P> inline
-            static bool match(P p, const std::regex &pattern,   bool case_sensitive=false) {
-                return path(p).match(pattern);
+            static bool match(P&& p, std::regex&& pattern,  bool case_sensitive=false) {
+                return path(std::forward<P>(p)).match(
+                    std::forward<std::regex>(pattern), case_sensitive);
             }
             
             template <typename P> inline
-            static bool search(P p, const std::regex &pattern,  bool case_sensitive=false) {
-                return path(p).search(pattern);
+            static bool search(P&& p, std::regex&& pattern, bool case_sensitive=false) {
+                return path(std::forward<P>(p)).search(
+                    std::forward<std::regex>(pattern), case_sensitive);
             }
             
             std::vector<path> list(                                                         bool full_paths=false);
@@ -163,7 +164,9 @@ namespace filesystem {
             std::vector<path> list(const std::regex &pattern,   bool case_sensitive=false,  bool full_paths=false);
             
             template <typename P, typename G> inline
-            static std::vector<path> list(P p, G g, bool full_paths=false) { return path(p).list(g, full_paths); }
+            static std::vector<path> list(P&& p, G&& g, bool full_paths=false) {
+                return path(std::forward<P>(p)).list(std::forward<G>(g), full_paths);
+            }
             
             bool is_file() const {
                 struct stat sb;
@@ -180,7 +183,9 @@ namespace filesystem {
             }
             
             template <typename P> inline
-            static std::string extension(P p) { return path(p).extension(); }
+            static std::string extension(P&& p) {
+                return path(std::forward<P>(p)).extension();
+            }
             
             path parent_path() const {
                 path result;
@@ -220,7 +225,9 @@ namespace filesystem {
             path operator/(const std::string &other) const { return join(path(other)); }
             
             template <typename P, typename Q> inline
-            static path join(const P one, const Q theother) { return path(one)/path(theother); }
+            static path join(P&& one, Q&& theother) {
+                return path(std::forward<P>(one)) / path(std::forward<Q>(theother));
+            }
             
             std::string str(path_type type = native_path) const {
                 std::ostringstream oss;
