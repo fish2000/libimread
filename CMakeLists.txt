@@ -60,7 +60,6 @@ IOD_SYMBOLIZE(
     ${IOD_SYMBOLS_HEADER})
 
 SET(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
-SET(LEXICAL_CAST_DIR "${DEPS_DIR}/lexical_cast")
 SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
@@ -93,7 +92,6 @@ find_package(Halide REQUIRED)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
-include_directories("${LEXICAL_CAST_DIR}/include")
 include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${DOCOPT_DIR}")
