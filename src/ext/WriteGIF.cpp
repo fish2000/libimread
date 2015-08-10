@@ -37,6 +37,28 @@ using im::byte;
 
 namespace {
     
+    static constexpr int CommentBlockSize = 34;
+    static constexpr char CommentText[CommentBlockSize] = "(c) Objects In Space And Time LLC";
+    
+    static constexpr int ExtensionIntroducer = 0x21;
+    static constexpr int ApplicationExtensionLabel = 0xff;
+    static constexpr int GraphicControlLabel = 0xf9;
+    static constexpr int CommentLabel = 0xfe;
+    static constexpr int Trailer = 0x3b;
+    static constexpr int Separator = 0x2c;
+    
+    static constexpr char GifFileHeader[7] = "GIF89a";
+    static constexpr char GifFileIdentifier[12] = "NETSCAPE2.0";
+    
+    static constexpr char GlobalColorTableBit = 0x80; /// bit 7
+    static constexpr char ColorResolutionMask = 0x70; /// bits 6,5,4
+    static constexpr char PaletteIsSortedBit = 0x8; /// bit 3
+    static constexpr char GlobalColorTableSizeMask = 0x7; ///bits 2,1,0
+    
+    static constexpr char BitsPerColor = 8;
+    static constexpr int AbsoluteColorCount = 256;
+    
+    
     void swap(unsigned char *a, unsigned char *b) {
         for (int i = 0; i < 3; i++) {
             unsigned char x = a[i];
@@ -64,11 +86,11 @@ namespace {
         if (leftCount > 1) { sortColorsByAxis(array, leftCount, axis); }
         if (rightCount > 1) { sortColorsByAxis(array+leftCount*3, rightCount, axis); }
     }
-
+    
     static int nearestIndexInPalette(unsigned char *palette,
                                      int paletteSize, unsigned char *rgb) {
-        int bestIndex = 0, bestDist = 0;
-        for (int i = 0; i < paletteSize; i++) {
+        int bestIndex = 0, bestDist = 0, i = 0;
+        for (; i < paletteSize; i++) {
             unsigned char *p = palette + i * 3;
             int dr = p[0] - rgb[0], dg = p[1] - rgb[1], db = p[2] - rgb[2];
             int d = dr * dr + dg * dg + db * db;
@@ -80,7 +102,7 @@ namespace {
         }
         return bestIndex;
     }
-
+    
     static void indexizeImageFromPaletteFuzzy(
         int Width, int Height, unsigned char *rgbImage, unsigned char *indexImage, 
         unsigned char *palette, int paletteSize) {
@@ -89,12 +111,13 @@ namespace {
             indexImage[i] = nearestIndexInPalette(palette, paletteSize, rgb);
         }
     }
-
+    
     static void writeTransparentPixelsWhereNotDifferent(
         unsigned char *prevImage, unsigned char *thisImage, unsigned char *outImage,
         int ImageWidth, int ImageHeight, int TranspValue) {
-        int count = 0;
-        for (int i = 0; i < ImageWidth * ImageHeight; i++) {
+        int count = 0,
+            i = 0;
+        for (; i < ImageWidth * ImageHeight; i++) {
             if (thisImage[i] == prevImage[i]) {
                 outImage[i] = TranspValue;
                 ++count;
@@ -130,7 +153,7 @@ namespace {
         int byteCount;
         int curBitMask;
         int totalBytesWritten;
-    
+        
         BlockWriter(FILE *f)
             :f(f)
             ,curBits(0), byteCount(0)
@@ -217,7 +240,7 @@ namespace {
             }
             length = 256 + 2; /// reserve "clear code" and "end of information"
         }
-    
+        
         void insertAfter(TableEntry *entry, unsigned char code) {
             if (entry->after[code]) {
                 WTF("WTF?");
@@ -324,11 +347,11 @@ namespace gif {
     void calculatePaletteByMedianCut(GIF *gif) {
         MAYBE("Caculating palette by median cut");
         unsigned char *uniqueColorArray = NULL;
-        int uniqueColorCount = 0, idx = 0;
-        
-        static char colorBitSet[256*256*256/8];
-        {
+        int uniqueColorCount = 0,
             idx = 0;
+        static char colorBitSet[256*256*256/8];
+        
+        {
             std::memset(colorBitSet, 0, 256*256*256/8);
             for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
                 idx++;
@@ -349,6 +372,7 @@ namespace gif {
         }
         
         uniqueColorArray = new unsigned char[uniqueColorCount * 3];
+        
         {
             idx = 0;
             memset(colorBitSet, 0, 256*256*256/8);
@@ -386,20 +410,21 @@ namespace gif {
             bool isLeaf() { return child[0] == NULL && child[1] == NULL; }
             
             void calcDim() {
-                int minDim[3] = { 255, 255, 255 }, maxDim[3] = { 0, 0, 0 };
-                for (int i = 0; i < colorCount; i++) {
+                int minDim[3] = { 255, 255, 255 }, maxDim[3] = { 0, 0, 0 },
+                    i = 0, a = 0;
+                for (; i < colorCount; i++) {
                     unsigned char *rgb = colors + i * 3;
-                    for (int a = 0; a < 3; a++) {
+                    for (; a < 3; a++) {
                         if (rgb[a] < minDim[a]) { minDim[a] = rgb[a]; }
                         if (maxDim[a] < rgb[a]) { maxDim[a] = rgb[a]; }
                     }
                 }
-                for (int a = 0; a < 3; a++) { dim[a] = maxDim[a] - minDim[a]; }
+                for (a = 0; a < 3; a++) { dim[a] = maxDim[a] - minDim[a]; }
             }
             
             void calcColor(unsigned char *rgbOut) {
-                int r = 0, g = 0, b = 0;
-                for (int i = 0; i < colorCount; i++) {
+                int r = 0, g = 0, b = 0, i = 0;
+                for (; i < colorCount; i++) {
                     r += (colors + i * 3)[0];
                     g += (colors + i * 3)[1];
                     b += (colors + i * 3)[2];
@@ -426,15 +451,18 @@ namespace gif {
             idx = 0;
             while (leafBoxCount < 255) {
                 idx++;
-                int maxDimAxis = 0;
-                int maxDim = 0;
+                int maxDimAxis = 0,
+                    maxDim = 0,
+                    i = 0,
+                    axis = 0;
                 ColorBox *maxDimBox = NULL;
-                for (int i = 0; i < colorBoxCount; i++) {
+                
+                for (; i < colorBoxCount; i++) {
                     ColorBox *box = colorBoxArray + i;
                     if (!box->isLeaf()) { continue; }
                     if (box->colorCount < 2) { continue; }
                     
-                    for (int axis = 0; axis < 3; axis++) {
+                    for (axis = 0; axis < 3; axis++) {
                         if (box->dim[axis] > maxDim || maxDimBox == NULL) {
                             maxDim = box->dim[axis];
                             maxDimAxis = axis;
@@ -442,6 +470,7 @@ namespace gif {
                         }
                     }
                 }
+                
                 if (maxDim < 2) { break; }
                 
                 if (colorBoxCount + 2 <= ColorBoxArraySize) {
@@ -552,29 +581,29 @@ namespace gif {
         memory::buffer membuf = memory::sink(membufstore.get(), membufsize);
         FILE *f = membuf.get();
         
-        const int ExtensionIntroducer = 0x21;
-        const int ApplicationExtensionLabel = 0xff;
-        const int GraphicControlLabel = 0xf9;
-        const int CommentLabel = 0xfe;
-        const int Trailer = 0x3b;
+        // const int ExtensionIntroducer = 0x21;
+        // const int ApplicationExtensionLabel = 0xff;
+        // const int GraphicControlLabel = 0xf9;
+        // const int CommentLabel = 0xfe;
+        // const int Trailer = 0x3b;
         
         {
-            fputs("GIF89a", f); /// header
+            fputs(GifFileHeader, f); /// header
         }
         
         {
             /// logical screen descriptor
-            const char GlobalColorTableBit = 0x80; /// bit 7
-            const char ColorResolutionMask = 0x70; /// bits 6,5,4
-            //const char PaletteIsSortedBit = 0x8; /// bit 3
-            const char GlobalColorTableSizeMask = 0x7; ///bits 2,1,0
+            // const char GlobalColorTableBit = 0x80; /// bit 7
+            // const char ColorResolutionMask = 0x70; /// bits 6,5,4
+            // //const char PaletteIsSortedBit = 0x8; /// bit 3
+            // const char GlobalColorTableSizeMask = 0x7; ///bits 2,1,0
             short width = gif->width;
             short height = gif->height;
             char packed = 0;
             char bgColorIndex = 255;
             char pixelAspectRatio = 0;
             packed |= GlobalColorTableBit;
-            const char BitsPerColor = 8;
+            // const char BitsPerColor = 8;
             packed |= ((BitsPerColor-1) << 4) & ColorResolutionMask;
             packed |= (BitsPerColor-1) & GlobalColorTableSizeMask;
             fwrite(&width, 2, 1, f);
@@ -586,8 +615,8 @@ namespace gif {
         
         {
             /// global color table
-            const int ColorCount = 256;
-            if (gif->palette) { fwrite(gif->palette, ColorCount*3, 1, f); }
+            // const int AbsoluteColorCount = 256;
+            if (gif->palette) { fwrite(gif->palette, AbsoluteColorCount*3, 1, f); }
         }
         
         if (isAnimated(gif)) {
@@ -595,7 +624,7 @@ namespace gif {
             fputc(ExtensionIntroducer, f);
             fputc(ApplicationExtensionLabel, f);
             fputc(11, f); /// block size
-            fputs("NETSCAPE2.0", f);
+            fputs(GifFileIdentifier, f); /// 'NETSCAPE2.0' lols
             fputc(3, f); /// data block size
             fputc(1, f);
             short repeatCount = 0; /// 0 = loop forever
@@ -651,44 +680,43 @@ namespace gif {
                         prevFrame->indexImage, frame->indexImage,
                         image, gif->width, gif->height,
                         TranspColorIndex);
-                    if (1) {
-                        /// crop if borders are transparent
-                        int cLeft, cRight, cTop, cBottom;
-                        calculatePossibleCrop(
-                            gif->width, gif->height, image,
-                            TranspColorIndex,
-                            cLeft, cRight, cTop, cBottom);
-                        
-                        if (cLeft <= cRight &&
-                            cTop <= cBottom &&
-                            cLeft > 0 && cTop > 0 &&
-                            cRight < gif->width - 1 &&
-                            cBottom < gif->height - 1) {
-                                
-                                fLeft = cLeft;
-                                fTop = cTop;
-                                fWidth = cRight + 1 - cLeft;
-                                fHeight = cBottom + 1 - cTop;
-                                unsigned char *cImage = new unsigned char[fWidth * fHeight];
-                                
-                                for (int y = 0; y < fHeight; y++) {
-                                    unsigned char *srcLine = image + (fTop + y) * gif->width + fLeft;
-                                    unsigned char *dstLine = cImage + y * fWidth;
-                                    memcpy(dstLine, srcLine, fWidth);
-                                }
-                                
-                                delete[] image;
-                                image = cImage;
-                                MAYBE(FF(" - cropped to %d%% area",
-                                       100 * (fWidth*fHeight) / (gif->width*gif->height)));
-                        }
-                    } /// end if (1)
+                    
+                    /// crop if borders are transparent
+                    int cLeft, cRight, cTop, cBottom;
+                    calculatePossibleCrop(
+                        gif->width, gif->height, image,
+                        TranspColorIndex,
+                        cLeft, cRight, cTop, cBottom);
+                    
+                    if (cLeft <= cRight &&
+                        cTop <= cBottom &&
+                        cLeft > 0 && cTop > 0 &&
+                        cRight < gif->width - 1 &&
+                        cBottom < gif->height - 1) {
+                            
+                            fLeft = cLeft;
+                            fTop = cTop;
+                            fWidth = cRight + 1 - cLeft;
+                            fHeight = cBottom + 1 - cTop;
+                            unsigned char *cImage = new unsigned char[fWidth * fHeight];
+                            
+                            for (int y = 0; y < fHeight; y++) {
+                                unsigned char *srcLine = image + (fTop + y) * gif->width + fLeft;
+                                unsigned char *dstLine = cImage + y * fWidth;
+                                memcpy(dstLine, srcLine, fWidth);
+                            }
+                            
+                            delete[] image;
+                            image = cImage;
+                            MAYBE(FF(" - cropped to %d%% area",
+                                100 * (fWidth*fHeight) / (gif->width*gif->height)));
+                    }
                 }
                 
                 {
                     /// image descriptor
                     char packed = 0;
-                    fputc(0x2c, f); /// separator
+                    fputc(Separator, f); /// separator
                     fwrite(&fLeft, 2, 1, f);
                     fwrite(&fTop, 2, 1, f);
                     fwrite(&fWidth, 2, 1, f);
@@ -696,31 +724,32 @@ namespace gif {
                     fputc(packed, f);
                 }
                 
-                if (1) {
-                    const int CodeSize = 8, MaxCodeSize = 12;
-                    fputc(CodeSize, f);
-                    BlockWriter blockWriter(f);
-                    encode(blockWriter, image, fWidth*fHeight, CodeSize, MaxCodeSize);
-                    blockWriter.finish();
-                    MAYBE(FF(" - %d bytes", blockWriter.totalBytesWritten));
-                } else {
-                    WTF("Using uncompressed method");
-                    int codeSize = 8;
-                    int clearCode = 1 << codeSize;
-                    int endOfInfo = clearCode + 1;
-                    fputc(codeSize, f);
-                    BlockWriter blockWriter(f);
-                    for (int y = 0; y < gif->height; y++) {
-                        for (int x = 0; x < gif->width; x++) {
-                            if (x % 100 == 0) { blockWriter.writeBitArray(clearCode, codeSize+1); }
-                            /// TODO: a cleverer way to calculate the table reset time...?
-                            int c = frame->indexImage[y*gif->width+x];
-                            blockWriter.writeBitArray(c, codeSize+1);
-                        }
-                    }
-                    blockWriter.writeBitArray(endOfInfo, codeSize+1);
-                    blockWriter.finish();
-                }
+                // if (1) {
+                const int CodeSize = 8, MaxCodeSize = 12;
+                fputc(CodeSize, f);
+                BlockWriter blockWriter(f);
+                encode(blockWriter, image, fWidth*fHeight, CodeSize, MaxCodeSize);
+                blockWriter.finish();
+                MAYBE(FF(" - %d bytes", blockWriter.totalBytesWritten));
+                // } else {
+                //     WTF("Using uncompressed method");
+                //     int codeSize = 8;
+                //     int clearCode = 1 << codeSize;
+                //     int endOfInfo = clearCode + 1;
+                //     fputc(codeSize, f);
+                //     BlockWriter blockWriter(f);
+                //     for (int y = 0; y < gif->height; y++) {
+                //         for (int x = 0; x < gif->width; x++) {
+                //             if (x % 100 == 0) { blockWriter.writeBitArray(clearCode, codeSize+1); }
+                //             /// TODO: a cleverer way to calculate the table reset time...?
+                //             int c = frame->indexImage[y*gif->width+x];
+                //             blockWriter.writeBitArray(c, codeSize+1);
+                //         }
+                //     }
+                //     blockWriter.writeBitArray(endOfInfo, codeSize+1);
+                //     blockWriter.finish();
+                // }
+                
                 if (image != frame->indexImage) { delete[] image; }
             }
         }
@@ -729,12 +758,14 @@ namespace gif {
             /// comment extension
             fputc(ExtensionIntroducer, f);
             fputc(CommentLabel, f);
-            const char *CommentText = "(c) Objects In Space And Time LLC";
-            const int blockSize = strlen(CommentText);
-            if (blockSize <= 255) {
-                fputc(blockSize, f);
-                fputs(CommentText, f);
-            }
+            // const char *CommentText = "(c) Objects In Space And Time LLC";
+            // const int blockSize = strlen(CommentText);
+            // if (CommentBlockSize <= 255) {
+            //     fputc(CommentBlockSize, f);
+            //     fputs(CommentText, f);
+            // }
+            fputc(CommentBlockSize, f);
+            fputs(CommentText, f);
             fputc(0, f); /// block terminator
         }
         fputc(Trailer, f);
@@ -745,9 +776,9 @@ namespace gif {
         overflow.resize(datasize);
         std::memcpy(&overflow[0], membufstore.get(), datasize);
         
-        MAYBE("Done.",
-            "About to call overflow.shrink_to_fit()",
-         FF("Current byte vector size: %d", overflow.size()));
+        // MAYBE("Done.",
+        //     "About to call overflow.shrink_to_fit()",
+        //  FF("Current byte vector size: %d", overflow.size()));
         
         overflow.shrink_to_fit();
         return overflow;

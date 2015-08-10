@@ -44,14 +44,6 @@ namespace detail {
     
 }
 
-/*
-struct invalid : std::exception {
-    std::string msg;
-    invalid(const char* msg) { this->msg = msg; }
-    invalid(std::string msg) { this->msg = msg; }
-};
-*/
-
 Json::Schema::Schema(Node* node) {
     if (node->type() != Type::OBJECT)
         throw use_error("not an object");
