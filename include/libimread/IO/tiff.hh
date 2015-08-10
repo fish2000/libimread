@@ -33,13 +33,13 @@ namespace im {
                     byte_source *s,
                     ImageFactory *f,
                     const options_map &opts) override {
-                std::unique_ptr<image_list> pages = this->do_read(s, f, false);
+                std::unique_ptr<ImageList> pages = this->do_read(s, f, false);
                 if (pages->size() != 1) { throw ProgrammingError(); }
                 std::vector<Image*> ims = pages->release();
                 return std::unique_ptr<Image>(ims[0]);
             }
             
-            virtual std::unique_ptr<image_list> read_multi(
+            virtual std::unique_ptr<ImageList> read_multi(
                     byte_source *s,
                     ImageFactory *f,
                     const options_map &opts) override {
@@ -51,7 +51,7 @@ namespace im {
                                const options_map &opts) override;
             
         private:
-            std::unique_ptr<image_list> do_read(byte_source *s,
+            std::unique_ptr<ImageList> do_read(byte_source *s,
                                                 ImageFactory *f,
                                                 bool is_multi);
     };
@@ -60,7 +60,7 @@ namespace im {
         public:
             typedef std::true_type can_read_multi;
             
-            virtual std::unique_ptr<image_list> read_multi(
+            virtual std::unique_ptr<ImageList> read_multi(
                 byte_source *s,
                 ImageFactory *f,
                 const options_map &opts) override;

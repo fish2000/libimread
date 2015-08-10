@@ -101,33 +101,40 @@ namespace im {
     };
     
     /// This class *owns* its members and will delete them if destroyed
-    struct image_list {
-        public:
-            image_list() {}
-            
-            std::vector<Image*>::size_type size() const { return content.size(); }
-            void push_back(std::unique_ptr<Image> p) { content.push_back(p.release()); }
-            
-            ~image_list() {
-                unsigned i = 0,
-                         x = static_cast<unsigned>(content.size());
-                for (; i != x; ++i) { delete content[i]; }
-            }
-            
-            /// After release(), all of the pointers will be owned by the caller
-            /// who must figure out how to delete them. Note that release() resets the list.
-            std::vector<Image*> release() {
-                std::vector<Image*> r;
-                r.swap(content);
-                return r;
-            }
+    struct ImageList {
+        typedef std::vector<Image*> vector_type;
+        typedef vector_type::size_type size_type;
+        
+        ImageList() {}
+        
+        size_type size() const {
+            return content.size();
+        }
+        
+        void push_back(std::unique_ptr<Image> p) {
+            content.push_back(p.release());
+        }
+        
+        ~ImageList() {
+            unsigned i = 0,
+                     x = static_cast<unsigned>(content.size());
+            for (; i != x; ++i) { delete content[i]; }
+        }
+        
+        /// After release(), all of the pointers will be owned by the caller
+        /// who must figure out how to delete them. Note that release() resets the list.
+        vector_type release() {
+            vector_type out;
+            out.swap(content);
+            return out;
+        }
         
         private:
-            image_list(image_list&&);
-            image_list(const image_list&);
-            image_list &operator=(image_list&&);
-            image_list &operator=(const image_list&);
-            std::vector<Image*> content;
+            ImageList(ImageList&&);
+            ImageList(const ImageList&);
+            ImageList &operator=(ImageList&&);
+            ImageList &operator=(const ImageList&);
+            vector_type content;
     };
 }
 

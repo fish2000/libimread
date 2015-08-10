@@ -182,7 +182,7 @@ namespace im {
         
     } /// namespace
     
-    std::unique_ptr<image_list> STKFormat::read_multi(byte_source *src,
+    std::unique_ptr<ImageList> STKFormat::read_multi(byte_source *src,
                                                       ImageFactory *factory,
                                                       const options_map &opts)  {
         shift_source moved(src);
@@ -190,7 +190,7 @@ namespace im {
         tiff_warn_error twe;
         
         tif_holder t = read_client(&moved);
-        std::unique_ptr<image_list> images(new image_list);
+        std::unique_ptr<ImageList> images(new ImageList);
         const uint32_t h = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
         const uint32_t w = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
 
@@ -229,12 +229,12 @@ namespace im {
         return images;
     }
     
-    std::unique_ptr<image_list> TIFFFormat::do_read(byte_source *src,
+    std::unique_ptr<ImageList> TIFFFormat::do_read(byte_source *src,
                                                     ImageFactory *factory,
                                                     bool is_multi)  {
         tiff_warn_error twe;
         tif_holder t = read_client(src);
-        std::unique_ptr<image_list> images(new image_list);
+        std::unique_ptr<ImageList> images(new ImageList);
         do {
             const uint32_t h = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
             const uint32_t w = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
