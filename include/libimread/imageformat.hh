@@ -26,8 +26,8 @@ namespace im {
         src->seek_relative(-n_read);
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }
-    inline bool match_magic(byte_source *src, const std::string &magic, const std::size_t n) {
-        return match_magic(src, magic.c_str(), n);
+    inline bool match_magic(byte_source *src, const std::string &magic) {
+        return match_magic(src, magic.c_str(), magic.size());
     }
     
     class ImageFormat {
@@ -58,7 +58,7 @@ namespace im {
             
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {
-                return match_magic(src, options.signature, 8);
+                return match_magic(src, options.signature);
             }
             
             static std::string get_suffix() {
