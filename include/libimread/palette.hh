@@ -8,8 +8,13 @@
 #include <limits>
 #include <bitset>
 #include <array>
+#include <set>
 #include <utility>
 #include <iostream>
+
+#include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
+
 
 namespace im {
     
@@ -119,7 +124,53 @@ namespace im {
         using component_t = Color::component_t;
         using channel_t = Color::channel_t;
         using composite_t = Color::composite_t;
+        using channel_list_t = std::initializer_list<channel_t>;
+        using channel_listlist_t = std::initializer_list<channel_list_t>
+        using composite_list_t = std::initializer_list<composite_t>;
+        using composite_listlist_t = std::initializer_list<composite_list_t>;
         
+        std::set<Color> items;
+        
+        Palette(const Palette& other)
+            :items(other.items)
+            {}
+        Palette(Palette&& other) {
+            items.swap(other.items);
+        }
+        
+        Palette &operator=(const Palette& other) { items = other.items; }
+        Palette &operator=(Palette&& other) { items.clear(); items.swap(other.items); }
+        explicit Palette(composite_list_t initlist)     { add_impl(initlist); }
+        explicit Palette(channel_listlist_t initlist)   { add_impl(initlist); }
+        
+        constexpr std::size_t max_size() const { return N; }
+        const std::size_t size() const { return items.size(); }
+        const bool contains(composite_t composite) const {
+            return static_cast<bool>(items.count(composite));
+        }
+        
+        bool add(composite_t composite)                 { return items.emplace(composite).second; }
+        bool add(channel_list_t channel_list)           { return items.emplace(channel_list).second; }
+        bool bulk_add(composite_list_t composite_list)  { return add_impl(composite_list); }
+        bool bulk_add(channel_listlist_t channel_list)  { return add_impl(channel_list); }
+        
+        Color &operator[](composite_t composite) {
+            auto search = items.find(composite);
+            if (search != items.end()) { return Color(*search); }
+            return Color(0); /// WE NEED TO DO BETTER THAN THIS
+        }
+        
+        private:
+            template <typename List> inline
+            bool add_impl(List list) {
+                const int siz;
+                int idx = siz = size();
+                auto seterator = items.begin();
+                for (auto it = list.begin();
+                     it != list.end() && idx < N;
+                     ++it) { seterator = items.emplace_hint(seterator, *it); ++idx; }
+                return siz < size();
+            }
         
     };
     

@@ -12,4 +12,5 @@ set(TEST_SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/test_halide_read.cpp
   ${CMAKE_CURRENT_LIST_DIR}/test_objc_rt.mm
   ${CMAKE_CURRENT_LIST_DIR}/test_sfinae.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/test_terminator.cpp
 PARENT_SCOPE)

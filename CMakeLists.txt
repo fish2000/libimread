@@ -37,6 +37,9 @@ endif()
 # Set the CMake module path to the project cmake directory. This location will
 # first be searched for external CMake packages.
 set(CMAKE_MODULE_PATH ${cmake_directory})
+set(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
+    $ENV{LD_LIBRARY_PATH}
+    /usr/lib/system)
 
 # Include the library build configuration. This will also include the custom
 # macro defined for the project.
@@ -89,6 +92,7 @@ find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
+find_package(LibUnwind REQUIRED)
 
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
@@ -108,7 +112,8 @@ include_directories(
     ${TIFF_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
-    ${HALIDE_INCLUDE_DIR})
+    ${HALIDE_INCLUDE_DIR}
+    ${LIBUNWIND_INCLUDE_DIR})
 
 # Set the files and options required to build the library
 include(CMakeProjectFiles.cmake)
@@ -163,8 +168,9 @@ add_dependencies("test_${PROJECT_NAME}" "docopt")
 add_dependencies("test_${PROJECT_NAME}" "sszip")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
-    png z imread sszip docopt
-    ${EXTRA_LIBS}
+    imread
+    sszip docopt
+    png z ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}

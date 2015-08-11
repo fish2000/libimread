@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/errors/terminator.hh>
 #include <libimread/errors.hh>
 #include <libimread/objc-rt.hh>
 

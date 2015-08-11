@@ -78,6 +78,9 @@ configure_file(
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     
+    ${hdrs_dir}/ext/errors/backtrace.hh
+    ${hdrs_dir}/ext/errors/demangle.hh
+    ${hdrs_dir}/ext/errors/terminator.hh
     ${hdrs_dir}/ext/filesystem/path.h
     ${hdrs_dir}/ext/filesystem/resolver.h
     ${hdrs_dir}/ext/filesystem/temporary.h
@@ -133,6 +136,8 @@ set(hdrs
 
 # Project source files
 set(srcs
+    ${srcs_dir}/ext/errors/backtrace.cpp
+    ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/path.cpp
     ${srcs_dir}/ext/filesystem/temporary.cpp
     ${srcs_dir}/ext/JSON/json11.cpp
@@ -215,14 +220,17 @@ endforeach()
 
 IF(APPLE)
     # Right now there are no non-Apple options that work
+    FIND_LIBRARY(SYSTEM_LIBRARY System)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
-    MARK_AS_ADVANCED(COCOA_LIBRARY
+    MARK_AS_ADVANCED(SYSTEM_LIBRARY
+                     COCOA_LIBRARY
                      FOUNDATION_LIBRARY
                      COREFOUNDATION_LIBRARY)
     SET(EXTRA_LIBS
         ${EXTRA_LIBS}
+        ${SYSTEM_LIBRARY}
         ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
         ${COREFOUNDATION_LIBRARY})
     
