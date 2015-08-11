@@ -243,7 +243,7 @@ inline void Palette<NCOLORS, NCHANNELS, GREEN_CHANNEL>::CopyToMemory(u8 *ptr) {
         for (unsigned int channel = 0; channel < NCHANNELS; channel++) {
             // copy element
             *ptr = data[color][channel];
-
+            
             // move forward
             ptr++;
         }

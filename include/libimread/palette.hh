@@ -9,6 +9,8 @@
 #include <bitset>
 #include <array>
 #include <set>
+#include <sstream>
+#include <iomanip>
 #include <utility>
 #include <iostream>
 
@@ -21,6 +23,21 @@
 #endif
 
 namespace im {
+    
+    namespace detail {
+        
+        /// to_hex() courtesy of:
+        /// http://stackoverflow.com/a/5100745/298171
+        template <typename T>
+        std::string to_hex(T tvalue) {
+            std::stringstream stream;
+            stream << "0x"
+                   << std::setfill('0') << std::setw(sizeof(T) * 2)
+                   << std::hex << tvalue;
+            return stream.str();
+        }
+        
+    }
     
     template <typename Channel>
     struct ChannelBase {
@@ -99,14 +116,56 @@ namespace im {
         const operator std::string() { return string_impl(index_t()); }
         
         constexpr Channel &operator[](std::size_t c) { return components[c]; }
-        constexpr bool operator<(const UniformColor& rhs) noexcept { return composite < rhs.composite; }
-        constexpr bool operator>(const UniformColor& rhs) noexcept { return composite > rhs.composite; }
-        constexpr bool operator<=(const UniformColor& rhs) noexcept { return composite <= rhs.composite; }
-        constexpr bool operator>=(const UniformColor& rhs) noexcept { return composite >= rhs.composite; }
-        constexpr bool operator==(const UniformColor& rhs) noexcept { return composite == rhs.composite; }
-        constexpr bool operator!=(const UniformColor& rhs) noexcept { return composite != rhs.composite; }
+        
+        template <typename Color>
+        constexpr bool operator<(const Color& rhs) const noexcept { return bool(composite < rhs.composite); }
+        template <typename Color>
+        constexpr bool operator>(const Color& rhs) const noexcept { return bool(composite > rhs.composite); }
+        template <typename Color>
+        constexpr bool operator<=(const Color& rhs) const noexcept { return bool(composite <= rhs.composite); }
+        template <typename Color>
+        constexpr bool operator>=(const Color& rhs) const noexcept { return bool(composite >= rhs.composite); }
+        template <typename Color>
+        constexpr bool operator==(const Color& rhs) const noexcept { return bool(composite == rhs.composite); }
+        template <typename Color>
+        constexpr bool operator!=(const Color& rhs) const noexcept { return bool(composite != rhs.composite); }
+        
+        constexpr bool operator<(const Composite& rhs) noexcept { return bool(composite < rhs); }
+        constexpr bool operator>(const Composite& rhs) noexcept { return bool(composite > rhs); }
+        constexpr bool operator<=(const Composite& rhs) noexcept { return bool(composite <= rhs); }
+        constexpr bool operator>=(const Composite& rhs) noexcept { return bool(composite >= rhs); }
+        constexpr bool operator==(const Composite& rhs) noexcept { return bool(composite == rhs); }
+        constexpr bool operator!=(const Composite& rhs) noexcept { return bool(composite != rhs); }
+        
+        constexpr bool operator<(const Components& rhs) noexcept { return bool(components < rhs); }
+        constexpr bool operator>(const Components& rhs) noexcept { return bool(components > rhs); }
+        constexpr bool operator<=(const Components& rhs) noexcept { return bool(components <= rhs); }
+        constexpr bool operator>=(const Components& rhs) noexcept { return bool(components >= rhs); }
+        constexpr bool operator==(const Components& rhs) noexcept { return bool(components == rhs); }
+        constexpr bool operator!=(const Components& rhs) noexcept { return bool(components != rhs); }
+        
+        constexpr unsigned int distance(const UniformColor& rhs) noexcept {
+            return distance_impl(rhs, 0, index_t());
+        }
+        
+        const std::string to_string() const {
+            std::ostringstream stream;
+            stream <<  "(" << detail::to_hex(composite)
+                   << ") " << string_impl(index_t())
+                   << "";
+            return stream.str();
+        }
         
         private:
+            template <std::size_t ...I> inline
+            unsigned int distance_impl(const UniformColor& rhs,
+                                       unsigned int out,
+                                       std::index_sequence<I...>) {
+                out += std::abs(
+                    std::get<I...>(components) - std::get<I...>(rhs.components)
+                );
+                return out;
+            }
             template <std::size_t ...I> inline
             array_t array_impl(std::index_sequence<I...>) {
                 return array_t{ components[I]... };
@@ -130,10 +189,16 @@ namespace im {
     template <typename Color = RGBAColor, std::size_t Nelems = 256>
     struct Palette {
         static constexpr std::size_t N = Nelems;
+        static constexpr std::size_t C = Color::Meta::channel_count;
         using color_t = Color;
         using component_t = typename Color::component_t;
         using channel_t = typename Color::channel_t;
         using composite_t = typename Color::composite_t;
+        //using array_t = std::array<composite_t, N>;
+        using array_t = std::array<component_t, N>;
+        using string_array_t = std::array<std::string, N>;
+        using index_t = std::make_index_sequence<N>;
+        
         using channel_list_t = std::initializer_list<channel_t>;
         using channel_listlist_t = std::initializer_list<channel_list_t>;
         using composite_list_t = std::initializer_list<composite_t>;
@@ -160,6 +225,17 @@ namespace im {
         constexpr bool bulk_add(composite_list_t composite_list)  { return add_impl(composite_list); }
         constexpr bool bulk_add(channel_listlist_t channel_list)  { return add_impl(channel_list); }
         
+        template <typename pT>
+        void rawcopy(pT *rawptr) { /// neuquant::u8
+            array_t array = to_component_array();
+            for (unsigned int color = 0; color < N; color++) {
+                for (unsigned int channel = 0; channel < C; channel++) {
+                    *rawptr = static_cast<pT>(array[color][channel]);    /// copy element
+                    rawptr++;                                            /// move forward
+                }
+            }
+        }
+        
         constexpr std::size_t max_size() const { return N; }
         const std::size_t size() const { return items.size(); }
         const bool contains(composite_t composite) const {
@@ -172,14 +248,46 @@ namespace im {
             return Color(0); /// WE NEED TO DO BETTER THAN THIS
         }
         
-        constexpr bool operator<(const Palette& rhs) noexcept { return items < rhs.items; }
-        constexpr bool operator>(const Palette& rhs) noexcept { return items > rhs.items; }
-        constexpr bool operator<=(const Palette& rhs) noexcept { return items <= rhs.items; }
-        constexpr bool operator>=(const Palette& rhs) noexcept { return items >= rhs.items; }
-        constexpr bool operator==(const Palette& rhs) noexcept { return items == rhs.items; }
-        constexpr bool operator!=(const Palette& rhs) noexcept { return items != rhs.items; }
+        constexpr bool operator<(const Palette& rhs) const noexcept { return bool(items < rhs.items); }
+        constexpr bool operator>(const Palette& rhs) const noexcept { return bool(items > rhs.items); }
+        constexpr bool operator<=(const Palette& rhs) const noexcept { return bool(items <= rhs.items); }
+        constexpr bool operator>=(const Palette& rhs) const noexcept { return bool(items >= rhs.items); }
+        constexpr bool operator==(const Palette& rhs) const noexcept { return bool(items == rhs.items); }
+        constexpr bool operator!=(const Palette& rhs) const noexcept { return bool(items != rhs.items); }
+        
+        const std::string to_string() const {
+            const std::string prefix("* ");
+            std::string out("");
+            string_array_t array = to_string_array();
+            std::for_each(array.begin(), array.end(),
+                      [&](const std::string& s) {
+                out += prefix + s + std::endl;
+            });
+            return out;
+        }
         
         private:
+            array_t to_component_array() {
+                array_t array;
+                array.fill(Color(0).components);
+                std::transform(items.begin(), items.end(),
+                               array.begin(), [&](const Color& color) {
+                    return color.components;
+                });
+                return array;
+            }
+            
+            string_array_t to_string_array() {
+                string_array_t array;
+                const std::string filler("");
+                array.fill(filler);
+                std::transform(items.begin(), items.end(),
+                               array.begin(), [&](const Color& color) {
+                    return color.to_string();
+                });
+                return array;
+            }
+            
             template <typename List> inline
             bool add_impl(List list) {
                 int idx;
@@ -190,7 +298,6 @@ namespace im {
                      ++it) { seterator = items.emplace_hint(seterator, *it); ++idx; }
                 return siz < size();
             }
-        
     };
     
 }
