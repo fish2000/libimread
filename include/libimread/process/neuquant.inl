@@ -1,6 +1,8 @@
 #ifndef __neuquant_inl__
 #define __neuquant_inl__
 
+/// this file is namespaced into 'neuquant' within neuquant.hh
+
 #ifndef __neuquant_h__
 #error "neuquant.inl should only be included by neuquant.hh"
 #endif
@@ -538,11 +540,11 @@ inline bool NeuralQuantizer<NCOLORS, NCHANNELS, GREEN_CHANNEL>::Run(
         }
 
         // calculate alpha
-        real alpha = exp(real(-0.03) * real(cycle));
+        real alpha = std::exp(real(-0.03) * real(cycle));
 
         // calculate radius
         unsigned int radius = (unsigned int)(floor(
-            real(NCOLORS) / real(8) * exp(real(-0.0325) * real(cycle))));
+            real(NCOLORS) / real(8) * std::exp(real(-0.0325) * real(cycle))));
 
         // present image data
         for (unsigned int i = 0; i < pels_per_cycle; i++) {

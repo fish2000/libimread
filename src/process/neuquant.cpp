@@ -22,15 +22,16 @@ int neuquant_main() {
     printf("Loading...\n");
     FILE *f;
     f = fopen(FILENAME, "rb");
-    u8 texture[WIDTH * HEIGHT * 3];
+    neuquant::u8 texture[WIDTH * HEIGHT * 3];
     fread(texture, WIDTH * HEIGHT * 3, 1, f);
     fclose(f);
     
     printf("Quantizing, Remapping...\n");
-    u8 newpal[16][3];
-    u8 newimage[WIDTH * HEIGHT];
-    NeuQuant_RGB_to_16((u8 *)texture, WIDTH, HEIGHT, (u8 *)newpal,
-                       (u8 *)newimage, 3);
+    neuquant::u8 newpal[16][3];
+    neuquant::u8 newimage[WIDTH * HEIGHT];
+    neuquant::NeuQuant_RGB_to_16((neuquant::u8 *)texture, WIDTH, HEIGHT,
+                                 (neuquant::u8 *)newpal,
+                                 (neuquant::u8 *)newimage, 3);
     
     // unpalettize original (hack so we can write out another RAW)
     for (unsigned int i = 0; i < (WIDTH * HEIGHT); i++) {
@@ -47,3 +48,7 @@ int neuquant_main() {
     
     return 0;
 }
+
+#undef FILENAME
+#undef WIDTH
+#undef HEIGHT

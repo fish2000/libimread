@@ -177,6 +177,7 @@ set(srcs
     ${srcs_dir}/imageformat.cpp
     ${srcs_dir}/objc-rt.mm
     ${srcs_dir}/options.cpp
+    ${srcs_dir}/palette.cpp
     ${srcs_dir}/symbols.cpp
 )
 

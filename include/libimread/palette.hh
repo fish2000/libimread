@@ -13,8 +13,12 @@
 #include <iostream>
 
 #include <libimread/libimread.hpp>
+#include <libimread/process/neuquant.hh>
 #include <libimread/errors.hh>
 
+#ifndef ALIGN_AS
+#define ALIGN_AS(type) __attribute__((aligned (alignof(type))))
+#endif
 
 namespace im {
     
@@ -49,7 +53,7 @@ namespace im {
         static constexpr uint8_t channel_count = 4;
     };
     
-    template <template <typename> typename ChannelMeta = RGBA,
+    template <template <typename> class ChannelMeta = RGBA,
               typename Composite = uint32_t,
               typename Channel = uint8_t>
     struct UniformColor : public ChannelMeta<Channel> {
@@ -59,7 +63,11 @@ namespace im {
         
         static constexpr uint8_t N = ChannelMeta<Channel>::channel_count;
         using Meta = ChannelMeta<Channel>;
-        using Components = alignas(Composite) Channel[N];
+        
+        /// WHY U NO ALIGN MY ALIASED ARRAY TYPES CLAAAAAAAAAAAAANG
+        /// ... makin me use stupid macros you stupid jerkface
+        //using Components = alignas(Composite) Channel[N];
+        using Components = ALIGN_AS(Composite) Channel[N];
         
         using bitset_t = std::bitset<sizeof(Composite) * 8>;
         using array_t = std::array<Channel, N>;
@@ -88,11 +96,13 @@ namespace im {
         
         constexpr operator Composite() noexcept { return composite; }
         constexpr operator array_t() noexcept { return array_impl(index_t()); }
-        constexpr operator std::string() { return string_impl(index_t()); }
+        const operator std::string() { return string_impl(index_t()); }
         
         constexpr Channel &operator[](std::size_t c) { return components[c]; }
         constexpr bool operator<(const UniformColor& rhs) noexcept { return composite < rhs.composite; }
         constexpr bool operator>(const UniformColor& rhs) noexcept { return composite > rhs.composite; }
+        constexpr bool operator<=(const UniformColor& rhs) noexcept { return composite <= rhs.composite; }
+        constexpr bool operator>=(const UniformColor& rhs) noexcept { return composite >= rhs.composite; }
         constexpr bool operator==(const UniformColor& rhs) noexcept { return composite == rhs.composite; }
         constexpr bool operator!=(const UniformColor& rhs) noexcept { return composite != rhs.composite; }
         
@@ -114,34 +124,41 @@ namespace im {
     
     using Monochrome = UniformColor<Mono, uint16_t, uint8_t>;
     using RGBAColor = UniformColor<>;
-    using RGBColor = UniformColor<RGB>
+    using RGBColor = UniformColor<RGB>;
     using HDRColor = UniformColor<RGBA, int64_t, int16_t>;
     
     template <typename Color = RGBAColor, std::size_t Nelems = 256>
     struct Palette {
         static constexpr std::size_t N = Nelems;
         using color_t = Color;
-        using component_t = Color::component_t;
-        using channel_t = Color::channel_t;
-        using composite_t = Color::composite_t;
+        using component_t = typename Color::component_t;
+        using channel_t = typename Color::channel_t;
+        using composite_t = typename Color::composite_t;
         using channel_list_t = std::initializer_list<channel_t>;
-        using channel_listlist_t = std::initializer_list<channel_list_t>
+        using channel_listlist_t = std::initializer_list<channel_list_t>;
         using composite_list_t = std::initializer_list<composite_t>;
         using composite_listlist_t = std::initializer_list<composite_list_t>;
         
         std::set<Color> items;
         
-        Palette(const Palette& other)
+        constexpr Palette(const Palette& other)
             :items(other.items)
             {}
-        Palette(Palette&& other) {
+        constexpr Palette(Palette&& other) {
             items.swap(other.items);
         }
         
-        Palette &operator=(const Palette& other) { items = other.items; }
-        Palette &operator=(Palette&& other) { items.clear(); items.swap(other.items); }
-        explicit Palette(composite_list_t initlist)     { add_impl(initlist); }
-        explicit Palette(channel_listlist_t initlist)   { add_impl(initlist); }
+        explicit constexpr Palette(composite_list_t initlist)     { add_impl(initlist); }
+        explicit constexpr Palette(channel_listlist_t initlist)   { add_impl(initlist); }
+        Palette &operator=(const Palette& other)        { items = other.items;                      return *this; }
+        Palette &operator=(Palette&& other)             { items.clear(); items.swap(other.items);   return *this; }
+        Palette &operator=(composite_list_t initlist)   { items.clear(); add_impl(initlist);        return *this; }
+        Palette &operator=(channel_listlist_t initlist) { items.clear(); add_impl(initlist);        return *this; }
+        
+        constexpr bool add(composite_t composite)                 { return items.emplace(composite).second; }
+        constexpr bool add(channel_list_t channel_list)           { return items.emplace(channel_list).second; }
+        constexpr bool bulk_add(composite_list_t composite_list)  { return add_impl(composite_list); }
+        constexpr bool bulk_add(channel_listlist_t channel_list)  { return add_impl(channel_list); }
         
         constexpr std::size_t max_size() const { return N; }
         const std::size_t size() const { return items.size(); }
@@ -149,22 +166,24 @@ namespace im {
             return static_cast<bool>(items.count(composite));
         }
         
-        bool add(composite_t composite)                 { return items.emplace(composite).second; }
-        bool add(channel_list_t channel_list)           { return items.emplace(channel_list).second; }
-        bool bulk_add(composite_list_t composite_list)  { return add_impl(composite_list); }
-        bool bulk_add(channel_listlist_t channel_list)  { return add_impl(channel_list); }
-        
         Color &operator[](composite_t composite) {
             auto search = items.find(composite);
             if (search != items.end()) { return Color(*search); }
             return Color(0); /// WE NEED TO DO BETTER THAN THIS
         }
         
+        constexpr bool operator<(const Palette& rhs) noexcept { return items < rhs.items; }
+        constexpr bool operator>(const Palette& rhs) noexcept { return items > rhs.items; }
+        constexpr bool operator<=(const Palette& rhs) noexcept { return items <= rhs.items; }
+        constexpr bool operator>=(const Palette& rhs) noexcept { return items >= rhs.items; }
+        constexpr bool operator==(const Palette& rhs) noexcept { return items == rhs.items; }
+        constexpr bool operator!=(const Palette& rhs) noexcept { return items != rhs.items; }
+        
         private:
             template <typename List> inline
             bool add_impl(List list) {
-                const int siz;
-                int idx = siz = size();
+                int idx;
+                const int siz = idx = size();
                 auto seterator = items.begin();
                 for (auto it = list.begin();
                      it != list.end() && idx < N;
@@ -175,5 +194,9 @@ namespace im {
     };
     
 }
+
+#ifdef ALIGN_AS
+#undef ALIGN_AS
+#endif
 
 #endif /// LIBIMREAD_PALETTE_HH_
