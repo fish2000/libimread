@@ -112,7 +112,10 @@ namespace im {
         }
         
         void push_back(std::unique_ptr<Image> p) {
-            content.push_back(p.release());
+            content.push_back(p.get());
+        }
+        void push_back(Image *p) {
+            content.push_back(p);
         }
         
         ~ImageList() {
@@ -121,8 +124,9 @@ namespace im {
             for (; i != x; ++i) { delete content[i]; }
         }
         
-        /// After release(), all of the pointers will be owned by the caller
-        /// who must figure out how to delete them. Note that release() resets the list.
+        /// After calling release(), ownership of the content image ponters
+        /// is transferred to the caller, who must figure out how to delete them.
+        /// Also note that release() resets the internal vector.
         vector_type release() {
             vector_type out;
             out.swap(content);

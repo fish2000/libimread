@@ -85,7 +85,7 @@ namespace im {
                 imread_raise_default(NotImplementedError);
             }
             
-            virtual void write_multi(std::vector<Image> &input,
+            virtual void write_multi(ImageList &input,
                                      byte_sink* output,
                                      const options_map &opts) {
                 imread_raise_default(NotImplementedError);

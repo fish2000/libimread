@@ -40,12 +40,12 @@ namespace im {
                                byte_sink *output,
                                const options_map &opts) override;
             
-            virtual void write_multi(std::vector<Image> &input,
+            virtual void write_multi(ImageList &input,
                                      byte_sink* output,
                                      const options_map &opts) override;
         
         private:
-            void write_impl(Image &input, detail::gifholder &g);
+            void write_impl(Image &&input, detail::gifholder &g);
     };
     
     namespace format {

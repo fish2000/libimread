@@ -27,7 +27,7 @@ using im::byte;
         trailer
 **************************************************/
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 #if (VERBOSE > 0)
 #define MAYBE(...) FORSURE(__VA_ARGS__)
@@ -64,8 +64,8 @@ namespace {
         if (leftCount > 1) { sortColorsByAxis(array, leftCount, axis); }
         if (rightCount > 1) { sortColorsByAxis(array+leftCount*3, rightCount, axis); }
     }
-
-    static int nearestIndexInPalette(unsigned char *palette,
+    
+    int nearestIndexInPalette(unsigned char *palette,
                                      int paletteSize, unsigned char *rgb) {
         int bestIndex = 0, bestDist = 0;
         for (int i = 0; i < paletteSize; i++) {
@@ -80,8 +80,8 @@ namespace {
         }
         return bestIndex;
     }
-
-    static void indexizeImageFromPaletteFuzzy(
+    
+    void indexizeImageFromPaletteFuzzy(
         int Width, int Height, unsigned char *rgbImage, unsigned char *indexImage, 
         unsigned char *palette, int paletteSize) {
         for (int i = 0; i < Width * Height; i++) {
@@ -89,8 +89,8 @@ namespace {
             indexImage[i] = nearestIndexInPalette(palette, paletteSize, rgb);
         }
     }
-
-    static void writeTransparentPixelsWhereNotDifferent(
+    
+    void writeTransparentPixelsWhereNotDifferent(
         unsigned char *prevImage, unsigned char *thisImage, unsigned char *outImage,
         int ImageWidth, int ImageHeight, int TranspValue) {
         int count = 0;
@@ -104,7 +104,7 @@ namespace {
         }
         MAYBE(FF(" - %d%% transparent", count * 100 / (ImageWidth*ImageHeight)));
     }
-
+    
     void calculatePossibleCrop(int width, int height,
                                unsigned char *indexImage,
                                unsigned char TranspColorIndex,
@@ -351,7 +351,7 @@ namespace gif {
         uniqueColorArray = new unsigned char[uniqueColorCount * 3];
         {
             idx = 0;
-            memset(colorBitSet, 0, 256*256*256/8);
+            std::memset(colorBitSet, 0, 256*256*256/8);
             unsigned char *afterLastUnique = uniqueColorArray + uniqueColorCount * 3;
             unsigned char *u = uniqueColorArray;
             for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
@@ -416,7 +416,7 @@ namespace gif {
         int leafBoxCount = 0;
         
         {
-            memset(&colorBoxArray, 0, sizeof(ColorBox) * 512);
+            std::memset(&colorBoxArray, 0, sizeof(ColorBox) * 512);
             colorBoxArray[0].colors = uniqueColorArray;
             colorBoxArray[0].colorCount = uniqueColorCount;
             colorBoxArray[0].calcDim();
@@ -465,7 +465,7 @@ namespace gif {
             }
             
             std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
-            std::memset(asterisks.get(), '*', idx);
+            std::memset(asterisks.get(), '*', 1+idx/10);
             MAYBE(
                 FF("Creating color boxes [%s]", asterisks.get()),
                 FF("Total box count: %d", colorBoxCount),
@@ -518,7 +518,7 @@ namespace gif {
         gif->lastFrame = f;
         if (gif->width && gif->height) {
             if (gif->width != W || gif->height != H) {
-                WTF("Frame width/height differ from GIF's!\n");
+                WTF("Frame dimensions differ from root GIF dimensions!\n");
             }
         } else {
             /// initialize the internal structs' width and height
@@ -644,45 +644,47 @@ namespace gif {
                       fTop = 0,
                       fWidth = gif->width,
                       fHeight = gif->height;
-                unsigned char * image = frame->indexImage;
+                unsigned char *image = frame->indexImage;
                 if (prevFrame) {
                     image = new unsigned char[gif->width * gif->height];
                     writeTransparentPixelsWhereNotDifferent(
                         prevFrame->indexImage, frame->indexImage,
                         image, gif->width, gif->height,
                         TranspColorIndex);
-                    if (1) {
-                        /// crop if borders are transparent
-                        int cLeft, cRight, cTop, cBottom;
-                        calculatePossibleCrop(
-                            gif->width, gif->height, image,
-                            TranspColorIndex,
-                            cLeft, cRight, cTop, cBottom);
-                        
-                        if (cLeft <= cRight &&
-                            cTop <= cBottom &&
-                            cLeft > 0 && cTop > 0 &&
-                            cRight < gif->width - 1 &&
-                            cBottom < gif->height - 1) {
-                                
-                                fLeft = cLeft;
-                                fTop = cTop;
-                                fWidth = cRight + 1 - cLeft;
-                                fHeight = cBottom + 1 - cTop;
-                                unsigned char *cImage = new unsigned char[fWidth * fHeight];
-                                
-                                for (int y = 0; y < fHeight; y++) {
-                                    unsigned char *srcLine = image + (fTop + y) * gif->width + fLeft;
-                                    unsigned char *dstLine = cImage + y * fWidth;
-                                    memcpy(dstLine, srcLine, fWidth);
-                                }
-                                
-                                delete[] image;
-                                image = cImage;
-                                MAYBE(FF(" - cropped to %d%% area",
-                                       100 * (fWidth*fHeight) / (gif->width*gif->height)));
-                        }
-                    } /// end if (1)
+                    
+                    // if (1) {
+                    //     /// crop if borders are transparent
+                    //     int cLeft, cRight, cTop, cBottom;
+                    //     calculatePossibleCrop(
+                    //         gif->width, gif->height, image,
+                    //         TranspColorIndex,
+                    //         cLeft, cRight, cTop, cBottom);
+                    //
+                    //     if (cLeft <= cRight &&
+                    //         cTop <= cBottom &&
+                    //         cLeft > 0 && cTop > 0 &&
+                    //         cRight < gif->width - 1 &&
+                    //         cBottom < gif->height - 1) {
+                    //
+                    //             fLeft = cLeft;
+                    //             fTop = cTop;
+                    //             fWidth = cRight + 1 - cLeft;
+                    //             fHeight = cBottom + 1 - cTop;
+                    //             unsigned char *cImage = new unsigned char[fWidth * fHeight];
+                    //
+                    //             for (int y = 0; y < fHeight; y++) {
+                    //                 unsigned char *srcLine = image + (fTop + y) * gif->width + fLeft;
+                    //                 unsigned char *dstLine = cImage + y * fWidth;
+                    //                 std::memcpy(dstLine, srcLine, fWidth);
+                    //             }
+                    //
+                    //             delete[] image;
+                    //             image = cImage;
+                    //             MAYBE(FF(" - cropped to %d%% area",
+                    //                    100 * (fWidth*fHeight) / (gif->width*gif->height)));
+                    //     }
+                    //
+                    // } /// end if (1)
                 }
                 
                 {

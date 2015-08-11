@@ -117,7 +117,7 @@ namespace im {
                           const options_map &opts) {
     }
     
-    void ANSIFormat::write_multi(std::vector<Image> &input,
+    void ANSIFormat::write_multi(ImageList &input,
                                 byte_sink *output,
                                 const options_map &opts) {
     }

@@ -181,7 +181,7 @@ namespace im {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
-            HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));
+            HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output.release()));
             image.set_host_dirty();
             return image;
         }
@@ -196,11 +196,11 @@ namespace im {
         }
         
         template <typename T = byte>
-        void write_multi(std::vector<HybridImage<T>> &input, const std::string &filename) {
+        void write_multi(ImageList &input, const std::string &filename) {
             options_map opts;
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            format->write_multi(dynamic_cast<std::vector<Image>&>(input), output.get(), opts);
+            format->write_multi(input, output.get(), opts);
         }
         
         template <typename Format, typename T = byte>
