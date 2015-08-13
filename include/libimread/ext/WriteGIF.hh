@@ -1,6 +1,6 @@
 
-#ifndef LIBIMREAD_EXT_WRITEGIF_H_
-#define LIBIMREAD_EXT_WRITEGIF_H_
+#ifndef LIBIMREAD_EXT_WRITEGIF_HH_
+#define LIBIMREAD_EXT_WRITEGIF_HH_
 
 #include <cstdlib>
 #include <cstdio>
@@ -21,4 +21,4 @@ namespace gif {
     std::vector<byte> write(GIF *gif);
 }
 
-#endif /// LIBIMREAD_EXT_WRITEGIF_H_
+#endif /// LIBIMREAD_EXT_WRITEGIF_HH_

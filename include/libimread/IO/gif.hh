@@ -1,14 +1,14 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
-#define FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#ifndef LIBIMREAD_IO_GIF_HH_
+#define LIBIMREAD_IO_GIF_HH_
 
 #include <memory>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/base.hh>
-#include <libimread/ext/WriteGIF.h>
+#include <libimread/ext/WriteGIF.hh>
 
 namespace im {
     
@@ -57,4 +57,4 @@ namespace im {
 /*
  *   [0]  http://www.astro.keele.ac.uk/oldusers/rno/Computing/File_magic.html
  */ 
-#endif // FISH2K_GIF_H_INCLUDE_GUARD_WED_FEB__1_16_34_50_WET_2012
+#endif /// LIBIMREAD_IO_GIF_HH_

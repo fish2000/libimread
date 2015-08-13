@@ -84,7 +84,7 @@ namespace im {
     std::string stringmerge(const Args& ...args) {
         /// adapted from http://stackoverflow.com/a/21806609/298171
         std::string out;
-        int unpack[] __attribute__((unused)) { 0, 
+        unpack {
             (out += "\t" + im::stringify<Args>(args) + "\n", 0)...
         };
         return out;

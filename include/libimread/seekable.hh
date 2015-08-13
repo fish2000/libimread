@@ -21,7 +21,7 @@ namespace im {
     
     struct seekable {
         virtual ~seekable() { }
-        virtual bool can_seek() const { return false; }
+        virtual bool can_seek() const noexcept { return false; }
         virtual std::size_t seek_absolute(std::size_t) { imread_raise_default(NotImplementedError); }
         virtual std::size_t seek_relative(int) { imread_raise_default(NotImplementedError); }
         virtual std::size_t seek_end(int) { imread_raise_default(NotImplementedError); }
@@ -31,7 +31,7 @@ namespace im {
         
         public:
             virtual ~byte_source() { }
-            virtual std::size_t read(byte *buffer, std::size_t) xWARN_UNUSED = 0;
+            virtual std::size_t read(byte *buffer, std::size_t) warn_unused = 0;
             
             template <std::size_t Nelems>
             std::size_t read(byte (&arr)[Nelems], std::size_t n) {
@@ -84,6 +84,7 @@ namespace im {
                         FF("\t  n = %i", n),
                         FF("\tout = %i", out));
             }
+            
             virtual void flush() { }
             
             template <typename ...Args>

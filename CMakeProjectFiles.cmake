@@ -90,7 +90,7 @@ set(hdrs
     ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.hh
     ${hdrs_dir}/ext/pystring.hh
-    ${hdrs_dir}/ext/WriteGIF.h
+    ${hdrs_dir}/ext/WriteGIF.hh
     
     ${hdrs_dir}/IO/ansi.hh
     ${hdrs_dir}/IO/apple.hh

@@ -50,7 +50,7 @@ namespace im {
                 }
             }
             
-            virtual bool can_seek() const { return true; }
+            virtual bool can_seek() const noexcept { return true; }
             virtual std::size_t seek_absolute(std::size_t pos) { return ::lseek(descriptor, pos, SEEK_SET); }
             virtual std::size_t seek_relative(int delta) { return ::lseek(descriptor, delta, SEEK_CUR); }
             virtual std::size_t seek_end(int delta) { return ::lseek(descriptor, delta, SEEK_END); }
@@ -61,8 +61,8 @@ namespace im {
             virtual std::size_t write(const std::vector<byte> &bv);
             virtual detail::stat_t stat() const;
             
-            virtual int fd() const;
-            virtual void fd(int fd);
+            virtual int fd() const noexcept;
+            virtual void fd(int fd) noexcept;
             
             virtual bool exists() const noexcept;
             virtual int open(char *cpath, filesystem::mode fmode = filesystem::mode::READ);

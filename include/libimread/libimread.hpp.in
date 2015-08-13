@@ -12,26 +12,32 @@
 #define IM_VERSION                      "@libimread_VERSION_MAJOR@.@libimread_VERSION_MINOR@.@libimread_VERSION_PATCH@"
 
 #define IM_COLOR_TRACE                  1
+#define IM_VERBOSE                      0
 
 #define FILESYSTEM_TEMP_SUFFIX          ".imdata"
 #define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"
 #define FILESYSTEM_TEMP_DIRECTORYNAME   "libimread-XXXXXXX"
 
-
 namespace im {
     
     typedef uint8_t byte;
     
-    #define xWARN_UNUSED                __attribute__((__warn_unused_result__))
+    /// unpack {
+    ///     (out += std::to_string(array[I]))...
+    /// };
+    #define unpack                     __attribute__((unused)) int unpacker[]
+    
+    /// virtual void func() warn_unused = 0;
+    #define warn_unused                __attribute__((__warn_unused_result__))
     
     /*
-    #define xALIAS(source)              __attribute__((weak, alias ( #source )))
-    #define xREQUIRED(idx, ...)         __attribute__((__nonnull__(idx, ##__VA_ARGS__)))
-    #define xUNUSED                     __attribute__((__unused__))
-    #define xINLINE                     __attribute__((__always_inline__))
-    #define xOVEROADABLE                __attribute__((__overloadable__))
-    #define xCONST                      __attribute__((__const__))
-    #define xPURE                       __attribute__((__pure__))
+    #define alias(source)              __attribute__((weak, alias ( #source )))
+    #define required(idx, ...)         __attribute__((__nonnull__(idx, ##__VA_ARGS__)))
+    #define unused                     __attribute__((__unused__))
+    #define always_inline              __attribute__((__always_inline__))
+    #define overloadable               __attribute__((__overloadable__))
+    #define always_const               __attribute__((__const__))
+    #define always_pure                __attribute__((__pure__))
     */
      
 }

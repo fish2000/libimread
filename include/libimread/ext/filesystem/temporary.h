@@ -45,10 +45,10 @@ namespace filesystem {
                                             create();
                                         }
         
-        inline std::string   str()  { return filepath.str(); }
-        inline const char *c_str()  { return filepath.c_str(); }
-        operator std::string()      { return str(); }
-        operator const char*()      { return c_str(); }
+        inline std::string   str() const noexcept  { return filepath.str(); }
+        inline const char *c_str() const noexcept  { return filepath.c_str(); }
+        operator std::string() const noexcept      { return str(); }
+        operator const char*() const noexcept      { return c_str(); }
         
         void create();
         void remove();
@@ -86,8 +86,8 @@ namespace filesystem {
                 dirpath = path(::mkdtemp(::strdup(tplpath.c_str())));
             }
         
-        operator std::string() { return dirpath.str(); }
-        operator const char*() { return dirpath.c_str(); }
+        operator std::string() const noexcept { return dirpath.str(); }
+        operator const char*() const noexcept { return dirpath.c_str(); }
         
         NamedTemporaryFile get(const std::string &suffix = tfs,
                                const std::string &prefix = tfp,

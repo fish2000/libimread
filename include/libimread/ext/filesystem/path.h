@@ -61,7 +61,7 @@ namespace filesystem {
         
         filesystem::file ffopen(const std::string &s, mode m = mode::READ);
         
-        inline const char *tmpdir() {
+        inline const char *tmpdir() noexcept {
             /// cribbed/tweaked from boost
             const char *dirname;
             dirname = std::getenv("TMPDIR");

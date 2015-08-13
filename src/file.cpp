@@ -59,11 +59,11 @@ namespace im {
         return res;
     }
     
-    int fd_source_sink::fd() const {
+    int fd_source_sink::fd() const noexcept {
         return descriptor;
     }
     
-    void fd_source_sink::fd(int fd) {
+    void fd_source_sink::fd(int fd) noexcept {
         descriptor = fd;
     }
     

@@ -1,7 +1,8 @@
 // Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 // License: MIT (see COPYING.MIT file)
 
-#include <libimread/ext/WriteGIF.h>
+#include <libimread/libimread.hpp>
+#include <libimread/ext/WriteGIF.hh>
 #include <libimread/ext/fmemopen.hh>
 #include <libimread/errors.hh>
 
@@ -27,9 +28,7 @@ using im::byte;
         trailer
 **************************************************/
 
-#define VERBOSE 1
-
-#if (VERBOSE > 0)
+#if (IM_VERBOSE > 0)
 #define MAYBE(...) FORSURE(__VA_ARGS__)
 #else
 #define MAYBE(...)
