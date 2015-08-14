@@ -15,9 +15,10 @@
 #include <initializer_list>
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/private/buffer_t.h>
 #include <libimread/color.hh>
-#include <libimread/errors.hh>
+#include <libimread/pixels.hh>
 #include <libimread/fs.hh>
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
@@ -69,10 +70,10 @@ namespace im {
                 buffer.extent[1] = y;
                 buffer.extent[2] = z;
                 buffer.extent[3] = w;
-                buffer.stride[0] = 1;
+                buffer.stride[0] = x * y;
                 buffer.stride[1] = x;
-                buffer.stride[2] = x * y;
-                buffer.stride[3] = x * y * z;
+                buffer.stride[2] = 1;
+                buffer.stride[3] = 1;
                 buffer.elem_size = sizeof(channel_t);
                 
                 std::size_t size = x * y * z;
@@ -251,6 +252,13 @@ namespace im {
                 return out;
             }
             
+            const std::size_t size() const{
+                return contents->buffer.extent[0] *
+                       contents->buffer.extent[1] *
+                       contents->buffer.extent[2];
+            }
+            
+            /// Halide static image API
             operator buffer_t *() const {
                 return &(contents->buffer);
             }
@@ -286,6 +294,54 @@ namespace im {
                 contents->buffer.min[1] = y;
                 contents->buffer.min[2] = z;
                 contents->buffer.min[3] = w;
+            }
+            
+            /// Color conversion
+            using toRGB = color::Convert<Color,     im::color::RGB>;
+            using toRGBA = color::Convert<Color,    im::color::RGBA>;
+            using toMono = color::Convert<Color,    im::color::Monochrome>;
+            
+            template <typename Conversion,
+                      typename Output = typename Conversion::dest_color_t::channel_t>
+            std::shared_ptr<Output> convert() {
+                using color_t = typename Conversion::color_t;
+                using dest_color_t = typename Conversion::dest_color_t;
+                using source_component_t = typename color_t::component_t;
+                using in_t = typename color_t::channel_t;
+                using out_t = Output;
+                
+                Conversion converter;
+                std::shared_ptr<out_t> out(new out_t[sizeof(out_t)*size()+40]);
+                out_t *data = out.get();
+                
+                dest_color_t dest_color;
+                const int w = width(),
+                          h = height(),
+                          c = dest_color_t::channels(),
+                          siz = sizeof(out_t) * c;
+                
+                pix::accessor<in_t> at = access();
+                pix::accessor<out_t> to = pix::accessor<out_t>(data, w * h,
+                                                                     w, 1);
+                
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++) {
+                        dest_color = converter(Color((source_component_t)at(x, y, 0)));
+                        std::memcpy(to(x, y, 0), &dest_color.components[0], siz);
+                    }
+                }
+                
+                return out;
+            };
+            
+            operator InterleavedImage<im::color::RGB>() const {
+                return convert<toRGB>();
+            }
+            operator InterleavedImage<im::color::RGBA>() const {
+                return convert<toRGBA>();
+            }
+            operator InterleavedImage<im::color::Monochrome>() const {
+                return convert<toMono>();
             }
             
             /// im::Image overrides

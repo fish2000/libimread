@@ -38,6 +38,13 @@ namespace im {
                    << std::hex << tvalue;
             return stream.str();
         }
+        
+        template <typename T, typename U>
+        using same = typename std::is_same<T, U>::type;
+        
+        template <typename T, typename U>
+        using different = typename std::integral_constant<bool, !std::is_same<T, U>::value>::type;
+        
     }
     
     namespace meta {
@@ -182,6 +189,8 @@ namespace im {
         constexpr bool operator==(const Components& rhs) noexcept { return bool(components == rhs); }
         constexpr bool operator!=(const Components& rhs) noexcept { return bool(components != rhs); }
         
+        static constexpr std::size_t channels() noexcept { return N; }
+        
         constexpr unsigned int distance(const UniformColor& rhs) const noexcept {
             return distance_impl(rhs, 0, index_t());
         }
@@ -230,6 +239,140 @@ namespace im {
         using RGBA = UniformColor<>;
         using RGB = UniformColor<meta::RGB>;
         using HDR = UniformColor<meta::RGBA, int64_t, int16_t>;
+        
+        //using rgba = UniformColor<>
+        
+        template <typename Color, typename DestColor>
+        struct ConverterBase {
+            using color_t = Color;
+            using dest_color_t = DestColor;
+            constexpr ConverterBase() noexcept = default;
+            virtual ~ConverterBase() {}
+            // virtual dest_color_t operator()(const color_t& color) const = 0;
+        };
+        
+        template <typename Color, typename DestColor>
+        struct Convert : public ConverterBase<Color, DestColor> {};
+        
+        template <>
+        struct Convert<RGB, RGB> {
+            using Base = ConverterBase<RGB, RGB>;
+            static_assert(detail::same<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t must be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                return (Base::dest_color_t)color;
+            }
+        };
+        
+        template <>
+        struct Convert<RGBA, RGBA> {
+            using Base = ConverterBase<RGBA, RGBA>;
+            static_assert(detail::same<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t must be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                return (Base::dest_color_t)color;
+            }
+        };
+        
+        template <>
+        struct Convert<Monochrome, Monochrome> {
+            using Base = ConverterBase<Monochrome, Monochrome>;
+            static_assert(detail::same<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t must be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                return (Base::dest_color_t)color;
+            }
+        };
+        
+        template <>
+        struct Convert<RGB, RGBA> {
+            using Base = ConverterBase<RGB, RGBA>;
+            static_assert(detail::different<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t cannot be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                /// discard alpha for now
+                Base::dest_color_t out{ color.components[0],
+                                        color.components[1],
+                                        color.components[2] };
+                return out;
+            }
+        };
+        
+        template <>
+        struct Convert<RGBA, RGB> {
+            using Base = ConverterBase<RGBA, RGB>;
+            static_assert(detail::different<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t cannot be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                /// set alpha to zero for now
+                Base::dest_color_t out{ color.components[0],
+                                        color.components[1],
+                                        color.components[2],
+                                        0x00 };
+                return out;
+            }
+        };
+        
+        template <>
+        struct Convert<RGB, Monochrome> {
+            using Base = ConverterBase<RGB, Monochrome>;
+            static_assert(detail::different<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t cannot be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                /// ITU R-601.2 -- adapted from my own Python code here:
+                /// https://github.com/fish2000/pylire/blob/master/pylire/process/grayscale.py#L6-L12
+                using val_t = typename Base::dest_color_t::channel_t;
+                Base::dest_color_t out{ val_t(float(color.components[0]) * 299.0f / 1000.0f +
+                                              float(color.components[1]) * 587.0f / 1000.0f +
+                                              float(color.components[2]) * 114.0f / 1000.0f) };
+                return out;
+            }
+        };
+        
+        template <>
+        struct Convert<RGBA, Monochrome> {
+            using Base = ConverterBase<RGBA, Monochrome>;
+            static_assert(detail::different<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t cannot be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                /// ITU R-601.2, as above -- 
+                /// only taking the RGB values, ignoring alpha
+                using val_t = typename Base::dest_color_t::channel_t;
+                Base::dest_color_t out{ val_t(float(color.components[0]) * 299.0f / 1000.0f +
+                                              float(color.components[1]) * 587.0f / 1000.0f +
+                                              float(color.components[2]) * 114.0f / 1000.0f) };
+                return out;
+            }
+        };
+        
+        template <>
+        struct Convert<Monochrome, RGB> {
+            using Base = ConverterBase<Monochrome, RGB>;
+            static_assert(detail::different<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t cannot be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                /// using the one value for the many (x3)
+                using val_t = typename Base::dest_color_t::channel_t;
+                const val_t value = val_t(color.components[0]);
+                Base::dest_color_t out{ value, value, value };
+                return out;
+            }
+        };
+        
+        template <>
+        struct Convert<Monochrome, RGBA> {
+            using Base = ConverterBase<Monochrome, RGBA>;
+            static_assert(detail::different<Base::color_t, Base::dest_color_t>(),
+                         "Color types color_t and dest_color_t cannot be the same");
+            virtual Base::dest_color_t operator()(const Base::color_t& color) const {
+                /// using the one value for the many (x4)
+                using val_t = typename Base::dest_color_t::channel_t;
+                const val_t value = val_t(color.components[0]);
+                Base::dest_color_t out{ value, value, value, value };
+                return out;
+            }
+        };
+        
     }
     
     
