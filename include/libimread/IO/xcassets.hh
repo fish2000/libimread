@@ -12,7 +12,7 @@ namespace im {
     
     class XCAssetsFormat : public PNGFormat {
         public:
-            typedef PNGFormat::can_write    can_write;
+            using can_write = PNGFormat::can_write;
             
             static bool match_format(byte_source *src) {
                 /// not sure how this will actually work,

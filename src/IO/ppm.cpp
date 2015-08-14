@@ -53,7 +53,7 @@ namespace im {
         if (bit_depth == 8) {
             uint8_t *data = new uint8_t[full_size];
             imread_assert(fread(static_cast<void*>(data),
-                          sizeof(uint8_t), full_size, membuf.get()) == static_cast<size_t>(full_size),
+                          sizeof(uint8_t), full_size, membuf.get()) == static_cast<std::size_t>(full_size),
                     "Could not read PPM 8-bit data\n");
             
             uint8_t *im_data = im->rowp_as<uint8_t>(0);
@@ -72,7 +72,7 @@ namespace im {
             int little_endian = detail::is_little_endian();
             uint16_t *data = new uint16_t[full_size];
             imread_assert(fread(static_cast<void*>(data),
-                          sizeof(uint16_t), full_size, membuf.get()) == static_cast<size_t>(full_size),
+                          sizeof(uint16_t), full_size, membuf.get()) == static_cast<std::size_t>(full_size),
                 "Could not read PPM 16-bit data\n");
             
             uint16_t *im_data = im->rowp_as<uint16_t>(0);
@@ -117,7 +117,7 @@ namespace im {
                     }
                 }
             }
-            imread_assert(output->write(data, full_size) == static_cast<size_t>(full_size),
+            imread_assert(output->write(data, full_size) == static_cast<std::size_t>(full_size),
                 "Could not write PPM 8-bit data\n");
             delete[] data;
         } else if (bit_depth == 16) {
@@ -135,7 +135,7 @@ namespace im {
                     }
                 }
             }
-            imread_assert(output->write(data, full_size) == static_cast<size_t>(full_size),
+            imread_assert(output->write(data, full_size) == static_cast<std::size_t>(full_size),
                 "Could not write PPM 16-bit data\n");
             delete[] data;
         }

@@ -82,15 +82,15 @@ namespace {
         }
     }
     
-    TEST_CASE("[objc-rt] Call an instance method with int and NSString arguments via objc::msg::send()",
-              "[objc-rt-call-instance-method-multiple-args-int-and-pointer-to-nsstring]")
-    {
-        @autoreleasepool {
-            IMTestReceiver *imts = [[IMTestReceiver alloc] init];
-            NSString __autoreleasing *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
-            objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, stringArg);
-        }
-    }
+    // TEST_CASE("[objc-rt] Call an instance method with int and NSString arguments via objc::msg::send()",
+    //           "[objc-rt-call-instance-method-multiple-args-int-and-pointer-to-nsstring]")
+    // {
+    //     @autoreleasepool {
+    //         IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+    //         NSString __autoreleasing *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
+    //         objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, stringArg);
+    //     }
+    // }
     
     // BLEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
     //     im::fs::NamedTemporaryFile temporary;

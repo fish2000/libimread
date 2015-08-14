@@ -11,7 +11,7 @@ namespace im {
 
     class BMPFormat : public ImageFormat {
         public:
-            typedef std::true_type can_read;
+            using can_read = std::true_type;
             
             static bool match_format(byte_source *src) {
                 return match_magic(src, "\x42\x4d", 2);

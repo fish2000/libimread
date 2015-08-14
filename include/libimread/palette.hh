@@ -270,8 +270,12 @@ namespace im {
         
         constexpr std::size_t max_size() const noexcept { return N; }
         inline const std::size_t size() const { return items.size(); }
+        
         inline const bool contains(composite_t composite) const {
             return static_cast<bool>(items.count(Color(composite)));
+        }
+        inline const bool contains(const Color& color) const {
+            return static_cast<bool>(items.count(color));
         }
         
         inline const bool remove(const Color& color) { return static_cast<bool>(items.erase(color)); }

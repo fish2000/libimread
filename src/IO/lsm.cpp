@@ -148,9 +148,9 @@ namespace {
 #define LSM_COMPRESSED 5
 
 namespace im {
-
+    
     namespace {
-
+        
         class LSMReader {
           public:
             LSMReader(byte_source *s);
@@ -181,7 +181,7 @@ namespace im {
             int AnalyzeTag(byte_source *, unsigned long);
             int ReadScanInformation(byte_source *, unsigned long);
             unsigned long GetOffsetToImage(int, int);
-
+            
             void CalculateExtentAndSpacing(int extent[6], double spacing[3]);
             void DecodeHorizontalDifferencing(unsigned char *, int);
             void DecodeHorizontalDifferencingUnsignedShort(unsigned short *,
@@ -239,11 +239,11 @@ namespace im {
                      bool swap = false) {
             s->seek_absolute(*pos);
             const unsigned ret = s->read(reinterpret_cast<byte *>(buf), size);
-#ifdef VTK_WORDS_BIGENDIAN
-            if (swap) {
-                vtkByteSwap::SwapLERange(buf, size);
-            }
-#endif
+            #ifdef VTK_WORDS_BIGENDIAN
+                if (swap) {
+                    vtkByteSwap::SwapLERange(buf, size);
+                }
+            #endif
             *pos += ret;
             return ret;
         }
@@ -282,45 +282,45 @@ namespace im {
         int ReadInt(byte_source *s, unsigned long *pos) {
             char buff[4];
             ReadFile(s, pos, 4, buff);
-#ifdef VTK_WORDS_BIGENDIAN
-            vtkByteSwap::Swap4LE((int *)buff);
-#endif
+            #ifdef VTK_WORDS_BIGENDIAN
+                vtkByteSwap::Swap4LE((int *)buff);
+            #endif
             return CharPointerToInt(buff);
         }
         
         unsigned int ReadUnsignedInt(byte_source *s, unsigned long *pos) {
             char buff[4];
             ReadFile(s, pos, 4, buff);
-#ifdef VTK_WORDS_BIGENDIAN
-            vtkByteSwap::Swap4LE((unsigned int *)buff);
-#endif
+            #ifdef VTK_WORDS_BIGENDIAN
+                vtkByteSwap::Swap4LE((unsigned int *)buff);
+            #endif
             return CharPointerToUnsignedInt(buff);
         }
         
         short ReadShort(byte_source *s, unsigned long *pos) {
             char buff[2];
             ReadFile(s, pos, 2, buff);
-#ifdef VTK_WORDS_BIGENDIAN
-            vtkByteSwap::Swap2LE((short *)buff);
-#endif
+            #ifdef VTK_WORDS_BIGENDIAN
+                vtkByteSwap::Swap2LE((short *)buff);
+            #endif
             return CharPointerToShort(buff);
         }
         
         unsigned short ReadUnsignedShort(byte_source *s, unsigned long *pos) {
             char buff[2];
             ReadFile(s, pos, 2, buff);
-#ifdef VTK_WORDS_BIGENDIAN
-            vtkByteSwap::Swap2LE((unsigned short *)buff);
-#endif
+            #ifdef VTK_WORDS_BIGENDIAN
+                vtkByteSwap::Swap2LE((unsigned short *)buff);
+            #endif
             return CharPointerToUnsignedShort(buff);
         }
         
         double ReadDouble(byte_source *s, unsigned long *pos) {
             char buff[8];
             ReadFile(s, pos, 8, buff);
-#ifdef VTK_WORDS_BIGENDIAN
-            vtkByteSwap::Swap8LE((double *)buff);
-#endif
+            #ifdef VTK_WORDS_BIGENDIAN
+                vtkByteSwap::Swap8LE((double *)buff);
+            #endif
             return CharPointerToDouble(buff);
         }
         
@@ -379,7 +379,7 @@ namespace im {
                 = this->NumberOfIntensityValues[2]
                 = this->NumberOfIntensityValues[3] = 0;
         }
-
+        
         LSMReader::~LSMReader() {
             this->channel_names_.clear();
             this->channel_colors_.clear();
@@ -394,19 +394,19 @@ namespace im {
         }
         
         void LSMReader::SetDataByteOrderToBigEndian() {
-#ifndef VTK_WORDS_BIGENDIAN
-            this->swap_bytes_ = false;
-#else
-            this->swap_bytes_ = true;
-#endif
+            #ifndef VTK_WORDS_BIGENDIAN
+                this->swap_bytes_ = false;
+            #else
+                this->swap_bytes_ = true;
+            #endif
         }
         
         void LSMReader::SetDataByteOrderToLittleEndian() {
-#ifdef VTK_WORDS_BIGENDIAN
-            this->swap_bytes_ = true;
-#else
-            this->swap_bytes_ = false;
-#endif
+            #ifdef VTK_WORDS_BIGENDIAN
+                this->swap_bytes_ = true;
+            #else
+                this->swap_bytes_ = false;
+            #endif
         }
         
         std::string LSMReader::GetChannelName(int chNum) {
@@ -470,13 +470,9 @@ namespace im {
             nameBuff = new char[sizeOfNames + 1];
             name = new char[sizeOfNames + 1];
             
-            if (colNum != this->dimensions_[4]) {
-                // not great
-            }
-            if (nameNum != this->dimensions_[4]) {
-                // not great
-            }
-
+            if (colNum != this->dimensions_[4]) {} // not great
+            if (nameNum != this->dimensions_[4]) {} // not great
+            
             // Read offset to color info
             colorOffset = ReadInt(s, &pos) + start;
             // Read offset to name info
@@ -747,15 +743,16 @@ namespace im {
             const unsigned short tag = ReadUnsignedShort(s, &startPos);
             const unsigned short type = ReadUnsignedShort(s, &startPos);
             const unsigned short length = ReadUnsignedInt(s, &startPos);
-
+            
             ReadFile(s, &startPos, 4, tempValue);
-
+            
             for (int i = 0; i < 4; i++) { tempValue2[i] = tempValue[i]; }
-#ifdef VTK_WORDS_BIGENDIAN
-            vtkByteSwap::Swap4LE((unsigned int *)tempValue2);
-#endif
+            
+            #ifdef VTK_WORDS_BIGENDIAN
+                vtkByteSwap::Swap4LE((unsigned int *)tempValue2);
+            #endif
             value = CharPointerToUnsignedInt(tempValue2);
-
+            
             // if there is more than 4 bytes in value,
             // value is an offset to the actual data
             dataSize = TIFF_BYTES(type);
@@ -778,26 +775,26 @@ namespace im {
                 break;
             
             case TIF_IMAGEWIDTH:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
+                #endif
                 // this->dimensions_[0] =
                 // this->CharPointerToUnsignedInt(actualValue);
                 // this->dimensions_[0] = value;
                 break;
             
             case TIF_IMAGELENGTH:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-// this->dimensions_[1] = this->CharPointerToUnsignedInt(actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
+                    // this->dimensions_[1] = this->CharPointerToUnsignedInt(actualValue);
+                #endif
                 // this->dimensions_[1] = value;
                 break;
             
             case TIF_BITSPERSAMPLE:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
+                #endif
                 this->bits_per_sample_.resize(length);
                 unsigned short bits_per_sample_;
                 for (int i = 0; i < length; i++) {
@@ -808,25 +805,25 @@ namespace im {
                 break;
             
             case TIF_COMPRESSION:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
+                #endif
                 this->compression_ = CharPointerToUnsignedShort(actualValue);
                 break;
             
             case TIF_PHOTOMETRICINTERPRETATION:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
+                #endif
                 this->PhotometricInterpretation
                     = CharPointerToUnsignedShort(actualValue);
                 break;
             
             case TIF_STRIPOFFSETS:
                 this->strip_offset_.resize(length);
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LERange((unsigned int *)actualValue, length);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap4LERange((unsigned int *)actualValue, length);
+                #endif
                 if (length > 1) {
                     for (int i = 0; i < length; ++i) {
                         unsigned int *offsets = (unsigned int *)actualValue;
@@ -838,16 +835,16 @@ namespace im {
                 break;
             
             case TIF_SAMPLESPERPIXEL:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
+                #endif
                 this->sample_per_pixel_ = CharPointerToUnsignedInt(actualValue);
                 break;
             
             case TIF_STRIPBYTECOUNTS:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LERange((unsigned int *)actualValue, length);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap4LERange((unsigned int *)actualValue, length);
+                #endif
                 this->strip_byte_count_.resize(length);
                 if (length > 1) {
                     for (int i = 0; i < length; ++i) {
@@ -860,24 +857,23 @@ namespace im {
                 break;
             
             case TIF_PLANARCONFIGURATION:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-#endif
-                this->PlanarConfiguration
-                    = CharPointerToUnsignedShort(actualValue);
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
+                #endif
+                this->PlanarConfiguration = CharPointerToUnsignedShort(actualValue);
                 break;
             
             case TIF_PREDICTOR:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
+                #endif
                 this->Predictor = CharPointerToUnsignedShort(actualValue);
                 break;
             
             case TIF_COLORMAP:
-#ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-#endif
+                #ifdef VTK_WORDS_BIGENDIAN
+                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
+                #endif
                 // this->ColorMapOffset = CharPointerToUnsignedInt(actualValue);
                 break;
             

@@ -63,38 +63,38 @@ namespace im {
                 UnicodeByteArray()
                     :ByteImage(), BaseImage()
                     {}
-            
+                
                 UnicodeByteArray(int x, int y, int z=8)
                     :ByteImage(x/2, y/4, z), BaseImage()
                     {}
-            
+                
                 virtual ~UnicodeByteArray() {}
-            
-                virtual int nbits() const override {
+                
+                virtual const int nbits() const override {
                     /// elem_size is in BYTES, so:
                     return sizeof(uint8_t) * 8;
                 }
-            
-                virtual int nbytes() const override {
+                
+                virtual const int nbytes() const override {
                     return sizeof(uint8_t);
                 }
-            
+                
                 virtual int ndims() const override {
                     return ByteImage::dimensions();
                 }
-            
+                
                 virtual int dim(int d) const override {
                     return ByteImage::extent(d);
                 }
-            
+                
                 virtual int stride(int s) const override {
                     return ByteImage::stride(s);
                 }
-            
+                
                 inline off_t rowp_stride() const {
                     return ByteImage::channels() == 1 ? 0 : off_t(ByteImage::stride(1));
                 }
-            
+                
                 virtual void *rowp(int r) override {
                     /// WARNING: FREAKY POINTERMATH FOLLOWS
                     uint8_t *host = (uint8_t *)ByteImage::data();

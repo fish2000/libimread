@@ -18,9 +18,9 @@ namespace im {
             virtual ~Image() {}
             
             virtual void *rowp(int r) = 0;
-            virtual int nbits() const = 0;
+            virtual const int nbits() const = 0;
             
-            virtual int nbytes() const {
+            virtual const int nbytes() const {
                 const int bits = this->nbits();
                 return (bits / 8) + bool(bits % 8);
             }
@@ -29,8 +29,8 @@ namespace im {
             virtual int dim(int) const = 0;
             virtual int stride(int) const = 0;
             
-            virtual int dim_or(int dim, int def) const {
-                if (dim >= this->ndims()) { return def; }
+            virtual int dim_or(int dim, int default_value) const {
+                if (dim >= this->ndims()) { return default_value; }
                 return this->dim(dim);
             }
             
@@ -47,13 +47,13 @@ namespace im {
             }
             
             template <typename T> inline
-            std::vector<T*> allrows() {
-                std::vector<T*> res;
+            std::vector<T*> allrows() const {
+                std::vector<T*> rows;
                 const int h = this->dim(0);
                 for (int r = 0; r != h; ++r) {
-                    res.push_back(this->rowp_as<T>(r));
+                    rows.push_back(this->rowp_as<T>(r));
                 }
-                return res;
+                return rows;
             }
     };
     
@@ -93,7 +93,7 @@ namespace im {
             
             virtual ~ImageWithMetadata() {}
             
-            std::string get_meta() { return meta; }
+            const std::string& get_meta() const { return meta; }
             void set_meta(const std::string &m) { meta = std::string(m); }
             
         private:
@@ -102,8 +102,8 @@ namespace im {
     
     /// This class *owns* its members and will delete them if destroyed
     struct ImageList {
-        typedef std::vector<Image*> vector_type;
-        typedef vector_type::size_type size_type;
+        using vector_type = std::vector<Image*>;
+        using size_type = vector_type::size_type;
         
         ImageList() {}
         

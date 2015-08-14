@@ -20,13 +20,13 @@ namespace im {
                 { set("metadata", ""); }
     };
     
-    std::string get_optional_string(const options_map &opts,  const std::string key);
-    const char *get_optional_cstring(const options_map &opts, const std::string key);
+    std::string get_optional_string(const options_map& opts,  const std::string& key);
+    const char *get_optional_cstring(const options_map& opts, const std::string& key);
     
-    int get_optional_int(const options_map &opts,   const std::string key,
-                                                    const int def);
-    bool get_optional_bool(const options_map &opts, const std::string key,
-                                                    const int def);
+    int get_optional_int(const options_map& opts,   const std::string& key,
+                                                    const int default_value);
+    bool get_optional_bool(const options_map& opts, const std::string& key,
+                                                    const bool default_value);
     
 }
 

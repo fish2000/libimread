@@ -14,8 +14,8 @@ namespace im {
 
     class JPEGFormat : public ImageFormat {
         public:
-            typedef std::true_type can_read;
-            typedef std::true_type can_write;
+            using can_read = std::true_type;
+            using can_write = std::true_type;
             
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {

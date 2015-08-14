@@ -58,7 +58,7 @@ std::vector<unsigned char> lzw_decode(void *buf, unsigned long len) {
     std::vector<std::string> table;
     std::vector<unsigned char> output;
     code_stream st(static_cast<unsigned char*>(buf), len);
-
+    
     int nbits = 9;
     unsigned short old_code = 0;
     const short ClearCode = 256;
@@ -74,9 +74,9 @@ std::vector<unsigned char> lzw_decode(void *buf, unsigned long len) {
             write_string(output, table[next_code]);
             old_code = next_code;
         } else if (code < 256 || (code - 258) < short(table.size())) {
-            write_string(output, table_at(table,code));
+            write_string(output, table_at(table, code));
             table.push_back(
-                    table_at(table,old_code) + table_at(table,code)[0]);
+                    table_at(table, old_code) + table_at(table,code)[0]);
             old_code = code;
         } else {
             std::string out_string = table_at(table, old_code) + table_at(table, old_code)[0];

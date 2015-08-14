@@ -6,6 +6,6 @@
 
 namespace im {
     
-    const ImageFormat::options_type ImageFormat::options = ImageFormat::OPTS();
+    const ImageFormat::options_t ImageFormat::options = ImageFormat::OPTS();
     
 }

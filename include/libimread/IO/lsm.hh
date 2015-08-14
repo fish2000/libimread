@@ -68,7 +68,7 @@ namespace im {
 
     class LSMFormat : public ImageFormat {
         public:
-            typedef std::true_type can_read;
+            using can_read = std::true_type;
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,

@@ -56,7 +56,7 @@ namespace im {
             const std::size_t curpos = s->seek_relative(0);
             const std::size_t size = s->seek_end(0);
             s->seek_absolute(curpos);
-            return size;
+            return toff_t(size);
         }
         
         void tiff_error(const char *module, const char *fmt, va_list ap) {
@@ -193,11 +193,11 @@ namespace im {
         std::unique_ptr<ImageList> images(new ImageList);
         const uint32_t h = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
         const uint32_t w = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
-
+        
         const uint16_t nr_samples = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, 1);
         const uint16_t bits_per_sample = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE, 8);
         const int depth = nr_samples > 1 ? nr_samples : -1;
-
+        
         const int strip_size = TIFFStripSize(t.tif);
         const int n_strips = TIFFNumberOfStrips(t.tif);
         int32_t n_planes;
@@ -297,14 +297,14 @@ namespace im {
                                                         PHOTOMETRIC_RGB :
                                                         PHOTOMETRIC_MINISBLACK);
         
-        TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH, uint32_t(h));
-        TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH, uint32_t(input.dim(1)));
+        TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH,        static_cast<uint32_t>(h));
+        TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH,         static_cast<uint32_t>(input.dim(1)));
         
-        TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE, uint16_t(input.nbits()));
-        TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL, uint16_t(input.dim_or(2, 1)));
+        TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE,      static_cast<uint16_t>(input.nbits()));
+        TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL,    static_cast<uint16_t>(input.dim_or(2, 1)));
         
-        TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC, uint16_t(photometric));
-        TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+        TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
+        TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
         
         if (get_optional_bool(opts, "tiff:compress", true)) {
             TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);

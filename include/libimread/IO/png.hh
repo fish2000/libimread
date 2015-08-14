@@ -18,11 +18,11 @@ namespace im {
     class PNGFormat : public ImageFormat {
         
         public:
-            typedef std::true_type can_read;
-            typedef std::true_type can_write;
+            using can_read = std::true_type;
+            using can_write = std::true_type;
             
-            static const options_type OPTS() {
-                const options_type O(
+            static const options_t OPTS() {
+                const options_t O(
                     "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
                     "png"
                 );

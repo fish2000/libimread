@@ -5,5 +5,5 @@
 #include <libimread/ansicolor.hh>
 
 namespace ansi {
-    const map<std::string, ANSI> color::idx = color::init();
+    //const map<std::string, ANSI> color::idx = color::init();
 }

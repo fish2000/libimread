@@ -18,10 +18,10 @@ namespace im {
 
     class TIFFFormat : public ImageFormat {
         public:
-            typedef std::true_type can_read;
-            typedef std::true_type can_read_multi;
-            typedef std::true_type can_read_metadata;
-            typedef std::true_type can_write;
+            using can_read = std::true_type;
+            using can_read_multi = std::true_type;
+            using can_read_metadata = std::true_type;
+            using can_write = std::true_type;
             
             static bool match_format(byte_source *src) {
                 return match_magic(src, "\x4d\x4d\x00\x2a", 4) ||
@@ -58,7 +58,7 @@ namespace im {
     
     class STKFormat : public ImageFormat {
         public:
-            typedef std::true_type can_read_multi;
+            using can_read_multi = std::true_type;
             
             virtual std::unique_ptr<ImageList> read_multi(
                 byte_source *s,

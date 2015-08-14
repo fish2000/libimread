@@ -15,8 +15,7 @@ TEST_CASE("[terminator] Display an exception with imread_raise_default()", "[ter
 
 TEST_CASE("[terminator] Display an exception with imread_raise()", "[terminator-imread-raise]") {
     CHECK_THROWS_AS(
-        imread_raise(ProgrammingError,
-            "This is a programming error,", "... dogg"),
+        imread_raise(ProgrammingError, "This is a programming error,", "... dogg"),
         ProgrammingError);
 }
 

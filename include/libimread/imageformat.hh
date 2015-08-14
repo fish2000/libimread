@@ -33,28 +33,27 @@ namespace im {
     class ImageFormat {
         
         public:
-            typedef std::false_type can_read;
-            typedef std::false_type can_read_multi;
-            typedef std::false_type can_read_metadata;
-            typedef std::false_type can_write;
-            typedef std::false_type can_write_multi;
-            typedef std::false_type can_write_metadata;
+            using can_read              = std::false_type;
+            using can_read_multi        = std::false_type;
+            using can_read_metadata     = std::false_type;
+            using can_write             = std::false_type;
+            using can_write_multi       = std::false_type;
+            using can_write_metadata    = std::false_type;
             
-            typedef decltype(D(
+            using options_t             = decltype(D(
                 _signature(_optional, _json_key = _signature)  = std::string(),
                 _suffix(_optional, _json_key = _suffix)        = std::string()
-            ))
-                options_type;
+            ));
             
-            static const options_type OPTS() {
-                const options_type O(
+            static const options_t OPTS() {
+                const options_t O(
                     "xxxxxxxx",         /// signature
                     "image"             /// suffix
                 );
                 return O;
             }
             
-            static const options_type options;
+            static const options_t options;
             
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {

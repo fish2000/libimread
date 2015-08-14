@@ -19,8 +19,8 @@ namespace im {
     
     class ANSIFormat : public ImageFormat {
         public:
-            typedef std::true_type can_write;
-            typedef std::true_type can_write_multi;
+            using can_write = std::true_type;
+            using can_write_multi = std::true_type;
             
             virtual void write(Image &input,
                                byte_sink *output,

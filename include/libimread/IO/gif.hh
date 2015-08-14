@@ -27,8 +27,8 @@ namespace im {
     
     class GIFFormat : public ImageFormat {
         public:
-            typedef std::true_type can_write;
-            typedef std::true_type can_write_multi;
+            using can_write = std::true_type;
+            using can_write_multi = std::true_type;
             
             static bool match_format(byte_source *src) {
                 /// 47 49 46 38 ("GIF8" in ASCII);

@@ -52,8 +52,8 @@ namespace im {
         template <typename P = byte, typename O = std::ptrdiff_t>
         struct alignas(alignof(P) * 16) accessor {
             /// Pointer difference and pixel types
-            typedef O pd_t;
-            typedef P px_t;
+            using pd_t = O;
+            using px_t = P;
             
             /// Stride values
             const pd_t stride0, stride1, stride2;

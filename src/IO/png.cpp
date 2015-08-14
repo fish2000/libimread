@@ -56,15 +56,15 @@ namespace im {
                 enum holder_mode { read_mode, write_mode } mode;
         };
         
-        void read_from_source(png_structp png_ptr, png_byte *buffer, size_t n) {
+        void read_from_source(png_structp png_ptr, png_byte *buffer, std::size_t n) {
             byte_source *s = static_cast<byte_source*>(png_get_io_ptr(png_ptr));
-            const size_t actual = s->read(reinterpret_cast<byte*>(buffer), n);
+            const std::size_t actual = s->read(reinterpret_cast<byte*>(buffer), n);
             if (actual != n) { imread_raise_default(CannotReadError); }
         }
         
-        void write_to_source(png_structp png_ptr, png_byte *buffer, size_t n) {
+        void write_to_source(png_structp png_ptr, png_byte *buffer, std::size_t n) {
             byte_sink *s = static_cast<byte_sink*>(png_get_io_ptr(png_ptr));
-            const size_t actual = s->write(reinterpret_cast<byte*>(buffer), n);
+            const std::size_t actual = s->write(reinterpret_cast<byte*>(buffer), n);
             if (actual != n) { imread_raise_default(CannotReadError); }
         }
         

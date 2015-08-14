@@ -7,11 +7,11 @@
 #include <cstring>
 #include <string>
 #include <iostream>
-#include <map>
+//#include <map>
 
 namespace ansi {
-
-    using std::map;
+    
+    //using std::map;
     
     enum ANSICode {
         FM_RESET            = 0,
@@ -70,6 +70,7 @@ namespace ansi {
     };
     
     /// XXX: fuck this map, it’s slow and redundant
+    /*
     struct color {
         static map<std::string, ANSI> init() {
             map<std::string, ANSI> _color_map = {
@@ -96,6 +97,7 @@ namespace ansi {
         }
         static const map<std::string, ANSI> idx;
     };
+    */
     
     const ANSI reset = ANSI(FM_RESET);
     const ANSI termdefault = ANSI(FG_DEFAULT_COLOR);
