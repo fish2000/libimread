@@ -188,26 +188,24 @@ namespace objc {
         prebound_t dispatcher;
         sender_t dispatch_with = (sender_t)objc_msgSend;
         
-        explicit arguments(Args&&... a)
+        explicit arguments(Args... a)
             :args(std::forward_as_tuple(a...))
             {}
         
         private:
             template <std::size_t ...I> inline
-            Return send_impl(types::rID self, types::rSEL op, std::index_sequence<I...>) {
-                return dispatcher(types::pass_id(self),
-                                  types::pass_selector(op),
-                                  std::forward<Args>(
-                                      std::get<I>(std::forward<tuple_t>(args)))...);
+            Return send_impl(types::tID self, types::tSEL op, std::index_sequence<I...>) {
+                return dispatcher(self, op, std::get<I>(args)...);
             }
         
         public:
             Return send(types::rID self, types::rSEL op) {
-                //dispatcher = (prebound_t(*))std::bind(dispatch_with, self, op);
                 dispatcher = (prebound_t)dispatch_with;
-                return send_impl(types::pass_id(self),
-                                 types::pass_selector(op),
-                                 index_t());
+                return send_impl(self, op, index_t());
+            }
+            Return send(types::tID self, types::tSEL op) {
+                dispatcher = (prebound_t)dispatch_with;
+                return send_impl(self, op, index_t());
             }
         
         private:
@@ -300,7 +298,7 @@ namespace objc {
         }
         
         template <typename ...Args>
-        ::id send(::BOOL dispatch, Args&& ...args) {
+        ::id send(::BOOL dispatch, Args ...args) {
             arguments<::id, Args...> ARGS(args...);
             return ARGS.send(types::pass_id(self), types::pass_selector(op));
         }
@@ -312,20 +310,17 @@ namespace objc {
         }
         
         template <typename Return, typename ...Args>
-        static Return get(rID self, rSEL op, Args&& ...args) {
-            arguments<Return, Args...> ARGS(std::forward<Args>(args)...);
+        static Return get(types::tID self, types::tSEL op, Args ...args) {
+            arguments<Return, Args...> ARGS(args...);
             const objc::id selfie(self);
             [*selfie retain];
-            return ARGS.send(types::pass_id(self),
-                             types::pass_selector(op));
+            return ARGS.send(self, op);
             [*selfie release];
         }
         
         template <typename ...Args>
-        static ::id send(rID self, rSEL op, Args&& ...args) {
-            return objc::msg::get<types::tID, Args...>(types::pass_id(self),
-                                                       types::pass_selector(op),
-                                                       std::forward<Args>(args)...);
+        static ::id send(types::tID self, types::tSEL op, Args ...args) {
+            return objc::msg::get<types::tID, Args...>(self, op, args...);
         }
         
         template <typename M,
