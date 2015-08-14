@@ -13,5 +13,5 @@ set(TEST_SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/test_interleaved_io.cpp
   ${CMAKE_CURRENT_LIST_DIR}/test_objc_rt.mm
   ${CMAKE_CURRENT_LIST_DIR}/test_sfinae.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/test_terminator.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/test_terminator.mm
 PARENT_SCOPE)
