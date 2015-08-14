@@ -19,9 +19,11 @@ SET(CXX_OPTIONS
     -x c++)
 
 SET(OBJC_OPTIONS
-    -fobjc-link-runtime
-    -fobjc-abi-version=3 -fobjc-arc -std=c99
-    -ObjC
+    -fstack-protector
+    -fobjc-abi-version=3
+    -fno-objc-arc
+    -fobjc-legacy-dispatch
+    -std=c99 -ObjC
     -x objective-c)
 
 SET(OBJCXX_OPTIONS
@@ -89,6 +91,7 @@ configure_file(
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     
+    ${hdrs_dir}/ext/categories/NSString+STL.hh
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
@@ -150,6 +153,7 @@ set(hdrs
 
 # Project source files
 set(srcs
+    ${srcs_dir}/ext/categories/NSString+STL.mm
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/path.cpp

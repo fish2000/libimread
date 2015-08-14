@@ -1,7 +1,6 @@
 
 #include <cstdlib>
 #include <string>
-#import <Cocoa/Cocoa.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/objc-rt.hh>
@@ -9,63 +8,7 @@
 #include <libimread/fs.hh>
 
 #include "include/catch.hpp"
-
-@interface IMTestReceiver : NSObject {}
-+ (void) callStatic;
-+ (void) callStaticWithInt:(int)arg;
-+ (void) callStaticWithInt:(int)arg andObjCString:(NSString *)anotherArg;
-- (void) callMethod;
-- (void) callMethodWithInt:(int)arg;
-- (void) callMethodWithInt:(int)arg andObjCString:(NSString *)anotherArg;
-- (void) callMethodWithInt:(int)arg andVoidPointer:(void *)anotherVoidArg;
-@end
-
-@implementation IMTestReceiver
-+ (void) callStatic {
-    WTF("WTF output from within function:",     ansi::lightcyan,
-        "[IMTestReceiver callStatic]",          ansi::reset,
-        "... dogg.");
-}
-+ (void) callStaticWithInt:(int)arg {
-    WTF("WTF output from within function:",                 ansi::lightcyan,
-        FF("[IMTestReceiver callStaticWithInt:%i]", arg),   ansi::reset,
-        "... dogg.");
-}
-+ (void) callStaticWithInt:(int)arg andObjCString:(NSString*)anotherArg {
-    WTF("WTF output from within function:",                 ansi::lightcyan,
-        FF("[IMTestReceiver callStaticWithInt:(%i)", arg),  ansi::reset,
-        FF("                    andObjCString:(%s)]",       [anotherArg UTF8String]),
-           "... dogg.");
-}
-- (void) callMethod {
-    WTF("WTF output from within method:", ansi::lightcyan,
-        "[imtsInstance callMethod]",      ansi::reset,
-        "... dogg.");
-}
-- (void) callMethodWithInt:(int)arg {
-    WTF("WTF output from within method:",               ansi::lightcyan,
-        FF("[imtsInstance callMethodWithInt:%i]", arg), ansi::reset,
-           "... dogg.");
-}
-- (void) callMethodWithInt:(int)arg andObjCString:(NSString *)anotherArg {
-    const char *str = "nil";
-    if (anotherArg != nil) { str = [anotherArg UTF8String]; }
-    WTF("WTF output from within method:",                 ansi::lightcyan,
-        FF("[imtsInstance callMethodWithInt:(%i)\n                          andObjCString:(%s)]",
-            arg, str),
-            ansi::reset, "... dogg.");
-}
-- (void) callMethodWithInt:(int)arg andVoidPointer:(void *)anotherVoidArg {
-    const char *str = "nil";
-    NSString *anotherArg = (__bridge NSString*)anotherVoidArg;
-    if (anotherArg != nil) { str = [anotherArg UTF8String]; }
-    WTF("WTF output from within method:",                 ansi::lightcyan,
-        FF("[imtsInstance callMethodWithInt:(%i)\n                          andVoidPointer:(%s)]",
-            arg, str),
-            ansi::reset, "... dogg.");
-}
-@end
-
+#import "helpers/IMTestReceiver.h"
 
 namespace {
     

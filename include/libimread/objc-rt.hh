@@ -15,29 +15,11 @@
 #include <libimread/ext/pystring.hh>
 
 #ifdef __OBJC__
+#import <libimread/ext/categories/NSString+STL.hh>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
-
-#ifndef FUNC_NAME_WTF
-#define FUNC_NAME_WTF(stuff) CFStringConvertEncodingToNSStringEncoding(stuff)
-#endif /// FUNC_NAME_WTF
-
-#if TARGET_RT_BIG_ENDIAN
-    const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32BE);
-#else
-    const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32LE);
-#endif /// TARGET_RT_BIG_ENDIAN
-
-@interface NSString (IMStringAdditions)
-+ (NSString *)   stringWithSTLString:(const std::string&)str;
-+ (NSString *)   stringWithSTLWideString:(const std::wstring&)wstr;
-- (std::string)  STLString;
-- (std::string)  STLStringUsingEncoding:(NSStringEncoding)encoding;
-- (std::wstring) STLWideString;
-@end
-
 #endif /// __OBJC__
 
 namespace objc {
@@ -388,9 +370,5 @@ namespace im {
     
     
 }
-
-#ifdef FUNC_NAME_WTF
-#undef FUNC_NAME_WTF
-#endif /// FUNC_NAME_WTF
 
 #endif /// LIBIMREAD_OBJC_RT_HH
