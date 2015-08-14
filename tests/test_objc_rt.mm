@@ -13,10 +13,11 @@
 @interface IMTestReceiver : NSObject {}
 + (void) callStatic;
 + (void) callStaticWithInt:(int)arg;
-+ (void) callStaticWithInt:(int)arg andObjCString:(NSString*)anotherArg;
++ (void) callStaticWithInt:(int)arg andObjCString:(NSString *)anotherArg;
 - (void) callMethod;
 - (void) callMethodWithInt:(int)arg;
-- (void) callMethodWithInt:(int)arg andObjCString:(void*)anotherVoidArg;
+- (void) callMethodWithInt:(int)arg andObjCString:(NSString *)anotherArg;
+- (void) callMethodWithInt:(int)arg andVoidPointer:(void *)anotherVoidArg;
 @end
 
 @implementation IMTestReceiver
@@ -46,12 +47,20 @@
         FF("[imtsInstance callMethodWithInt:%i]", arg), ansi::reset,
            "... dogg.");
 }
-- (void) callMethodWithInt:(int)arg andObjCString:(void*)anotherVoidArg {
+- (void) callMethodWithInt:(int)arg andObjCString:(NSString *)anotherArg {
+    const char *str = "nil";
+    if (anotherArg != nil) { str = [anotherArg UTF8String]; }
+    WTF("WTF output from within method:",                 ansi::lightcyan,
+        FF("[imtsInstance callMethodWithInt:(%i)\n                          andObjCString:(%s)]",
+            arg, str),
+            ansi::reset, "... dogg.");
+}
+- (void) callMethodWithInt:(int)arg andVoidPointer:(void *)anotherVoidArg {
     const char *str = "nil";
     NSString *anotherArg = (__bridge NSString*)anotherVoidArg;
     if (anotherArg != nil) { str = [anotherArg UTF8String]; }
     WTF("WTF output from within method:",                 ansi::lightcyan,
-        FF("[imtsInstance callMethodWithInt:(%i)\n                          andObjCString:(%s)]",
+        FF("[imtsInstance callMethodWithInt:(%i)\n                          andVoidPointer:(%s)]",
             arg, str),
             ansi::reset, "... dogg.");
 }
@@ -91,7 +100,17 @@ namespace {
         IMTestReceiver *imts = [[IMTestReceiver alloc] init];
         NSString *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
         [stringArg retain];
-        objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, (__bridge void*)stringArg);
+        objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, stringArg);
+        [stringArg release];
+    }
+    
+    TEST_CASE("[objc-rt] Call an instance method with int and (__bridge void*)NSString arguments via objc::msg::send()",
+              "[objc-rt-call-instance-method-multiple-args-int-and-pointer-to-nsstring]")
+    {
+        IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+        NSString *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
+        [stringArg retain];
+        objc::msg::send(imts, objc::selector("callMethodWithInt:andVoidPointer:"), 42, (__bridge void*)stringArg);
         [stringArg release];
     }
     

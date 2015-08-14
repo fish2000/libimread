@@ -300,7 +300,7 @@ namespace objc {
         template <typename ...Args>
         ::id send(::BOOL dispatch, Args ...args) {
             arguments<::id, Args...> ARGS(args...);
-            return ARGS.send(types::pass_id(self), types::pass_selector(op));
+            return ARGS.send(self, op);
         }
         
         template <typename M,
