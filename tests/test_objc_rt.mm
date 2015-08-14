@@ -16,7 +16,7 @@
 + (void) callStaticWithInt:(int)arg andObjCString:(NSString*)anotherArg;
 - (void) callMethod;
 - (void) callMethodWithInt:(int)arg;
-- (void) callMethodWithInt:(int)arg andObjCString:(NSString*)anotherArg;
+- (void) callMethodWithInt:(int)arg andObjCString:(void*)anotherVoidArg;
 @end
 
 @implementation IMTestReceiver
@@ -46,11 +46,14 @@
         FF("[imtsInstance callMethodWithInt:%i]", arg), ansi::reset,
            "... dogg.");
 }
-- (void) callMethodWithInt:(int)arg andObjCString:(NSString*)anotherArg {
+- (void) callMethodWithInt:(int)arg andObjCString:(void*)anotherVoidArg {
+    const char *str = "nil";
+    NSString *anotherArg = (__bridge NSString*)anotherVoidArg;
+    if (anotherArg != nil) { str = [anotherArg UTF8String]; }
     WTF("WTF output from within method:",                 ansi::lightcyan,
-        FF("[imtsInstance callMethodWithInt:(%i)", arg),  ansi::reset,
-        FF("                  andObjCString:(%s)]",       [anotherArg UTF8String]),
-           "... dogg.");
+        FF("[imtsInstance callMethodWithInt:(%i)\n                          andObjCString:(%s)]",
+            arg, str),
+            ansi::reset, "... dogg.");
 }
 @end
 
@@ -82,15 +85,15 @@ namespace {
         }
     }
     
-    // TEST_CASE("[objc-rt] Call an instance method with int and NSString arguments via objc::msg::send()",
-    //           "[objc-rt-call-instance-method-multiple-args-int-and-pointer-to-nsstring]")
-    // {
-    //     @autoreleasepool {
-    //         IMTestReceiver *imts = [[IMTestReceiver alloc] init];
-    //         NSString __autoreleasing *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
-    //         objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, stringArg);
-    //     }
-    // }
+    TEST_CASE("[objc-rt] Call an instance method with int and NSString arguments via objc::msg::send()",
+              "[objc-rt-call-instance-method-multiple-args-int-and-pointer-to-nsstring]")
+    {
+        IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+        NSString *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
+        [stringArg retain];
+        objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, (__bridge void*)stringArg);
+        [stringArg release];
+    }
     
     // BLEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
     //     im::fs::NamedTemporaryFile temporary;

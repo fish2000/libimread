@@ -49,11 +49,11 @@ namespace objc {
     
     namespace types {
         
-        using baseID = __unsafe_unretained ::id;
+        using baseID = ::id;
         using baseSEL = ::SEL;
         
-        using rID = std::add_rvalue_reference_t<__unsafe_unretained ::id>;
-        using xID = std::add_lvalue_reference_t<__unsafe_unretained ::id>;
+        using rID = std::add_rvalue_reference_t<::id>;
+        using xID = std::add_lvalue_reference_t<::id>;
         using tID = std::remove_reference_t<rID>;
         
         using rSEL = std::add_rvalue_reference_t<::SEL>;
@@ -79,10 +79,14 @@ namespace objc {
     
     struct id {
         
-        __unsafe_unretained ::id iid;
+        ::id iid;
         
         explicit id(types::rID ii)
             :iid(std::forward<types::tID>(ii))
+            {}
+        
+        explicit id(types::xID ii)
+            :iid(ii)
             {}
         
         operator ::id()     const { return iid; }
@@ -103,7 +107,7 @@ namespace objc {
             return ::objc_getClass(__cls_name());
         }
         
-        static std::string classname(__unsafe_unretained ::id ii) {
+        static std::string classname(::id ii) {
             return std::string(__cls_name(ii));
         }
         
@@ -279,13 +283,21 @@ namespace objc {
         using rID = types::rID;
         using rSEL = types::rSEL;
         
+        objc::id myself;
         rID self;
         rSEL op;
         
         explicit msg(rID s, rSEL o)
             :self(types::pass_id(s))
+            ,myself(s)
             ,op(types::pass_selector(o))
-            {}
+            {
+                [*myself retain];
+            }
+        
+        virtual ~msg() {
+            [*myself release];
+        }
         
         template <typename ...Args>
         ::id send(::BOOL dispatch, Args&& ...args) {
@@ -302,8 +314,11 @@ namespace objc {
         template <typename Return, typename ...Args>
         static Return get(rID self, rSEL op, Args&& ...args) {
             arguments<Return, Args...> ARGS(std::forward<Args>(args)...);
+            const objc::id selfie(self);
+            [*selfie retain];
             return ARGS.send(types::pass_id(self),
                              types::pass_selector(op));
+            [*selfie release];
         }
         
         template <typename ...Args>

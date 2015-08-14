@@ -25,7 +25,18 @@ SET(OBJC_OPTIONS
     -x objective-c)
 
 SET(OBJCXX_OPTIONS
-    -fobjc-abi-version=3 -fobjc-arc -fobjc-call-cxx-cdtors
+    -fstack-protector
+    -fobjc-abi-version=3
+    -fno-objc-arc
+    -fobjc-legacy-dispatch
+    -fobjc-call-cxx-cdtors
+    -std=c++14 -stdlib=libc++
+    -x objective-c++)
+
+SET(OBJCXX_OPTIONS_ARC
+    -fobjc-abi-version=3
+    -fobjc-arc -fobjc-call-cxx-cdtors
+    -fno-objc-arc-exceptions
     -std=c++14 -stdlib=libc++
     -x objective-c++)
 
