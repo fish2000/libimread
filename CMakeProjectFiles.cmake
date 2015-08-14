@@ -84,10 +84,10 @@ set(hdrs
     ${hdrs_dir}/ext/filesystem/path.h
     ${hdrs_dir}/ext/filesystem/resolver.h
     ${hdrs_dir}/ext/filesystem/temporary.h
+    ${hdrs_dir}/ext/memory/fmemopen.hh
+    ${hdrs_dir}/ext/memory/open_memstream.hh
     ${hdrs_dir}/ext/JSON/json11.h
-    ${hdrs_dir}/ext/fmemopen.hh
     ${hdrs_dir}/ext/iod.hh
-    ${hdrs_dir}/ext/open_memstream.hh
     ${hdrs_dir}/ext/pvr.hh
     ${hdrs_dir}/ext/pystring.hh
     ${hdrs_dir}/ext/WriteGIF.hh
@@ -116,6 +116,7 @@ set(hdrs
     
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
+    ${hdrs_dir}/color.hh
     ${hdrs_dir}/coregraphics.hh
     ${hdrs_dir}/errors.hh
     ${hdrs_dir}/file.hh
@@ -124,9 +125,11 @@ set(hdrs
     ${hdrs_dir}/halide.hh
     ${hdrs_dir}/image.hh
     ${hdrs_dir}/imageformat.hh
+    ${hdrs_dir}/interleaved.hh
     ${hdrs_dir}/memory.hh
     ${hdrs_dir}/objc-rt.hh
     ${hdrs_dir}/options.hh
+    ${hdrs_dir}/palette.hh
     ${hdrs_dir}/pixels.hh
     ${hdrs_dir}/seekable.hh
     ${hdrs_dir}/symbols.hh
@@ -140,10 +143,10 @@ set(srcs
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/path.cpp
     ${srcs_dir}/ext/filesystem/temporary.cpp
+    ${srcs_dir}/ext/memory/fmemopen.cpp
+    ${srcs_dir}/ext/memory/open_memstream.cpp
     ${srcs_dir}/ext/JSON/json11.cpp
     ${srcs_dir}/ext/JSON/schema.cpp
-    ${srcs_dir}/ext/fmemopen.cpp
-    ${srcs_dir}/ext/open_memstream.cpp
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
     ${srcs_dir}/ext/pystring.cpp
@@ -168,13 +171,17 @@ set(srcs
     
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp
+    ${srcs_dir}/color.cpp
     ${srcs_dir}/coregraphics.mm
     ${srcs_dir}/errors.cpp
     ${srcs_dir}/file.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/fs.cpp
     ${srcs_dir}/halide.cpp
+    ${srcs_dir}/image.cpp
     ${srcs_dir}/imageformat.cpp
+    ${srcs_dir}/interleaved.cpp
+    ${srcs_dir}/memory.cpp
     ${srcs_dir}/objc-rt.mm
     ${srcs_dir}/options.cpp
     ${srcs_dir}/palette.cpp

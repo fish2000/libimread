@@ -58,7 +58,7 @@ namespace im {
         }
         */
         
-        template <typename T = byte>
+        template <typename T = byte> inline
         ImageType<T> read(const std::string &filename,
                           const options_map &opts = apple_default_opts) {
             HalideFactory<T> factory(filename);

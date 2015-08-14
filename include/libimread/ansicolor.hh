@@ -7,11 +7,8 @@
 #include <cstring>
 #include <string>
 #include <iostream>
-//#include <map>
 
 namespace ansi {
-    
-    //using std::map;
     
     enum ANSICode {
         FM_RESET            = 0,
@@ -68,36 +65,6 @@ namespace ansi {
             operator std::string() const { return str(); }
             operator char*() const { return c_str(); }
     };
-    
-    /// XXX: fuck this map, it’s slow and redundant
-    /*
-    struct color {
-        static map<std::string, ANSI> init() {
-            map<std::string, ANSI> _color_map = {
-                { "reset",          ANSI(FM_RESET) },
-                { "default",        ANSI(FG_DEFAULT_COLOR) },
-                { "black",          ANSI(FG_BLACK) },
-                { "red",            ANSI(FG_RED) },
-                { "green",          ANSI(FG_GREEN) },
-                { "yellow",         ANSI(FG_YELLOW) },
-                { "blue",           ANSI(FG_BLUE) },
-                { "magenta",        ANSI(FG_MAGENTA) },
-                { "cyan",           ANSI(FG_CYAN) },
-                { "lightred",       ANSI(FG_LIGHTRED) },
-                { "lightgreen",     ANSI(FG_LIGHTGREEN) },
-                { "lightyellow",    ANSI(FG_LIGHTYELLOW) },
-                { "lightblue",      ANSI(FG_LIGHTBLUE) },
-                { "lightmagenta",   ANSI(FG_LIGHTMAGENTA) },
-                { "lightcyan",      ANSI(FG_LIGHTCYAN) },
-                { "lightgray",      ANSI(FG_LIGHTGRAY) },
-                { "darkgray",       ANSI(FG_DARKGRAY) },
-                { "white",          ANSI(FG_WHITE) },
-            };
-            return _color_map;
-        }
-        static const map<std::string, ANSI> idx;
-    };
-    */
     
     const ANSI reset = ANSI(FM_RESET);
     const ANSI termdefault = ANSI(FG_DEFAULT_COLOR);

@@ -178,7 +178,7 @@ namespace im {
         
         static const options_map halide_default_opts;
         
-        template <typename T = byte>
+        template <typename T = byte> inline
         HybridImage<T> read(const std::string &filename,
                             const options_map &opts = halide_default_opts) {
             HalideFactory<T> factory(filename);
@@ -190,7 +190,7 @@ namespace im {
             return image;
         }
         
-        template <typename T = byte>
+        template <typename T = byte> inline
         void write(HybridImage<T> &input, const std::string &filename,
                                           const options_map &opts = halide_default_opts) {
             if (input.dim(2) > 3) { return; }
@@ -199,15 +199,14 @@ namespace im {
             format->write(dynamic_cast<Image&>(input), output.get(), opts);
         }
         
-        template <typename T = byte>
-        void write_multi(ImageList &input, const std::string &filename,
+        inline void write_multi(ImageList &input, const std::string &filename,
                                            const options_map &opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write_multi(input, output.get(), opts);
         }
         
-        template <typename Format, typename T = byte>
+        template <typename Format, typename T = byte> inline
         std::string tmpwrite(HybridImage<T> &input,
                              const options_map &opts = halide_default_opts) {
             if (input.dim(2) > 3) { return ""; }

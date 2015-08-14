@@ -2,6 +2,6 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
-#include <libimread/ansicolor.hh>
+#include <libimread/pixels.hh>
 
-namespace ansi {}
+namespace im {}

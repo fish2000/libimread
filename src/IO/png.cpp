@@ -230,6 +230,10 @@ namespace im {
         int c_stride = (d == 1) ? 0 : output->stride(2);
         uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
         
+        WTF("About to enter pixel access loop...",
+            FF("w = %i, h = %i, channels = %i, bit_depth = %i, d = %i",
+                w, h, channels, bit_depth, d));
+        
         if (bit_depth == 8) {
             for (int y = 0; y < h; y++) {
                 uint8_t *srcPtr = static_cast<uint8_t*>(row_pointers[y]);

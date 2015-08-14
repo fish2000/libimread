@@ -2,7 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 /// Use funopen(3) to provide open_memstream(3) like functionality.
 
-#include "libimread/ext/open_memstream.hh"
+#include <libimread/ext/memory/open_memstream.hh>
 
 namespace memory {
     

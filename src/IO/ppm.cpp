@@ -8,7 +8,7 @@
 #include <cstring>
 
 #include <libimread/IO/ppm.hh>
-#include <libimread/ext/fmemopen.hh>
+#include <libimread/ext/memory/fmemopen.hh>
 #include <libimread/errors.hh>
 #include <libimread/pixels.hh>
 

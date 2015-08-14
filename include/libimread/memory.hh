@@ -9,7 +9,7 @@
 #include <memory>
 
 #include <libimread/libimread.hpp>
-#include <libimread/ext/fmemopen.hh>
+#include <libimread/ext/memory/fmemopen.hh>
 #include <libimread/seekable.hh>
 
 namespace im {
@@ -29,7 +29,7 @@ namespace im {
                 return n;
             }
             
-            virtual bool can_seek() const { return true; }
+            virtual bool can_seek() const noexcept { return true; }
             virtual std::size_t seek_absolute(std::size_t p) { return pos = p; }
             virtual std::size_t seek_relative(int delta) { return pos += delta; }
             virtual std::size_t seek_end(int delta) { return pos = (len-delta-1); }
@@ -48,16 +48,16 @@ namespace im {
             
             virtual ~memory_sink() {}
             
-            virtual bool can_seek() const { return true; }
-            virtual std::size_t seek_absolute(std::size_t pos) { return ::fseek(membuf, pos, SEEK_SET); }
-            virtual std::size_t seek_relative(int delta) { return ::fseek(membuf, delta, SEEK_CUR); }
-            virtual std::size_t seek_end(int delta) { return ::fseek(membuf, delta, SEEK_END); }
+            virtual bool can_seek() const noexcept { return true; }
+            virtual std::size_t seek_absolute(std::size_t pos) { return ::fseek(membuf.get(), pos, SEEK_SET); }
+            virtual std::size_t seek_relative(int delta) { return ::fseek(membuf.get(), delta, SEEK_CUR); }
+            virtual std::size_t seek_end(int delta) { return ::fseek(membuf.get(), delta, SEEK_END); }
             
             virtual std::size_t write(const void *buffer, std::size_t n) {
-                return ::fwrite(buffer, sizeof(byte), n, membuf);
+                return ::fwrite(buffer, sizeof(byte), n, membuf.get());
             }
             
-            virtual void flush() { ::fflush(membuf); }
+            virtual void flush() { ::fflush(membuf.get()); }
             
             virtual std::vector<byte> contents() {
                 std::vector<byte> out(len);

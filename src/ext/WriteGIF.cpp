@@ -3,7 +3,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/WriteGIF.hh>
-#include <libimread/ext/fmemopen.hh>
+#include <libimread/ext/memory/fmemopen.hh>
 #include <libimread/errors.hh>
 
 using im::byte;

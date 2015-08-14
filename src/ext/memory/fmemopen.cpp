@@ -4,7 +4,7 @@
  * 20150115 Alexander Fucking Bohn (this totally awesome c++11'd iteration)
  */
 
-#include "libimread/ext/fmemopen.hh"
+#include <libimread/ext/memory/fmemopen.hh>
 
 namespace memory {
     
