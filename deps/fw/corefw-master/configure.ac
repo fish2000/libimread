@@ -1,0 +1,20 @@
+AC_INIT(corefw, 0.1, js@webkeks.org)
+AC_CONFIG_SRCDIR(src)
+
+AC_CANONICAL_HOST
+
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_LN_S
+AC_PROG_INSTALL
+
+AS_IF([test x"$GCC" = x"yes"], [
+	CFLAGS="$CFLAGS -Wall -Werror -pipe -std=c99 -pedantic"
+])
+
+BUILDSYS_SHARED_LIB
+BUILDSYS_INIT
+BUILDSYS_TOUCH_DEPS
+
+AC_CONFIG_FILES(buildsys.mk)
+AC_OUTPUT

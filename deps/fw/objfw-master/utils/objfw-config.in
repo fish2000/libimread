@@ -1,0 +1,174 @@
+#!/bin/sh
+#
+#  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
+#    Jonathan Schleifer <js@webkeks.org>
+#
+#  All rights reserved.
+#
+#  This file is part of ObjFW. It may be distributed under the terms of the
+#  Q Public License 1.0, which can be found in the file LICENSE.QPL included in
+#  the packaging of this file.
+#
+#  Alternatively, it may be distributed under the terms of the GNU General
+#  Public License, either version 2 or 3, which can be found in the file
+#  LICENSE.GPLv2 or LICENSE.GPLv3 respectively included in the packaging of this
+#  file.
+#
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+libdir="@libdir@"
+CFLAGS=""
+CPPFLAGS="-I@includedir@"
+CXXFLAGS=""
+OBJC="@OBJC@"
+OBJCFLAGS="@RUNTIME_FLAGS@ -fexceptions -fobjc-exceptions -funwind-tables"
+OBJCFLAGS="$OBJCFLAGS -fconstant-string-class=OFConstantString"
+OBJCFLAGS="$OBJCFLAGS @NO_CONST_CFSTRINGS@ @BLOCKS_FLAGS@ @NO_WARN_UNUSED@"
+LIB_CFLAGS="@LIB_CFLAGS@"
+LIB_LDFLAGS="@LIB_LDFLAGS@"
+LIB_PREFIX="@LIB_PREFIX@"
+LIB_SUFFIX="@LIB_SUFFIX@"
+LDFLAGS=""
+LDFLAGS_REEXPORT="@LDFLAGS_REEXPORT@"
+LDFLAGS_RPATH="@LDFLAGS_RPATH@"
+LIBS="-L${libdir} -lobjfw @LIBS@"
+PLUGIN_CFLAGS="@PLUGIN_CFLAGS@"
+PLUGIN_LDFLAGS="@PLUGIN_LDFLAGS@"
+PLUGIN_SUFFIX="@PLUGIN_SUFFIX@"
+PROG_SUFFIX="@EXEEXT@"
+STATIC_LIBS="${libdir}/libobjfw.a @LIBS@"
+VERSION="@PACKAGE_VERSION@"
+
+show_help() {
+	cat <<__EOF__
+objfw-config: Available arguments are:
+
+	--all		Outputs all flags + libs
+	--arc		Outputs the required OBJCFLAGS to use ARC
+	--cflags	Outputs the required CFLAGS
+	--cppflags	Outputs the required CPPFLAGS
+	--cxxflags	Outputs the required CXXFLAGS
+	--objc		Outputs the OBJC used to compile ObjFW
+	--objcflags	Outputs the required OBJCFLAGS
+	--ldflags	Outputs the required LDFLAGS
+	--reexport	Outputs LDFLAGS to reexport ObjFW
+	--rpath		Outputs LDFLAGS for using rpath
+	--libs		Outputs the required LIBS
+	--lib-cflags	Outputs CFLAGS for building a library"
+	--lib-ldflags	Outputs LDFLAGS for building a library"
+	--lib-prefix	Outputs the prefix for libraries"
+	--lib-suffix	Outputs the suffix for libraries"
+	--prog-suffix	Outputs the suffix for binaries"
+	--static-libs	Outputs the required LIBS to link ObjFW statically
+	--version	Outputs the installed version
+__EOF__
+	exit $1
+}
+
+test -z "$1" && show_help 1
+
+while test -n "$1"; do
+	case "$1" in
+		--all)
+			printf "%s %s %s " "$CFLAGS" "$CPPFLAGS" "$CXXFLAGS"
+			printf "%s %s " "$OBJCFLAGS" "$LDFLAGS"
+			printf "%s %s " "$LDFLAGS_REEXPORT" "$LDFLAGS_RPATH"
+			printf "%s" "$LIBS"
+			;;
+		--arc)
+			printf "%s" "-fobjc-arc -fobjc-arc-exceptions"
+			;;
+		--cflags)
+			printf "%s" "$CFLAGS"
+			;;
+		--cppflags)
+			printf "%s" "$CPPFLAGS"
+			;;
+		--cxxflags)
+			printf "%s" "$CXXFLAGS"
+			;;
+		--objc)
+			printf "%s" "$OBJC"
+			;;
+		--objcflags)
+			printf "%s" "$OBJCFLAGS"
+			;;
+		--libs)
+			printf "%s" "$LIBS"
+			;;
+		--lib-cflags)
+			if test x"$LIB_MAJOR" = x"" -o x"$LIB_MINOR" = x""; then
+				echo "LIB_MAJOR and LIB_MINOR need to be set!" \
+					1>&2
+				exit 1
+			fi
+
+			printf "%s" "$LIB_CFLAGS"
+			;;
+		--lib-ldflags)
+			if test x"$SHARED_LIB" = x"" -o x"$LIB_MAJOR" = x"" \
+			-o x"$LIB_MINOR" = x""; then
+				printf "SHARED_LIB, LIB_MAJOR and " 2>&1
+				echo "and LIB_MINOR to be set!" 1>&2
+				exit 1
+			fi
+
+			printf "%s" "$LIB_LDFLAGS"
+			;;
+		--lib-prefix)
+			if test x"$LIB_MAJOR" = x"" -o x"$LIB_MINOR" = x""; then
+				echo "LIB_MAJOR and LIB_MINOR need to be set!" \
+					1>&2
+				exit 1
+			fi
+
+			printf "%s" "$LIB_PREFIX"
+			;;
+		--lib-suffix)
+			if test x"$LIB_MAJOR" = x"" -o x"$LIB_MINOR" = x""; then
+				echo "LIB_MAJOR and LIB_MINOR need to be set!" \
+					1>&2
+				exit 1
+			fi
+
+			printf "%s" "$LIB_SUFFIX"
+			;;
+		--ldflags)
+			printf "%s" "$LDFLAGS"
+			;;
+		--reexport)
+			printf "%s" "$LDFLAGS_REEXPORT"
+			;;
+		--rpath)
+			printf "%s" "$LDFLAGS_RPATH"
+			;;
+		--plugin-cflags)
+			printf "%s" "$PLUGIN_CFLAGS"
+			;;
+		--plugin-ldflags)
+			printf "%s" "$PLUGIN_LDFLAGS"
+			;;
+		--plugin-suffix)
+			printf "%s" "$PLUGIN_SUFFIX"
+			;;
+		--prog-suffix)
+			printf "%s" "$PROG_SUFFIX"
+			;;
+		--static-libs)
+			printf "%s" "$STATIC_LIBS"
+			;;
+		--version)
+			printf "%s" "$VERSION"
+			;;
+		*)
+			echo "Invalid option: $1" 1>&2
+			exit 1
+			;;
+	esac
+	shift
+
+	test -n "$1" && printf " "
+done
+
+echo
