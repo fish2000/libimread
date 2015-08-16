@@ -67,17 +67,15 @@ namespace {
         std::string prefix = "";
         std::size_t nbytes = 20 * 1024; /// 20480
         unsigned char randos[20480] = {0};
-
+        
         arc4random_buf(static_cast<void*>(randos), nbytes);
         path = prefix + temporary.str();
-
+        
         @autoreleasepool {
             datum = [[NSData alloc] initWithBytes:(const void *)&randos[0]
                                            length:(NSInteger)nbytes];
             urlpath = [[NSString alloc] initWithUTF8String:path.c_str()];
             url = [[NSURL alloc] initWithString:urlpath];
-            
-            // [datum writeToFile:urlpath atomically:YES];
             
             [datum retain];
             [urlpath retain];
@@ -86,17 +84,11 @@ namespace {
                 objc::selector("writeToFile:atomically:"),
                 urlpath, YES);
             
-            // objc_msgSend((id)datum,
-            //     @selector(writeToFile:atomically:),
-            //     urlpath, YES);
-            
-            #if !__has_feature(objc_arc)
-                [datum release];
-                [urlpath release];
-                [url release];
-            #endif
+            [datum release];
+            [urlpath release];
+            [url release];
         };
-
+        
     }
     
 }

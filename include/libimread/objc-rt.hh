@@ -25,7 +25,7 @@
 namespace objc {
     
     /// pointer swap
-    template <typename T>
+    template <typename T> inline
     void ptr_swap(T*& oA, T*& oB) {
         T* oT = oA; oA = oB; oB = oT;
     }
