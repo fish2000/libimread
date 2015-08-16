@@ -24,10 +24,16 @@
 
 namespace objc {
     
+    /// pointer swap
     template <typename T>
     void ptr_swap(T*& oA, T*& oB) {
         T* oT = oA; oA = oB; oB = oT;
     }
+    
+    /// bridge cast
+    template <typename T, typename U>
+    __attribute__((__always_inline__))
+    T bridge(U castee) { return (__bridge T)castee; }
     
     namespace types {
         

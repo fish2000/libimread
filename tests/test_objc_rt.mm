@@ -53,7 +53,7 @@ namespace {
         IMTestReceiver *imts = [[IMTestReceiver alloc] init];
         NSString *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
         [stringArg retain];
-        objc::msg::send(imts, objc::selector("callMethodWithInt:andVoidPointer:"), 42, (__bridge void*)stringArg);
+        objc::msg::send(imts, objc::selector("callMethodWithInt:andVoidPointer:"), 42, objc::bridge<void*>(stringArg));
         [stringArg release];
     }
     

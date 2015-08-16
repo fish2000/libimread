@@ -42,7 +42,7 @@
 }
 - (void) callMethodWithInt:(int)arg andVoidPointer:(void *)anotherVoidArg {
     const char *str = "nil";
-    NSString *anotherArg = (__bridge NSString*)anotherVoidArg;
+    NSString *anotherArg = objc::bridge<NSString*>(anotherVoidArg);
     if (anotherArg != nil) { str = [anotherArg UTF8String]; }
     WTF("WTF output from within method:",                 ansi::lightcyan,
         FF("[imtsInstance callMethodWithInt:(%i)\n                          andVoidPointer:(%s)]",
