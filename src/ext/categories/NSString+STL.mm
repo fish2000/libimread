@@ -22,6 +22,16 @@
                                            encoding:kSTLWideStringEncoding];
     return out;
 }
+- (NSString *) initWithSTLString:(const std::string&)str {
+    return [self initWithUTF8String:str.c_str()];
+}
+- (NSString *) initWithSTLWideString:(const std::wstring&)wstr {
+    unsigned siz = wstr.size() * sizeof(wchar_t);
+    const char *bytes = reinterpret_cast<const char*>(wstr.data());
+    return [self initWithBytes:bytes
+                        length:siz
+                      encoding:kSTLWideStringEncoding];
+}
 - (std::string) STLString {
     return [self STLStringUsingEncoding:NSUTF8StringEncoding];
 }

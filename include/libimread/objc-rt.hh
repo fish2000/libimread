@@ -37,15 +37,17 @@ namespace objc {
     
     namespace types {
         
-        using baseID = ::id;
-        using baseSEL = ::SEL;
+        using ID = ::id;
+        using selector = ::SEL;
+        using cls = ::Class;
+        using boolean = ::BOOL;
         
-        using rID = std::add_rvalue_reference_t<::id>;
-        using xID = std::add_lvalue_reference_t<::id>;
+        using rID = std::add_rvalue_reference_t<ID>;
+        using xID = std::add_lvalue_reference_t<ID>;
         using tID = std::remove_reference_t<rID>;
         
-        using rSEL = std::add_rvalue_reference_t<::SEL>;
-        using xSEL = std::add_lvalue_reference_t<::SEL>;
+        using rSEL = std::add_rvalue_reference_t<selector>;
+        using xSEL = std::add_lvalue_reference_t<selector>;
         using tSEL = std::remove_reference_t<rSEL>;
         
         inline decltype(auto) pass_id(rID r)          { return std::forward<tID>(r); }
@@ -65,58 +67,12 @@ namespace objc {
     template <typename ...Args>
     using object_sender_t = std::add_pointer_t<::id(types::tID, types::tSEL, Args...)>;
     
-    struct id {
-        
-        ::id iid;
-        
-        explicit id(types::rID ii)
-            :iid(std::forward<types::tID>(ii))
-            {}
-        
-        explicit id(types::xID ii)
-            :iid(ii)
-            {}
-        
-        operator ::id()     const { return iid; }
-        ::id operator*()    const { return iid; }
-        ::id operator->()   const { return iid; }
-        
-        inline const char * __cls_name() const      { return ::object_getClassName(iid); }
-        static const char * __cls_name(::id ii)     { return ::object_getClassName(ii); }
-        
-        std::string classname() const {
-            return std::string(__cls_name(iid));
-        }
-        
-        ::Class lookupclass() {
-            return ::objc_lookUpClass(__cls_name());
-        }
-        ::Class getclass() {
-            return ::objc_getClass(__cls_name());
-        }
-        
-        static std::string classname(::id ii) {
-            return std::string(__cls_name(ii));
-        }
-        
-        static ::Class lookup(types::rID ii) {
-            return ::objc_lookUpClass(
-                __cls_name(std::forward<types::tID>(ii)));
-        }
-        static ::Class lookup(const std::string &s) {
-            return ::objc_lookUpClass(s.c_str());
-        }
-        static ::Class lookup(const char *s) {
-            return ::objc_lookUpClass(s);
-        }
-    
-    };
     
     struct selector {
         
-        ::SEL sel;
+        types::selector sel;
         
-        explicit selector(::SEL s)
+        explicit selector(types::selector s)
             :sel(s)
             {}
         explicit selector(const std::string &name)
@@ -125,6 +81,9 @@ namespace objc {
         explicit selector(const char *name)
             :sel(::sel_registerName(name))
             {}
+        explicit selector(NSString *name)
+            :sel(::NSSelectorFromString(name))
+            {}
         
         bool operator==(const objc::selector &s) {
             return ::sel_isEqual(sel, s.sel) == YES;
@@ -132,10 +91,10 @@ namespace objc {
         bool operator!=(const objc::selector &s) {
             return ::sel_isEqual(sel, s.sel) == NO;
         }
-        bool operator==(const ::SEL &s) {
+        bool operator==(const types::selector &s) {
             return ::sel_isEqual(sel, s) == YES;
         }
-        bool operator!=(const ::SEL &s) {
+        bool operator!=(const types::selector &s) {
             return ::sel_isEqual(sel, s) == NO;
         }
         
@@ -146,7 +105,7 @@ namespace objc {
             return std::string(c_str());
         }
         
-        operator ::SEL() { return sel; }
+        operator types::selector() { return sel; }
         operator std::string() { return str(); }
         operator const char*() { return c_str(); }
         operator char*() { return const_cast<char*>(c_str()); }
@@ -155,6 +114,9 @@ namespace objc {
             return objc::selector(name);
         }
         static objc::selector register_name(const char *name) {
+            return objc::selector(name);
+        }
+        static objc::selector register_name(NSString *name) {
             return objc::selector(name);
         }
         
@@ -205,19 +167,19 @@ namespace objc {
     
     template <typename Return, typename ...Args>
     struct message : public arguments<Return, Args...> {
-        using arguments_type = arguments<Return, Args...>;
-        using arguments_type::argc;
-        using arguments_type::args;
-        ::id self;
-        ::SEL op;
+        using arguments_t = arguments<Return, Args...>;
+        using arguments_t::argc;
+        using arguments_t::args;
+        types::ID self;
+        types::selector op;
         
-        explicit message(::id s, ::SEL o, Args&&... a)
-            :arguments_type(a...)
+        explicit message(types::ID s, types::selector o, Args&&... a)
+            :arguments_t(a...)
             ,self(s), op(o)
             {}
         
         Return send() const {
-            return arguments_type::send(self, op);
+            return arguments_t::send(self, op);
         }
         
         private:
@@ -227,6 +189,123 @@ namespace objc {
             message &operator=(message&&);
             
     };
+    
+    struct id {
+        
+        types::ID self = nil;
+        
+        explicit id(types::rID ii)
+            :self(std::forward<types::tID>(ii))
+            {
+                retain();
+            }
+        
+        explicit id(types::xID ii)
+            :self(ii)
+            {
+                retain();
+            }
+        
+        id(const objc::id& other)
+            :self(other.self)
+            {
+                retain();
+            }
+        
+        id(objc::id&& other)
+            :self(other.self)
+            {
+                retain();
+                //other.release();
+            }
+        
+        ~id() { release(); }
+        
+        id &operator=(const objc::id& other) {
+            types::ID s = other.self;
+            if (s != nil)    { [s retain]; }
+            if (self != nil) { [self release]; }
+            self = s;
+            return *this;
+        }
+        
+        id &operator=(objc::id&& other) {
+            types::ID s = other.self;
+            if (s != nil)    { [s retain]; }
+            if (self != nil) { [self release]; }
+            self = s;
+            //other.release();
+            return *this;
+        }
+        
+        operator types::ID()     const { return self; }
+        types::ID operator*()    const { return self; }
+        types::ID operator->()   const { return self; }
+        
+        template <typename T> inline
+        T bridge() {
+            return objc::bridge<T>(self);
+        }
+        
+        inline bool responds_to(types::selector s) const {
+            return [self respondsToSelector:s] == YES;
+        }
+        
+        inline void retain() const          { if (self != nil) { [self retain]; } }
+        inline void release() const         { if (self != nil) { [self release]; } }
+        inline void autorelease() const     { if (self != nil) { [self autorelease]; } }
+        
+        template <typename ...Args>
+        types::ID operator()(types::selector s, Args&&... args) {
+            arguments<types::ID, Args...> ARGS(std::forward<Args>(args)...);
+            retain();
+            types::ID out = ARGS.send(self, s);
+            release();
+            return out;
+        }
+        
+        bool operator[](types::selector s) const      { return responds_to(s); }
+        bool operator[](const char *s) const          { return responds_to(::sel_registerName(s)); }
+        bool operator[](const std::string &s) const   { return responds_to(::sel_registerName(s.c_str())); }
+        bool operator[](NSString *s) const            { return responds_to(::NSSelectorFromString(s)); }
+        
+        inline const char * __cls_name() const          { return ::object_getClassName(self); }
+        static const char * __cls_name(types::ID ii)    { return ::object_getClassName(ii); }
+        
+        std::string classname() const {
+            return std::string(__cls_name(self));
+        }
+        
+        types::cls lookup() const {
+            return ::objc_lookUpClass(__cls_name());
+        }
+        types::cls getclass() const {
+            return ::objc_getClass(__cls_name());
+        }
+        
+        /// STATIC METHODS
+        static std::string classname(types::ID ii) {
+            return std::string(__cls_name(ii));
+        }
+        
+        static types::cls lookup(types::rID ii) {
+            return ::objc_lookUpClass(
+                __cls_name(std::forward<types::tID>(ii)));
+        }
+        static types::cls lookup(const std::string &s) {
+            return ::objc_lookUpClass(s.c_str());
+        }
+        static types::cls lookup(const char *s) {
+            return ::objc_lookUpClass(s);
+        }
+        static types::cls lookup(NSString *s) {
+            return ::objc_lookUpClass([s UTF8String]);
+        }
+        
+        private:
+            id(void);
+    };
+    
     
     namespace traits {
     
@@ -259,61 +338,50 @@ namespace objc {
         template <typename T>
         struct is_class<T,
             typename std::enable_if_t<
-                 std::is_convertible<T, objc::types::tID>::value,
+                 std::is_convertible<T, objc::types::ID>::value,
                  bool>> : std::true_type {};
         
     }
     
     struct msg {
         
-        using rID = types::rID;
-        using rSEL = types::rSEL;
+        objc::id myself; /// scoped retain/release
+        types::rID self;
+        types::rSEL op;
         
-        objc::id myself;
-        rID self;
-        rSEL op;
-        
-        explicit msg(rID s, rSEL o)
+        explicit msg(types::rID s, types::rSEL o)
             :self(types::pass_id(s))
             ,myself(s)
             ,op(types::pass_selector(o))
-            {
-                [*myself retain];
-            }
-        
-        virtual ~msg() {
-            [*myself release];
-        }
+            {}
         
         template <typename ...Args>
-        ::id send(::BOOL dispatch, Args ...args) {
-            arguments<::id, Args...> ARGS(args...);
+        types::ID send(types::boolean dispatch, Args ...args) {
+            arguments<types::ID, Args...> ARGS(args...);
             return ARGS.send(self, op);
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
-        ::id sendv(M&& arg_list) const {
+        types::ID sendv(M&& arg_list) const {
             return arg_list.send(self, op);
         }
         
         template <typename Return, typename ...Args>
         static Return get(types::tID self, types::tSEL op, Args ...args) {
             arguments<Return, Args...> ARGS(args...);
-            const objc::id selfie(self);
-            [*selfie retain];
+            const objc::id selfie(self); /// for scoped retain/release
             return ARGS.send(self, op);
-            [*selfie release];
         }
         
         template <typename ...Args>
-        static ::id send(types::tID self, types::tSEL op, Args ...args) {
+        static types::ID send(types::tID self, types::tSEL op, Args ...args) {
             return objc::msg::get<types::tID, Args...>(self, op, args...);
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
-        static ::id sendv(rID self, rSEL op, M&& arg_list) {
+        static types::ID sendv(types::rID self, types::rSEL op, M&& arg_list) {
             return arg_list.send(self, op);
         }
         
