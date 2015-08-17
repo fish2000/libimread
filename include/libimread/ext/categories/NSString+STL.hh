@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 
+#include <libimread/libimread.hpp>
+
 #ifndef FUNC_NAME_WTF
 #define FUNC_NAME_WTF(stuff) CFStringConvertEncodingToNSStringEncoding(stuff)
 #endif /// FUNC_NAME_WTF

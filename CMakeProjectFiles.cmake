@@ -92,6 +92,8 @@ set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     
     ${hdrs_dir}/ext/categories/NSString+STL.hh
+    ${hdrs_dir}/ext/categories/NSBitmapImageRep+IM.hh
+    ${hdrs_dir}/ext/categories/NSColor+IM.hh
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
@@ -154,6 +156,7 @@ set(hdrs
 # Project source files
 set(srcs
     ${srcs_dir}/ext/categories/NSString+STL.mm
+    ${srcs_dir}/ext/categories/NSBitmapImageRep+IM.mm
     ${srcs_dir}/ext/categories/NSColor+IM.mm
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
