@@ -93,6 +93,7 @@ set(hdrs
     
     ${hdrs_dir}/ext/categories/NSString+STL.hh
     ${hdrs_dir}/ext/categories/NSBitmapImageRep+IM.hh
+    ${hdrs_dir}/ext/categories/NSData+CFPP.hh
     ${hdrs_dir}/ext/categories/NSColor+IM.hh
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
@@ -157,6 +158,7 @@ set(hdrs
 set(srcs
     ${srcs_dir}/ext/categories/NSString+STL.mm
     ${srcs_dir}/ext/categories/NSBitmapImageRep+IM.mm
+    ${srcs_dir}/ext/categories/NSData+CFPP.mm
     ${srcs_dir}/ext/categories/NSColor+IM.mm
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
@@ -251,15 +253,18 @@ IF(APPLE)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
+    FIND_LIBRARY(CFPP_LIBRARY CF++
+        PATHS /usr/local/Frameworks)
     MARK_AS_ADVANCED(SYSTEM_LIBRARY
                      COCOA_LIBRARY
                      FOUNDATION_LIBRARY
-                     COREFOUNDATION_LIBRARY)
+                     COREFOUNDATION_LIBRARY
+                     CFPP_LIBRARY)
     SET(EXTRA_LIBS
         ${EXTRA_LIBS}
         ${SYSTEM_LIBRARY}
         ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
-        ${COREFOUNDATION_LIBRARY})
+        ${COREFOUNDATION_LIBRARY} ${CFPP_LIBRARY})
     
 ENDIF(APPLE)
 

@@ -24,6 +24,8 @@ namespace im {
             
             virtual std::size_t read(byte *buffer, std::size_t n) {
                 if (pos + n > len) { n = len-pos; }
+                /// FYI, std::memmove() actually copies bytes, rather
+                /// than 'moving' them (whatever that might mean)
                 std::memmove(buffer, data + pos, n);
                 pos += n;
                 return n;

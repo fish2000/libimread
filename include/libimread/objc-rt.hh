@@ -35,6 +35,17 @@ namespace objc {
     __attribute__((__always_inline__))
     T bridge(U castee) { return (__bridge T)castee; }
     
+    #if __has_feature(objc_arc)
+    template <typename T, typename U>
+    __attribute__((__always_inline__))
+    T bridgeretained(U castee) { return (__bridge_retained T)castee; }
+    #else
+    template <typename T, typename U>
+    __attribute__((__always_inline__))
+    T bridgeretained(U castee) { return (__bridge T)castee; }
+    #endif
+    
+    
     namespace types {
         
         using ID = ::id;

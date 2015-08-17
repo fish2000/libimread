@@ -17,6 +17,15 @@
 
 namespace im {
     
+    using MetaImage = ImageWithMetadata;
+    
+    
+    class CoreGraphicsImage : public Image, public MetaImage {
+        
+        
+        
+    };
+    
     namespace apple {
         
         //using halide::default_opts;
