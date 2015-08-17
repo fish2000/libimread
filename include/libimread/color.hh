@@ -243,6 +243,13 @@ namespace im {
         static_assert(detail::different<color_t, dest_color_t>(),                   \
                      "Color types color_t and dest_color_t cannot be the same");
     
+    #define DECLARE_CONVERTER(Color, DestColor)                                     \
+        template <>                                                                 \
+        struct Convert<Color, DestColor> : public ConverterBase<Color, DestColor>
+    
+    #define CONVERTER_OP()                                                          \
+        virtual dest_color_t operator()(const color_t& color) const override
+    
     namespace color {
         using Monochrome = UniformColor<meta::Mono, uint16_t, uint8_t>;
         using RGBA = UniformColor<>;
@@ -266,34 +273,30 @@ namespace im {
             using Base = ConverterBase<Color, DestColor>;
         };
         
-        template <>
-        struct Convert<RGB, RGB> : public ConverterBase<RGB, RGB> {
+        DECLARE_CONVERTER(RGB, RGB) {
             STATIC_ASSERT_SAME();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 return (dest_color_t)color;
             }
         };
         
-        template <>
-        struct Convert<RGBA, RGBA> : public ConverterBase<RGBA, RGBA> {
+        DECLARE_CONVERTER(RGBA, RGBA) {
             STATIC_ASSERT_SAME();
-            virtual dest_color_t operator()(const color_t& color) const override  {
+            CONVERTER_OP()  {
                 return (dest_color_t)color;
             }
         };
         
-        template <>
-        struct Convert<Monochrome, Monochrome> : public ConverterBase<Monochrome, Monochrome> {
+        DECLARE_CONVERTER(Monochrome, Monochrome) {
             STATIC_ASSERT_SAME();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 return (dest_color_t)color;
             }
         };
         
-        template <>
-        struct Convert<RGB, RGBA> : public ConverterBase<RGB, RGBA> {
+        DECLARE_CONVERTER(RGB, RGBA) {
             STATIC_ASSERT_DIFFERENT();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 /// discard alpha for now
                 dest_color_t out{ color.components[0],
                                   color.components[1],
@@ -302,10 +305,9 @@ namespace im {
             }
         };
         
-        template <>
-        struct Convert<RGBA, RGB> : public ConverterBase<RGBA, RGB> {
+        DECLARE_CONVERTER(RGBA, RGB) {
             STATIC_ASSERT_DIFFERENT();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 /// set alpha to zero for now
                 dest_color_t out{ color.components[0],
                                   color.components[1],
@@ -315,10 +317,9 @@ namespace im {
             }
         };
         
-        template <>
-        struct Convert<RGB, Monochrome> : public ConverterBase<RGB, Monochrome> {
+        DECLARE_CONVERTER(RGB, Monochrome) {
             STATIC_ASSERT_DIFFERENT();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 /// ITU R-601.2 -- adapted from my own Python code here:
                 /// https://github.com/fish2000/pylire/blob/master/pylire/process/grayscale.py#L6-L12
                 dest_color_t out{ val_t(float(color.components[0]) * 299.0f / 1000.0f +
@@ -328,10 +329,9 @@ namespace im {
             }
         };
         
-        template <>
-        struct Convert<RGBA, Monochrome> : public ConverterBase<RGBA, Monochrome> {
+        DECLARE_CONVERTER(RGBA, Monochrome) {
             STATIC_ASSERT_DIFFERENT();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 /// ITU R-601.2, as above -- 
                 /// only taking the RGB values, ignoring alpha
                 dest_color_t out{ val_t(float(color.components[0]) * 299.0f / 1000.0f +
@@ -341,10 +341,9 @@ namespace im {
             }
         };
         
-        template <>
-        struct Convert<Monochrome, RGB> : public ConverterBase<Monochrome, RGB> {
+        DECLARE_CONVERTER(Monochrome, RGB) {
             STATIC_ASSERT_DIFFERENT();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 /// using the one value for the many (x3)
                 const val_t value = val_t(color.components[0]);
                 dest_color_t out{ value, value, value };
@@ -352,10 +351,9 @@ namespace im {
             }
         };
         
-        template <>
-        struct Convert<Monochrome, RGBA> : public ConverterBase<Monochrome, RGBA> {
+        DECLARE_CONVERTER(Monochrome, RGBA) {
             STATIC_ASSERT_DIFFERENT();
-            virtual dest_color_t operator()(const color_t& color) const override {
+            CONVERTER_OP() {
                 /// using the one value for the many (x4)
                 const val_t value = val_t(color.components[0]);
                 dest_color_t out{ value, value, value, value };
@@ -365,6 +363,10 @@ namespace im {
         
     }
     
+    #undef STATIC_ASSERT_SAME
+    #undef STATIC_ASSERT_DIFFERENT
+    #undef DECLARE_CONVERTER
+    #undef CONVERTER_OP
     
 }
 
