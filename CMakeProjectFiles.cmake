@@ -154,6 +154,7 @@ set(hdrs
 # Project source files
 set(srcs
     ${srcs_dir}/ext/categories/NSString+STL.mm
+    ${srcs_dir}/ext/categories/NSColor+IM.mm
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/path.cpp

@@ -176,7 +176,13 @@ namespace objc {
         explicit message(types::ID s, types::selector o, Args&&... a)
             :arguments_t(a...)
             ,self(s), op(o)
-            {}
+            {
+                [self retain];
+            }
+        
+        virtual ~message() {
+            [self release];
+        }
         
         Return send() const {
             return arguments_t::send(self, op);
@@ -276,6 +282,10 @@ namespace objc {
             return std::string(__cls_name(self));
         }
         
+        std::string description() const {
+            return [[self description] STLString];
+        }
+        
         types::cls lookup() const {
             return ::objc_lookUpClass(__cls_name());
         }
@@ -286,6 +296,10 @@ namespace objc {
         /// STATIC METHODS
         static std::string classname(types::ID ii) {
             return std::string(__cls_name(ii));
+        }
+        
+        static std::string description(types::ID ii) {
+            return [[ii description] STLString];
         }
         
         static types::cls lookup(types::rID ii) {
@@ -341,48 +355,66 @@ namespace objc {
                  std::is_convertible<T, objc::types::ID>::value,
                  bool>> : std::true_type {};
         
+        template <typename T, typename V = bool>
+        struct is_selector : std::false_type {};
+        template <typename T>
+        struct is_selector<T,
+            typename std::enable_if_t<
+                std::is_convertible<T, objc::types::selector>::value,
+                bool>> : std::true_type {};
+        
+        template <typename T, typename V = bool>
+        struct is_class_type : std::false_type {};
+        template <typename T>
+        struct is_class_type<T,
+            typename std::enable_if_t<
+                std::is_convertible<T, objc::types::cls>::value,
+                bool>> : std::true_type {};
+
+        // template <typename T>
+        // using is_class_t = is_class<T>::value;
     }
     
     struct msg {
         
-        objc::id myself; /// scoped retain/release
-        types::rID self;
+        objc::id self; /// scoped retain/release
+        types::rID selfref;
         types::rSEL op;
         
         explicit msg(types::rID s, types::rSEL o)
-            :self(types::pass_id(s))
-            ,myself(s)
+            :self(objc::id(s))
+            ,selfref(types::pass_id(s))
             ,op(types::pass_selector(o))
             {}
         
         template <typename ...Args>
         types::ID send(types::boolean dispatch, Args ...args) {
             arguments<types::ID, Args...> ARGS(args...);
-            return ARGS.send(self, op);
+            return ARGS.send(selfref, op);
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
         types::ID sendv(M&& arg_list) const {
-            return arg_list.send(self, op);
+            return arg_list.send(selfref, op);
         }
         
         template <typename Return, typename ...Args>
-        static Return get(types::tID self, types::tSEL op, Args ...args) {
+        static Return get(types::tID s, types::tSEL op, Args ...args) {
             arguments<Return, Args...> ARGS(args...);
-            const objc::id selfie(self); /// for scoped retain/release
-            return ARGS.send(self, op);
+            const objc::id selfie(s); /// for scoped retain/release
+            return ARGS.send(s, op);
         }
         
         template <typename ...Args>
-        static types::ID send(types::tID self, types::tSEL op, Args ...args) {
-            return objc::msg::get<types::tID, Args...>(self, op, args...);
+        static types::ID send(types::tID s, types::tSEL op, Args ...args) {
+            return objc::msg::get<types::tID, Args...>(s, op, args...);
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
-        static types::ID sendv(types::rID self, types::rSEL op, M&& arg_list) {
-            return arg_list.send(self, op);
+        static types::ID sendv(types::rID s, types::rSEL op, M&& arg_list) {
+            return arg_list.send(s, op);
         }
         
         private:
@@ -401,29 +433,6 @@ inline objc::selector operator"" _SEL(const char *name) {
 
 namespace im {
     
-    namespace {
-        
-        /// these functions are so terrible,
-        /// they don't even deserve a name for their namespace.
-        /// ... OOH BURN
-        static constexpr unsigned int len = 3;
-        static const std::array<std::string, len> stringnames{
-            "nsstring",
-            "nsmutablestring",
-            "nsattributedstring"
-        };
-        
-        bool is_stringishly_named(const std::string &name) {
-            bool out = false;
-            std::string lowername = pystring::lower(name);
-            std::for_each(stringnames.begin(), stringnames.end(), [&](std::string nm) {
-                out = out || nm == lowername;
-            });
-            return out;
-        }
-        
-    }
-    
     /// q.v. libimread/errors.hh, lines 45-90 (aprox., subject to change) --
     ///      ... The other overload-resolution-phase versions of `stringify()` are
     ///      defined therein. This one gets enable-if'ed when anyone tries to use the 
@@ -436,10 +445,10 @@ namespace im {
     typename std::enable_if_t<objc::traits::is_class<S>::value, std::string>
         stringify(S *s) {
             const objc::id self(s);
-            if (is_stringishly_named(self.classname())) {
+            if (self[@"STLString"]) {
                 return [*self STLString];
             }
-            return [[*self description] STLString];
+            return self.description();
         }
     
     

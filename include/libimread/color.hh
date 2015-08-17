@@ -70,9 +70,9 @@ namespace im {
             static constexpr bool is_int() noexcept { return false; }
             static constexpr bool is_signed() noexcept { return false; }
             static constexpr bool contains_value() noexcept { return false; }
-            static constexpr bool check() { return false; }
-            static constexpr bool check(const NonValueBase& b) { return false; }
-            static constexpr bool check(const Base& b) { return typename Base::is_value(); }
+            // static constexpr bool check() { return false; }
+            // static constexpr bool check(const NonValueBase& b) { return false; }
+            // static constexpr bool check(const Base& b) { return typename Base::is_value(); }
         };
         
         template <typename Channel>
