@@ -25,7 +25,8 @@ using namespace im;
                          length:(NSUInteger)bytes {
     NSData *datum;
     std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);
-    int idx = byteSource->read(buffer.get(), static_cast<std::size_t>(bytes));
+    int idx = byteSource->read(buffer.get(),
+                               static_cast<std::size_t>(bytes));
     datum = [[NSData alloc] initWithBytes:(const void *)buffer.get()
                                    length:(NSInteger)bytes];
     return datum;

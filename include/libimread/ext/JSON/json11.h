@@ -25,6 +25,7 @@
 #include <initializer_list>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/ext/filesystem/path.h>
 
 using Base = std::integral_constant<uint8_t, 1>;
 using BaseType = Base::value_type;
@@ -435,6 +436,10 @@ class Json {
         };
 };
 
+template <> inline
+decltype(auto) Json::cast<filesystem::path>(const std::string &key) const {
+    return filesystem::path(static_cast<std::string>(get(key)));
+}
 template <> inline
 decltype(auto) Json::cast<const char*>(const std::string &key) const {
     return static_cast<std::string>(get(key)).c_str();

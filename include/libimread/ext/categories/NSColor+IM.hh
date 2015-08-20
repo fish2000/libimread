@@ -10,13 +10,15 @@
 #include <libimread/libimread.hpp>
 #include <libimread/color.hh>
 
+using namespace im;
+
 @interface NSColor (IMColorAdditions)
-+ (NSColor *)               colorWithUniformRGBA:(const im::color::RGBA&)rgba;
-+ (NSColor *)               colorWithUniformRGB:(const im::color::RGB&)rgb;
-+ (NSColor *)               colorWithUniformMonochrome:(const im::color::Monochrome&)mono;
-- (im::color::RGBA)         uniformRGBA;
-- (im::color::RGB)          uniformRGB;
-- (im::color::Monochrome)   uniformMonochrome;
++ (NSColor *)           colorWithUniformRGBA:(const color::RGBA&)rgba;
++ (NSColor *)           colorWithUniformRGB:(const color::RGB&)rgb;
++ (NSColor *)           colorWithUniformMonochrome:(const color::Monochrome&)mono;
+- (color::RGBA)         uniformRGBA;
+- (color::RGB)          uniformRGB;
+- (color::Monochrome)   uniformMonochrome;
 @end
 
 

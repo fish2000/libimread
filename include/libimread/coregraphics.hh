@@ -17,6 +17,7 @@
 
 namespace im {
     
+    /*
     using MetaImage = ImageWithMetadata;
     
     
@@ -25,6 +26,7 @@ namespace im {
         
         
     };
+    */
     
     namespace apple {
         

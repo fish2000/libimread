@@ -102,12 +102,12 @@ namespace im {
     
     /// This class *owns* its members and will delete them if destroyed
     struct ImageList {
-        using vector_type = std::vector<Image*>;
-        using size_type = vector_type::size_type;
+        using vector_t = std::vector<Image*>;
+        using vector_size_t = vector_t::size_type;
         
         ImageList() {}
         
-        size_type size() const {
+        vector_size_t size() const {
             return content.size();
         }
         
@@ -127,8 +127,8 @@ namespace im {
         /// After calling release(), ownership of the content image ponters
         /// is transferred to the caller, who must figure out how to delete them.
         /// Also note that release() resets the internal vector.
-        vector_type release() {
-            vector_type out;
+        vector_t release() {
+            vector_t out;
             out.swap(content);
             return out;
         }
@@ -138,7 +138,7 @@ namespace im {
             ImageList(const ImageList&);
             ImageList &operator=(ImageList&&);
             ImageList &operator=(const ImageList&);
-            vector_type content;
+            vector_t content;
     };
 }
 

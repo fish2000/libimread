@@ -132,13 +132,13 @@ namespace im {
         
         constexpr UniformColor() noexcept = default;
         
-        explicit constexpr UniformColor(Composite c) noexcept
+        explicit constexpr UniformColor(const Composite c) noexcept
             :composite(c)
             {}
         
-        explicit constexpr UniformColor(Components c) noexcept
-            :components(c)
-            {}
+        explicit constexpr UniformColor(const Components c) noexcept {
+            component_assign_impl(c, index_t());
+        }
         
         explicit constexpr UniformColor(channel_list_t initlist) noexcept {
             int idx = 0;
@@ -218,6 +218,12 @@ namespace im {
             }
             
             template <std::size_t ...I> inline
+            void component_assign_impl(const Components c,
+                                          std::index_sequence<I...>) const noexcept {
+                unpack { (components[I] = c[I])... };
+            }
+            
+            template <std::size_t ...I> inline
             array_t array_impl(std::index_sequence<I...>) const noexcept {
                 return array_t{ components[I]... };
             }
@@ -247,8 +253,8 @@ namespace im {
         template <>                                                                 \
         struct Convert<Color, DestColor> : public ConverterBase<Color, DestColor>
     
-    #define CONVERTER_OP()                                                          \
-        virtual dest_color_t operator()(const color_t& color) const override
+    #define CONVERTER_OP(argname)                                                   \
+        inline dest_color_t operator()(const component_t& argname) const
     
     namespace color {
         using Monochrome = UniformColor<meta::Mono, uint16_t, uint8_t>;
@@ -262,56 +268,48 @@ namespace im {
         struct ConverterBase {
             using color_t = Color;
             using dest_color_t = DestColor;
+            using component_t = typename color_t::component_t;
             using val_t = typename dest_color_t::channel_t;
             constexpr ConverterBase() noexcept = default;
-            virtual ~ConverterBase() {}
-            virtual dest_color_t operator()(const color_t& color) const = 0;
+            //virtual ~ConverterBase() {}
+            //dest_color_t operator()(const color_t& color) const = 0;
         };
         
         template <typename Color, typename DestColor>
         struct Convert : public ConverterBase<Color, DestColor> {
-            using Base = ConverterBase<Color, DestColor>;
+            //using Base = ConverterBase<Color, DestColor>;
         };
         
-        DECLARE_CONVERTER(RGB, RGB) {
-            STATIC_ASSERT_SAME();
-            CONVERTER_OP() {
-                return (dest_color_t)color;
+        #define DECLARE_IDENTITY_CONVERTER(Color)                                   \
+            DECLARE_CONVERTER(Color, Color) {                                       \
+                STATIC_ASSERT_SAME();                                               \
+                CONVERTER_OP(components) {                                          \
+                    return dest_color_t(components);                                \
+                }                                                                   \
             }
-        };
         
-        DECLARE_CONVERTER(RGBA, RGBA) {
-            STATIC_ASSERT_SAME();
-            CONVERTER_OP()  {
-                return (dest_color_t)color;
-            }
-        };
-        
-        DECLARE_CONVERTER(Monochrome, Monochrome) {
-            STATIC_ASSERT_SAME();
-            CONVERTER_OP() {
-                return (dest_color_t)color;
-            }
-        };
+        DECLARE_IDENTITY_CONVERTER(RGB);
+        DECLARE_IDENTITY_CONVERTER(RGBA);
+        DECLARE_IDENTITY_CONVERTER(Monochrome);
         
         DECLARE_CONVERTER(RGB, RGBA) {
             STATIC_ASSERT_DIFFERENT();
-            CONVERTER_OP() {
+            CONVERTER_OP(components) {
                 /// discard alpha for now
-                dest_color_t out{ color.components[0],
-                                  color.components[1],
-                                  color.components[2] };
+                dest_color_t out{ components[0],
+                                  components[1],
+                                  components[2] };
                 return out;
             }
         };
         
         DECLARE_CONVERTER(RGBA, RGB) {
             STATIC_ASSERT_DIFFERENT();
-            CONVERTER_OP() {
+            CONVERTER_OP(components) {
                 /// set alpha to zero for now
-                dest_color_t out{ color.components[0],
-                                  color.components[1],
-                                  color.components[2],
+                dest_color_t out{ components[0],
+                                  components[1],
+                                  components[2],
                                   0x00 };
                 return out;
             }
@@ -319,33 +317,33 @@ namespace im {
         
         DECLARE_CONVERTER(RGB, Monochrome) {
             STATIC_ASSERT_DIFFERENT();
-            CONVERTER_OP() {
+            CONVERTER_OP(components) {
                 /// ITU R-601.2 -- adapted from my own Python code here:
                 /// https://github.com/fish2000/pylire/blob/master/pylire/process/grayscale.py#L6-L12
-                dest_color_t out{ val_t(float(color.components[0]) * 299.0f / 1000.0f +
-                                        float(color.components[1]) * 587.0f / 1000.0f +
-                                        float(color.components[2]) * 114.0f / 1000.0f) };
+                dest_color_t out{ val_t(float(components[0]) * 299.0f / 1000.0f +
+                                        float(components[1]) * 587.0f / 1000.0f +
+                                        float(components[2]) * 114.0f / 1000.0f) };
                 return out;
             }
         };
         
         DECLARE_CONVERTER(RGBA, Monochrome) {
             STATIC_ASSERT_DIFFERENT();
-            CONVERTER_OP() {
+            CONVERTER_OP(components) {
                 /// ITU R-601.2, as above -- 
                 /// only taking the RGB values, ignoring alpha
-                dest_color_t out{ val_t(float(color.components[0]) * 299.0f / 1000.0f +
-                                        float(color.components[1]) * 587.0f / 1000.0f +
-                                        float(color.components[2]) * 114.0f / 1000.0f) };
+                dest_color_t out{ val_t(float(components[0]) * 299.0f / 1000.0f +
+                                        float(components[1]) * 587.0f / 1000.0f +
+                                        float(components[2]) * 114.0f / 1000.0f) };
                 return out;
             }
         };
         
         DECLARE_CONVERTER(Monochrome, RGB) {
             STATIC_ASSERT_DIFFERENT();
-            CONVERTER_OP() {
+            CONVERTER_OP(components) {
                 /// using the one value for the many (x3)
-                const val_t value = val_t(color.components[0]);
+                const val_t value = val_t(components[0]);
                 dest_color_t out{ value, value, value };
                 return out;
             }
@@ -353,9 +351,9 @@ namespace im {
         
         DECLARE_CONVERTER(Monochrome, RGBA) {
             STATIC_ASSERT_DIFFERENT();
-            CONVERTER_OP() {
+            CONVERTER_OP(components) {
                 /// using the one value for the many (x4)
-                const val_t value = val_t(color.components[0]);
+                const val_t value = val_t(components[0]);
                 dest_color_t out{ value, value, value, value };
                 return out;
             }
@@ -367,6 +365,7 @@ namespace im {
     #undef STATIC_ASSERT_DIFFERENT
     #undef DECLARE_CONVERTER
     #undef CONVERTER_OP
+    #undef DECLARE_IDENTITY_CONVERTER
     
 }
 

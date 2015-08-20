@@ -381,9 +381,7 @@ namespace objc {
             typename std::enable_if_t<
                 std::is_convertible<T, objc::types::cls>::value,
                 bool>> : std::true_type {};
-
-        // template <typename T>
-        // using is_class_t = is_class<T>::value;
+        
     }
     
     struct msg {

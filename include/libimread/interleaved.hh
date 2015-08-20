@@ -70,9 +70,9 @@ namespace im {
                 buffer.extent[1] = y;
                 buffer.extent[2] = z;
                 buffer.extent[3] = w;
-                buffer.stride[0] = x * y;
-                buffer.stride[1] = x;
-                buffer.stride[2] = 1;
+                buffer.stride[0] = x * y * sizeof(channel_t);
+                buffer.stride[1] = x * sizeof(channel_t);
+                buffer.stride[2] = sizeof(channel_t);
                 buffer.stride[3] = 1;
                 buffer.elem_size = sizeof(channel_t);
                 
@@ -297,9 +297,9 @@ namespace im {
             }
             
             /// Color conversion
-            using toRGB = color::Convert<Color,     im::color::RGB>;
-            using toRGBA = color::Convert<Color,    im::color::RGBA>;
-            using toMono = color::Convert<Color,    im::color::Monochrome>;
+            using toRGB = im::color::Convert<Color,     im::color::RGB>;
+            using toRGBA = im::color::Convert<Color,    im::color::RGBA>;
+            using toMono = im::color::Convert<Color,    im::color::Monochrome>;
             
             template <typename Conversion,
                       typename Output = typename Conversion::dest_color_t::channel_t>
@@ -314,34 +314,50 @@ namespace im {
                 std::shared_ptr<out_t> out(new out_t[sizeof(out_t)*size()+40]);
                 out_t *data = out.get();
                 
-                dest_color_t dest_color;
                 const int w = width(),
                           h = height(),
                           c = dest_color_t::channels(),
                           siz = sizeof(out_t) * c;
                 
                 pix::accessor<in_t> at = access();
-                pix::accessor<out_t> to = pix::accessor<out_t>(data, w * h,
-                                                                     w, 1);
+                pix::accessor<out_t> to = pix::accessor<out_t>(data,
+                                                               w * h, w, 1);
                 
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
-                        dest_color = converter(Color((source_component_t)at(x, y, 0)));
-                        std::memcpy(to(x, y, 0), &dest_color.components[0], siz);
+                        dest_color_t dest_color = converter((source_component_t)at(x, y, 0));
+                        std::memcpy(to(x, y, 0),
+                                    &dest_color.components[0],
+                                    siz);
                     }
                 }
                 
                 return out;
             };
             
-            operator InterleavedImage<im::color::RGB>() const {
-                return convert<toRGB>();
+            template <typename DestColor>
+            operator InterleavedImage<DestColor>() const {
+                auto data = convert<im::color::Convert<Color, DestColor>>();
+                buffer_t buffer = {0};
+                buffer.dev = 0;
+                buffer.host = data.release();
+                buffer.extent[0] = extent(0);
+                buffer.extent[1] = extent(1);
+                buffer.extent[2] = DestColor::N;
+                buffer.extent[3] = extent(3);
+                buffer.stride[0] = extent(0) * extent(1) * sizeof(DestColor::channel_t);
+                buffer.stride[1] = extent(0) * sizeof(DestColor::channel_t);
+                buffer.stride[2] = sizeof(DestColor::channel_t);
+                buffer.stride[3] = 1;
+                buffer.host_dirty = true;
+                buffer.dev_dirty = false;
+                buffer.elem_size = sizeof(DestColor::channel_t);
+                return InterleavedImage<DestColor>(buffer);
             }
-            operator InterleavedImage<im::color::RGBA>() const {
-                return convert<toRGBA>();
-            }
-            operator InterleavedImage<im::color::Monochrome>() const {
-                return convert<toMono>();
+            
+            template <>
+            operator InterleavedImage<Color>() const {
+                return *this;
             }
             
             /// im::Image overrides

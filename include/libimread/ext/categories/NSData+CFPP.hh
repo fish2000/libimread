@@ -14,7 +14,8 @@
 #include <CF++.hpp>
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
-
+#include <libimread/ext/categories/NSString+STL.hh>
+#include <libimread/objc-rt.hh>
 
 namespace im {
     
@@ -22,6 +23,11 @@ namespace im {
         public:
             NSDataSource(NSData *d)
                 :data(d), pos(0)
+                {
+                    [data retain];
+                }
+            NSDataSource(NSMutableData *d)
+                :data(objc::bridge<NSData*>(d)), pos(0)
                 {
                     [data retain];
                 }

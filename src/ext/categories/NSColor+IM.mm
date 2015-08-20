@@ -9,9 +9,11 @@
 
 #ifdef __OBJC__
 
+using namespace im;
+
 @implementation NSColor (IMColorAdditions)
-+ (NSColor *) colorWithUniformRGBA:(const im::color::RGBA&)rgba {
-    using Color = im::color::RGBA;
++ (NSColor *) colorWithUniformRGBA:(const color::RGBA&)rgba {
+    using Color = color::RGBA;
     using Channel = Color::channel_t;
     Color::array_t array = rgba.to_array();
     std::array<CGFloat, Color::N> farray;
@@ -24,8 +26,8 @@
                             blue:farray[2]
                            alpha:farray[3]];
 }
-+ (NSColor *) colorWithUniformRGB:(const im::color::RGB&)rgb {
-    using Color = im::color::RGB;
++ (NSColor *) colorWithUniformRGB:(const color::RGB&)rgb {
+    using Color = color::RGB;
     using Channel = Color::channel_t;
     Color::array_t array = rgb.to_array();
     std::array<CGFloat, Color::N> farray;
@@ -38,14 +40,14 @@
                             blue:farray[2]
                            alpha:(CGFloat)0.0f];
 }
-+ (NSColor *) colorWithUniformMonochrome:(const im::color::Monochrome&)mono {
-    using Color = im::color::Monochrome;
++ (NSColor *) colorWithUniformMonochrome:(const color::Monochrome&)mono {
+    using Color = color::Monochrome;
     CGFloat white = (CGFloat)((float)mono.components[0] / (float)Color::max());
     return [NSColor colorWithWhite:white
                              alpha:(CGFloat)0.0f];
 }
-- (im::color::RGBA) uniformRGBA {
-    using Color = im::color::RGBA;
+- (color::RGBA) uniformRGBA {
+    using Color = color::RGBA;
     using Channel = Color::channel_t;
     Color out{
         static_cast<Channel>([self redComponent]    * Color::max()),
@@ -54,8 +56,8 @@
         static_cast<Channel>([self alphaComponent]  * Color::max()) };
     return out;
 }
-- (im::color::RGB) uniformRGB {
-    using Color = im::color::RGB;
+- (color::RGB) uniformRGB {
+    using Color = color::RGB;
     using Channel = Color::channel_t;
     Color out{
         static_cast<Channel>([self redComponent]    * Color::max()),
@@ -63,8 +65,8 @@
         static_cast<Channel>([self blueComponent]   * Color::max()) };
     return out;
 }
-- (im::color::Monochrome) uniformMonochrome {
-    using Color = im::color::Monochrome;
+- (color::Monochrome) uniformMonochrome {
+    using Color = color::Monochrome;
     using Channel = Color::channel_t;
     Color out{
         static_cast<Channel>([self brightnessComponent] * Color::max()) };

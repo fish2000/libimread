@@ -113,6 +113,7 @@ set(hdrs
     ${hdrs_dir}/IO/apple.hh
     ${hdrs_dir}/IO/bmp.hh
     ${hdrs_dir}/IO/gif.hh
+    ${hdrs_dir}/IO/hdf5.hh
     ${hdrs_dir}/IO/jpeg.hh
     ${hdrs_dir}/IO/lsm.hh
     ${hdrs_dir}/IO/png.hh
@@ -124,6 +125,7 @@ set(hdrs
     
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
+    ${hdrs_dir}/private/singleton.hh
     ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/private/vpp_symbols.hh
     
@@ -177,6 +179,7 @@ set(srcs
     ${srcs_dir}/IO/apple.mm
     ${srcs_dir}/IO/bmp.cpp
     ${srcs_dir}/IO/gif.cpp
+    ${srcs_dir}/IO/hdf5.cpp
     ${srcs_dir}/IO/jpeg.cpp
     ${srcs_dir}/IO/lsm.cpp
     ${srcs_dir}/IO/lzw.cpp
