@@ -149,11 +149,7 @@ namespace im {
         }
         
         explicit constexpr UniformColor(array_t array) noexcept {
-            int idx = 0;
-            for (auto it = array.begin();
-                 it != array.end() && idx < N;
-                 ++it) { components[idx] = array[idx];
-                         ++idx; }
+            component_assign_impl(array.data(), index_t());
         }
         
         constexpr operator Composite() const noexcept { return composite; }
@@ -219,7 +215,7 @@ namespace im {
             
             template <std::size_t ...I> inline
             void component_assign_impl(const Components c,
-                                          std::index_sequence<I...>) const noexcept {
+                                       std::index_sequence<I...>) const noexcept {
                 unpack { (components[I] = c[I])... };
             }
             
@@ -271,8 +267,6 @@ namespace im {
             using component_t = typename color_t::component_t;
             using val_t = typename dest_color_t::channel_t;
             constexpr ConverterBase() noexcept = default;
-            //virtual ~ConverterBase() {}
-            //dest_color_t operator()(const color_t& color) const = 0;
         };
         
         template <typename Color, typename DestColor>

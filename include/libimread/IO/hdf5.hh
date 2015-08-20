@@ -78,15 +78,16 @@ namespace im {
         // template <> inline
         // dtype type<CFTypeRef>() { return dtype::NATIVE_OPAQUE; }
         
-        template <> inline
-        dtype type<std::size_t>() { return dtype::NATIVE_HSIZE; }
+        // template <> inline
+        // dtype type<std::size_t>() { return dtype::NATIVE_HSIZE; }
         
-        template <> inline
-        dtype type<std::ssize_t>() { return dtype::NATIVE_HSSIZE; }
+        // template <> inline
+        // dtype type<ssize_t>() { return dtype::NATIVE_HSSIZE; }
         
-        template <> inline
-        dtype type<errno_t>() { return dtype::NATIVE_HERR; }
+        // template <> inline
+        // dtype type<errno_t>() { return dtype::NATIVE_HERR; }
         
+        /*
         template <> inline
         dtype type<bool>() { return dtype::NATIVE_HBOOL; }
         
@@ -113,6 +114,7 @@ namespace im {
         
         template <> inline
         dtype type<uint64_t>() { return dtype::NATIVE_UINT64; }
+        */
         
     }
     

@@ -5,6 +5,7 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/IO/hdf5.hh>
 #include <H5Cpp.h>
+#include <H5LTpublic.h>
 
 namespace im {
     
@@ -12,6 +13,10 @@ namespace im {
     using namespace H5;
     
     class H5MemoryBuffer : public H5::H5File {
+        public:
+            static const unsigned OPEN_RW      =  H5LT_FILE_IMAGE_OPEN_RW;
+            static const unsigned DONT_COPY    =  H5LT_FILE_IMAGE_DONT_COPY;
+            static const unsigned DONT_RELEASE =  H5LT_FILE_IMAGE_DONT_RELEASE;
         
         public:
             H5MemoryBuffer(void *buffer, std::size_t size, unsigned flags)
@@ -25,10 +30,6 @@ namespace im {
                     p_setId(idx);
                 }
     };
-    
-    const unsigned H5MemoryBuffer::OPEN_RW      =  H5LT_FILE_IMAGE_OPEN_RW;
-    const unsigned H5MemoryBuffer::DONT_COPY    =  H5LT_FILE_IMAGE_DONT_COPY;
-    const unsigned H5MemoryBuffer::DONT_RELEASE =  H5LT_FILE_IMAGE_DONT_RELEASE;
     
     const unsigned kDefaultFlags = H5MemoryBuffer::OPEN_RW &
                                    H5MemoryBuffer::DONT_COPY &
@@ -45,7 +46,7 @@ namespace im {
                                    std::string("imread-data"));
         
         H5MemoryBuffer store(&data[0], data.size(), kDefaultFlags);
-        Group group(store.openGroup(imagepath));
+        Group group(store.openGroup(imagepath.str()));
         std::unique_ptr<DataSet> dataset(new DataSet(
                                  group.openDataSet(nm)));
         
@@ -67,5 +68,10 @@ namespace im {
         
         
     }
-
+    
+    
+    void HDF5Format::write(Image &input,
+                       byte_sink *output,
+                       const options_map &opts) {}
+    
 }

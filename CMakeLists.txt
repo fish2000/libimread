@@ -94,6 +94,11 @@ find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
 find_package(LibUnwind REQUIRED)
 
+set(HDF5_USE_STATIC_LIBRARIES false)
+set(HDF5_ROOT /usr/local/opt/hdf5/)
+find_package(HDF5 REQUIRED
+    COMPONENTS C CXX HL)
+
 # Add the project include directory
 include_directories(${${PROJECT_NAME}_include_dir})
 include_directories("${CMAKE_BINARY_DIR}/../include")
@@ -113,7 +118,7 @@ include_directories(
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
     ${HALIDE_INCLUDE_DIR}
-    ${LIBUNWIND_INCLUDE_DIR})
+    ${HDF5_INCLUDE_DIRS})
 
 # Set the files and options required to build the library
 include(CMakeProjectFiles.cmake)
@@ -142,14 +147,16 @@ add_dependencies(imread     "iod_symbolize")
 #     ${TIFF_LIBRARIES}
 #     ${JPEG_LIBRARIES}
 #     ${WEBP_LIBRARIES}
-#     ${HALIDE_LIBRARIES})
+#     ${HALIDE_LIBRARIES}
+#     ${HDF5_LIBRARIES})
 target_link_libraries(imread
     sszip docopt
     png z ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES})
+    ${HALIDE_LIBRARIES}
+    ${HDF5_LIBRARIES})
 
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})
@@ -174,7 +181,8 @@ target_link_libraries("test_${PROJECT_NAME}"
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES})
+    ${HALIDE_LIBRARIES}
+    ${HDF5_LIBRARIES})
 
 # install(TARGETS libimread DESTINATION lib)
 install(TARGETS imread DESTINATION lib)

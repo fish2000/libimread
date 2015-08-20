@@ -109,7 +109,7 @@ namespace im {
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(3);
-        ImageList::vector_type imagevec = input.release();
+        ImageList::vector_t imagevec = input.release();
         std::for_each(imagevec.begin(), imagevec.end(), [&](Image *image) {
             write_impl(std::forward<Image>(*image), g);
         });

@@ -74,7 +74,7 @@ namespace im {
                     }
                 }
             }
-        
+            delete[] data;
         } else if (bit_depth == 16) {
             uint16_t *data = new uint16_t[full_size];
             imread_assert(fread(static_cast<void*>(data),
@@ -105,9 +105,9 @@ namespace im {
                     }
                 }
             }
+            delete[] data;
         }
         
-        delete[] data;
         return im;
     }
     
@@ -135,6 +135,9 @@ namespace im {
                     }
                 }
             }
+            imread_assert(output->write(data, full_size) == static_cast<std::size_t>(full_size),
+                "Could not write 8-bit PPM data\n");
+            delete[] data;
         } else if (bit_depth == 16) {
             pix::accessor<uint16_t> at = input.access<uint16_t>();
             uint16_t *data = new uint16_t[full_size];
@@ -160,10 +163,10 @@ namespace im {
                     }
                 }
             }
+            imread_assert(output->write(data, full_size) == static_cast<std::size_t>(full_size),
+                "Could not write 16-bit PPM data\n");
+            delete[] data;
         }
-        imread_assert(output->write(data, full_size) == static_cast<std::size_t>(full_size),
-            "Could not write PPM data\n");
-        delete[] data;
         
         output->flush();
     }

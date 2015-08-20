@@ -335,7 +335,7 @@ namespace im {
                 return out;
             };
             
-            template <typename DestColor>
+            template <typename DestColor, typename = void>
             operator InterleavedImage<DestColor>() const {
                 auto data = convert<im::color::Convert<Color, DestColor>>();
                 buffer_t buffer = {0};
@@ -355,10 +355,13 @@ namespace im {
                 return InterleavedImage<DestColor>(buffer);
             }
             
-            template <>
-            operator InterleavedImage<Color>() const {
+            /*
+            template <typename C = Color,
+                      typename X = std::enable_if_t<detail::same<C, Color>::value>>
+            operator InterleavedImage<C>() const {
                 return *this;
             }
+            */
             
             /// im::Image overrides
             virtual const int nbits() const override {
@@ -393,6 +396,13 @@ namespace im {
             }
             
     };
+    
+    // template <>
+    // template <typename Color = color::RGBA>
+    // inline InterleavedImage<Color>::operator InterleavedImage<typename Color::color_t>() const {
+    //     return *this;
+    // }
+    
     
 #define xWIDTH d1
 #define xHEIGHT d0
@@ -468,7 +478,7 @@ namespace im {
         template <typename Color = im::color::RGBA>
         im::InterleavedImage<Color> read(const std::string &filename,
                                          const options_map &opts = interleaved_default_opts) {
-            im::InterleavedFactory factory(filename);
+            InterleavedFactory factory(filename);
             std::unique_ptr<im::ImageFormat> format(im::for_filename(filename));
             std::unique_ptr<im::FileSource> input(new im::FileSource(filename));
             std::unique_ptr<im::Image> output = format->read(input.get(), &factory, opts);
@@ -481,7 +491,7 @@ namespace im {
         
         template <typename Color = im::color::RGB> inline
         void write(im::InterleavedImage<Color> &input, const std::string &filename,
-                                                   const options_map &opts = interleaved_default_opts) {
+                   const options_map &opts = interleaved_default_opts) {
             if (input.dim(2) > 3) { return; }
             std::unique_ptr<im::ImageFormat> format(im::for_filename(filename));
             std::unique_ptr<im::FileSink> output(new im::FileSink(filename));
@@ -489,7 +499,7 @@ namespace im {
         }
         
         inline void write_multi(im::ImageList &input, const std::string &filename,
-                                           const options_map &opts = interleaved_default_opts) {
+                                const options_map &opts = interleaved_default_opts) {
             std::unique_ptr<im::ImageFormat> format(im::for_filename(filename));
             std::unique_ptr<im::FileSink> output(new im::FileSink(filename));
             format->write_multi(input, output.get(), opts);
