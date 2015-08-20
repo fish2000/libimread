@@ -355,14 +355,6 @@ namespace im {
                 return InterleavedImage<DestColor>(buffer);
             }
             
-            /*
-            template <typename C = Color,
-                      typename X = std::enable_if_t<detail::same<C, Color>::value>>
-            operator InterleavedImage<C>() const {
-                return *this;
-            }
-            */
-            
             /// im::Image overrides
             virtual const int nbits() const override {
                 return sizeof(channel_t) * 8;
@@ -396,13 +388,6 @@ namespace im {
             }
             
     };
-    
-    // template <>
-    // template <typename Color = color::RGBA>
-    // inline InterleavedImage<Color>::operator InterleavedImage<typename Color::color_t>() const {
-    //     return *this;
-    // }
-    
     
 #define xWIDTH d1
 #define xHEIGHT d0

@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/IO/hdf5.hh>
+
 #include <H5Cpp.h>
 #include <H5LTpublic.h>
 
@@ -25,7 +26,7 @@ namespace im {
                     hid_t idx = H5LTopen_file_image(buffer, size, flags);
                     if (idx < 0) {
                         throw FileIException("H5MemoryBuffer constructor:",
-                                                 "H5LTopen_file_image failed");
+                                             "H5LTopen_file_image failed.");
                     }
                     p_setId(idx);
                 }
@@ -65,7 +66,7 @@ namespace im {
         std::unique_ptr<hsize_t[]> DIMS(new hsize_t[rank]);
         int ndims = dataspace->getSimpleExtentDims(DIMS.get(), NULL);
         
-        
+        // detail::type<>();
         
     }
     

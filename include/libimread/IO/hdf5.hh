@@ -4,10 +4,8 @@
 #ifndef LIBIMREAD_IO_HDF5_HH_
 #define LIBIMREAD_IO_HDF5_HH_
 
-#include <vector>
-#include <sstream>
-
 #include <H5Cpp.h>
+#import <CoreFoundation/CoreFoundation.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
@@ -64,6 +62,12 @@ namespace im {
         template <> inline
         dtype type<long double>() { return dtype::NATIVE_LDOUBLE; }
         
+        template <> inline
+        dtype type<bool>() { return dtype::NATIVE_HBOOL; }
+        
+        template <> inline
+        dtype type<CFTypeRef>() { return dtype::NATIVE_OPAQUE; }
+        
         /*
         template <> inline
         dtype type<char>() { return dtype::NATIVE_B8; }
@@ -75,21 +79,15 @@ namespace im {
         dtype type<char>() { return dtype::NATIVE_B64; }
         */
         
-        // template <> inline
-        // dtype type<CFTypeRef>() { return dtype::NATIVE_OPAQUE; }
-        
-        // template <> inline
-        // dtype type<std::size_t>() { return dtype::NATIVE_HSIZE; }
-        
-        // template <> inline
-        // dtype type<ssize_t>() { return dtype::NATIVE_HSSIZE; }
-        
-        // template <> inline
-        // dtype type<errno_t>() { return dtype::NATIVE_HERR; }
-        
         /*
         template <> inline
-        dtype type<bool>() { return dtype::NATIVE_HBOOL; }
+        dtype type<std::size_t>() { return dtype::NATIVE_HSIZE; }
+        
+        template <> inline
+        dtype type<ssize_t>() { return dtype::NATIVE_HSSIZE; }
+        
+        template <> inline
+        dtype type<errno_t>() { return dtype::NATIVE_HERR; }
         
         template <> inline
         dtype type<int8_t>() { return dtype::NATIVE_INT8; }

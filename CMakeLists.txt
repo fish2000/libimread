@@ -118,6 +118,7 @@ include_directories(
     ${ZLIB_INCLUDE_DIR}
     ${WEBP_INCLUDE_DIR}
     ${HALIDE_INCLUDE_DIR}
+    ${LIBUNWIND_INCLUDE_DIR}
     ${HDF5_INCLUDE_DIRS})
 
 # Set the files and options required to build the library
