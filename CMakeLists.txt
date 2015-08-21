@@ -177,15 +177,18 @@ add_custom_target("test_data_header"
 set_source_files_properties(
     ${TEST_INCLUDE_DIR}/test_data.hpp
     PROPERTIES GENERATED TRUE)
-add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
-add_dependencies("test_${PROJECT_NAME}" "test_data_header")
-add_dependencies("test_${PROJECT_NAME}" "iod_symbolize")
-add_dependencies("test_${PROJECT_NAME}" "docopt")
-add_dependencies("test_${PROJECT_NAME}" "maBlockClosure")
-add_dependencies("test_${PROJECT_NAME}" "sszip")
-add_dependencies("test_${PROJECT_NAME}" "imread")
+set(imread_tests "test_${PROJECT_NAME}")
+add_executable(imread_tests ${TEST_SOURCES})
+set_target_properties(imread_tests
+    PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
+add_dependencies(imread_tests "test_data_header")
+add_dependencies(imread_tests "iod_symbolize")
+add_dependencies(imread_tests "docopt")
+add_dependencies(imread_tests "maBlockClosure")
+add_dependencies(imread_tests "sszip")
+add_dependencies(imread_tests "imread")
 link_directories(${CMAKE_BINARY_DIR})
-target_link_libraries("test_${PROJECT_NAME}"
+target_link_libraries(imread_tests
     imread
     maBlockClosure
     sszip docopt

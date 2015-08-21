@@ -29,10 +29,13 @@ set(EXTRA_LIBS ${EXTRA_LIBS}
     ${LIBFFI_LIBRARY})
 
 set(srcs
-    "MABlockClosure.m")
+    "MABlockClosure.m"
+    "BlockFptr.m")
 
 set(hdrs
-    "MABlockClosure.h")
+    "MABlockClosure.h"
+    "BlockFptr.h"
+    "BlockClosure.h")
 
 # add_library(libmaBlockClosure STATIC ${srcs} ${hdrs})
 add_library(maBlockClosure SHARED ${srcs} ${hdrs})

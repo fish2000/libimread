@@ -14,7 +14,7 @@ pushd $PROJECT_PATH
             -Wno-dev \
             -DCMAKE_INSTALL_PREFIX=./dist
         make -j4 install && \
-            ./test_libimread --success --durations yes --abortx 10
+            ./imread_tests --success --durations yes --abortx 10
 
 popd
 popd
