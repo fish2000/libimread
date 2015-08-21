@@ -7,6 +7,8 @@
 
 namespace im {
     
+    const ImageFormat::options_t BMPFormat::options = BMPFormat::OPTS();
+    
     namespace {
         
         void flippixels(byte *row, const int n) {

@@ -33,7 +33,10 @@ namespace im {
         if (detail::ext(format, "stk")) { return format_ptr(new format::STK); }
         if (detail::ext(format, "gif")) { return format_ptr(new format::GIF); }
         
-        if (detail::ext(format, "objc") || detail::ext(format, "ns")) { return format_ptr(new format::NS); }
+        /// save JPEG2000 files with apple I/O
+        if (detail::ext(format, "jp2") || detail::ext(format, "jpe2") || detail::ext(format, "jpg2")) {
+            return format_ptr(new format::NS);
+        }
         
         imread_raise(FormatNotFound, "Format Error:",
             FF("\tFile format not found for suffix %s", format));

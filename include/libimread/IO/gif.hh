@@ -30,11 +30,15 @@ namespace im {
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
             
-            static bool match_format(byte_source *src) {
-                /// 47 49 46 38 ("GIF8" in ASCII);
-                /// ... from “File Magic Numbers” [0]
-                return match_magic(src, "\x47\x49\x46\x38", 4);
+            static const options_t OPTS() {
+                const options_t O(
+                    "\x47\x49\x46\x38", /// [0]
+                    "gif",
+                    "image/gif"
+                );
+                return O;
             }
+            static const options_t options;
             
             virtual void write(Image &input,
                                byte_sink *output,

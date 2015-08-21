@@ -13,10 +13,15 @@ namespace im {
         public:
             using can_read = std::true_type;
             
-            static bool match_format(byte_source *src) {
-                return match_magic(src, "\x42\x4d", 2);
+            static const options_t OPTS() {
+                const options_t O(
+                    "\x42\x4d",
+                    "png",
+                    "image/png"
+                );
+                return O;
             }
-            
+            static const options_t options;
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,

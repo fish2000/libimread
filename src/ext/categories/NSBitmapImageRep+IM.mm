@@ -20,10 +20,10 @@ using namespace im;
     };
     return rep;
 }
-- (NSBitmapImageRep *) initWithByteVector:(const std::vector<byte>&)byteVector {
+- initWithByteVector:(const std::vector<byte>&)byteVector {
     NSData *datum;
     datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
-                                length:(NSInteger)byteVector.size()];
+                                   length:(NSInteger)byteVector.size()];
     [self initWithData:datum];
     #if !__has_feature(objc_arc)
         [datum release];

@@ -24,8 +24,8 @@
 @interface NSString (IMStringAdditions)
 + (NSString *)   stringWithSTLString:(const std::string&)str;
 + (NSString *)   stringWithSTLWideString:(const std::wstring&)wstr;
-- (NSString *)   initWithSTLString:(const std::string&)str;
-- (NSString *)   initWithSTLWideString:(const std::wstring&)wstr;
+-                initWithSTLString:(const std::string&)str;
+-                initWithSTLWideString:(const std::wstring&)wstr;
 - (std::string)  STLString;
 - (std::string)  STLStringUsingEncoding:(NSStringEncoding)encoding;
 - (std::wstring) STLWideString;

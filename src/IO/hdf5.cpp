@@ -10,6 +10,8 @@
 
 namespace im {
     
+    const ImageFormat::options_t HDF5Format::options = HDF5Format::OPTS();
+    
     using filesystem::path;
     using namespace H5;
     

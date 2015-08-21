@@ -24,10 +24,12 @@ namespace im {
             static const options_t OPTS() {
                 const options_t O(
                     "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
-                    "png"
+                    "png",
+                    "image/png"
                 );
                 return O;
             }
+            static const options_t options;
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,
@@ -36,7 +38,7 @@ namespace im {
                                byte_sink *output,
                                const options_map &opts) override;
             
-            /// ALSO NOT AN OVERRIDE:
+            /// NOT AN OVERRIDE:
             virtual void write_ios(Image &input,
                                    byte_sink *output,
                                    const options_map &opts);

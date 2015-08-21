@@ -10,7 +10,9 @@ extern "C" {
 }
 
 namespace im {
-
+    
+    const ImageFormat::options_t JPEGFormat::options = JPEGFormat::OPTS();
+    
     namespace {
         
         const std::size_t buffer_size = 4096;

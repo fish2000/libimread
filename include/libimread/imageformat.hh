@@ -42,13 +42,15 @@ namespace im {
             
             using options_t             = decltype(D(
                 _signature(_optional, _json_key = _signature)  = std::string(),
-                _suffix(_optional, _json_key = _suffix)        = std::string()
+                _suffix(_optional, _json_key = _suffix)        = std::string(),
+                _mimetype(_optional, _json_key = _mimetype)        = std::string()
             ));
             
             static const options_t OPTS() {
                 const options_t O(
-                    "xxxxxxxx",         /// signature
-                    "image"             /// suffix
+                    "xxxxxxxx",                 /// signature
+                    "image",                    /// suffix
+                    "application/octet-stream"  /// mimetype
                 );
                 return O;
             }

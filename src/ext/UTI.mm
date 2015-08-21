@@ -24,7 +24,8 @@
 
 /* $Id$ */
 
-#import "libimread/ext/UTI.h"
+#import <libimread/ext/UTI.h>
+#import <CoreServices/CoreServices.h>
 
 #ifndef __has_feature
 #define __has_feature( _x_ )    0
@@ -46,7 +47,6 @@
 //@import MobileCoreServices;
 #else
 //@import CoreServices;
-#import <CoreServices/CoreServices.h>
 #endif
 
 @interface UTI()

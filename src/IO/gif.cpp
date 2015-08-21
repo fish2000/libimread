@@ -8,6 +8,8 @@
 
 namespace im {
     
+    const ImageFormat::options_t GIFFormat::options = GIFFormat::OPTS();
+    
     namespace detail {
         
         inline void __attribute__((unused)) setPixel(unsigned char *rgb, int r, int g, int b) {

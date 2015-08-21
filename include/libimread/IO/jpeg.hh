@@ -17,10 +17,15 @@ namespace im {
             using can_read = std::true_type;
             using can_write = std::true_type;
             
-            /// NOT AN OVERRIDE:
-            static bool match_format(byte_source *src) {
-                return match_magic(src, "\xff\xd8\xff", 3);
+            static const options_t OPTS() {
+                const options_t O(
+                    "\xff\xd8\xff",
+                    "jpg",
+                    "image/jpeg"
+                );
+                return O;
             }
+            static const options_t options;
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,

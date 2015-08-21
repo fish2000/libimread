@@ -15,6 +15,7 @@
 
 namespace im {
     
+    const ImageFormat::options_t PNGFormat::options = PNGFormat::OPTS();
     
     namespace {
         

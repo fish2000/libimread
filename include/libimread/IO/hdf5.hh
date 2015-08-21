@@ -126,10 +126,12 @@ namespace im {
             static const options_t OPTS() {
                 const options_t O(
                     "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
-                    "hdf5"
+                    "hdf5",
+                    "image/hdf5"
                 );
                 return O;
             }
+            static const options_t options;
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,
