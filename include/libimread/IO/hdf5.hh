@@ -68,52 +68,6 @@ namespace im {
         template <> inline
         dtype type<CFTypeRef>() { return dtype::NATIVE_OPAQUE; }
         
-        /*
-        template <> inline
-        dtype type<char>() { return dtype::NATIVE_B8; }
-        template <> inline
-        dtype type<char>() { return dtype::NATIVE_B16; }
-        template <> inline
-        dtype type<char>() { return dtype::NATIVE_B32; }
-        template <> inline
-        dtype type<char>() { return dtype::NATIVE_B64; }
-        */
-        
-        /*
-        template <> inline
-        dtype type<std::size_t>() { return dtype::NATIVE_HSIZE; }
-        
-        template <> inline
-        dtype type<ssize_t>() { return dtype::NATIVE_HSSIZE; }
-        
-        template <> inline
-        dtype type<errno_t>() { return dtype::NATIVE_HERR; }
-        
-        template <> inline
-        dtype type<int8_t>() { return dtype::NATIVE_INT8; }
-        
-        template <> inline
-        dtype type<uint8_t>() { return dtype::NATIVE_UINT8; }
-        
-        template <> inline
-        dtype type<int16_t>() { return dtype::NATIVE_INT16; }
-        
-        template <> inline
-        dtype type<uint16_t>() { return dtype::NATIVE_UINT16; }
-        
-        template <> inline
-        dtype type<int32_t>() { return dtype::NATIVE_INT32; }
-        
-        template <> inline
-        dtype type<uint32_t>() { return dtype::NATIVE_UINT32; }
-        
-        template <> inline
-        dtype type<int64_t>() { return dtype::NATIVE_INT64; }
-        
-        template <> inline
-        dtype type<uint64_t>() { return dtype::NATIVE_UINT64; }
-        */
-        
     }
     
     

@@ -357,6 +357,12 @@ class Json {
         bool has(const char *key) const             { return has(std::string(key)); }
         std::vector<std::string> keys();
         
+        /// traverse
+        using JSONNode = Node;
+        void traverse(void (*f)(const JSONNode*)) {
+            root->traverse(f);
+        }
+        
         /// cast operations
         template <typename T> inline
         decltype(auto) cast(const std::string &key) const {

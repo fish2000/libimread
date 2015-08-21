@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+project(SG14 LANGUAGES CXX)
+
+install(DIRECTORY SG14 DESTINATION include
+  FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY SG14 DESTINATION include
+  FILES_MATCHING PATTERN "*.hpp")

@@ -1,7 +1,7 @@
 # Author: Alexander Böhn (with Félix C. Morency)
 # © 2011.10 -- GPL, Motherfuckers
 cmake_minimum_required(VERSION 3.0)
-project(libsszip LANGUAGES C CXX)
+project(libsszip LANGUAGES C)
 
 set(libsszip_VERSION_MAJOR "0")
 set(libsszip_VERSION_MINOR "3")
@@ -59,5 +59,5 @@ target_link_libraries(sszip ${EXTRA_LIBS})
 install(TARGETS sszip DESTINATION lib)
 install(DIRECTORY SSZipArchive/ DESTINATION include/libsszip
     FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY SSZipArchive/minizip/ DESTINATION include/libsszip
+install(DIRECTORY SSZipArchive/minizip/ DESTINATION include/libsszip/minizip
     FILES_MATCHING PATTERN "*.h")

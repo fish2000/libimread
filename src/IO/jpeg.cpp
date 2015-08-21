@@ -11,7 +11,7 @@ extern "C" {
 
 namespace im {
     
-    const ImageFormat::options_t JPEGFormat::options = JPEGFormat::OPTS();
+    DECLARE_FORMAT_OPTIONS(JPEGFormat);
     
     namespace {
         

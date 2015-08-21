@@ -37,6 +37,9 @@ namespace im {
         }                                                                           \
         static const options_t options;
     
+    #define DECLARE_FORMAT_OPTIONS(format)                                          \
+        const ImageFormat::options_t format::options = format::OPTS();
+    
     class ImageFormat {
         
         public:

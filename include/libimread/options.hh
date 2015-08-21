@@ -17,7 +17,9 @@ namespace im {
             
             options_map()
                 :Json()
-                { set("metadata", ""); }
+                {
+                    set("metadata", "");
+                }
     };
     
     std::string get_optional_string(const options_map& opts,  const std::string& key);

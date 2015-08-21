@@ -95,8 +95,8 @@ Json::parse_error::parse_error(const std::string &msg, std::istream &in)
     {
         line = detail::currpos(in, &col);
     }
-// Node and helper classes
 
+/// Node and helper classes
 Json::Node::Node(unsigned init) {
     refcnt = init;
 }
@@ -212,7 +212,8 @@ Json::Object* Json::mkobject() {
     if (root->type() != Type::OBJECT)
         imread_raise(JSONUseError,
             "Json::mkobject() method not applicable",
-         FF("\troot->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
+         FF("\troot->type() == Type::%s", root->typestr()),
+            "\t(Requires Type::OBJECT)");
     return (Object*)root;
 }
 
@@ -232,7 +233,8 @@ Json::Array* Json::mkarray() {
     if (root->type() != Type::ARRAY)
         imread_raise(JSONUseError,
             "Json::mkarray() method not applicable",
-         FF("\troot->type() == Type::%s (Requires Type::ARRAY)", root->typestr()));
+         FF("\troot->type() == Type::%s", root->typestr()),
+            "\t(Requires Type::ARRAY)");
     return (Array*)root;
 }
 
@@ -267,7 +269,7 @@ Json Json::Property::operator=(const Json& that) {
         ((Array*)host)->repl(index, that.root);
     else
         imread_raise(JSONLogicError,
-            "Property::operator=() assignment logic error:",
+            "Property::operator=(Json) assignment logic error:",
          FF("\tAssignment attempt made on LHS object of Type::%s", host->typestr()),
             "\tJson LHS object (assignee) should be Type::OBJECT or Type::ARRAY");
     return target();
@@ -290,16 +292,20 @@ std::size_t Json::size() const {
         return ((Array*)root)->list.size();
     if (root->type() == Type::OBJECT)
         return ((Object*)root)->map.size();
+    if (root->type() == Type::STRING)
+        return ((String*)root)->value.size();
     imread_raise(JSONUseError,
         "Json::size() method not applicable",
-     FF("root->type() == Type::%s (Requires {Type::OBJECT | Type::ARRAY})", root->typestr()));
+     FF("root->type() == Type::%s", root->typestr()),
+        "(Requires {Type::OBJECT | Type::ARRAY | Type::STRING})");
 }
 
 Json Json::get(const std::string& key) const {
     if (root->type() != Type::OBJECT)
         imread_raise(JSONUseError,
-            "Json::get() method not applicable",
-         FF("root->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
+            "Json::get(key) method not applicable",
+         FF("\troot->type() == Type::%s", root->typestr()),
+            "\t(Requires Type::OBJECT)");
     Node* n = ((Object*)root)->get(key);
     return n == nullptr ? undefined : Json(n);
 }
@@ -307,8 +313,9 @@ Json Json::get(const std::string& key) const {
 bool Json::has(const std::string& key) const {
     if (root->type() != Type::OBJECT)
         imread_raise(JSONUseError,
-            "Json::has() method not applicable",
-         FF("root->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
+            "Json::has(key) method not applicable",
+         FF("\troot->type() == Type::%s", root->typestr()),
+            "\t(Requires Type::OBJECT)");
     auto kp = keyset.find(key);
     if (kp == keyset.end())
         return false;
@@ -320,8 +327,9 @@ bool Json::has(const std::string& key) const {
 Json::Property::Property(Node* node, const std::string& key) : host(node) {
     if (node->type() != Type::OBJECT)
         imread_raise(JSONUseError,
-            "Json::size() method not applicable",
-         FF("node->type() == Type::%s (Requires Type::OBJECT)", node->typestr()));
+            "Json::Property::Property(node, key) method not applicable",
+         FF("\tnode->type() == Type::%s", node->typestr()),
+            "\t(Requires Type::OBJECT)");
     this->key = key;
     index = -1;
 }
@@ -329,8 +337,9 @@ Json::Property::Property(Node* node, const std::string& key) : host(node) {
 Json::Property::Property(Node* node, int index) : host(node) {
     if (node->type() != Type::ARRAY)
         imread_raise(JSONUseError,
-            "Json::size() method not applicable",
-         FF("\tnode->type() == Type::%s (Requires Type::ARRAY)", node->typestr()));
+            "Json::Property::Property(node, idx) method not applicable",
+         FF("\tnode->type() == Type::%s", node->typestr()),
+            "(Requires Type::ARRAY)");
     key = "";
     this->index = index;
 }
@@ -349,8 +358,9 @@ Json Json::Property::target() const {
 std::vector<std::string> Json::keys() {
     if (root->type() != Type::OBJECT)
         imread_raise(JSONUseError,
-            "Json::size() method not applicable",
-         FF("\troot->type() == Type::%s (Requires Type::OBJECT)", root->typestr()));
+            "Json::keys() method not applicable",
+         FF("\troot->type() == Type::%s", root->typestr()),
+            "\t(Requires Type::OBJECT)");
     Object* op = (Object*)root;
     std::vector<std::string> ret;
     for (auto it : op->map)
@@ -377,14 +387,14 @@ void Json::String::print(std::ostream& out) const {
     detail::escape(out, value);
 }
 
-void Json::Object::traverse(void (*f)(const Node*)) const {
-    for (auto it : map)
-        f(it.second);
+void Json::Object::traverse(void (*f)(const JSONNode*)) const {
+    //for (auto it : map) { f(it.second); }
+    for (auto it : map) { it.second->traverse(f); }
 }
 
-void Json::Array::traverse(void (*f)(const Node*)) const {
-    for (auto it : list)
-        f(it);
+void Json::Array::traverse(void (*f)(const JSONNode*)) const {
+    //for (auto it : list) { f(it); }
+    for (auto it : list) { it->traverse(f); }
 }
 
 void Json::Object::print(std::ostream& out) const {
@@ -624,10 +634,10 @@ Json::Json(std::istream& in, bool full) {
             in.putback(c);
             Json key(in, false);
             if (key.root->type() != Type::STRING)
-                throw parse_error("a std::string expected", in);
+                throw parse_error("std::string expected", in);
             in >> c;
             if (c != ':')
-                throw parse_error("a colon expected", in);
+                throw parse_error("colon expected", in);
             Json obj(in, false);
             set(key, obj);
             in >> c;
@@ -695,7 +705,7 @@ Json Json::parse(const std::string& str) {
         /* skip */;
     if (is.eof())
         return parsed;
-    throw parse_error("json format error", is);
+    throw parse_error("JSON format error", is);
 }
 
 Json::operator std::string() const {

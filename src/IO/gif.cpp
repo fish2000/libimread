@@ -8,7 +8,7 @@
 
 namespace im {
     
-    const ImageFormat::options_t GIFFormat::options = GIFFormat::OPTS();
+    DECLARE_FORMAT_OPTIONS(GIFFormat);
     
     namespace detail {
         

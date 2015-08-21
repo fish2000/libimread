@@ -7,7 +7,7 @@
 
 namespace im {
     
-    const ImageFormat::options_t BMPFormat::options = BMPFormat::OPTS();
+    DECLARE_FORMAT_OPTIONS(BMPFormat);
     
     namespace {
         

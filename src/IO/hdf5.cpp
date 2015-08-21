@@ -10,7 +10,7 @@
 
 namespace im {
     
-    const ImageFormat::options_t HDF5Format::options = HDF5Format::OPTS();
+    DECLARE_FORMAT_OPTIONS(HDF5Format);
     
     using filesystem::path;
     using namespace H5;
@@ -53,7 +53,9 @@ namespace im {
         std::unique_ptr<DataSet> dataset(new DataSet(
                                  group.openDataSet(nm)));
         
-        DSetCreatPropList plist = dataset->getCreatePlist();
+        //DSetCreatPropList plist = dataset->getCreatePlist();
+        //DSetMemXferPropList plist = dataset->getCreatePlist();
+        //DSetMemXferPropList plist;
         
         H5T_class_t typeclass = dataset->getTypeClass();
         IntType inttype = dataset->getIntType();
@@ -67,14 +69,25 @@ namespace im {
         int rank = dataspace->getSimpleExtentNdims(); /// should be 3
         std::unique_ptr<hsize_t[]> DIMS(new hsize_t[rank]);
         int ndims = dataspace->getSimpleExtentDims(DIMS.get(), NULL);
+        //hsize_t bufsize = dataset->getVlenBufSize(inttype, dataspace.get());
         
-        // detail::type<>();
+        std::unique_ptr<Image> output = factory->create(size, DIMS[0],
+                                                              DIMS[1],
+                                                              DIMS[2]);
         
+        /// read into memory buffer
+        dataset->read(output->rowp(0),
+                      detail::type<uint8_t>(),
+                      DataSpace::ALL,
+                      *dataspace.get());
+        
+        /// return image
+        return output;
     }
     
     
     void HDF5Format::write(Image &input,
-                       byte_sink *output,
-                       const options_map &opts) {}
+                           byte_sink *output,
+                           const options_map &opts) {}
     
 }

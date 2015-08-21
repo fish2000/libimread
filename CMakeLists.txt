@@ -66,6 +66,8 @@ SET(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
+SET(MABLOCKCLOSURE_DIR "${DEPS_DIR}/MABlockClosure")
+SET(SG14_DIR "${DEPS_DIR}/SG14")
 SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
 add_subdirectory(${DEPS_DIR})
 set_property(DIRECTORY ${IOD_TEST_DIR}
@@ -104,7 +106,9 @@ include_directories(${${PROJECT_NAME}_include_dir})
 include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${DOCOPT_DIR}")
+include_directories("${MABLOCKCLOSURE_DIR}")
 include_directories("${IOD_DIR}")
+include_directories("${SG14_DIR}")
 include_directories("${SSZIP_DIR}")
 
 # Ugh
@@ -137,13 +141,16 @@ set_target_properties(imread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 # add_dependencies(libimread "libdocopt")
 add_dependencies(imread "docopt")
+# add_dependencies(libimread "libmaBlockClosure")
+add_dependencies(imread "maBlockClosure")
 # add_dependencies(libimread "libsszip")
 add_dependencies(imread "sszip")
-# add_dependencies(libimread  "iod_symbolize")
-add_dependencies(imread     "iod_symbolize")
+# add_dependencies(libimread "iod_symbolize")
+add_dependencies(imread "iod_symbolize")
 
 # target_link_libraries(libimread
-#     libsszip
+#     libsszip libdocopt
+#     libmaBlockClosure
 #     png z ${EXTRA_LIBS}
 #     ${TIFF_LIBRARIES}
 #     ${JPEG_LIBRARIES}
@@ -152,6 +159,7 @@ add_dependencies(imread     "iod_symbolize")
 #     ${HDF5_LIBRARIES})
 target_link_libraries(imread
     sszip docopt
+    maBlockClosure
     png z ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -172,11 +180,13 @@ set_source_files_properties(
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 add_dependencies("test_${PROJECT_NAME}" "iod_symbolize")
+add_dependencies("test_${PROJECT_NAME}" "maBlockClosure")
 add_dependencies("test_${PROJECT_NAME}" "docopt")
 add_dependencies("test_${PROJECT_NAME}" "sszip")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     imread
+    maBlockClosure
     sszip docopt
     png z ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
