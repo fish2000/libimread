@@ -460,7 +460,6 @@ namespace im {
             return self.description();
         }
     
-    
 }
 
 #endif /// LIBIMREAD_OBJC_RT_HH

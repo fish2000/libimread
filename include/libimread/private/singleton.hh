@@ -30,12 +30,11 @@ namespace im {
         protected:
             constexpr Base() noexcept = default;
             virtual ~Base() {}
-        
-        public:
-        
             virtual shared_t shared() {
                 return shared_from_this();
             }
+        
+        public:
             
             static shared_t& get() {
                 static shared_t instance = nullptr;
@@ -50,14 +49,6 @@ namespace im {
             virtual bool has(const path&) = 0;
             virtual bool has(path&&) = 0;
             
-            virtual std::unique_ptr<byte_source> source(std::string) {
-                imread_raise_default(NotImplementedError);
-            };
-            
-            virtual std::unique_ptr<byte_sink>   sink(std::string) {
-                imread_raise_default(NotImplementedError);
-            };
-    
     };
     
     class Singleton : public Base {
@@ -65,8 +56,8 @@ namespace im {
             virtual bool has(const std::string& s) { return true; }
             virtual bool has(std::string&& s) { return true; }
         protected:
-            constexpr Store() noexcept = default;
-            virtual ~Store() {}
+            constexpr Singleton() noexcept = default;
+            virtual ~Singleton() {}
     };
 }
 
