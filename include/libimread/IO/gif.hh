@@ -30,15 +30,10 @@ namespace im {
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
             
-            static const options_t OPTS() {
-                const options_t O(
-                    "\x47\x49\x46\x38", /// [0]
-                    "gif",
-                    "image/gif"
-                );
-                return O;
-            }
-            static const options_t options;
+            DECLARE_OPTIONS(
+                "\x47\x49\x46\x38", /// [0]
+                "gif",
+                "image/gif");
             
             virtual void write(Image &input,
                                byte_sink *output,

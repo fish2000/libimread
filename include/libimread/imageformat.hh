@@ -30,6 +30,13 @@ namespace im {
         return match_magic(src, magic.c_str(), magic.size());
     }
     
+    #define DECLARE_OPTIONS(...)                                                    \
+        static const options_t OPTS() {                                             \
+            const options_t O(__VA_ARGS__);                                         \
+            return O;                                                               \
+        }                                                                           \
+        static const options_t options;
+    
     class ImageFormat {
         
         public:
@@ -42,20 +49,15 @@ namespace im {
             
             using options_t             = decltype(D(
                 _signature(_optional, _json_key = _signature)  = std::string(),
-                _suffix(_optional, _json_key = _suffix)        = std::string(),
-                _mimetype(_optional, _json_key = _mimetype)        = std::string()
+                _suffix(_optional,    _json_key = _suffix)     = std::string(),
+                _mimetype(_optional,  _json_key = _mimetype)   = std::string()
             ));
             
-            static const options_t OPTS() {
-                const options_t O(
-                    "xxxxxxxx",                 /// signature
-                    "image",                    /// suffix
-                    "application/octet-stream"  /// mimetype
-                );
-                return O;
-            }
-            
-            static const options_t options;
+            DECLARE_OPTIONS(
+                "xxxxxxxx",                 /// signature
+                "image",                    /// suffix
+                "application/octet-stream"  /// mimetype
+            );
             
             /// NOT AN OVERRIDE:
             static bool match_format(byte_source *src) {

@@ -17,15 +17,10 @@ namespace im {
             using can_read = std::true_type;
             using can_write = std::true_type;
             
-            static const options_t OPTS() {
-                const options_t O(
-                    "\xff\xd8\xff",
-                    "jpg",
-                    "image/jpeg"
-                );
-                return O;
-            }
-            static const options_t options;
+            DECLARE_OPTIONS(
+                "\xff\xd8\xff",
+                "jpg",
+                "image/jpeg");
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,

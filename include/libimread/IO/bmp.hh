@@ -8,20 +8,15 @@
 #include <libimread/base.hh>
 
 namespace im {
-
+    
     class BMPFormat : public ImageFormat {
         public:
             using can_read = std::true_type;
             
-            static const options_t OPTS() {
-                const options_t O(
-                    "\x42\x4d",
-                    "png",
-                    "image/png"
-                );
-                return O;
-            }
-            static const options_t options;
+            DECLARE_OPTIONS(
+                "\x42\x4d",
+                "png",
+                "image/png");
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,

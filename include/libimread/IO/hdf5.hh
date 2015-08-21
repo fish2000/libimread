@@ -123,15 +123,10 @@ namespace im {
             using can_read = std::true_type;
             using can_write = std::true_type;
             
-            static const options_t OPTS() {
-                const options_t O(
-                    "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
-                    "hdf5",
-                    "image/hdf5"
-                );
-                return O;
-            }
-            static const options_t options;
+            DECLARE_OPTIONS(
+                "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
+                "hdf5",
+                "image/hdf5");
             
             virtual std::unique_ptr<Image> read(byte_source *src,
                                                 ImageFactory *factory,
