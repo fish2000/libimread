@@ -39,25 +39,25 @@ namespace {
         IRGBA leavedim3 = im::interleaved::read(D("IMG_7333.jpeg"));
     }
     
-    TEST_CASE("[interleaved-io] Read a JPEG and rewrite it as a PNG", "[interleaved-read-jpeg-write-png]") {
-        IRGBA leavedim = im::interleaved::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
-        im::interleaved::write(leavedim, td.dirpath/"OH_DAWG666.png");
-        
-        IRGBA leavedim2 = im::interleaved::read(D("IMG_4332.jpg"));
-        im::interleaved::write(leavedim2, td.dirpath/"IMG_4332_JPG.png");
-        
-        IRGBA leavedim3 = im::interleaved::read(D("IMG_7333.jpeg"));
-        im::interleaved::write(leavedim3, td.dirpath/"IMG_7333_JPG.png");
-        
-        IRGBA leavedim4 = im::interleaved::read(D("10954288_342637995941364_1354507656_n.jpg"));
-        im::interleaved::write(leavedim4, td.dirpath/"HAY_GUISE.png");
-    }
+    // TEST_CASE("[interleaved-io] Read a JPEG and rewrite it as a PNG", "[interleaved-read-jpeg-write-png]") {
+    //     IRGBA leavedim = im::interleaved::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
+    //     im::interleaved::write(leavedim, td.dirpath/"OH_DAWG666.png");
+    //
+    //     IRGBA leavedim2 = im::interleaved::read(D("IMG_4332.jpg"));
+    //     im::interleaved::write(leavedim2, td.dirpath/"IMG_4332_JPG.png");
+    //
+    //     IRGBA leavedim3 = im::interleaved::read(D("IMG_7333.jpeg"));
+    //     im::interleaved::write(leavedim3, td.dirpath/"IMG_7333_JPG.png");
+    //
+    //     IRGBA leavedim4 = im::interleaved::read(D("10954288_342637995941364_1354507656_n.jpg"));
+    //     im::interleaved::write(leavedim4, td.dirpath/"HAY_GUISE.png");
+    // }
     
     // TEST_CASE("[interleaved-io] Read a TIFF", "[interleaved-read-tiff]") {
     //     IRGBA leavedim = im::interleaved::read(D("ptlobos.tif"));
     //     im::interleaved::write(leavedim, td.dirpath/"TIFF_DUG986.png");
     // }
-    //
+    
     // TEST_CASE("[interleaved-io] Write multiple formats as PPM", "[interleaved-read-tiff-write-ppm]") {
     //     IRGBA leavedim = im::interleaved::read(D("ptlobos.tif"));
     //     im::interleaved::write(leavedim, td.dirpath/"PPM_DUG986.ppm");

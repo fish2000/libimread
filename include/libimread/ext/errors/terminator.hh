@@ -45,7 +45,9 @@ namespace {
                 std::clog << "backtrace: unhandled exception std::exception:what(): " << e.what() << std::endl;
             } catch (...) {
                 if (std::type_info * et = abi::__cxa_current_exception_type()) {
-                    std::clog << "backtrace: unhandled exception type: " << get_demangled_name(et->name()) << std::endl;
+                    std::clog << "backtrace: unhandled exception type: "
+                              << get_demangled_name(et->name())
+                              << std::endl;
                 } else {
                     std::clog << "backtrace: unhandled unknown exception" << std::endl;
                 }

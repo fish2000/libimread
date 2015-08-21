@@ -2,6 +2,8 @@
 /// License: MIT (see COPYING.MIT file)
 /// Adapted from http://stackoverflow.com/a/31633962/298171
 
+#include <string>
+#include <libimread/ext/pystring.hh>
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/errors/backtrace.hh>
 
@@ -15,6 +17,13 @@
 #include <libunwind.h>
 
 namespace {
+    
+    const std::string string_name = "std::string";
+    const std::string string_tpl = "std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >";
+    
+    inline std::string destringify(char const* demangled_name) {
+        return pystring::replace(demangled_name, string_tpl, string_name);
+    }
     
     void print_reg(std::ostream & _out, unw_word_t reg) noexcept {
         constexpr std::size_t address_width = std::numeric_limits<std::uintptr_t>::digits / 4;
@@ -44,7 +53,7 @@ void backtrace(std::ostream& _out) noexcept {
         if (unw_get_proc_name(&cursor,
                               symbol, sizeof(symbol),
                               &offset) == 0) {
-            _out << "(" << get_demangled_name(symbol) << " + 0x" << offset << ")\n\n";
+            _out << "(" << destringify(get_demangled_name(symbol)) << " + 0x" << offset << ")\n\n";
         } else {
             _out << "-- error: unable to obtain symbol name for this frame\n\n";
         }

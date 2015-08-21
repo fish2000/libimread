@@ -264,7 +264,8 @@ namespace im {
         struct ConverterBase {
             using color_t = Color;
             using dest_color_t = DestColor;
-            using component_t = typename color_t::component_t;
+            //using component_t = typename color_t::component_t;
+            using component_t = typename std::add_pointer_t<typename color_t::channel_t>;
             using val_t = typename dest_color_t::channel_t;
             constexpr ConverterBase() noexcept = default;
         };

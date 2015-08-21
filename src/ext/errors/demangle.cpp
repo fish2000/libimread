@@ -23,7 +23,7 @@ char const *get_demangled_name(char const* const symbol) noexcept {
     int status = -4;
     demangled_name.reset(
         abi::__cxa_demangle(symbol,
-                            demangled_name.release(),
+                            demangled_name.get(),
                             nullptr, &status));
-    return ((status == 0) ? demangled_name.get() : symbol);
+    return ((status == 0) ? demangled_name.release() : symbol);
 }
