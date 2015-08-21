@@ -180,9 +180,10 @@ set_source_files_properties(
 add_executable("test_${PROJECT_NAME}" ${TEST_SOURCES})
 add_dependencies("test_${PROJECT_NAME}" "test_data_header")
 add_dependencies("test_${PROJECT_NAME}" "iod_symbolize")
-add_dependencies("test_${PROJECT_NAME}" "maBlockClosure")
 add_dependencies("test_${PROJECT_NAME}" "docopt")
+add_dependencies("test_${PROJECT_NAME}" "maBlockClosure")
 add_dependencies("test_${PROJECT_NAME}" "sszip")
+add_dependencies("test_${PROJECT_NAME}" "imread")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries("test_${PROJECT_NAME}"
     imread

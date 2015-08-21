@@ -38,6 +38,10 @@ namespace im {
             return format_ptr(new format::NS);
         }
         
+        if (detail::ext(format, "objc") || detail::ext(format, "ns")) {
+            return format_ptr(new format::NS);
+        }
+        
         imread_raise(FormatNotFound, "Format Error:",
             FF("\tFile format not found for suffix %s", format));
     }

@@ -49,9 +49,9 @@ set(hdrs
 add_library(sszip SHARED ${srcs} ${hdrs})
 
 # set_target_properties(libsszip
-#     PROPERTIES ARCHIVE_OUTPUT_NAME "sszip")
+#     PROPERTIES OUTPUT_NAME "sszip")
 set_target_properties(sszip
-    PROPERTIES LIBRARY_OUTPUT_NAME "sszip")
+    PROPERTIES OUTPUT_NAME "sszip")
 # target_link_libraries(libsszip ${EXTRA_LIBS})
 target_link_libraries(sszip ${EXTRA_LIBS})
 

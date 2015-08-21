@@ -1,7 +1,7 @@
 # Author: Alexander Böhn (with Félix C. Morency)
 # © 2011.10 -- GPL, Motherfuckers
 cmake_minimum_required(VERSION 3.1)
-project(maBlockClosure LANGUAGES C)
+project(maBlockClosure)
 
 set(maBlockClosure_VERSION_MAJOR "0")
 set(maBlockClosure_VERSION_MINOR "1")
@@ -9,7 +9,6 @@ set(maBlockClosure_VERSION_PATCH "0")
 
 list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/libffi/lib/pkgconfig)
 include(FindLibFFI.cmake)
-# find_package(LibFFI REQUIRED)
 find_path(FOUNDATION_INCLUDE_DIR Foundation/Foundation.h)
 find_library(FOUNDATION_LIBRARY Foundation)
 
@@ -19,6 +18,9 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_definitions(
+    -fstack-protector-all
+    -fobjc-abi-version=3
+    -fno-objc-arc
     -std=c99
     -x objective-c)
 
@@ -36,9 +38,9 @@ set(hdrs
 add_library(maBlockClosure SHARED ${srcs} ${hdrs})
 
 # set_target_properties(libmaBlockClosure
-#     PROPERTIES ARCHIVE_OUTPUT_NAME "maBlockClosure")
+#     PROPERTIES OUTPUT_NAME "maBlockClosure")
 set_target_properties(maBlockClosure
-    PROPERTIES LIBRARY_OUTPUT_NAME "maBlockClosure")
+    PROPERTIES OUTPUT_NAME "maBlockClosure")
 # target_link_libraries(libmaBlockClosure ${EXTRA_LIBS})
 target_link_libraries(maBlockClosure ${EXTRA_LIBS})
 

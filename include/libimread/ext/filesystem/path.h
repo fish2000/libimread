@@ -170,6 +170,11 @@ namespace filesystem {
                 return S_ISREG(sb.st_mode);
             }
             
+            bool remove() {
+                if (!is_file()) { return false; }
+                return bool(::unlink(make_absolute().c_str()) != -1);
+            }
+            
             std::string extension() const {
                 if (empty()) { return ""; }
                 const std::string &last = m_path[m_path.size()-1];

@@ -119,40 +119,40 @@ static int ArgCount(const char *str)
 - (ffi_type *)_ffiArgForEncode: (const char *)str
 {
     #define SINT(type) do { \
-    	if(str[0] == @encode(type)[0]) \
-    	{ \
-    	   if(sizeof(type) == 1) \
-    	       return &ffi_type_sint8; \
-    	   else if(sizeof(type) == 2) \
-    	       return &ffi_type_sint16; \
-    	   else if(sizeof(type) == 4) \
-    	       return &ffi_type_sint32; \
-    	   else if(sizeof(type) == 8) \
-    	       return &ffi_type_sint64; \
-    	   else \
-    	   { \
-    	       NSLog(@"Unknown size for type %s", #type); \
-    	       abort(); \
-    	   } \
+        if(str[0] == @encode(type)[0]) \
+        { \
+           if(sizeof(type) == 1) \
+               return &ffi_type_sint8; \
+           else if(sizeof(type) == 2) \
+               return &ffi_type_sint16; \
+           else if(sizeof(type) == 4) \
+               return &ffi_type_sint32; \
+           else if(sizeof(type) == 8) \
+               return &ffi_type_sint64; \
+           else \
+           { \
+               NSLog(@"Unknown size for type %s", #type); \
+               abort(); \
+           } \
         } \
     } while(0)
     
     #define UINT(type) do { \
-    	if(str[0] == @encode(type)[0]) \
-    	{ \
-    	   if(sizeof(type) == 1) \
-    	       return &ffi_type_uint8; \
-    	   else if(sizeof(type) == 2) \
-    	       return &ffi_type_uint16; \
-    	   else if(sizeof(type) == 4) \
-    	       return &ffi_type_uint32; \
-    	   else if(sizeof(type) == 8) \
-    	       return &ffi_type_uint64; \
-    	   else \
-    	   { \
-    	       NSLog(@"Unknown size for type %s", #type); \
-    	       abort(); \
-    	   } \
+        if(str[0] == @encode(type)[0]) \
+        { \
+           if(sizeof(type) == 1) \
+               return &ffi_type_uint8; \
+           else if(sizeof(type) == 2) \
+               return &ffi_type_uint16; \
+           else if(sizeof(type) == 4) \
+               return &ffi_type_uint32; \
+           else if(sizeof(type) == 8) \
+               return &ffi_type_uint64; \
+           else \
+           { \
+               NSLog(@"Unknown size for type %s", #type); \
+               abort(); \
+           } \
         } \
     } while(0)
     

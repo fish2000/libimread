@@ -34,10 +34,11 @@ namespace filesystem {
     void TemporaryDirectory::clean() {
         /// scrub all files
         /// N.B. this will not recurse -- keep yr structures FLAAAT
-        directory cleand = detail::ddopen(dirpath.make_absolute().c_str());
+        path abspath = dirpath.make_absolute();
+        directory cleand = detail::ddopen(abspath.c_str());
         if (!cleand.get()) {
             imread_raise(FileSystemError, "[ERROR]",
-                FF("Internal error in detail::ddopen(%s):", dirpath.c_str()),
+                FF("Internal error in detail::ddopen(%s):", abspath.c_str()),
                 std::strerror(errno));
         }
         
@@ -46,7 +47,7 @@ namespace filesystem {
             std::string dname(::strdup(entry->d_name));
             if (std::strncmp(dname.c_str(), ".", 1) == 0)               { continue; }
             if (std::strncmp(dname.c_str(), "..", 2) != 0)              { continue; }
-            path epp = dirpath.join(path(dname));
+            path epp = abspath/dname;
             const char *ep = epp.make_absolute().c_str();
             if (::remove(ep) == -1) {
                 imread_raise(FileSystemError, "[ERROR]",
@@ -58,7 +59,7 @@ namespace filesystem {
     
     void TemporaryDirectory::remove() {
         /// unlink the directory itself
-        if (::rmdir(dirpath.c_str()) == -1) {
+        if (::rmdir(dirpath.make_absolute().c_str()) == -1) {
             // imread_raise(FileSystemError,
             //     "Internal error in rmdir():\n\t", dirpath.str(),
             //     std::strerror(errno));
