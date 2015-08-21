@@ -230,8 +230,8 @@ namespace im {
     }
     
     std::unique_ptr<ImageList> TIFFFormat::do_read(byte_source *src,
-                                                    ImageFactory *factory,
-                                                    bool is_multi)  {
+                                                   ImageFactory *factory,
+                                                   bool is_multi)  {
         tiff_warn_error twe;
         tif_holder t = read_client(src);
         std::unique_ptr<ImageList> images(new ImageList);
@@ -244,17 +244,19 @@ namespace im {
             
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
-            // if (ImageWithMetadata *metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
-            //     std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
-            //     metaout->set_meta(description);
-            // }
+            if (ImageWithMetadata *metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
+                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
+                metaout->set_meta(description);
+            }
             
             /// Hardcoding uint8_t as the type for now
             int c_stride = (depth == 1) ? 0 : output->stride(2);
-            uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+            uint8_t *ptr = output->rowp_as<uint8_t>(0);
+            byte *srcPtr = new byte[w*depth*sizeof(uint8_t)];
+            ptrdiff_t srcPtrOrig = *srcPtr;
             
             for (uint32_t r = 0; r != h; ++r) {
-                byte *srcPtr = output->rowp_as<byte>(r);
+                *srcPtr = srcPtrOrig;
                 if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
                     imread_raise(CannotReadError, "Error reading scanline");
                 }
@@ -306,14 +308,17 @@ namespace im {
         TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
         TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
         
-        if (get_optional_bool(opts, "tiff:compress", true)) {
+        //get_optional_bool(opts, "tiff:compress", true)
+        //get_optional_bool(opts, "tiff:horizontal-predictor", prediction_default)
+        
+        if (opts.cast<bool>("tiff:compress", true)) {
             TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
             // For 8 bit images, prediction defaults to false; for 16 bit images,
             // it defaults to true. This is because compression of raw 16 bit
             // images is often counter-productive without this flag. See the
             // discusssion at http://www.asmail.be/msg0055176395.html
             const bool prediction_default = input.nbits() != 8;
-            if (get_optional_bool(opts, "tiff:horizontal-predictor", prediction_default)) {
+            if (opts.cast<bool>("tiff:horizontal-predictor", prediction_default)) {
                 TIFFSetField(t.tif, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
                 if (!copy_data) {
                     bufdata.resize(input.dim(1) * input.nbytes());
@@ -324,8 +329,12 @@ namespace im {
         }
         
         TIFFSetField(t.tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-        const char *meta = get_optional_cstring(opts, "metadata");
-        if (meta) { TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta); }
+        
+        //const char *meta = get_optional_cstring(opts, "metadata");
+        //if (meta) { TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta); }
+        const char *meta = opts.cast<std::string>("metadata", "<TIFF METADATA STRING>").c_str();
+        TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta);
+        
         if (opts.has("tiff:XResolution")) {
             TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,
                 opts.cast<int>("tiff:XResolution"));

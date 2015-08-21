@@ -62,12 +62,11 @@ namespace {
         im::halide::write(halim, td.dirpath/"PPM_DUG986.ppm");
         U8Image halim2 = im::halide::read(td.dirpath/"PPM_DUG986.ppm");
         im::halide::write(halim2, td.dirpath/"PPM_YO_DOGG222.png");
-        
+
         U8Image halim3 = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         im::halide::write(halim3, td.dirpath/"PPM_OH_DOGGGGG.ppm");
         U8Image halim4 = im::halide::read(td.dirpath/"PPM_OH_DOGGGGG.ppm");
         im::halide::write(halim4, td.dirpath/"PPM_IMG_DOGGGGGGGGG.png");
-        
     }
     
     TEST_CASE("[halide-io] Check the dimensions of a new image", "[halide-image-dims]") {

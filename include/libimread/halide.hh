@@ -185,7 +185,7 @@ namespace im {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
-            HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output.release()));
+            HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output));
             image.set_host_dirty();
             return image;
         }

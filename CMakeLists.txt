@@ -181,6 +181,8 @@ set(imread_tests "test_${PROJECT_NAME}")
 add_executable(imread_tests ${TEST_SOURCES})
 set_target_properties(imread_tests
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
+# add_dependencies("test_data_header" libimread)
+add_dependencies("test_data_header" imread)
 add_dependencies(imread_tests "test_data_header")
 add_dependencies(imread_tests "iod_symbolize")
 add_dependencies(imread_tests "docopt")
