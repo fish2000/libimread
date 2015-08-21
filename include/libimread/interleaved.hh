@@ -321,24 +321,25 @@ namespace im {
                 WTF("convert() called");
                 
                 Conversion converter;
-                //std::shared_ptr<out_t> out(new out_t[sizeof(out_t)*size()+40]);
-                out_t *data = new out_t[sizeof(out_t)*size()+40];
+                const int siz = sizeof(out_t);
+                out_t *data = new out_t[siz*size()+40];
                 
                 const int w = width(),
                           h = height(),
                           c = dest_color_t::channels(),
-                          siz = sizeof(out_t) * c;
+                          csiz = siz * c;
                 
                 pix::accessor<in_t> at = access();
                 pix::accessor<out_t> to = pix::accessor<out_t>(data,
-                                                               w * h, w, 1);
+                                                               w * h * siz,
+                                                               w * siz,
+                                                               siz);
                 
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
                         dest_color_t dest_color = converter(at(x, y, 0));
                         std::memcpy(to(x, y, 0),
-                                    &dest_color.components[0],
-                                    siz);
+                                    &dest_color.components[0], csiz);
                     }
                 }
                 

@@ -229,7 +229,8 @@ namespace im {
         
         compressor.info.image_width = w;
         compressor.info.image_height = h;
-        compressor.info.input_components = (dims > 2 ? input.dim(2) : 1);
+        //compressor.info.input_components = (dims > 2 ? input.dim(2) : 1);
+        compressor.info.input_components = d;
         compressor.info.in_color_space = color_space(compressor.info.input_components);
         
         jpeg_set_defaults(&compressor.info);

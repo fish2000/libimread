@@ -250,7 +250,7 @@ namespace im {
                 metaout->set_meta(description);
             }
             
-            WTF("About to enter pixel loop", FF("bits_per_sample = %i", bits_per_sample));
+            //WTF("About to enter pixel loop", FF("bits_per_sample = %i", bits_per_sample));
             
             if (bits_per_sample == 8) {
                 /// Hardcoding uint8_t as the type for now
@@ -264,9 +264,6 @@ namespace im {
                     }
                     for (int x = 0; x < w; x++) {
                         for (int c = 0; c < depth; c++) {
-                            /// theoretically you would want to scale this next bit,
-                            /// depending on whatever the bit depth may be
-                            /// -- SOMEDAAAAAAAAAAAAAAY.....
                             pix::convert(*srcPtr++, ptr[c*c_stride]);
                         }
                         ptr++;
@@ -330,9 +327,6 @@ namespace im {
         TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
         TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
         
-        //get_optional_bool(opts, "tiff:compress", true)
-        //get_optional_bool(opts, "tiff:horizontal-predictor", prediction_default)
-        
         if (opts.cast<bool>("tiff:compress", true)) {
             TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
             // For 8 bit images, prediction defaults to false; for 16 bit images,
@@ -352,8 +346,6 @@ namespace im {
         
         TIFFSetField(t.tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
         
-        //const char *meta = get_optional_cstring(opts, "metadata");
-        //if (meta) { TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta); }
         const char *meta = opts.cast<std::string>("metadata", "<TIFF METADATA STRING>").c_str();
         TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta);
         
