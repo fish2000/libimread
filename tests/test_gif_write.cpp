@@ -18,7 +18,7 @@ namespace {
     using namespace im::fs;
     using U8Image = im::HybridImage<uint8_t>;
     
-    TEST_CASE("Read PNG files and write as individual GIF files", "[write-individual-gifs]") {
+    TEST_CASE("[gif-write] Read PNG files and write as individual GIF files", "[gif-write-individual-files]") {
         TemporaryDirectory td("write-individual-gifs-XXXXX");
         path basedir(im::test::basedir);
         std::vector<path> sequence = basedir.list("output_*.png");
@@ -30,7 +30,7 @@ namespace {
         });
     }
     
-    TEST_CASE("Read PNG files and write as a single animated GIF file", "[write-animated-gif]") {
+    TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file", "[gif-write-multi-animated]") {
         TemporaryDirectory td("write-individual-gifs-XXXXX");
         path basedir(im::test::basedir);
         std::vector<path> sequence = basedir.list("output_*.png");

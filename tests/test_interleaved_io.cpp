@@ -53,23 +53,22 @@ namespace {
         im::interleaved::write(leavedim4, td.dirpath/"HAY_GUISE.png");
     }
     
-    TEST_CASE("[interleaved-io] Read a TIFF", "[interleaved-read-tiff]") {
-        IRGBA leavedim = im::interleaved::read(D("ptlobos.tif"));
-        im::interleaved::write(leavedim, td.dirpath/"TIFF_DUG986.png");
-    }
-    
-    TEST_CASE("[interleaved-io] Write multiple formats as PPM", "[interleaved-read-tiff-write-ppm]") {
-        IRGBA leavedim = im::interleaved::read(D("ptlobos.tif"));
-        im::interleaved::write(leavedim, td.dirpath/"PPM_DUG986.ppm");
-        IRGBA leavedim2 = im::interleaved::read(td.dirpath/"PPM_DUG986.ppm");
-        im::interleaved::write(leavedim2, td.dirpath/"PPM_YO_DOGG222.png");
-        
-        IRGBA leavedim3 = im::interleaved::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
-        im::interleaved::write(leavedim3, td.dirpath/"PPM_OH_DOGGGGG.ppm");
-        IRGBA leavedim4 = im::interleaved::read(td.dirpath/"PPM_OH_DOGGGGG.ppm");
-        im::interleaved::write(leavedim4, td.dirpath/"PPM_IMG_DOGGGGGGGGG.png");
-        
-    }
+    // TEST_CASE("[interleaved-io] Read a TIFF", "[interleaved-read-tiff]") {
+    //     IRGBA leavedim = im::interleaved::read(D("ptlobos.tif"));
+    //     im::interleaved::write(leavedim, td.dirpath/"TIFF_DUG986.png");
+    // }
+    //
+    // TEST_CASE("[interleaved-io] Write multiple formats as PPM", "[interleaved-read-tiff-write-ppm]") {
+    //     IRGBA leavedim = im::interleaved::read(D("ptlobos.tif"));
+    //     im::interleaved::write(leavedim, td.dirpath/"PPM_DUG986.ppm");
+    //     IRGBA leavedim2 = im::interleaved::read(td.dirpath/"PPM_DUG986.ppm");
+    //     im::interleaved::write(leavedim2, td.dirpath/"PPM_YO_DOGG222.png");
+    //
+    //     IRGBA leavedim3 = im::interleaved::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
+    //     im::interleaved::write(leavedim3, td.dirpath/"PPM_OH_DOGGGGG.ppm");
+    //     IRGBA leavedim4 = im::interleaved::read(td.dirpath/"PPM_OH_DOGGGGG.ppm");
+    //     im::interleaved::write(leavedim4, td.dirpath/"PPM_IMG_DOGGGGGGGGG.png");
+    // }
     
     TEST_CASE("[interleaved-io] Check the dimensions of a new image", "[interleaved-image-dims]") {
         IRGBA leavedim = im::interleaved::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));

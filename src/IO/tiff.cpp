@@ -242,6 +242,7 @@ namespace im {
             const uint16_t bits_per_sample = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE);
             const int depth = nr_samples > 1 ? nr_samples : -1;
             
+            std::unique_ptr<Image> inter = factory->create(bits_per_sample, h, w, depth);
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
             if (ImageWithMetadata *metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
@@ -249,29 +250,50 @@ namespace im {
                 metaout->set_meta(description);
             }
             
-            /// Hardcoding uint8_t as the type for now
-            int c_stride = (depth == 1) ? 0 : output->stride(2);
-            uint8_t *ptr = output->rowp_as<uint8_t>(0);
-            byte *srcPtr = new byte[w*depth*sizeof(uint8_t)];
-            ptrdiff_t srcPtrOrig = *srcPtr;
+            WTF("About to enter pixel loop", FF("bits_per_sample = %i", bits_per_sample));
             
-            for (uint32_t r = 0; r != h; ++r) {
-                *srcPtr = srcPtrOrig;
-                if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
-                    imread_raise(CannotReadError, "Error reading scanline");
-                }
-                for (int x = 0; x < w; x++) {
-                    for (int c = 0; c < depth; c++) {
-                        /// theoretically you would want to scale this next bit,
-                        /// depending on whatever the bit depth may be
-                        /// -- SOMEDAAAAAAAAAAAAAAY.....
-                        pix::convert(*srcPtr++, ptr[c*c_stride]);
+            if (bits_per_sample == 8) {
+                /// Hardcoding uint8_t as the type for now
+                int c_stride = (depth == 1) ? 0 : output->stride(2);
+                uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+                
+                for (uint32_t r = 0; r != h; ++r) {
+                    byte *srcPtr = inter->rowp_as<byte>(r);
+                    if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
+                        imread_raise(CannotReadError, "Error reading scanline");
                     }
-                    ptr++;
+                    for (int x = 0; x < w; x++) {
+                        for (int c = 0; c < depth; c++) {
+                            /// theoretically you would want to scale this next bit,
+                            /// depending on whatever the bit depth may be
+                            /// -- SOMEDAAAAAAAAAAAAAAY.....
+                            pix::convert(*srcPtr++, ptr[c*c_stride]);
+                        }
+                        ptr++;
+                    }
+                }
+            } else if (bits_per_sample == 16) {
+                /// Hardcoding uint16_t as the type for now
+                int c_stride = (depth == 1) ? 0 : output->stride(2);
+                uint16_t *ptr = static_cast<uint16_t*>(output->rowp_as<uint16_t>(0));
+                
+                for (uint32_t r = 0; r != h; ++r) {
+                    byte *srcPtr = inter->rowp_as<byte>(r);
+                    if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
+                        imread_raise(CannotReadError, "Error reading scanline");
+                    }
+                    for (int x = 0; x < w; x++) {
+                        for (int c = 0; c < depth; c++) {
+                            uint16_t hi = (*srcPtr++) << 8;
+                            uint16_t lo = hi | (*srcPtr++);
+                            pix::convert(lo, ptr[c*c_stride]);
+                        }
+                        ptr++;
+                    }
                 }
             }
             
-            images->push_back(std::move(output));
+            images->push_back(output.release());
         
         } while (is_multi && TIFFReadDirectory(t.tif));
         
