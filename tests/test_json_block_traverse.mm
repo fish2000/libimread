@@ -1,4 +1,6 @@
 
+#include <string>
+#include <iostream>
 #import <Foundation/Foundation.h>
 #import <BlockClosure.h>
 
@@ -20,12 +22,23 @@ namespace {
         dict["two"] = "two.";
         dict["three"] = { 435, 345987, 238746, 21 };
         
+        __block int idx = 0;
+        
         id block = ^(void* node) {
-            WTF("JSONNode found: ", ((Node *)node)->typestr());
+            FORSURE(FF("[%i] %s node found: ", idx, ((Node *)node)->typestr()));
+            std::cerr << "\t\t";
+            ((Node *)node)->print(std::cerr);
+            std::cerr << std::endl << std::endl;
+            idx++;
         };
         [block retain];
         
+        std::cerr << std::endl << std::endl;
+        std::cerr << "\tTraversing dict:" << std::endl;
+        std::cerr << "\t\t" << dict;
+        std::cerr << std::endl << std::endl;
         dict.traverse((fptr_t)BlockFptr(block));
+        std::cerr << std::endl << std::endl;
         [block release];
     }
     
