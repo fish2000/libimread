@@ -28,18 +28,14 @@ namespace {
     // using IRGB = std::unique_ptr<im::Image>;
     // using IRGBA = std::unique_ptr<im::Image>;
     
-    im::fs::TemporaryDirectory td("test-interleaved-io-XXXXX");
-    
     TEST_CASE("[interleaved-io] Read PNG files", "[interleaved-read-png]") {
-        // IRGBA readpng_leavedim = im::interleaved::read(D("roses_512_rrt_srgb.png"));
-        // IRGBA readpng_leavedim2 = im::interleaved::read(D("marci_512_srgb.png"));
-        // IRGBA readpng_leavedim3 = im::interleaved::read(D("marci_512_srgb8.png"));
+        im::fs::TemporaryDirectory td("test-interleaved-io-XXXXX");
         path basedir(im::test::basedir);
-        const std::vector<path> v = basedir.list("*.png");
-        std::for_each(v.begin(), v.end(), [&basedir](const path &p) {
-            auto iim = im::interleaved::read(basedir/p);
-            REQUIRE(iim.width() > 0);
-            REQUIRE(iim.height() > 0);
+        const std::vector<path> pngs = basedir.list("*.png");
+        std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
+            auto png = im::interleaved::read(basedir/p);
+            REQUIRE(png.width() > 0);
+            REQUIRE(png.height() > 0);
         });
     }
     
@@ -53,17 +49,18 @@ namespace {
     //     IRGBA rewrite_png_jpeg_leavedim3 = im::interleaved::read(D("marci_512_srgb8.png"));
     //     im::interleaved::write(rewrite_png_jpeg_leavedim3, td.dirpath/"jpgg_marci_512_srgb_YO_YO_YO.jpg");
     // }
-    //
-    // TEST_CASE("[interleaved-io] Read JPEG files", "[interleaved-read-jpg]") {
-    //     path basedir(im::test::basedir);
-    //     std::vector<path> v = basedir.list("*.jpg");
-    //     std::for_each(v.begin(), v.end(), [&](path &p) {
-    //         IRGBA iim = im::interleaved::read(basedir/p);
-    //         REQUIRE(iim.width() > 0);
-    //         REQUIRE(iim.height() > 0);
-    //     });
-    // }
-    //
+    
+    TEST_CASE("[interleaved-io] Read JPEG files", "[interleaved-read-jpg]") {
+        im::fs::TemporaryDirectory td("test-interleaved-io-XXXXX");
+        path basedir(im::test::basedir);
+        const std::vector<path> jpgs = basedir.list("*.jpg");
+        std::for_each(jpgs.begin(), jpgs.end(), [&basedir](const path &p) {
+            auto jpg = im::interleaved::read(basedir/p);
+            REQUIRE(jpg.width() > 0);
+            REQUIRE(jpg.height() > 0);
+        });
+    }
+    
     // TEST_CASE("[interleaved-io] Read a JPEG and rewrite it as a PNG", "[interleaved-read-jpeg-write-png]") {
     //     IRGBA rewrite_jpeg_png_leavedim = im::interleaved::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
     //     im::interleaved::write(rewrite_jpeg_png_leavedim, td.dirpath/"OH_DAWG666.png");

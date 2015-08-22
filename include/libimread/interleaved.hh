@@ -63,31 +63,31 @@ namespace im {
             Contents *contents;
             
             void init(int x, int y = 0) {
-                buffer_t buffer = { 0 };
+                buffer_t b = { 0 };
                 const int z = C,
                           w = 0;
-                buffer.extent[0] = x;
-                buffer.extent[1] = y;
-                buffer.extent[2] = C;
-                buffer.extent[3] = 0;
-                buffer.stride[0] = x * y * sizeof(composite_t);
-                buffer.stride[1] = x * sizeof(composite_t);
-                buffer.stride[2] = sizeof(composite_t);
-                buffer.stride[3] = 1;
-                buffer.elem_size = sizeof(composite_t);
+                b.extent[0] = x;
+                b.extent[1] = y;
+                b.extent[2] = C;
+                b.extent[3] = 0;
+                b.stride[0] = x * y * sizeof(composite_t);
+                b.stride[1] = x * sizeof(composite_t);
+                b.stride[2] = sizeof(composite_t);
+                b.stride[3] = 1;
+                b.elem_size = sizeof(composite_t);
                 
                 std::size_t size = x * y;
                 uint8_t *ptr = new uint8_t[sizeof(composite_t)*size + 40];
-                buffer.host = ptr;
-                buffer.host_dirty = false;
-                buffer.dev_dirty = false;
-                buffer.dev = 0;
-                while ((std::size_t)buffer.host & 0x1f) { buffer.host++; }
-                contents = new Contents(buffer, buffer.host);
+                b.host = ptr;
+                b.host_dirty = false;
+                b.dev_dirty = false;
+                b.dev = 0;
+                while ((std::size_t)b.host & 0x1f) { b.host++; }
+                contents = new Contents(b, b.host);
             }
             
-            void init(buffer_t buffer) {
-                contents = new Contents(buffer, buffer.host);
+            void init(buffer_t b) {
+                contents = new Contents(b, b.host);
             }
         
         public:
@@ -95,8 +95,8 @@ namespace im {
                 :contents(NULL)
                 {}
             
-            explicit InterleavedImage(int x, int y)      { init(x, y); }
-            explicit InterleavedImage(buffer_t buffer)   { init(buffer); }
+            explicit InterleavedImage(int x, int y)     { init(x, y); }
+            explicit InterleavedImage(buffer_t b)       { init(b); }
             
             InterleavedImage(const InterleavedImage& other)
                 :contents(other.contents)
@@ -109,7 +109,7 @@ namespace im {
                 {
                     ref(contents, 1);
                     decref(other.contents);
-                    other.contents = NULL;
+                    //other.contents = NULL;
                 }
             
             virtual ~InterleavedImage() { decref(contents); }
@@ -127,7 +127,7 @@ namespace im {
                 ref(p, 1);
                 decref(contents);
                 contents = p;
-                other.contents = NULL;
+                //other.contents = NULL;
                 return *this;
             }
             
@@ -338,24 +338,24 @@ namespace im {
             operator InterleavedImage<DestColor>() const {
                 using dest_composite_t = typename DestColor::composite_t;
                 const void* data = conversion_impl<im::color::Convert<Color, DestColor>>();
-                buffer_t buffer = {0};
-                buffer.dev = 0;
-                buffer.host = new uint8_t[size()*size()];
-                std::memcpy((void *)buffer.host, (const dest_composite_t*)data, size());
+                buffer_t b = {0};
+                b.dev = 0;
+                b.host = new uint8_t[size()*sizeof(dest_composite_t)+40];
+                std::memcpy((void *)b.host, (const dest_composite_t*)data, size());
                 delete[] (const uint32_t*)data;
-                buffer.extent[0] = extent(0);
-                buffer.extent[1] = extent(1);
-                buffer.extent[2] = DestColor::N;
-                buffer.extent[3] = 0;
-                buffer.stride[0] = extent(0) * extent(1) * sizeof(dest_composite_t);
-                buffer.stride[1] = extent(0) * sizeof(dest_composite_t);
-                buffer.stride[2] = sizeof(dest_composite_t);
-                buffer.stride[3] = 1;
-                buffer.host_dirty = true;
-                buffer.dev_dirty = false;
-                buffer.elem_size = sizeof(dest_composite_t);
+                b.extent[0] = extent(0);
+                b.extent[1] = extent(1);
+                b.extent[2] = DestColor::N;
+                b.extent[3] = 0;
+                b.stride[0] = extent(0) * extent(1) * sizeof(dest_composite_t);
+                b.stride[1] = extent(0) * sizeof(dest_composite_t);
+                b.stride[2] = sizeof(dest_composite_t);
+                b.stride[3] = 1;
+                b.host_dirty = true;
+                b.dev_dirty = false;
+                b.elem_size = sizeof(dest_composite_t);
                 // WTF("Returning from conversion operator");
-                return InterleavedImage<DestColor>(buffer);
+                return InterleavedImage<DestColor>(b);
             }
             
             /// im::Image overrides
@@ -507,7 +507,7 @@ namespace im {
                 iimage.set_host_dirty();
                 return iimage;
             } catch (std::bad_cast& exc) {
-                WTF("LEAVING ALPHAVILLE.");
+                // WTF("LEAVING ALPHAVILLE.");
                 InterleavedImage<Color> iimage(
                     dynamic_cast<InterleavedImage<color::RGB>&>(
                         *output.get()));
