@@ -28,8 +28,8 @@ namespace im {
     class fd_source_sink : public byte_source, public byte_sink {
         
         protected:
-            static constexpr int READ_FLAGS = O_RDONLY | O_FSYNC;
-            static constexpr int WRITE_FLAGS = O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC;
+            static constexpr int READ_FLAGS = O_RDONLY | O_NONBLOCK;
+            static constexpr int WRITE_FLAGS = O_WRONLY | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
             static constexpr int WRITE_CREATE_MASK = 0644;
             
             inline int open_read(char *p) const {

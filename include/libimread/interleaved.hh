@@ -102,11 +102,13 @@ namespace im {
                 :contents(other.contents)
                 {
                     incref(contents);
+                    decref(other.contents);
                 }
             InterleavedImage(InterleavedImage&& other)
                 :contents(other.contents)
                 {
                     ref(contents, 1);
+                    decref(other.contents);
                     other.contents = NULL;
                 }
             
@@ -311,41 +313,34 @@ namespace im {
                 using in_t = typename color_t::composite_t;
                 using out_t = Output;
                 
-                WTF("convert() called");
-                
                 Conversion converter;
                 out_t *data = new out_t[size()*size()+40*sizeof(out_t)];
-                
                 const int w = width(),
                           h = height();
+                
+                // WTF("Converting...");
                 
                 out_t *dest;
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
                         typename color_t::array_t components = get(x, y).to_array();
-                        // WTF("in pixel loop", FF("x = %i, y = %i, components.size() = %i",
-                        //     x, y, components.size()
-                        // ));
                         dest_color_t dest_color = converter(components.data());
-                        // WTF("Returned from converter to pixel loop");
                         dest = data + (y * x);
-                        // WTF("About to call pix::convert()");
                         pix::convert(dest_color.composite, *dest);
                     }
                 }
                 
-                WTF("convert() returning");
+                // WTF("Returning from conversion");
                 return (const void*)data;
             };
             
-            template <typename DestColor, typename = void>
+            template <typename DestColor>
             operator InterleavedImage<DestColor>() const {
                 using dest_composite_t = typename DestColor::composite_t;
                 const void* data = conversion_impl<im::color::Convert<Color, DestColor>>();
                 buffer_t buffer = {0};
                 buffer.dev = 0;
-                buffer.host = new uint8_t[size()];
-                std::memset((void *)buffer.host, 0, size());
+                buffer.host = new uint8_t[size()*size()];
                 std::memcpy((void *)buffer.host, (const dest_composite_t*)data, size());
                 delete[] (const uint32_t*)data;
                 buffer.extent[0] = extent(0);
@@ -359,6 +354,7 @@ namespace im {
                 buffer.host_dirty = true;
                 buffer.dev_dirty = false;
                 buffer.elem_size = sizeof(dest_composite_t);
+                // WTF("Returning from conversion operator");
                 return InterleavedImage<DestColor>(buffer);
             }
             
@@ -476,7 +472,7 @@ namespace im {
         
         template <typename Color = color::RGBA>
         InterleavedImage<Color> read(const std::string &filename,
-                                     const options_map &opts = interleaved_default_opts) {
+                                    const options_map &opts = interleaved_default_opts) {
             InterleavedFactory factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
@@ -488,16 +484,30 @@ namespace im {
             //                                                           output->dim(2),
             //                                                           output->ndims()));
             
-            int depth = output->dim(2);
-            
-            if (depth == 1) {
+            // int depth = output->dim(2);
+            // if (depth == 1) {
+            //     InterleavedImage<Color> iimage(
+            //         dynamic_cast<InterleavedImage<color::Monochrome>&>(
+            //             *output.get()));
+            //     iimage.set_host_dirty();
+            //     return iimage;
+            //
+            // } else if (depth == 3) {
+            //     InterleavedImage<Color> iimage(
+            //         dynamic_cast<InterleavedImage<color::RGB>&>(
+            //             *output.get()));
+            //     iimage.set_host_dirty();
+            //     return iimage;
+            // }
+            //
+            try {
                 InterleavedImage<Color> iimage(
-                    dynamic_cast<InterleavedImage<color::Monochrome>&>(
+                    dynamic_cast<InterleavedImage<color::RGBA>&>(
                         *output.get()));
                 iimage.set_host_dirty();
                 return iimage;
-            
-            } else if (depth == 3) {
+            } catch (std::bad_cast& exc) {
+                WTF("LEAVING ALPHAVILLE.");
                 InterleavedImage<Color> iimage(
                     dynamic_cast<InterleavedImage<color::RGB>&>(
                         *output.get()));
@@ -505,21 +515,22 @@ namespace im {
                 return iimage;
             }
             
-            InterleavedImage<Color> iimage(
-                dynamic_cast<InterleavedImage<color::RGBA>&>(
-                    *output.get()));
-            iimage.set_host_dirty();
-            return iimage;
-            
         }
         
         template <typename Color = color::RGB> inline
-        void write(InterleavedImage<Color> &input, const std::string &filename,
+        void write(InterleavedImage<Color> *input, const std::string &filename,
                    const options_map &opts = interleaved_default_opts) {
-            if (input.dim(2) > 3) { return; }
+            if (input->dim(2) > 3) { return; }
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write(dynamic_cast<Image&>(input), output.get(), opts);
+        }
+        
+        template <typename Color = color::RGB> inline
+        void write(std::unique_ptr<Image> input, const std::string &filename,
+                   const options_map &opts = interleaved_default_opts) {
+            write<Color>(dynamic_cast<InterleavedImage<Color>>(input.get()),
+                         filename, opts);
         }
         
         inline void write_multi(ImageList &input, const std::string &filename,
