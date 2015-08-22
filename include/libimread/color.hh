@@ -264,7 +264,7 @@ namespace im {
         struct ConverterBase {
             using color_t = Color;
             using dest_color_t = DestColor;
-            //using component_t = typename color_t::component_t;
+            using composite_t = typename color_t::composite_t;
             using component_t = typename std::add_pointer_t<typename color_t::channel_t>;
             using val_t = typename dest_color_t::channel_t;
             constexpr ConverterBase() noexcept = default;
@@ -290,10 +290,12 @@ namespace im {
         DECLARE_CONVERTER(RGB, RGBA) {
             STATIC_ASSERT_DIFFERENT();
             CONVERTER_OP(components) {
+                WTF("IN COLOR CONVERTER!!!", "Source = RGB, Destination = RGBA");
                 /// discard alpha for now
                 dest_color_t out{ components[0],
                                   components[1],
                                   components[2] };
+                WTF("Returning from converter");
                 return out;
             }
         };
@@ -301,6 +303,7 @@ namespace im {
         DECLARE_CONVERTER(RGBA, RGB) {
             STATIC_ASSERT_DIFFERENT();
             CONVERTER_OP(components) {
+                WTF("IN COLOR CONVERTER!!!", "Source = RGBA, Destination = RGB");
                 /// set alpha to zero for now
                 dest_color_t out{ components[0],
                                   components[1],
@@ -313,6 +316,7 @@ namespace im {
         DECLARE_CONVERTER(RGB, Monochrome) {
             STATIC_ASSERT_DIFFERENT();
             CONVERTER_OP(components) {
+                WTF("IN COLOR CONVERTER!!!", "Source = RGB, Destination = Monochrome");
                 /// ITU R-601.2 -- adapted from my own Python code here:
                 /// https://github.com/fish2000/pylire/blob/master/pylire/process/grayscale.py#L6-L12
                 dest_color_t out{ val_t(float(components[0]) * 299.0f / 1000.0f +
@@ -325,6 +329,7 @@ namespace im {
         DECLARE_CONVERTER(RGBA, Monochrome) {
             STATIC_ASSERT_DIFFERENT();
             CONVERTER_OP(components) {
+                WTF("IN COLOR CONVERTER!!!", "Source = RGBA, Destination = Monochrome");
                 /// ITU R-601.2, as above -- 
                 /// only taking the RGB values, ignoring alpha
                 dest_color_t out{ val_t(float(components[0]) * 299.0f / 1000.0f +
@@ -337,6 +342,7 @@ namespace im {
         DECLARE_CONVERTER(Monochrome, RGB) {
             STATIC_ASSERT_DIFFERENT();
             CONVERTER_OP(components) {
+                WTF("IN COLOR CONVERTER!!!", "Source = Monochrome, Destination = RGB");
                 /// using the one value for the many (x3)
                 const val_t value = val_t(components[0]);
                 dest_color_t out{ value, value, value };
@@ -347,6 +353,7 @@ namespace im {
         DECLARE_CONVERTER(Monochrome, RGBA) {
             STATIC_ASSERT_DIFFERENT();
             CONVERTER_OP(components) {
+                WTF("IN COLOR CONVERTER!!!", "Source = Monochrome, Destination = RGBA");
                 /// using the one value for the many (x4)
                 const val_t value = val_t(components[0]);
                 dest_color_t out{ value, value, value, value };

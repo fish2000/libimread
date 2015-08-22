@@ -68,16 +68,16 @@ namespace im {
                           w = 0;
                 buffer.extent[0] = x;
                 buffer.extent[1] = y;
-                buffer.extent[2] = z;
-                buffer.extent[3] = w;
-                buffer.stride[0] = x * y * sizeof(channel_t);
-                buffer.stride[1] = x * sizeof(channel_t);
-                buffer.stride[2] = sizeof(channel_t);
+                buffer.extent[2] = C;
+                buffer.extent[3] = 0;
+                buffer.stride[0] = x * y * sizeof(composite_t);
+                buffer.stride[1] = x * sizeof(composite_t);
+                buffer.stride[2] = sizeof(composite_t);
                 buffer.stride[3] = 1;
-                buffer.elem_size = sizeof(channel_t);
+                buffer.elem_size = sizeof(composite_t);
                 
-                std::size_t size = x * y * z;
-                uint8_t *ptr = new uint8_t[sizeof(channel_t)*size + 40];
+                std::size_t size = x * y;
+                uint8_t *ptr = new uint8_t[sizeof(composite_t)*size + 40];
                 buffer.host = ptr;
                 buffer.host_dirty = false;
                 buffer.dev_dirty = false;
@@ -147,8 +147,8 @@ namespace im {
                 }
             }
             
-            channel_t *data() const {
-                return static_cast<channel_t*>(contents->buffer.host);
+            composite_t *data() const {
+                return reinterpret_cast<composite_t*>(contents->buffer.host);
             }
             
             void set_host_dirty(bool dirty = true) {
@@ -174,16 +174,15 @@ namespace im {
             
             explicit InterleavedImage(composite_list_t list) {
                 int idx = 0;
-                init(list.size() * C);
+                init(list.size());
                 for (auto it = list.begin(), item = *it; it != list.end(); ++it) {
                     Color color = Color(static_cast<composite_t>(*it));
-                    for (int i = 0; i < C; ++i) {
-                        (*this)(idx+i) = color.components[i];
-                    }
-                    idx += C;
+                    (*this)(idx) = color.composite;
+                    idx++;
                 }
             }
             
+            /*
             explicit InterleavedImage(channel_listlist_t list) {
                 int idx = 0;
                 init(list.size() * C);
@@ -194,40 +193,43 @@ namespace im {
                     }
                 }
             }
+            */
             
-            channel_t &operator()(int x, int y = 0, int z = 0, int w = 0) {
-                channel_t *ptr = static_cast<channel_t*>(contents->buffer.host);
+            composite_t &operator()(int x, int y = 0, int z = 0, int w = 0) {
+                composite_t *ptr = reinterpret_cast<composite_t*>(contents->buffer.host);
                 x -= contents->buffer.min[0];
                 y -= contents->buffer.min[1];
-                z -= contents->buffer.min[2];
-                w -= contents->buffer.min[3];
+                // z -= contents->buffer.min[2];
+                // w -= contents->buffer.min[3];
                 std::size_t s0 = contents->buffer.stride[0];
                 std::size_t s1 = contents->buffer.stride[1];
-                std::size_t s2 = contents->buffer.stride[2];
-                std::size_t s3 = contents->buffer.stride[3];
+                //std::size_t s2 = contents->buffer.stride[2];
+                //std::size_t s3 = contents->buffer.stride[3];
+                std::size_t s2 = 0;
+                std::size_t s3 = 0;
                 return ptr[s0 * x + s1 * y + s2 * z + s3 * w];
             }
             
-            const channel_t &operator()(int x, int y = 0, int z = 0, int w = 0) const {
-                const channel_t *ptr = static_cast<const channel_t*>(contents->buffer.host);
+            const composite_t &operator()(int x, int y = 0, int z = 0, int w = 0) const {
+                const composite_t *ptr = reinterpret_cast<const composite_t*>(contents->buffer.host);
                 x -= contents->buffer.min[0];
                 y -= contents->buffer.min[1];
                 z -= contents->buffer.min[2];
                 w -= contents->buffer.min[3];
                 std::size_t s0 = contents->buffer.stride[0];
                 std::size_t s1 = contents->buffer.stride[1];
-                std::size_t s2 = contents->buffer.stride[2];
-                std::size_t s3 = contents->buffer.stride[3];
+                // std::size_t s2 = contents->buffer.stride[2];
+                // std::size_t s3 = contents->buffer.stride[3];
+                std::size_t s2 = 0;
+                std::size_t s3 = 0;
                 return ptr[s0 * x + s1 * y + s2 * z + s3 * w];
             }
             
             void set(int x, int y, const Color& color) {
-                for (int i = 0; i < C; ++i) {
-                    (*this)(x, y, i) = color.components[i];
-                }
+                (*this)(x, y) = color.composite;
             }
             void set(int x, int y, composite_t composite) {
-                set(x, y, Color(composite));
+                (*this)(x, y) = composite;
             }
             void set(int x, int y, channel_list_t&& list) {
                 set(x, y, Color(std::forward<channel_list_t>(list)));
@@ -236,26 +238,17 @@ namespace im {
                 set(x, y, Color(std::forward<array_t>(array)));
             }
             
-            Color get(int x, int y) {
+            inline Color get(int x, int y) const {
                 Color out;
-                for (int i = 0; i < C; ++i) {
-                    out.components[i] = *this->operator()(x, y, i);
-                }
-                return out;
-            }
-            
-            const Color& get(int x, int y) const {
-                Color out;
-                for (int i = 0; i < C; ++i) {
-                    out.components[i] = *this->operator()(x, y, i);
-                }
+                out.composite = (*this)(x, y);
                 return out;
             }
             
             const std::size_t size() const{
                 return contents->buffer.extent[0] *
                        contents->buffer.extent[1] *
-                       contents->buffer.extent[2];
+                       contents->buffer.extent[2] *
+                       sizeof(composite_t);
             }
             
             /// Halide static image API
@@ -274,7 +267,7 @@ namespace im {
             }
             
             int channels() const {
-                return contents->buffer.extent[2];
+                return C;
             }
             
             int stride_(int dim) const {
@@ -310,60 +303,61 @@ namespace im {
             }
             
             template <typename Conversion,
-                      typename Output = typename Conversion::dest_color_t::channel_t>
-            Output* convert() const {
+                      typename Output = typename Conversion::dest_color_t::composite_t>
+            const void* conversion_impl() const {
                 using color_t = typename Conversion::color_t;
                 using dest_color_t = typename Conversion::dest_color_t;
                 using source_component_t = typename color_t::component_t;
-                using in_t = typename color_t::channel_t;
+                using in_t = typename color_t::composite_t;
                 using out_t = Output;
                 
                 WTF("convert() called");
                 
                 Conversion converter;
-                const int siz = sizeof(out_t);
-                out_t *data = new out_t[siz*size()+40];
+                out_t *data = new out_t[size()*size()+40*sizeof(out_t)];
                 
                 const int w = width(),
-                          h = height(),
-                          c = dest_color_t::channels(),
-                          csiz = siz * c;
+                          h = height();
                 
-                pix::accessor<in_t> at = access();
-                pix::accessor<out_t> to = pix::accessor<out_t>(data,
-                                                               w * h * siz,
-                                                               w * siz,
-                                                               siz);
-                
+                out_t *dest;
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
-                        dest_color_t dest_color = converter(at(x, y, 0));
-                        std::memcpy(to(x, y, 0),
-                                    &dest_color.components[0], csiz);
+                        typename color_t::array_t components = get(x, y).to_array();
+                        WTF("in pixel loop", FF("x = %i, y = %i, components.size() = %i",
+                            x, y, components.size()
+                        ));
+                        dest_color_t dest_color = converter(components.data());
+                        WTF("Returned from converter to pixel loop");
+                        dest = data + (y * x);
+                        WTF("About to call pix::convert()");
+                        pix::convert(dest_color.composite, *dest);
                     }
                 }
                 
-                return data;
+                WTF("convert() returning");
+                return (const void*)data;
             };
             
             template <typename DestColor, typename = void>
             operator InterleavedImage<DestColor>() const {
-                using dest_channel_t = typename DestColor::channel_t;
-                auto data = convert<im::color::Convert<Color, DestColor>>();
+                using dest_composite_t = typename DestColor::composite_t;
+                const void* data = conversion_impl<im::color::Convert<Color, DestColor>>();
                 buffer_t buffer = {0};
                 buffer.dev = 0;
-                buffer.host = data;
+                //buffer.host = reinterpret_cast<uint8_t*>(data);
+                std::memcpy(buffer.host, data, size());
+                delete[] (const uint32_t*)data;
                 buffer.extent[0] = extent(0);
                 buffer.extent[1] = extent(1);
                 buffer.extent[2] = DestColor::N;
-                buffer.extent[3] = extent(3);
-                buffer.stride[0] = extent(0) * extent(1) * sizeof(dest_channel_t);
-                buffer.stride[1] = extent(0) * sizeof(dest_channel_t);
-                buffer.stride[2] = sizeof(dest_channel_t);
+                buffer.extent[3] = 0;
+                buffer.stride[0] = extent(0) * extent(1) * sizeof(dest_composite_t);
+                buffer.stride[1] = extent(0) * sizeof(dest_composite_t);
+                buffer.stride[2] = sizeof(dest_composite_t);
                 buffer.stride[3] = 1;
                 buffer.host_dirty = true;
                 buffer.dev_dirty = false;
-                buffer.elem_size = sizeof(dest_channel_t);
+                buffer.elem_size = sizeof(dest_composite_t);
                 return InterleavedImage<DestColor>(buffer);
             }
             
@@ -377,7 +371,8 @@ namespace im {
             }
             
             virtual int ndims() const override {
-                return InterleavedImage<Color>::dimensions();
+                //return InterleavedImage<Color>::dimensions();
+                return 3;
             }
             
             virtual int dim(int d) const override {
@@ -394,13 +389,13 @@ namespace im {
             
             virtual void *rowp(int r) override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
-                channel_t *host = InterleavedImage<Color>::data();
+                channel_t *host = reinterpret_cast<channel_t*>(InterleavedImage<Color>::data());
                 host += off_t(r * rowp_stride());
                 return static_cast<void *>(host);
             }
             
             void *rowpc(int r) const {
-                channel_t *host = InterleavedImage<Color>::data();
+                channel_t *host = reinterpret_cast<channel_t*>(InterleavedImage<Color>::data());
                 host += off_t(r * rowp_stride());
                 return static_cast<void *>(host);
             }
@@ -515,15 +510,6 @@ namespace im {
             iimage.set_host_dirty();
             return iimage;
             
-            // try {
-            //     InterleavedImage<Color> iimage(
-            //         dynamic_cast<InterleavedImage<Color>&>(
-            //             *output.get()));
-            //     iimage.set_host_dirty();
-            //     return iimage;
-            // } catch (std::bad_cast& exc) {
-            //     std::terminate();
-            // }
         }
         
         template <typename Color = color::RGB> inline
