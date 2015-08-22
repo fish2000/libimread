@@ -22,16 +22,19 @@ namespace im { namespace test {
     
     static const std::string basedir = "/Users/fish/Dropbox/libimread/tests/data";
     
-    static const int num_jpg = 3;
+    static const int num_jpg = 4;
     static const std::string jpg[] = {
         "10954288_342637995941364_1354507656_n.jpg",
         "IMG_4332.jpg",
+        "Rd4lKZq.jpg",
         "tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"
     };
     
-    static const int num_jpeg = 1;
+    static const int num_jpeg = 3;
     static const std::string jpeg[] = {
-        "IMG_7333.jpeg"
+        "IMG_7333.jpeg",
+        "tara-bruno-NO-YOU-DONT-SEE-ME-almost-two-years-ago.jpeg",
+        "taylor-omg.jpeg"
     };
     
     static const int num_png = 13;

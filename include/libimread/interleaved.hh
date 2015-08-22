@@ -323,13 +323,13 @@ namespace im {
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
                         typename color_t::array_t components = get(x, y).to_array();
-                        WTF("in pixel loop", FF("x = %i, y = %i, components.size() = %i",
-                            x, y, components.size()
-                        ));
+                        // WTF("in pixel loop", FF("x = %i, y = %i, components.size() = %i",
+                        //     x, y, components.size()
+                        // ));
                         dest_color_t dest_color = converter(components.data());
-                        WTF("Returned from converter to pixel loop");
+                        // WTF("Returned from converter to pixel loop");
                         dest = data + (y * x);
-                        WTF("About to call pix::convert()");
+                        // WTF("About to call pix::convert()");
                         pix::convert(dest_color.composite, *dest);
                     }
                 }
@@ -344,8 +344,9 @@ namespace im {
                 const void* data = conversion_impl<im::color::Convert<Color, DestColor>>();
                 buffer_t buffer = {0};
                 buffer.dev = 0;
-                //buffer.host = reinterpret_cast<uint8_t*>(data);
-                std::memcpy(buffer.host, data, size());
+                buffer.host = new uint8_t[size()];
+                std::memset((void *)buffer.host, 0, size());
+                std::memcpy((void *)buffer.host, (const dest_composite_t*)data, size());
                 delete[] (const uint32_t*)data;
                 buffer.extent[0] = extent(0);
                 buffer.extent[1] = extent(1);

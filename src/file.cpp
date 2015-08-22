@@ -80,16 +80,20 @@ namespace im {
                              filesystem::mode fmode) {
         if (fmode == filesystem::mode::WRITE) {
             descriptor = open_write(cpath);
+            if (descriptor < 0) {
+                imread_raise(CannotWriteError, "file open-to-write failure:",
+                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC)", cpath),
+                    FF("\treturned negative value: %i", descriptor),
+                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+            }
         } else {
             descriptor = open_read(cpath);
-        }
-        if (descriptor < 0) {
-            imread_raise(CannotReadError, "file read failure:",
-                FF("\t::open(\"%s\", %s)", cpath, ((fmode == filesystem::mode::READ)
-                            ? "O_RDONLY | O_NONBLOCK"
-                            : "O_CREAT | O_WRONLY | O_TRUNC | O_EXLOCK | O_SYMLINK")),
-                FF("\treturned negative value: %i", descriptor),
-                   "\tERROR MESSAGE IS: ", std::strerror(errno));
+            if (descriptor < 0) {
+                imread_raise(CannotReadError, "file open-to-read failure:",
+                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC)", cpath),
+                    FF("\treturned negative value: %i", descriptor),
+                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+            }
         }
         return descriptor;
     }
