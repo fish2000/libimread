@@ -24,7 +24,8 @@ namespace {
     {
         @autoreleasepool {
             IMTestReceiver *imts = [[IMTestReceiver alloc] init];
-            objc::msg::send(imts, objc::selector("callMethod"));
+            objc::msg::send(imts,
+                objc::selector("callMethod"));
         }
     }
     
@@ -33,7 +34,8 @@ namespace {
     {
         @autoreleasepool {
             IMTestReceiver *imts = [[IMTestReceiver alloc] init];
-            objc::msg::send(imts, objc::selector("callMethodWithInt:"), 42);
+            objc::msg::send(imts,
+                objc::selector("callMethodWithInt:"), 42);
         }
     }
     
@@ -43,7 +45,9 @@ namespace {
         IMTestReceiver *imts = [[IMTestReceiver alloc] init];
         NSString *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
         [stringArg retain];
-        objc::msg::send(imts, objc::selector("callMethodWithInt:andObjCString:"), 42, stringArg);
+        objc::msg::send(imts,
+            objc::selector("callMethodWithInt:andObjCString:"),
+            42, stringArg);
         [stringArg release];
     }
     
@@ -53,39 +57,53 @@ namespace {
         IMTestReceiver *imts = [[IMTestReceiver alloc] init];
         NSString *stringArg = @"OH SHIT DOGG PARDON MY STRING PASSING";
         [stringArg retain];
-        objc::msg::send(imts, objc::selector("callMethodWithInt:andVoidPointer:"), 42, objc::bridge<void*>(stringArg));
+        objc::msg::send(imts,
+            objc::selector("callMethodWithInt:andVoidPointer:"),
+            42, objc::bridge<void*>(stringArg));
         [stringArg release];
     }
     
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
         im::fs::NamedTemporaryFile temporary;
         NSData *datum;
+        NSString *filepath;
         NSURL *url;
-        NSString *urlpath;
-        std::string path;
-        //std::string prefix = "file://";
-        std::string prefix = "";
+        
+        std::string prefix = "file://";
         std::size_t nbytes = 20 * 1024; /// 20480
         unsigned char randos[20480] = {0};
+        bool removed = false;
         
         arc4random_buf(static_cast<void*>(randos), nbytes);
-        path = prefix + temporary.str();
+        std::string prefixed = prefix + temporary.str();
         
         @autoreleasepool {
             datum = [[NSData alloc] initWithBytes:(const void *)&randos[0]
                                            length:(NSInteger)nbytes];
-            urlpath = [[NSString alloc] initWithUTF8String:path.c_str()];
-            url = [[NSURL alloc] initWithString:urlpath];
+            filepath = [[NSString alloc] initWithUTF8String:temporary.c_str()];
+            url = [[NSURL alloc] initWithString:[
+                [NSString alloc] initWithUTF8String:prefixed.c_str()]];
             
             [datum retain];
-            [urlpath retain];
+            [filepath retain];
+            [url retain];
             
             objc::msg::send((id)datum,
                 objc::selector("writeToFile:atomically:"),
-                urlpath, YES);
+                filepath, YES);
+            
+            removed = temporary.remove();
+            REQUIRE(removed == true);
+            
+            objc::msg::send((id)datum,
+                objc::selector("writeToURL:atomically:"),
+                url, YES);
+            
+            removed = temporary.remove();
+            REQUIRE(removed == true);
             
             [datum release];
-            [urlpath release];
+            [filepath release];
             [url release];
         };
         

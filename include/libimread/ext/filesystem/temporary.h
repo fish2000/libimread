@@ -51,7 +51,7 @@ namespace filesystem {
         operator const char*() const noexcept      { return c_str(); }
         
         void create();
-        void remove();
+        bool remove();
         
         ~NamedTemporaryFile() {
             if (cleanup) { remove(); }

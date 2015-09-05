@@ -19,12 +19,8 @@ namespace filesystem {
         }
     }
     
-    void NamedTemporaryFile::remove() {
-        if (::unlink(filepath.c_str()) == -1) {
-            imread_raise(FileSystemError, "[ERROR]",
-                FF("Internal error in ::unlink(%s):", filepath.c_str()),
-                std::strerror(errno));
-        }
+    bool NamedTemporaryFile::remove() {
+        return filepath.remove();
     }
     
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tdp, FILESYSTEM_TEMP_DIRECTORYNAME);
