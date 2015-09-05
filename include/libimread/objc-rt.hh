@@ -24,9 +24,9 @@
 
 namespace objc {
     
-    /// pointer swap
+    /// pointer swapper
     template <typename T> inline
-    void ptr_swap(T*& oA, T*& oB) {
+    void swap(T*& oA, T*& oB) {
         T* oT = oA; oA = oB; oB = oT;
     }
     
@@ -35,16 +35,20 @@ namespace objc {
     __attribute__((__always_inline__))
     T bridge(U castee) { return (__bridge T)castee; }
     
-    #if __has_feature(objc_arc)
+    /// bridge-retain cast --
+    /// kind of a NOOp in MRC-mode
+    /// (which currently we don't do ARC anyway)
     template <typename T, typename U>
     __attribute__((__always_inline__))
-    T bridgeretained(U castee) { return (__bridge_retained T)castee; }
-    #else
-    template <typename T, typename U>
-    __attribute__((__always_inline__))
-    T bridgeretained(U castee) { return (__bridge T)castee; }
-    #endif
+    T bridgeretain(U castee) {
+        #if __has_feature(objc_arc)
+            return (__bridge_retained T)castee;
+        #else
+            return (__bridge T)castee;
+        #endif
+    }
     
+    /// namespaced references, to everything use from the objective-c type system
     
     namespace types {
         
@@ -69,6 +73,7 @@ namespace objc {
     }
     
     /// function-pointer templates for wrapping objc_msgSend() with a bunch of possible sigs
+    
     template <typename Return, typename ...Args>
     using return_sender_t = std::add_pointer_t<Return(types::tID, types::tSEL, Args...)>;
     
@@ -78,6 +83,9 @@ namespace objc {
     template <typename ...Args>
     using object_sender_t = std::add_pointer_t<::id(types::tID, types::tSEL, Args...)>;
     
+    /// Straightforward wrapper around an objective-c selector (the SEL type).
+    /// + Constructable from, and convertable to, common string types
+    /// + Overloaded for equality testing
     
     struct selector {
         
@@ -136,10 +144,16 @@ namespace objc {
         
     };
     
+    /// variadic tuple-unpacking argument wrapper structure
+    /// for referencing objective-c message arguments passed
+    /// to objc_msgSend and its multitudinous variants.
+    /// ... users really shouldn't need to invoke this directly;
+    /// use  `objc::msg` instead, see its definition and notes below.
+    
     template <typename Return, typename ...Args>
     struct arguments {
         static constexpr std::size_t argc = sizeof...(Args);
-        using is_argument_list = std::true_type;
+        using is_argument_list_t = std::true_type;
         using index_t = std::make_index_sequence<argc>;
         using tuple_t = std::tuple<Args...>;
         using sender_t = return_sender_t<Return, Args...>;
@@ -176,6 +190,11 @@ namespace objc {
             arguments &operator=(arguments&&);
     };
     
+    /// objc::arguments<...> subclass used for reimplementing objc_msgSendv()
+    /// ... which you may ask, why did I do that? Why would a sane person do that?
+    /// Hahaha. I had my reasons, of which I am not, at time of writing,
+    /// necessarily proud. Buy me a beer and I will explain it to you.
+    
     template <typename Return, typename ...Args>
     struct message : public arguments<Return, Args...> {
         using arguments_t = arguments<Return, Args...>;
@@ -206,6 +225,22 @@ namespace objc {
             message &operator=(message&&);
             
     };
+    
+    /// wrapper around an objective-c instance
+    /// ... FEATURING:
+    /// + automatic scoped memory management via RAII through MRC messages
+    /// ... plus fine control through inlined retain/release/autorelease methods
+    /// + access to wrapped object pointer via operator*()
+    /// + boolean selector-response test via operator[](T t) e.g.
+    ///
+    ///     objc::id yodogg([[NSYoDogg alloc] init]);
+    ///     if (yodogg[@"iHeardYouRespondTo:"]) {
+    ///         [*yodogg iHeardYouRespondTo:argsInYourArgs];
+    ///     }
+    ///
+    /// + convenience methods e.g. yodogg.classname(), yodogg.description(), yodogg.lookup() ...
+    /// + inline bridging template e.g. void* asVoid = yodogg.bridge<void*>();
+    /// + E-Z static methods for looking shit up in the runtime heiarchy
     
     struct id {
         
@@ -341,11 +376,13 @@ namespace objc {
                                                         std::true_type, std::false_type>;
             
             template <typename T, typename ...Args>
-            static auto test_is_argument_list(int) -> typename T::is_argument_list;
+            static auto test_is_argument_list(int) -> typename T::is_argument_list_t;
             template <typename, typename ...Args>
             static auto test_is_argument_list(long) -> std::false_type;
             
         }
+        
+        /// Unnecessarily overwrought compile-time test for objc::message and descendants
         
         template <typename T>
         struct is_argument_list : decltype(detail::test_is_argument_list<T>(0)) {
@@ -358,14 +395,18 @@ namespace objc {
             }
         };
         
+        /// compile-time tests for objective-c primitives:
+        
+        /// test for an object-pointer instance (NSObject* and descendants)
         template <typename T, typename V = bool>
-        struct is_class : std::false_type {};
+        struct is_object : std::false_type {};
         template <typename T>
-        struct is_class<T,
+        struct is_object<T,
             typename std::enable_if_t<
                  std::is_convertible<T, objc::types::ID>::value,
                  bool>> : std::true_type {};
         
+        /// test for a selector struct
         template <typename T, typename V = bool>
         struct is_selector : std::false_type {};
         template <typename T>
@@ -374,10 +415,11 @@ namespace objc {
                 std::is_convertible<T, objc::types::selector>::value,
                 bool>> : std::true_type {};
         
+        /// test for the objective-c class struct type
         template <typename T, typename V = bool>
-        struct is_class_type : std::false_type {};
+        struct is_class : std::false_type {};
         template <typename T>
-        struct is_class_type<T,
+        struct is_class<T,
             typename std::enable_if_t<
                 std::is_convertible<T, objc::types::cls>::value,
                 bool>> : std::true_type {};
@@ -436,6 +478,10 @@ namespace objc {
     
 }
 
+/// string suffix for inline declaration of objc::selector objects
+/// ... e.g. create an inline wrapper for a `yoDogg:` selector like so:
+///     objc::selector yodogg = "yoDogg:"_SEL;
+
 inline objc::selector operator"" _SEL(const char *name) {
     return objc::selector(name);
 }
@@ -450,8 +496,9 @@ namespace im {
     ///      with more dynamic whatever-the-fuck type serialization provisions as needed.
     ///
     ///      *) See also http://bit.ly/1P8d8va for in-depth analysis of this pivotal term
+    
     template <typename S> inline
-    typename std::enable_if_t<objc::traits::is_class<S>::value, std::string>
+    typename std::enable_if_t<objc::traits::is_object<S>::value, std::string>
         stringify(S *s) {
             const objc::id self(s);
             if (self[@"STLString"]) {
