@@ -173,8 +173,8 @@ namespace im {
         
         const int w = png_get_image_width (p.png_ptr, p.png_info);
         const int h = png_get_image_height(p.png_ptr, p.png_info);
-        int channels = png_get_channels(p.png_ptr, p.png_info);
-        int bit_depth = png_get_bit_depth(p.png_ptr, p.png_info);
+        volatile int channels = png_get_channels(p.png_ptr, p.png_info);
+        volatile int bit_depth = png_get_bit_depth(p.png_ptr, p.png_info);
         
         if (bit_depth != 1 && bit_depth != 8 && bit_depth != 16) {
             imread_raise(CannotReadError,
@@ -183,7 +183,7 @@ namespace im {
         }
         if (bit_depth == 16 && !is_big_endian()) { png_set_swap(p.png_ptr); }
         
-        int d = -1;
+        volatile int d = -1;
         switch (png_get_color_type(p.png_ptr, p.png_info)) {
             case PNG_COLOR_TYPE_PALETTE:
                 png_set_palette_to_rgb(p.png_ptr); /// ??
@@ -214,7 +214,7 @@ namespace im {
         
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         
-        int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
+        volatile int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
         png_bytep *row_pointers = new png_bytep[h];
         for (int y = 0; y < h; y++) {
             row_pointers[y] = new png_byte[row_bytes];
@@ -228,7 +228,7 @@ namespace im {
         
         /// convert the data to T (fake it for now with uint8_t)
         //T *ptr = (T*)output->data();
-        int c_stride = (d == 1) ? 0 : output->stride(2);
+        const int c_stride = (d == 1) ? 0 : output->stride(2);
         uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
         
         // WTF("About to enter pixel access loop...",
@@ -277,7 +277,7 @@ namespace im {
         const int bit_depth = input.nbits();
         
         png_bytep *row_pointers;
-        png_byte color_type = color_types[channels - 1];
+        const png_byte color_type = color_types[channels - 1];
         
         png_set_IHDR(p.png_ptr, p.png_info,
                      width, height, bit_depth, color_type,
@@ -294,8 +294,8 @@ namespace im {
         png_write_info(p.png_ptr, p.png_info);
         row_pointers = new png_bytep[height];
         
-        int c_stride = (channels == 1) ? 0 : input.stride(2);
-        int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
+        const int c_stride = (channels == 1) ? 0 : input.stride(2);
+        const int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
         int x = 0, y = 0, c = 0;
         uint8_t *dstPtr;
         uint8_t out;
