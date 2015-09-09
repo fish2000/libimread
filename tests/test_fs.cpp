@@ -41,6 +41,30 @@ TEST_CASE("[filesystem] Ensure `switchdir()` changes back on scope exit",
     REQUIRE(check_three);
     chdir(current);
 }
+TEST_CASE("[filesystem] Test path::hash() and std::hash<path> specialization integrity",
+          "[fs-path-hash-and-std-hash-specialization-integrity]") {
+    path basedir(im::test::basedir);
+    path absdir(basedir.make_absolute());
+    path tmpdir("/private/tmp");
+    std::hash<path> hasher;
+    /// test data header will write 'basedir' out as absolute
+    REQUIRE(basedir == absdir);
+    REQUIRE(basedir != tmpdir);
+    /// path::operator==() uses path::hash()
+    REQUIRE(basedir.hash() == absdir.hash());
+    REQUIRE(basedir.hash() != tmpdir.hash());
+    /// std::hash<path> also uses path::hash()
+    REQUIRE(hasher(basedir) == basedir.hash());
+    REQUIRE(hasher(basedir) != tmpdir.hash());
+    REQUIRE(hasher(basedir) == hasher(absdir));
+    /// path::hash<P>(p) forwards to path::hash()
+    REQUIRE(path::hash(basedir) == path::hash(absdir));
+    REQUIRE(path::hash(basedir) != path::hash(tmpdir));
+    REQUIRE(path::hash(basedir) == absdir.hash());
+    REQUIRE(path::hash(basedir) != tmpdir.hash());
+    REQUIRE(path::hash(basedir) == hasher(absdir));
+    REQUIRE(path::hash(basedir) != hasher(tmpdir));
+}
 
 TEST_CASE("[filesystem] Check count and names of test jpg files",
           "[fs-check-jpg]") {
