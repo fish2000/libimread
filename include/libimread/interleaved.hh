@@ -507,7 +507,7 @@ namespace im {
                 iimage.set_host_dirty();
                 return iimage;
             } catch (std::bad_cast& exc) {
-                // WTF("LEAVING ALPHAVILLE.");
+                WTF("LEAVING ALPHAVILLE.");
                 InterleavedImage<Color> iimage(
                     dynamic_cast<InterleavedImage<color::RGB>&>(
                         *output.get()));

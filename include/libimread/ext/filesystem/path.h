@@ -100,13 +100,13 @@ namespace filesystem {
                 {}
             
             path(const path &path)
-                :m_type(path.m_type)
+                :m_type(native_path)
                 ,m_path(path.m_path)
                 ,m_absolute(path.m_absolute)
                 {}
             
             path(path &&path)
-                :m_type(path.m_type)
+                :m_type(native_path)
                 ,m_path(std::move(path.m_path))
                 ,m_absolute(path.m_absolute)
                 {}
@@ -206,10 +206,6 @@ namespace filesystem {
                     imread_raise(FileSystemError,
                         "path::operator/(): Expected a relative path!");
                 }
-                if (other.m_type != other.m_type) {
-                    imread_raise(FileSystemError,
-                        "path::operator/(): Expected a path of the same type!");
-                }
                 
                 path result(*this);
                 std::string::size_type idx = 0,
@@ -230,10 +226,10 @@ namespace filesystem {
                 return path(std::forward<P>(one)) / path(std::forward<Q>(theother));
             }
             
-            std::string str(path_type type = native_path) const {
+            std::string str() const {
                 std::string out = "";
-                char sep = (type == posix_path) ? '/' : '\\';
-                if (type == posix_path && m_absolute) { out += sep; }
+                const char sep = '/';
+                if (m_absolute) { out += sep; }
                 std::string::size_type idx = 0,
                                        siz = m_path.size();
                 for (; idx < siz; ++idx) {
@@ -261,26 +257,21 @@ namespace filesystem {
             operator std::string()          { return str(); }
             operator const char*()          { return c_str(); }
             
-            void set(const std::string &str, path_type type = native_path) {
-                m_type = type;
-                if (type == windows_path) {
-                    m_path = tokenize(str, "/\\");
-                    m_absolute = str.size() >= 2 && std::isalpha(str[0]) && str[1] == ':';
-                } else {
-                    m_path = tokenize(str, "/");
-                    m_absolute = !str.empty() && str[0] == '/';
-                }
+            void set(const std::string &str) {
+                m_type = native_path;
+                m_path = tokenize(str, "/");
+                m_absolute = !str.empty() && str[0] == '/';
             }
             
             path &operator=(const std::string &str) { set(str); return *this; }
             path &operator=(const path &path) {
-                m_type = path.m_type;
+                m_type = native_path;
                 m_path = path.m_path;
                 m_absolute = path.m_absolute;
                 return *this;
             }
             path &operator=(path &&path) {
-                m_type = path.m_type;
+                m_type = native_path;
                 m_absolute = path.m_absolute;
                 if (this != &path) {
                     m_path = std::move(path.m_path);
@@ -301,6 +292,11 @@ namespace filesystem {
                     detail::rehash(H, *idx);
                 }
                 return H;
+            }
+            
+            template <typename P> inline
+            static std::size_t hash(P&& p) {
+                return path(std::forward<P>(p)).hash();
             }
             
         protected:
