@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 #include <glob.h>
+#include <cstdlib>
 #include <algorithm>
 #include <libimread/ext/filesystem/path.h>
 
@@ -11,19 +12,31 @@ namespace filesystem {
     namespace detail {
         
         filesystem::directory ddopen(const char *c) {
-            return filesystem::directory(opendir(path::absolute(c)));
+            return filesystem::directory(::opendir(path::absolute(c).c_str()));
         }
+        
         filesystem::directory ddopen(const std::string &s) {
-            return filesystem::directory(opendir(path::absolute(s)));
+            return filesystem::directory(::opendir(path::absolute(s).c_str()));
         }
+        
         filesystem::directory ddopen(const path &p) {
-            return filesystem::directory(opendir(p.make_absolute().c_str()));
+            return filesystem::directory(::opendir(p.make_absolute().c_str()));
         }
         
         inline const char *fm(mode m) noexcept { return m == mode::READ ? "r+b" : "w+x"; }
         
         filesystem::file ffopen(const std::string &s, mode m) {
             return filesystem::file(fopen(s.c_str(), fm(m)));
+        }
+        
+        const char *tmpdir() noexcept {
+            /// cribbed/tweaked from boost
+            const char *dirname;
+            dirname = std::getenv("TMPDIR");
+            if (NULL == dirname) { dirname = std::getenv("TMP"); }
+            if (NULL == dirname) { dirname = std::getenv("TEMP"); }
+            if (NULL == dirname) { dirname = "/tmp"; }
+            return dirname;
         }
         
     }
@@ -181,6 +194,15 @@ namespace filesystem {
         if (is_file())      { return bool(::unlink(make_absolute().c_str()) != -1); }
         if (is_directory()) { return bool(::rmdir(make_absolute().c_str()) != -1); }
         return false;
+    }
+    
+    path path::getcwd() {
+        char temp[PATH_MAX];
+        if (::getcwd(temp, PATH_MAX) == NULL) {
+            imread_raise(FileSystemError,
+                "Internal error in getcwd():", strerror(errno));
+        }
+        return path(temp);
     }
     
     
