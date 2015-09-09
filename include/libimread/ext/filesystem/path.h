@@ -70,6 +70,13 @@ namespace filesystem {
             return dirname;
         }
         
+        template <typename T> inline
+        void rehash(std::size_t& seed, const T& v) {
+            /// also cribbed from boost,
+            /// via http://stackoverflow.com/a/23860042/298171
+            std::hash<T> hasher;
+            seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
     }
     
     /**
@@ -118,12 +125,9 @@ namespace filesystem {
             static path absolute(P&& p) { return path(std::forward<P>(p)).make_absolute(); }
             
             bool compare_debug(const path &other) const;
+            bool compare_lexical(const path &other) const;
             bool compare(const path &other) const;
             
-            template <typename P, typename Q> inline
-            static bool compare_debug(P&& p, Q&& q) {
-                return path(std::forward<P>(p)).compare_debug(path(std::forward<Q>(q)));
-            }
             template <typename P, typename Q> inline
             static bool compare(P&& p, Q&& q) {
                 return path(std::forward<P>(p)).compare(path(std::forward<Q>(q)));
@@ -227,16 +231,16 @@ namespace filesystem {
             }
             
             std::string str(path_type type = native_path) const {
-                std::ostringstream oss;
+                std::string out = "";
                 char sep = (type == posix_path) ? '/' : '\\';
-                if (type == posix_path && m_absolute) { oss << sep; }
+                if (type == posix_path && m_absolute) { out += sep; }
                 std::string::size_type idx = 0,
                                        siz = m_path.size();
                 for (; idx < siz; ++idx) {
-                    oss << m_path[idx];
-                    if (idx + 1 < siz) { oss << sep; }
+                    out += m_path[idx];
+                    if (idx + 1 < siz) { out += sep; }
                 }
-                return oss.str();
+                return out;
             }
             
             inline const char *c_str() const { return str().c_str(); }
@@ -289,6 +293,14 @@ namespace filesystem {
             friend std::ostream &operator<<(std::ostream &os, const path &path) {
                 os << path.str();
                 return os;
+            }
+            
+            std::size_t hash() const {
+                std::size_t H = static_cast<std::size_t>(is_absolute());
+                for (auto idx = m_path.begin(); idx != m_path.end(); ++idx) {
+                    detail::rehash(H, *idx);
+                }
+                return H;
             }
             
         protected:
@@ -345,5 +357,25 @@ namespace filesystem {
     };
     
 }; /* namespace filesystem */
+
+namespace std {
+    
+    /// std::hash specialization for filesystem::path
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<filesystem::path> {
+        
+        typedef filesystem::path argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& p) const {
+            return static_cast<result_type>(p.hash());
+        }
+        
+    };
+    
+}; /* namespace std */
 
 #endif /// LIBIMREAD_EXT_FILESYSTEM_PATH_H_

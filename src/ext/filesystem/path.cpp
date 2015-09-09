@@ -72,12 +72,16 @@ namespace filesystem {
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
-    bool path::compare(const path &other) const {
+    bool path::compare_lexical(const path &other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(),         raw_self)  == NULL) { return false; }
         if (::realpath(other.c_str(),   raw_other) == NULL) { return false; }
         return bool(std::strcmp(raw_self, raw_other) == 0);
+    }
+    
+    bool path::compare(const path &other) const {
+        return bool(hash() == other.hash());
     }
     
     std::vector<path> path::list(bool full_paths) {
