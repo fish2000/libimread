@@ -44,22 +44,20 @@ namespace filesystem {
             if (std::strncmp(dname.c_str(), ".", 1) == 0)               { continue; }
             if (std::strncmp(dname.c_str(), "..", 2) != 0)              { continue; }
             path epp = abspath/dname;
+            epp.remove();
+            /*
             const char *ep = epp.make_absolute().c_str();
             if (::remove(ep) == -1) {
                 imread_raise(FileSystemError, "[ERROR]",
                     FF("Internal error in ::remove(%s):", ep),
                     std::strerror(errno));
             }
+            */
         }
     }
     
-    void TemporaryDirectory::remove() {
-        /// unlink the directory itself
-        if (::rmdir(dirpath.make_absolute().c_str()) == -1) {
-            // imread_raise(FileSystemError,
-            //     "Internal error in rmdir():\n\t", dirpath.str(),
-            //     std::strerror(errno));
-        }
+    bool TemporaryDirectory::remove() {
+        return dirpath.remove();
     }
     
 }

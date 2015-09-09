@@ -95,7 +95,7 @@ namespace filesystem {
                                                           suffix, prefix, dirpath, cleanup, m); }
         
         void clean();
-        void remove();
+        bool remove();
         
         ~TemporaryDirectory() {
             if (cleanup) { clean(); remove(); }

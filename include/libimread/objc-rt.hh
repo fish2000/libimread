@@ -48,11 +48,22 @@ namespace objc {
         #endif
     }
     
-    /// namespaced references, to everything use from the objective-c type system
+    /// block type alias --
+    /// because `objc::block<T> thing`
+    /// looks better than `__block T` 
+    
+    template <typename Type>
+    using block_t = Type __attribute__((__blocks__(byref)));
+    
+    template <typename Type>
+    using block = __block block_t<typename std::remove_cv<Type>::type>;
+    
+    /// namespaced references,
+    /// for everything we use from the objective-c type system
     
     namespace types {
         
-        using ID = ::id;
+        using ID = ::id __attribute__((NSObject));
         using selector = ::SEL;
         using cls = ::Class;
         using boolean = ::BOOL;
@@ -200,8 +211,9 @@ namespace objc {
         using arguments_t = arguments<Return, Args...>;
         using arguments_t::argc;
         using arguments_t::args;
-        types::ID self;
+        
         types::selector op;
+        types::ID self;
         
         explicit message(types::ID s, types::selector o, Args&&... a)
             :arguments_t(a...)

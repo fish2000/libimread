@@ -171,8 +171,9 @@ namespace filesystem {
             }
             
             bool remove() {
-                if (!is_file()) { return false; }
-                return bool(::unlink(make_absolute().c_str()) != -1);
+                if (is_file())      { return bool(::unlink(make_absolute().c_str()) != -1); }
+                if (is_directory()) { return bool(::rmdir(make_absolute().c_str()) != -1); }
+                return false;
             }
             
             std::string extension() const {
