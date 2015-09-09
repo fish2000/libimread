@@ -11,20 +11,20 @@ using namespace im;
 
 #include "include/catch.hpp"
 
-TEST_CASE("Check if PNG can read", "[sfinae-PNG-check-can-read]") {
+TEST_CASE("[SFINAE] Check if PNG can read", "[sfinae-PNG-check-can-read]") {
     REQUIRE(has_read<format::PNG>());
 }
 
-TEST_CASE("Check if JPEG can read", "[sfinae-JPEG-check-can-read]") {
+TEST_CASE("[SFINAE] Check if JPEG can read", "[sfinae-JPEG-check-can-read]") {
     REQUIRE(has_read<format::JPG>());
     REQUIRE(has_read<format::JPEG>());
 }
 
-TEST_CASE("Confirm WebP can NOT write", "[sfinae-WebP-confirm-no-write]") {
+TEST_CASE("[SFINAE] Confirm WebP can NOT write", "[sfinae-WebP-confirm-no-write]") {
     REQUIRE(!has_write<format::WebP>());
 }
 
-TEST_CASE("Confirm PVR can NOT write", "[sfinae-PVR-confirm-no-write]") {
+TEST_CASE("[SFINAE] Confirm PVR can NOT write", "[sfinae-PVR-confirm-no-write]") {
     REQUIRE(!has_write<format::PVR>());
     REQUIRE(!has_write<format::PVRTC>());
 }

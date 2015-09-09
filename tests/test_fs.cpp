@@ -13,12 +13,14 @@
 using im::fs::path;
 using im::fs::switchdir;
 
-TEST_CASE("Check if `basedir` is a directory", "[fs-basedir-isdirectory]") {
+TEST_CASE("[filesystem] Check if `basedir` is a directory",
+          "[fs-basedir-isdirectory]") {
     path basedir(im::test::basedir);
     REQUIRE(basedir.is_directory());
 }
 
-TEST_CASE("Ensure `switchdir()` changes back on scope exit", "[fs-switchdir-change-back-scope-exit]") {
+TEST_CASE("[filesystem] Ensure `switchdir()` changes back on scope exit",
+          "[fs-switchdir-change-back-scope-exit]") {
     path basedir(im::test::basedir);
     path absdir(basedir.make_absolute());
     path tmpdir("/private/tmp");
@@ -26,16 +28,22 @@ TEST_CASE("Ensure `switchdir()` changes back on scope exit", "[fs-switchdir-chan
     REQUIRE(tmpdir.is_directory());
     const char *current = path::cwd();
     chdir(absdir);
-    REQUIRE(path::cwd().make_absolute().str() == absdir.str());
+    bool check_one = bool(path::cwd() == absdir);
+    REQUIRE(check_one);
     {
         switchdir s(tmpdir);
-        REQUIRE(path::cwd().make_absolute().str() == tmpdir.str());
+        bool check_two = bool(path::cwd() == tmpdir);
+        bool check_two_and_a_half = bool(s.from() == absdir);
+        REQUIRE(check_two);
+        REQUIRE(check_two_and_a_half);
     }
-    REQUIRE(path::cwd().make_absolute().str() == absdir.str());
+    bool check_three = bool(path::cwd() == absdir);
+    REQUIRE(check_three);
     chdir(current);
 }
 
-TEST_CASE("Check count and names of test jpg files", "[fs-check-jpg]") {
+TEST_CASE("[filesystem] Check count and names of test jpg files",
+          "[fs-check-jpg]") {
     path basedir(im::test::basedir);
     std::vector<path> v = basedir.list("*.jpg");
     REQUIRE(v.size() == im::test::num_jpg);
@@ -47,7 +55,8 @@ TEST_CASE("Check count and names of test jpg files", "[fs-check-jpg]") {
     }
 }
 
-TEST_CASE("Check count of test jpeg files", "[fs-count-jpeg]") {
+TEST_CASE("[filesystem] Check count of test jpeg files",
+          "[fs-count-jpeg]") {
     path basedir(im::test::basedir);
     std::vector<path> v = basedir.list("*.jpeg");
     REQUIRE(v.size() == im::test::num_jpeg);
@@ -59,7 +68,8 @@ TEST_CASE("Check count of test jpeg files", "[fs-count-jpeg]") {
     }
 }
 
-TEST_CASE("Check count of test png files", "[fs-count-png]") {
+TEST_CASE("[filesystem] Check count of test png files",
+          "[fs-count-png]") {
     path basedir(im::test::basedir);
     std::vector<path> v = basedir.list("*.png");
     REQUIRE(v.size() == im::test::num_png);
@@ -71,7 +81,8 @@ TEST_CASE("Check count of test png files", "[fs-count-png]") {
     }
 }
 
-TEST_CASE("Check count of test tif files", "[fs-count-tif]") {
+TEST_CASE("[filesystem] Check count of test tif files",
+          "[fs-count-tif]") {
     path basedir(im::test::basedir);
     std::vector<path> v = basedir.list("*.tif");
     REQUIRE(v.size() == im::test::num_tif);
@@ -83,7 +94,8 @@ TEST_CASE("Check count of test tif files", "[fs-count-tif]") {
     }
 }
 
-TEST_CASE("Check count of test tiff files (should be 0)", "[fs-count-tiff]") {
+TEST_CASE("[filesystem] Check count of test tiff files (should be 0)",
+          "[fs-count-tiff]") {
     path basedir(im::test::basedir);
     std::vector<path> v = basedir.list("*.tiff");
     REQUIRE(v.size() == im::test::num_tiff);
@@ -97,7 +109,8 @@ TEST_CASE("Check count of test tiff files (should be 0)", "[fs-count-tiff]") {
 
 #define RE_FLAGS std::regex::extended | std::regex::icase
 
-TEST_CASE("Count both jpg and jpeg files with a regex", "[fs-count-jpg-jpeg-regex]") {
+TEST_CASE("[filesystem] Count both jpg and jpeg files with a regex",
+          "[fs-count-jpg-jpeg-regex]") {
     path basedir(im::test::basedir);
     std::regex re("(jpg|jpeg)$", RE_FLAGS);
     std::vector<path> v = basedir.list(re);

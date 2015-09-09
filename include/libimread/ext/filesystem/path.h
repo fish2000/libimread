@@ -8,22 +8,21 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <mutex>
 #include <functional>
 #include <regex>
 #include <sstream>
+
 #include <cctype>
 #include <cstdlib>
 #include <cstddef>
 #include <cerrno>
 #include <cstring>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-
-using namespace std::placeholders;
 
 namespace filesystem {
     
@@ -113,31 +112,20 @@ namespace filesystem {
             inline bool empty() const       { return m_path.empty(); }
             inline bool is_absolute() const { return m_absolute; }
             
-            path make_absolute() const {
-                char temp[PATH_MAX];
-                if (::realpath(c_str(), temp) == NULL) {
-                    imread_raise(FileSystemError,
-                        "FATAL internal error raised during path::make_absolute() call to realpath():",
-                     FF("\t%s (%d)", std::strerror(errno), errno),
-                        "In reference to path value:",
-                     FF("\t%s", c_str()));
-                }
-                return path(temp);
-            }
+            path make_absolute() const;
             
             template <typename P> inline
             static path absolute(P&& p) { return path(std::forward<P>(p)).make_absolute(); }
             
-            bool exists() const {
-                struct stat sb;
-                return ::stat(c_str(), &sb) == 0;
-            }
+            bool compare_debug(const path &other) const;
+            bool compare(const path &other) const;
             
-            bool is_directory() const {
-                struct stat sb;
-                if (::stat(c_str(), &sb)) { return false; }
-                return S_ISDIR(sb.st_mode);
-            }
+            bool operator==(const path &other) const { return compare(other); }
+            bool operator!=(const path &other) const { return !compare(other); }
+            
+            bool exists() const;
+            bool is_file() const;
+            bool is_directory() const;
             
             bool match(const std::regex &pattern,           bool case_sensitive=false);
             bool search(const std::regex &pattern,          bool case_sensitive=false);
@@ -164,16 +152,11 @@ namespace filesystem {
                 return path(std::forward<P>(p)).list(std::forward<G>(g), full_paths);
             }
             
-            bool is_file() const {
-                struct stat sb;
-                if (::stat(c_str(), &sb)) { return false; }
-                return S_ISREG(sb.st_mode);
-            }
+            bool remove();
             
-            bool remove() {
-                if (is_file())      { return bool(::unlink(make_absolute().c_str()) != -1); }
-                if (is_directory()) { return bool(::rmdir(make_absolute().c_str()) != -1); }
-                return false;
+            template <typename P> inline
+            static bool remove(P&& p) {
+                return path(std::forward<P>(p)).remove();
             }
             
             std::string extension() const {
@@ -325,13 +308,31 @@ namespace filesystem {
     
     /// change directory temporarily with RAII
     struct switchdir {
-        explicit switchdir(path newdir)
+        
+        explicit switchdir(path nd)
             :olddir(path::cwd().str())
-            { chdir(newdir.c_str()); }
+            ,newdir(nd.str())
+            {
+                mute.lock();
+                ::chdir(newdir.c_str());
+            }
         
-        ~switchdir() { chdir(olddir.c_str()); }
+        path from() const { return path(olddir); }
         
-        std::string olddir;
+        ~switchdir() {
+            ::chdir(olddir.c_str());
+            mute.unlock();
+        }
+        
+        private:
+            switchdir(void);
+            switchdir(const switchdir&);
+            switchdir(switchdir&&);
+            switchdir &operator=(const switchdir&);
+            switchdir &operator=(switchdir&&);
+            static std::mutex mute; /// declaration but not definition
+            mutable std::string olddir;
+            mutable std::string newdir;
     };
     
 }; /* namespace filesystem */

@@ -11,12 +11,8 @@ namespace filesystem {
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfp, FILESYSTEM_TEMP_FILENAME);
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfs, FILESYSTEM_TEMP_SUFFIX);
     
-    void NamedTemporaryFile::create() {
-        if (::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix)) == -1) {
-            imread_raise(FileSystemError, "[ERROR]",
-                "NamedTemporaryFile::create(): error in ::mktemps():",
-                std::strerror(errno));
-        }
+    bool NamedTemporaryFile::create() {
+        return (::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix)) != -1);
     }
     
     bool NamedTemporaryFile::remove() {
