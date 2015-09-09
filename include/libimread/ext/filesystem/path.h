@@ -120,6 +120,15 @@ namespace filesystem {
             bool compare_debug(const path &other) const;
             bool compare(const path &other) const;
             
+            template <typename P, typename Q> inline
+            static bool compare_debug(P&& p, Q&& q) {
+                return path(std::forward<P>(p)).compare_debug(path(std::forward<Q>(q)));
+            }
+            template <typename P, typename Q> inline
+            static bool compare(P&& p, Q&& q) {
+                return path(std::forward<P>(p)).compare(path(std::forward<Q>(q)));
+            }
+            
             bool operator==(const path &other) const { return compare(other); }
             bool operator!=(const path &other) const { return !compare(other); }
             

@@ -69,7 +69,7 @@ namespace filesystem {
             str(), other.str(),
             "AS RAW STRINGS:",
             raw_self, raw_other);
-        return bool(std::strncmp(raw_self, raw_other, str().size()) == 0);
+        return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
     bool path::compare(const path &other) const {
@@ -77,7 +77,7 @@ namespace filesystem {
              raw_other[PATH_MAX];
         if (::realpath(c_str(),         raw_self)  == NULL) { return false; }
         if (::realpath(other.c_str(),   raw_other) == NULL) { return false; }
-        return bool(std::strncmp(raw_self, raw_other, str().size()) == 0);
+        return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
     std::vector<path> path::list(bool full_paths) {
