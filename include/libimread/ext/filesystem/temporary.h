@@ -94,7 +94,7 @@ namespace filesystem {
                                mode m = mode::WRITE) { return NamedTemporaryFile(
                                                           suffix, prefix, dirpath, cleanup, m); }
         
-        void clean();
+        bool clean();
         bool remove();
         
         ~TemporaryDirectory() {

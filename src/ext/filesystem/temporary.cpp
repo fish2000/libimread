@@ -14,7 +14,7 @@ namespace filesystem {
     void NamedTemporaryFile::create() {
         if (::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix)) == -1) {
             imread_raise(FileSystemError, "[ERROR]",
-                "Internal error in mktemps():",
+                "NamedTemporaryFile::create(): error in ::mktemps():",
                 std::strerror(errno));
         }
     }
@@ -27,33 +27,30 @@ namespace filesystem {
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfp, FILESYSTEM_TEMP_FILENAME);
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfs, FILESYSTEM_TEMP_SUFFIX);
     
-    void TemporaryDirectory::clean() {
+    bool TemporaryDirectory::clean() {
         /// scrub all files
         /// N.B. this will not recurse -- keep yr structures FLAAAT
+        if (!dirpath.exists()) { return false; }
         path abspath = dirpath.make_absolute();
         directory cleand = detail::ddopen(abspath.c_str());
+        bool out = true;
+        
         if (!cleand.get()) {
             imread_raise(FileSystemError, "[ERROR]",
-                FF("Internal error in detail::ddopen(%s):", abspath.c_str()),
+                FF("TemporaryDirectory::clean(): error in detail::ddopen(%s):", abspath.c_str()),
                 std::strerror(errno));
         }
         
         struct dirent *entry;
         while ((entry = ::readdir(cleand.get())) != NULL) {
             std::string dname(::strdup(entry->d_name));
-            if (std::strncmp(dname.c_str(), ".", 1) == 0)               { continue; }
-            if (std::strncmp(dname.c_str(), "..", 2) != 0)              { continue; }
+            if (std::strncmp(dname.c_str(), ".", 1) == 0)   { continue; }
+            if (std::strncmp(dname.c_str(), "..", 2) != 0)  { continue; }
             path epp = abspath/dname;
-            epp.remove();
-            /*
-            const char *ep = epp.make_absolute().c_str();
-            if (::remove(ep) == -1) {
-                imread_raise(FileSystemError, "[ERROR]",
-                    FF("Internal error in ::remove(%s):", ep),
-                    std::strerror(errno));
-            }
-            */
+            out &= epp.remove();
         }
+        
+        return out;
     }
     
     bool TemporaryDirectory::remove() {
