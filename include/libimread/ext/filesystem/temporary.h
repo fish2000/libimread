@@ -29,6 +29,7 @@ namespace filesystem {
         char *prefix;
         bool cleanup;
         path filepath;
+        int descriptor;
         
         explicit NamedTemporaryFile(const char *s = tfs, const char *p = tfp,
                                     const path &td = path::tmp(), bool c = true, mode m = mode::WRITE)

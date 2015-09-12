@@ -3,8 +3,8 @@
 #include <string>
 
 #include <libimread/libimread.hpp>
-#include <libimread/objc-rt.hh>
 #include <libimread/errors.hh>
+#include <libimread/objc-rt.hh>
 #include <libimread/fs.hh>
 
 #include "include/catch.hpp"
@@ -63,6 +63,23 @@ namespace {
         [stringArg release];
     }
     
+    TEST_CASE("[objc-rt] Test objc::id equality",
+              "[objc-rt-test-objc-id-equality]")
+    {
+        NSString *st = @"Yo Dogg";
+        NSString *so = @"I Heard You Like Hashed Comparable Objects";
+        objc::id s(st);
+        objc::id o(so);
+        //REQUIRE(s == st);
+        //REQUIRE(s == @"Yo Dogg");
+        bool check_one = bool(s == (id)st);
+        bool check_two = bool(s == (id)@"Yo Dogg");
+        bool check_three = bool(s != o);
+        REQUIRE(check_one);
+        REQUIRE(check_two);
+        REQUIRE(check_three);
+    }
+    
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
         im::fs::NamedTemporaryFile temporary;
         NSData *datum;
@@ -77,35 +94,35 @@ namespace {
         arc4random_buf(static_cast<void*>(randos), nbytes);
         std::string prefixed = prefix + temporary.str();
         
-        @autoreleasepool {
-            datum = [[NSData alloc] initWithBytes:(const void *)&randos[0]
-                                           length:(NSInteger)nbytes];
-            filepath = [[NSString alloc] initWithUTF8String:temporary.c_str()];
-            url = [[NSURL alloc] initWithString:[
-                [NSString alloc] initWithUTF8String:prefixed.c_str()]];
-            
-            [datum retain];
-            [filepath retain];
-            [url retain];
-            
-            objc::msg::send((id)datum,
-                objc::selector("writeToFile:atomically:"),
-                filepath, YES);
-            
-            removed = temporary.remove();
-            REQUIRE(removed == true);
-            
-            objc::msg::send((id)datum,
-                objc::selector("writeToURL:atomically:"),
-                url, YES);
-            
-            removed = temporary.remove();
-            REQUIRE(removed == true);
-            
-            [datum release];
-            [filepath release];
-            [url release];
-        };
+        datum = [[NSData alloc] initWithBytes:(const void *)&randos[0]
+                                    length:(NSInteger)nbytes];
+        filepath = [[NSString alloc] initWithUTF8String:temporary.c_str()];
+        url = [[NSURL alloc] initWithString:[
+            [NSString alloc] initWithUTF8String:prefixed.c_str()]];
+        
+        [datum retain];
+        [filepath retain];
+        [url retain];
+        
+        WTF("Path variables:", prefixed, temporary.str());
+        
+        objc::msg::send((id)datum,
+            objc::selector("writeToFile:atomically:"),
+            filepath, YES);
+        
+        removed = temporary.remove();
+        REQUIRE(removed == true);
+        
+        objc::msg::send((id)datum,
+            objc::selector("writeToURL:atomically:"),
+            url, YES);
+        
+        removed = temporary.remove();
+        REQUIRE(removed == true);
+        
+        [datum release];
+        [filepath release];
+        [url release];
         
     }
     

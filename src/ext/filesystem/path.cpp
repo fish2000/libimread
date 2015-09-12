@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 #include <glob.h>
+#include <fcntl.h>
 #include <cstdlib>
 #include <algorithm>
 #include <libimread/ext/filesystem/path.h>
@@ -39,6 +40,18 @@ namespace filesystem {
             return dirname;
         }
         
+    }
+    
+    path::path(int descriptor) {
+        char fdpath[PATH_MAX];
+        int return_value = ::fcntl(descriptor, F_GETPATH, fdpath);
+        if (return_value != -1) {
+            set(fdpath);
+        } else {
+            imread_raise(FileSystemError,
+                "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath):",
+                return_value);
+        }
     }
     
     bool path::match(const std::regex &pattern, bool) {
@@ -190,7 +203,7 @@ namespace filesystem {
     }
     
     bool path::remove() {
-        if (!exists())      { return false; }
+        //if (!exists())      { return false; }
         if (is_file())      { return bool(::unlink(make_absolute().c_str()) != -1); }
         if (is_directory()) { return bool(::rmdir(make_absolute().c_str()) != -1); }
         return false;

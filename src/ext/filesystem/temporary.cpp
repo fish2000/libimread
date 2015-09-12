@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <cstdio>
+#include <fcntl.h>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/temporary.h>
@@ -12,7 +13,13 @@ namespace filesystem {
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfs, FILESYSTEM_TEMP_SUFFIX);
     
     bool NamedTemporaryFile::create() {
-        return (::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix)) != -1);
+        descriptor = ::mkstemps(::strdup(filepath.c_str()), std::strlen(suffix));
+        if (descriptor != -1) {
+            filepath = path(descriptor);
+            ::close(descriptor);
+            return true;
+        }
+        return false;
     }
     
     bool NamedTemporaryFile::remove() {

@@ -99,13 +99,13 @@ namespace filesystem {
                 ,m_absolute(false)
                 {}
             
-            path(const path &path)
+            path(const path& path)
                 :m_type(native_path)
                 ,m_path(path.m_path)
                 ,m_absolute(path.m_absolute)
                 {}
             
-            path(path &&path)
+            path(path&& path)
                 :m_type(native_path)
                 ,m_path(std::move(path.m_path))
                 ,m_absolute(path.m_absolute)
@@ -114,6 +114,8 @@ namespace filesystem {
             path(char *st)              { set(st); }
             path(const char *st)        { set(st); }
             path(const std::string &st) { set(st); }
+            
+            explicit path(int descriptor);
             
             inline std::size_t size() const { return static_cast<std::size_t>(m_path.size()); }
             inline bool empty() const       { return m_path.empty(); }

@@ -582,6 +582,8 @@ namespace im {
             const objc::id self(s);
             if (self[@"STLString"]) {
                 return [*self STLString];
+            } else if (self[@"UTF8String"]) {
+                return std::string([*self UTF8String]);
             }
             return self.description();
         }
