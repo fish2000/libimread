@@ -1,6 +1,7 @@
 
 #include <cstdlib>
 #include <string>
+#include <functional>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
@@ -70,6 +71,9 @@ namespace {
         NSString *so = @"I Heard You Like Hashed Comparable Objects";
         objc::id s(st);
         objc::id o(so);
+        std::hash<objc::id> id_hasher;
+        std::hash<objc::types::ID> object_hasher;
+        
         //REQUIRE(s == st);
         //REQUIRE(s == @"Yo Dogg");
         bool check_one = bool(s == (id)st);
@@ -78,8 +82,12 @@ namespace {
         REQUIRE(check_one);
         REQUIRE(check_two);
         REQUIRE(check_three);
+        /// check hashes via member methods
         REQUIRE(s.hash() == [st hash]);
         REQUIRE(s.hash() != [so hash]);
+        /// check hashes via std::hash<T>
+        REQUIRE(id_hasher(s) == object_hasher(st));
+        REQUIRE(id_hasher(s) != object_hasher(so));
     }
     
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
