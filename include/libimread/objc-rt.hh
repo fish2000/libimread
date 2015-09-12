@@ -552,6 +552,19 @@ namespace std {
     };
     
     template <>
+    struct hash<objc::types::selector> {
+        
+        typedef objc::types::selector argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& selector) const {
+            objc::selector s(selector);
+            return static_cast<result_type>(s.hash());
+        }
+        
+    };
+    
+    template <>
     struct hash<objc::types::ID> {
         
         typedef objc::types::ID argument_type;
