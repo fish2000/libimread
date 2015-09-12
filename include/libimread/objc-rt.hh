@@ -50,7 +50,7 @@ namespace objc {
     
     /// block type alias --
     /// because `objc::block<T> thing`
-    /// looks better than `__block T` 
+    /// looks better than `__block T thing` IN MY HUMBLE OPINION
     
     template <typename Type>
     using block_t = Type __attribute__((__blocks__(byref)));
@@ -133,6 +133,11 @@ namespace objc {
         }
         inline std::string str() const {
             return std::string(c_str());
+        }
+        
+        std::size_t hash() const {
+            std::hash<std::string> hasher;
+            return hasher(str());
         }
         
         operator types::selector() { return sel; }
@@ -306,6 +311,19 @@ namespace objc {
         types::ID operator*()    const { return self; }
         types::ID operator->()   const { return self; }
         
+        bool operator==(const objc::id& other) const {
+            return [self isEqual:other.self] == YES;
+        }
+        bool operator!=(const objc::id& other) const {
+            return [self isEqual:other.self] == NO;
+        }
+        bool operator==(const types::ID& other) const {
+            return [self isEqual:other] == YES;
+        }
+        bool operator!=(const types::ID& other) const {
+            return [self isEqual:other] == NO;
+        }
+        
         template <typename T> inline
         T bridge() {
             return objc::bridge<T>(self);
@@ -328,10 +346,11 @@ namespace objc {
             return out;
         }
         
-        bool operator[](types::selector s) const      { return responds_to(s); }
-        bool operator[](const char *s) const          { return responds_to(::sel_registerName(s)); }
-        bool operator[](const std::string &s) const   { return responds_to(::sel_registerName(s.c_str())); }
-        bool operator[](NSString *s) const            { return responds_to(::NSSelectorFromString(s)); }
+        bool operator[](types::selector s) const        { return responds_to(s); }
+        bool operator[](const objc::selector &s) const  { return responds_to(s.sel); }
+        bool operator[](const char *s) const            { return responds_to(::sel_registerName(s)); }
+        bool operator[](const std::string &s) const     { return responds_to(::sel_registerName(s.c_str())); }
+        bool operator[](NSString *s) const              { return responds_to(::NSSelectorFromString(s)); }
         
         inline const char * __cls_name() const          { return ::object_getClassName(self); }
         static const char * __cls_name(types::ID ii)    { return ::object_getClassName(ii); }
@@ -349,6 +368,10 @@ namespace objc {
         }
         types::cls getclass() const {
             return ::objc_getClass(__cls_name());
+        }
+        
+        std::size_t hash() const {
+            return static_cast<std::size_t>([self hash]);
         }
         
         /// STATIC METHODS
@@ -488,7 +511,7 @@ namespace objc {
         
     };
     
-}
+} /* namespace objc */
 
 /// string suffix for inline declaration of objc::selector objects
 /// ... e.g. create an inline wrapper for a `yoDogg:` selector like so:
@@ -497,6 +520,50 @@ namespace objc {
 inline objc::selector operator"" _SEL(const char *name) {
     return objc::selector(name);
 }
+
+namespace std {
+    
+    /// std::hash specializations for objc::selector and objc::id
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<objc::selector> {
+        
+        typedef objc::selector argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& selector) const {
+            return static_cast<result_type>(selector.hash());
+        }
+        
+    };
+    
+    template <>
+    struct hash<objc::id> {
+        
+        typedef objc::id argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& instance) const {
+            return static_cast<result_type>(instance.hash());
+        }
+        
+    };
+    
+    template <>
+    struct hash<objc::types::ID> {
+        
+        typedef objc::types::ID argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& instance) const {
+            return static_cast<result_type>([instance hash]);
+        }
+        
+    };
+    
+}; /* namespace std */
 
 namespace im {
     
@@ -519,6 +586,6 @@ namespace im {
             return self.description();
         }
     
-}
+} /* namespace im */
 
 #endif /// LIBIMREAD_OBJC_RT_HH
