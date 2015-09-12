@@ -78,6 +78,8 @@ namespace {
         REQUIRE(check_one);
         REQUIRE(check_two);
         REQUIRE(check_three);
+        REQUIRE(s.hash() == [st hash]);
+        REQUIRE(s.hash() != [so hash]);
     }
     
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
