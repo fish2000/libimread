@@ -156,7 +156,7 @@ namespace blockhash {
             weight_top = (1 - y_frac);
             weight_bottom = y_frac;
             
-            // y_int will be 0 on bottom/right borders and on block boundaries
+            /// y_int will be 0 on bottom/right borders and on block boundaries
             if (y_int > 0 || (y + 1) == height) {
                 block_top = block_bottom = (int)std::floor((float) y / block_height);
             } else {
@@ -178,6 +178,7 @@ namespace blockhash {
                     block_right = (int)std::ceil((float) x / block_width);
                 }
                 
+                /// get value at coords
                 value = (float) at(x, y, 0)[0] +
                         (float) at(x, y, 1)[0] +
                         (float) at(x, y, 2)[0];

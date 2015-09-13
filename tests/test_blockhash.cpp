@@ -21,7 +21,7 @@ namespace {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash_quick(png);
             WTF("BLOCKHASH_QUICK:", bithash.to_ullong(),
-                              bithash.to_string());
+                                    bithash.to_string());
         });
     }
     
