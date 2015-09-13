@@ -77,7 +77,7 @@ namespace im {
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
-                "\x89\x48\x44\x46\x0d\x0a\x1a\x0a",
+                "\x89\x48\x44\x46\x0d\x0a\x1a\x0a", /// [0]
                 "hdf5",
                 "image/hdf5");
             
@@ -97,5 +97,9 @@ namespace im {
     
 }
 
+/*
+ * Via: http://www.digitalpreservation.gov/formats/fdd/fdd000229.shtml
+ *  ... which that looks like a useful resource in general
+ */
 
 #endif /// LIBIMREAD_IO_HDF5_HH_
