@@ -56,12 +56,14 @@ namespace blockhash {
             /// middle for odd-length, and "upper-middle" for even length
             std::array<Type, NN> local;
             std::copy(begin, end, local.begin());
-            Iterator middle = local.begin() + (local.end() - local.begin()) / 2;
+            auto diff = local.end() - local.begin();
+            Iterator middle = local.begin() + diff / 2;
             
             /// This function runs in O(n) on average
             std::nth_element(local.begin(), middle, local.end());
             
-            if ((local.end() - local.begin()) % 2 != 0) { // odd length
+            if (diff % 2 != 0) {
+                /// odd length
                 return *middle;
             } else {
                 /// even length -- the "lower middle" is the max of the lower half
