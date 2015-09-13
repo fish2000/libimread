@@ -4,6 +4,9 @@
 #ifndef LIBIMREAD_HASHING_HH_
 #define LIBIMREAD_HASHING_HH_
 
+#include <functional>
+#include <libimread/libimread.hpp>
+
 namespace detail {
     
     template <typename T> inline
@@ -15,5 +18,22 @@ namespace detail {
     }
     
 }
+
+namespace blockhash {
+    
+    int cmpint(const void *pa, const void *pb) noexcept;
+    int cmpfloat(const void *pa, const void *pb) noexcept;
+    float median(int *data, int n);
+    float medianf(float *data, int n);
+    char* bits_to_hexhash(int *bits, int nbits);
+    
+    void blockhash_quick(int bits, unsigned char *data,
+                         int width, int height, int **hash);
+    
+    void blockhash(int bits, unsigned char *data,
+                   int width, int height, int **hash);
+    
+};
+
 
 #endif /// LIBIMREAD_HASHING_HH_

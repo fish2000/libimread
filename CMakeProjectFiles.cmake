@@ -205,6 +205,7 @@ set(srcs
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/fs.cpp
     ${srcs_dir}/halide.cpp
+    ${srcs_dir}/hashing.cpp
     ${srcs_dir}/image.cpp
     ${srcs_dir}/imageformat.cpp
     ${srcs_dir}/interleaved.cpp
