@@ -8,6 +8,7 @@
 #include <bitset>
 #include <algorithm>
 #include <functional>
+#include <type_traits>
 
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
@@ -50,8 +51,10 @@ namespace blockhash {
         
         template <std::size_t NN, typename Iterator>
         float median(Iterator begin, Iterator end) {
+            using Type = typename std::remove_pointer_t<std::decay_t<Iterator>>;
+            
             /// middle for odd-length, and "upper-middle" for even length
-            std::array<int, NN> local;
+            std::array<Type, NN> local;
             std::copy(begin, end, local.begin());
             Iterator middle = local.begin() + (local.end() - local.begin()) / 2;
             
@@ -71,19 +74,15 @@ namespace blockhash {
     
     template <std::size_t N = 8>
     std::bitset<N*N> blockhash_quick(Image& image) {
-        constexpr int        NN = N*N;
-        constexpr int        NN2 = NN/2;
-        constexpr int        NN4 = NN/4;
-        int                  i, x, y, ix, iy;
-        int                  ii, alpha, value;
-        int                  block_width;
-        int                  block_height;
-        float                m[4];
-        std::bitset<NN>      out;
-        std::array<int, NN>  blocks;
-        
-        block_width = image.dim(0) / N;
-        block_height = image.dim(1) / N;
+        constexpr int           NN = N*N;
+        constexpr int           NN2 = NN/2;
+        constexpr int           NN4 = NN/4;
+        const int               block_width = image.dim(0) / N;
+        const int               block_height = image.dim(1) / N;
+        int                     i, x, y, ix, iy, value;
+        float                   m[4];
+        std::bitset<NN>         out;
+        std::array<int, NN>     blocks;
         im::pix::accessor<byte> at = image.access();
         
         for (y = 0; y < N; y++) {
