@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_HASHING_HH_
 #define LIBIMREAD_HASHING_HH_
 
+#include <cmath>
 #include <array>
 #include <bitset>
 #include <algorithm>
@@ -57,7 +58,7 @@ namespace blockhash {
             std::array<Type, NN> local;
             std::copy(begin, end, local.begin());
             auto diff = local.end() - local.begin();
-            Iterator middle = local.begin() + diff / 2;
+            auto middle = local.begin() + diff / 2;
             
             /// This function runs in O(n) on average
             std::nth_element(local.begin(), middle, local.end());
@@ -67,7 +68,7 @@ namespace blockhash {
                 return *middle;
             } else {
                 /// even length -- the "lower middle" is the max of the lower half
-                Iterator lower_middle = std::max_element(local.begin(), middle);
+                auto lower_middle = std::max_element(local.begin(), middle);
                 return (*middle + *lower_middle) / 2.0f;
             }
         }
@@ -126,9 +127,90 @@ namespace blockhash {
     
     template <std::size_t N = 8>
     std::bitset<N*N> blockhash(Image& image) {
+        constexpr int               NN = N*N;
+        constexpr int               NN2 = NN/2;
+        constexpr int               NN4 = NN/4;
+        const float                 block_width = (float) image.dim(0) / (float) N;
+        const float                 block_height = (float) image.dim(1) / (float) N;
+        const int                   width = image.dim(0);
+        const int                   height = image.dim(1);
+        float                       m[4];
+        float                       y_frac, y_int;
+        float                       x_frac, x_int;
+        float                       x_mod, y_mod, value;
+        float                       weight_top, weight_bottom, weight_left, weight_right;
+        int                         block_top, block_bottom, block_left, block_right;
+        int                         i, x, y;
+        std::bitset<NN>             out;
+        std::array<float, NN>       blocks;
+        im::pix::accessor<byte>     at = image.access();
         
-    }
-    
+        if (width % N == 0 && height % N == 0) {
+            return blockhash_quick<N>(image);
+        }
+        
+        for (y = 0; y < height; y++) {
+            y_mod = std::fmod(y + 1, block_height);
+            y_frac = std::modf(y_mod, &y_int);
+            
+            weight_top = (1 - y_frac);
+            weight_bottom = y_frac;
+            
+            // y_int will be 0 on bottom/right borders and on block boundaries
+            if (y_int > 0 || (y + 1) == height) {
+                block_top = block_bottom = (int)std::floor((float) y / block_height);
+            } else {
+                block_top = (int)std::floor((float) y / block_height);
+                block_bottom = (int)std::ceil((float) y / block_height);
+            }
+            
+            for (x = 0; x < width; x++) {
+                x_mod = std::fmod(x + 1, block_width);
+                x_frac = std::modf(x_mod, &x_int);
+                weight_left = (1 - x_frac);
+                weight_right = x_frac;
+                
+                /// x_int will be 0 on bottom/right borders and on block boundaries
+                if (x_int > 0 || (x + 1) == width) {
+                    block_left = block_right = (int)std::floor((float) x / block_width);
+                } else {
+                    block_left = (int)std::floor((float) x / block_width);
+                    block_right = (int)std::ceil((float) x / block_width);
+                }
+                
+                value = (float) at(x, y, 0)[0] +
+                        (float) at(x, y, 1)[0] +
+                        (float) at(x, y, 2)[0];
+                
+                /// add weighted pixel value to relevant blocks
+                blocks[block_top * N + block_left] += value * weight_top * weight_left;
+                blocks[block_top * N + block_right] += value * weight_top * weight_right;
+                blocks[block_bottom * N + block_left] += value * weight_bottom * weight_left;
+                blocks[block_bottom * N + block_right] += value * weight_bottom * weight_right;
+            }
+        }
+        
+        for (i = 0; i < 4; i++) {
+            auto ppbegin = &blocks[i*NN4];
+            auto ppend = ppbegin + NN4;
+            m[i] = detail::median<NN4>(ppbegin, ppend);
+        }
+        
+        for (i = 0; i < NN; i++) {
+            if (  ((blocks[i] < m[0]) && (i < NN4))
+               || ((blocks[i] < m[1]) && (i >= NN4) && (i < NN2))
+               || ((blocks[i] < m[2]) && (i >= NN2) && (i < NN4+NN2))
+               || ((blocks[i] < m[3]) && (i >= NN2+NN4))
+               )
+            {
+              out[i] = false;
+            } else {
+              out[i] = true;
+            }
+        }
+        
+        return out;
+    }    
 };
 
 

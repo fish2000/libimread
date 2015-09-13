@@ -12,20 +12,30 @@ namespace {
     
     using filesystem::path;
     
-    TEST_CASE("[blockhash] Calculate blockhash for HybridImage instances",
-              "[blockhash-calculate-for-hybridimage-instances]")
+    TEST_CASE("[blockhash] Calculate blockhash_quick for HybridImage PNG instances",
+              "[blockhash-quick-hybridimage-png]")
     {
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
             auto png = im::halide::read(basedir/p);
-            // REQUIRE(png.width() > 0);
-            // REQUIRE(png.height() > 0);
             auto bithash = blockhash::blockhash_quick(png);
+            WTF("BLOCKHASH_QUICK:", bithash.to_ullong(),
+                              bithash.to_string());
+        });
+    }
+    
+    TEST_CASE("[blockhash] Calculate blockhash for HybridImage PNG instances",
+              "[blockhash-hybridimage-png]")
+    {
+        path basedir(im::test::basedir);
+        const std::vector<path> pngs = basedir.list("*.png");
+        std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
+            auto png = im::halide::read(basedir/p);
+            auto bithash = blockhash::blockhash(png);
             WTF("BLOCKHASH:", bithash.to_ullong(),
                               bithash.to_string());
         });
-        
     }
     
 };
