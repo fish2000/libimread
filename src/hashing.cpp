@@ -8,6 +8,8 @@
 
 namespace blockhash {
     
+    namespace orig {
+    
     int cmpint(const void *pa, const void *pb) noexcept {
         int a = *(const int *) pa;
         int b = *(const int *) pb;
@@ -84,8 +86,6 @@ namespace blockhash {
         free(stmp);
         return hex;
     }
-    
-    namespace orig {
     
     /** Calculate perceptual hash for an RGBA image using quick method.
     *
