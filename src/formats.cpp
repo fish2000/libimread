@@ -55,6 +55,7 @@ namespace im {
         if (format::GIF::match_format(src)) { return "gif"; }
         if (format::JPG::match_format(src)) { return "jpg"; }
         if (format::PNG::match_format(src)) { return "png"; }
+        if (format::HDF5::match_format(src)) { return "hdf5"; }
         if (format::TIFF::match_format(src)) { return "tif"; }
         return 0;
     }
