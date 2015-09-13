@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_HASHING_HH_
 #define LIBIMREAD_HASHING_HH_
 
+#include <array>
 #include <bitset>
 #include <functional>
 
@@ -46,17 +47,16 @@ namespace blockhash {
     
     template <std::size_t N = 8>
     std::bitset<N*N> blockhash_quick(Image& image) {
-        int                 i, x, y, ix, iy;
-        int                 ii, alpha, value;
-        int                 block_width;
-        int                 block_height;
-        int                *blocks;
-        float               m[4];
-        std::bitset<N*N>    out;
+        int                  i, x, y, ix, iy;
+        int                  ii, alpha, value;
+        int                  block_width;
+        int                  block_height;
+        float                m[4];
+        std::bitset<N*N>     out;
+        std::array<int, N*N> blocks;
         
         block_width = image.dim(0) / N;
         block_height = image.dim(1) / N;
-        blocks = (int *)calloc(N * N, sizeof(int));
         im::pix::accessor<byte> at = image.access();
         
         for (y = 0; y < N; y++) {
@@ -91,7 +91,6 @@ namespace blockhash {
             }
         }
         
-        free(blocks);
         return out;
     }
     

@@ -19,10 +19,11 @@ namespace {
         const std::vector<path> pngs = basedir.list("*.png");
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
             auto png = im::halide::read(basedir/p);
-            REQUIRE(png.width() > 0);
-            REQUIRE(png.height() > 0);
+            // REQUIRE(png.width() > 0);
+            // REQUIRE(png.height() > 0);
             auto bithash = blockhash::blockhash_quick(png);
-            WTF("BLOCKHASH:", bithash.to_string());
+            WTF("BLOCKHASH:", bithash.to_ullong(),
+                              bithash.to_string());
         });
         
     }
