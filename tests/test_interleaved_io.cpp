@@ -29,7 +29,7 @@ namespace {
     // using IRGBA = std::unique_ptr<im::Image>;
     
     TEST_CASE("[interleaved-io] Read PNG files", "[interleaved-read-png]") {
-        im::fs::TemporaryDirectory td("test-interleaved-io-XXXXX");
+        //im::fs::TemporaryDirectory td("test-interleaved-io-XXXXX");
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
@@ -51,7 +51,7 @@ namespace {
     // }
     
     TEST_CASE("[interleaved-io] Read JPEG files", "[interleaved-read-jpg]") {
-        im::fs::TemporaryDirectory td("test-interleaved-io-XXXXX");
+        //im::fs::TemporaryDirectory td("test-interleaved-io-XXXXX");
         path basedir(im::test::basedir);
         const std::vector<path> jpgs = basedir.list("*.jpg");
         std::for_each(jpgs.begin(), jpgs.end(), [&basedir](const path &p) {

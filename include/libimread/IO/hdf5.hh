@@ -4,9 +4,8 @@
 #ifndef LIBIMREAD_IO_HDF5_HH_
 #define LIBIMREAD_IO_HDF5_HH_
 
+#include <hdf5.h>
 #include <H5Cpp.h>
-#import <CoreFoundation/CoreFoundation.h>
-
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/options.hh>
@@ -65,8 +64,8 @@ namespace im {
         template <> inline
         dtype type<bool>() { return dtype::NATIVE_HBOOL; }
         
-        template <> inline
-        dtype type<CFTypeRef>() { return dtype::NATIVE_OPAQUE; }
+        // template <> inline
+        // dtype type<CFTypeRef>() { return dtype::NATIVE_OPAQUE; }
         
     }
     
@@ -78,7 +77,7 @@ namespace im {
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
-                "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
+                "\x89\x48\x44\x46\x0d\x0a\x1a\x0a",
                 "hdf5",
                 "image/hdf5");
             

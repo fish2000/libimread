@@ -1,11 +1,15 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#include <errno.h>
+#include <string>
+#include <vector>
+#include <memory>
+
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/temporary.h>
+#include <libimread/file.hh>
 #include <libimread/IO/hdf5.hh>
 
-#include <H5Cpp.h>
 #include <H5LTpublic.h>
 
 namespace im {
@@ -13,6 +17,7 @@ namespace im {
     DECLARE_FORMAT_OPTIONS(HDF5Format);
     
     using filesystem::path;
+    using filesystem::NamedTemporaryFile;
     using namespace H5;
     
     class H5MemoryBuffer : public H5::H5File {
@@ -42,52 +47,167 @@ namespace im {
                                             ImageFactory *factory,
                                             const options_map &opts) {
         
+        /// load the raw sources' full data, and set some options:
         std::vector<byte> data = src->full_data();
-        path imagepath = opts.cast<path>("hdf5:path",
-                                   path("/image/raster"));
-        std::string nm = opts.cast<std::string>("hdf5:name",
-                                   std::string("imread-data"));
+        path h5imagepath = opts.cast<path>("hdf5:path",
+                                     path("/image/raster"));
+        std::string name = opts.cast<std::string>("hdf5:name",
+                                     std::string("imread-data"));
         
-        H5MemoryBuffer store(&data[0], data.size(), kDefaultFlags);
-        Group group(store.openGroup(imagepath.str()));
-        std::unique_ptr<DataSet> dataset(new DataSet(
-                                 group.openDataSet(nm)));
+        std::unique_ptr<Image> output;
+        herr_t status;
         
-        //DSetCreatPropList plist = dataset->getCreatePlist();
-        //DSetMemXferPropList plist = dataset->getCreatePlist();
-        //DSetMemXferPropList plist;
+        /// Open a data buffer as an HDF5 store (née "file image") for fast reading:
+        hid_t file_id = H5LTopen_file_image(&data[0], data.size(), kDefaultFlags);
+        if (file_id < 0) {
+            imread_raise(CannotReadError,
+                "Error opening HDF5 binary data");
+        }
         
-        H5T_class_t typeclass = dataset->getTypeClass();
-        IntType inttype = dataset->getIntType();
-        std::string byteorder_string;
-        H5T_order_t byteorder = inttype.getOrder(byteorder_string);
-        std::size_t size = inttype.getSize();
+        /// Open the image dataset within the HDF5 store:
+        hid_t dataset_id;
+        #if H5Dopen_vers == 2
+            dataset_id = H5Dopen2(file_id, name.c_str(), H5P_DEFAULT);
+        #else
+            dataset_id = H5Dopen(file_id, name.c_str());
+        #endif
+        if (dataset_id < 0) {
+            imread_raise(CannotReadError,
+                "Error opening HDF5 dataset within data buffer");
+        }
         
-        std::unique_ptr<DataSpace> dataspace(new DataSpace(
-                                   dataset->getSpace()));
+        /// set up an array to hold the dimensions of the image,
+        /// which we read in from the in-memory HDF5 store:
+        constexpr std::size_t NDIMS = 3;
+        hid_t space_id = H5Dget_space(dataset_id);
+        hsize_t dims[NDIMS];
+        H5Sget_simple_extent_dims(space_id, dims, NULL);
         
-        int rank = dataspace->getSimpleExtentNdims(); /// should be 3
-        std::unique_ptr<hsize_t[]> DIMS(new hsize_t[rank]);
-        int ndims = dataspace->getSimpleExtentDims(DIMS.get(), NULL);
-        //hsize_t bufsize = dataset->getVlenBufSize(inttype, dataspace.get());
+        /// Allocate a new unique-pointer-wrapped image instance:
+        output = factory->create(8,  dims[0],
+                                     dims[1],
+                                     dims[2]);
         
-        std::unique_ptr<Image> output = factory->create(size, DIMS[0],
-                                                              DIMS[1],
-                                                              DIMS[2]);
+        /// read typed data into the internal data buffer
+        /// of the new image, from the HDF5 dataset in question:
+        status = H5Dread(dataset_id, H5T_NATIVE_UCHAR,
+                                     H5S_ALL, H5S_ALL,
+                                     H5P_DEFAULT,
+                                     output->rowp_as<uint8_t>(0));
         
-        /// read into memory buffer
-        dataset->read(output->rowp(0),
-                      detail::type<uint8_t>(),
-                      DataSpace::ALL,
-                      *dataspace.get());
+        if (status < 0) {
+            imread_raise(CannotReadError,
+                "Error reading HDF5 dataset");
+        }
         
-        /// return image
+        /// close HDF5 handles
+        H5Sclose(space_id);
+        H5Dclose(dataset_id);
+        H5Fclose(file_id);
+        
+        /// return the image pointer
         return output;
     }
     
-    
     void HDF5Format::write(Image &input,
                            byte_sink *output,
-                           const options_map &opts) {}
+                           const options_map &opts) {
+        
+        path h5imagepath = opts.cast<path>("hdf5:path",
+                                        path("/image/raster"));
+        std::string name = opts.cast<std::string>("hdf5:name",
+                                        std::string("imread-data"));
+        
+        #if H5Eset_auto_vers == 2
+            H5Eset_auto( H5E_DEFAULT, NULL, NULL );
+        #else
+            H5Eset_auto( NULL, NULL );
+        #endif
+        
+        NamedTemporaryFile tf(".hdf5");
+        herr_t status;
+        // hid_t file_id = H5Fopen(tf.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT);
+        // if (file_id < 0) {
+        //     WTF("H5Fopen() failed, trying H5Fcreate() with:", tf.str());
+        //     file_id = H5Fcreate(tf.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        // }
+        hid_t file_id = H5Fcreate(tf.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        if (file_id < 0) {
+            imread_raise(CannotWriteError,
+                "Error opening temporary HDF5 file for writing");
+        }
+        
+        /// stow the image dimensions in an hsize_t array,
+        /// and create two dataspaces based on that array:
+        constexpr std::size_t NDIMS = 3;
+        hsize_t dims[NDIMS] = { static_cast<hsize_t>(input.dim(0)),
+                                static_cast<hsize_t>(input.dim(1)),
+                                static_cast<hsize_t>(input.dim(2)) };
+        hid_t space_id      = H5Screate_simple(NDIMS, dims, NULL); /// first arg here is rank (aka NDIMS)
+        hid_t memspace_id   = H5Screate_simple(NDIMS, dims, NULL);
+        
+        /// try creating a new dataset --
+        hid_t dataset_id;
+        #if H5Dcreate_vers == 2
+            dataset_id = H5Dcreate2(file_id, name.c_str(),
+                                    H5T_NATIVE_UCHAR,
+                                    space_id,
+                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        #else
+            dataset_id = H5Dcreate(file_id, name.c_str(),
+                                   H5T_NATIVE_UCHAR,
+                                   space_id,
+                                   H5P_DEFAULT);
+        #endif
+        
+        /// -- and if that didn't work, try opening an existant one:
+        if (dataset_id < 0) {
+            #if H5Dopen_vers == 2
+                dataset_id = H5Dopen2(file_id, name.c_str(), H5P_DEFAULT);
+            #else
+                dataset_id = H5Dopen(file_id, name.c_str());
+            #endif
+        }
+        if (dataset_id < 0) {
+            imread_raise(CannotWriteError,
+                "Error creating or opening dataset in temporary HDF5 file");
+        }
+        
+        /// actually write the image data
+        status = H5Dwrite(dataset_id, H5T_NATIVE_UCHAR,
+                          memspace_id, space_id,
+                          H5P_DEFAULT,
+                          (const void *)input.rowp(0));
+        
+        if (status < 0) {
+            imread_raise(CannotWriteError,
+                "Error writing to temporary HDF5 dataset");
+        }
+        
+        /// close all HDF5 handles
+        H5Sclose(memspace_id);
+        H5Sclose(space_id);
+        H5Dclose(dataset_id);
+        H5Fclose(file_id);
+        
+        /// read the binary data back from the temporary file,
+        /// and write it out to the output byte sink
+        std::unique_ptr<FileSource> readback(new FileSource(tf.filepath));
+        std::vector<byte> data = readback->full_data();
+        output->write((const void *)&data[0], data.size());
+        output->flush();
+        
+        /// clean up file resources
+        readback->close();
+        readback.reset(nullptr);
+        bool removed = tf.remove();
+        if (!removed) {
+            removed = tf.filepath.remove();
+            if (!removed) {
+                WTF("Couldn't remove NamedTemporaryFile after HDF5 output:",
+                    tf.filepath.str());
+            }
+        }
+    }
     
 }

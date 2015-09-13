@@ -134,7 +134,7 @@ namespace filesystem {
         return out;
     }
     
-    static const int glob_pattern_flags = GLOB_TILDE | GLOB_NOSORT | GLOB_DOOFFS;
+    static const int glob_pattern_flags = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
     
     std::vector<path> path::list(const char *pattern, bool full_paths) {
         /// list files with glob

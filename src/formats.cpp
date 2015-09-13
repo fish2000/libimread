@@ -8,6 +8,7 @@
 #include <libimread/IO/apple.hh>
 #include <libimread/IO/bmp.hh>
 #include <libimread/IO/gif.hh>
+#include <libimread/IO/hdf5.hh>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/IO/lsm.hh>
 #include <libimread/IO/png.hh>
@@ -26,6 +27,9 @@ namespace im {
         if (detail::ext(format, "jpg") || detail::ext(format, "jpeg")) { return format_ptr(new format::JPG); }
         if (detail::ext(format, "tif") || detail::ext(format, "tiff")) { return format_ptr(new format::TIFF); }
         if (detail::ext(format, "pvr") || detail::ext(format, "pvrtc")) { return format_ptr(new format::PVR); }
+        if (detail::ext(format, "hdf5") || detail::ext(format, "h5") || detail::ext(format, "hdf")) {
+            return format_ptr(new format::HDF5);
+        }
         if (detail::ext(format, "webp")) { return format_ptr(new format::WebP); }
         if (detail::ext(format, "ppm")) { return format_ptr(new format::PPM); }
         if (detail::ext(format, "bmp")) { return format_ptr(new format::BMP); }
