@@ -64,6 +64,11 @@ namespace im { namespace test {
 
     };
     
+    static const int num_hdf5 = 0;
+    static const std::string hdf5[] = {
+
+    };
+    
 } } /// namespaces
 
 #endif /// IMREAD_TESTDATA_HPP_
