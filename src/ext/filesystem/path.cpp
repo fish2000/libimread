@@ -49,8 +49,7 @@ namespace filesystem {
             set(fdpath);
         } else {
             imread_raise(FileSystemError,
-                "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath):",
-                return_value);
+                "Internal error when ::fnctl(fd, F_GETPATH, fdpath) returned -1");
         }
     }
     
@@ -170,10 +169,6 @@ namespace filesystem {
     
     std::vector<path> path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) {
         /// list files with regex object
-        if (!is_directory()) {
-            imread_raise(FileSystemError,
-                "Can't list files from a non-directory:", str());
-        }
         path abspath = make_absolute();
         std::vector<path> unfiltered = abspath.list();
         std::vector<path> out;

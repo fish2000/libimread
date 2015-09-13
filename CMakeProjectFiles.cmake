@@ -143,6 +143,7 @@ set(hdrs
     ${hdrs_dir}/formats.hh
     ${hdrs_dir}/fs.hh
     ${hdrs_dir}/halide.hh
+    ${hdrs_dir}/hashing.hh
     ${hdrs_dir}/image.hh
     ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/interleaved.hh

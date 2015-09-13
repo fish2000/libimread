@@ -22,6 +22,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/hashing.hh>
 
 namespace filesystem {
     
@@ -76,13 +77,6 @@ namespace filesystem {
         /// get the temporary directory via std::getenv() and guesswork
         const char *tmpdir() noexcept;
         
-        template <typename T> inline
-        void rehash(std::size_t& seed, const T& v) {
-            /// also cribbed from boost,
-            /// via http://stackoverflow.com/a/23860042/298171
-            std::hash<T> hasher;
-            seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        }
     }
     
     /// The actual class for representing a path on the filesystem
@@ -307,6 +301,7 @@ namespace filesystem {
             
             /// ... and here, we have the requisite assign operators
             path &operator=(const std::string &str) { set(str); return *this; }
+            path &operator=(const char *str)        { set(str); return *this; }
             path &operator=(const path &path) {
                 m_type = native_path;
                 m_path = path.m_path;
@@ -334,7 +329,7 @@ namespace filesystem {
             std::size_t hash() const {
                 std::size_t H = static_cast<std::size_t>(is_absolute());
                 for (auto idx = m_path.begin(); idx != m_path.end(); ++idx) {
-                    detail::rehash(H, *idx);
+                    ::detail::rehash(H, *idx);
                 }
                 return H;
             }
@@ -367,7 +362,8 @@ namespace filesystem {
             path_type m_type;
             std::vector<std::string> m_path;
             bool m_absolute;
-    };
+    
+    }; /* class path */
     
     /// change directory temporarily with RAII
     struct switchdir {

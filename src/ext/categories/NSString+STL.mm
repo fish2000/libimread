@@ -30,8 +30,8 @@
     unsigned siz = wstr.size() * sizeof(wchar_t);
     const char *bytes = reinterpret_cast<const char*>(wstr.data());
     [self initWithBytes:bytes
-                  length:siz
-                encoding:kSTLWideStringEncoding];
+                 length:siz
+               encoding:kSTLWideStringEncoding];
     return self;
 }
 - (std::string) STLString {

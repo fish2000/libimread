@@ -690,7 +690,7 @@ out:
     }
 }
 
-std::string Json::format() {
+std::string Json::format() const {
     std::ostringstream is("");
     is << *this;
     return is.str();

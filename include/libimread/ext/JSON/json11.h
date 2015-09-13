@@ -25,6 +25,7 @@
 #include <initializer_list>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/hashing.hh>
 #include <libimread/ext/filesystem/path.h>
 
 using Base = std::integral_constant<uint8_t, 1>;
@@ -404,10 +405,16 @@ class Json {
         Json::Property operator[](int);
         
         /// stringification
-        std::string stringify() { return format(); }
-        std::string format();
+        std::string stringify() const { return format(); }
+        std::string format() const;
         friend std::ostream &operator<<(std::ostream &, const Json &);
         friend std::istream &operator>>(std::istream &, Json &);
+        
+        /// hashing
+        std::size_t hash(std::size_t H = 0) const {
+            ::detail::rehash<std::string>(H, format());
+            return H;
+        }
         
         /// boolean comparison
         bool operator==(const Json &) const;
@@ -454,5 +461,25 @@ template <> inline
 decltype(auto) Json::cast<char*>(const std::string &key) const {
     return const_cast<char*>(static_cast<std::string>(get(key)).c_str());
 }
+
+namespace std {
+    
+    /// std::hash specialization for Json
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<Json> {
+        
+        typedef Json argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& json) const {
+            return static_cast<result_type>(json.hash());
+        }
+        
+    };
+    
+}; /* namespace std */
 
 #endif /// LIBIMREAD_EXT_JSON_JSON11_H_
