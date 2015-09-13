@@ -27,6 +27,9 @@ namespace detail {
     
 }
 
+using im::Image;
+using im::byte;
+
 namespace blockhash {
     
     namespace orig {
@@ -44,9 +47,6 @@ namespace blockhash {
                        int width, int height, int **hash);
     
     };
-    
-    using im::Image;
-    using im::byte;
     
     namespace detail {
         
@@ -213,6 +213,27 @@ namespace blockhash {
         return out;
     }    
 };
+
+namespace std {
+    
+    /// std::hash specialization for im::Image
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<im::Image> {
+        
+        typedef im::Image argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type& image) const {
+            auto bithash = blockhash::blockhash(image);
+            return static_cast<result_type>(bithash.to_ullong());
+        }
+        
+    };
+    
+}; /* namespace std */
 
 
 #endif /// LIBIMREAD_HASHING_HH_
