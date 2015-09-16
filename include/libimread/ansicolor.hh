@@ -56,14 +56,11 @@ namespace ansi {
             std::string str() const {
                 return "\033[" + std::to_string(code) + "m";
             }
-            char *c_str() const {
-                int numbytes = code < 10 ? 6 : 7;
-                char printbuf[numbytes];
-                std::snprintf(printbuf, numbytes, "\033[%im", code);
-                return strdup(printbuf);
+            const char *c_str() const {
+                return str().c_str();
             }
             operator std::string() const { return str(); }
-            operator char*() const { return c_str(); }
+            operator const char*() const { return c_str(); }
     };
     
     const ANSI reset = ANSI(FM_RESET);
