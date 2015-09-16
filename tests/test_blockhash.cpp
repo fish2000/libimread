@@ -5,6 +5,7 @@
 #include <libimread/halide.hh>
 #include <libimread/hashing.hh>
 #include <libimread/fs.hh>
+
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 

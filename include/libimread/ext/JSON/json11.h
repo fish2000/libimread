@@ -25,7 +25,7 @@
 #include <initializer_list>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/hashing.hh>
+#include <libimread/rehash.hh>
 #include <libimread/ext/filesystem/path.h>
 
 using Base = std::integral_constant<uint8_t, 1>;

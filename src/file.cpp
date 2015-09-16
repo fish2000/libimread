@@ -1,7 +1,13 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <cerrno>
+#include <cstring>
+#include <string>
+#include <utility>
+
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/file.hh>
 
 namespace im {

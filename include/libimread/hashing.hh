@@ -15,18 +15,6 @@
 #include <libimread/image.hh>
 #include <libimread/pixels.hh>
 
-namespace detail {
-    
-    template <typename T> inline
-    void rehash(std::size_t& seed, const T& v) {
-        /// also cribbed from boost,
-        /// via http://stackoverflow.com/a/23860042/298171
-        std::hash<T> hasher;
-        seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-    
-}
-
 using im::Image;
 using im::byte;
 
@@ -211,8 +199,9 @@ namespace blockhash {
         }
         
         return out;
-    }    
-};
+    }
+    
+}; /* namespace blockhash */
 
 namespace std {
     

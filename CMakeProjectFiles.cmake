@@ -152,6 +152,7 @@ set(hdrs
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/palette.hh
     ${hdrs_dir}/pixels.hh
+    ${hdrs_dir}/rehash.hh
     ${hdrs_dir}/seekable.hh
     ${hdrs_dir}/symbols.hh
     ${IOD_SYMBOLS_HEADER}

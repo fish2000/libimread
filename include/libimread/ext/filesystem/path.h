@@ -22,7 +22,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/hashing.hh>
+#include <libimread/rehash.hh>
 
 namespace filesystem {
     

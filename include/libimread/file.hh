@@ -8,15 +8,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#include <cerrno>
-#include <cstring>
-#include <string>
-#include <utility>
+#include <vector>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/errors.hh>
 #include <libimread/seekable.hh>
 
 namespace im {
@@ -45,15 +40,7 @@ namespace im {
                 :descriptor(fd)
                 {}
             
-            virtual ~fd_source_sink() {
-                if (descriptor > 0) {
-                    if (::close(descriptor) == -1) {
-                        imread_raise(FileSystemError,
-                            "error while destructing fd_source_sink():",
-                            std::strerror(errno));
-                    }
-                }
-            }
+            virtual ~fd_source_sink() { close(); }
             
             virtual bool can_seek() const noexcept { return true; }
             virtual std::size_t seek_absolute(std::size_t pos) { return ::lseek(descriptor, pos, SEEK_SET); }
