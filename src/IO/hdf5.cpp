@@ -8,6 +8,7 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
+#include <libimread/errors.hh>
 #include <libimread/IO/hdf5.hh>
 
 #include <H5LTpublic.h>
@@ -32,8 +33,9 @@ namespace im {
                 {
                     hid_t idx = H5LTopen_file_image(buffer, size, flags);
                     if (idx < 0) {
-                        throw FileIException("H5MemoryBuffer constructor:",
-                                             "H5LTopen_file_image failed.");
+                        imread_raise(HDF5IOError,
+                            "H5MemoryBuffer constructor:",
+                            "H5LTopen_file_image failed.");
                     }
                     p_setId(idx);
                 }

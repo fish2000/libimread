@@ -6,10 +6,7 @@
 
 #include <string>
 #include <cstring>
-#include <cerrno>
 #include <cstdlib>
-#include <cstddef>
-#include <dirent.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
@@ -34,7 +31,7 @@ namespace filesystem {
         explicit NamedTemporaryFile(const char *s = tfs, const char *p = tfp,
                                     const path &td = path::tmp(), bool c = true, mode m = mode::WRITE)
                                         :mm(m), cleanup(c), suffix(::strdup(s)), prefix(::strdup(p))
-                                        ,filepath(td/::strcat(::strdup(p), s))
+                                        ,filepath(td/std::strcat(prefix, s))
                                         {
                                             create();
                                         }
@@ -56,6 +53,8 @@ namespace filesystem {
         
         ~NamedTemporaryFile() {
             if (cleanup) { remove(); }
+            free(suffix);
+            free(prefix);
         }
     
     };
@@ -76,7 +75,7 @@ namespace filesystem {
             ,cleanup(c)
             ,tplpath(path::join(path::gettmp(), path(t)))
             {
-                dirpath = path(::mkdtemp(::strdup(tplpath.c_str())));
+                create();
             }
         
         explicit TemporaryDirectory(const std::string &t, bool c = true)
@@ -84,7 +83,7 @@ namespace filesystem {
             ,cleanup(c)
             ,tplpath(path::join(path::gettmp(), path(t)))
             {
-                dirpath = path(::mkdtemp(::strdup(tplpath.c_str())));
+                create();
             }
         
         inline std::string   str() const noexcept   { return dirpath.str(); }
@@ -97,11 +96,13 @@ namespace filesystem {
                                mode m = mode::WRITE) { return NamedTemporaryFile(
                                                           suffix, prefix, dirpath, cleanup, m); }
         
+        bool create();
         bool clean();
         bool remove();
         
         ~TemporaryDirectory() {
             if (cleanup) { clean(); remove(); }
+            free(tpl);
         }
     
     };

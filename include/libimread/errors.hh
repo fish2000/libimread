@@ -261,6 +261,9 @@ DECLARE_IMREAD_ERROR_TYPE(JSONInvalidSchema,        "JSON schema parsing error")
 DECLARE_IMREAD_ERROR_TYPE(JSONOutOfRange,           "JSON index value out of range");
 DECLARE_IMREAD_ERROR_TYPE(JSONBadCast,              "Error casting JSON value");
 
+DECLARE_IMREAD_ERROR_TYPE(HDF5IOError,              "Error in HDF5 I/O");
+
+
 }
 
 #endif // LIBIMREAD_ERRORS_HH_

@@ -17,20 +17,21 @@ namespace im {
     constexpr char TypeName::default_message[static_strlen(ST(DefaultMsg))];
 #endif /// DECLARE_IMREAD_ERROR_DEFAULT
 
-DECLARE_IMREAD_ERROR_DEFAULT(CannotReadError,          "Read Error");
-DECLARE_IMREAD_ERROR_DEFAULT(CannotWriteError,         "Write Error");
-DECLARE_IMREAD_ERROR_DEFAULT(NotImplementedError,      "Not Implemented");
-DECLARE_IMREAD_ERROR_DEFAULT(ProgrammingError,         "Programming Error");
-DECLARE_IMREAD_ERROR_DEFAULT(OptionsError,             "Options Error");
-DECLARE_IMREAD_ERROR_DEFAULT(WriteOptionsError,        "Write Options Error");
-DECLARE_IMREAD_ERROR_DEFAULT(FileSystemError,          "File System Error");
-DECLARE_IMREAD_ERROR_DEFAULT(FormatNotFound,           "File Format Not Found");
-
-DECLARE_IMREAD_ERROR_DEFAULT(JSONParseError,           "JSON parsing error");
-DECLARE_IMREAD_ERROR_DEFAULT(JSONLogicError,           "JSON operator logic error");
-DECLARE_IMREAD_ERROR_DEFAULT(JSONUseError,             "JSON library internal error");
-DECLARE_IMREAD_ERROR_DEFAULT(JSONInvalidSchema,        "JSON schema parsing error");
-DECLARE_IMREAD_ERROR_DEFAULT(JSONOutOfRange,           "JSON index value out of range");
-DECLARE_IMREAD_ERROR_DEFAULT(JSONBadCast,              "Error casting JSON value");
+    DECLARE_IMREAD_ERROR_DEFAULT(CannotReadError,          "Read Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(CannotWriteError,         "Write Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(NotImplementedError,      "Not Implemented");
+    DECLARE_IMREAD_ERROR_DEFAULT(ProgrammingError,         "Programming Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(OptionsError,             "Options Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(WriteOptionsError,        "Write Options Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(FileSystemError,          "File System Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(FormatNotFound,           "File Format Not Found");
     
+    DECLARE_IMREAD_ERROR_DEFAULT(JSONParseError,           "JSON parsing error");
+    DECLARE_IMREAD_ERROR_DEFAULT(JSONLogicError,           "JSON operator logic error");
+    DECLARE_IMREAD_ERROR_DEFAULT(JSONUseError,             "JSON library internal error");
+    DECLARE_IMREAD_ERROR_DEFAULT(JSONInvalidSchema,        "JSON schema parsing error");
+    DECLARE_IMREAD_ERROR_DEFAULT(JSONOutOfRange,           "JSON index value out of range");
+    DECLARE_IMREAD_ERROR_DEFAULT(JSONBadCast,              "Error casting JSON value");
+    DECLARE_IMREAD_ERROR_DEFAULT(HDF5IOError,              "Error in HDF5 I/O");
+
 }

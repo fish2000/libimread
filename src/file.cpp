@@ -45,16 +45,24 @@ namespace im {
     }
     
     std::vector<byte> fd_source_sink::full_data() {
-        std::size_t orig = ::lseek(descriptor, 0, SEEK_CUR);
+        /// grab stat struct and store initial seek position
         detail::stat_t info = this->stat();
+        std::size_t orig = ::lseek(descriptor, 0, SEEK_CUR);
         
+        /// allocate output vector per size of file
         std::vector<byte> res(info.st_size * sizeof(byte));
+        
+        /// start as you mean to go on
         ::lseek(descriptor, 0, SEEK_SET);
+        
+        /// unbuffered read directly from descriptor:
         if (::read(descriptor, &res[0], res.size()) == -1) {
             imread_raise(CannotReadError,
                 "error in full_data(): read() returned -1",
                 std::strerror(errno));
         }
+        
+        /// reset descriptor position before returning
         ::lseek(descriptor, orig, SEEK_SET);
         return res;
     }
