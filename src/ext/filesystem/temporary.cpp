@@ -12,6 +12,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/ext/pystring.hh>
 #include <libimread/ext/filesystem/temporary.h>
 
 namespace filesystem {
@@ -40,9 +41,14 @@ namespace filesystem {
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfs, FILESYSTEM_TEMP_SUFFIX);
     
     bool TemporaryDirectory::create() {
-        const char *d = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
-        if (d == NULL) { return false; }
-        dirpath = path(d);
+        if (!pystring::endswith(tpl, "XXX")) {
+            tplpath = path::join(path::gettmp(), path(tpl)).append("-XXXXXX");
+        } else {
+            tplpath = path::join(path::gettmp(), path(tpl));
+        }
+        const char *dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
+        if (dtemp == NULL) { return false; }
+        dirpath = path(dtemp);
         return true;
     }
     

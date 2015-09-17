@@ -79,15 +79,15 @@ namespace {
         bool check_one = bool(s == (id)st);
         bool check_two = bool(s == (id)@"Yo Dogg");
         bool check_three = bool(s != o);
-        REQUIRE(check_one);
-        REQUIRE(check_two);
-        REQUIRE(check_three);
+        CHECK(check_one);
+        CHECK(check_two);
+        CHECK(check_three);
         /// check hashes via member methods
-        REQUIRE(s.hash() == [st hash]);
-        REQUIRE(s.hash() != [so hash]);
+        CHECK(s.hash() == [st hash]);
+        CHECK(s.hash() != [so hash]);
         /// check hashes via std::hash<T>
-        REQUIRE(id_hasher(s) == object_hasher(st));
-        REQUIRE(id_hasher(s) != object_hasher(so));
+        CHECK(id_hasher(s) == object_hasher(st));
+        CHECK(id_hasher(s) != object_hasher(so));
     }
     
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
@@ -121,14 +121,14 @@ namespace {
             filepath, YES);
         
         removed = temporary.remove();
-        REQUIRE(removed == true);
+        CHECK(removed == true);
         
         objc::msg::send((id)datum,
             objc::selector("writeToURL:atomically:"),
             url, YES);
         
         removed = temporary.remove();
-        REQUIRE(removed == true);
+        CHECK(removed == true);
         
         [datum release];
         [filepath release];

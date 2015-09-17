@@ -70,18 +70,14 @@ namespace filesystem {
         path tplpath;
         path dirpath;
         
-        explicit TemporaryDirectory(const char *t, bool c = true)
-            :tpl(::strdup(t))
-            ,cleanup(c)
-            ,tplpath(path::join(path::gettmp(), path(t)))
+        explicit TemporaryDirectory(const char *t = tdp, bool c = true)
+            :tpl(::strdup(t)), cleanup(c)
             {
                 create();
             }
         
         explicit TemporaryDirectory(const std::string &t, bool c = true)
-            :tpl(::strdup(t.c_str()))
-            ,cleanup(c)
-            ,tplpath(path::join(path::gettmp(), path(t)))
+            :tpl(::strdup(t.c_str())), cleanup(c)
             {
                 create();
             }

@@ -143,6 +143,21 @@ namespace filesystem {
             bool is_file() const;
             bool is_directory() const;
             
+            /// Static forwarders for aforementioned interrogatives
+            template <typename P> inline
+            static bool exists(P&& p) {
+                return path(std::forward<P>(p)).exists();
+            }
+            
+            template <typename P> inline
+            static bool is_file(P&& p) {
+                return path(std::forward<P>(p)).is_file();
+            }
+            template <typename P> inline
+            static bool is_directory(P&& p) {
+                return path(std::forward<P>(p)).is_directory();
+            }
+            
             /// convenience funcs for matching a std::regex against the path in question:
             /// get a boolean back for your (possibly case-insenitive) std::regex reference;
             /// match() and search() hand respectively straight off to std::regex_match
@@ -251,9 +266,9 @@ namespace filesystem {
             ///     path q = p / "iheard";
             ///     path r = q / "youlike";
             ///     path s = r / "appending";
-            path operator/(const path &other) const { return join(other); }
-            path operator/(const char *other) const { return join(path(other)); }
-            path operator/(const std::string &other) const { return join(path(other)); }
+            path operator/(const path& other) const { return join(other); }
+            path operator/(const char* other) const { return join(path(other)); }
+            path operator/(const std::string& other) const { return join(path(other)); }
             
             /// Static forwarder for path::join<P, Q>(p, q) --
             /// sometimes you want to just join stuff mainually like:
@@ -262,6 +277,22 @@ namespace filesystem {
             template <typename P, typename Q> inline
             static path join(P&& one, Q&& theother) {
                 return path(std::forward<P>(one)) / path(std::forward<Q>(theother));
+            }
+            
+            path append(const std::string& appendix) const {
+                path out = path(*this);
+                std::string::size_type N = out.m_path.size() - 1;
+                out.m_path[N].append(appendix);
+                return out;
+            }
+            
+            path operator+(const path& other) const { return append(other.str()); }
+            path operator+(const char* other) const { return append(std::string(other)); }
+            path operator+(const std::string& other) const { return append(other); }
+            
+            template <typename P, typename Q> inline
+            static path append(P&& one, Q&& theother) {
+                return path(std::forward<P>(one)) + std::forward<Q>(theother);
             }
             
             /// Stringify the path (pared down for UNIX-only specifics)

@@ -15,7 +15,7 @@ namespace {
     TEST_CASE("[hdf5-io] Read PNG and JPEG files and write as individual HDF5 binary store files",
               "[hdf5-read-png-jpeg-write-individual-hdf5-files]")
     {
-        im::fs::TemporaryDirectory td("test-hdf5-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-hdf5-io");
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         const std::vector<path> jpgs = basedir.list("*.jpg");
@@ -23,25 +23,27 @@ namespace {
         std::for_each(pngs.begin(), pngs.end(), [&basedir, &td](const path &p) {
             auto png = im::halide::read(basedir/p);
             path np = td.dirpath/p;
-            std::string npext = np.str() + ".hdf5";
+            path npext = np + ".hdf5";
             im::halide::write(png, npext);
+            // CHECK(path::exists(npext));
         });
         
         std::for_each(jpgs.begin(), jpgs.end(), [&basedir, &td](const path &p) {
             auto jpg = im::halide::read(basedir/p);
             path np = td.dirpath/p;
-            std::string npext = np.str() + ".hdf5";
+            path npext = np + ".hdf5";
             im::halide::write(jpg, npext);
+            // CHECK(path::exists(npext));
         });
         
         const std::vector<path> hdfs = td.dirpath.list("*.hdf5");
+        CHECK(hdfs.size() == pngs.size() + jpgs.size());
         
         std::for_each(hdfs.begin(), hdfs.end(), [&basedir, &td](const path &p) {
             path np = td.dirpath/p;
             auto hdf = im::halide::read(np);
             REQUIRE(hdf.dim(0) > 0);
             REQUIRE(hdf.dim(1) > 0);
-            REQUIRE(np.remove());
         });
         
     }

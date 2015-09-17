@@ -193,7 +193,6 @@ namespace im {
         template <typename T = byte> inline
         void write(HybridImage<T> &input, const std::string &filename,
                                           const options_map &opts = halide_default_opts) {
-            if (input.dim(2) > 3) { return; }
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write(dynamic_cast<Image&>(input), output.get(), opts);
@@ -209,7 +208,6 @@ namespace im {
         template <typename Format, typename T = byte> inline
         std::string tmpwrite(HybridImage<T> &input,
                              const options_map &opts = halide_default_opts) {
-            if (input.dim(2) > 3) { return ""; }
             im::fs::NamedTemporaryFile tf(Format::get_suffix());
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));

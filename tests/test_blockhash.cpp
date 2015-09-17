@@ -37,12 +37,11 @@ namespace {
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash_quick(png);
-            // unsigned long long longhash = bithash.to_ullong();
+            unsigned long long longhash = bithash.to_ullong();
             std::string hexhash = blockhash::detail::hexify(bithash);
-            // REQUIRE(hexhash == detail::to_hex(longhash));
+            // CHECK(hexhash == detail::to_hex(longhash));
             WTF("BLOCKHASH_QUICK:", hexhash,
                                     bithash.to_string());
-            // WTF("detail::to_hex(longhash):", detail::to_hex(longhash));
         });
     }
     
@@ -54,12 +53,11 @@ namespace {
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash(png);
-            // unsigned long long longhash = bithash.to_ullong();
+            unsigned long long longhash = bithash.to_ullong();
             std::string hexhash = blockhash::detail::hexify(bithash);
-            // REQUIRE(hexhash == detail::to_hex(longhash));
+            // CHECK(hexhash == detail::to_hex(longhash));
             WTF("BLOCKHASH:", hexhash,
                               bithash.to_string());
-            // WTF("detail::to_hex(longhash):", detail::to_hex(longhash));
         });
     }
     
