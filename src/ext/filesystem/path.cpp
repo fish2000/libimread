@@ -53,11 +53,11 @@ namespace filesystem {
         }
     }
     
-    bool path::match(const std::regex &pattern, bool) {
+    bool path::match(const std::regex &pattern, bool) const {
         return std::regex_match(str(), pattern);
     }
     
-    bool path::search(const std::regex &pattern, bool) {
+    bool path::search(const std::regex &pattern, bool) const {
         return std::regex_search(str(), pattern);
     }
     
@@ -109,7 +109,7 @@ namespace filesystem {
         return bool(hash() == other.hash());
     }
     
-    std::vector<path> path::list(bool full_paths) {
+    std::vector<path> path::list(bool full_paths) const {
         /// list all files
         if (!is_directory()) {
             imread_raise(FileSystemError,
@@ -138,7 +138,7 @@ namespace filesystem {
     
     static const int glob_pattern_flags = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
     
-    std::vector<path> path::list(const char *pattern, bool full_paths) {
+    std::vector<path> path::list(const char *pattern, bool full_paths) const {
         /// list files with glob
         if (!pattern) {
             imread_raise(FileSystemError,
@@ -162,14 +162,14 @@ namespace filesystem {
         return out;
     }
     
-    std::vector<path> path::list(const std::string &pattern, bool full_paths) {
+    std::vector<path> path::list(const std::string &pattern, bool full_paths) const {
         return list(pattern.c_str());
     }
     
     static const int regex_flags        = std::regex::extended;
     static const int regex_flags_icase  = std::regex::extended | std::regex::icase;
     
-    std::vector<path> path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) {
+    std::vector<path> path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) const {
         /// list files with regex object
         path abspath = make_absolute();
         std::vector<path> unfiltered = abspath.list();

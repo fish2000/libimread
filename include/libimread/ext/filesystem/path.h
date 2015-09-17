@@ -83,6 +83,8 @@ namespace filesystem {
     class path {
         
         public:
+            using size_type = std::size_t;
+            
             enum path_type {
                 windows_path = 0, posix_path = 1,
                 native_path = posix_path
@@ -162,8 +164,8 @@ namespace filesystem {
             /// get a boolean back for your (possibly case-insenitive) std::regex reference;
             /// match() and search() hand respectively straight off to std::regex_match
             /// and std::regex_search()
-            bool match(const std::regex &pattern,           bool case_sensitive=false);
-            bool search(const std::regex &pattern,          bool case_sensitive=false);
+            bool match(const std::regex &pattern,           bool case_sensitive=false) const;
+            bool search(const std::regex &pattern,          bool case_sensitive=false) const;
             
             /// static forwarder for path::match<P>(p)
             template <typename P> inline
@@ -186,10 +188,10 @@ namespace filesystem {
             ///     b) pass a string (C-style or std::string) with a glob with which to filter the list, or;
             ///     c) pass a std::regex (optionally case-sensitive) for fine-grained iterator-based filtering.
             /// ... in all cases, you can specify a trailing boolean to ensure the paths you get back are absolute.
-            std::vector<path> list(                                                         bool full_paths=false);
-            std::vector<path> list(const char *pattern,                                     bool full_paths=false);
-            std::vector<path> list(const std::string &pattern,                              bool full_paths=false);
-            std::vector<path> list(const std::regex &pattern,   bool case_sensitive=false,  bool full_paths=false);
+            std::vector<path> list(                                                         bool full_paths=false) const;
+            std::vector<path> list(const char *pattern,                                     bool full_paths=false) const;
+            std::vector<path> list(const std::string &pattern,                              bool full_paths=false) const;
+            std::vector<path> list(const std::regex &pattern,   bool case_sensitive=false,  bool full_paths=false) const;
             
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
             template <typename P, typename G> inline
