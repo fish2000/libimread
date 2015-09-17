@@ -53,8 +53,8 @@ namespace filesystem {
         
         if (!cleand.get()) {
             imread_raise(FileSystemError, "[ERROR]",
-                FF("TemporaryDirectory::clean(): error in detail::ddopen(%s):", abspath.c_str()),
-                std::strerror(errno));
+                "TemporaryDirectory::clean(): error in detail::ddopen() with path:",
+                abspath.str(), std::strerror(errno));
         }
         
         struct dirent *entry;
