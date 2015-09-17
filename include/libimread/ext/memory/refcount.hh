@@ -14,6 +14,8 @@
 #include <cstdint>
 
 #include <guid.h>
+#include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/rehash.hh>
 
 namespace std {
@@ -42,9 +44,21 @@ namespace memory {
     static std::unordered_map<Guid, std::atomic<int64_t>> refcounts;
     
     template <typename Target>
-    struct RefCount {
+    struct DefaultDeleter : public std::unary_function<Target*, void> {
+        using Base = std::unary_function<Target*, void>;
+        void operator()(Target* target) const {
+            /// default deleter
+            WTF("DefaultDeleter::operator()(Target*): about to call `delete target`");
+            delete target;
+        }
+    };
+    
+    template <typename Target,
+              typename Deleter = DefaultDeleter<Target>>
+    struct RefCount : public DefaultDeleter<Target>::Base {
         
-        using Deleter = std::add_pointer_t<void(const Target*)>;
+        //using Deleter = std::add_pointer_t<void(const Target*)>;
+        // using Deleter = void(Target*);
         
         Guid guid;
         Target *object;
@@ -55,7 +69,13 @@ namespace memory {
             return RefCount<Target>(new Target(std::forward<Args>(args)...));
         }
         
-        explicit RefCount(Target *o, Deleter d = nullptr)
+        explicit RefCount(Target *o)
+            :object(o), deleter(Deleter{})
+            {
+                init();
+                retain();
+            }
+        explicit RefCount(Target *o, Deleter d)
             :object(o), deleter(d)
             {
                 init();
@@ -72,15 +92,21 @@ namespace memory {
         void init() {
             guid = generator.newGuid();
             refcounts[guid].store(0);
-            if (deleter == nullptr) {
-                deleter = (Deleter)this; /// default
-            }
+            // if (deleter == nullptr) {
+            //     deleter = (Deleter)this; /// default
+            // }
         }
         
-        virtual ~RefCount() { release(); }
+        virtual ~RefCount() {
+            WTF("RefCount::~RefCount(): in destructor");
+            release();
+        }
         
         void retain() { refcounts[guid]++; }
         void release() { refcounts[guid]--; gc(); }
+        
+        /// for debugging purposes really
+        int64_t retainCount() { return refcounts[guid].load(); }
         
         RefCount &operator=(const RefCount& other) {
             RefCount(other).swap(*this);
@@ -91,15 +117,16 @@ namespace memory {
             return *this;
         }
         
+        void operator()(Target* target) const {
+            /// default deleter
+            delete target;
+        }
+        
         inline void gc() {
+            WTF("Collecting garbage, refcount[guid] = ", refcounts[guid].load());
             if (refcounts[guid].load() < 1) {
                 deleter(object);
             }
-        }
-        
-        /// default deleter
-        void operator()(const Target *target) {
-            delete[] target;
         }
         
         void swap(RefCount& other) noexcept {
