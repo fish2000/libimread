@@ -10,6 +10,7 @@ namespace {
     
     using memory::RefCount;
     using im::test::ByteHeap;
+    using im::byte;
     
     struct Trivial {
         volatile int integer;
@@ -40,9 +41,34 @@ namespace {
         
     }
     
-    // TEST_CASE("[refcount] Test RefCount with ByteHeap",
-    //           "[refcount-with-byteheap]")
-    // {}
+    TEST_CASE("[refcount] Test RefCount with ByteHeap",
+              "[refcount-with-byteheap]")
+    {
+        constexpr int SIZE = 128;
+        
+        {
+            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+        {
+            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+        {
+            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+        {
+            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+        
+        
+    }
     
 }
 

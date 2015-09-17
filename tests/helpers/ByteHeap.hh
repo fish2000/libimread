@@ -4,8 +4,10 @@
 #ifndef LIBIMREAD_TESTS_HELPERS_HEAPBYTES_HH_
 #define LIBIMREAD_TESTS_HELPERS_HEAPBYTES_HH_
 
+#include <cstdlib>
 #include <string>
 #include <vector>
+
 #include <libimread/libimread.hpp>
 
 namespace im {
@@ -18,27 +20,31 @@ namespace test {
             using string_t = std::basic_string<T>;
             using vector_t = std::vector<T>;
             
-            std::size_t size;
+            std::size_t siz;
             T* bytes;
             
             explicit ByteHeap(std::size_t s)
-                :size(s), bytes(new T[s])
-                {}
+                :siz(s), bytes(new T[s])
+                {
+                    arc4random_buf(static_cast<void*>(bytes), siz);
+                }
             
             ByteHeap(const ByteHeap& other)
-                :size(other.size), bytes(other.bytes)
+                :siz(other.siz), bytes(other.bytes)
                 {}
             
             virtual ~ByteHeap() {
                 delete[] bytes;
             }
             
+            std::size_t size() { return siz; }
+            
             string_t bytestring() {
                 return string_t(bytes);
             }
             
             vector_t bytevector() {
-                vector_t out(size);
+                vector_t out(siz);
                 for (auto b : bytes) {
                     out.push_back(b);
                 }

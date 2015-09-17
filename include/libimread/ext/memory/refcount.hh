@@ -111,6 +111,9 @@ namespace memory {
             return *this;
         }
         
+        Target* operator->() const { return  object; }
+        Target  operator* () const { return *object; }
+        
         void operator()(Target* target) const {
             /// default deleter
             delete target;
