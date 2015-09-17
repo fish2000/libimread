@@ -356,7 +356,7 @@ namespace objc {
         static const char * __cls_name(types::ID ii)    { return ::object_getClassName(ii); }
         
         std::string classname() const {
-            return std::string(__cls_name(self));
+            return std::string(__cls_name());
         }
         
         std::string description() const {
