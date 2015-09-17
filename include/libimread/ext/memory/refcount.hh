@@ -51,11 +51,14 @@ namespace memory {
         Deleter deleter;
         
         template <typename ...Args>
-        explicit RefCount(Deleter d, Args&& ...args)
-            :deleter(d)
+        static RefCount MakeRef(Args&& ...args) {
+            return RefCount<Target>(new Target(std::forward<Args>(args)...));
+        }
+        
+        explicit RefCount(Target *o, Deleter d = nullptr)
+            :object(o), deleter(d)
             {
                 init();
-                object = new Target(std::forward<Args>(args)...);
                 retain();
             }
         
