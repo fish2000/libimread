@@ -48,7 +48,6 @@ namespace memory {
         using Base = std::unary_function<Target*, void>;
         void operator()(Target* target) const {
             /// default deleter
-            // WTF("DefaultDeleter::operator()(Target*): about to call `delete target`");
             delete target;
         }
     };
@@ -92,7 +91,6 @@ namespace memory {
         }
         
         virtual ~RefCount() {
-            // WTF("RefCount::~RefCount(): in destructor");
             release();
         }
         

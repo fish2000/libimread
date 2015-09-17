@@ -18,8 +18,6 @@ namespace std {
 
 namespace memory {
     
-    // std::unordered_map<Guid, std::atomic<int64_t>> refcounts;
-    
     void garbageday() {
         /// ""?ref-0p-="" -Tux
         using KVPair = typename decltype(refcounts)::value_type;
