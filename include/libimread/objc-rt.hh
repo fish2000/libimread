@@ -9,6 +9,7 @@
 #include <string>
 #include <tuple>
 #include <array>
+#include <utility>
 #include <functional>
 #include <type_traits>
 
@@ -24,9 +25,9 @@
 
 namespace objc {
     
-    /// pointer swapper
+    /// pointer swap
     template <typename T> inline
-    void swap(T*& oA, T*& oB) {
+    void swap(T*& oA, T*& oB) noexcept {
         T* oT = oA; oA = oB; oB = oT;
     }
     
@@ -115,6 +116,15 @@ namespace objc {
             :sel(::NSSelectorFromString(name))
             {}
         
+        objc::selector& operator=(objc::selector other) {
+            other.swap(*this);
+            return *this;
+        }
+        objc::selector& operator=(types::selector other) {
+            std::swap(this->sel, other);
+            return *this;
+        }
+        
         bool operator==(const objc::selector &s) {
             return ::sel_isEqual(sel, s.sel) == YES;
         }
@@ -138,6 +148,13 @@ namespace objc {
         std::size_t hash() const {
             std::hash<std::string> hasher;
             return hasher(str());
+        }
+        
+        void swap(objc::selector& other) noexcept {
+            std::swap(this->sel, other.sel);
+        }
+        void swap(types::selector& other) noexcept {
+            std::swap(this->sel, other);
         }
         
         operator types::selector() { return sel; }
@@ -261,7 +278,7 @@ namespace objc {
     
     struct id {
         
-        types::ID self = nil;
+        types::ID self;
         
         explicit id(types::rID ii)
             :self(std::forward<types::tID>(ii))
@@ -291,19 +308,23 @@ namespace objc {
         ~id() { release(); }
         
         id &operator=(const objc::id& other) {
-            types::ID s = other.self;
-            if (s != nil)    { [s retain]; }
-            if (self != nil) { [self release]; }
-            self = s;
+            if (this != &other) {
+                objc::id(other).swap(*this);
+            }
             return *this;
         }
         
         id &operator=(objc::id&& other) {
-            types::ID s = other.self;
-            if (s != nil)    { [s retain]; }
-            if (self != nil) { [self release]; }
-            self = s;
-            //other.release();
+            if (this != &other) {
+                objc::id(other).swap(*this);
+            }
+            return *this;
+        }
+        
+        id &operator=(types::ID other) {
+            if ([self isEqual:other] == NO) {
+                objc::id(other).swap(*this);
+            }
             return *this;
         }
         
@@ -372,6 +393,13 @@ namespace objc {
         
         std::size_t hash() const {
             return static_cast<std::size_t>([self hash]);
+        }
+        
+        void swap(objc::id& other) noexcept {
+            objc::swap(this->self, other.self);
+        }
+        void swap(types::ID& other) noexcept {
+            objc::swap(this->self, other);
         }
         
         /// STATIC METHODS
@@ -522,6 +550,14 @@ inline objc::selector operator"" _SEL(const char *name) {
 }
 
 namespace std {
+    
+    /// std::swap() specialization for objc::selector and objc::id
+    
+    template <>
+    void swap(objc::selector& s0, objc::selector& s1);
+    
+    template <>
+    void swap(objc::id& s0, objc::id& s1);
     
     /// std::hash specializations for objc::selector and objc::id
     /// ... following the recipe found here:
