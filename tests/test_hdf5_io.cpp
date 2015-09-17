@@ -41,6 +41,7 @@ namespace {
             auto hdf = im::halide::read(np);
             REQUIRE(hdf.dim(0) > 0);
             REQUIRE(hdf.dim(1) > 0);
+            REQUIRE(np.remove());
         });
         
     }

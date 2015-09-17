@@ -7,6 +7,9 @@
 #include <dirent.h>
 #include <fcntl.h>
 
+#include <vector>
+#include <algorithm>
+
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/temporary.h>
@@ -43,7 +46,7 @@ namespace filesystem {
         return true;
     }
     
-    bool TemporaryDirectory::clean() {
+    bool TemporaryDirectory::cleand() {
         /// scrub all files
         /// N.B. this will not recurse -- keep yr structures FLAAAT
         if (!dirpath.exists()) { return false; }
@@ -61,11 +64,21 @@ namespace filesystem {
         while ((entry = ::readdir(cleand.get())) != NULL) {
             std::string dname(entry->d_name);
             if (std::strncmp(dname.c_str(), ".", 1) == 0)   { continue; }
-            if (std::strncmp(dname.c_str(), "..", 2) != 0)  { continue; }
+            if (std::strncmp(dname.c_str(), "..", 2) == 0)  { continue; }
             path epp = abspath/dname;
             out &= epp.remove();
         }
         
+        return out;
+    }
+    
+    bool TemporaryDirectory::clean() {
+        if (!dirpath.exists()) { return false; }
+        bool out = true;
+        path abspath = dirpath.make_absolute();
+        std::vector<path> entries = abspath.list(true); /// full_paths
+        std::for_each(entries.begin(), entries.end(),
+               [&out](const path& p) { out &= p.remove(); });
         return out;
     }
     

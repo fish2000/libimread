@@ -186,7 +186,7 @@ namespace filesystem {
             /// USE WITH CAUTION -- this is basically ::unlink() or ::rmdir(),
             /// in other words it's like 'rm -f' on some object with which you might not
             /// be totally familiar with. Again I say: USE WITH CAUTION.
-            bool remove();
+            bool remove() const;
             
             /// Static forwarder for path::remove<P>(p) that should also be USED WITH CAUTION
             template <typename P> inline

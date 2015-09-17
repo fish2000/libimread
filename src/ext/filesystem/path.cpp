@@ -125,6 +125,8 @@ namespace filesystem {
             }
             struct dirent *entp;
             while ((entp = ::readdir(d.get())) != NULL) {
+                if (std::strncmp(entp->d_name, ".", 1) == 0)   { continue; }
+                if (std::strncmp(entp->d_name, "..", 2) == 0)  { continue; }
                 if (entp->d_type == DT_DIR || entp->d_type == DT_REG || entp->d_type == DT_LNK) {
                     /// ... it's either a directory, a regular file, or a symbolic link
                     out.push_back(full_paths ? abspath/entp->d_name : path(entp->d_name));
@@ -197,8 +199,7 @@ namespace filesystem {
         return S_ISDIR(sb.st_mode);
     }
     
-    bool path::remove() {
-        //if (!exists())      { return false; }
+    bool path::remove() const {
         if (is_file())      { return bool(::unlink(make_absolute().c_str()) != -1); }
         if (is_directory()) { return bool(::rmdir(make_absolute().c_str()) != -1); }
         return false;

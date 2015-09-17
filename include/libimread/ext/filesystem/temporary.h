@@ -97,6 +97,7 @@ namespace filesystem {
                                                           suffix, prefix, dirpath, cleanup, m); }
         
         bool create();
+        bool cleand();
         bool clean();
         bool remove();
         
