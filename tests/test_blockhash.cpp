@@ -21,7 +21,8 @@ namespace {
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash_quick(png);
-            WTF("BLOCKHASH_QUICK:", bithash.to_ullong(),
+            WTF("BLOCKHASH_QUICK:", blockhash::detail::hexify(bithash),
+                                    bithash.to_ullong(),
                                     bithash.to_string());
         });
     }
@@ -34,7 +35,8 @@ namespace {
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash(png);
-            WTF("BLOCKHASH:", bithash.to_ullong(),
+            WTF("BLOCKHASH:", blockhash::detail::hexify(bithash),
+                              bithash.to_ullong(),
                               bithash.to_string());
         });
     }

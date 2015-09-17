@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_HASHING_HH_
 #define LIBIMREAD_HASHING_HH_
 
+#include <cstring>
 #include <cmath>
 #include <array>
 #include <bitset>
@@ -59,6 +60,39 @@ namespace blockhash {
                 auto lower_middle = std::max_element(local.begin(), middle);
                 return (*middle + *lower_middle) / 2.0f;
             }
+        }
+        
+        /// to_hex() courtesy of:
+        /// http://stackoverflow.com/a/5100745/298171
+        // template <typename T> inline
+        // std::string to_hex(T tvalue) {
+        //     std::stringstream stream;
+        //     stream << "0x"
+        //            << std::setfill('0') << std::setw(sizeof(T) * 2)
+        //            << std::hex << tvalue;
+        //     return stream.str();
+        // }
+        
+        template <std::size_t N> inline
+        std::string hexify(std::bitset<N> bits) {
+            const std::string   prefix("0x");
+            constexpr int       len = N / 4;
+            int                 i, j, b, t, tmp;
+            char                stmp[2];
+            std::string         out(len, ' ');
+            
+            for (i = 0; i < len; i++) {
+                tmp = 0;
+                for (j = 0; j < 4; j++) {
+                    b = i * 4 + j;
+                    t = int(bits[b]);
+                    tmp = tmp | (t << 3 >> j);
+                }
+                std::sprintf(stmp, "%1x", tmp);
+                out[i] = stmp[0];
+            }
+            
+            return prefix + out;
         }
         
     };
