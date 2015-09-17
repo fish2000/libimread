@@ -9,6 +9,11 @@ namespace std {
         guid0.swap(guid1);
     }
     
+    template <typename T>
+    void swap(RefCount<T>& refcount0, RefCount<T>& refcount1) {
+        refcount0.swap(refcount1);
+    }
+    
 }; /* namespace std */
 
 namespace memory {

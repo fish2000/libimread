@@ -48,7 +48,7 @@ namespace memory {
         using Base = std::unary_function<Target*, void>;
         void operator()(Target* target) const {
             /// default deleter
-            WTF("DefaultDeleter::operator()(Target*): about to call `delete target`");
+            // WTF("DefaultDeleter::operator()(Target*): about to call `delete target`");
             delete target;
         }
     };
@@ -56,9 +56,6 @@ namespace memory {
     template <typename Target,
               typename Deleter = DefaultDeleter<Target>>
     struct RefCount : public DefaultDeleter<Target>::Base {
-        
-        //using Deleter = std::add_pointer_t<void(const Target*)>;
-        // using Deleter = void(Target*);
         
         Guid guid;
         Target *object;
@@ -92,13 +89,10 @@ namespace memory {
         void init() {
             guid = generator.newGuid();
             refcounts[guid].store(0);
-            // if (deleter == nullptr) {
-            //     deleter = (Deleter)this; /// default
-            // }
         }
         
         virtual ~RefCount() {
-            WTF("RefCount::~RefCount(): in destructor");
+            // WTF("RefCount::~RefCount(): in destructor");
             release();
         }
         
@@ -106,7 +100,7 @@ namespace memory {
         void release() { refcounts[guid]--; gc(); }
         
         /// for debugging purposes really
-        int64_t retainCount() { return refcounts[guid].load(); }
+        int64_t retainCount() const { return refcounts[guid].load(); }
         
         RefCount &operator=(const RefCount& other) {
             RefCount(other).swap(*this);
@@ -123,10 +117,18 @@ namespace memory {
         }
         
         inline void gc() {
-            WTF("Collecting garbage, refcount[guid] = ", refcounts[guid].load());
+            // WTF("Collecting garbage, refcount[guid] = ", refcounts[guid].load());
             if (refcounts[guid].load() < 1) {
                 deleter(object);
             }
+        }
+        
+        std::size_t hash() const {
+            std::hash<Target*> pHasher;
+            std::hash<Guid> guidHasher;
+            std::size_t H = guidHasher(guid);
+            ::detail::rehash(H, pHasher(object));
+            return H;
         }
         
         void swap(RefCount& other) noexcept {
@@ -141,5 +143,27 @@ namespace memory {
     static void garbageday();
     
 }; /* namespace memory */
+
+namespace std {
+    
+    template <typename T>
+    using RefCount = memory::RefCount<T>;
+    
+    template <typename T>
+    void swap(RefCount<T>& refcount0, RefCount<T>& refcount1);
+    
+    template <typename T>
+    struct hash<RefCount<T>> {
+        
+        typedef RefCount<T> argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& refcount) const {
+            return static_cast<result_type>(refcount.hash());
+        }
+        
+    };
+    
+}; /* namespace std */
 
 #endif /// LIBIMREAD_EXT_MEMORY_REFCOUNT_HH_

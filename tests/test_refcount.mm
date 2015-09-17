@@ -29,6 +29,15 @@ namespace {
         auto count = RefCount<Trivial>(new Trivial());
         REQUIRE(count.retainCount() == 1);
         
+        auto cc(count);
+        REQUIRE(count.retainCount() == 2);
+        
+        cc.retain();
+        REQUIRE(count.retainCount() == 3);
+        
+        cc.release();
+        REQUIRE(count.retainCount() == 2);
+        
     }
     
     // TEST_CASE("[refcount] Test RefCount with ByteHeap",
