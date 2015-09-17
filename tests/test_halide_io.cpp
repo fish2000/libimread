@@ -14,14 +14,14 @@ namespace {
     using U8Image = im::HybridImage<uint8_t>;
     
     TEST_CASE("[halide-io] Read PNG files", "[halide-read-png]") {
-        im::fs::TemporaryDirectory td("test-halide-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-halide-io");
         U8Image halim = im::halide::read(D("roses_512_rrt_srgb.png"));
         U8Image halim2 = im::halide::read(D("marci_512_srgb.png"));
         U8Image halim3 = im::halide::read(D("marci_512_srgb8.png"));
     }
     
     TEST_CASE("[halide-io] Read a PNG and rewrite it as a JPEG", "[halide-read-jpeg-write-png]") {
-        im::fs::TemporaryDirectory td("test-halide-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-halide-io");
         
         U8Image halim = im::halide::read(D("roses_512_rrt_srgb.png"));
         im::halide::write(halim, td.dirpath/"jpgg_YO_DOGG222.jpg");
@@ -34,14 +34,14 @@ namespace {
     }
     
     TEST_CASE("[halide-io] Read JPEG files", "[halide-read-jpeg]") {
-        im::fs::TemporaryDirectory td("test-halide-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-halide-io");
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         U8Image halim2 = im::halide::read(D("IMG_4332.jpg"));
         U8Image halim3 = im::halide::read(D("IMG_7333.jpeg"));
     }
     
     TEST_CASE("[halide-io] Read a JPEG and rewrite it as a PNG", "[halide-read-jpeg-write-png]") {
-        im::fs::TemporaryDirectory td("test-halide-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-halide-io");
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         im::halide::write(halim, td.dirpath/"OH_DAWG666.png");
         
@@ -56,13 +56,13 @@ namespace {
     }
     
     TEST_CASE("[halide-io] Read a TIFF", "[halide-read-tiff]") {
-        im::fs::TemporaryDirectory td("test-halide-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-halide-io");
         U8Image halim = im::halide::read(D("ptlobos.tif"));
         im::halide::write(halim, td.dirpath/"TIFF_DUG986.png");
     }
     
     TEST_CASE("[halide-io] Write multiple formats as PPM", "[halide-read-tiff-write-ppm]") {
-        im::fs::TemporaryDirectory td("test-halide-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-halide-io");
         
         U8Image halim = im::halide::read(D("ptlobos.tif"));
         im::halide::write(halim, td.dirpath/"PPM_DUG986.ppm");
@@ -76,7 +76,7 @@ namespace {
     }
     
     TEST_CASE("[halide-io] Check the dimensions of a new image", "[halide-image-dims]") {
-        im::fs::TemporaryDirectory td("test-halide-io-XXXXX");
+        im::fs::TemporaryDirectory td("test-halide-io");
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         U8Image halim2 = im::halide::read(D("marci_512_srgb8.png"));
     }

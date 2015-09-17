@@ -14,7 +14,7 @@ namespace {
     TEST_CASE("[libssip] Create zip archive with contents of directory",
               "[libsszip-create-zip-with-directory]")
     {
-        im::fs::TemporaryDirectory td("test-libsszip-XXXXX");
+        im::fs::TemporaryDirectory td("test-libsszip");
         im::fs::path zpth = td.dirpath/"test-directory.zip";
         NSString *zipPath = [NSString stringWithSTLString:zpth.str()];
         NSString *dirPath = @"/Users/fish/Dropbox/libimread/tests/data";
