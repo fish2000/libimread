@@ -178,7 +178,8 @@ Guid::Guid(const Guid &other)
 // overload assignment operator
 Guid &Guid::operator=(const Guid &other)
 {
-  _bytes = other._bytes;
+  //_bytes = other._bytes;
+  Guid(other).swap(*this);
   return *this;
 }
 
@@ -193,6 +194,11 @@ bool Guid::operator!=(const Guid &other) const
 {
   return !((*this) == other);
 }
+
+void Guid::swap(Guid& other) noexcept {
+    std::swap(_bytes, other._bytes);
+}
+
 
 // This is the linux friendly implementation, but it could work on other
 // systems that have libuuid available

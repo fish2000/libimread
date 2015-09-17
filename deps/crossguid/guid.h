@@ -69,6 +69,8 @@ class Guid
 
     operator std::string() const;
 
+    void swap(Guid& other) noexcept;
+
   private:
 
     // actual data

@@ -104,6 +104,7 @@ set(hdrs
     ${hdrs_dir}/ext/filesystem/temporary.h
     ${hdrs_dir}/ext/memory/fmemopen.hh
     ${hdrs_dir}/ext/memory/open_memstream.hh
+    ${hdrs_dir}/ext/memory/refcount.hh
     ${hdrs_dir}/ext/JSON/json11.h
     ${hdrs_dir}/ext/iod.hh
     ${hdrs_dir}/ext/pvr.hh
@@ -172,6 +173,7 @@ set(srcs
     ${srcs_dir}/ext/filesystem/temporary.cpp
     ${srcs_dir}/ext/memory/fmemopen.cpp
     ${srcs_dir}/ext/memory/open_memstream.cpp
+    ${srcs_dir}/ext/memory/refcount.cpp
     ${srcs_dir}/ext/JSON/json11.cpp
     ${srcs_dir}/ext/JSON/schema.cpp
     ${srcs_dir}/ext/pvr.cpp
