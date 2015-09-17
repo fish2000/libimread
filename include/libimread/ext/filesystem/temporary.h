@@ -29,14 +29,14 @@ namespace filesystem {
         int descriptor;
         
         explicit NamedTemporaryFile(const char *s = tfs, const char *p = tfp,
-                                    const path &td = path::tmp(), bool c = true, mode m = mode::WRITE)
+                                    bool c = true, mode m = mode::WRITE, const path &td = path::tmp())
                                         :mm(m), cleanup(c), suffix(::strdup(s)), prefix(::strdup(p))
                                         ,filepath(td/std::strcat(prefix, s))
                                         {
                                             create();
                                         }
         explicit NamedTemporaryFile(const std::string &s, const std::string &p = tfp,
-                                    const path &td = path::tmp(), bool c = true, mode m = mode::WRITE)
+                                    bool c = true, mode m = mode::WRITE, const path &td = path::tmp())
                                         :mm(m), cleanup(c), suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
                                         ,filepath(td/(p+s))
                                         {
@@ -90,7 +90,8 @@ namespace filesystem {
         NamedTemporaryFile get(const std::string &suffix = tfs,
                                const std::string &prefix = tfp,
                                mode m = mode::WRITE) { return NamedTemporaryFile(
-                                                          suffix, prefix, dirpath, cleanup, m); }
+                                                          suffix, prefix,
+                                                          cleanup, m, dirpath); }
         
         bool create();
         bool cleand();

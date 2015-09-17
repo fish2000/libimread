@@ -68,7 +68,7 @@ namespace im {
             }
             
             static std::string get_suffix() {
-                return std::string(options.suffix);
+                return "." + options.suffix;
             }
             
             virtual ~ImageFormat() {}
