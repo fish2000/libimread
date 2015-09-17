@@ -145,8 +145,11 @@ namespace im {
         hsize_t dims[NDIMS] = { static_cast<hsize_t>(input.dim(0)),
                                 static_cast<hsize_t>(input.dim(1)),
                                 static_cast<hsize_t>(input.dim(2)) };
+        hsize_t mdims[1] = { static_cast<hsize_t>(input.dim(0) *
+                                                  input.dim(1) *
+                                                  input.dim(2)) };
         hid_t space_id      = H5Screate_simple(NDIMS, dims, NULL); /// first arg here is rank (aka NDIMS)
-        hid_t memspace_id   = H5Screate_simple(NDIMS, dims, NULL);
+        hid_t memspace_id   = H5Screate_simple(1, mdims, NULL);
         
         /// try creating a new dataset --
         hid_t dataset_id;
@@ -175,6 +178,32 @@ namespace im {
                 "Error creating or opening dataset in temporary HDF5 file");
         }
         
+        /// create attributes to save metadata: nbits, ndims, dim(x), stride(x)
+        hid_t attspace_id = H5Screate(H5S_SCALAR);
+        
+        #define Attribute(name, type)                                                   \
+            H5Acreate(dataset_id, name, type, attspace_id, H5P_DEFAULT, H5P_DEFAULT)
+        
+        hid_t attr_nbits   = Attribute("nbits",   H5T_NATIVE_INT);
+        hid_t attr_ndims   = Attribute("ndims",   H5T_NATIVE_INT);
+        hid_t attr_dim0    = Attribute("dim0",    H5T_NATIVE_INT);
+        hid_t attr_dim1    = Attribute("dim1",    H5T_NATIVE_INT);
+        hid_t attr_dim2    = Attribute("dim2",    H5T_NATIVE_INT);
+        hid_t attr_stride0 = Attribute("stride0", H5T_NATIVE_INT);
+        hid_t attr_stride1 = Attribute("stride1", H5T_NATIVE_INT);
+        hid_t attr_stride2 = Attribute("stride2", H5T_NATIVE_INT);
+        
+        #undef Attribute
+        
+        const int val_nbits   = input.nbits();
+        const int val_ndims   = input.ndims();
+        const int val_dim0    = input.dim(0);
+        const int val_dim1    = input.dim(1);
+        const int val_dim2    = input.dim(2);
+        const int val_stride0 = input.stride(0);
+        const int val_stride1 = input.stride(1);
+        const int val_stride2 = input.stride(2);
+        
         /// actually write the image data
         status = H5Dwrite(dataset_id, H5T_NATIVE_UCHAR,
                           memspace_id, space_id,
@@ -185,6 +214,27 @@ namespace im {
             imread_raise(CannotWriteError,
                 "Error writing to temporary HDF5 dataset");
         }
+        
+        /// write the attributes
+        H5Awrite(attr_nbits,   H5T_NATIVE_INT, &val_nbits);
+        H5Awrite(attr_ndims,   H5T_NATIVE_INT, &val_ndims);
+        H5Awrite(attr_dim0,    H5T_NATIVE_INT, &val_dim0);
+        H5Awrite(attr_dim1,    H5T_NATIVE_INT, &val_dim1);
+        H5Awrite(attr_dim2,    H5T_NATIVE_INT, &val_dim2);
+        H5Awrite(attr_stride0, H5T_NATIVE_INT, &val_stride0);
+        H5Awrite(attr_stride1, H5T_NATIVE_INT, &val_stride1);
+        H5Awrite(attr_stride2, H5T_NATIVE_INT, &val_stride2);
+        
+        /// close attribute dataspace and attribute handles
+        H5Sclose(attspace_id);
+        H5Aclose(attr_nbits);
+        H5Aclose(attr_ndims);
+        H5Aclose(attr_dim0);
+        H5Aclose(attr_dim1);
+        H5Aclose(attr_dim2);
+        H5Aclose(attr_stride0);
+        H5Aclose(attr_stride1);
+        H5Aclose(attr_stride2);
         
         /// close all HDF5 handles
         H5Sclose(memspace_id);
