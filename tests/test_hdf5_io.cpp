@@ -25,7 +25,6 @@ namespace {
             path np = td.dirpath/p;
             path npext = np + ".hdf5";
             im::halide::write(png, npext);
-            // CHECK(path::exists(npext));
         });
         
         std::for_each(jpgs.begin(), jpgs.end(), [&basedir, &td](const path &p) {
@@ -33,7 +32,6 @@ namespace {
             path np = td.dirpath/p;
             path npext = np + ".hdf5";
             im::halide::write(jpg, npext);
-            // CHECK(path::exists(npext));
         });
         
         const std::vector<path> hdfs = td.dirpath.list("*.hdf5");

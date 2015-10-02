@@ -24,30 +24,53 @@ TEST_CASE("[filesystem] Ensure `switchdir()` changes back on scope exit",
     path basedir(im::test::basedir);
     path absdir(basedir.make_absolute());
     path tmpdir("/private/tmp");
+    /// preflight: ensure that `absdir` (which is `basedir` in a suit)
+    ///            and `tmpdir` (which guess) are actually existant and valid
     REQUIRE(absdir.is_directory());
     REQUIRE(tmpdir.is_directory());
+    /// preflight: store the current WD using path::cwd(),
+    ///            manually call chdir() to start out in `basedir`
     const char *current = path::cwd();
     chdir(absdir);
+    
+    /// confirm the new WD using path::cwd() and operator==() with `absdir`
     bool check_one = bool(path::cwd() == absdir);
     REQUIRE(check_one);
+    
     {
+        /// switch working directory to /private/tmp
         switchdir s(tmpdir);
+        /// confirm we are in the new directory
         bool check_two = bool(path::cwd() == tmpdir);
+        /// confirm we came from the old directory
         bool check_two_and_a_half = bool(s.from() == absdir);
+        /// confirm our new location's listing contains at least one file
+        bool check_two_and_two_thirds = bool(path::cwd().list().size() > 0);
+        /// proceed ...
         REQUIRE(check_two);
         REQUIRE(check_two_and_a_half);
+        REQUIRE(check_two_and_two_thirds);
+        /// ... aaaand the working directory flips back to `basedir` at scope exit
     }
+    
+    /// confirm we are back in `basedir`
     bool check_three = bool(path::cwd() == absdir);
     REQUIRE(check_three);
+    
+    /// post-hoc: manually chdir() back to point of origin,
+    ///           so as to hopefully return back into the test runner without having
+    ///           problematically fucked with its state (like at least as minimally
+    ///           fucked as one can, like possibly, erm)
     chdir(current);
 }
+
 TEST_CASE("[filesystem] Test path::hash() and std::hash<path> specialization integrity",
           "[fs-path-hash-and-std-hash-specialization-integrity]") {
     path basedir(im::test::basedir);
     path absdir(basedir.make_absolute());
     path tmpdir("/private/tmp");
     std::hash<path> hasher;
-    /// test data header will write 'basedir' out as absolute
+    /// the test data header-generator will write 'basedir' out as absolute
     REQUIRE(basedir == absdir);
     REQUIRE(basedir != tmpdir);
     /// path::operator==() uses path::hash()

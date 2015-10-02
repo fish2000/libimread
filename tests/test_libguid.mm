@@ -15,7 +15,7 @@ namespace {
         auto r2 = generator.newGuid();
         auto r3 = generator.newGuid();
         
-        WTF("YO DOGG: generator.newGuid output as follows:", r1, r2, r3);
+        // WTF("YO DOGG: generator.newGuid output as follows:", r1, r2, r3);
         
         Guid s1("7bcd757f-5b10-4f9b-af69-1a1f226f3b3e");
         Guid s2("16d1bd03-09a5-47d3-944b-5e326fd52d27");

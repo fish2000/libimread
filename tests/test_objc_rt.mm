@@ -114,7 +114,7 @@ namespace {
         [filepath retain];
         [url retain];
         
-        WTF("Path variables:", prefixed, temporary.str());
+        // WTF("Path variables:", prefixed, temporary.str());
         
         objc::msg::send((id)datum,
             objc::selector("writeToFile:atomically:"),

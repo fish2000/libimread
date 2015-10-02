@@ -17,10 +17,10 @@ namespace {
         Trivial()
             :integer(0)
             {
-                WTF("Trivial::Trivial() copy constructor");
+                // WTF("Trivial::Trivial() copy constructor");
             }
         virtual ~Trivial() {
-            WTF("Trivial::~Trivial() destructor");
+            // WTF("Trivial::~Trivial() destructor");
         }
     };
     

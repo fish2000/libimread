@@ -40,8 +40,8 @@ namespace {
             unsigned long long longhash = bithash.to_ullong();
             std::string hexhash = blockhash::detail::hexify(bithash);
             // CHECK(hexhash == detail::to_hex(longhash));
-            WTF("BLOCKHASH_QUICK:", hexhash,
-                                    bithash.to_string());
+            // WTF("BLOCKHASH_QUICK:", hexhash,
+            //                         bithash.to_string());
         });
     }
     
@@ -56,8 +56,8 @@ namespace {
             unsigned long long longhash = bithash.to_ullong();
             std::string hexhash = blockhash::detail::hexify(bithash);
             // CHECK(hexhash == detail::to_hex(longhash));
-            WTF("BLOCKHASH:", hexhash,
-                              bithash.to_string());
+            // WTF("BLOCKHASH:", hexhash,
+            //                   bithash.to_string());
         });
     }
     

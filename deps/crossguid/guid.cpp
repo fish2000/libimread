@@ -23,6 +23,7 @@ THE SOFTWARE.
 */
 
 #include <cstring>
+#include <utility>
 #include "guid.h"
 
 #ifdef GUID_LIBUUID
@@ -70,7 +71,7 @@ ostream &operator<<(ostream &s, const Guid &guid)
 }
 
 std::string Guid::str() const {
-    char  one[10],    two[6],
+    char   one[10],   two[6],
           three[6],  four[6],
                      five[14];
     
@@ -178,7 +179,6 @@ Guid::Guid(const Guid &other)
 // overload assignment operator
 Guid &Guid::operator=(const Guid &other)
 {
-  //_bytes = other._bytes;
   Guid(other).swap(*this);
   return *this;
 }
@@ -196,7 +196,8 @@ bool Guid::operator!=(const Guid &other) const
 }
 
 void Guid::swap(Guid& other) noexcept {
-    std::swap(_bytes, other._bytes);
+    using std::swap;
+    swap(_bytes, other._bytes);
 }
 
 

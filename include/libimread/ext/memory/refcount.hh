@@ -44,17 +44,32 @@ namespace memory {
     static std::unordered_map<Guid, std::atomic<int64_t>> refcounts;
     
     template <typename Target>
-    struct DefaultDeleter : public std::unary_function<Target*, void> {
-        using Base = std::unary_function<Target*, void>;
-        void operator()(Target* target) const {
-            /// default deleter
+    struct DefaultDeleter : public std::unary_function<std::add_pointer_t<Target>, void> {
+        using target_ptr_t = typename std::add_pointer_t<Target>;
+        void operator()(target_ptr_t target) const {
             delete target;
+        }
+    };
+    
+    template <typename Target>
+    struct ArrayDeleter : public std::unary_function<std::add_pointer_t<Target>, void> {
+        using target_ptr_t = typename std::add_pointer_t<Target>;
+        void operator()(target_ptr_t target) const {
+            delete[] target;
+        }
+    };
+    
+    template <typename Target>
+    struct DeallocationDeleter : public std::unary_function<std::add_pointer_t<Target>, void> {
+        using target_ptr_t = typename std::add_pointer_t<Target>;
+        void operator()(target_ptr_t target) const {
+            free(target);
         }
     };
     
     template <typename Target,
               typename Deleter = DefaultDeleter<Target>>
-    struct RefCount : public DefaultDeleter<Target>::Base {
+    struct RefCount {
         
         Guid guid;
         Target *object;
@@ -62,7 +77,8 @@ namespace memory {
         
         template <typename ...Args>
         static RefCount MakeRef(Args&& ...args) {
-            return RefCount<Target>(new Target(std::forward<Args>(args)...));
+            return RefCount<Target>(
+                new Target(std::forward<Args>(args)...));
         }
         
         explicit RefCount(Target *o)
@@ -98,7 +114,9 @@ namespace memory {
         void release() { refcounts[guid]--; gc(); }
         
         /// for debugging purposes really
-        int64_t retainCount() const { return refcounts[guid].load(); }
+        int64_t retainCount() const {
+            return refcounts[guid].load();
+        }
         
         RefCount &operator=(const RefCount& other) {
             RefCount(other).swap(*this);
@@ -112,13 +130,7 @@ namespace memory {
         Target* operator->() const { return  object; }
         Target  operator* () const { return *object; }
         
-        void operator()(Target* target) const {
-            /// default deleter
-            delete target;
-        }
-        
         inline void gc() {
-            // WTF("Collecting garbage, refcount[guid] = ", refcounts[guid].load());
             if (refcounts[guid].load() < 1) {
                 deleter(object);
             }
@@ -133,38 +145,22 @@ namespace memory {
         }
         
         void swap(RefCount& other) noexcept {
-            std::swap(other.guid, guid);
-            std::swap(other.object, object);
-            std::swap(other.deleter, deleter);
+            using std::swap;
+            swap(other.guid, guid);
+            swap(other.object, object);
+            swap(other.deleter, deleter);
+        }
+        
+        friend void swap(RefCount& lhs, RefCount& rhs) {
+            /// so I guess like 'friend' implies 'static' ?!
+            lhs.swap(rhs);
         }
         
     };
     
-    /// GARBAGEDAAAAAY!
+    /// GARBAGEDAAAAAY
     static void garbageday();
     
 }; /* namespace memory */
-
-namespace std {
-    
-    template <typename T>
-    using RefCount = memory::RefCount<T>;
-    
-    template <typename T>
-    void swap(RefCount<T>& refcount0, RefCount<T>& refcount1);
-    
-    template <typename T>
-    struct hash<RefCount<T>> {
-        
-        typedef RefCount<T> argument_type;
-        typedef std::size_t result_type;
-        
-        result_type operator()(argument_type const& refcount) const {
-            return static_cast<result_type>(refcount.hash());
-        }
-        
-    };
-    
-}; /* namespace std */
 
 #endif /// LIBIMREAD_EXT_MEMORY_REFCOUNT_HH_
