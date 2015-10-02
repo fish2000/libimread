@@ -16,6 +16,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/ext/memory/refcount.hh>
 #include <libimread/private/buffer_t.h>
 #include <libimread/color.hh>
 #include <libimread/pixels.hh>
@@ -28,6 +29,9 @@
 namespace im {
     
     using MetaImage = ImageWithMetadata;
+    using memory::RefCount;
+    using memory::DefaultDeleter;
+    using memory::ArrayDeleter;
     
     template <typename Color = color::RGBA>
     class InterleavedImage : public Image, public MetaImage {
@@ -50,17 +54,17 @@ namespace im {
         private:
             struct Contents {
                 buffer_t buffer;
-                int32_t refcount;
                 uint8_t *alloc;
                 
                 Contents(buffer_t b, uint8_t *a)
-                    :buffer(b), refcount(1), alloc(a)
+                    :buffer(b), alloc(a)
                     {}
                 
                 ~Contents() { delete[] alloc; }
             };
             
-            Contents *contents;
+            using RefContents = RefCount<Contents>;
+            RefContents contents;
             
             void init(int x, int y = 0) {
                 buffer_t b = { 0 };
@@ -82,71 +86,46 @@ namespace im {
                 b.host_dirty = false;
                 b.dev_dirty = false;
                 b.dev = 0;
-                while ((std::size_t)b.host & 0x1f) { b.host++; }
-                contents = new Contents(b, b.host);
+                // while ((std::size_t)b.host & 0x1f) { b.host++; }
+                // contents = new Contents(b, b.host);
+                contents = RefContents::MakeRef(b, ptr);
+            }
+            void init(buffer_t b, uint8_t *ptr) {
+                contents = RefContents::MakeRef(b, ptr);
+            }
+            void init(buffer_t b) {
+                contents = RefContents::MakeRef(b, b.host);
             }
             
-            void init(buffer_t b) {
-                contents = new Contents(b, b.host);
-            }
-        
-        public:
-            InterleavedImage()
+            /// private default constructor
+            InterleavedImage(void)
                 :contents(NULL)
                 {}
+        
+        public:
             
-            explicit InterleavedImage(int x, int y)     { init(x, y); }
-            explicit InterleavedImage(buffer_t b)       { init(b); }
+            explicit InterleavedImage(int x, int y) { init(x, y); }
+            explicit InterleavedImage(buffer_t b)   { init(b); }
             
             InterleavedImage(const InterleavedImage& other)
                 :contents(other.contents)
-                {
-                    incref(contents);
-                    decref(other.contents);
-                }
+                {}
             InterleavedImage(InterleavedImage&& other)
                 :contents(other.contents)
-                {
-                    ref(contents, 1);
-                    decref(other.contents);
-                    //other.contents = NULL;
-                }
+                {}
             
-            virtual ~InterleavedImage() { decref(contents); }
+            virtual ~InterleavedImage() {}
             
             InterleavedImage &operator=(const InterleavedImage& other) {
-                Contents *p = other.contents;
-                incref(p);
-                decref(contents);
-                contents = p;
+                using std::swap;
+                swap(other.contents, this->contents);
                 return *this;
             }
             
             InterleavedImage &operator=(InterleavedImage&& other) {
-                Contents *p = other.contents;
-                ref(p, 1);
-                decref(contents);
-                contents = p;
-                //other.contents = NULL;
+                using std::swap;
+                swap(other.contents, this->contents);
                 return *this;
-            }
-            
-            inline void ref(Contents *c, int count = 1) {
-                if (c) { c->refcount = count; }
-            }
-            
-            inline void incref(Contents *c) {
-                if (c) { c->refcount++; }
-            }
-            
-            inline void decref(Contents *c) {
-                if (c) {
-                    c->refcount--;
-                    if (c->refcount == 0) {
-                        delete c;
-                        c = NULL;
-                    }
-                }
             }
             
             composite_t *data() const {

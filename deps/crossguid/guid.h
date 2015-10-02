@@ -24,10 +24,12 @@ THE SOFTWARE.
 
 #pragma once
 
+#include <functional>
 #include <iostream>
 #include <vector>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <iomanip>
 
 #ifdef GUID_ANDROID
@@ -107,3 +109,23 @@ class GuidGenerator
     jmethodID _leastSignificantBitsMethod;
 #endif
 };
+
+namespace std {
+    
+    template <>
+    void swap(Guid& guid0, Guid& guid1);
+    
+    template <>
+    struct hash<Guid> {
+        
+        typedef Guid argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& guid) const {
+            std::hash<std::string> hasher;
+            return static_cast<result_type>(hasher(guid.str()));
+        }
+        
+    };
+    
+}; /* namespace std */

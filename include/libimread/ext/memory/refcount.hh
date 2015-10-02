@@ -18,26 +18,6 @@
 #include <libimread/errors.hh>
 #include <libimread/rehash.hh>
 
-namespace std {
-    
-    template <>
-    void swap(Guid& guid0, Guid& guid1);
-    
-    template <>
-    struct hash<Guid> {
-        
-        typedef Guid argument_type;
-        typedef std::size_t result_type;
-        
-        result_type operator()(argument_type const& guid) const {
-            std::hash<std::string> hasher;
-            return static_cast<result_type>(hasher(guid.str()));
-        }
-        
-    };
-    
-}; /* namespace std */
-
 namespace memory {
     
     static GuidGenerator generator = GuidGenerator();
@@ -80,6 +60,8 @@ namespace memory {
             return RefCount<Target>(
                 new Target(std::forward<Args>(args)...));
         }
+        
+        RefCount() = default;
         
         explicit RefCount(Target *o)
             :object(o), deleter(Deleter{})
@@ -144,9 +126,9 @@ namespace memory {
             return H;
         }
         
-        void swap(RefCount& other) noexcept {
+        void swap(RefCount& other) {
             using std::swap;
-            swap(other.guid, guid);
+            guid.swap(other.guid);
             swap(other.object, object);
             swap(other.deleter, deleter);
         }

@@ -3,15 +3,6 @@
 #include <algorithm>
 #include <libimread/ext/memory/refcount.hh>
 
-namespace std {
-    
-    template <>
-    void swap(Guid& guid0, Guid& guid1) {
-        guid0.swap(guid1);
-    }
-    
-}; /* namespace std */
-
 namespace memory {
     
     void garbageday() {

@@ -23,7 +23,6 @@ THE SOFTWARE.
 */
 
 #include <cstring>
-#include <utility>
 #include "guid.h"
 
 #ifdef GUID_LIBUUID
@@ -196,8 +195,7 @@ bool Guid::operator!=(const Guid &other) const
 }
 
 void Guid::swap(Guid& other) noexcept {
-    using std::swap;
-    swap(_bytes, other._bytes);
+    _bytes.swap(other._bytes);
 }
 
 
@@ -315,4 +313,14 @@ Guid GuidGenerator::newGuid()
   };
   return bytes;
 }
+
+namespace std {
+    
+    template <>
+    void swap(Guid& guid0, Guid& guid1) {
+        guid0.swap(guid1);
+    }
+    
+}; /* namespace std */
+
 #endif

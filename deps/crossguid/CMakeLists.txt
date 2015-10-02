@@ -25,8 +25,7 @@ set(COMMON_LINK_FLAGS
     -m64)
 
 set(srcs
-    "guid.cpp"
-    "test.cpp")
+    "guid.cpp")
 
 foreach(FLAG IN LISTS ${COMMON_LINK_FLAGS})
 
@@ -37,8 +36,7 @@ foreach(FLAG IN LISTS ${COMMON_LINK_FLAGS})
 endforeach()
 
 set(hdrs
-    "guid.h"
-    "test.h")
+    "guid.h")
 
 # add_library(libguid STATIC ${srcs} ${hdrs})
 add_library(guid SHARED ${srcs} ${hdrs})
@@ -55,3 +53,5 @@ target_link_libraries(guid
 install(TARGETS guid DESTINATION lib)
 install(DIRECTORY ./ DESTINATION include/libguid
     FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ./ DESTINATION include/libguid
+    FILES_MATCHING PATTERN "*.hh")
