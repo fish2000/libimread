@@ -104,10 +104,6 @@ namespace memory {
             RefCount(other).swap(*this);
             return *this;
         }
-        RefCount &operator=(RefCount&& other) {
-            other.swap(*this);
-            return *this;
-        }
         
         Target* operator->() const { return  object; }
         Target  operator* () const { return *object; }

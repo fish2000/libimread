@@ -309,23 +309,9 @@ namespace objc {
                 retain();
             }
         
-        id(objc::id&& other)
-            :self(other.self)
-            {
-                retain();
-                //other.release();
-            }
-        
         ~id() { release(); }
         
         id &operator=(const objc::id& other) {
-            if (this != &other) {
-                objc::id(other).swap(*this);
-            }
-            return *this;
-        }
-        
-        id &operator=(objc::id&& other) {
             if (this != &other) {
                 objc::id(other).swap(*this);
             }
