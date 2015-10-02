@@ -1,6 +1,6 @@
 
 add_subdirectory(crossguid)
-add_subdirectory(docopt)
+# add_subdirectory(docopt)
 add_subdirectory(iod)
 add_subdirectory(MABlockClosure)
 add_subdirectory(SG14)

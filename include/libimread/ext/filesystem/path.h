@@ -64,7 +64,7 @@ namespace filesystem {
         /// ... these are shortcuts that wrap calls to ::opendir() and ::fopen(), respectively;
         /// so you can be like:
         ///
-        ///     filesystem::directory dir = ddopen("the/path/to/it/");
+        ///     filesystem::directory dir = detail::ddopen("the/path/to/it/");
         ///     /// dir will auto-close on scope exit
         ///     ::some_posix_func_that_wants_a_dirhandle(dir.get());
         ///     
@@ -74,7 +74,8 @@ namespace filesystem {
         filesystem::directory ddopen(const path &p);
         filesystem::file ffopen(const std::string &s, mode m = mode::READ);
         
-        /// get the temporary directory via std::getenv() and guesswork
+        /// returns a C-style string containing the temporary directory,
+        // using std::getenv() and some guesswork -- originally cribbed from boost
         const char *tmpdir() noexcept;
         
     }
@@ -95,16 +96,16 @@ namespace filesystem {
                 ,m_absolute(false)
                 {}
             
-            path(const path& path)
+            path(const path& p)
                 :m_type(native_path)
-                ,m_path(path.m_path)
-                ,m_absolute(path.m_absolute)
+                ,m_path(p.m_path)
+                ,m_absolute(p.m_absolute)
                 {}
             
-            path(path&& path)
+            path(path&& p)
                 :m_type(native_path)
-                ,m_path(std::move(path.m_path))
-                ,m_absolute(path.m_absolute)
+                ,m_path(std::move(p.m_path))
+                ,m_absolute(p.m_absolute)
                 {}
             
             path(char *st)              { set(st); }
@@ -188,10 +189,11 @@ namespace filesystem {
             ///     b) pass a string (C-style or std::string) with a glob with which to filter the list, or;
             ///     c) pass a std::regex (optionally case-sensitive) for fine-grained iterator-based filtering.
             /// ... in all cases, you can specify a trailing boolean to ensure the paths you get back are absolute.
-            std::vector<path> list(                                                         bool full_paths=false) const;
-            std::vector<path> list(const char *pattern,                                     bool full_paths=false) const;
-            std::vector<path> list(const std::string &pattern,                              bool full_paths=false) const;
-            std::vector<path> list(const std::regex &pattern,   bool case_sensitive=false,  bool full_paths=false) const;
+            std::vector<path> list(                            bool full_paths=false) const;
+            std::vector<path> list(const char *pattern,        bool full_paths=false) const;
+            std::vector<path> list(const std::string &pattern, bool full_paths=false) const;
+            std::vector<path> list(const std::regex &pattern,
+                                   bool case_sensitive=false,  bool full_paths=false) const;
             
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
             template <typename P, typename G> inline
@@ -250,7 +252,7 @@ namespace filesystem {
             path join(const path &other) const {
                 if (other.m_absolute) {
                     imread_raise(FileSystemError,
-                        "path::join(): Expected a relative path!");
+                        "path::join() expects a relative-path RHS");
                 }
                 
                 path result(*this);
@@ -281,6 +283,7 @@ namespace filesystem {
                 return path(std::forward<P>(one)) / path(std::forward<Q>(theother));
             }
             
+            /// Simple string-append for the trailing path segment
             path append(const std::string& appendix) const {
                 path out = path(*this);
                 std::string::size_type N = out.m_path.size() - 1;
@@ -288,10 +291,18 @@ namespace filesystem {
                 return out;
             }
             
+            /// operator overloads for string-appending -- like so:
+            ///     path p = "/yo/dogg";
+            ///     path q = p + "_i_heard";
+            ///     path r = q + "_you_dont_necessarily_like";
+            ///     path s = r + "_segment_based_append_operations";
             path operator+(const path& other) const { return append(other.str()); }
             path operator+(const char* other) const { return append(std::string(other)); }
             path operator+(const std::string& other) const { return append(other); }
             
+            /// Static forwarder for path::append<P, Q>(p, q) --
+            /// you *get* this by now, rite? It's just like some shorthand for
+            ///     path p = path::append(p, ".newFileExt"); /// OR WHATEVER DUDE SRSLY UGH
             template <typename P, typename Q> inline
             static path append(P&& one, Q&& theother) {
                 return path(std::forward<P>(one)) + std::forward<Q>(theother);
@@ -335,26 +346,26 @@ namespace filesystem {
             /// ... and here, we have the requisite assign operators
             path &operator=(const std::string &str) { set(str); return *this; }
             path &operator=(const char *str)        { set(str); return *this; }
-            path &operator=(const path &path) {
-                m_type = native_path;
-                m_path = path.m_path;
-                m_absolute = path.m_absolute;
+            path &operator=(const path& p) {
+                if (!compare(p, *this)) {
+                    path(p).swap(*this);
+                }
                 return *this;
             }
-            path &operator=(path &&path) {
+            path &operator=(path&& p) {
                 m_type = native_path;
-                m_absolute = path.m_absolute;
-                if (this != &path) {
-                    m_path = std::move(path.m_path);
+                m_absolute = p.m_absolute;
+                if (!compare(p, *this)) {
+                    m_path = std::move(p.m_path);
                 } else {
-                    m_path = path.m_path;
+                    m_path = p.m_path;
                 }
                 return *this;
             }
             
             /// Stringify the path to an ostream
-            friend std::ostream &operator<<(std::ostream &os, const path &path) {
-                os << path.str();
+            friend std::ostream &operator<<(std::ostream &os, const path &p) {
+                os << p.str();
                 return os;
             }
             
@@ -372,6 +383,9 @@ namespace filesystem {
             static std::size_t hash(P&& p) {
                 return path(std::forward<P>(p)).hash();
             }
+            
+            /// no-except member swap
+            void swap(path& other) noexcept;
             
         protected:
             static std::vector<std::string> tokenize(const std::string &source, const std::string &delim) {
@@ -430,6 +444,9 @@ namespace filesystem {
 }; /* namespace filesystem */
 
 namespace std {
+    
+    template <>
+    void swap(filesystem::path& p0, filesystem::path& p1);
     
     /// std::hash specialization for filesystem::path
     /// ... following the recipe found here:

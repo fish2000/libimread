@@ -33,17 +33,11 @@ namespace test {
                 :siz(other.siz), bytes(other.bytes)
                 {}
             
-            virtual ~ByteHeap() {
-                delete[] bytes;
-            }
+            virtual ~ByteHeap() { delete[] bytes; }
+            std::size_t size() const noexcept { return siz; }
+            string_t bytestring() const { return string_t(bytes); }
             
-            std::size_t size() { return siz; }
-            
-            string_t bytestring() {
-                return string_t(bytes);
-            }
-            
-            vector_t bytevector() {
+            vector_t bytevector() const {
                 vector_t out(siz);
                 for (auto b : bytes) {
                     out.push_back(b);

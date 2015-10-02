@@ -12,6 +12,9 @@ namespace filesystem {
     
     namespace detail {
         
+        using stat_t = struct stat;
+        using dirent_t = struct dirent;
+        
         filesystem::directory ddopen(const char *c) {
             return filesystem::directory(::opendir(path::absolute(c).c_str()));
         }
@@ -49,7 +52,8 @@ namespace filesystem {
             set(fdpath);
         } else {
             imread_raise(FileSystemError,
-                "Internal error when ::fnctl(fd, F_GETPATH, fdpath) returned -1");
+                "Internal error: -1 returned by ::fnctl(descriptor, F_GETPATH, fdpath)",
+                "where fdpath = ", fdpath);
         }
     }
     
@@ -100,8 +104,8 @@ namespace filesystem {
     bool path::compare_lexical(const path &other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
-        if (::realpath(c_str(),         raw_self)  == NULL) { return false; }
-        if (::realpath(other.c_str(),   raw_other) == NULL) { return false; }
+        if (::realpath(c_str(),       raw_self)  == NULL) { return false; }
+        if (::realpath(other.c_str(), raw_other) == NULL) { return false; }
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
@@ -121,15 +125,21 @@ namespace filesystem {
             directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
-                    "Internal error in opendir():", strerror(errno));
+                    "Internal error in opendir():", strerror(errno),
+                    "For path:", str());
             }
-            struct dirent *entp;
+            detail::dirent_t *entp;
             while ((entp = ::readdir(d.get())) != NULL) {
                 if (std::strncmp(entp->d_name, ".", 1) == 0)   { continue; }
                 if (std::strncmp(entp->d_name, "..", 2) == 0)  { continue; }
-                if (entp->d_type == DT_DIR || entp->d_type == DT_REG || entp->d_type == DT_LNK) {
-                    /// ... it's either a directory, a regular file, or a symbolic link
-                    out.push_back(full_paths ? abspath/entp->d_name : path(entp->d_name));
+                /// ... it's either a directory, a regular file, or a symbolic link
+                switch (entp->d_type) {
+                    case DT_DIR:
+                    case DT_REG:
+                    case DT_LNK:
+                        out.push_back(full_paths ? abspath/entp->d_name : path(entp->d_name));
+                    default:
+                        continue;
                 }
             }
         } /// scope exit for d
@@ -142,11 +152,11 @@ namespace filesystem {
         /// list files with glob
         if (!pattern) {
             imread_raise(FileSystemError,
-                "No pattern provided for listing:", str());
+                "Called path::list() with false-y pattern pointer on path:", str());
         }
         if (!is_directory()) {
             imread_raise(FileSystemError,
-                "Can't list files from a non-directory:", str());
+                "Bad call to path::list() from a non-directory:", str());
         }
         path abspath = make_absolute();
         glob_t g = {0};
@@ -183,18 +193,18 @@ namespace filesystem {
     }
     
     bool path::exists() const {
-        struct stat sb;
+        detail::stat_t sb;
         return ::stat(c_str(), &sb) == 0;
     }
     
     bool path::is_file() const {
-        struct stat sb;
+        detail::stat_t sb;
         if (::stat(c_str(), &sb)) { return false; }
         return S_ISREG(sb.st_mode);
     }
     
     bool path::is_directory() const {
-        struct stat sb;
+        detail::stat_t sb;
         if (::stat(c_str(), &sb)) { return false; }
         return S_ISDIR(sb.st_mode);
     }
@@ -214,8 +224,22 @@ namespace filesystem {
         return path(temp);
     }
     
+    void path::swap(path& other) noexcept {
+        using std::swap;
+        m_path.swap(other.m_path);
+        swap(m_absolute, other.m_absolute);
+    }
     
     /// define static mutex, as declared in switchdir struct:
     std::mutex switchdir::mute;
     
-}
+} /* namespace filesystem */
+
+namespace std {
+    
+    template <>
+    void swap(filesystem::path& p0, filesystem::path& p1) {
+        p0.swap(p1);
+    }
+    
+}; /* namespace std */

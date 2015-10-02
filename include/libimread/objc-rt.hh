@@ -116,25 +116,32 @@ namespace objc {
             :sel(::NSSelectorFromString(name))
             {}
         
+        selector(const objc::selector& other)
+            :sel(other.sel)
+            {}
+        selector(objc::selector&& other)
+            :sel(other.sel)
+            {}
+        
         objc::selector& operator=(objc::selector other) {
-            other.swap(*this);
+            objc::selector(other).swap(*this);
             return *this;
         }
         objc::selector& operator=(types::selector other) {
-            std::swap(this->sel, other);
+            objc::selector(other).swap(*this);
             return *this;
         }
         
-        bool operator==(const objc::selector &s) {
+        bool operator==(const objc::selector &s) const {
             return ::sel_isEqual(sel, s.sel) == YES;
         }
-        bool operator!=(const objc::selector &s) {
+        bool operator!=(const objc::selector &s) const {
             return ::sel_isEqual(sel, s.sel) == NO;
         }
-        bool operator==(const types::selector &s) {
+        bool operator==(const types::selector &s) const {
             return ::sel_isEqual(sel, s) == YES;
         }
-        bool operator!=(const types::selector &s) {
+        bool operator!=(const types::selector &s) const {
             return ::sel_isEqual(sel, s) == NO;
         }
         
@@ -151,16 +158,20 @@ namespace objc {
         }
         
         void swap(objc::selector& other) noexcept {
-            std::swap(this->sel, other.sel);
+            using std::swap;
+            using objc::swap;
+            swap(this->sel, other.sel);
         }
         void swap(types::selector& other) noexcept {
-            std::swap(this->sel, other);
+            using std::swap;
+            using objc::swap;
+            swap(this->sel, other);
         }
         
-        operator types::selector() { return sel; }
-        operator std::string() { return str(); }
-        operator const char*() { return c_str(); }
-        operator char*() { return const_cast<char*>(c_str()); }
+        operator types::selector() const { return sel; }
+        operator std::string() const { return str(); }
+        operator const char*() const { return c_str(); }
+        operator char*() const { return const_cast<char*>(c_str()); }
         
         static objc::selector register_name(const std::string &name) {
             return objc::selector(name);
@@ -328,9 +339,9 @@ namespace objc {
             return *this;
         }
         
-        operator types::ID()     const { return self; }
-        types::ID operator*()    const { return self; }
-        types::ID operator->()   const { return self; }
+        operator types::ID()   const { return self; }
+        types::ID operator*()  const { return self; }
+        types::ID operator->() const { return self; }
         
         bool operator==(const objc::id& other) const {
             return [self isEqual:other.self] == YES;
@@ -354,9 +365,9 @@ namespace objc {
             return [self respondsToSelector:s] == YES;
         }
         
-        inline void retain() const          { if (self != nil) { [self retain]; } }
-        inline void release() const         { if (self != nil) { [self release]; } }
-        inline void autorelease() const     { if (self != nil) { [self autorelease]; } }
+        inline void retain() const      { if (self != nil) { [self retain]; } }
+        inline void release() const     { if (self != nil) { [self release]; } }
+        inline void autorelease() const { if (self != nil) { [self autorelease]; } }
         
         template <typename ...Args>
         types::ID operator()(types::selector s, Args&&... args) {
@@ -367,14 +378,14 @@ namespace objc {
             return out;
         }
         
-        bool operator[](types::selector s) const        { return responds_to(s); }
-        bool operator[](const objc::selector &s) const  { return responds_to(s.sel); }
-        bool operator[](const char *s) const            { return responds_to(::sel_registerName(s)); }
-        bool operator[](const std::string &s) const     { return responds_to(::sel_registerName(s.c_str())); }
-        bool operator[](NSString *s) const              { return responds_to(::NSSelectorFromString(s)); }
+        bool operator[](types::selector s) const       { return responds_to(s); }
+        bool operator[](const objc::selector &s) const { return responds_to(s.sel); }
+        bool operator[](const char *s) const           { return responds_to(::sel_registerName(s)); }
+        bool operator[](const std::string &s) const    { return responds_to(::sel_registerName(s.c_str())); }
+        bool operator[](NSString *s) const             { return responds_to(::NSSelectorFromString(s)); }
         
-        inline const char * __cls_name() const          { return ::object_getClassName(self); }
-        static const char * __cls_name(types::ID ii)    { return ::object_getClassName(ii); }
+        inline const char * __cls_name() const         { return ::object_getClassName(self); }
+        static const char * __cls_name(types::ID ii)   { return ::object_getClassName(ii); }
         
         std::string classname() const {
             return std::string(__cls_name());
@@ -396,10 +407,14 @@ namespace objc {
         }
         
         void swap(objc::id& other) noexcept {
-            objc::swap(this->self, other.self);
+            using std::swap;
+            using objc::swap;
+            swap(this->self, other.self);
         }
         void swap(types::ID& other) noexcept {
-            objc::swap(this->self, other);
+            using std::swap;
+            using objc::swap;
+            swap(this->self, other);
         }
         
         /// STATIC METHODS
@@ -502,7 +517,7 @@ namespace objc {
             {}
         
         template <typename ...Args>
-        types::ID send(types::boolean dispatch, Args ...args) {
+        types::ID send(types::boolean dispatch, Args ...args) const {
             arguments<types::ID, Args...> ARGS(args...);
             return ARGS.send(selfref, op);
         }
