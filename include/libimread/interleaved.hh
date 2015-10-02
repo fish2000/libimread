@@ -56,7 +56,7 @@ namespace im {
                 buffer_t buffer;
                 uint8_t *alloc;
                 
-                Contents(buffer_t b, uint8_t *a)
+                explicit Contents(buffer_t b, uint8_t *a)
                     :buffer(b), alloc(a)
                     {}
                 
@@ -99,32 +99,39 @@ namespace im {
             
             /// private default constructor
             InterleavedImage(void)
-                :contents(NULL)
+                :Image(), MetaImage(), contents(NULL)
                 {}
         
         public:
             
-            explicit InterleavedImage(int x, int y) { init(x, y); }
-            explicit InterleavedImage(buffer_t b)   { init(b); }
+            explicit InterleavedImage(int x, int y)
+                :Image(), MetaImage()
+                {
+                    init(x, y);
+                }
+            explicit InterleavedImage(buffer_t b)
+                :Image(), MetaImage()
+                {
+                    init(b);
+                }
             
             InterleavedImage(const InterleavedImage& other)
-                :contents(other.contents)
-                {}
-            InterleavedImage(InterleavedImage&& other)
-                :contents(other.contents)
+                :Image(), MetaImage(), contents(other.contents)
                 {}
             
+            /// NB: is this really necessary?
             virtual ~InterleavedImage() {}
             
             InterleavedImage &operator=(const InterleavedImage& other) {
-                using std::swap;
-                swap(other.contents, this->contents);
-                return *this;
-            }
-            
-            InterleavedImage &operator=(InterleavedImage&& other) {
-                using std::swap;
-                swap(other.contents, this->contents);
+                /// allegedly, the whole 'using-followed-by-naked-swap' crazy talk is a trick:
+                /// a ruse to get around the inflexibility of partially-specialized-template bindings
+                /// and allow the swap call to get picked up as defined elsewhere -- like for example
+                /// the 'friend void RefCount::swap(RefCount&, RefCount&)' func we put in RefCount --
+                /// during overload resolution. Which OK yeah if you also think that that
+                /// is a fucking weird way to do things then >PPFFFFT< yeah I totally feel you dogg
+                // using std::swap;
+                // swap(other.contents, this->contents);
+                contents = other.contents; /// COPY-AND-SWAPDOGG
                 return *this;
             }
             
@@ -146,34 +153,40 @@ namespace im {
                 imread_raise_default(NotImplementedError);
             }
             
-            explicit InterleavedImage(channel_t vals[]) {
-                init(sizeof(vals) / sizeof(channel_t));
-                for (int idx = 0; idx < sizeof(vals); idx++) {
-                    (*this)(idx) = vals[idx];
-                }
-            }
-            
-            explicit InterleavedImage(composite_list_t list) {
-                int idx = 0;
-                init(list.size());
-                for (auto it = list.begin(), item = *it; it != list.end(); ++it) {
-                    Color color = Color(static_cast<composite_t>(*it));
-                    (*this)(idx) = color.composite;
-                    idx++;
-                }
-            }
-            
-            /*
-            explicit InterleavedImage(channel_listlist_t list) {
-                int idx = 0;
-                init(list.size() * C);
-                for (auto it = list.begin(), item = *it; it != list.end(); ++it) {
-                    for (auto itit = item.begin(); itit != item.end(); ++itit) {
-                        (*this)(idx) = static_cast<channel_t>(*itit);
-                        ++idx;
+            explicit InterleavedImage(channel_t vals[])
+                :Image(), MetaImage()
+                {
+                    init(sizeof(vals) / sizeof(channel_t));
+                    for (int idx = 0; idx < sizeof(vals); idx++) {
+                        (*this)(idx) = vals[idx];
                     }
                 }
-            }
+            
+            explicit InterleavedImage(composite_list_t list)
+                :Image(), MetaImage()
+                {
+                    int idx = 0;
+                    init(list.size());
+                    for (auto it = list.begin(), item = *it; it != list.end(); ++it) {
+                        Color color = Color(static_cast<composite_t>(*it));
+                        (*this)(idx) = color.composite;
+                        idx++;
+                    }
+                }
+            
+            /*
+            explicit InterleavedImage(channel_listlist_t list)
+                :Image(), MetaImage()
+                {
+                    int idx = 0;
+                    init(list.size() * C);
+                    for (auto it = list.begin(), item = *it; it != list.end(); ++it) {
+                        for (auto itit = item.begin(); itit != item.end(); ++itit) {
+                            (*this)(idx) = static_cast<channel_t>(*itit);
+                            ++idx;
+                        }
+                    }
+                }
             */
             
             composite_t &operator()(int x, int y = 0, int z = 0, int w = 0) {
@@ -275,6 +288,7 @@ namespace im {
             using toRGBA = im::color::Convert<Color,    im::color::RGBA>;
             using toMono = im::color::Convert<Color,    im::color::Monochrome>;
             
+            /// NB: RETHINK ACCESSORS HERE, MOTHERFUCKER
             template <typename T = byte> inline
             pix::accessor<T> access() const {
                 return pix::accessor<T>(
@@ -299,6 +313,7 @@ namespace im {
                 
                 // WTF("Converting...");
                 
+                /// NB: this next bit is probably way fucked and should get totally rewrote, totally
                 out_t *dest;
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
@@ -316,12 +331,16 @@ namespace im {
             template <typename DestColor>
             operator InterleavedImage<DestColor>() const {
                 using dest_composite_t = typename DestColor::composite_t;
+                
                 const void* data = conversion_impl<im::color::Convert<Color, DestColor>>();
+                
                 buffer_t b = {0};
                 b.dev = 0;
                 b.host = new uint8_t[size()*sizeof(dest_composite_t)+40];
+                
                 std::memcpy((void *)b.host, (const dest_composite_t*)data, size());
                 delete[] (const uint32_t*)data;
+                
                 b.extent[0] = extent(0);
                 b.extent[1] = extent(1);
                 b.extent[2] = DestColor::N;
@@ -333,6 +352,7 @@ namespace im {
                 b.host_dirty = true;
                 b.dev_dirty = false;
                 b.elem_size = sizeof(dest_composite_t);
+                
                 // WTF("Returning from conversion operator");
                 return InterleavedImage<DestColor>(b);
             }
