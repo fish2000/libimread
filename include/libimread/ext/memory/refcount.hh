@@ -85,7 +85,7 @@ namespace memory {
         
         void init() {
             guid = generator.newGuid();
-            refcounts[guid].store(0);
+            refcounts[guid].store(1);
         }
         
         virtual ~RefCount() {
