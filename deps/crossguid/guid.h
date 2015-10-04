@@ -110,22 +110,29 @@ class GuidGenerator
 #endif
 };
 
-namespace std {
-    
-    template <>
-    void swap(Guid& guid0, Guid& guid1);
-    
-    template <>
-    struct hash<Guid> {
-        
-        typedef Guid argument_type;
-        typedef std::size_t result_type;
-        
-        result_type operator()(argument_type const& guid) const {
-            std::hash<std::string> hasher;
-            return static_cast<result_type>(hasher(guid.str()));
-        }
-        
-    };
-    
+namespace std
+{
+
+  // Template specialization for std::swap<Guid>() --
+  // See guid.cpp for the function definition
+  template <>
+  void swap(Guid &guid0, Guid &guid1);
+
+  // Specialization for std::hash<Guid> -- this implementation
+  // uses std::hash<std::string> on the stringification of the guid
+  // to calculate the hash
+  template <>
+  struct hash<Guid>
+  {
+
+    typedef Guid argument_type;
+    typedef std::size_t result_type;
+
+    result_type operator()(argument_type const &guid) const
+    {
+      std::hash<std::string> hasher;
+      return static_cast<result_type>(hasher(guid.str()));
+    }
+  };
+
 }; /* namespace std */

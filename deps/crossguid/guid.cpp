@@ -69,36 +69,38 @@ ostream &operator<<(ostream &s, const Guid &guid)
     << setw(2) << (int)guid._bytes[15];
 }
 
-std::string Guid::str() const {
-    char   one[10],   two[6],
-          three[6],  four[6],
-                     five[14];
-    
-    std::snprintf(one,  10, "%02x%02x%02x%02x",         _bytes[0],  _bytes[1],
+std::string Guid::str() const
+{
+  char  one[  10 ],   two[ 6 ],
+        three[ 6 ],  four[ 6 ],
+                    five[ 14 ];
+  
+  std::snprintf(one,   10, "%02x%02x%02x%02x",          _bytes[0],  _bytes[1],
                                                         _bytes[2],  _bytes[3]);
-    std::snprintf(two,   6, "%02x%02x",                 _bytes[4],  _bytes[5]);
-    std::snprintf(three, 6, "%02x%02x",                 _bytes[6],  _bytes[7]);
-    std::snprintf(four,  6, "%02x%02x",                 _bytes[8],  _bytes[9]);
-    std::snprintf(five, 14, "%02x%02x%02x%02x%02x%02x", _bytes[10], _bytes[11], _bytes[12],
+  std::snprintf(two,    6, "%02x%02x",                  _bytes[4],  _bytes[5]);
+  std::snprintf(three,  6, "%02x%02x",                  _bytes[6],  _bytes[7]);
+  std::snprintf(four,   6, "%02x%02x",                  _bytes[8],  _bytes[9]);
+  std::snprintf(five,  14, "%02x%02x%02x%02x%02x%02x",  _bytes[10], _bytes[11], _bytes[12],
                                                         _bytes[13], _bytes[14], _bytes[15]);
-    
-    const std::string S("-");
-    std::string out(one);
-    
-    out += S + two;
-    out += S + three;
-    out += S + four;
-    out += S + five;
-    
-    return out;
+  const std::string S("-");
+  std::string out(one);
+  
+  out += S + two;
+  out += S + three;
+  out += S + four;
+  out += S + five;
+  
+  return out;
 }
 
-const char *Guid::c_str() const {
-    return str().c_str();
+const char *Guid::c_str() const
+{
+  return str().c_str();
 }
 
-Guid::operator std::string() const {
-    return str();
+Guid::operator std::string() const
+{
+  return str();
 }
 
 // create a guid from vector of bytes
@@ -194,8 +196,9 @@ bool Guid::operator!=(const Guid &other) const
   return !((*this) == other);
 }
 
-void Guid::swap(Guid& other) noexcept {
-    _bytes.swap(other._bytes);
+void Guid::swap(Guid& other) noexcept
+{
+  _bytes.swap(other._bytes);
 }
 
 
@@ -313,14 +316,15 @@ Guid GuidGenerator::newGuid()
   };
   return bytes;
 }
-
-namespace std {
-    
-    template <>
-    void swap(Guid& guid0, Guid& guid1) {
-        guid0.swap(guid1);
-    }
-    
-}; /* namespace std */
-
 #endif
+
+namespace std
+{
+  
+  template <>
+  void swap(Guid& guid0, Guid& guid1)
+  {
+    guid0.swap(guid1);
+  }
+  
+}; /* namespace std */

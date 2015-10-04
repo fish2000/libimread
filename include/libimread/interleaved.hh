@@ -120,7 +120,9 @@ namespace im {
                 {}
             
             /// NB: is this really necessary?
-            virtual ~InterleavedImage() {}
+            virtual ~InterleavedImage() {
+                // contents.release();
+            }
             
             InterleavedImage &operator=(const InterleavedImage& other) {
                 /// allegedly, the whole 'using-followed-by-naked-swap' crazy talk is a trick:
@@ -129,9 +131,9 @@ namespace im {
                 /// the 'friend void RefCount::swap(RefCount&, RefCount&)' func we put in RefCount --
                 /// during overload resolution. Which OK yeah if you also think that that
                 /// is a fucking weird way to do things then >PPFFFFT< yeah I totally feel you dogg
-                // using std::swap;
-                // swap(other.contents, this->contents);
-                contents = other.contents; /// COPY-AND-SWAPDOGG
+                using std::swap;
+                swap(other.contents, this->contents);
+                // contents = other.contents; /// COPY-AND-SWAPDOGG
                 return *this;
             }
             
@@ -311,7 +313,7 @@ namespace im {
                 const int w = width(),
                           h = height();
                 
-                // WTF("Converting...");
+                WTF("Converting...");
                 
                 /// NB: this next bit is probably way fucked and should get totally rewrote, totally
                 out_t *dest;
@@ -324,7 +326,7 @@ namespace im {
                     }
                 }
                 
-                // WTF("Returning from conversion");
+                WTF("Returning from conversion");
                 return (const void*)data;
             };
             
@@ -353,7 +355,7 @@ namespace im {
                 b.dev_dirty = false;
                 b.elem_size = sizeof(dest_composite_t);
                 
-                // WTF("Returning from conversion operator");
+                WTF("Returning from conversion operator");
                 return InterleavedImage<DestColor>(b);
             }
             

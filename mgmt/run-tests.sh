@@ -5,6 +5,7 @@ echo "*** TEST RUN COMMENCING"
 : ${THISDIR:=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)}
 : ${PRAXONS:="${THISDIR}/praxons"}
 source "${PRAXONS}/anybar.sh"
+source "${PRAXONS}/gmalloc.sh"
 
 PROJECT_PATH="/Users/fish/Dropbox/libimread"
 

@@ -88,7 +88,7 @@ namespace memory {
             refcounts[guid].store(1);
         }
         
-        virtual ~RefCount() {
+        ~RefCount() {
             release();
         }
         
@@ -108,7 +108,7 @@ namespace memory {
         Target* operator->() const { return  object; }
         Target  operator* () const { return *object; }
         
-        inline void gc() {
+        void gc() {
             if (refcounts[guid].load() < 1) {
                 deleter(object);
             }
