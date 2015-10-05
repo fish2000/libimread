@@ -41,6 +41,7 @@ namespace im {
         static constexpr std::size_t D = Dimensions;
         using array_t = std::array<std::size_t, D>;
         using index_t = std::make_index_sequence<D>;
+        
         std::size_t elem_size;
         array_t extents;
         array_t strides;
@@ -70,11 +71,6 @@ namespace im {
         std::size_t size() const {
             return size_impl(index_t());
         }
-        
-        // template <typename DestColor>
-        // operator Meta<DestColor>() const {
-        //     return Meta<DestColor>(this);
-        // }
         
         template <std::size_t ...I> inline
         std::size_t size_impl(std::index_sequence<I...>) const {
@@ -124,6 +120,7 @@ namespace im {
                     new channel_t[meta.size()+P],
                     deleter_t());
             }
+            
             void init(Contents c, Meta m) {
                 meta = m;
                 contents = c;
@@ -195,12 +192,11 @@ namespace im {
                     }
                 }
             
-            /*
             explicit InterleavedImage(composite_list_t list)
                 :Image(), MetaImage()
                 {
                     int idx = 0;
-                    init(list.size());
+                    init(list.size(), 1);
                     for (auto it = list.begin(), item = *it; it != list.end(); ++it) {
                         Color color = Color(static_cast<composite_t>(*it));
                         (*this)(idx) = color.composite;
@@ -212,7 +208,7 @@ namespace im {
                 :Image(), MetaImage()
                 {
                     int idx = 0;
-                    init(list.size() * C);
+                    init(list.size(), 1, C);
                     for (auto it = list.begin(), item = *it; it != list.end(); ++it) {
                         for (auto itit = item.begin(); itit != item.end(); ++itit) {
                             (*this)(idx) = static_cast<channel_t>(*itit);
@@ -220,7 +216,6 @@ namespace im {
                         }
                     }
                 }
-            */
             
             channel_t &operator()(int x, int y = 0, int z = 0, int w = 0) {
                 channel_t *ptr = contents.get();
@@ -254,12 +249,12 @@ namespace im {
             void set(int x, int y, composite_t composite) {
                 (*this)(x, y) = composite;
             }
-            // void set(int x, int y, channel_list_t&& list) {
-            //     set(x, y, Color(std::forward<channel_list_t>(list)));
-            // }
-            // void set(int x, int y, array_t&& array) {
-            //     set(x, y, Color(std::forward<array_t>(array)));
-            // }
+            void set(int x, int y, channel_list_t&& list) {
+                set(x, y, Color(std::forward<channel_list_t>(list)));
+            }
+            void set(int x, int y, array_t&& array) {
+                set(x, y, Color(std::forward<array_t>(array)));
+            }
             
             inline Color get(int x, int y) const {
                 Color out;
@@ -474,30 +469,8 @@ namespace im {
             InterleavedFactory factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
+            std::shared_ptr<Image> output(format->read(input.get(), &factory, opts));
             
-            // WTF("About to apply dynamic_cast<HybridImage<T>&> to output:",
-            //     FF("WIDTH = %i, HEIGHT = %i, DEPTH = %i, NDIMS = %i", output->dim(0),
-            //                                                           output->dim(1),
-            //                                                           output->dim(2),
-            //                                                           output->ndims()));
-            
-            // int depth = output->dim(2);
-            // if (depth == 1) {
-            //     InterleavedImage<Color> iimage(
-            //         dynamic_cast<InterleavedImage<color::Monochrome>&>(
-            //             *output.get()));
-            //     iimage.set_host_dirty();
-            //     return iimage;
-            //
-            // } else if (depth == 3) {
-            //     InterleavedImage<Color> iimage(
-            //         dynamic_cast<InterleavedImage<color::RGB>&>(
-            //             *output.get()));
-            //     iimage.set_host_dirty();
-            //     return iimage;
-            // }
-            //
             try {
                 InterleavedImage<Color> iimage(
                     dynamic_cast<InterleavedImage<color::RGBA>&>(
@@ -513,7 +486,7 @@ namespace im {
             
         }
         
-        template <typename Color = color::RGB> inline
+        template <typename Color = color::RGBA> inline
         void write(InterleavedImage<Color> *input, const std::string &filename,
                    const options_map &opts = interleaved_default_opts) {
             if (input->dim(2) > 3) { return; }
@@ -522,7 +495,7 @@ namespace im {
             format->write(dynamic_cast<Image&>(input), output.get(), opts);
         }
         
-        template <typename Color = color::RGB> inline
+        template <typename Color = color::RGBA> inline
         void write(std::unique_ptr<Image> input, const std::string &filename,
                    const options_map &opts = interleaved_default_opts) {
             write<Color>(dynamic_cast<InterleavedImage<Color>>(input.get()),
@@ -536,7 +509,7 @@ namespace im {
             format->write_multi(input, output.get(), opts);
         }
         
-        template <typename Format, typename Color = color::RGB> inline
+        template <typename Format, typename Color = color::RGBA> inline
         std::string tmpwrite(InterleavedImage<Color> &input,
                              const options_map &opts = interleaved_default_opts) {
             if (input.dim(2) > 3) { return ""; }

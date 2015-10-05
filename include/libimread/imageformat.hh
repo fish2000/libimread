@@ -80,8 +80,8 @@ namespace im {
             }
             
             virtual std::unique_ptr<ImageList> read_multi(byte_source *src,
-                                                           ImageFactory *factory,
-                                                           const options_map &opts) {
+                                                          ImageFactory *factory,
+                                                          const options_map &opts) {
                 imread_raise_default(NotImplementedError);
             }
             
