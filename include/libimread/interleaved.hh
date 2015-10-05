@@ -95,15 +95,21 @@ namespace im {
                     ,host_dirty(false), dev_dirty(false)
                     {}
                 
-                explicit Contents(component_t* bytes, std::size_t size = 0,
+                explicit Contents(component_t* bytes, std::size_t size,
                                   uint64_t dev_id = 0)
                     :host(bytes, size), dev(dev_id)
                     ,host_dirty(false), dev_dirty(false)
                     {}
                 
-                explicit Contents(std::size_t size = 0,
+                explicit Contents(std::size_t size,
                                   uint64_t dev_id = 0)
                     :host(size, static_cast<component_t>(0)), dev(dev_id)
+                    ,host_dirty(false), dev_dirty(false)
+                    {}
+                
+                explicit Contents(const bytestring_t& bytes,
+                                  uint64_t dev_id = 0)
+                    :host(bytes), dev(dev_id)
                     ,host_dirty(false), dev_dirty(false)
                     {}
                 
