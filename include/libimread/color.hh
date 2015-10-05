@@ -199,7 +199,7 @@ namespace im {
             return stream.str();
         }
         
-        const array_t to_array() const {
+        array_t to_array() const {
             return array_impl(index_t());
         }
         
@@ -250,7 +250,7 @@ namespace im {
         struct Convert<Color, DestColor> : public ConverterBase<Color, DestColor>
     
     #define CONVERTER_OP(argname)                                                   \
-        inline dest_color_t operator()(const component_t& argname) const
+        inline dest_color_t operator()(component_t&& argname) const
     
     namespace color {
         using Monochrome = UniformColor<meta::Mono, uint16_t, uint8_t>;
