@@ -177,9 +177,7 @@ namespace im {
                 {}
             
             /// NB: is this really necessary?
-            virtual ~InterleavedImage() {
-                // contents.release();
-            }
+            virtual ~InterleavedImage() {}
             
             InterleavedImage &operator=(const InterleavedImage& other) {
                 /// allegedly, the whole 'using-followed-by-naked-swap' crazy talk is a trick:
