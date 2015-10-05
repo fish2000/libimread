@@ -320,23 +320,23 @@ namespace im {
                 
                 Conversion converter;
                 Contents destination = std::shared_ptr<channel_t>(
-                                            new channel_t[meta.size()*meta.size()+P],
+                                            new channel_t[meta.size()+P],
                                             deleter_t());
                 const int w = width(),
                           h = height();
                 
                 WTF("Converting...");
                 
-                // channel_t *data = destination.get();
-                // out_t *dest;
-                // for (int y = 0; y < h; y++) {
-                //     for (int x = 0; x < w; x++) {
-                //         source_array_t source_colors = get(x, y).to_array();
-                //         dest_color_t dest_color = converter(source_colors.data());
-                //         dest = (out_t*)data + (y * x);
-                //         pix::convert(dest_color.composite, *dest);
-                //     }
-                // }
+                channel_t *data = destination.get();
+                channel_t *dest;
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++) {
+                        source_array_t source_colors = get(x, y).to_array();
+                        dest_color_t dest_color = converter(source_colors.data());
+                        dest = data + (y * x);
+                        pix::convert(dest_color.composite, *dest);
+                    }
+                }
                 
                 WTF("Returning from conversion");
                 return destination;
