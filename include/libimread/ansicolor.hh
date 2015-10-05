@@ -15,9 +15,9 @@ namespace ansi {
         FM_BOLD             = 1,
         FM_DIM              = 2,
         FM_UNDERLINE        = 4,
-        // FM_BOLD_OFF         = 1,
-        // FM_DIM_OFF          = 2,
-        // FM_UNDERLINE_OFF    = 4,
+        // FM_BOLD_OFF      = 1,
+        // FM_DIM_OFF       = 2,
+        // FM_UNDERLINE_OFF = 4,
         
         FG_BLACK            = 30,
         FG_RED              = 31,
@@ -46,7 +46,7 @@ namespace ansi {
         private:
             ANSICode code;
         public:
-            explicit ANSI(ANSICode c)
+            explicit constexpr ANSI(ANSICode c)
                 :code(c)
                 {}
             friend std::ostream&

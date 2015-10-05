@@ -32,8 +32,6 @@ namespace im {
     using Halide::Argument;
     using Halide::ExternFuncArgument;
     
-    //using HalUnderscore = Halide::_; /// OMG GUYS THATS MY UNDERSCORE
-    
     template <typename pT>
     class HybridImage : public HalImage<pT>, public Image, public MetaImage {
         public:

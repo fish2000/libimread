@@ -365,8 +365,7 @@ namespace filesystem {
             
             /// Stringify the path to an ostream
             friend std::ostream &operator<<(std::ostream &os, const path &p) {
-                os << p.str();
-                return os;
+                return os << p.str();
             }
             
             /// calculate the hash value for the path

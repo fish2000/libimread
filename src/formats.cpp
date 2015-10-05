@@ -46,8 +46,9 @@ namespace im {
             return format_ptr(new format::NS);
         }
         
-        imread_raise(FormatNotFound, "Format Error:",
-            FF("\tFile format not found for suffix %s", format));
+        imread_raise(FormatNotFound,
+            "Format Error:",
+            "\tFile format not found for suffix:", format);
     }
     
     const char *magic_format(byte_source *src) {

@@ -361,30 +361,23 @@ namespace im {
             }
             
             virtual int ndims() const override {
-                //return InterleavedImage<Color>::dimensions();
-                return 3;
+                return Dimensions;
             }
             
             virtual int dim(int d) const override {
-                return InterleavedImage<Color>::extent(d);
+                return extent(d);
             }
             
             virtual int stride(int s) const override {
-                return InterleavedImage<Color>::stride_(s);
+                return stride_(s);
             }
             
             inline off_t rowp_stride() const {
-                return off_t(InterleavedImage<Color>::stride(1));
+                return off_t(stride(1));
             }
             
             virtual void* rowp(int r) override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
-                channel_t* host = data();
-                host += off_t(r * rowp_stride());
-                return static_cast<void*>(host);
-            }
-            
-            void* rowpc(int r) const {
                 channel_t* host = data();
                 host += off_t(r * rowp_stride());
                 return static_cast<void*>(host);
