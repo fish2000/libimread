@@ -327,16 +327,16 @@ namespace im {
                 
                 WTF("Converting...");
                 
-                channel_t *data = destination.get();
-                out_t *dest;
-                for (int y = 0; y < h; y++) {
-                    for (int x = 0; x < w; x++) {
-                        source_array_t source_colors = get(x, y).to_array();
-                        dest_color_t dest_color = converter(source_colors.data());
-                        dest = (out_t*)data + (y * x);
-                        pix::convert(dest_color.composite, *dest);
-                    }
-                }
+                // channel_t *data = destination.get();
+                // out_t *dest;
+                // for (int y = 0; y < h; y++) {
+                //     for (int x = 0; x < w; x++) {
+                //         source_array_t source_colors = get(x, y).to_array();
+                //         dest_color_t dest_color = converter(source_colors.data());
+                //         dest = (out_t*)data + (y * x);
+                //         pix::convert(dest_color.composite, *dest);
+                //     }
+                // }
                 
                 WTF("Returning from conversion");
                 return destination;
@@ -348,10 +348,9 @@ namespace im {
                 using dest_channel_t = typename DestColor::channel_t;
                 
                 Contents newContents = conversion_impl<im::color::Convert<Color, DestColor>>();
-                
-                Meta newMeta = Meta(extent(0), extent(1),
-                                    DestColor::N,
-                                    sizeof(dest_channel_t));
+                Meta newMeta(extent(0), extent(1),
+                             DestColor::N,
+                             sizeof(dest_channel_t));
                 
                 WTF("Returning from conversion operator");
                 return InterleavedImage<DestColor>(newContents, newMeta);
