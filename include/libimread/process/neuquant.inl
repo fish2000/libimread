@@ -323,7 +323,7 @@ inline void Palette<NCOLORS, NCHANNELS, GREEN_CHANNEL>::ReMap(
     unsigned int pixels = width * height;
     bool sorted = IsSorted();
 
-    if (IsSorted()) {
+    if (sorted) {
         // store the smallest distance we've found in a match (this becomes our
         // search neighborhood)
         unsigned int d_min = NCOLORS;

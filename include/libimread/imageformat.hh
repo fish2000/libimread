@@ -22,7 +22,7 @@ namespace im {
         if (!src->can_seek()) { return false; }
         std::vector<byte> buf;
         buf.resize(n);
-        const int n_read = src->read(&buf.front(), n);
+        const int n_read = static_cast<int>(src->read(&buf.front(), n));
         src->seek_relative(-n_read);
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }

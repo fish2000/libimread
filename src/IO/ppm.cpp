@@ -98,7 +98,6 @@ namespace im {
                 for (int y = 0; y < height; y++) {
                     uint16_t *row = static_cast<uint16_t*>(&data[(y*width)*channels]);
                     for (int x = 0; x < width; x++) {
-                        uint16_t value;
                         for (int c = 0; c < channels; c++) {
                             pix::convert(*row++, im_data[(c*height+y)*width+x]);
                         }

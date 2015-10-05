@@ -33,18 +33,21 @@ namespace im {
     using memory::DefaultDeleter;
     using memory::ArrayDeleter;
     
-    template <typename Color = color::RGBA>
+    template <typename Color = color::RGBA,
+              std::size_t Dimensions = 3>
     class InterleavedImage : public Image, public MetaImage {
         public:
             static constexpr std::size_t C = Color::Meta::channel_count;
+            static constexpr std::size_t D = Dimensions;
             using color_t = Color;
             using nonvalue_t = typename Color::NonValue;
             using component_t = typename Color::component_t;
             using channel_t = typename Color::channel_t;
             using composite_t = typename Color::composite_t;
             
-            using array_t = std::array<channel_t, C>;
-            using index_t = std::make_index_sequence<C>;
+            using array_t = std::array<std::size_t, D>;
+            using index_t = std::make_index_sequence<D>;
+            using bytestring_t = std::basic_string<component_t>;
             
             using channel_list_t = typename Color::channel_list_t;
             using channel_listlist_t = std::initializer_list<channel_list_t>;
@@ -52,18 +55,72 @@ namespace im {
             using composite_listlist_t = std::initializer_list<composite_list_t>;
         
         private:
+            struct Meta {
+                static constexpr std::size_t S = sizeof(component_t);
+                std::size_t elem_size;
+                array_t extents;
+                array_t strides;
+                array_t min = { 0, 0, 0 };
+                
+                explicit Meta(std::size_t x,
+                              std::size_t y,
+                              std::size_t c = C,
+                              std::size_t s = S)
+                    :extents(array_t{ x,     y,   c })
+                    ,strides(array_t{ x*y*s, x*s, s })
+                    ,elem_size(s)
+                {}
+                
+                std::size_t size() const {
+                    return size_impl(index_t());
+                }
+                
+                template <std::size_t ...I> inline
+                std::size_t size_impl(std::index_sequence<I...>) const {
+                    std::size_t out = 1;
+                    unpack { (out *= extents[I])... };
+                    return out;
+                }
+                
+            };
+            
             struct Contents {
+                bool dev_dirty;
+                bool host_dirty;
+                uint64_t dev;
+                bytestring_t host;
+                
+                Contents()
+                    :host(), dev(0)
+                    ,host_dirty(false), dev_dirty(false)
+                    {}
+                
+                explicit Contents(component_t* bytes, std::size_t size = 0,
+                                  uint64_t dev_id = 0)
+                    :host(bytes, size), dev(dev_id)
+                    ,host_dirty(false), dev_dirty(false)
+                    {}
+                
+                explicit Contents(std::size_t size = 0,
+                                  uint64_t dev_id = 0)
+                    :host(size, static_cast<component_t>(0)), dev(dev_id)
+                    ,host_dirty(false), dev_dirty(false)
+                    {}
+                
+            };
+            
+            struct HeapContents {
                 buffer_t buffer;
                 uint8_t *alloc;
                 
-                explicit Contents(buffer_t b, uint8_t *a)
+                explicit HeapContents(buffer_t b, uint8_t *a)
                     :buffer(b), alloc(a)
                     {}
                 
-                ~Contents() { delete[] alloc; }
+                ~HeapContents() { delete[] alloc; }
             };
             
-            using RefContents = RefCount<Contents>;
+            using RefContents = RefCount<HeapContents>;
             RefContents contents;
             
             void init(int x, int y = 0) {

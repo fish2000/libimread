@@ -15,13 +15,13 @@
 
 #include <libimread/ext/pystring.hh>
 
-#ifdef __OBJC__
+//#ifdef __OBJC__
 #import <libimread/ext/categories/NSString+STL.hh>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
-#endif /// __OBJC__
+//#endif /// __OBJC__
 
 namespace objc {
     
