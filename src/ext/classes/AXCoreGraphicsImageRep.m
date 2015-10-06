@@ -1,4 +1,14 @@
-#import <libimread/ext/classes/IMCoreGraphicsImageRep.h>
+// Copyright 2001-2005, 2010-2013 Omni Development, Inc. All rights reserved.
+//
+// I, Alexander Bohn, totally ripped this class off from these talented people:
+//      http://git.io/vc7tO
+//
+// This software may only be used and reproduced according to the
+// terms in the file OmniSourceLicense.html, which should be
+// distributed with this project and can also be found at
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
+
+#import <libimread/ext/classes/AXCoreGraphicsImageRep.h>
 
 #import <Foundation/Foundation.h>
 #import <AppKit/NSGraphics.h>
@@ -23,7 +33,7 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return out;
 }
 
-@implementation IMCoreGraphicsImageRep
+@implementation AXCoreGraphicsImageRep
 
 + (void)initialize {
     OBJC_INITIALIZE;
