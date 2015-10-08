@@ -25,7 +25,9 @@
                                                colorSpaceName:space];
 }
 
+__attribute__((cf_returns_not_retained))
 CGImageRef CGImageFromInterleaved(const InterleavedImage& interleaved,
+                                  __attribute__((cf_consumed))
                                   CGColorSpaceRef colorspace) {
     CGContextRef context = CGBitmapContextCreate(
         interleaved.data(),
