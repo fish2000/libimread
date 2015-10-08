@@ -96,6 +96,7 @@ set(hdrs
     ${hdrs_dir}/ext/categories/NSData+CFPP.hh
     ${hdrs_dir}/ext/categories/NSColor+IM.hh
     ${hdrs_dir}/ext/classes/AXCoreGraphicsImageRep.h
+    ${hdrs_dir}/ext/classes/AXInterleavedImageRep.hh
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
@@ -167,6 +168,7 @@ set(srcs
     ${srcs_dir}/ext/categories/NSData+CFPP.mm
     ${srcs_dir}/ext/categories/NSColor+IM.mm
     ${srcs_dir}/ext/classes/AXCoreGraphicsImageRep.m
+    ${srcs_dir}/ext/classes/AXInterleavedImageRep.mm
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/path.cpp

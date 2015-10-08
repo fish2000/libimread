@@ -77,6 +77,19 @@ namespace filesystem {
         /// returns a C-style string containing the temporary directory,
         // using std::getenv() and some guesswork -- originally cribbed from boost
         const char *tmpdir() noexcept;
+        const char *userdir() noexcept;
+        
+        /// return type for path::list(), when called with a detail::list_separate_t tag
+        using vector_pair_t = std::pair<std::vector<std::string>, std::vector<std::string>>;
+        
+        /// tag for dispatching path::list() returning detail::vector_pair_t,
+        /// instead of plain ol' std::vector<path>
+        struct list_separate_t {};
+        
+        /// user-provide callback function signature for path::walk()
+        using walk_visitor_t = std::function<void(const path&,              /// root path
+                                             std::vector<std::string>&,     /// directories
+                                             std::vector<std::string>&)>;   /// files
         
     }
     
@@ -126,6 +139,13 @@ namespace filesystem {
             template <typename P> inline
             static path absolute(P&& p) { return path(std::forward<P>(p)).make_absolute(); }
             
+            /// expand a leading tilde segment -- e.g.
+            ///     ~/Downloads/file.jpg
+            /// becomes:
+            ///     /Users/YoDogg/Downloads/file.jpg
+            /// ... or whatever it is on your system, I don't know
+            path expand_user() const;
+            
             bool compare_debug(const path &other) const;        /// legacy, full of printf-debuggery
             bool compare_lexical(const path &other) const;      /// compare using std::strcmp(),
                                                                 /// fails for nonexistant paths
@@ -144,21 +164,30 @@ namespace filesystem {
             /// self-explanatory interrogatives
             bool exists() const;
             bool is_file() const;
+            bool is_link() const;
             bool is_directory() const;
+            bool is_file_or_link() const;
             
             /// Static forwarders for aforementioned interrogatives
             template <typename P> inline
             static bool exists(P&& p) {
                 return path(std::forward<P>(p)).exists();
             }
-            
             template <typename P> inline
             static bool is_file(P&& p) {
                 return path(std::forward<P>(p)).is_file();
             }
             template <typename P> inline
+            static bool is_link(P&& p) {
+                return path(std::forward<P>(p)).is_link();
+            }
+            template <typename P> inline
             static bool is_directory(P&& p) {
                 return path(std::forward<P>(p)).is_directory();
+            }
+            template <typename P> inline
+            static bool is_file_or_link(P&& p) {
+                return path(std::forward<P>(p)).is_file_or_link();
             }
             
             /// convenience funcs for matching a std::regex against the path in question:
@@ -183,22 +212,45 @@ namespace filesystem {
             }
             
             /// list the directory contents of the path in question.
-            /// The lists are returned as a std::vector<path>.
+            /// The lists are stored in std::vector<path> for return.
             /// You can either:
             ///     a) pass nothing, and get all the files back -- excepting '.' and '..';
-            ///     b) pass a string (C-style or std::string) with a glob with which to filter the list, or;
-            ///     c) pass a std::regex (optionally case-sensitive) for fine-grained iterator-based filtering.
+            ///     b) pass a detail::list_separate_t tag, like vanilla list(), but returns a pair of path vectors;
+            ///     c) pass a string (C-style or std::string) with a glob with which to filter the list, or;
+            ///     d) pass a std::regex (optionally case-sensitive) for fine-grained iterator-based filtering.
             /// ... in all cases, you can specify a trailing boolean to ensure the paths you get back are absolute.
-            std::vector<path> list(                            bool full_paths=false) const;
-            std::vector<path> list(const char *pattern,        bool full_paths=false) const;
-            std::vector<path> list(const std::string &pattern, bool full_paths=false) const;
-            std::vector<path> list(const std::regex &pattern,
-                                   bool case_sensitive=false,  bool full_paths=false) const;
+            std::vector<path>     list(                             bool full_paths=false) const;
+            detail::vector_pair_t list(detail::list_separate_t tag, bool full_paths=false) const;
+            std::vector<path>     list(const char *pattern,         bool full_paths=false) const;
+            std::vector<path>     list(const std::string &pattern,  bool full_paths=false) const;
+            std::vector<path>     list(const std::regex &pattern,
+                                       bool case_sensitive=false,   bool full_paths=false) const;
             
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
             template <typename P, typename G> inline
             static std::vector<path> list(P&& p, G&& g, bool full_paths=false) {
                 return path(std::forward<P>(p)).list(std::forward<G>(g), full_paths);
+            }
+            
+            /// Walk a path, a la os.walk() / os.path.walk() from Python
+            /// ... pass a function like so:
+            ///     path p = "/yo/dogg";
+            ///     p.walk([](const path& p,
+            ///               std::vector<std::string>& directories,
+            ///               std::vector<std::string>& files) {
+            ///         std::for_each(directories.begin(), directories.end(), [&p](std::string& d) {
+            ///             std::cout << "Directory: " << p/d << std::endl;
+            ///         });
+            ///         std::for_each(files.begin(), files.end(), [&p](std::string& f) {
+            ///             std::cout << "File: " << p/f << std::endl;
+            ///         });
+            ///     });
+            void walk(detail::walk_visitor_t&& walk_visitor) const;
+            
+            /// static forwarder for path::walk<P, F>(p, f)
+            template <typename P, typename F> inline
+            static void walk(P&& p, F&& f) {
+                path(std::forward<P>(p)).walk(std::forward<F>(f));
             }
             
             /// attempt to delete the file or directory at this path.
@@ -325,11 +377,13 @@ namespace filesystem {
             /// Convenience function to get a C-style string, a la std::string's API
             inline const char *c_str() const { return str().c_str(); }
             
-            /// Static functions for getting both the current and system temp directories
+            /// Static functions for getting both the current, system temp, and user/home directories
             static path getcwd();
             static path cwd()               { return path::getcwd(); }
             static path gettmp()            { return path(detail::tmpdir()); }
             static path tmp()               { return path(detail::tmpdir()); }
+            static path home()              { return path(detail::userdir()); }
+            static path user()              { return path(detail::userdir()); }
             
             /// Conversion operators -- in theory you can pass your paths to functions
             /// expecting either std::strings or const char*s with these...
@@ -357,8 +411,6 @@ namespace filesystem {
                 m_absolute = p.m_absolute;
                 if (!compare(p, *this)) {
                     m_path = std::move(p.m_path);
-                } else {
-                    m_path = p.m_path;
                 }
                 return *this;
             }

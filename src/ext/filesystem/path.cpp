@@ -2,9 +2,12 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
 #include <glob.h>
 #include <fcntl.h>
 #include <cstdlib>
+#include <utility>
 #include <algorithm>
 #include <libimread/ext/filesystem/path.h>
 
@@ -14,6 +17,7 @@ namespace filesystem {
         
         using stat_t = struct stat;
         using dirent_t = struct dirent;
+        using passwd_t = struct passwd;
         
         filesystem::directory ddopen(const char *c) {
             return filesystem::directory(::opendir(path::absolute(c).c_str()));
@@ -43,7 +47,21 @@ namespace filesystem {
             return dirname;
         }
         
+        const char *userdir() noexcept {
+            const char *dirname;
+            dirname = std::getenv("HOME");
+            if (NULL == dirname) {
+                passwd_t* pw = getpwuid(geteuid());
+                std::string dn(pw->pw_dir);
+                dirname = dn.c_str();
+            }
+            return dirname;
+        }
+        
     }
+    
+    static const std::regex::flag_type regex_flags        = std::regex::extended;
+    static const std::regex::flag_type regex_flags_icase  = std::regex::extended | std::regex::icase;
     
     path::path(int descriptor) {
         char fdpath[PATH_MAX];
@@ -75,6 +93,13 @@ namespace filesystem {
              FF("\t%s", c_str()));
         }
         return path(temp);
+    }
+    
+    path path::expand_user() const {
+        const std::regex re("^~", regex_flags);
+        if (m_path.empty()) { return path(); }
+        if (m_path[0] != "~") { return path(*this); }
+        return path(std::regex_replace(str(), re, detail::userdir()));
     }
     
     bool path::compare_debug(const path &other) const {
@@ -146,6 +171,46 @@ namespace filesystem {
         return out;
     }
     
+    detail::vector_pair_t path::list(detail::list_separate_t tag, bool full_paths) const {
+        /// list all files
+        if (!is_directory()) {
+            imread_raise(FileSystemError,
+                "Can't list files from a non-directory:", str());
+        }
+        path abspath = make_absolute();
+        std::vector<std::string> directories;
+        std::vector<std::string> files;
+        {
+            directory d = detail::ddopen(abspath.str());
+            if (!d.get()) {
+                imread_raise(FileSystemError,
+                    "Internal error in opendir():", strerror(errno),
+                    "For path:", str());
+            }
+            detail::dirent_t *entp;
+            while ((entp = ::readdir(d.get())) != NULL) {
+                if (std::strncmp(entp->d_name, ".", 1) == 0)   { continue; }
+                if (std::strncmp(entp->d_name, "..", 2) == 0)  { continue; }
+                /// ... it's either a directory, a regular file, or a symbolic link
+                std::string t(entp->d_name);
+                switch (entp->d_type) {
+                    case DT_DIR:
+                        directories.push_back(std::move(t));
+                        continue;
+                    case DT_REG:
+                    case DT_LNK:
+                        files.push_back(std::move(t));
+                        continue;
+                    default:
+                        continue;
+                }
+            }
+        } /// scope exit for d
+        return std::make_pair(
+            std::move(directories),
+            std::move(files));
+    }
+    
     static const int glob_pattern_flags = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
     
     std::vector<path> path::list(const char *pattern, bool full_paths) const {
@@ -176,9 +241,6 @@ namespace filesystem {
         return list(pattern.c_str());
     }
     
-    static const int regex_flags        = std::regex::extended;
-    static const int regex_flags_icase  = std::regex::extended | std::regex::icase;
-    
     std::vector<path> path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) const {
         /// list files with regex object
         path abspath = make_absolute();
@@ -190,6 +252,34 @@ namespace filesystem {
             }
         });
         return out;
+    }
+            
+    // using walk_visitor_t = std::function<void(const path&,               /// root path
+    //                                      std::vector<std::string>&,      /// directories
+    //                                      std::vector<std::string>&)>;    /// files
+    
+    void path::walk(detail::walk_visitor_t&& walk_visitor) const {
+        if (!is_directory()) {
+            imread_raise(FileSystemError,
+                "Bad call to path::walk() from a non-directory:", str());
+        }
+        
+        /// list with tag dispatch for separate return vectors
+        const detail::list_separate_t tag{};
+        detail::vector_pair_t vector_pair = list(tag);
+        
+        /// separate out files and directories
+        std::vector<std::string> directories = std::move(vector_pair.first);
+        std::vector<std::string> files = std::move(vector_pair.second);
+        
+        /// walk_visitor() may modify `directories`
+        std::forward<detail::walk_visitor_t>(walk_visitor)(*this, directories, files);
+        
+        /// recursively walk into subdirs
+        if (directories.empty()) { return; }
+        std::for_each(directories.begin(), directories.end(), [&](std::string &subdir) {
+            path::walk(subdir, std::forward<detail::walk_visitor_t>(walk_visitor));
+        });
     }
     
     bool path::exists() const {
@@ -203,15 +293,27 @@ namespace filesystem {
         return S_ISREG(sb.st_mode);
     }
     
+    bool path::is_link() const {
+        detail::stat_t sb;
+        if (::stat(c_str(), &sb)) { return false; }
+        return S_ISLNK(sb.st_mode);
+    }
+    
     bool path::is_directory() const {
         detail::stat_t sb;
         if (::stat(c_str(), &sb)) { return false; }
         return S_ISDIR(sb.st_mode);
     }
     
+    bool path::is_file_or_link() const {
+        detail::stat_t sb;
+        if (::stat(c_str(), &sb)) { return false; }
+        return bool(S_ISREG(sb.st_mode)) || bool(S_ISLNK(sb.st_mode));
+    }
+    
     bool path::remove() const {
-        if (is_file())      { return bool(::unlink(make_absolute().c_str()) != -1); }
-        if (is_directory()) { return bool(::rmdir(make_absolute().c_str()) != -1); }
+        if (is_file_or_link()) { return bool(::unlink(make_absolute().c_str()) != -1); }
+        if (is_directory())    { return bool(::rmdir(make_absolute().c_str()) != -1); }
         return false;
     }
     
