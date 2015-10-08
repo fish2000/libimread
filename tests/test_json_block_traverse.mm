@@ -23,7 +23,7 @@ namespace {
         dict["two"] = "two.";
         dict["three"] = { 435, 345987, 238746, 21 };
         
-        //objc::block<int> idx = 0;
+        // objc::block<int> idx = 0;
         __block int idx = 0;
         
         id block = ^(void* node) {

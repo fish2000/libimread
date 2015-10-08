@@ -22,8 +22,8 @@
 #endif /// TARGET_RT_BIG_ENDIAN
 
 @interface NSString (IMStringAdditions)
-+ (NSString *)   stringWithSTLString:(const std::string&)str;
-+ (NSString *)   stringWithSTLWideString:(const std::wstring&)wstr;
++ (instancetype) stringWithSTLString:(const std::string&)str;
++ (instancetype) stringWithSTLWideString:(const std::wstring&)wstr;
 -                initWithSTLString:(const std::string&)str;
 -                initWithSTLWideString:(const std::wstring&)wstr;
 - (std::string)  STLString;

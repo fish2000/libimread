@@ -18,6 +18,7 @@
 
 #ifdef __APPLE__
 #import <libimread/ext/categories/NSString+STL.hh>
+#import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 #import <objc/message.h>
@@ -55,10 +56,12 @@ namespace objc {
     /// looks better than `__block T thing` IN MY HUMBLE OPINION
     
     template <typename Type>
-    using block_t = Type __attribute__((__blocks__(byref)));
+    using block_t = Type
+        __attribute__((__blocks__(byref)));
     
     template <typename Type>
-    using block = __block block_t<typename std::remove_cv<Type>::type>;
+    using block = __block block_t<typename std::remove_cv<Type>::type>
+        __attribute__((__always_inline__));
     
     /// namespaced references,
     /// for everything we use from the objective-c type system
@@ -158,6 +161,12 @@ namespace objc {
         inline std::string str() const {
             return c_str();
         }
+        inline NSString *ns_str() const {
+            return ::NSStringFromSelector(sel);
+        }
+        inline CFStringRef cf_str() const {
+            return objc::bridge<CFStringRef>(ns_str());
+        }
         
         friend std::ostream &operator<<(std::ostream &os, const objc::selector& s) {
             return os << "@selector( " << s.str() << " )";
@@ -183,6 +192,8 @@ namespace objc {
         operator std::string() const { return str(); }
         operator const char*() const { return c_str(); }
         operator char*() const { return const_cast<char*>(c_str()); }
+        operator NSString*() const { return ::NSStringFromSelector(sel); }
+        operator CFStringRef() const { return objc::bridge<CFStringRef>(ns_str()); }
         
         static objc::selector register_name(const std::string &name) {
             return objc::selector(name);
@@ -380,12 +391,14 @@ namespace objc {
         bool operator[](const char *s) const           { return responds_to(::sel_registerName(s)); }
         bool operator[](const std::string &s) const    { return responds_to(::sel_registerName(s.c_str())); }
         bool operator[](NSString *s) const             { return responds_to(::NSSelectorFromString(s)); }
+        bool operator[](CFStringRef s) const           { return responds_to(::NSSelectorFromString(
+                                                                        objc::bridge<NSString*>(s))); }
         
         inline const char * __cls_name() const         { return ::object_getClassName(self); }
         static const char * __cls_name(types::ID ii)   { return ::object_getClassName(ii); }
         
         std::string classname() const {
-            return __cls_name();
+            return [::NSStringFromClass([self class]) STLString];
         }
         
         std::string description() const {
@@ -424,7 +437,7 @@ namespace objc {
         
         /// STATIC METHODS
         static std::string classname(types::ID ii) {
-            return std::string(__cls_name(ii));
+            return [::NSStringFromClass([ii class]) STLString];
         }
         
         static std::string description(types::ID ii) {
@@ -442,7 +455,10 @@ namespace objc {
             return ::objc_lookUpClass(s);
         }
         static types::cls lookup(NSString *s) {
-            return ::objc_lookUpClass([s UTF8String]);
+            return ::NSClassFromString(s);
+        }
+        static types::cls lookup(CFStringRef s) {
+            return ::NSClassFromString(objc::bridge<NSString*>(s));
         }
         
         private:
