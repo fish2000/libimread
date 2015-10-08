@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <algorithm>
 #include <regex>
 
@@ -100,6 +101,24 @@ TEST_CASE("[filesystem] Check count and names of test jpg files",
     for (int idx = 0; idx < im::test::num_jpg; idx++) {
         REQUIRE((basedir/im::test::jpg[idx]).is_file());
     }
+}
+
+TEST_CASE("[filesystem] Test `path::walk()` on `im::test::basedir`",
+          "[fs-path-walk-on-basedir]") {
+    path basedir(im::test::basedir);
+    basedir.walk([](const path& p,
+                    std::vector<std::string>& directories,
+                    std::vector<std::string>& files) {
+        std::for_each(directories.begin(), directories.end(), [&](std::string& d) {
+            // std::cout << "Directory: " << p/d << std::endl;
+            REQUIRE((p/d).is_directory());
+        });
+        std::for_each(files.begin(), files.end(), [&](std::string& f) {
+            // std::cout << "File: " << p/f << std::endl;
+            REQUIRE((p/f).is_file());
+        });
+    });
+    
 }
 
 TEST_CASE("[filesystem] Check count of test jpeg files",

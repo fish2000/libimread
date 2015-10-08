@@ -265,12 +265,25 @@ namespace filesystem {
                 return path(std::forward<P>(p)).remove();
             }
             
+            /// get the basename -- i.e. for path /yo/dogg/iheardyoulike/basenames.jpg
+            /// ... the basename returned is "basenames.jpg"
+            std::string basename() const {
+                if (empty()) { return ""; }
+                return m_path.back();
+            }
+            
+            /// Static forwarder for path::basename<P>(p)
+            template <typename P> inline
+            static std::string basename(P&& p) {
+                return path(std::forward<P>(p)).basename();
+            }
+            
             /// Attempt to return the string extention (WITHOUT THE LEADING ".")
             /// ... I never know when to include the fucking leading "." and so
             /// at any given time, half my functions support it and half don't. BLEAH.
             std::string extension() const {
                 if (empty()) { return ""; }
-                const std::string &last = m_path[m_path.size()-1];
+                const std::string &last = m_path.back();
                 std::string::size_type pos = last.find_last_of(".");
                 if (pos == std::string::npos) { return ""; }
                 return last.substr(pos+1);
@@ -284,12 +297,17 @@ namespace filesystem {
             
             /// Get back the parent path (also known as the 'dirname' if you are
             /// a fan of the python os.path module, which meh I could take or leave)
-            path parent_path() const {
+            path parent() const {
                 path result;
                 result.m_absolute = m_absolute;
                 
                 if (m_path.empty()) {
-                    if (!m_absolute) { result.m_path.push_back(".."); }
+                    if (!m_absolute) {
+                        result.m_path.push_back("..");
+                    } else {
+                        imread_raise(FileSystemError,
+                            "path::parent() can't get the relative parent of an empty path");
+                    }
                 } else {
                     std::string::size_type idx = 0,
                                            until = m_path.size() - 1;
@@ -338,8 +356,8 @@ namespace filesystem {
             /// Simple string-append for the trailing path segment
             path append(const std::string& appendix) const {
                 path out = path(*this);
-                std::string::size_type N = out.m_path.size() - 1;
-                out.m_path[N].append(appendix);
+                // std::string::size_type N = out.m_path.size() - 1;
+                out.m_path.back().append(appendix);
                 return out;
             }
             

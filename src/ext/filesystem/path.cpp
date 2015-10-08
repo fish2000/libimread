@@ -84,13 +84,14 @@ namespace filesystem {
     }
     
     path path::make_absolute() const {
+        if (m_absolute) { return path(*this); }
         char temp[PATH_MAX];
         if (::realpath(c_str(), temp) == NULL) {
             imread_raise(FileSystemError,
                 "FATAL internal error raised during path::make_absolute() call to ::realpath():",
-             FF("\t%s (%d)", std::strerror(errno), errno),
+            FF("\t%s (%d)", std::strerror(errno), errno),
                 "In reference to path value:",
-             FF("\t%s", c_str()));
+            FF("\t%s", c_str()));
         }
         return path(temp);
     }
@@ -266,19 +267,20 @@ namespace filesystem {
         
         /// list with tag dispatch for separate return vectors
         const detail::list_separate_t tag{};
-        detail::vector_pair_t vector_pair = list(tag);
+        path abspath = make_absolute();
+        detail::vector_pair_t vector_pair = abspath.list(tag);
         
         /// separate out files and directories
         std::vector<std::string> directories = std::move(vector_pair.first);
         std::vector<std::string> files = std::move(vector_pair.second);
         
         /// walk_visitor() may modify `directories`
-        std::forward<detail::walk_visitor_t>(walk_visitor)(*this, directories, files);
+        std::forward<detail::walk_visitor_t>(walk_visitor)(abspath, directories, files);
         
         /// recursively walk into subdirs
         if (directories.empty()) { return; }
         std::for_each(directories.begin(), directories.end(), [&](std::string &subdir) {
-            path::walk(subdir, std::forward<detail::walk_visitor_t>(walk_visitor));
+            abspath.join(subdir).walk(std::forward<detail::walk_visitor_t>(walk_visitor));
         });
     }
     
