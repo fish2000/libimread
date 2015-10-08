@@ -13,6 +13,7 @@
 #include <algorithm>
 
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/opaques.h>
 #include <libimread/rehash.hh>
 
 namespace filesystem {
@@ -22,24 +23,6 @@ namespace filesystem {
         using stat_t = struct stat;
         using dirent_t = struct dirent;
         using passwd_t = struct passwd;
-        
-        filesystem::directory ddopen(const char *c) {
-            return filesystem::directory(::opendir(path::absolute(c).c_str()));
-        }
-        
-        filesystem::directory ddopen(const std::string &s) {
-            return filesystem::directory(::opendir(path::absolute(s).c_str()));
-        }
-        
-        filesystem::directory ddopen(const path &p) {
-            return filesystem::directory(::opendir(p.make_absolute().c_str()));
-        }
-        
-        inline const char *fm(mode m) noexcept { return m == mode::READ ? "r+b" : "w+x"; }
-        
-        filesystem::file ffopen(const std::string &s, mode m) {
-            return filesystem::file(std::fopen(s.c_str(), fm(m)));
-        }
         
         const char *tmpdir() noexcept {
             /// cribbed/tweaked from boost

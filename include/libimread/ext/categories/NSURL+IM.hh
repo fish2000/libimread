@@ -4,6 +4,8 @@
 #ifndef LIBIMREAD_EXT_CATEGORIES_NSURL_PLUS_IM_HH_
 #define LIBIMREAD_EXT_CATEGORIES_NSURL_PLUS_IM_HH_
 
+#include <string>
+
 #ifdef __OBJC__
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
@@ -16,13 +18,14 @@
 
 #ifdef __OBJC__
 
-// using namespace filesystem;
-
 @interface NSURL (IMURLAdditions)
-+ (instancetype)        fileURLWithFilesystemPath:(const filesystem::path&)path;
--                       initFileURLWithFilesystemPath:(const filesystem::path&)path;
-- (instancetype)        URLByAppendingFilesystemPath:(const filesystem::path&)path;
-- (filesystem::path)    filesystemPath;
++ (instancetype)     fileURLWithFilesystemPath:(const filesystem::path&)path;
+-                    initFileURLWithFilesystemPath:(const filesystem::path&)path;
+- (instancetype)     URLByAppendingSTLPathComponent:(const std::string&)component;
+- (instancetype)     URLByAppendingFilesystemPath:(const filesystem::path&)path;
+- (BOOL)             openWithApplication:(NSString *)application;
+- (BOOL)             preview;
+- (filesystem::path) filesystemPath;
 @end
 
 #endif /// __OBJC__

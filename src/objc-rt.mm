@@ -7,10 +7,10 @@
 namespace objc {
     
     // __attribute__((__always_inline__))
-    types::boolean boolean(bool value) { return value ? YES : NO; }
+    types::boolean boolean(bool value) { return types::boolean(value ? YES : NO); }
     
     // __attribute__((__always_inline__))
-    bool to_bool(types::boolean value) { return value == YES; }
+    bool to_bool(types::boolean value) { return bool(value == YES); }
     
 }
 

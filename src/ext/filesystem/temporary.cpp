@@ -14,6 +14,7 @@
 #include <libimread/errors.hh>
 #include <libimread/ext/pystring.hh>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/ext/filesystem/opaques.h>
 
 namespace filesystem {
     

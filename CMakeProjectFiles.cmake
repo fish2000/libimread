@@ -101,6 +101,7 @@ set(hdrs
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
+    ${hdrs_dir}/ext/filesystem/opaques.h
     ${hdrs_dir}/ext/filesystem/path.h
     ${hdrs_dir}/ext/filesystem/resolver.h
     ${hdrs_dir}/ext/filesystem/temporary.h
@@ -173,6 +174,7 @@ set(srcs
     ${srcs_dir}/ext/classes/AXInterleavedImageRep.mm
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
+    ${srcs_dir}/ext/filesystem/opaques.cpp
     ${srcs_dir}/ext/filesystem/path.cpp
     ${srcs_dir}/ext/filesystem/temporary.cpp
     ${srcs_dir}/ext/memory/fmemopen.cpp
