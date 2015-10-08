@@ -64,6 +64,18 @@ namespace {
         [stringArg release];
     }
     
+    TEST_CASE("[objc-rt] Confirm correct behavior of objc::boolean(bool) and objc::to_bool(BOOL)",
+              "[objc-rt-confirm-behavior-objc-boolean-to_bool]")
+    {
+        /// objc::boolean(bool) -> BOOL;
+        CHECK(objc::boolean(true) == YES);
+        CHECK(objc::boolean(false) == NO);
+        
+        /// objc::to_bool(BOOL) -> bool;
+        CHECK(objc::to_bool(YES) == true);
+        CHECK(objc::to_bool(NO) == false);
+    }
+    
     TEST_CASE("[objc-rt] Test objc::id equality",
               "[objc-rt-test-objc-id-equality]")
     {
