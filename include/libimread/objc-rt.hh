@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <algorithm>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <array>
@@ -109,9 +110,6 @@ namespace objc {
         
         types::selector sel;
         
-        explicit selector(types::selector s)
-            :sel(s)
-            {}
         explicit selector(const std::string &name)
             :sel(::sel_registerName(name.c_str()))
             {}
@@ -122,6 +120,9 @@ namespace objc {
             :sel(::NSSelectorFromString(name))
             {}
         
+        selector(types::selector s)
+            :sel(s)
+            {}
         selector(const objc::selector& other)
             :sel(other.sel)
             {}
@@ -129,7 +130,7 @@ namespace objc {
             :sel(other.sel)
             {}
         
-        objc::selector& operator=(objc::selector other) {
+        objc::selector& operator=(const objc::selector& other) {
             objc::selector(other).swap(*this);
             return *this;
         }
@@ -138,24 +139,28 @@ namespace objc {
             return *this;
         }
         
-        bool operator==(const objc::selector &s) const {
+        bool operator==(const objc::selector& s) const {
             return objc::to_bool(::sel_isEqual(sel, s.sel));
         }
-        bool operator!=(const objc::selector &s) const {
-            return objc::to_bool(::sel_isEqual(sel, s.sel));
+        bool operator!=(const objc::selector& s) const {
+            return !objc::to_bool(::sel_isEqual(sel, s.sel));
         }
-        bool operator==(const types::selector &s) const {
+        bool operator==(const types::selector& s) const {
             return objc::to_bool(::sel_isEqual(sel, s));
         }
-        bool operator!=(const types::selector &s) const {
-            return objc::to_bool(::sel_isEqual(sel, s));
+        bool operator!=(const types::selector& s) const {
+            return !objc::to_bool(::sel_isEqual(sel, s));
         }
         
         inline const char *c_str() const {
             return ::sel_getName(sel);
         }
         inline std::string str() const {
-            return std::string(c_str());
+            return c_str();
+        }
+        
+        friend std::ostream &operator<<(std::ostream &os, const objc::selector& s) {
+            return os << "@selector( " << s.str() << " )";
         }
         
         std::size_t hash() const {
@@ -336,16 +341,16 @@ namespace objc {
         types::ID operator->() const { return self; }
         
         bool operator==(const objc::id& other) const {
-            return [self isEqual:other.self] == YES;
+            return objc::to_bool([self isEqual:other.self]);
         }
         bool operator!=(const objc::id& other) const {
-            return [self isEqual:other.self] == NO;
+            return !objc::to_bool([self isEqual:other.self]);
         }
         bool operator==(const types::ID& other) const {
             return objc::to_bool([self isEqual:other]);
         }
         bool operator!=(const types::ID& other) const {
-            return objc::to_bool([self isEqual:other]);
+            return !objc::to_bool([self isEqual:other]);
         }
         
         template <typename T> inline
@@ -380,11 +385,19 @@ namespace objc {
         static const char * __cls_name(types::ID ii)   { return ::object_getClassName(ii); }
         
         std::string classname() const {
-            return std::string(__cls_name());
+            return __cls_name();
         }
         
         std::string description() const {
             return [[self description] STLString];
+        }
+        
+        friend std::ostream &operator<<(std::ostream &os, const objc::id& smelf) {
+            return os << "<" << smelf.classname()   << "> "
+                      << "(" << smelf.description() << ") "
+                      << "[" << std::hex << "0x"
+                             << smelf.hash()
+                             << std::dec << "]";
         }
         
         types::cls lookup() const {
@@ -450,6 +463,43 @@ namespace objc {
             template <typename, typename ...Args>
             static auto test_is_argument_list(long) -> std::false_type;
             
+            /// OLDSKOOL SFINAE 4 LYFE -- courtesy WikiBooks:
+            /// https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Member_Detector
+            /// To test for an Objective-C object pointer, we see if the struct
+            /// at which it points contains an `isa` member (see http://stackoverflow.com/q/1990695/298171)
+            /// Now this is a budget way to SFINAE I know but that is cuz my SFINAE is
+            /// ... STRAIGHT OUTTA COMPTON DOGG this one is FOR ALL MY ISAZ
+            /// 
+            /// (ahem)
+            ///
+            /// Also the IsaIsa class is itself enable_if'd only for classes because
+            /// specializing it for fundamental types makes it all FREAK THE GEEK OUT
+            template <typename T,
+                      typename X = typename std::enable_if<std::is_class<T>::value>::type>
+            class IsaIsa {
+                struct Fallback { int isa; };
+                struct Derived : T, Fallback {};
+                
+                template <typename U, U>
+                struct Check;
+                
+                typedef char ArrayOfOne[1];
+                typedef char ArrayOfTwo[2];
+                
+                template <typename U>
+                static ArrayOfOne &func(Check<int Fallback::*, &U::isa> *);
+                
+                template <typename U>
+                static ArrayOfTwo &func(...);
+                
+                public:
+                    typedef IsaIsa type;
+                    enum {
+                        value = sizeof(func<Derived>(0)) == 2
+                    };
+            };
+            
+            
         }
         
         /// Unnecessarily overwrought compile-time test for objc::message and descendants
@@ -473,7 +523,7 @@ namespace objc {
         template <typename T>
         struct is_object<T,
             typename std::enable_if_t<
-                 std::is_convertible<T, objc::types::ID>::value,
+                 detail::IsaIsa<std::remove_pointer_t<T>>::value,
                  bool>> : std::true_type {};
         
         /// test for a selector struct

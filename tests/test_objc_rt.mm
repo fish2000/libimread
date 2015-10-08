@@ -96,12 +96,43 @@ namespace {
         CHECK(check_three);
         CHECK(st != so);
         CHECK(s != o);
+        
         /// check hashes via member methods
         CHECK(s.hash() == [st hash]);
         CHECK(s.hash() != [so hash]);
+        
         /// check hashes via std::hash<T>
         CHECK(id_hasher(s) == object_hasher(st));
         CHECK(id_hasher(s) != object_hasher(so));
+    }
+    
+    TEST_CASE("[objc-rt] Test objc::selector equality",
+              "[objc-rt-test-objc-selector-equality]")
+    {
+        objc::selector yd("yoDogg:");
+        objc::selector ih("iHeardYouLikeSelectors:");
+        objc::selector s = @selector(yoDogg:);
+        std::hash<objc::selector> struct_hasher;
+        std::hash<objc::types::selector> type_hasher;
+        
+        bool check_one = bool(yd == s);
+        bool check_two = bool(yd == @selector(yoDogg:));
+        bool check_three = bool(yd != ih);
+        CHECK(check_one);
+        CHECK(check_two);
+        CHECK(check_three);
+        CHECK(yd == s);
+        CHECK(yd != ih);
+        
+        /// check hashes via member methods
+        CHECK(yd.hash() == s.hash());
+        CHECK(yd.hash() != ih.hash());
+        
+        /// check hashes via std::hash<T>
+        CHECK(struct_hasher(s) == struct_hasher(yd));
+        CHECK(struct_hasher(s) != struct_hasher(ih));
+        CHECK(struct_hasher(s) == type_hasher(@selector(yoDogg:)));
+        CHECK(struct_hasher(s) != type_hasher(@selector(iHeardYouLikeSelectors:)));
     }
     
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
