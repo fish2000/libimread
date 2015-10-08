@@ -6,10 +6,14 @@
 #include <pwd.h>
 #include <glob.h>
 #include <fcntl.h>
+
+#include <cerrno>
 #include <cstdlib>
-#include <utility>
+#include <iterator>
 #include <algorithm>
+
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/rehash.hh>
 
 namespace filesystem {
     
@@ -34,7 +38,7 @@ namespace filesystem {
         inline const char *fm(mode m) noexcept { return m == mode::READ ? "r+b" : "w+x"; }
         
         filesystem::file ffopen(const std::string &s, mode m) {
-            return filesystem::file(fopen(s.c_str(), fm(m)));
+            return filesystem::file(std::fopen(s.c_str(), fm(m)));
         }
         
         const char *tmpdir() noexcept {
@@ -51,7 +55,7 @@ namespace filesystem {
             const char *dirname;
             dirname = std::getenv("HOME");
             if (NULL == dirname) {
-                passwd_t* pw = getpwuid(geteuid());
+                passwd_t* pw = ::getpwuid(::geteuid());
                 std::string dn(pw->pw_dir);
                 dirname = dn.c_str();
             }
@@ -328,10 +332,27 @@ namespace filesystem {
         return path(temp);
     }
     
+    /// calculate the hash value for the path
+    std::size_t path::hash() const {
+        std::size_t H = static_cast<std::size_t>(is_absolute());
+        for (auto idx = m_path.begin(); idx != m_path.end(); ++idx) {
+            ::detail::rehash(H, *idx);
+        }
+        return H;
+    }
+    
     void path::swap(path& other) noexcept {
         using std::swap;
         m_path.swap(other.m_path);
         swap(m_absolute, other.m_absolute);
+    }
+    
+    /// path component vector
+    std::vector<std::string> path::components() const {
+        std::vector<std::string> out;
+        std::copy(m_path.begin(),
+                  m_path.end(), std::back_inserter(out));
+        return std::move(out);
     }
     
     /// define static mutex, as declared in switchdir struct:

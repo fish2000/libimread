@@ -82,6 +82,8 @@ namespace {
         CHECK(check_one);
         CHECK(check_two);
         CHECK(check_three);
+        CHECK(st != so);
+        CHECK(s != o);
         /// check hashes via member methods
         CHECK(s.hash() == [st hash]);
         CHECK(s.hash() != [so hash]);

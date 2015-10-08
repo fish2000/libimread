@@ -91,10 +91,11 @@ configure_file(
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     
-    ${hdrs_dir}/ext/categories/NSString+STL.hh
     ${hdrs_dir}/ext/categories/NSBitmapImageRep+IM.hh
-    ${hdrs_dir}/ext/categories/NSData+CFPP.hh
     ${hdrs_dir}/ext/categories/NSColor+IM.hh
+    ${hdrs_dir}/ext/categories/NSData+CFPP.hh
+    ${hdrs_dir}/ext/categories/NSString+STL.hh
+    ${hdrs_dir}/ext/categories/NSURL+IM.hh
     ${hdrs_dir}/ext/classes/AXCoreGraphicsImageRep.h
     ${hdrs_dir}/ext/classes/AXInterleavedImageRep.hh
     ${hdrs_dir}/ext/errors/backtrace.hh
@@ -163,10 +164,11 @@ set(hdrs
 
 # Project source files
 set(srcs
-    ${srcs_dir}/ext/categories/NSString+STL.mm
     ${srcs_dir}/ext/categories/NSBitmapImageRep+IM.mm
-    ${srcs_dir}/ext/categories/NSData+CFPP.mm
     ${srcs_dir}/ext/categories/NSColor+IM.mm
+    ${srcs_dir}/ext/categories/NSData+CFPP.mm
+    ${srcs_dir}/ext/categories/NSString+STL.mm
+    ${srcs_dir}/ext/categories/NSURL+IM.mm
     ${srcs_dir}/ext/classes/AXCoreGraphicsImageRep.m
     ${srcs_dir}/ext/classes/AXInterleavedImageRep.mm
     ${srcs_dir}/ext/errors/backtrace.cpp

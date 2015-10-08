@@ -95,6 +95,12 @@ namespace objc {
     template <typename ...Args>
     using object_sender_t = std::add_pointer_t<::id(types::tID, types::tSEL, Args...)>;
     
+    /// objc::boolean(bool_value) -> YES or NO
+    /// objc::to_bool(BOOL_value) -> true or false
+    
+    __attribute__((__always_inline__)) types::boolean boolean(bool value);
+    __attribute__((__always_inline__)) bool to_bool(types::boolean value);
+    
     /// Straightforward wrapper around an objective-c selector (the SEL type).
     /// + Constructable from, and convertable to, common string types
     /// + Overloaded for equality testing
@@ -133,16 +139,16 @@ namespace objc {
         }
         
         bool operator==(const objc::selector &s) const {
-            return ::sel_isEqual(sel, s.sel) == YES;
+            return objc::to_bool(::sel_isEqual(sel, s.sel));
         }
         bool operator!=(const objc::selector &s) const {
-            return ::sel_isEqual(sel, s.sel) == NO;
+            return objc::to_bool(::sel_isEqual(sel, s.sel));
         }
         bool operator==(const types::selector &s) const {
-            return ::sel_isEqual(sel, s) == YES;
+            return objc::to_bool(::sel_isEqual(sel, s));
         }
         bool operator!=(const types::selector &s) const {
-            return ::sel_isEqual(sel, s) == NO;
+            return objc::to_bool(::sel_isEqual(sel, s));
         }
         
         inline const char *c_str() const {
@@ -336,10 +342,10 @@ namespace objc {
             return [self isEqual:other.self] == NO;
         }
         bool operator==(const types::ID& other) const {
-            return [self isEqual:other] == YES;
+            return objc::to_bool([self isEqual:other]);
         }
         bool operator!=(const types::ID& other) const {
-            return [self isEqual:other] == NO;
+            return objc::to_bool([self isEqual:other]);
         }
         
         template <typename T> inline
@@ -348,7 +354,7 @@ namespace objc {
         }
         
         inline bool responds_to(types::selector s) const {
-            return [self respondsToSelector:s] == YES;
+            return objc::to_bool([self respondsToSelector:s]);
         }
         
         inline void retain() const      { if (self != nil) { [self retain]; } }

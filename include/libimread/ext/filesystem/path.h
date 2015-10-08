@@ -11,10 +11,11 @@
 #include <mutex>
 #include <regex>
 #include <sstream>
+#include <utility>
 #include <functional>
 
 #include <cctype>
-#include <cerrno>
+#include <cstdio>
 #include <cstring>
 #include <cstddef>
 #include <unistd.h>
@@ -22,7 +23,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/rehash.hh>
 
 namespace filesystem {
     
@@ -45,7 +45,7 @@ namespace filesystem {
         struct filecloser {
             constexpr filecloser() noexcept = default;
             template <typename U> filecloser(const filecloser<U>&) noexcept {};
-            void operator()(F *filehandle) { ::fclose(filehandle); }
+            void operator()(F *filehandle) { std::fclose(filehandle); }
         };
         
     }
@@ -439,13 +439,7 @@ namespace filesystem {
             }
             
             /// calculate the hash value for the path
-            std::size_t hash() const {
-                std::size_t H = static_cast<std::size_t>(is_absolute());
-                for (auto idx = m_path.begin(); idx != m_path.end(); ++idx) {
-                    ::detail::rehash(H, *idx);
-                }
-                return H;
-            }
+            std::size_t hash() const;
             
             /// Static forwarder for the hash function
             template <typename P> inline
@@ -455,6 +449,9 @@ namespace filesystem {
             
             /// no-except member swap
             void swap(path& other) noexcept;
+            
+            /// path component vector
+            std::vector<std::string> components() const;
             
         protected:
             static std::vector<std::string> tokenize(const std::string &source, const std::string &delim) {
