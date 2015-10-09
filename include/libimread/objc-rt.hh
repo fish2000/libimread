@@ -470,49 +470,49 @@ namespace objc {
     
         namespace detail {
             
+            /// convenience type struct that should already freaking exist
+            /// to go along with std::is_convertible<From, To>
+            
             template <typename From, typename To>
             using is_convertible_t = std::conditional_t<std::is_convertible<From, To>::value,
                                                         std::true_type, std::false_type>;
+            
+            /// detail test defs for overwrought argument-list check (see below)
             
             template <typename T, typename ...Args>
             static auto test_is_argument_list(int) -> typename T::is_argument_list_t;
             template <typename, typename ...Args>
             static auto test_is_argument_list(long) -> std::false_type;
             
-            /// OLDSKOOL SFINAE 4 LYFE -- courtesy WikiBooks:
+            /// OLDSKOOL SFINAE 4 LYFE. Recipe courtesy WikiBooks:
             /// https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Member_Detector
-            /// To test for an Objective-C object pointer, we see if the struct
-            /// at which it points contains an `isa` member (see http://stackoverflow.com/q/1990695/298171)
+            /// ... to test for an Objective-C object, IsaIsa<PointerType> checks the struct
+            /// at which it points for an `isa` member (see http://stackoverflow.com/q/1990695/298171)
             /// Now this is a budget way to SFINAE I know but that is cuz my SFINAE is
-            /// ... STRAIGHT OUTTA COMPTON DOGG this one is FOR ALL MY ISAZ
+            /// STRAIGHT OUTTA COMPTON DOGG this one is FOR ALL MY ISAZ
             /// 
             /// (ahem)
             ///
             /// Also the IsaIsa class is itself enable_if'd only for classes because
             /// specializing it for fundamental types makes it all FREAK THE GEEK OUT
-            template <typename T,
-                      typename X = typename std::enable_if<std::is_class<T>::value>::type>
+            
+            template <typename Target,
+                      typename T = typename std::remove_pointer_t<Target>,
+                      typename X = typename std::enable_if_t<
+                                            std::is_class<T>::value>>
             class IsaIsa {
-                struct Fallback { int isa; };
-                struct Derived : T, Fallback {};
-                
-                template <typename U, U>
-                struct Check;
-                
-                typedef char ArrayOfOne[1];
-                typedef char ArrayOfTwo[2];
-                
+                struct fallback { int isa; };
+                struct derived : T, fallback {};
+                template <typename U, U> struct check;
+                typedef char one[1];
+                typedef char two[2];
                 template <typename U>
-                static ArrayOfOne &func(Check<int Fallback::*, &U::isa> *);
-                
+                static one &func(check<int fallback::*, &U::isa>*);
                 template <typename U>
-                static ArrayOfTwo &func(...);
-                
+                static two &func(...);
                 public:
                     typedef IsaIsa type;
-                    enum {
-                        value = sizeof(func<Derived>(0)) == 2
-                    };
+                    enum { value = sizeof(func<derived>(0)) == 2 };
             };
             
             
@@ -534,12 +534,13 @@ namespace objc {
         /// compile-time tests for objective-c primitives:
         
         /// test for an object-pointer instance (NSObject* and descendants)
+        /// ... uses objc::traits::detail::IsaIsa to enable_if itself properly
         template <typename T, typename V = bool>
         struct is_object : std::false_type {};
         template <typename T>
         struct is_object<T,
             typename std::enable_if_t<
-                 detail::IsaIsa<std::remove_pointer_t<T>>::value,
+                 detail::IsaIsa<T>::value,
                  bool>> : std::true_type {};
         
         /// test for a selector struct
