@@ -486,36 +486,60 @@ namespace objc {
             
             /// OLDSKOOL SFINAE 4 LYFE. Recipe courtesy WikiBooks:
             /// https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Member_Detector
-            /// ... to test for an Objective-C object, IsaIsa<PointerType> checks the struct
+            /// ... to test for an Objective-C object, has_isa<PointerType> checks the struct
             /// at which it points for an `isa` member (see http://stackoverflow.com/q/1990695/298171)
             /// Now this is a budget way to SFINAE I know but that is cuz my SFINAE is
             /// STRAIGHT OUTTA COMPTON DOGG this one is FOR ALL MY ISAZ
             /// 
             /// (ahem)
             ///
-            /// Also the IsaIsa class is itself enable_if'd only for classes because
+            /// Also the has_isa class is itself enable_if'd only for classes because
             /// specializing it for fundamental types makes it all FREAK THE GEEK OUT
+            
+            template <typename U, U> struct check;
+            typedef char one[1];
+            typedef char two[2];
             
             template <typename Target,
                       typename T = typename std::remove_pointer_t<Target>,
                       typename X = typename std::enable_if_t<
                                             std::is_class<T>::value>>
-            class IsaIsa {
-                struct fallback { int isa; };
-                struct derived : T, fallback {};
-                template <typename U, U> struct check;
-                typedef char one[1];
-                typedef char two[2];
-                template <typename U>
-                static one &func(check<int fallback::*, &U::isa>*);
-                template <typename U>
-                static two &func(...);
+            class has_isa {
+                struct detect { int isa; };
+                struct composite : T, detect {};
+                template <typename U> static detail::one &test(
+                                      detail::check<
+                                          int detect::*,
+                                          &U::isa>*);
+                template <typename U> static detail::two &test(...);
                 public:
-                    typedef IsaIsa type;
-                    enum { value = sizeof(func<derived>(0)) == 2 };
+                    typedef T type;
+                    typedef Target pointer_type;
+                    enum { value = sizeof(test<composite>(0)) == 2 };
             };
             
-            
+            template <typename Target,
+                      typename T = typename std::remove_pointer_t<Target>,
+                      typename X = typename std::enable_if_t<
+                                            std::is_class<T>::value>>
+            class has_superclass {
+                struct detect { int superclass; };
+                struct detect_ { int super_class; };
+                struct composite : T, detect, detect_ {};
+                template <typename U> static detail::one &test(
+                                      detail::check<
+                                          int detect::*,
+                                          &U::superclass>*);
+                template <typename U> static detail::one &test(
+                                      detail::check<
+                                          int detect_::*,
+                                          &U::super_class>*);
+                template <typename U> static detail::two &test(...);
+                public:
+                    typedef T type;
+                    typedef Target pointer_type;
+                    enum { value = sizeof(test<composite>(0)) == 2 };
+            };
         }
         
         /// Unnecessarily overwrought compile-time test for objc::message and descendants
@@ -540,7 +564,7 @@ namespace objc {
         template <typename T>
         struct is_object<T,
             typename std::enable_if_t<
-                 detail::IsaIsa<T>::value,
+                 detail::has_isa<T>::value,
                  bool>> : std::true_type {};
         
         /// test for a selector struct
@@ -549,7 +573,7 @@ namespace objc {
         template <typename T>
         struct is_selector<T,
             typename std::enable_if_t<
-                std::is_convertible<T, objc::types::selector>::value,
+                std::is_same<T, objc::types::selector>::value,
                 bool>> : std::true_type {};
         
         /// test for the objective-c class struct type
@@ -558,7 +582,7 @@ namespace objc {
         template <typename T>
         struct is_class<T,
             typename std::enable_if_t<
-                std::is_convertible<T, objc::types::cls>::value,
+                detail::has_superclass<T>::value,
                 bool>> : std::true_type {};
         
     }
