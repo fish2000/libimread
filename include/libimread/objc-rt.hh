@@ -91,13 +91,13 @@ namespace objc {
     /// function-pointer templates for wrapping objc_msgSend() with a bunch of possible sigs
     
     template <typename Return, typename ...Args>
-    using return_sender_t = std::add_pointer_t<Return(types::tID, types::tSEL, Args...)>;
+    using return_sender_t = std::add_pointer_t<Return(types::ID, types::selector, Args...)>;
     
     template <typename ...Args>
-    using void_sender_t = std::add_pointer_t<void(types::tID, types::tSEL, Args...)>;
+    using void_sender_t = std::add_pointer_t<void(types::ID, types::selector, Args...)>;
     
     template <typename ...Args>
-    using object_sender_t = std::add_pointer_t<::id(types::tID, types::tSEL, Args...)>;
+    using object_sender_t = std::add_pointer_t<types::ID(types::ID, types::selector, Args...)>;
     
     /// objc::boolean(bool_value) -> YES or NO
     /// objc::to_bool(BOOL_value) -> true or false
@@ -223,11 +223,12 @@ namespace objc {
         using index_t = std::make_index_sequence<argc>;
         using tuple_t = std::tuple<Args...>;
         using sender_t = return_sender_t<Return, Args...>;
-        using prebound_t = std::function<Return(types::tID, types::tSEL, Args...)>;
+        using prebound_t = std::function<Return(types::ID, types::selector, Args...)>;
         
         tuple_t args;
-        prebound_t dispatcher;
-        sender_t dispatch_with = (sender_t)objc_msgSend;
+        sender_t dispatcher = (std::is_floating_point<Return>::value ? (sender_t)objc_msgSend_fpret : 
+                              (std::is_class<Return>::value          ? (sender_t)objc_msgSend_stret : 
+                                                                       (sender_t)objc_msgSend));
         
         explicit arguments(Args... a)
             :args(std::forward_as_tuple(a...))
@@ -235,17 +236,15 @@ namespace objc {
         
         private:
             template <std::size_t ...I> inline
-            Return send_impl(types::tID self, types::tSEL op, std::index_sequence<I...>) {
-                return dispatcher(self, op, std::get<I>(args)...);
+            Return send_impl(types::ID self, types::selector op, std::index_sequence<I...>) {
+                return static_cast<prebound_t>(dispatcher)(self, op, std::get<I>(args)...);
             }
         
         public:
             Return send(types::rID self, types::rSEL op) {
-                dispatcher = (prebound_t)dispatch_with;
                 return send_impl(self, op, index_t());
             }
-            Return send(types::tID self, types::tSEL op) {
-                dispatcher = (prebound_t)dispatch_with;
+            Return send(types::ID self, types::selector op) {
                 return send_impl(self, op, index_t());
             }
         
