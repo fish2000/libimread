@@ -222,8 +222,11 @@ namespace objc {
         using is_argument_list_t = std::true_type;
         using index_t = std::make_index_sequence<argc>;
         using tuple_t = std::tuple<Args...>;
-        using sender_t = return_sender_t<Return, Args...>;
         using prebound_t = std::function<Return(types::ID, types::selector, Args...)>;
+        using sender_t = typename std::conditional<
+                                  std::is_void<Return>::value,
+                                      void_sender_t<Args...>,
+                                      return_sender_t<Return, Args...>>::type;
         
         tuple_t args;
         sender_t dispatcher = (std::is_floating_point<Return>::value ? (sender_t)objc_msgSend_fpret : 
