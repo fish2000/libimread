@@ -626,23 +626,6 @@ namespace objc {
             return ARGS.send(selfie.self, op);
         }
         
-        // template <typename ...Args>
-        // struct send {
-        //     using tuple_t = std::tuple<Args...>;
-        //     types::ID target;
-        //     types::selector action;
-        //     tuple_t args;
-        //
-        //     explicit send(types::ID t, types::selector s, Args ...a)
-        //         :target(t), action(s), args(std::forward_as_tuple(a))
-        //         {}
-        //
-        //     template <typename Return>
-        //     operator Return() const {
-        //         return arguments<Return, Args...>(args).send(target, action);
-        //     }
-        // };
-        
         template <typename ...Args>
         static types::ID send(types::ID s, types::selector op, Args ...args) {
             return objc::msg::get<types::ID, Args...>(s, op, args...);
