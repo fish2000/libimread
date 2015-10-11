@@ -233,6 +233,14 @@ namespace objc {
                               (std::is_class<Return>::value          ? (sender_t)objc_msgSend_stret : 
                                                                        (sender_t)objc_msgSend));
         
+        template <typename Tuple,
+                  typename X = std::enable_if_t<
+                               std::is_same<Tuple, tuple_t>::value &&
+                               std::tuple_size<Tuple>::value == argc>>
+        explicit arguments(Tuple t)
+            :args(t)
+            {}
+        
         explicit arguments(Args... a)
             :args(std::forward_as_tuple(a...))
             {}
@@ -591,38 +599,53 @@ namespace objc {
     
     struct msg {
         
-        objc::id self; /// scoped retain/release
-        types::rID selfref;
-        types::rSEL op;
+        objc::id target; /// scoped retain/release
+        objc::selector action;
         
-        explicit msg(types::rID s, types::rSEL o)
-            :self(objc::id(s))
-            ,selfref(types::pass_id(s))
-            ,op(types::pass_selector(o))
+        explicit msg(types::ID s, types::selector o)
+            :target(objc::id(s))
+            ,action(objc::selector(o))
             {}
         
         template <typename ...Args>
         types::ID send(types::boolean dispatch, Args ...args) const {
             arguments<types::ID, Args...> ARGS(args...);
-            return ARGS.send(selfref, op);
+            return ARGS.send(target.self, action.sel);
         }
         
         template <typename M,
                   typename X = std::enable_if_t<traits::is_argument_list<M>::value()>>
         types::ID sendv(M&& arg_list) const {
-            return arg_list.send(selfref, op);
+            return arg_list.send(target.self, action.sel);
         }
         
         template <typename Return, typename ...Args>
-        static Return get(types::tID s, types::tSEL op, Args ...args) {
+        static Return get(types::ID s, types::selector op, Args ...args) {
             arguments<Return, Args...> ARGS(args...);
             const objc::id selfie(s); /// for scoped retain/release
-            return ARGS.send(s, op);
+            return ARGS.send(selfie.self, op);
         }
         
+        // template <typename ...Args>
+        // struct send {
+        //     using tuple_t = std::tuple<Args...>;
+        //     types::ID target;
+        //     types::selector action;
+        //     tuple_t args;
+        //
+        //     explicit send(types::ID t, types::selector s, Args ...a)
+        //         :target(t), action(s), args(std::forward_as_tuple(a))
+        //         {}
+        //
+        //     template <typename Return>
+        //     operator Return() const {
+        //         return arguments<Return, Args...>(args).send(target, action);
+        //     }
+        // };
+        
         template <typename ...Args>
-        static types::ID send(types::tID s, types::tSEL op, Args ...args) {
-            return objc::msg::get<types::tID, Args...>(s, op, args...);
+        static types::ID send(types::ID s, types::selector op, Args ...args) {
+            return objc::msg::get<types::ID, Args...>(s, op, args...);
         }
         
         template <typename M,
