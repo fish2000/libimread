@@ -72,6 +72,8 @@ namespace objc {
         using object_t = struct ::objc_object;
         using selector = ::SEL;
         using cls = ::Class;
+        using method = ::Method;
+        using implement = ::IMP;
         using boolean = ::BOOL;
         
         using rID = std::add_rvalue_reference_t<ID>;
@@ -222,11 +224,8 @@ namespace objc {
         static constexpr std::size_t argc = sizeof...(Args);
         using is_argument_list_t = std::true_type;
         using index_t = std::make_index_sequence<argc>;
-        using tuple_t = std::tuple<Args...>;
-        // using return_t = typename std::conditional<
-        //                           std::is_class<Return>::value,
-        //                               std::add_pointer_t<Return>, Return>::type;
         using return_t = Return;
+        using tuple_t = std::tuple<Args...>;
         using prebound_t = std::function<return_t(types::ID, types::selector, Args...)>;
         using sender_t = typename std::conditional<
                                   std::is_void<Return>::value,
@@ -455,9 +454,7 @@ namespace objc {
         struct is_object<T,
             typename std::enable_if_t<
                  std::is_pointer<T>::value,
-                 bool>> : std::conditional_t<detail::is_object_pointer<T>::value,
-                                             std::true_type,
-                                             std::false_type> {};
+                 bool>> : detail::is_object_pointer<T> {};
         
         /// test for a selector struct
         template <typename T, typename V = bool>
