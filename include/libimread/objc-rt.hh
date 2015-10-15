@@ -223,15 +223,19 @@ namespace objc {
         using is_argument_list_t = std::true_type;
         using index_t = std::make_index_sequence<argc>;
         using tuple_t = std::tuple<Args...>;
-        using prebound_t = std::function<Return(types::ID, types::selector, Args...)>;
+        // using return_t = typename std::conditional<
+        //                           std::is_class<Return>::value,
+        //                               std::add_pointer_t<Return>, Return>::type;
+        using return_t = Return;
+        using prebound_t = std::function<return_t(types::ID, types::selector, Args...)>;
         using sender_t = typename std::conditional<
                                   std::is_void<Return>::value,
                                       void_sender_t<Args...>,
-                                      return_sender_t<Return, Args...>>::type;
+                                      return_sender_t<return_t, Args...>>::type;
         
         tuple_t args;
         sender_t dispatcher = (std::is_floating_point<Return>::value ? (sender_t)objc_msgSend_fpret : 
-                              (std::is_class<Return>::value          ? (sender_t)objc_msgSend_stret : 
+                              (std::is_class<Return>::value          ? (sender_t)objc_msgSend : 
                                                                        (sender_t)objc_msgSend));
         
         template <typename Tuple,
@@ -253,12 +257,12 @@ namespace objc {
             }
             
             template <std::size_t ...I> inline
-            Return send_impl(types::ID self, types::selector op, std::index_sequence<I...>) const {
+            return_t send_impl(types::ID self, types::selector op, std::index_sequence<I...>) const {
                 return static_cast<prebound_t>(dispatcher)(self, op, std::get<I>(args)...);
             }
         
         public:
-            inline auto send(types::ID self, types::selector op) const -> Return {
+            inline auto send(types::ID self, types::selector op) const -> return_t {
                 if (!std::is_void<Return>::value) {
                     /// dead code elimination collapses this conditional
                     return send_impl(self, op, index_t());
@@ -664,10 +668,10 @@ namespace objc {
         }
         
         template <typename ...Args>
-        static void send(types::ID s, types::selector op, Args ...args) {
-            arguments<void, Args...> ARGS(args...);
+        static types::ID send(types::ID s, types::selector op, Args ...args) {
+            arguments<types::ID, Args...> ARGS(args...);
             const objc::id selfie(s);
-            ARGS.send(selfie.self, op);
+            return ARGS.send(selfie.self, op);
         }
         
         template <typename M,

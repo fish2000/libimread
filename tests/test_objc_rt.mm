@@ -64,6 +64,28 @@ namespace {
         [stringArg release];
     }
     
+    TEST_CASE("[objc-rt] Call an instance method via objc::msg::get<Return, ...>() returning a float value",
+              "[objc-rt-call-instance-method-return-float]")
+    {
+        @autoreleasepool {
+            IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+            float out = objc::msg::get<float>(imts,
+                objc::selector("returnFloat"));
+            CHECK(out == 3.14159f);
+        }
+    }
+    
+    TEST_CASE("[objc-rt] Call an instance method via objc::msg::get<Return, ...>() returning a struct value",
+              "[objc-rt-call-instance-method-return-struct]")
+    {
+        @autoreleasepool {
+            IMTestReceiver *imts = [[IMTestReceiver alloc] init];
+            StructReturn out = objc::msg::get<StructReturn>(imts,
+                objc::selector("returnStruct"));
+            CHECK(out.value == 666);
+        }
+    }
+    
     TEST_CASE("[objc-rt] Confirm correct behavior of objc::boolean(bool) and objc::to_bool(BOOL)",
               "[objc-rt-confirm-behavior-objc-boolean-to_bool]")
     {
@@ -161,14 +183,14 @@ namespace {
         
         // WTF("Path variables:", prefixed, temporary.str());
         
-        objc::msg::send((id)datum,
+        objc::msg::send(datum,
             objc::selector("writeToFile:atomically:"),
             filepath, YES);
         
         removed = temporary.remove();
         CHECK(removed == true);
         
-        objc::msg::send((id)datum,
+        objc::msg::send(datum,
             objc::selector("writeToURL:atomically:"),
             url, YES);
         
