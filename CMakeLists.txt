@@ -73,7 +73,6 @@ SET(SG14_DIR "${DEPS_DIR}/SG14")
 SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
 SET(LIBIMREAD_CONFIG_DIR "${DEPS_DIR}/libimread-config")
 add_subdirectory(${DEPS_DIR})
-add_subdirectory(${APPS_DIR})
 set_property(DIRECTORY ${IOD_TEST_DIR}
              PROPERTY EXCLUDE_FROM_ALL TRUE)
 set_property(DIRECTORY ${IOD_TEST_DIR}
@@ -151,6 +150,17 @@ add_dependencies(imread "sszip")
 # add_dependencies(libimread "iod_symbolize")
 add_dependencies(imread "iod_symbolize")
 
+# deal with config variables
+get_target_property(IM_COMPILE_OPTIONS imread COMPILE_OPTIONS)
+get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
+get_target_property(IM_LINK_LIBRARIES imread LINK_LIBRARIES)
+get_target_property(IM_LINK_FLAGS imread LINK_FLAGS)
+
+# Configure the project-settings header file
+configure_file(
+    "${hdrs_dir}/libimread.hpp.in"
+    "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
+
 # target_link_libraries(libimread
 #     libguid libdocopt
 #     libmaBlockClosure
@@ -171,6 +181,9 @@ target_link_libraries(imread
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES}
     ${HDF5_LIBRARIES})
+
+# Add the apps
+add_subdirectory(${APPS_DIR})
 
 # Run the tests
 add_subdirectory(${TEST_SOURCE_DIR})

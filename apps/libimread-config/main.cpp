@@ -33,7 +33,7 @@ R"(Configuration for libimread
 
 )";
 
-static const char VERSION[] = "libimread-config 0.1.0";
+const std::string VERSION = "libimread-config ";
 
 int main(int argc, const char** argv) {
     using optmap_t = std::map<std::string, docopt::value>;
@@ -42,7 +42,7 @@ int main(int argc, const char** argv) {
     optmap_t raw_args = docopt::docopt(USAGE,
                                        { argv + 1, argv + argc },
                                        true, /// show help
-                                       VERSION);
+                                       VERSION + im::config::version);
     
     /// filter out all docopt parse artifacts,
     /// leaving only things beginning with "--"
@@ -50,7 +50,26 @@ int main(int argc, const char** argv) {
                  std::inserter(args, args.begin()),
                  [](const optpair_t& p) { return p.first.substr(0, 2) == "--"; });
     
+    // for (auto const& arg : args) {
+    //     std::cout << arg.first << " --> " << arg.second << std::endl;
+    // }
+    
+    /// print the value for the truthy option flag
     for (auto const& arg : args) {
-        std::cout << arg.first << " --> " << arg.second << std::endl;
+        if (!bool(arg.second)) { continue; }
+        if (arg.first == "--prefix") {
+            std::cout << im::config::prefix << std::endl;
+        } else if (arg.first == "--exec-prefix") {
+            std::cout << im::config::exec_prefix << std::endl;
+        } else if (arg.first == "--includes") {
+            std::cout << im::config::includes << std::endl;
+        } else if (arg.first == "--libs") {
+            std::cout << im::config::libs << std::endl;
+        } else if (arg.first == "--cflags") {
+            std::cout << im::config::cflags << std::endl;
+        } else if (arg.first == "--ldflags") {
+            std::cout << im::config::ldflags << std::endl;
+        }
     }
+
 }

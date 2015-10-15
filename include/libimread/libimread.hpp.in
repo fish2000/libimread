@@ -12,6 +12,12 @@
 #define IM_VERSION_PATCH                @libimread_VERSION_PATCH@
 #define IM_VERSION                      "@libimread_VERSION_MAJOR@.@libimread_VERSION_MINOR@.@libimread_VERSION_PATCH@"
 
+#define IM_INSTALL_PREFIX               "@CMAKE_INSTALL_PREFIX@"
+#define IM_COMPILE_OPTIONS              "@IM_COMPILE_OPTIONS@"
+#define IM_INCLUDE_DIRECTORIES          "@IM_INCLUDE_DIRECTORIES@"
+#define IM_LINK_LIBRARIES               "@IM_LINK_LIBRARIES@"
+#define IM_LINK_FLAGS                   "@IM_LINK_FLAGS@"
+
 #define IM_COLOR_TRACE                  1
 #define IM_VERBOSE                      0
 

@@ -82,11 +82,6 @@ SEPARATE_ARGUMENTS(OBJC_OPTIONS)
 SEPARATE_ARGUMENTS(OBJCXX_OPTIONS)
 SEPARATE_ARGUMENTS(IO_EXTRA_OPTIONS)
 
-# Configure the project-settings header file
-configure_file(
-    "${hdrs_dir}/libimread.hpp.in"
-    "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
-
 # Project header files
 set(hdrs
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
@@ -288,4 +283,3 @@ add_definitions(
     ${OBJCXX_OPTIONS}
     -DWITH_SCHEMA
     -O3 -mtune=native -fstrict-aliasing)
-
