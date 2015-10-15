@@ -20,8 +20,6 @@
 
 namespace filesystem {
     
-    // enum class mode { READ, WRITE };
-        
     /// forward declaration for these next few prototypes/templates
     class path;
     
@@ -54,8 +52,10 @@ namespace filesystem {
     using file = std::unique_ptr<typename std::decay<FILE>::type, detail::filecloser<FILE>>;
     
     namespace detail {
+        using dirent_t = struct dirent;
+        
         /// We can construct the above unique_ptr type aliases directly from FILE* and DIR* --
-        /// ... these are shortcuts that wrap calls to ::opendir() and ::fopen(), respectively;
+        /// ... these are shortcuts that wrap calls to ::opendir() and std::fopen(), respectively;
         /// so you can be like:
         ///
         ///     filesystem::directory dir = detail::ddopen("the/path/to/it/");

@@ -47,7 +47,7 @@ namespace filesystem {
         } else {
             tplpath = path::join(path::gettmp(), path(tpl));
         }
-        const char *dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
+        const char* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
         if (dtemp == NULL) { return false; }
         dirpath = path(dtemp);
         return true;
@@ -67,7 +67,7 @@ namespace filesystem {
                 abspath.str(), std::strerror(errno));
         }
         
-        struct dirent *entry;
+        detail::dirent_t* entry;
         while ((entry = ::readdir(cleand.get())) != NULL) {
             std::string dname(entry->d_name);
             if (std::strncmp(dname.c_str(), ".", 1) == 0)   { continue; }
@@ -82,10 +82,37 @@ namespace filesystem {
     bool TemporaryDirectory::clean() {
         if (!dirpath.exists()) { return false; }
         bool out = true;
+        std::vector<path> directorylist;
         path abspath = dirpath.make_absolute();
-        std::vector<path> entries = abspath.list(true); /// full_paths
-        std::for_each(entries.begin(), entries.end(),
-               [&out](const path& p) { out &= p.remove(); });
+        
+        /// walk_visitor_t recursively removes files while saving directories
+        /// as full paths in the `directorylist` vector
+        detail::walk_visitor_t walk_visitor = [&out, &directorylist](
+                                    const path& p,
+                                    detail::stringvec_t& files,
+                                    detail::stringvec_t& directories) {
+                                        if (!files.empty()) {
+                                            std::for_each(files.begin(), files.end(),
+                                                [&p, &out](const std::string& file) {
+                                                    out &= (p/file).remove(); });
+                                        }
+                                        if (!directories.empty()) {
+                                            std::for_each(directories.begin(), directories.end(),
+                                                [&p, &directorylist](const std::string& directory) {
+                                                    directorylist.push_back(p/directory); });
+                                        }
+                                     };
+        
+        /// perform walk with visitor
+        abspath.walk(std::forward<detail::walk_visitor_t>(walk_visitor));
+        
+        /// remove emptied directories per saved list
+        if (!directorylist.empty()) {
+            std::for_each(directorylist.begin(), directorylist.end(),
+                   [&out](const path& p) { out &= p.remove(); });
+        }
+        
+        /// return as per logical sum of `remove()` call successes
         return out;
     }
     

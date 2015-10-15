@@ -38,11 +38,25 @@ TEST_CASE("[SFINAE] Confirm PVR can NOT write",
 
 TEST_CASE("[SFINAE] Confirm results of objc::traits::is_object<objc::types::ID>::value",
           "[sfinae-objc-traits-confirm-objc-types-ID-value]") {
-    CHECK(objc::traits::is_object<objc::types::ID>::value);
+    using objc_object_t = struct objc_object;
+    struct non_object {};
+    
+    bool check_one = objc::traits::detail::has_isa<objc_object_t>::value == true;
+    // bool check_one_and_a_half = objc::traits::detail::has_isa<std::remove_pointer_t<std::common_type<id, NSObject*>::type>>::value == true;
+    bool check_one_and_a_half = objc::traits::detail::is_object_pointer<NSObject*>::value == true;
+    bool check_two = objc::traits::is_object<objc::types::ID>::value == true;
+    bool check_three = objc::traits::is_object<non_object*>::value == false;
+    CHECK(check_one);
+    CHECK(check_one_and_a_half);
+    CHECK(check_two);
+    CHECK(check_three);
 }
 
 TEST_CASE("[SFINAE] Confirm results of objc::traits::is_object<NSObject*>::value",
           "[sfinae-objc-traits-confirm-NSObject-pointer-value]") {
-    CHECK(objc::traits::is_object<NSObject*>::value);
+    bool check_one = objc::traits::detail::has_isa<objc_object>::value == true;
+    bool check_two = objc::traits::is_object<NSObject*>::value == true;
+    CHECK(check_one);
+    CHECK(check_two);
 }
 

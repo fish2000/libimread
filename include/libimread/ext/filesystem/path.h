@@ -28,20 +28,21 @@ namespace filesystem {
     namespace detail {
         /// returns a C-style string containing the temporary directory,
         // using std::getenv() and some guesswork -- originally cribbed from boost
-        const char *tmpdir() noexcept;
-        const char *userdir() noexcept;
+        const char* tmpdir() noexcept;
+        const char* userdir() noexcept;
         
         /// return type for path::list(), when called with a detail::list_separate_t tag
-        using vector_pair_t = std::pair<std::vector<std::string>, std::vector<std::string>>;
+        using stringvec_t = std::vector<std::string>;
+        using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
         /// instead of plain ol' std::vector<path>
         struct list_separate_t {};
         
         /// user-provide callback function signature for path::walk()
-        using walk_visitor_t = std::function<void(const path&,              /// root path
-                                             std::vector<std::string>&,     /// directories
-                                             std::vector<std::string>&)>;   /// files
+        using walk_visitor_t = std::function<void(const path&,  /// root path
+                                             stringvec_t&,      /// directories
+                                             stringvec_t&)>;    /// files
     }
     
     /// The actual class for representing a path on the filesystem
@@ -72,9 +73,9 @@ namespace filesystem {
                 ,m_absolute(p.m_absolute)
                 {}
             
-            path(char *st)              { set(st); }
-            path(const char *st)        { set(st); }
-            path(const std::string &st) { set(st); }
+            path(char* st)              { set(st); }
+            path(const char* st)        { set(st); }
+            path(const std::string& st) { set(st); }
             
             explicit path(int descriptor);
             
@@ -97,10 +98,10 @@ namespace filesystem {
             /// ... or whatever it is on your system, I don't know
             path expand_user() const;
             
-            bool compare_debug(const path &other) const;        /// legacy, full of printf-debuggery
-            bool compare_lexical(const path &other) const;      /// compare using std::strcmp(),
+            bool compare_debug(const path& other) const;        /// legacy, full of printf-debuggery
+            bool compare_lexical(const path& other) const;      /// compare using std::strcmp(),
                                                                 /// fails for nonexistant paths
-            bool compare(const path &other) const;              /// compare using fast-as-fuck path::hash()
+            bool compare(const path& other) const;              /// compare using fast-as-fuck path::hash()
             
             /// static forwarder for path::compare<P>(p)
             template <typename P, typename Q> inline
@@ -109,8 +110,8 @@ namespace filesystem {
             }
             
             /// equality-test operators use path::hash()
-            bool operator==(const path &other) const { return compare(other); }
-            bool operator!=(const path &other) const { return !compare(other); }
+            bool operator==(const path& other) const { return compare(other); }
+            bool operator!=(const path& other) const { return !compare(other); }
             
             /// self-explanatory interrogatives
             bool exists() const;
@@ -145,8 +146,10 @@ namespace filesystem {
             /// get a boolean back for your (possibly case-insenitive) std::regex reference;
             /// match() and search() hand respectively straight off to std::regex_match
             /// and std::regex_search()
-            bool match(const std::regex &pattern,           bool case_sensitive=false) const;
-            bool search(const std::regex &pattern,          bool case_sensitive=false) const;
+            bool match(const std::regex& pattern,           bool case_sensitive=false) const;
+            bool search(const std::regex& pattern,          bool case_sensitive=false) const;
+            path replace(const std::regex& pattern,         const char* s) const;
+            path replace(const std::regex& pattern,         const std::string& s) const;
             
             /// static forwarder for path::match<P>(p)
             template <typename P> inline
@@ -160,6 +163,13 @@ namespace filesystem {
             static bool search(P&& p, std::regex&& pattern, bool case_sensitive=false) {
                 return path(std::forward<P>(p)).search(
                     std::forward<std::regex>(pattern), case_sensitive);
+            }
+            
+            /// static forwarder for path::replace<P>(p)
+            template <typename P, typename S> inline
+            static path replace(P&& p, std::regex&& pattern, S&& s) {
+                return path(std::forward<P>(p)).replace(
+                    std::forward<std::regex>(pattern), std::forward<S>(s));
             }
             
             /// list the directory contents of the path in question.
@@ -307,7 +317,6 @@ namespace filesystem {
             /// Simple string-append for the trailing path segment
             path append(const std::string& appendix) const {
                 path out = path(*this);
-                // std::string::size_type N = out.m_path.size() - 1;
                 out.m_path.back().append(appendix);
                 return out;
             }
@@ -344,7 +353,7 @@ namespace filesystem {
             }
             
             /// Convenience function to get a C-style string, a la std::string's API
-            inline const char *c_str() const { return str().c_str(); }
+            inline const char* c_str() const { return str().c_str(); }
             
             /// Static functions for getting both the current, system temp, and user/home directories
             static path getcwd();
@@ -360,15 +369,15 @@ namespace filesystem {
             operator const char*()          { return c_str(); }
             
             /// Set and tokenize the path using a std::string (mainly used internally)
-            void set(const std::string &str) {
+            void set(const std::string& str) {
                 m_type = native_path;
                 m_path = tokenize(str, "/");
                 m_absolute = !str.empty() && str[0] == '/';
             }
             
             /// ... and here, we have the requisite assign operators
-            path &operator=(const std::string &str) { set(str); return *this; }
-            path &operator=(const char *str)        { set(str); return *this; }
+            path &operator=(const std::string& str) { set(str); return *this; }
+            path &operator=(const char* str)        { set(str); return *this; }
             path &operator=(const path& p) {
                 if (!compare(p, *this)) {
                     path(p).swap(*this);
@@ -402,11 +411,11 @@ namespace filesystem {
             void swap(path& other) noexcept;
             
             /// path component vector
-            std::vector<std::string> components() const;
+            detail::stringvec_t components() const;
             
         protected:
-            static std::vector<std::string> tokenize(const std::string &source, const std::string &delim) {
-                std::vector<std::string> tokens;
+            static detail::stringvec_t tokenize(const std::string& source, const std::string& delim) {
+                detail::stringvec_t tokens;
                 std::string::size_type lastPos = 0,
                                        pos = source.find_first_of(delim, lastPos);
                 
@@ -424,7 +433,7 @@ namespace filesystem {
             
         protected:
             path_type m_type;
-            std::vector<std::string> m_path;
+            detail::stringvec_t m_path;
             bool m_absolute;
     
     }; /* class path */

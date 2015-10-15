@@ -21,12 +21,11 @@ namespace filesystem {
     namespace detail {
         
         using stat_t = struct stat;
-        using dirent_t = struct dirent;
         using passwd_t = struct passwd;
         
-        const char *tmpdir() noexcept {
+        const char* tmpdir() noexcept {
             /// cribbed/tweaked from boost
-            const char *dirname;
+            const char* dirname;
             dirname = std::getenv("TMPDIR");
             if (NULL == dirname) { dirname = std::getenv("TMP"); }
             if (NULL == dirname) { dirname = std::getenv("TEMP"); }
@@ -34,8 +33,8 @@ namespace filesystem {
             return dirname;
         }
         
-        const char *userdir() noexcept {
-            const char *dirname;
+        const char* userdir() noexcept {
+            const char* dirname;
             dirname = std::getenv("HOME");
             if (NULL == dirname) {
                 passwd_t* pw = ::getpwuid(::geteuid());
@@ -57,17 +56,25 @@ namespace filesystem {
             set(fdpath);
         } else {
             imread_raise(FileSystemError,
-                "Internal error: -1 returned by ::fnctl(descriptor, F_GETPATH, fdpath)",
-                "where fdpath = ", fdpath);
+                "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath)",
+                "where fdpath = ", fdpath,
+                std::strerror(errno));
         }
     }
     
-    bool path::match(const std::regex &pattern, bool) const {
+    bool path::match(const std::regex& pattern, bool) const {
         return std::regex_match(str(), pattern);
     }
     
-    bool path::search(const std::regex &pattern, bool) const {
+    bool path::search(const std::regex& pattern, bool) const {
         return std::regex_search(str(), pattern);
+    }
+    
+    path path::replace(const std::regex& pattern, const char* s) const {
+        return path(std::regex_replace(str(), pattern, s));
+    }
+    path path::replace(const std::regex& pattern, const std::string& s) const {
+        return path(std::regex_replace(str(), pattern, s));
     }
     
     path path::make_absolute() const {
@@ -87,7 +94,7 @@ namespace filesystem {
         const std::regex re("^~", regex_flags);
         if (m_path.empty()) { return path(); }
         if (m_path[0] != "~") { return path(*this); }
-        return path(std::regex_replace(str(), re, detail::userdir()));
+        return replace(re, detail::userdir());
     }
     
     bool path::compare_debug(const path &other) const {
@@ -141,7 +148,7 @@ namespace filesystem {
                     "Internal error in opendir():", strerror(errno),
                     "For path:", str());
             }
-            detail::dirent_t *entp;
+            detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != NULL) {
                 if (std::strncmp(entp->d_name, ".", 1) == 0)   { continue; }
                 if (std::strncmp(entp->d_name, "..", 2) == 0)  { continue; }
@@ -160,14 +167,9 @@ namespace filesystem {
     }
     
     detail::vector_pair_t path::list(detail::list_separate_t tag, bool full_paths) const {
-        /// list all files
-        if (!is_directory()) {
-            imread_raise(FileSystemError,
-                "Can't list files from a non-directory:", str());
-        }
         path abspath = make_absolute();
-        std::vector<std::string> directories;
-        std::vector<std::string> files;
+        detail::stringvec_t directories;
+        detail::stringvec_t files;
         {
             directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
@@ -175,7 +177,7 @@ namespace filesystem {
                     "Internal error in opendir():", strerror(errno),
                     "For path:", str());
             }
-            detail::dirent_t *entp;
+            detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != NULL) {
                 if (std::strncmp(entp->d_name, ".", 1) == 0)   { continue; }
                 if (std::strncmp(entp->d_name, "..", 2) == 0)  { continue; }
@@ -242,9 +244,9 @@ namespace filesystem {
         return out;
     }
             
-    // using walk_visitor_t = std::function<void(const path&,               /// root path
-    //                                      std::vector<std::string>&,      /// directories
-    //                                      std::vector<std::string>&)>;    /// files
+    // using walk_visitor_t = std::function<void(const path&,       /// root path
+    //                                      detail::stringvec_t&,   /// directories
+    //                                      detail::stringvec_t&)>; /// files
     
     void path::walk(detail::walk_visitor_t&& walk_visitor) const {
         if (!is_directory()) {
@@ -258,8 +260,8 @@ namespace filesystem {
         detail::vector_pair_t vector_pair = abspath.list(tag);
         
         /// separate out files and directories
-        std::vector<std::string> directories = std::move(vector_pair.first);
-        std::vector<std::string> files = std::move(vector_pair.second);
+        detail::stringvec_t directories = std::move(vector_pair.first);
+        detail::stringvec_t files = std::move(vector_pair.second);
         
         /// walk_visitor() may modify `directories`
         std::forward<detail::walk_visitor_t>(walk_visitor)(abspath, directories, files);
@@ -310,7 +312,8 @@ namespace filesystem {
         char temp[PATH_MAX];
         if (::getcwd(temp, PATH_MAX) == NULL) {
             imread_raise(FileSystemError,
-                "Internal error in getcwd():", strerror(errno));
+                "Internal error in getcwd():",
+                std::strerror(errno));
         }
         return path(temp);
     }
@@ -331,8 +334,8 @@ namespace filesystem {
     }
     
     /// path component vector
-    std::vector<std::string> path::components() const {
-        std::vector<std::string> out;
+    detail::stringvec_t path::components() const {
+        detail::stringvec_t out;
         std::copy(m_path.begin(),
                   m_path.end(), std::back_inserter(out));
         return std::move(out);

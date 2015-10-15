@@ -69,6 +69,7 @@ namespace objc {
     namespace types {
         
         using ID = ::id __attribute__((NSObject));
+        using object_t = struct ::objc_object;
         using selector = ::SEL;
         using cls = ::Class;
         using boolean = ::BOOL;
@@ -353,9 +354,8 @@ namespace objc {
             typedef char two[2];
             
             template <typename Target,
-                      typename T = typename std::remove_pointer_t<std::decay_t<Target>>,
-                      typename X = typename std::enable_if_t<
-                                            std::is_class<T>::value>>
+                      typename T = std::remove_pointer_t<
+                                   std::decay_t<Target>>>
             class has_isa {
                 struct detect { int isa; };
                 struct composite : T, detect {};
@@ -371,9 +371,8 @@ namespace objc {
             };
             
             template <typename Target,
-                      typename T = typename std::remove_pointer_t<std::decay_t<Target>>,
-                      typename X = typename std::enable_if_t<
-                                            std::is_class<T>::value>>
+                      typename T = std::remove_pointer_t<
+                                   std::decay_t<Target>>>
             class has_superclass {
                 struct detect { int superclass; };
                 struct detect_ { int super_class; };
@@ -392,6 +391,46 @@ namespace objc {
                     typedef Target pointer_type;
                     enum { value = sizeof(test<composite>(0)) == 2 };
             };
+            
+            template <typename T, typename U>
+            using ct2 = decltype(std::declval<bool>() ? std::declval<T>() : std::declval<U>());
+            
+            template <typename T>
+            using void_t = std::conditional_t<true, void, T>;
+            
+            template <class, class...>
+            struct ct {};
+            template <class T>
+            struct ct<void, T> { using type = std::decay_t<T>; };
+            template <class T, class U, class ...V>
+            struct ct<void_t<ct2<T, U>>, T, U, V...> : ct<void, ct2<T, U>, V...> {};
+            
+            template <typename ...Types>
+            struct common_type : ct<void, Types...> {};
+            
+            template <class, class = void>
+            struct has_type_member : std::false_type {};
+            template <class T>
+            struct has_type_member<T, void_t<typename T::type>> : std::true_type {};
+            
+            template <typename ...Types>
+            using common_type_t = typename common_type<Types...>::type;
+            template <typename ...Types>
+            using has_common_type = has_type_member<common_type<Types...>>;
+            
+            // template <typename Target,
+            //           typename T = common_type_t<types::object_t*, types::ID, Target>>
+            // class is_object_pointer {
+            //     template <typename U> static detail::one &test(Target);
+            //     template <typename U> static detail::two &test(...);
+            //     public:
+            //         typedef T common_type;
+            //         typedef Target type;
+            //         enum { value = sizeof(test<T>(static_cast<T>(0))) == 1 };
+            // };
+            
+            template <typename Target>
+            using is_object_pointer = has_common_type<std::decay_t<Target>, types::ID>;
         }
         
         /// Unnecessarily overwrought compile-time test for objc::message and descendants
@@ -416,8 +455,10 @@ namespace objc {
         template <typename T>
         struct is_object<T,
             typename std::enable_if_t<
-                 detail::has_isa<T>::value,
-                 bool>> : std::true_type {};
+                 std::is_pointer<T>::value,
+                 bool>> : std::conditional_t<detail::is_object_pointer<T>::value,
+                                             std::true_type,
+                                             std::false_type> {};
         
         /// test for a selector struct
         template <typename T, typename V = bool>
