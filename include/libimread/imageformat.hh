@@ -18,7 +18,7 @@
 
 namespace im {
     
-    inline bool match_magic(byte_source *src, const char *magic, const std::size_t n) {
+    inline bool match_magic(byte_source* src, const char* magic, const std::size_t n) {
         if (!src->can_seek()) { return false; }
         std::vector<byte> buf;
         buf.resize(n);
@@ -26,7 +26,7 @@ namespace im {
         src->seek_relative(-n_read);
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }
-    inline bool match_magic(byte_source *src, const std::string &magic) {
+    inline bool match_magic(byte_source* src, const std::string& magic) {
         return match_magic(src, magic.c_str(), magic.size());
     }
     
@@ -63,7 +63,7 @@ namespace im {
             );
             
             /// NOT AN OVERRIDE:
-            static bool match_format(byte_source *src) {
+            static bool match_format(byte_source* src) {
                 return match_magic(src, options.signature);
             }
             
@@ -73,27 +73,27 @@ namespace im {
             
             virtual ~ImageFormat() {}
             
-            virtual std::unique_ptr<Image> read(byte_source *src,
-                                                ImageFactory *factory,
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
                                                 const options_map &opts) {
                 imread_raise_default(NotImplementedError);
             }
             
-            virtual std::unique_ptr<ImageList> read_multi(byte_source *src,
-                                                          ImageFactory *factory,
-                                                          const options_map &opts) {
+            virtual std::unique_ptr<ImageList> read_multi(byte_source* src,
+                                                          ImageFactory* factory,
+                                                          const options_map& opts) {
                 imread_raise_default(NotImplementedError);
             }
             
-            virtual void write(Image &input,
-                               byte_sink *output,
-                               const options_map &opts) {
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               const options_map& opts) {
                 imread_raise_default(NotImplementedError);
             }
             
-            virtual void write_multi(ImageList &input,
+            virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     const options_map &opts) {
+                                     const options_map& opts) {
                 imread_raise_default(NotImplementedError);
             }
             

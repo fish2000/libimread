@@ -43,7 +43,7 @@ namespace im {
                 return this->read(p, n);
             }
             
-            void read_check(byte *buffer, std::size_t n) {
+            void read_check(byte* buffer, std::size_t n) {
                 if (this->read(buffer, n) != n) {
                     imread_raise(CannotReadError, "File ended prematurely");
                 }
@@ -65,7 +65,7 @@ namespace im {
         
         public:
             virtual ~byte_sink() { }
-            virtual std::size_t write(const void *buffer, std::size_t n) = 0;
+            virtual std::size_t write(const void* buffer, std::size_t n) = 0;
             
             template <std::size_t Nelems>
             std::size_t write(byte (&arr)[Nelems], std::size_t n) {
@@ -73,11 +73,11 @@ namespace im {
                     "write<Nelems>() called with n-value > template-value:",
                         FF("\t     n = %i", n),
                         FF("\tNelems = %i", Nelems));
-                byte *p = arr;
+                byte* p = arr;
                 return this->write(p, n);
             }
             
-            void write_check(const byte *buffer, std::size_t n) {
+            void write_check(const byte* buffer, std::size_t n) {
                 std::size_t out = this->write(buffer, n);
                 imread_assert(out == n,
                     "write_check() return value differs from n:",
@@ -88,7 +88,7 @@ namespace im {
             virtual void flush() { }
             
             template <typename ...Args>
-            std::size_t writef(const char *fmt, Args... args) {
+            std::size_t writef(const char* fmt, Args... args) {
                 char buffer[1024];
                 // std::size_t buffer_size = std::snprintf(buffer, 1024, fmt, args...);
                 std::snprintf(buffer, 1024, fmt, args...);

@@ -17,7 +17,7 @@
 using namespace im;
 
 @interface NSBitmapImageRep (IMBitmapImageRepAdditions)
-+ (instancetype)           imageRepWithByteVector:(const std::vector<byte>&)byteVector;
++ (NSBitmapImageRep *)     imageRepWithByteVector:(const std::vector<byte>&)byteVector;
 -                          initWithByteVector:(const std::vector<byte>&)byteVector;
 - (std::unique_ptr<Image>) imageUsingImageFactory:(ImageFactory*)factory;
 @end

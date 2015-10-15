@@ -16,7 +16,7 @@ namespace im {
     constexpr int fd_source_sink::WRITE_FLAGS;
     constexpr int fd_source_sink::WRITE_CREATE_MASK;
     
-    std::size_t fd_source_sink::read(byte *buffer, std::size_t n) {
+    std::size_t fd_source_sink::read(byte* buffer, std::size_t n) {
         int out = ::read(descriptor, buffer, n);
         if (out == -1) {
             imread_raise(CannotReadError,
@@ -26,7 +26,7 @@ namespace im {
         return static_cast<std::size_t>(out);
     }
     
-    std::size_t fd_source_sink::write(const void *buffer, std::size_t n) {
+    std::size_t fd_source_sink::write(const void* buffer, std::size_t n) {
         int out = ::write(descriptor, buffer, n);
         if (out == -1) {
             imread_raise(CannotWriteError,
@@ -35,7 +35,7 @@ namespace im {
         }
         return static_cast<std::size_t>(out);
     }
-    std::size_t fd_source_sink::write(const std::vector<byte> &bv) {
+    std::size_t fd_source_sink::write(const std::vector<byte>& bv) {
         return this->write(static_cast<const void*>(&bv[0]),
                            bv.size());
     }
@@ -113,6 +113,7 @@ namespace im {
     }
     
     int fd_source_sink::close() {
+        using std::swap;
         int out = -1;
         if (descriptor > 0) {
             if (::close(descriptor) == -1) {
@@ -120,7 +121,7 @@ namespace im {
                     "error while closing file descriptor:",
                     std::strerror(errno));
             }
-            std::swap(out, descriptor);
+            swap(out, descriptor);
         }
         return out;
     }

@@ -12,15 +12,18 @@
 using namespace im;
 
 @implementation NSData (IMDataAdditions)
+
 + (NSData *) dataWithByteVector:(const std::vector<byte>&)byteVector {
     NSData *datum;
     datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
                                    length:(NSInteger)byteVector.size()];
     return datum;
 }
+
 + (NSData *) dataWithByteSource:(byte_source*)byteSource {
     return [NSData dataWithByteVector:byteSource->full_data()];
 }
+
 + (NSData *) dataWithByteSource:(byte_source*)byteSource
                          length:(NSUInteger)bytes {
     NSData *datum;
@@ -31,29 +34,37 @@ using namespace im;
                                    length:(NSInteger)bytes];
     return datum;
 }
+
 + (NSData *) dataWithCFData:(const CF::Data&)cfdata {
     CF::Data out(cfdata);
     return objc::bridge<NSData*>(out.GetCFObject());
 }
+
 - (CF::Data) cf {
     return CF::Data(objc::bridge<CFDataRef>(self));
 }
+
 - (NSDataSource) dataSource {
     return NSDataSource(self);
 }
+
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink {
     return static_cast<NSUInteger>(byteSink->write((byte *)self.bytes,
                                                    (std::size_t)self.length));
 }
+
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink
                            length:(NSUInteger)bytes {
     return static_cast<NSUInteger>(byteSink->write((byte *)self.bytes,
                                                    (std::size_t)bytes));
 }
+
 @end
 
 @implementation NSMutableData (IMMutableDataAdditions)
+
 - (NSDataSink) dataSink {
     return NSDataSink(self);
 }
+
 @end

@@ -5,6 +5,7 @@
 #define LIBIMREAD_CMAKE_HPP_IN_
 
 #include <cstdint>
+#include <vector>
 
 #define IM_VERSION_MAJOR                @libimread_VERSION_MAJOR@
 #define IM_VERSION_MINOR                @libimread_VERSION_MINOR@
@@ -21,6 +22,10 @@
 namespace im {
     
     typedef uint8_t byte;
+    
+    // namespace detail {
+    //     typedef std::vector<byte> bytevec_t;
+    // };
     
     /// unpack {
     ///     (out += std::to_string(array[I]))...

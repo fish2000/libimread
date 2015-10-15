@@ -13,6 +13,7 @@
 #include <sstream>
 #include <utility>
 #include <functional>
+#include <initializer_list>
 
 #include <unistd.h>
 #include <libimread/libimread.hpp>
@@ -32,11 +33,13 @@ namespace filesystem {
         const char* userdir() noexcept;
         
         /// return type for path::list(), when called with a detail::list_separate_t tag
+        using pathvec_t = std::vector<path>;
         using stringvec_t = std::vector<std::string>;
+        using stringlist_t = std::initializer_list<std::string>;
         using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
-        /// instead of plain ol' std::vector<path>
+        /// instead of plain ol' pathvec_t
         struct list_separate_t {};
         
         /// user-provide callback function signature for path::walk()
@@ -78,6 +81,7 @@ namespace filesystem {
             path(const std::string& st) { set(st); }
             
             explicit path(int descriptor);
+            explicit path(detail::stringlist_t list);
             
             inline std::size_t size() const { return static_cast<std::size_t>(m_path.size()); }
             inline bool empty() const       { return m_path.empty(); }
@@ -180,16 +184,16 @@ namespace filesystem {
             ///     c) pass a string (C-style or std::string) with a glob with which to filter the list, or;
             ///     d) pass a std::regex (optionally case-sensitive) for fine-grained iterator-based filtering.
             /// ... in all cases, you can specify a trailing boolean to ensure the paths you get back are absolute.
-            std::vector<path>     list(                             bool full_paths=false) const;
+            detail::pathvec_t     list(                             bool full_paths=false) const;
             detail::vector_pair_t list(detail::list_separate_t tag, bool full_paths=false) const;
-            std::vector<path>     list(const char *pattern,         bool full_paths=false) const;
-            std::vector<path>     list(const std::string &pattern,  bool full_paths=false) const;
-            std::vector<path>     list(const std::regex &pattern,
+            detail::pathvec_t     list(const char *pattern,         bool full_paths=false) const;
+            detail::pathvec_t     list(const std::string &pattern,  bool full_paths=false) const;
+            detail::pathvec_t     list(const std::regex &pattern,
                                        bool case_sensitive=false,   bool full_paths=false) const;
             
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
             template <typename P, typename G> inline
-            static std::vector<path> list(P&& p, G&& g, bool full_paths=false) {
+            static detail::pathvec_t list(P&& p, G&& g, bool full_paths=false) {
                 return path(std::forward<P>(p)).list(std::forward<G>(g), full_paths);
             }
             
@@ -197,8 +201,8 @@ namespace filesystem {
             /// ... pass a function like so:
             ///     path p = "/yo/dogg";
             ///     p.walk([](const path& p,
-            ///               std::vector<std::string>& directories,
-            ///               std::vector<std::string>& files) {
+            ///               detail::stringvec_t& directories,
+            ///               detail::stringvec_t& files) {
             ///         std::for_each(directories.begin(), directories.end(), [&p](std::string& d) {
             ///             std::cout << "Directory: " << p/d << std::endl;
             ///         });

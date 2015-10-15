@@ -82,7 +82,7 @@ namespace filesystem {
     bool TemporaryDirectory::clean() {
         if (!dirpath.exists()) { return false; }
         bool out = true;
-        std::vector<path> directorylist;
+        detail::pathvec_t directorylist;
         path abspath = dirpath.make_absolute();
         
         /// walk_visitor_t recursively removes files while saving directories

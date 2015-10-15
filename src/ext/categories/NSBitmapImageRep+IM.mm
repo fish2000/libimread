@@ -7,19 +7,21 @@
 using namespace im;
 
 @implementation NSBitmapImageRep (IMBitmapImageRepAdditions)
-+ (instancetype) imageRepWithByteVector:(const std::vector<byte>&)byteVector {
+
++ (NSBitmapImageRep *) imageRepWithByteVector:(const std::vector<byte>&)byteVector {
     NSBitmapImageRep *rep;
     @autoreleasepool {
         NSData *datum;
         datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
                                        length:(NSInteger)byteVector.size()];
-        NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:datum];
+        rep = [[NSBitmapImageRep alloc] initWithData:datum];
         #if !__has_feature(objc_arc)
             [datum release];
         #endif
     };
     return rep;
 }
+
 - initWithByteVector:(const std::vector<byte>&)byteVector {
     NSData *datum;
     datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
@@ -30,6 +32,7 @@ using namespace im;
     #endif
     return self;
 }
+
 - (std::unique_ptr<Image>) imageUsingImageFactory:(ImageFactory*)factory {
     NSInteger height = [self pixelsHigh];
     NSInteger width = [self pixelsWide];
@@ -50,5 +53,6 @@ using namespace im;
     
     return output;
 }
+
 @end
 

@@ -11,7 +11,7 @@ namespace im {
     
     namespace {
         
-        void flippixels(byte *row, const int n) {
+        void flippixels(byte* row, const int n) {
             for (int i = 0; i != n; row += 3, ++i) {
                 byte b = row[0];
                 byte g = row[1];
@@ -22,7 +22,7 @@ namespace im {
             }
         }
         
-        void color_expand(const std::vector<byte> &color_table, byte *row,
+        void color_expand(const std::vector<byte>& color_table, byte* row,
                           const int w) {
             // We are expanding in-place --
             // This means that we must process the row backwards,
@@ -68,12 +68,12 @@ namespace im {
         
     }
     
-    std::unique_ptr<Image> BMPFormat::read(byte_source *src,
-                                           ImageFactory *factory,
+    std::unique_ptr<Image> BMPFormat::read(byte_source* src,
+                                           ImageFactory* factory,
                                            const options_map &opts)  {
         char magic[2];
         
-        if (src->read(reinterpret_cast<byte *>(magic), 2) != 2) {
+        if (src->read(reinterpret_cast<byte*>(magic), 2) != 2) {
             imread_raise(CannotReadError, "File is empty");
         }
         
@@ -141,7 +141,7 @@ namespace im {
         byte buf[4];
         
         for (unsigned int r = 0; r != height; ++r) {
-            byte *rowp = output->rowp_as<byte>(height - r - 1);
+            byte* rowp = output->rowp_as<byte>(height - r - 1);
             src->read_check(rowp, bytes_per_row);
             
             if (bitsppixel == 24) {

@@ -62,6 +62,24 @@ namespace filesystem {
         }
     }
     
+    path::path(detail::stringlist_t list)
+        :m_absolute(false), m_type(native_path)
+        ,m_path(list)
+        {}
+    
+    // path::path(detail::stringlist_t list)
+    //     :m_absolute(false), m_type(native_path)
+    //     ,m_path(list.size())
+    //     {
+    //         int idx;
+    //         const int siz = idx = 0;
+    //         auto vectorator = m_path.begin();
+    //         for (auto it = list.begin();
+    //             it != list.end() && idx < N;
+    //             ++it) { seterator = m_path.emplace_hint(vectorator, *it);
+    //                     ++idx; }
+    //     }
+    
     bool path::match(const std::regex& pattern, bool) const {
         return std::regex_match(str(), pattern);
     }
@@ -133,14 +151,14 @@ namespace filesystem {
         return bool(hash() == other.hash());
     }
     
-    std::vector<path> path::list(bool full_paths) const {
+    detail::pathvec_t path::list(bool full_paths) const {
         /// list all files
         if (!is_directory()) {
             imread_raise(FileSystemError,
                 "Can't list files from a non-directory:", str());
         }
         path abspath = make_absolute();
-        std::vector<path> out;
+        detail::pathvec_t out;
         {
             directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
@@ -203,7 +221,7 @@ namespace filesystem {
     
     static const int glob_pattern_flags = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
     
-    std::vector<path> path::list(const char *pattern, bool full_paths) const {
+    detail::pathvec_t path::list(const char *pattern, bool full_paths) const {
         /// list files with glob
         if (!pattern) {
             imread_raise(FileSystemError,
@@ -219,7 +237,7 @@ namespace filesystem {
             filesystem::switchdir s(abspath);
             ::glob(pattern, glob_pattern_flags, NULL, &g);
         }
-        std::vector<path> out;
+        detail::pathvec_t out;
         for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
             out.push_back(full_paths ? abspath/g.gl_pathv[idx] : path(g.gl_pathv[idx]));
         }
@@ -227,15 +245,15 @@ namespace filesystem {
         return out;
     }
     
-    std::vector<path> path::list(const std::string &pattern, bool full_paths) const {
+    detail::pathvec_t path::list(const std::string &pattern, bool full_paths) const {
         return list(pattern.c_str());
     }
     
-    std::vector<path> path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) const {
+    detail::pathvec_t path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) const {
         /// list files with regex object
         path abspath = make_absolute();
-        std::vector<path> unfiltered = abspath.list();
-        std::vector<path> out;
+        detail::pathvec_t unfiltered = abspath.list();
+        detail::pathvec_t out;
         std::for_each(unfiltered.begin(), unfiltered.end(), [&](path &p) {
             if (p.search(pattern, case_sensitive)) {
                 out.push_back(full_paths ? abspath/p : p);

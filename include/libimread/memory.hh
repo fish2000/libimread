@@ -16,13 +16,13 @@ namespace im {
     
     class memory_source : public byte_source {
         public:
-            memory_source(const byte *c, const int l)
+            memory_source(const byte* c, const int l)
                 :data(c), len(l), pos(0)
                 { }
             
             virtual ~memory_source() { }
             
-            virtual std::size_t read(byte *buffer, std::size_t n) {
+            virtual std::size_t read(byte* buffer, std::size_t n) {
                 if (pos + n > len) { n = len-pos; }
                 /// FYI, std::memmove() actually copies bytes, rather
                 /// than 'moving' them (whatever that might mean)
@@ -37,29 +37,29 @@ namespace im {
             virtual std::size_t seek_end(int delta) { return pos = (len-delta-1); }
         
         private:
-            const byte *data;
+            const byte* data;
             const std::size_t len;
             std::size_t pos;
     };
     
     class memory_sink : public byte_sink {
         public:
-            memory_sink(byte *c, std::size_t l)
+            memory_sink(byte* c, std::size_t l)
                 :data(c), membuf(memory::sink(data, l)), len(l)
                 {}
             
             virtual ~memory_sink() {}
             
             virtual bool can_seek() const noexcept { return true; }
-            virtual std::size_t seek_absolute(std::size_t pos) { return ::fseek(membuf.get(), pos, SEEK_SET); }
-            virtual std::size_t seek_relative(int delta) { return ::fseek(membuf.get(), delta, SEEK_CUR); }
-            virtual std::size_t seek_end(int delta) { return ::fseek(membuf.get(), delta, SEEK_END); }
+            virtual std::size_t seek_absolute(std::size_t pos) { return std::fseek(membuf.get(), pos, SEEK_SET); }
+            virtual std::size_t seek_relative(int delta) { return std::fseek(membuf.get(), delta, SEEK_CUR); }
+            virtual std::size_t seek_end(int delta) { return std::fseek(membuf.get(), delta, SEEK_END); }
             
-            virtual std::size_t write(const void *buffer, std::size_t n) {
-                return ::fwrite(buffer, sizeof(byte), n, membuf.get());
+            virtual std::size_t write(const void* buffer, std::size_t n) {
+                return std::fwrite(buffer, sizeof(byte), n, membuf.get());
             }
             
-            virtual void flush() { ::fflush(membuf.get()); }
+            virtual void flush() { std::fflush(membuf.get()); }
             
             virtual std::vector<byte> contents() {
                 std::vector<byte> out(len);

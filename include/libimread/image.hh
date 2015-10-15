@@ -17,7 +17,7 @@ namespace im {
         public:
             virtual ~Image() {}
             
-            virtual void *rowp(int r) = 0;
+            virtual void* rowp(int r) = 0;
             virtual const int nbits() const = 0;
             
             virtual const int nbytes() const {
@@ -35,7 +35,7 @@ namespace im {
             }
             
             template <typename T> inline
-            T *rowp_as(const int r) {
+            T* rowp_as(const int r) {
                 return static_cast<T*>(this->rowp(r));
             }
             
@@ -114,7 +114,7 @@ namespace im {
         void push_back(std::unique_ptr<Image> p) {
             content.push_back(p.get());
         }
-        void push_back(Image *p) {
+        void push_back(Image* p) {
             content.push_back(p);
         }
         

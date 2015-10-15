@@ -9,38 +9,36 @@
 
 namespace filesystem {
 
-class resolver {
-    
-    public:
-        typedef std::vector<path>::iterator iterator;
-        typedef std::vector<path>::const_iterator const_iterator;
+    class resolver {
         
-        resolver() {
-            m_paths.push_back(path::getcwd());
-        }
-        
-        size_t size() const { return m_paths.size(); }
-        
-        iterator begin() { return m_paths.begin(); }
-        iterator end()   { return m_paths.end(); }
-        
-        const_iterator begin() const { return m_paths.begin(); }
-        const_iterator end()   const { return m_paths.end(); }
-        
-        void erase(iterator it) { m_paths.erase(it); }
-        void prepend(const path &path) { m_paths.insert(m_paths.begin(), path); }
-        void append(const path &path) { m_paths.push_back(path); }
-        
-        path resolve(const path &value) const {
-            for (const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
-                path combined = *it / value;
-                if (combined.exists()) { return combined; }
+        public:
+            typedef detail::pathvec_t::iterator iterator;
+            typedef detail::pathvec_t::const_iterator const_iterator;
+            
+            resolver()
+                { m_paths.push_back(path::getcwd()); }
+            
+            std::size_t size() const        { return m_paths.size(); }
+            iterator begin()                { return m_paths.begin(); }
+            iterator end()                  { return m_paths.end(); }
+            const_iterator begin() const    { return m_paths.begin(); }
+            const_iterator end()   const    { return m_paths.end(); }
+            
+            void erase(iterator it)         { m_paths.erase(it); }
+            void prepend(const path& path)  { m_paths.insert(m_paths.begin(), path); }
+            void append(const path& path)   { m_paths.push_back(path); }
+            
+            path resolve(const path& value) const {
+                for (const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
+                    path combined = *it / value;
+                    if (combined.exists()) { return combined; }
+                }
+                return path();
             }
-            return path();
-        }
-        
-    private:
-        std::vector<path> m_paths;
+            
+        private:
+            detail::pathvec_t m_paths;
+    
     };
 
 }; /* namespace filesystem */
