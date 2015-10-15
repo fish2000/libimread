@@ -42,7 +42,6 @@ TEST_CASE("[SFINAE] Confirm results of objc::traits::is_object<objc::types::ID>:
     struct non_object {};
     
     bool check_one = objc::traits::detail::has_isa<objc_object_t>::value == true;
-    // bool check_one_and_a_half = objc::traits::detail::has_isa<std::remove_pointer_t<std::common_type<id, NSObject*>::type>>::value == true;
     bool check_one_and_a_half = objc::traits::detail::is_object_pointer<NSObject*>::value == true;
     bool check_two = objc::traits::is_object<objc::types::ID>::value == true;
     bool check_three = objc::traits::is_object<non_object*>::value == false;

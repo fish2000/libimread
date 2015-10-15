@@ -392,6 +392,9 @@ namespace objc {
                     enum { value = sizeof(test<composite>(0)) == 2 };
             };
             
+            /// All of this following hoohah is a SFINAE-compatible reimplementation
+            /// of std::common_type<T>, taken right from this document:
+            ///     http://open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3843.pdf
             template <typename T, typename U>
             using ct2 = decltype(std::declval<bool>() ? std::declval<T>() : std::declval<U>());
             
@@ -418,17 +421,8 @@ namespace objc {
             template <typename ...Types>
             using has_common_type = has_type_member<common_type<Types...>>;
             
-            // template <typename Target,
-            //           typename T = common_type_t<types::object_t*, types::ID, Target>>
-            // class is_object_pointer {
-            //     template <typename U> static detail::one &test(Target);
-            //     template <typename U> static detail::two &test(...);
-            //     public:
-            //         typedef T common_type;
-            //         typedef Target type;
-            //         enum { value = sizeof(test<T>(static_cast<T>(0))) == 1 };
-            // };
-            
+            /// objc::traits::detail::is_object_pointer<T> checks using
+            /// objc::traits::detail::has_common_type<T, objc::types::ID>
             template <typename Target>
             using is_object_pointer = has_common_type<std::decay_t<Target>, types::ID>;
         }
@@ -449,7 +443,8 @@ namespace objc {
         /// compile-time tests for objective-c primitives:
         
         /// test for an object-pointer instance (NSObject* and descendants)
-        /// ... uses objc::traits::detail::IsaIsa to enable_if itself properly
+        /// ... uses std::is_pointer<T> to enable_if itself properly,
+        /// ... and objc::traits::detail::is_object_pointer<T> to make the call
         template <typename T, typename V = bool>
         struct is_object : std::false_type {};
         template <typename T>
@@ -486,8 +481,8 @@ namespace objc {
         using object_t = typename std::remove_pointer_t<std::decay_t<OCType>>;
         using pointer_t = OCType;
         
-        // static_assert(objc::traits::is_object<NSObject*>::value,
-        //               "objc::object<OCType> requires a pointer to objc_object");
+        static_assert(objc::traits::is_object<OCType>::value,
+                      "objc::object<OCType> requires a pointer to objc_object");
         
         pointer_t self;
         
