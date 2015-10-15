@@ -772,15 +772,24 @@ namespace im {
     ///      *) See also http://bit.ly/1P8d8va for in-depth analysis of this pivotal term
     
     template <typename S> inline
-    typename std::enable_if_t<objc::traits::is_object<S>::value, std::string>
-        stringify(S *s) {
+    typename std::enable_if_t<objc::traits::is_object<S>::value,
+        const std::string>
+        stringify(S s) {
             const objc::id self(s);
             if (self[@"STLString"]) {
                 return [*self STLString];
             } else if (self[@"UTF8String"]) {
-                return std::string([*self UTF8String]);
+                return [*self UTF8String];
             }
             return self.description();
+        }
+    
+    template <typename S> inline
+    typename std::enable_if_t<objc::traits::is_selector<S>::value,
+        const std::string>
+        stringify(S s) {
+            const objc::selector sel(s);
+            return sel.str();
         }
     
 } /* namespace im */
