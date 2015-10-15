@@ -7,13 +7,13 @@
 using namespace im;
 
 @implementation NSBitmapImageRep (IMBitmapImageRepAdditions)
-+ (NSBitmapImageRep *) imageRepWithByteVector:(const std::vector<byte>&)byteVector {
++ (instancetype) imageRepWithByteVector:(const std::vector<byte>&)byteVector {
     NSBitmapImageRep *rep;
     @autoreleasepool {
         NSData *datum;
         datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
                                        length:(NSInteger)byteVector.size()];
-        rep = [[NSBitmapImageRep alloc] initWithData:datum];
+        NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:datum];
         #if !__has_feature(objc_arc)
             [datum release];
         #endif

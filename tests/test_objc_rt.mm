@@ -50,6 +50,7 @@ namespace {
             objc::selector("callMethodWithInt:andObjCString:"),
             42, stringArg);
         [stringArg release];
+        [imts release];
     }
     
     TEST_CASE("[objc-rt] Call an instance method with int and (__bridge void*)NSString arguments via objc::msg::send()",
@@ -62,6 +63,7 @@ namespace {
             objc::selector("callMethodWithInt:andVoidPointer:"),
             42, objc::bridge<void*>(stringArg));
         [stringArg release];
+        [imts release];
     }
     
     TEST_CASE("[objc-rt] Call an instance method via objc::msg::get<Return, ...>() returning a float value",
