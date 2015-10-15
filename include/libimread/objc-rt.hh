@@ -261,9 +261,9 @@ namespace objc {
             inline auto send(types::ID self, types::selector op) const -> Return {
                 if (!std::is_void<Return>::value) {
                     /// dead code elimination collapses this conditional
-                    return void_impl(self, op, index_t());
+                    return send_impl(self, op, index_t());
                 }
-                send_impl(self, op, index_t());
+                void_impl(self, op, index_t());
             }
         
         private:
