@@ -88,7 +88,7 @@ namespace im {
         public:
             static constexpr std::size_t C = Color::Meta::channel_count;
             static constexpr std::size_t D = Dimensions;
-            static constexpr std::size_t P = 40;
+            static constexpr std::size_t P = 40; /// padding (I still don't quite get this)
             using color_t = Color;
             using nonvalue_t = typename Color::NonValue;
             using component_t = typename Color::component_t; /// == channel_t[N]
@@ -116,9 +116,8 @@ namespace im {
             
             void init(int x, int y = 1) {
                 meta = Meta(x, y);
-                contents = std::shared_ptr<channel_t>(
-                    new channel_t[meta.size()+P],
-                    deleter_t());
+                contents = contents_t(new channel_t[meta.size()+P],
+                                      deleter_t());
             }
             
             void init(Contents c, Meta m) {
@@ -313,12 +312,10 @@ namespace im {
                 using dest_color_t = Output;
                 using source_array_t = typename Color::array_t;
                 using channel_t = typename Output::channel_t;
-                using out_t = typename Output::composite_t;
                 
                 Conversion converter;
-                Contents destination = std::shared_ptr<channel_t>(
-                                            new channel_t[meta.size()+P],
-                                            deleter_t());
+                Contents destination = contents_t(new channel_t[meta.size()+P],
+                                                  deleter_t());
                 const int w = width(),
                           h = height();
                 
@@ -375,13 +372,13 @@ namespace im {
             }
             
             inline off_t rowp_stride() const {
-                return off_t(stride(1));
+                return off_t(meta.strides[1]);
             }
             
             virtual void* rowp(int r) override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
                 channel_t* host = data();
-                host += off_t(r * rowp_stride());
+                host += off_t(r * meta.strides[1]);
                 return static_cast<void*>(host);
             }
             

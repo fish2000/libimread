@@ -232,7 +232,14 @@ namespace objc {
                                       void_sender_t<Args...>,
                                       return_sender_t<return_t, Args...>>::type;
         
+        /// I like my members like I like my args: tupled
         tuple_t args;
+        
+        /// You would think that one of these function pointers -- probably the one
+        /// corresponding to std::is_class<T> -- would be objc_msgSend_stret, right?
+        /// WRONG. As it turns out, that is only what you want if you like segfaults;
+        /// the _stret-related functionality is actually somehow included in 
+        /// plain ol' objc_msgSend() these days. WHO KNEW.
         sender_t dispatcher = (std::is_floating_point<Return>::value ? (sender_t)objc_msgSend_fpret : 
                               (std::is_class<Return>::value          ? (sender_t)objc_msgSend : 
                                                                        (sender_t)objc_msgSend));
@@ -305,22 +312,6 @@ namespace objc {
             message &operator=(message&&);
             
     };
-    
-    /// wrapper around an objective-c instance
-    /// ... FEATURING:
-    /// + automatic scoped memory management via RAII through MRC messages
-    /// ... plus fine control through inlined retain/release/autorelease methods
-    /// + access to wrapped object pointer via operator*()
-    /// + boolean selector-response test via operator[](T t) e.g.
-    ///
-    ///     objc::id yodogg([[NSYoDogg alloc] init]);
-    ///     if (yodogg[@"iHeardYouRespondTo:"]) {
-    ///         [*yodogg iHeardYouRespondTo:argsInYourArgs];
-    ///     }
-    ///
-    /// + convenience methods e.g. yodogg.classname(), yodogg.description(), yodogg.lookup() ...
-    /// + inline bridging template e.g. void* asVoid = yodogg.bridge<void*>();
-    /// + E-Z static methods for looking shit up in the runtime heiarchy
     
     namespace traits {
     
@@ -441,7 +432,8 @@ namespace objc {
                               "Type does not conform to objc::arguments<Args...>");
                 return detail::test_is_argument_list<T>(0);
             }
-        };
+        
+        }; /* namespace detail */
         
         /// compile-time tests for objective-c primitives:
         
@@ -474,8 +466,23 @@ namespace objc {
                 detail::has_superclass<T>::value,
                 bool>> : std::true_type {};
         
-    }
+    } /* namespace traits */
     
+    /// wrapper around an objective-c instance
+    /// ... FEATURING:
+    /// + automatic scoped memory management via RAII through MRC messages
+    /// ... plus fine control through inlined retain/release/autorelease methods
+    /// + access to wrapped object pointer via operator*()
+    /// + boolean selector-response test via operator[](T t) e.g.
+    ///
+    ///     objc::object<NSYoDogg*> yodogg([[NSYoDogg alloc] init]);
+    ///     if (yodogg[@"iHeardYouRespondTo:"]) {
+    ///         [*yodogg iHeardYouRespondTo:argsInYourArgs];
+    ///     }
+    ///
+    /// + convenience methods e.g. yodogg.classname(), yodogg.description(), yodogg.lookup() ...
+    /// + inline bridging template e.g. void* asVoid = yodogg.bridge<void*>();
+    /// + E-Z static methods for looking shit up in the runtime heiarchy
     
     template <typename OCType>
     struct object {

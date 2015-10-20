@@ -110,8 +110,6 @@ namespace {
         std::hash<objc::id> id_hasher;
         std::hash<objc::types::ID> object_hasher;
         
-        //REQUIRE(s == st);
-        //REQUIRE(s == @"Yo Dogg");
         bool check_one = bool(s == (id)st);
         bool check_two = bool(s == (id)@"Yo Dogg");
         bool check_three = bool(s != o);
