@@ -63,10 +63,10 @@ namespace filesystem {
         ///     ::some_posix_func_that_wants_a_dirhandle(dir.get());
         ///     
         /// ... see? see what I am getting at with all this? NO DIR!! haha. anyway.
-        filesystem::directory ddopen(const char *c);
-        filesystem::directory ddopen(const std::string &s);
-        filesystem::directory ddopen(const path &p);
-        filesystem::file ffopen(const std::string &s, mode m = mode::READ);
+        filesystem::directory ddopen(const char* c);
+        filesystem::directory ddopen(const std::string& s);
+        filesystem::directory ddopen(const path& p);
+        filesystem::file ffopen(const std::string& s, mode m = mode::READ);
     }
 
 } /* namespace filesystem */

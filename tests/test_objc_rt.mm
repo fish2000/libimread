@@ -172,7 +172,7 @@ namespace {
         std::string prefixed = prefix + temporary.str();
         
         datum = [[NSData alloc] initWithBytes:(const void *)&randos[0]
-                                    length:(NSInteger)nbytes];
+                                       length:(NSInteger)nbytes];
         filepath = [[NSString alloc] initWithUTF8String:temporary.c_str()];
         url = [[NSURL alloc] initWithString:[
             [NSString alloc] initWithUTF8String:prefixed.c_str()]];

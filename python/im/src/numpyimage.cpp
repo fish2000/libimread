@@ -13,15 +13,15 @@ namespace im {
         
         /// XXX: remind me why in fuck did I write this shit originally
         template <typename T, typename pT>
-        std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT> &&src) {
+        std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT>&& src) {
             /// Force a dynamic_cast upon a unique_ptr via interim swap
             /// ... danger, will robinson: DELETERS/ALLOCATORS NOT WELCOME
             /// ... from http://stackoverflow.com/a/14777419/298171
             if (!src) { return std::unique_ptr<T>(); }
-        
+            
             /// Throws a std::bad_cast() if this doesn't work out
             T *dst = &dynamic_cast<T&>(*src.get());
-        
+            
             src.release();
             std::unique_ptr<T> ret(dst);
             return ret;
@@ -36,8 +36,9 @@ using ImagePtr = std::unique_ptr<im::HybridArray>;
 
 struct NumpyImage {
     PyObject_HEAD
-    ImagePtr image = ImagePtr(nullptr);
-    PyArray_Descr *dtype = NULL;
+    //std::shared_ptr<im::HybridArray> image = std::shared_ptr<im::HybridArray>(nullptr);
+    im::HybridArray* image = nullptr;
+    PyArray_Descr* dtype = NULL;
     
     void cleanup() {
         image.release();
@@ -52,13 +53,13 @@ struct NumpyImage {
 /// ALLOCATE / __new__ implementation
 static PyObject *NumpyImage_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
     NumpyImage *self;
-    self = reinterpret_cast<NumpyImage *>(type->tp_alloc(type, 0));
+    self = reinterpret_cast<NumpyImage*>(type->tp_alloc(type, 0));
     /// initialize with defaults
     if (self != NULL) {
-        self->image = ImagePtr(nullptr);
+        self->image = nullptr;
         self->dtype = NULL;
     }
-    return reinterpret_cast<PyObject *>(self); /// all is well, return self
+    return reinterpret_cast<PyObject*>(self); /// all is well, return self
 }
 
 /// __init__ implementation
@@ -149,7 +150,7 @@ static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYP
 static PyTypeObject NumpyImage_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                          /* ob_size */
-    "_im.NumpyImage",                                            /* tp_name */
+    "_im.NumpyImage",                                           /* tp_name */
     sizeof(NumpyImage),                                         /* tp_basicsize */
     0,                                                          /* tp_itemsize */
     (destructor)NumpyImage_dealloc,                             /* tp_dealloc */

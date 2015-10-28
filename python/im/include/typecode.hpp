@@ -97,8 +97,8 @@ namespace typecode {
             return _typecode_character_map;
         }
         
-        static std::unordered_map<NPY_TYPES, string> init_typecode_literal_map() {
-            std::unordered_map<NPY_TYPES, string> _typecode_literal_map = {
+        static std::unordered_map<NPY_TYPES, std::string> init_typecode_literal_map() {
+            std::unordered_map<NPY_TYPES, std::string> _typecode_literal_map = {
                 { NPY_BOOL, "NPY_BOOL" },
                 { NPY_BYTE, "NPY_BYTE" },
                 { NPY_UBYTE, "NPY_UBYTE" },
@@ -131,7 +131,7 @@ namespace typecode {
         
         static const std::unordered_map<int, NPY_TYPES> integral;
         static const std::unordered_map<NPY_TYPES, NPY_TYPECHAR> character;
-        static const std::unordered_map<NPY_TYPES, string> literal;
+        static const std::unordered_map<NPY_TYPES, std::string> literal;
     };
     
     NPY_TYPECHAR typechar(NPY_TYPES typecode);

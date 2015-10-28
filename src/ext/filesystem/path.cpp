@@ -221,7 +221,7 @@ namespace filesystem {
     
     static const int glob_pattern_flags = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
     
-    detail::pathvec_t path::list(const char *pattern, bool full_paths) const {
+    detail::pathvec_t path::list(const char* pattern, bool full_paths) const {
         /// list files with glob
         if (!pattern) {
             imread_raise(FileSystemError,
@@ -245,11 +245,11 @@ namespace filesystem {
         return out;
     }
     
-    detail::pathvec_t path::list(const std::string &pattern, bool full_paths) const {
+    detail::pathvec_t path::list(const std::string& pattern, bool full_paths) const {
         return list(pattern.c_str());
     }
     
-    detail::pathvec_t path::list(const std::regex &pattern, bool case_sensitive, bool full_paths) const {
+    detail::pathvec_t path::list(const std::regex& pattern, bool case_sensitive, bool full_paths) const {
         /// list files with regex object
         path abspath = make_absolute();
         detail::pathvec_t unfiltered = abspath.list();
@@ -274,7 +274,7 @@ namespace filesystem {
         
         /// list with tag dispatch for separate return vectors
         const detail::list_separate_t tag{};
-        path abspath = make_absolute();
+        const path abspath = make_absolute();
         detail::vector_pair_t vector_pair = abspath.list(tag);
         
         /// separate out files and directories
@@ -286,7 +286,7 @@ namespace filesystem {
         
         /// recursively walk into subdirs
         if (directories.empty()) { return; }
-        std::for_each(directories.begin(), directories.end(), [&](std::string &subdir) {
+        std::for_each(directories.begin(), directories.end(), [&](const std::string& subdir) {
             abspath.join(subdir).walk(std::forward<detail::walk_visitor_t>(walk_visitor));
         });
     }

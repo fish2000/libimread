@@ -116,13 +116,13 @@ namespace objc {
         
         types::selector sel;
         
-        explicit selector(const std::string &name)
+        explicit selector(const std::string& name)
             :sel(::sel_registerName(name.c_str()))
             {}
-        explicit selector(const char *name)
+        explicit selector(const char* name)
             :sel(::sel_registerName(name))
             {}
-        explicit selector(NSString *name)
+        explicit selector(NSString* name)
             :sel(::NSSelectorFromString(name))
             {}
         
@@ -158,20 +158,20 @@ namespace objc {
             return !objc::to_bool(::sel_isEqual(sel, s));
         }
         
-        inline const char *c_str() const {
+        inline const char* c_str() const {
             return ::sel_getName(sel);
         }
         inline std::string str() const {
             return c_str();
         }
-        inline NSString *ns_str() const {
+        inline NSString* ns_str() const {
             return ::NSStringFromSelector(sel);
         }
         inline CFStringRef cf_str() const {
             return objc::bridge<CFStringRef>(ns_str());
         }
         
-        friend std::ostream &operator<<(std::ostream &os, const objc::selector& s) {
+        friend std::ostream &operator<<(std::ostream& os, const objc::selector& s) {
             return os << "@selector( " << s.str() << " )";
         }
         
@@ -198,13 +198,13 @@ namespace objc {
         operator NSString*() const { return ::NSStringFromSelector(sel); }
         operator CFStringRef() const { return objc::bridge<CFStringRef>(ns_str()); }
         
-        static objc::selector register_name(const std::string &name) {
+        static objc::selector register_name(const std::string& name) {
             return objc::selector(name);
         }
-        static objc::selector register_name(const char *name) {
+        static objc::selector register_name(const char* name) {
             return objc::selector(name);
         }
-        static objc::selector register_name(NSString *name) {
+        static objc::selector register_name(NSString* name) {
             return objc::selector(name);
         }
         
@@ -562,10 +562,10 @@ namespace objc {
         }
         
         bool operator[](types::selector s) const       { return responds_to(s); }
-        bool operator[](const objc::selector &s) const { return responds_to(s.sel); }
-        bool operator[](const char *s) const           { return responds_to(::sel_registerName(s)); }
-        bool operator[](const std::string &s) const    { return responds_to(::sel_registerName(s.c_str())); }
-        bool operator[](NSString *s) const             { return responds_to(::NSSelectorFromString(s)); }
+        bool operator[](const objc::selector& s) const { return responds_to(s.sel); }
+        bool operator[](const char* s) const           { return responds_to(::sel_registerName(s)); }
+        bool operator[](const std::string& s) const    { return responds_to(::sel_registerName(s.c_str())); }
+        bool operator[](NSString* s) const             { return responds_to(::NSSelectorFromString(s)); }
         bool operator[](CFStringRef s) const           { return responds_to(::NSSelectorFromString(
                                                                         objc::bridge<NSString*>(s))); }
         
@@ -580,11 +580,11 @@ namespace objc {
             return [[self description] STLString];
         }
         
-        friend std::ostream &operator<<(std::ostream &os, const object& smelf) {
-            return os << "<" << smelf.classname()   << "> "
-                      << "(" << smelf.description() << ") "
+        friend std::ostream &operator<<(std::ostream &os, const object& friendly) {
+            return os << "<" << friendly.classname()   << "> "
+                      << "(" << friendly.description() << ") "
                       << "[" << std::hex << "0x"
-                             << smelf.hash()
+                             << friendly.hash()
                              << std::dec << "]";
         }
         
@@ -623,13 +623,13 @@ namespace objc {
             return ::objc_lookUpClass(
                 __cls_name(std::forward<pointer_t>(ii)));
         }
-        static types::cls lookup(const std::string &s) {
+        static types::cls lookup(const std::string& s) {
             return ::objc_lookUpClass(s.c_str());
         }
-        static types::cls lookup(const char *s) {
+        static types::cls lookup(const char* s) {
             return ::objc_lookUpClass(s);
         }
-        // static types::cls lookup(NSString *s) {
+        // static types::cls lookup(NSString* s) {
         //     return ::NSClassFromString(s);
         // }
         // static types::cls lookup(CFStringRef s) {
@@ -698,7 +698,7 @@ namespace objc {
 /// ... e.g. create an inline wrapper for a `yoDogg:` selector like so:
 ///     objc::selector yodogg = "yoDogg:"_SEL;
 
-inline objc::selector operator"" _SEL(const char *name) {
+inline objc::selector operator"" _SEL(const char* name) {
     return objc::selector(name);
 }
 

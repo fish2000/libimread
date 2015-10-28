@@ -87,14 +87,14 @@ namespace im {
             ImageWithMetadata()
                 :meta("")
                 {}
-            ImageWithMetadata(const std::string &m)
-                :meta(std::string(m))
+            ImageWithMetadata(const std::string& m)
+                :meta(m)
                 {}
             
             virtual ~ImageWithMetadata() {}
             
             const std::string& get_meta() const { return meta; }
-            void set_meta(const std::string &m) { meta = std::string(m); }
+            void set_meta(const std::string& m) { meta = m; }
             
         private:
             std::string meta;

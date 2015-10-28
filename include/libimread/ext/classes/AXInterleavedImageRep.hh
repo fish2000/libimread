@@ -21,9 +21,11 @@ using InterleavedImage = im::InterleavedImage<RGB, 3>;
 }
 
 + (instancetype)        imageRepWithInterleaved:(const InterleavedImage&)interleaved;
-+ (instancetype)        imageRepWithInterleaved:(const InterleavedImage&)interleaved colorSpaceName:(NSString *)space;
++ (instancetype)        imageRepWithInterleaved:(const InterleavedImage&)interleaved
+                                 colorSpaceName:(NSString *)space;
 -                       initWithInterleaved:(const InterleavedImage&)interleaved;
--                       initWithInterleaved:(const InterleavedImage&)interleaved colorSpaceName:(NSString *)space;
+-                       initWithInterleaved:(const InterleavedImage&)interleaved
+                             colorSpaceName:(NSString *)space;
 - (void)                setInterleaved:(const InterleavedImage&)interleaved;
 - (InterleavedImage)    interleaved;
 - (const Meta&)         imageMeta;

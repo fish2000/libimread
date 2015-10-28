@@ -66,27 +66,27 @@ namespace im {
         public:
             HybridArray()
                 :HalBase(), Image(), MetaImage()
-                ;dtype_(NPY_UINT8)
+                ,dtype_(NPY_UINT8)
                 {}
             
-            HybridArray(NPY_TYPES d, int x, int y, int z, int w, const std::string &name="")
+            HybridArray(NPY_TYPES d, int x, int y, int z, int w, const std::string& name="")
                 :HalBase(for_dtype(d), x, y, z, w, name), Image(), MetaImage(name)
-                ;dtype_(d)
+                ,dtype_(d)
                 {}
             
-            HybridArray(NPY_TYPES d, int x, int y, int z, const std::string &name="")
+            HybridArray(NPY_TYPES d, int x, int y, int z, const std::string& name="")
                 :HalBase(for_dtype(d), x, y, z, name), Image(), MetaImage(name)
-                ;dtype_(d)
+                ,dtype_(d)
                 {}
             
-            HybridArray(NPY_TYPES d, int x, int y, const std::string &name="")
+            HybridArray(NPY_TYPES d, int x, int y, const std::string& name="")
                 :HalBase(for_dtype(d), x, y, name), Image(), MetaImage(name)
-                ;dtype_(d)
+                ,dtype_(d)
                 {}
             
-            HybridArray(NPY_TYPES d, int x, const std::string &name="")
+            HybridArray(NPY_TYPES d, int x, const std::string& name="")
                 :HalBase(for_dtype(d), x, name), Image(), MetaImage(name)
-                ;dtype_(d)
+                ,dtype_(d)
                 {}
             
             using HalBase::dimensions;
@@ -99,8 +99,8 @@ namespace im {
             virtual ~HybridArray() {}
             
             PyObject *metadataPyObject() {
-                std::string *s = MetaImage::get_meta();
-                if (s) { return PyBytes_FromString(s->c_str()); }
+                const std::string& s = MetaImage::get_meta();
+                if (s != "") { return PyBytes_FromString(s.c_str()); }
                 Py_RETURN_NONE;
             }
             
@@ -138,10 +138,10 @@ namespace im {
                 return HalBase::channels() == 1 ? 0 : off_t(HalBase::stride(1));
             }
             
-            virtual void *rowp(int r) override {
-                uint8_t *host = data();
+            virtual void* rowp(int r) override {
+                uint8_t* host = data();
                 host += off_t(r * rowp_stride());
-                return static_cast<void *>(host);
+                return static_cast<void*>(host);
             }
             
             /// extent, stride, min
@@ -164,16 +164,16 @@ namespace im {
         
         public:
             ArrayFactory()
-                :nm(std::string(""))
+                :nm("")
                 {}
-            ArrayFactory(const std::string &n)
-                :nm(std::string(n))
+            ArrayFactory(const std::string& n)
+                :nm(n)
                 {}
             
             virtual ~ArrayFactory() {}
             
             std::string &name() { return nm; }
-            void name(std::string &nnm) { nm = nnm; }
+            void name(const std::string &n) { nm = n; }
         
         protected:
             virtual std::unique_ptr<Image> create(int nbits,

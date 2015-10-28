@@ -186,9 +186,9 @@ namespace filesystem {
             /// ... in all cases, you can specify a trailing boolean to ensure the paths you get back are absolute.
             detail::pathvec_t     list(                             bool full_paths=false) const;
             detail::vector_pair_t list(detail::list_separate_t tag, bool full_paths=false) const;
-            detail::pathvec_t     list(const char *pattern,         bool full_paths=false) const;
-            detail::pathvec_t     list(const std::string &pattern,  bool full_paths=false) const;
-            detail::pathvec_t     list(const std::regex &pattern,
+            detail::pathvec_t     list(const char* pattern,         bool full_paths=false) const;
+            detail::pathvec_t     list(const std::string& pattern,  bool full_paths=false) const;
+            detail::pathvec_t     list(const std::regex& pattern,
                                        bool case_sensitive=false,   bool full_paths=false) const;
             
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
@@ -221,7 +221,7 @@ namespace filesystem {
             /// attempt to delete the file or directory at this path.
             /// USE WITH CAUTION -- this is basically ::unlink() or ::rmdir(),
             /// in other words it's like 'rm -f' on some object with which you might not
-            /// be totally familiar with. Again I say: USE WITH CAUTION.
+            /// be totally familiar. Again I say: USE WITH CAUTION.
             bool remove() const;
             
             /// Static forwarder for path::remove<P>(p) that should also be USED WITH CAUTION
@@ -261,7 +261,7 @@ namespace filesystem {
             }
             
             /// Get back the parent path (also known as the 'dirname' if you are
-            /// a fan of the python os.path module, which meh I could take or leave)
+            /// a fan of the Python os.path module, which meh I could take or leave)
             path parent() const {
                 path result;
                 result.m_absolute = m_absolute;
