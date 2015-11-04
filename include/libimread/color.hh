@@ -255,13 +255,22 @@ namespace im {
         using RGB = UniformColor<meta::RGB>;
         using HDR = UniformColor<meta::RGBA, int64_t, int16_t>;
         
-        template <typename Color, typename DestColor>
+        template <typename T>
+        using void_t = std::conditional_t<true, void, T>;
+        
+        template <class, class = void>
+        struct has_channel_member : std::false_type {};
+        template <class T>
+        struct has_channel_member<T, void_t<typename T::channel_t>> : std::true_type {};
+        
+        template <typename Color, typename DestColor, typename Channel = uint8_t>
         struct ConverterBase {
             using color_t = Color;
             using dest_color_t = DestColor;
             using composite_t = typename color_t::composite_t;
             using component_t = typename std::add_pointer_t<typename color_t::channel_t>;
-            using val_t = typename dest_color_t::channel_t;
+            using val_t = std::conditional_t<has_channel_member<dest_color_t>::value,
+                                typename dest_color_t::channel_t, Channel>;
             constexpr ConverterBase() noexcept = default;
         };
         
