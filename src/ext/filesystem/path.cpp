@@ -330,8 +330,7 @@ namespace filesystem {
         char temp[PATH_MAX];
         if (::getcwd(temp, PATH_MAX) == NULL) {
             imread_raise(FileSystemError,
-                "Internal error in getcwd():",
-                std::strerror(errno));
+                "Internal error in getcwd():", std::strerror(errno));
         }
         return path(temp);
     }

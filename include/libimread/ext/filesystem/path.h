@@ -42,7 +42,7 @@ namespace filesystem {
         /// instead of plain ol' pathvec_t
         struct list_separate_t {};
         
-        /// user-provide callback function signature for path::walk()
+        /// user-provided callback function signature for path::walk()
         using walk_visitor_t = std::function<void(const path&,  /// root path
                                              stringvec_t&,      /// directories
                                              stringvec_t&)>;    /// files
