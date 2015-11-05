@@ -84,8 +84,8 @@ namespace filesystem {
             explicit path(detail::stringlist_t list);
             
             inline std::size_t size() const { return static_cast<std::size_t>(m_path.size()); }
-            inline bool empty() const       { return m_path.empty(); }
             inline bool is_absolute() const { return m_absolute; }
+            inline bool empty() const       { return m_path.empty(); }
             
             /// return a new and fully-absolute path wrapper,
             /// based on the path in question
@@ -146,14 +146,17 @@ namespace filesystem {
                 return path(std::forward<P>(p)).is_file_or_link();
             }
             
-            /// convenience funcs for matching a std::regex against the path in question:
-            /// get a boolean back for your (possibly case-insenitive) std::regex reference;
-            /// match() and search() hand respectively straight off to std::regex_match
-            /// and std::regex_search()
+            /// Convenience funcs for running a std::regex against the path in question:
+            /// match(), search() and replace() hand respectively straight off to std::regex_match,
+            /// std::regex_search(), and std::regex_replace, using the stringified path.
+            /// As one would expect, calls to the former two return booleans whereas
+            /// both replace() overloads yield new path objects.
             bool match(const std::regex& pattern,           bool case_sensitive=false) const;
             bool search(const std::regex& pattern,          bool case_sensitive=false) const;
-            path replace(const std::regex& pattern,         const char* s) const;
-            path replace(const std::regex& pattern,         const std::string& s) const;
+            path replace(const std::regex& pattern,         const char* replacement,
+                                                            bool case_sensitive=false) const;
+            path replace(const std::regex& pattern,         const std::string& replacement,
+                                                            bool case_sensitive=false) const;
             
             /// static forwarder for path::match<P>(p)
             template <typename P> inline
@@ -171,9 +174,9 @@ namespace filesystem {
             
             /// static forwarder for path::replace<P>(p)
             template <typename P, typename S> inline
-            static path replace(P&& p, std::regex&& pattern, S&& s) {
+            static path replace(P&& p, std::regex&& pattern, S&& s, bool case_sensitive=false) {
                 return path(std::forward<P>(p)).replace(
-                    std::forward<std::regex>(pattern), std::forward<S>(s));
+                    std::forward<std::regex>(pattern), std::forward<S>(s), case_sensitive);
             }
             
             /// list the directory contents of the path in question.
@@ -271,7 +274,7 @@ namespace filesystem {
                         result.m_path.push_back("..");
                     } else {
                         imread_raise(FileSystemError,
-                            "path::parent() can't get the relative parent of an empty path");
+                            "path::parent() can't get the parent of an empty absolute path");
                     }
                 } else {
                     std::string::size_type idx = 0,
@@ -282,6 +285,8 @@ namespace filesystem {
                 }
                 return result;
             }
+            
+            inline path dirname() const { return parent(); }
             
             /// join a path with a new trailing path fragment
             path join(const path &other) const {
@@ -300,13 +305,13 @@ namespace filesystem {
                 return result;
             }
             
-            /// operator overloads for path joining -- you can be like this:
+            /// operator overloads to join paths with slashes -- you can be like this:
             ///     path p = "/yo/dogg";
             ///     path q = p / "iheard";
             ///     path r = q / "youlike";
             ///     path s = r / "appending";
-            path operator/(const path& other) const { return join(other); }
-            path operator/(const char* other) const { return join(path(other)); }
+            path operator/(const path& other) const        { return join(other); }
+            path operator/(const char* other) const        { return join(path(other)); }
             path operator/(const std::string& other) const { return join(path(other)); }
             
             /// Static forwarder for path::join<P, Q>(p, q) --
@@ -325,13 +330,13 @@ namespace filesystem {
                 return out;
             }
             
-            /// operator overloads for string-appending -- like so:
+            /// operator overloads for bog-standard string-appending -- like so:
             ///     path p = "/yo/dogg";
             ///     path q = p + "_i_heard";
             ///     path r = q + "_you_dont_necessarily_like";
             ///     path s = r + "_segment_based_append_operations";
-            path operator+(const path& other) const { return append(other.str()); }
-            path operator+(const char* other) const { return append(std::string(other)); }
+            path operator+(const path& other) const        { return append(other.str()); }
+            path operator+(const char* other) const        { return append(other); }
             path operator+(const std::string& other) const { return append(other); }
             
             /// Static forwarder for path::append<P, Q>(p, q) --
@@ -361,16 +366,16 @@ namespace filesystem {
             
             /// Static functions for getting both the current, system temp, and user/home directories
             static path getcwd();
-            static path cwd()               { return path::getcwd(); }
-            static path gettmp()            { return path(detail::tmpdir()); }
-            static path tmp()               { return path(detail::tmpdir()); }
-            static path home()              { return path(detail::userdir()); }
-            static path user()              { return path(detail::userdir()); }
+            static path cwd()                { return path::getcwd(); }
+            static path gettmp()             { return path(detail::tmpdir()); }
+            static path tmp()                { return path(detail::tmpdir()); }
+            static path home()               { return path(detail::userdir()); }
+            static path user()               { return path(detail::userdir()); }
             
             /// Conversion operators -- in theory you can pass your paths to functions
             /// expecting either std::strings or const char*s with these...
-            operator std::string()          { return str(); }
-            operator const char*()          { return c_str(); }
+            operator std::string()           { return str(); }
+            operator const char*()           { return c_str(); }
             
             /// Set and tokenize the path using a std::string (mainly used internally)
             void set(const std::string& str) {

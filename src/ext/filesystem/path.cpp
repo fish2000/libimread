@@ -9,6 +9,7 @@
 
 #include <cerrno>
 #include <cstdlib>
+#include <numeric>
 #include <iterator>
 #include <algorithm>
 
@@ -22,6 +23,7 @@ namespace filesystem {
         
         using stat_t = struct stat;
         using passwd_t = struct passwd;
+        using rehasher_t = hash::rehasher<std::string>;
         
         const char* tmpdir() noexcept {
             /// cribbed/tweaked from boost
@@ -44,7 +46,7 @@ namespace filesystem {
             return dirname;
         }
         
-    }
+    } /* namespace detail */
     
     static const std::regex::flag_type regex_flags        = std::regex::extended;
     static const std::regex::flag_type regex_flags_icase  = std::regex::extended | std::regex::icase;
@@ -57,8 +59,7 @@ namespace filesystem {
         } else {
             imread_raise(FileSystemError,
                 "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath)",
-                "where fdpath = ", fdpath,
-                std::strerror(errno));
+                "where fdpath = ", fdpath, std::strerror(errno));
         }
     }
     
@@ -67,33 +68,24 @@ namespace filesystem {
         ,m_path(list)
         {}
     
-    // path::path(detail::stringlist_t list)
-    //     :m_absolute(false), m_type(native_path)
-    //     ,m_path(list.size())
-    //     {
-    //         int idx;
-    //         const int siz = idx = 0;
-    //         auto vectorator = m_path.begin();
-    //         for (auto it = list.begin();
-    //             it != list.end() && idx < N;
-    //             ++it) { seterator = m_path.emplace_hint(vectorator, *it);
-    //                     ++idx; }
-    //     }
+    #define REGEX_FLAGS case_sensitive ? regex_flags_icase : regex_flags
     
-    bool path::match(const std::regex& pattern, bool) const {
+    bool path::match(const std::regex& pattern, bool case_sensitive) const {
         return std::regex_match(str(), pattern);
     }
     
-    bool path::search(const std::regex& pattern, bool) const {
+    bool path::search(const std::regex& pattern, bool case_sensitive) const {
         return std::regex_search(str(), pattern);
     }
     
-    path path::replace(const std::regex& pattern, const char* s) const {
-        return path(std::regex_replace(str(), pattern, s));
+    path path::replace(const std::regex& pattern, const char* replacement, bool case_sensitive) const {
+        return path(std::regex_replace(str(), pattern, replacement));
     }
-    path path::replace(const std::regex& pattern, const std::string& s) const {
-        return path(std::regex_replace(str(), pattern, s));
+    path path::replace(const std::regex& pattern, const std::string& replacement, bool case_sensitive) const {
+        return path(std::regex_replace(str(), pattern, replacement));
     }
+    
+    #undef REGEX_FLAGS
     
     path path::make_absolute() const {
         if (m_absolute) { return path(*this); }
@@ -111,11 +103,11 @@ namespace filesystem {
     path path::expand_user() const {
         const std::regex re("^~", regex_flags);
         if (m_path.empty()) { return path(); }
-        if (m_path[0] != "~") { return path(*this); }
+        if (m_path[0].substr(0, 1) != "~") { return path(*this); }
         return replace(re, detail::userdir());
     }
     
-    bool path::compare_debug(const path &other) const {
+    bool path::compare_debug(const path& other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(), raw_self)  == NULL) {
@@ -139,7 +131,7 @@ namespace filesystem {
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
-    bool path::compare_lexical(const path &other) const {
+    bool path::compare_lexical(const path& other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(),       raw_self)  == NULL) { return false; }
@@ -147,7 +139,7 @@ namespace filesystem {
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
-    bool path::compare(const path &other) const {
+    bool path::compare(const path& other) const {
         return bool(hash() == other.hash());
     }
     
@@ -185,11 +177,10 @@ namespace filesystem {
     }
     
     detail::vector_pair_t path::list(detail::list_separate_t tag, bool full_paths) const {
-        path abspath = make_absolute();
         detail::stringvec_t directories;
         detail::stringvec_t files;
         {
-            directory d = detail::ddopen(abspath.str());
+            directory d = detail::ddopen(make_absolute().str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
                     "Internal error in opendir():", strerror(errno),
@@ -246,22 +237,23 @@ namespace filesystem {
     }
     
     detail::pathvec_t path::list(const std::string& pattern, bool full_paths) const {
-        return list(pattern.c_str());
+        return list(pattern.c_str(), full_paths);
     }
     
     detail::pathvec_t path::list(const std::regex& pattern, bool case_sensitive, bool full_paths) const {
         /// list files with regex object
-        path abspath = make_absolute();
-        detail::pathvec_t unfiltered = abspath.list();
+        detail::pathvec_t unfiltered = list(full_paths);
         detail::pathvec_t out;
-        std::for_each(unfiltered.begin(), unfiltered.end(), [&](path &p) {
-            if (p.search(pattern, case_sensitive)) {
-                out.push_back(full_paths ? abspath/p : p);
-            }
+        if (unfiltered.size() == 0) { return std::move(out); }
+        std::copy_if(unfiltered.begin(), unfiltered.end(),
+                     std::back_inserter(out),
+                     [&](const path& p) {
+            /// keep those paths that match the pattern
+            return p.search(pattern, case_sensitive);
         });
-        return out;
+        return std::move(out);
     }
-            
+    
     // using walk_visitor_t = std::function<void(const path&,       /// root path
     //                                      detail::stringvec_t&,   /// directories
     //                                      detail::stringvec_t&)>; /// files
@@ -286,8 +278,10 @@ namespace filesystem {
         
         /// recursively walk into subdirs
         if (directories.empty()) { return; }
-        std::for_each(directories.begin(), directories.end(), [&](const std::string& subdir) {
-            abspath.join(subdir).walk(std::forward<detail::walk_visitor_t>(walk_visitor));
+        std::for_each(directories.begin(), directories.end(),
+                      [&](const std::string& subdir) {
+            abspath.join(subdir).walk(
+                std::forward<detail::walk_visitor_t>(walk_visitor));
         });
     }
     
@@ -337,16 +331,15 @@ namespace filesystem {
     
     /// calculate the hash value for the path
     std::size_t path::hash() const {
-        std::size_t H = static_cast<std::size_t>(is_absolute());
-        for (auto idx = m_path.begin(); idx != m_path.end(); ++idx) {
-            ::detail::rehash(H, *idx);
-        }
-        return H;
+        std::size_t seed = static_cast<std::size_t>(is_absolute());
+        return std::accumulate(m_path.begin(), m_path.end(),
+                               seed,
+                               detail::rehasher_t());
     }
     
     void path::swap(path& other) noexcept {
         using std::swap;
-        m_path.swap(other.m_path);
+        swap(m_path, other.m_path);
         swap(m_absolute, other.m_absolute);
     }
     

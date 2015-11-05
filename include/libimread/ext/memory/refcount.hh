@@ -118,7 +118,7 @@ namespace memory {
             std::hash<Target*> pHasher;
             std::hash<Guid> guidHasher;
             std::size_t H = guidHasher(guid);
-            ::detail::rehash(H, pHasher(object));
+            hash::rehash(H, pHasher(object));
             return H;
         }
         

@@ -412,7 +412,7 @@ class Json {
         
         /// hashing
         std::size_t hash(std::size_t H = 0) const {
-            detail::rehash<std::string>(H, format());
+            hash::rehash<std::string>(H, format());
             return H;
         }
         
