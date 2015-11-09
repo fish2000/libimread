@@ -10,19 +10,19 @@ namespace blockhash {
     
     namespace orig {
         
-        int cmpint(const void *pa, const void *pb) noexcept {
+        int cmpint(const void* pa, const void* pb) noexcept {
             int a = *(const int *) pa;
             int b = *(const int *) pb;
             return (a < b) ? -1 : (a > b);
         }
         
-        int cmpfloat(const void *pa, const void *pb) noexcept {
+        int cmpfloat(const void* pa, const void* pb) noexcept {
             float a = *(const float *) pa;
             float b = *(const float *) pb;
             return (a < b) ? -1 : (a > b);
         }
         
-        float median(int *data, int n) {
+        float median(int* data, int n) {
             int *sorted;
             float result;
             
@@ -39,7 +39,7 @@ namespace blockhash {
             return result;
         }
         
-        float medianf(float *data, int n) {
+        float medianf(float* data, int n) {
             float *sorted;
             float result;
             
@@ -61,7 +61,7 @@ namespace blockhash {
          *
          * Returns: null-terminated hexadecimal string hash.
          */
-        char* bits_to_hexhash(int *bits, int nbits) {
+        char* bits_to_hexhash(int* bits, int nbits) {
             int    i, j, b;
             int    len;
             int    tmp;
@@ -100,8 +100,8 @@ namespace blockhash {
         * height - image height.
         * hash - the resulting hash will be allocated and stored in the given array as bits.
         */
-        void blockhash_quick(int bits, unsigned char *data,
-                             int width, int height, int **hash) {
+        void blockhash_quick(int bits, unsigned char* data,
+                             int width, int height, int** hash) {
             int    i, x, y, ix, iy;
             int    ii, alpha, value;
             int    block_width;
@@ -167,8 +167,8 @@ namespace blockhash {
         * height - image height.
         * hash - the resulting hash will be allocated and stored in the given array as bits.
         */
-        void blockhash(int bits, unsigned char *data,
-                       int width, int height, int **hash) {
+        void blockhash(int bits, unsigned char* data,
+                       int width, int height, int** hash) {
             float   block_width;
             float   block_height;
             float   y_frac, y_int;

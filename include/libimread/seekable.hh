@@ -31,7 +31,7 @@ namespace im {
         
         public:
             virtual ~byte_source() { }
-            virtual std::size_t read(byte *buffer, std::size_t) warn_unused = 0;
+            virtual std::size_t read(byte* buffer, std::size_t) warn_unused = 0;
             
             template <std::size_t Nelems>
             std::size_t read(byte (&arr)[Nelems], std::size_t n) {

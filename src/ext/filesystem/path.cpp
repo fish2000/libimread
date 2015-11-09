@@ -51,6 +51,9 @@ namespace filesystem {
     static const std::regex::flag_type regex_flags        = std::regex::extended;
     static const std::regex::flag_type regex_flags_icase  = std::regex::extended | std::regex::icase;
     
+    constexpr path::character_type path::sep;
+    constexpr path::character_type path::extsep;
+    
     path::path(int descriptor) {
         char fdpath[PATH_MAX];
         int return_value = ::fcntl(descriptor, F_GETPATH, fdpath);
@@ -244,14 +247,14 @@ namespace filesystem {
         /// list files with regex object
         detail::pathvec_t unfiltered = list(full_paths);
         detail::pathvec_t out;
-        if (unfiltered.size() == 0) { return std::move(out); }
+        if (unfiltered.size() == 0) { return out; }
         std::copy_if(unfiltered.begin(), unfiltered.end(),
                      std::back_inserter(out),
                      [&](const path& p) {
             /// keep those paths that match the pattern
             return p.search(pattern, case_sensitive);
         });
-        return std::move(out);
+        return out;
     }
     
     // using walk_visitor_t = std::function<void(const path&,       /// root path
@@ -348,11 +351,18 @@ namespace filesystem {
         detail::stringvec_t out;
         std::copy(m_path.begin(),
                   m_path.end(), std::back_inserter(out));
-        return std::move(out);
+        return out;
     }
     
-    /// define static mutex, as declared in switchdir struct:
+    /// define static mutex,
+    /// as declared in switchdir struct:
     std::mutex switchdir::mute;
+    
+    /// define static recursive mutex and global path stack,
+    /// as declared in workingdir struct:
+    std::recursive_mutex workingdir::mute;
+    std::stack<path> workingdir::dstack;
+    const path workingdir::empty = path();
     
 } /* namespace filesystem */
 

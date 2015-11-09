@@ -5,4 +5,4 @@
 #pragma once
 #include <ostream>
 
-void backtrace(std::ostream & _out) noexcept;
+void backtrace(std::ostream& _out) noexcept;

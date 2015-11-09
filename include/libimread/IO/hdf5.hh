@@ -81,13 +81,13 @@ namespace im {
                 "hdf5",
                 "image/hdf5");
             
-            virtual std::unique_ptr<Image> read(byte_source *src,
-                                                ImageFactory *factory,
-                                                const options_map &opts) override;
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
+                                                const options_map& opts) override;
             
-            virtual void write(Image &input,
-                               byte_sink *output,
-                               const options_map &opts) override;
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               const options_map& opts) override;
     };
     
     namespace format {

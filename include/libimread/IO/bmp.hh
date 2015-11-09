@@ -18,9 +18,9 @@ namespace im {
                 "png",
                 "image/png");
             
-            virtual std::unique_ptr<Image> read(byte_source *src,
-                                                ImageFactory *factory,
-                                                const options_map &opts) override;
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
+                                                const options_map& opts) override;
     };
     
     namespace format {

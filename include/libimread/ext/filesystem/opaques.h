@@ -30,14 +30,14 @@ namespace filesystem {
         struct dircloser {
             constexpr dircloser() noexcept = default;
             template <typename U> dircloser(const dircloser<U>&) noexcept {};
-            void operator()(D *dirhandle) { ::closedir(dirhandle); }
+            void operator()(D* dirhandle) { ::closedir(dirhandle); }
         };
     
         template <typename F>
         struct filecloser {
             constexpr filecloser() noexcept = default;
             template <typename U> filecloser(const filecloser<U>&) noexcept {};
-            void operator()(F *filehandle) { std::fclose(filehandle); }
+            void operator()(F* filehandle) { std::fclose(filehandle); }
         };
         
     }

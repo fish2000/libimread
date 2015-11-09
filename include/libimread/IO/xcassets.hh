@@ -22,9 +22,9 @@ namespace im {
                 return PNGFormat::match_format(src);
             }
             
-            virtual void write(Image &input,
-                               byte_sink *output,
-                               const options_map &opts) override;
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               const options_map& opts) override;
     };
     
     namespace format {

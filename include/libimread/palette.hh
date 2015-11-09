@@ -71,7 +71,7 @@ namespace im {
         constexpr bool bulk_add(channel_listlist_t channel_list)  { return add_impl(channel_list); }
         
         template <typename pT>
-        void rawcopy(pT *rawptr) const { /// neuquant::u8
+        void rawcopy(pT* rawptr) const { /// neuquant::u8
             array_t array = to_component_array();
             const std::size_t siz = size();
             for (unsigned int color = 0; color < siz; color++) {

@@ -569,9 +569,6 @@ namespace objc {
         bool operator[](CFStringRef s) const           { return responds_to(::NSSelectorFromString(
                                                                         objc::bridge<NSString*>(s))); }
         
-        inline const char * __cls_name() const         { return ::object_getClassName(self); }
-        static const char * __cls_name(types::ID ii)   { return ::object_getClassName(ii); }
-        
         std::string classname() const {
             return [::NSStringFromClass([self class]) STLString];
         }
@@ -589,10 +586,10 @@ namespace objc {
         }
         
         types::cls lookup() const {
-            return ::objc_lookUpClass(__cls_name());
+            return ::objc_lookUpClass(::object_getClassName(self));
         }
         types::cls getclass() const {
-            return ::objc_getClass(__cls_name());
+            return ::objc_getClass(::object_getClassName(self));
         }
         
         std::size_t hash() const {
@@ -621,7 +618,7 @@ namespace objc {
         
         static types::cls lookup(pointer_t&& ii) {
             return ::objc_lookUpClass(
-                __cls_name(std::forward<pointer_t>(ii)));
+                ::object_getClassName(std::forward<pointer_t>(ii)));
         }
         static types::cls lookup(const std::string& s) {
             return ::objc_lookUpClass(s.c_str());

@@ -52,7 +52,7 @@ namespace memory {
     struct RefCount {
         
         Guid guid;
-        Target *object;
+        Target* object;
         Deleter deleter;
         
         template <typename ...Args>
@@ -63,13 +63,13 @@ namespace memory {
         
         RefCount() = default;
         
-        explicit RefCount(Target *o)
+        explicit RefCount(Target* o)
             :object(o), deleter(Deleter{})
             {
                 init();
                 retain();
             }
-        explicit RefCount(Target *o, Deleter d)
+        explicit RefCount(Target* o, Deleter d)
             :object(o), deleter(d)
             {
                 init();

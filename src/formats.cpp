@@ -20,7 +20,7 @@
 
 namespace im {
     
-    std::unique_ptr<ImageFormat> get_format(const char *format) {
+    std::unique_ptr<ImageFormat> get_format(const char* format) {
         using format_ptr = std::unique_ptr<ImageFormat>;
         
         if (detail::ext(format, "png")) { return format_ptr(new format::PNG); }
@@ -51,7 +51,7 @@ namespace im {
             "\tFile format not found for suffix:", format);
     }
     
-    const char *magic_format(byte_source *src) {
+    const char* magic_format(byte_source* src) {
         if (format::BMP::match_format(src)) { return "bmp"; }
         if (format::GIF::match_format(src)) { return "gif"; }
         if (format::JPG::match_format(src)) { return "jpg"; }
@@ -61,4 +61,4 @@ namespace im {
         return 0;
     }
 
-}
+} /* namespace im */

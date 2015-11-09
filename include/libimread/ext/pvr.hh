@@ -61,16 +61,16 @@ struct PVRTexture
     PVRTexture();
     ~PVRTexture();
     
-    ePVRLoadResult load(uint8_t *data, unsigned int size);
-    bool loadApplePVRTC(uint8_t *data, int size);
+    ePVRLoadResult load(uint8_t* data, unsigned int size);
+    bool loadApplePVRTC(uint8_t* data, int size);
 
     unsigned int width;
     unsigned int height;
     unsigned int numMips;
     unsigned int bpp;
-    const char *format;
+    const char* format;
 
-    uint8_t *data;
+    uint8_t* data;
 };
 
 #endif /// LIBIMREAD_EXT_PVR_H_

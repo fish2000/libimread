@@ -25,7 +25,7 @@ namespace {
         return pystring::replace(demangled_name, string_tpl, string_name);
     }
     
-    void print_reg(std::ostream & _out, unw_word_t reg) noexcept {
+    void print_reg(std::ostream& _out, unw_word_t reg) noexcept {
         constexpr std::size_t address_width = std::numeric_limits<std::uintptr_t>::digits / 4;
         _out << "0x" << std::setfill('0') << std::setw(address_width) << reg;
     }

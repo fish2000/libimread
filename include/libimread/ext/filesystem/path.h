@@ -10,6 +10,7 @@
 #include <memory>
 #include <mutex>
 #include <regex>
+#include <stack>
 #include <sstream>
 #include <utility>
 #include <functional>
@@ -46,6 +47,12 @@ namespace filesystem {
         using walk_visitor_t = std::function<void(const path&,  /// root path
                                              stringvec_t&,      /// directories
                                              stringvec_t&)>;    /// files
+        
+        /// constants for path separators
+        static constexpr char windows_extension_separator = '.';
+        static constexpr char windows_path_separator      = '\\';
+        static constexpr char posix_extension_separator   = '.';
+        static constexpr char posix_path_separator        = '/';
     }
     
     /// The actual class for representing a path on the filesystem
@@ -53,6 +60,9 @@ namespace filesystem {
         
         public:
             using size_type = std::size_t;
+            using character_type = std::string::value_type;
+            static constexpr character_type sep = detail::posix_path_separator;
+            static constexpr character_type extsep = detail::posix_extension_separator;
             
             enum path_type {
                 windows_path = 0, posix_path = 1,
@@ -194,6 +204,17 @@ namespace filesystem {
             detail::pathvec_t     list(const std::regex& pattern,
                                        bool case_sensitive=false,   bool full_paths=false) const;
             
+            /// Static function path::list(), without arguments, lists current working directory
+            // static detail::pathvec_t list(bool full_paths=false) {
+            //     return path::cwd().list(full_paths);
+            // }
+            
+            /// Generic static forwarder for path::list<P>(p)
+            // template <typename P> inline
+            // static detail::pathvec_t list(P&& p, bool full_paths=false) {
+            //     return path(std::forward<P>(p)).list(full_paths);
+            // }
+            
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
             template <typename P, typename G> inline
             static detail::pathvec_t list(P&& p, G&& g, bool full_paths=false) {
@@ -214,6 +235,12 @@ namespace filesystem {
             ///         });
             ///     });
             void walk(detail::walk_visitor_t&& walk_visitor) const;
+            
+            /// static forwarder for path::walk<F>(f)
+            // template <typename F> inline
+            // static void walk(F&& f) {
+            //     path::cwd().walk(std::forward<F>(f));
+            // }
             
             /// static forwarder for path::walk<P, F>(p, f)
             template <typename P, typename F> inline
@@ -252,7 +279,7 @@ namespace filesystem {
             std::string extension() const {
                 if (empty()) { return ""; }
                 const std::string &last = m_path.back();
-                std::string::size_type pos = last.find_last_of(".");
+                std::string::size_type pos = last.find_last_of(extsep);
                 if (pos == std::string::npos) { return ""; }
                 return last.substr(pos+1);
             }
@@ -350,7 +377,6 @@ namespace filesystem {
             /// Stringify the path (pared down for UNIX-only specifics)
             std::string str() const {
                 std::string out = "";
-                const char sep = '/';
                 if (m_absolute) { out += sep; }
                 std::string::size_type idx = 0,
                                        siz = m_path.size();
@@ -380,8 +406,8 @@ namespace filesystem {
             /// Set and tokenize the path using a std::string (mainly used internally)
             void set(const std::string& str) {
                 m_type = native_path;
-                m_path = tokenize(str, "/");
-                m_absolute = !str.empty() && str[0] == '/';
+                m_path = tokenize(str, sep);
+                m_absolute = !str.empty() && str[0] == sep;
             }
             
             /// ... and here, we have the requisite assign operators
@@ -403,7 +429,7 @@ namespace filesystem {
             }
             
             /// Stringify the path to an ostream
-            friend std::ostream &operator<<(std::ostream &os, const path &p) {
+            friend std::ostream &operator<<(std::ostream& os, const path& p) {
                 return os << p.str();
             }
             
@@ -423,7 +449,8 @@ namespace filesystem {
             detail::stringvec_t components() const;
             
         protected:
-            static detail::stringvec_t tokenize(const std::string& source, const std::string& delim) {
+            static detail::stringvec_t tokenize(const std::string& source,
+                                                const character_type delim) {
                 detail::stringvec_t tokens;
                 std::string::size_type lastPos = 0,
                                        pos = source.find_first_of(delim, lastPos);
@@ -447,8 +474,41 @@ namespace filesystem {
     
     }; /* class path */
     
-    /// change directory temporarily with RAII
+    
     struct switchdir {
+        
+        /// Change working directory temporarily with RAII while
+        /// holding a process-unique lock during the switchover.
+        ///
+        ///     // assume we ran as "cd /usr/local/bin && ./yodogg"
+        ///     using filesystem::path;
+        ///     path new_directory = path("/usr/local/var/myshit");
+        ///     // most list() calls yield pathvec_t, a std::vector<filesystem::path>
+        ///     filesystem::detail::pathvec_t stuff;
+        ///     {
+        ///         filesystem::switchdir switch(new_directory); // threads block here serially
+        ///         assert(path::cwd() == "/usr/local/var/myshit");
+        ///         assert(switchdir.from() == "/usr/local/bin");
+        ///         stuff = path::cwd().list();
+        ///     }
+        ///     // scope exit destroys the `switch` instance --
+        ///     // restoring the process-wide previous working directory
+        ///     // and unlocking the global `filesystem::switchdir` mutex
+        ///     assert(path::cwd() == "/usr/local/bin");
+        ///     std::cout << "We found " << stuff.size()
+        ///               << " items inside  " new_directory << "..."
+        ///               << std::endl;
+        ///     std::cout << "We're currently working out of " << path::cwd() << ""
+        ///               << std::endl;
+        ///
+        /// This avoids a slew of the race conditions you are risking
+        /// whenever you start shooting off naked ::chdir() calls --
+        /// including wierd results from APIs like the POSIX filesystem calls
+        /// (e.g. ::glob() and ::readdir(), both of which path.cpp leverages).
+        /// Those older C-string-based interfaces are generous with
+        /// semantic vagaries, and can behave in ways that make irritating
+        /// use of, or assumptions about, the process' current working directory.
+        /// ... and so yeah: "Block before chdir()" is the new "Use a condom".
         
         explicit switchdir(path nd)
             :olddir(path::cwd().str())
@@ -471,10 +531,54 @@ namespace filesystem {
             switchdir(switchdir&&);
             switchdir &operator=(const switchdir&);
             switchdir &operator=(switchdir&&);
-            static std::mutex mute; /// declaration but not definition
+            static std::mutex mute; /// declaration not definition
             mutable std::string olddir;
             mutable std::string newdir;
     };
+    
+    struct workingdir {
+        
+        /// Change working directory multiple times with a RAII idiom,
+        /// using a process-unique recursive lock to maintain a stack of
+        /// previously occupied directories.
+        /// rewinding automatically to the previous originating directory
+        /// on scope exit.
+        
+        workingdir(path&& nd)
+            { push(std::forward<path>(nd)); }
+        
+        path from() const { return path(top()); }
+        ~workingdir() { pop(); }
+        
+        static void push(path&& nd) {
+            if (nd == dstack.top()) { return; }
+            mute.lock();
+            dstack.push(path::cwd());
+            ::chdir(nd.c_str());
+        }
+        
+        static void pop() {
+            if (dstack.empty()) { return; }
+            mute.unlock();
+            ::chdir(dstack.top().c_str());
+            dstack.pop();
+        }
+        
+        static const path& top() {
+            return dstack.empty() ? empty : dstack.top();
+        }
+        
+        private:
+            workingdir(void);
+            workingdir(const workingdir&);
+            workingdir(workingdir&&);
+            workingdir &operator=(const workingdir&);
+            workingdir &operator=(workingdir&&);
+            static std::recursive_mutex mute; /// declaration not definition
+            static std::stack<path> dstack;   /// declaration not definition
+            static const path empty;          /// declaration not definition
+    };
+    
     
 }; /* namespace filesystem */
 

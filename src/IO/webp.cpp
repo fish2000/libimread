@@ -19,7 +19,7 @@ namespace im {
         
         std::unique_ptr<Image> output(factory->create(8, h, w, 4));
         const int stride = w*4;
-        const byte *p = WebPDecodeRGBAInto(
+        const byte* p = WebPDecodeRGBAInto(
                 &data[0], data.size(),
                 output->rowp_as<byte>(0), h*stride, stride);
         

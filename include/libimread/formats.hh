@@ -16,10 +16,11 @@ namespace im {
     
     namespace detail {
         
-        inline bool ext(const char *format, const char *suffix) {
+        inline bool ext(const char* format, const char* suffix) {
             return !std::strcmp(format, suffix);
         }
-    }
+        
+    } /* namespace detail */
     
     std::unique_ptr<ImageFormat> get_format(const char*);
     
@@ -31,6 +32,6 @@ namespace im {
     
     const char *magic_format(byte_source*);
 
-}
+} /* namespace im */
 
 #endif /// LIBIMREAD_FORMATS_HH_

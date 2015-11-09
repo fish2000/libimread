@@ -109,12 +109,12 @@ TEST_CASE("[filesystem] Test `path::walk()` on `im::test::basedir`",
     basedir.walk([](const path& p,
                     std::vector<std::string>& directories,
                     std::vector<std::string>& files) {
-        std::for_each(directories.begin(), directories.end(), [&](std::string& d) {
-            // std::cout << "Directory: " << p/d << std::endl;
+        std::for_each(directories.begin(), directories.end(), [&](const std::string& d) {
+            std::cout << "Directory: " << p/d << std::endl;
             REQUIRE((p/d).is_directory());
         });
-        std::for_each(files.begin(), files.end(), [&](std::string& f) {
-            // std::cout << "File: " << p/f << std::endl;
+        std::for_each(files.begin(), files.end(), [&](const std::string& f) {
+            std::cout << "File: " << p/f << std::endl;
             REQUIRE((p/f).is_file());
         });
     });

@@ -92,8 +92,8 @@ namespace im {
     
     template <typename ...Args> inline
     void __attribute__((nonnull (1, 3)))
-         srsly(const char *title, const ansi::ANSI color,
-               const char *file, int line, Args&& ...args) {
+         srsly(const char* title, const ansi::ANSI color,
+               const char* file, int line, Args&& ...args) {
         std::cerr  << color << im::stringify(title) << ansi::reset
           << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
           << " : " << ansi::red << im::stringify(line) << ansi::reset
@@ -104,8 +104,8 @@ namespace im {
     
     template <typename ...Args> inline
     std::string __attribute__((nonnull (1, 3)))
-         emerg(const char *title, const ansi::ANSI color,
-               const char *file, int line, Args&& ...args) {
+         emerg(const char* title, const ansi::ANSI color,
+               const char* file, int line, Args&& ...args) {
         std::ostringstream errstream;
         errstream  << color << im::stringify(title) << ansi::reset
           << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
@@ -197,7 +197,7 @@ namespace im {
         { }                                                                             \
     virtual ~TypeName() { }                                                             \
                                                                                         \
-    const char *what() const noexcept { return w.c_str(); }                             \
+    const char* what() const noexcept { return w.c_str(); }                             \
     std::string w;
 #endif /// DECLARE_IMREAD_ERROR_INNARDS
 
@@ -219,7 +219,7 @@ namespace im {
         { }                                                                             \
     virtual ~TypeName() { }                                                             \
                                                                                         \
-    const char *what() const noexcept { return w.c_str(); }                             \
+    const char* what() const noexcept { return w.c_str(); }                             \
     std::string w;
 #endif /// DECLARE_IMREAD_ERROR_SUBTYPE_INNARDS
 

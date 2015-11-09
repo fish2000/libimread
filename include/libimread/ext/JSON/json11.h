@@ -101,17 +101,17 @@ class Json {
             Node(unsigned init = 0);
             virtual ~Node();
             virtual Type type() const { return Type::JSNULL; }
-            virtual void print(std::ostream &out) const { out << "null"; }
-            virtual void traverse(void (*f)(const Node *)) const { f(this); }
-            virtual bool contains(const Node *that) const { return false; }
-            virtual bool operator==(const Node &that) const {
+            virtual void print(std::ostream& out) const { out << "null"; }
+            virtual void traverse(void (*f)(const Node*)) const { f(this); }
+            virtual bool contains(const Node* that) const { return false; }
+            virtual bool operator==(const Node& that) const {
                 return this == &that;
             }
             virtual bool is_schema() const { return false; }
             void unref();
-            const char *typestr() const { return tc::typestr(this->type()); }
-            virtual void validate(const Schema &schema,
-                                  std::vector<const Node *> &) const;
+            const char* typestr() const { return tc::typestr(this->type()); }
+            virtual void validate(const Schema& schema,
+                                  std::vector<const Node*>&) const;
             static Node null, undefined;
         };
         
@@ -166,99 +166,99 @@ class Json {
                 prec = -1;
                 value = static_cast<int>(x);
             }
-            Number(std::istream &);
+            Number(std::istream&);
             Type type() const override { return Type::NUMBER; }
-            void print(std::ostream &out) const override;
-            bool operator==(const Node &that) const override;
-            void validate(const Schema &schema,
-                          std::vector<const Node *> &) const override;
+            void print(std::ostream& out) const override;
+            bool operator==(const Node& that) const override;
+            void validate(const Schema& schema,
+                          std::vector<const Node*>&) const override;
         };
         
         struct String : Node {
             std::string value;
-            String(std::string s) { value = s; }
-            String(const char *cs) { value = std::string(cs); }
-            String(std::istream &);
+            String(const std::string& s) { value = s; }
+            String(const char* cs) { value = cs; }
+            String(std::istream&);
             Type type() const override { return Type::STRING; }
-            void print(std::ostream &out) const override;
-            bool operator==(const Node &that) const override;
-            void validate(const Schema &schema,
-                          std::vector<const Node *> &) const override;
+            void print(std::ostream& out) const override;
+            bool operator==(const Node& that) const override;
+            void validate(const Schema& schema,
+                          std::vector<const Node*>&) const override;
         };
         
         struct Array : Node {
-            std::vector<Node *> list;
+            std::vector<Node*> list;
             virtual ~Array();
             Type type() const override { return Type::ARRAY; }
-            void print(std::ostream &) const override;
-            void traverse(void (*f)(const Node *)) const override;
-            void add(Node *);
-            void ins(int, Node *);
+            void print(std::ostream&) const override;
+            void traverse(void (*f)(const Node*)) const override;
+            void add(Node*);
+            void ins(int, Node*);
             void del(int);
-            void repl(int, Node *);
-            bool contains(const Node *) const override;
-            bool operator==(const Node &that) const override;
-            void validate(const Schema &schema,
-                          std::vector<const Node *> &) const override;
+            void repl(int, Node*);
+            bool contains(const Node*) const override;
+            bool operator==(const Node& that) const override;
+            void validate(const Schema& schema,
+                          std::vector<const Node*>&) const override;
         };
         
         struct Object : Node {
-            std::map<const std::string *, Node *> map;
+            std::map<const std::string*, Node*> map;
             virtual ~Object();
             Type type() const override { return Type::OBJECT; }
-            void print(std::ostream &) const override;
-            void traverse(void (*f)(const Node *)) const override;
-            Node *get(const std::string &) const;
-            void set(const std::string &, Node *);
-            bool contains(const Node *) const override;
-            bool operator==(const Node &that) const override;
-            void validate(const Schema &schema,
-                          std::vector<const Node *> &) const override;
+            void print(std::ostream&) const override;
+            void traverse(void (*f)(const Node*)) const override;
+            Node* get(const std::string&) const;
+            void set(const std::string&, Node*);
+            bool contains(const Node*) const override;
+            bool operator==(const Node& that) const override;
+            void validate(const Schema& schema,
+                          std::vector<const Node*>&) const override;
         };
         
         struct Schema : Node {
-            Schema(Node *);
+            Schema(Node*);
             virtual ~Schema();
             std::string uri;
             std::string s_type;
-            Array *s_enum = nullptr;
-            std::vector<Schema *> allof;
-            std::vector<Schema *> anyof;
-            std::vector<Schema *> oneof;
-            Schema *s_not = nullptr;
+            Array* s_enum = nullptr;
+            std::vector<Schema*> allof;
+            std::vector<Schema*> anyof;
+            std::vector<Schema*> oneof;
+            Schema* s_not = nullptr;
             long double max_num = LDBL_MAX;
             long double min_num = -LDBL_MAX;
             long double mult_of = 0;
             bool max_exc = false, min_exc = false;
             unsigned long max_len = UINT32_MAX;
             unsigned long min_len = 0;
-            std::regex *pattern = nullptr; // regex
-            Schema *item = nullptr;
-            std::vector<Schema *> items;
-            Schema *add_items = nullptr;
+            std::regex* pattern = nullptr; // regex
+            Schema* item = nullptr;
+            std::vector<Schema*> items;
+            Schema* add_items = nullptr;
             bool add_items_bool = false;
             bool unique_items = false;
-            Object *props = nullptr;
-            Object *pat_props = nullptr;
-            Schema *add_props = nullptr;
+            Object* props = nullptr;
+            Object* pat_props = nullptr;
+            Schema* add_props = nullptr;
             bool add_props_bool = false;
-            Array *required = nullptr;
-            Object *deps = nullptr;
-            Object *defs = nullptr;
-            Node *deflt = nullptr;
+            Array* required = nullptr;
+            Object* deps = nullptr;
+            Object* defs = nullptr;
+            Node* deflt = nullptr;
             bool is_schema() const { return true; }
         };
         
         class Property {
-            Node *host;
+            Node* host;
             std::string key;
             int index;
             Json target() const;
             
             public:
-                Property(Node *, const std::string &);
-                Property(Node *, int);
-                explicit Property(Node *n, const char *c)
+                Property(Node*, const std::string&);
+                Property(Node*, int);
+                explicit Property(Node* n, const char* c)
                     :Property(n, std::string(c))
                     {}
                 operator Json() const           { return target(); }
@@ -270,59 +270,59 @@ class Json {
                 explicit operator long long()   { return static_cast<long long>(target()); }
                 explicit operator double()      { return static_cast<double>(target()); }
                 explicit operator long double() { return static_cast<long double>(target()); }
-                Property operator[](const std::string &k) { return target()[k]; }
-                Property operator[](const char *k) { return (*this)[std::string(k)]; }
+                Property operator[](const std::string& k) { return target()[k]; }
+                Property operator[](const char* k) { return (*this)[std::string(k)]; }
                 Property operator[](int i) { return target()[i]; }
-                Json operator=(const Json &);
-                Json operator=(const Property &);
-                bool operator==(const Json &js) const { return (Json)(*this) == js; }
-                bool operator!=(const Json &js) const { return !(*this == js); }
+                Json operator=(const Json&);
+                Json operator=(const Property&);
+                bool operator==(const Json& js) const { return (Json)(*this) == js; }
+                bool operator!=(const Json& js) const { return !(*this == js); }
                 std::vector<std::string> keys() { return target().keys(); }
-                bool has(const std::string &key) const { return target().has(key); }
-                bool has(const char *key) const { return target().has(std::string(key)); }
+                bool has(const std::string& key) const { return target().has(key); }
+                bool has(const char* key) const { return target().has(std::string(key)); }
             
-            friend std::ostream &operator<<(std::ostream &out, const Property &p) {
+            friend std::ostream &operator<<(std::ostream& out, const Property& p) {
                 return out << (Json)p;
             }
             
             friend Json;
         };
         
-        Array *mkarray();
-        Object *mkobject();
+        Array* mkarray();
+        Object* mkobject();
         
         static std::set<std::string> keyset; /// all propery names
         static int level;                    /// for pretty printing
         
-        Json(Node *node) {
+        Json(Node* node) {
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
         }
         
-        Node *root;
+        Node* root;
         
     public:
         /// constructors
         Json() { (root = &Node::null)->refcnt++; }
-        Json(const Json &that);
-        Json(Json &&that);
-        Json(std::istream &, bool full = true); // parse
+        Json(const Json& that);
+        Json(Json&& that);
+        Json(std::istream&, bool full=true); // parse
         virtual ~Json();
         
         /// assignment
-        Json &operator=(const Json &);
-        Json &operator=(Json &&);
+        Json &operator=(const Json&);
+        Json &operator=(Json&&);
         
         /// more constructors
         Json(int x)                 { (root = new Number(x))->refcnt++; }
         Json(float x)               { (root = new Number(x))->refcnt++; }
-        Json(const std::string &s)  { (root = new String(s))->refcnt++; }
+        Json(const std::string& s)  { (root = new String(s))->refcnt++; }
         Json(bool x)                { (root = (x ? &Bool::T : &Bool::F))->refcnt++; }
         Json(long x)                { (root = new Number(x))->refcnt++; }
         Json(long long x)           { (root = new Number(x))->refcnt++; }
         Json(double x)              { (root = new Number(x))->refcnt++; }
         Json(long double x)         { (root = new Number(x))->refcnt++; }
-        Json(const char *s)         { (root = new String(s))->refcnt++; }
-        Json(const Property &p)     { (root = p.target().root)->refcnt++; }
+        Json(const char* s)         { (root = new String(s))->refcnt++; }
+        Json(const Property& p)     { (root = p.target().root)->refcnt++; }
         Json(std::initializer_list<Json>);
         
         explicit Json(uint8_t x)    { (root = new Number(x))->refcnt++; }
@@ -350,12 +350,12 @@ class Json {
         explicit operator long double() const;
         
         /// dictionary operations (or "object properties" in JS-Ville)
-        Json &set(std::string key, const Json &val);
-        Json get(const std::string &key) const;
-        bool has(const std::string &key) const;
-        Json &set(const char *key, const Json &val) { return set(std::string(key), val); }
-        Json get(const char *key) const             { return get(std::string(key)); }
-        bool has(const char *key) const             { return has(std::string(key)); }
+        Json &set(std::string key, const Json& val);
+        Json get(const std::string& key) const;
+        bool has(const std::string& key) const;
+        Json &set(const char* key, const Json& val) { return set(std::string(key), val); }
+        Json get(const char* key) const             { return get(std::string(key)); }
+        bool has(const char* key) const             { return has(std::string(key)); }
         std::vector<std::string> keys();
         
         /// traverse
@@ -366,13 +366,13 @@ class Json {
         
         /// cast operations
         template <typename T> inline
-        decltype(auto) cast(const std::string &key) const {
+        decltype(auto) cast(const std::string& key) const {
             using rT = std::remove_reference_t<T>;
             return static_cast<rT>(get(key));
         }
         
         template <typename T> inline
-        decltype(auto) cast(const std::string &key,
+        decltype(auto) cast(const std::string& key,
                             T default_value) const {
             using rT = std::remove_reference_t<T>;
             if (!has(key)) { return static_cast<rT>(default_value); }
@@ -380,35 +380,35 @@ class Json {
         }
         
         template <Type t = Type::STRING> inline
-        decltype(auto) json_cast(const std::string &key) const {
+        decltype(auto) json_cast(const std::string& key) const {
             using rT = tc::idx::helper_t<t>;
             return static_cast<rT>(get(key));
         }
         
         template <Type t = Type::STRING> inline
-        decltype(auto) json_cast(const std::string &key,
+        decltype(auto) json_cast(const std::string& key,
                                  tc::idx::helper_t<t> default_value) const {
             if (!has(key)) { return default_value; }
             return json_cast<t>(key);
         }
         
         /// array operations
-        Json &operator<<(const Json &);
-        void insert(int index, const Json &);
+        Json& operator<<(const Json&);
+        void insert(int index, const Json&);
         void erase(int index);
-        Json &replace(int index, const Json &);
+        Json& replace(int index, const Json&);
         
         /// subscripting
         std::size_t size() const;
-        Json::Property operator[](const std::string &);
-        Json::Property operator[](const char *k) { return (*this)[std::string(k)]; }
+        Json::Property operator[](const std::string&);
+        Json::Property operator[](const char* k) { return (*this)[std::string(k)]; }
         Json::Property operator[](int);
         
         /// stringification
         std::string stringify() const { return format(); }
         std::string format() const;
-        friend std::ostream &operator<<(std::ostream &, const Json &);
-        friend std::istream &operator>>(std::istream &, Json &);
+        friend std::ostream &operator<<(std::ostream&, const Json&);
+        friend std::istream &operator>>(std::istream&, Json&);
         
         /// hashing
         std::size_t hash(std::size_t H = 0) const {
@@ -417,17 +417,17 @@ class Json {
         }
         
         /// boolean comparison
-        bool operator==(const Json &) const;
-        bool operator!=(const Json &that) const { return !(*this == that); }
+        bool operator==(const Json&) const;
+        bool operator!=(const Json& that) const { return !(*this == that); }
     
         /// schema hooks
-        bool to_schema(std::string *reason);
-        bool valid(Json &schema, std::string *reason = nullptr);
+        bool to_schema(std::string* reason);
+        bool valid(Json& schema, std::string* reason = nullptr);
         
         /// input parsing
         static Json null, undefined;
-        static Json parse(const std::string &);
-        static Json parse(const char *json) { return parse(std::string(json)); }
+        static Json parse(const std::string&);
+        static Json parse(const char* json) { return parse(std::string(json)); }
         
         static Json array() { return new Array(); }   // returns empty array
         static Json object() { return new Object(); } // returns empty object
@@ -435,30 +435,30 @@ class Json {
         
         struct parse_error : im::JSONParseError {
             unsigned line = 0, col = 0;
-            parse_error(const char *msg, std::istream &in);
-            parse_error(const std::string &msg, std::istream &in);
+            parse_error(const char* msg, std::istream& in);
+            parse_error(const std::string &msg, std::istream& in);
         };
         
         struct use_error : im::JSONUseError {
-            use_error(const char *msg)
+            use_error(const char* msg)
                 :im::JSONUseError(msg)
                 {}
-            use_error(const std::string &msg)
+            use_error(const std::string& msg)
                 :im::JSONUseError(msg)
                 {}
         };
 };
 
 template <> inline
-decltype(auto) Json::cast<filesystem::path>(const std::string &key) const {
+decltype(auto) Json::cast<filesystem::path>(const std::string& key) const {
     return filesystem::path(static_cast<std::string>(get(key)));
 }
 template <> inline
-decltype(auto) Json::cast<const char*>(const std::string &key) const {
+decltype(auto) Json::cast<const char*>(const std::string& key) const {
     return static_cast<std::string>(get(key)).c_str();
 }
 template <> inline
-decltype(auto) Json::cast<char*>(const std::string &key) const {
+decltype(auto) Json::cast<char*>(const std::string& key) const {
     return const_cast<char*>(static_cast<std::string>(get(key)).c_str());
 }
 

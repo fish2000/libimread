@@ -10,14 +10,14 @@
 namespace memory {
     
     struct memstream {
-        char **cp;
-        std::size_t *lenp;
+        char** cp;
+        std::size_t* lenp;
         std::size_t offset;
     };
     
     typedef struct memstream mstream;
 }
 
-FILE *open_memstream(char **cp, std::size_t *lenp);
+FILE* open_memstream(char** cp, std::size_t* lenp);
 
 #endif /// LIBIMREAD_EXT_OPEN_MEMSTREAM_HH_

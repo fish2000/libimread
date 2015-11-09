@@ -36,7 +36,7 @@ using im::byte;
 
 namespace {
     
-    void swap(unsigned char *a, unsigned char *b) {
+    void swap(unsigned char* a, unsigned char* b) {
         for (int i = 0; i < 3; i++) {
             unsigned char x = a[i];
             a[i] = b[i];
@@ -44,11 +44,11 @@ namespace {
         }
     }
     
-    void sortColorsByAxis(unsigned char *array,
-                          int count, int axis) {
+    void sortColorsByAxis(unsigned char* array,
+                                     int count, int axis) {
         if (count < 2) { return; }
         unsigned char pivot = (array + (count/2)*3)[axis];
-        unsigned char *left = array, *right = array + (count-1)*3;
+        unsigned char* left = array, *right = array + (count-1)*3;
         while (left < right) {
             while (left[axis] < pivot) { left += 3; }
             while (right[axis] > pivot) { right -= 3; }
@@ -64,11 +64,11 @@ namespace {
         if (rightCount > 1) { sortColorsByAxis(array+leftCount*3, rightCount, axis); }
     }
     
-    int nearestIndexInPalette(unsigned char *palette,
-                                     int paletteSize, unsigned char *rgb) {
+    int nearestIndexInPalette(unsigned char* palette,
+                                     int paletteSize, unsigned char* rgb) {
         int bestIndex = 0, bestDist = 0;
         for (int i = 0; i < paletteSize; i++) {
-            unsigned char *p = palette + i * 3;
+            unsigned char* p = palette + i * 3;
             int dr = p[0] - rgb[0], dg = p[1] - rgb[1], db = p[2] - rgb[2];
             int d = dr * dr + dg * dg + db * db;
             if (d == 0) { return i; }
@@ -81,16 +81,16 @@ namespace {
     }
     
     void indexizeImageFromPaletteFuzzy(
-        int Width, int Height, unsigned char *rgbImage, unsigned char *indexImage, 
-        unsigned char *palette, int paletteSize) {
+        int Width, int Height, unsigned char* rgbImage, unsigned char* indexImage, 
+        unsigned char* palette, int paletteSize) {
         for (int i = 0; i < Width * Height; i++) {
-            unsigned char *rgb = rgbImage + 3 * i;
+            unsigned char* rgb = rgbImage + 3 * i;
             indexImage[i] = nearestIndexInPalette(palette, paletteSize, rgb);
         }
     }
     
     void writeTransparentPixelsWhereNotDifferent(
-        unsigned char *prevImage, unsigned char *thisImage, unsigned char *outImage,
+        unsigned char* prevImage, unsigned char* thisImage, unsigned char* outImage,
         int ImageWidth, int ImageHeight, int TranspValue) {
         int count = 0;
         for (int i = 0; i < ImageWidth * ImageHeight; i++) {
@@ -105,9 +105,9 @@ namespace {
     }
     
     void calculatePossibleCrop(int width, int height,
-                               unsigned char *indexImage,
+                               unsigned char* indexImage,
                                unsigned char TranspColorIndex,
-                               int &left, int &right, int &top, int &bottom) {
+                               int& left, int& right, int& top, int& bottom) {
         left = width, right = 0, top = height, bottom = 0;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -123,14 +123,14 @@ namespace {
     }
     
     struct BlockWriter {
-        FILE *f;
+        FILE* f;
         char bytes[255];
         char curBits;
         int byteCount;
         int curBitMask;
         int totalBytesWritten;
     
-        BlockWriter(FILE *f)
+        BlockWriter(FILE* f)
             :f(f)
             ,curBits(0), byteCount(0)
             ,curBitMask(1), totalBytesWritten(0)
@@ -181,7 +181,7 @@ namespace {
     
     struct TableEntry {
         int length, index;
-        TableEntry *after[256];
+        TableEntry* after[256];
         TableEntry() {
             for (int i = 0; i < 256; i++) { after[i] = NULL; }
         }
@@ -196,7 +196,7 @@ namespace {
             }
         }
         
-        TableEntry *findLongestString(unsigned char *input, int inputSize) {
+        TableEntry* findLongestString(unsigned char* input, int inputSize) {
             if (inputSize > 0) {
                 if (after[input[0]]) {
                     return after[input[0]]->findLongestString(input+1, inputSize-1);
@@ -217,7 +217,7 @@ namespace {
             length = 256 + 2; /// reserve "clear code" and "end of information"
         }
     
-        void insertAfter(TableEntry *entry, unsigned char code) {
+        void insertAfter(TableEntry* entry, unsigned char code) {
             if (entry->after[code]) {
                 WTF("WTF?");
             } else {
@@ -229,7 +229,7 @@ namespace {
     
     };
     
-    void encode(BlockWriter& output, unsigned char *input, int inputSize,
+    void encode(BlockWriter& output, unsigned char* input, int inputSize,
                 const int InitCodeSize, const int MaxCodeSize) {
         const int ClearCode = (1 << InitCodeSize);
         const int EndOfInformation = ClearCode + 1;
@@ -238,7 +238,7 @@ namespace {
         table.resetTable();
         output.writeBitArray(ClearCode, codeSize+1);
         while (inputSize > 0) {
-            TableEntry *entry = table.findLongestString(input, inputSize);
+            TableEntry* entry = table.findLongestString(input, inputSize);
             if (!entry) { WTF("WTF-2"); }
             
             output.writeBitArray(entry->index, codeSize+1);
@@ -269,24 +269,24 @@ namespace {
 namespace gif {
     
     struct Frame {
-        Frame *next;
-        unsigned char *rgbImage;
-        unsigned char *indexImage;
+        Frame* next;
+        unsigned char* rgbImage;
+        unsigned char* indexImage;
         int delay; ///* 1/100 sec
     };
     
     struct GIF {
-        int width, height;
-        Frame *frames, *lastFrame;
-        int frameDelay;
-        unsigned char *palette;
+        int width, height, frameDelay;
+        Frame* frames;
+        Frame* lastFrame;
+        unsigned char* palette;
         int paletteSize;
     };
     
-    void dispose(GIF *gif) {
-        Frame *f = gif->frames;
+    void dispose(GIF* gif) {
+        Frame* f = gif->frames;
         while (f) {
-            Frame *next = f->next;
+            Frame* next = f->next;
             if (f->indexImage) { delete[] f->indexImage; }
             if (f->rgbImage) { delete[] f->rgbImage; }
             delete f; f = next;
@@ -297,10 +297,10 @@ namespace gif {
     
     static const int TranspColorIndex = 255; /// arbitrary, [0..255]
     
-    bool isAnimated(GIF *gif) { return (gif->frames && gif->frames->next); }
+    bool isAnimated(GIF* gif) { return (gif->frames && gif->frames->next); }
     
-    GIF *newGIF(int delay) {
-        GIF *gif = new GIF;
+    GIF* newGIF(int delay) {
+        GIF* gif = new GIF;
         gif->width = 0, gif->height = 0;
         gif->frames = NULL;
         gif->lastFrame = NULL;
@@ -310,19 +310,19 @@ namespace gif {
         return gif;
     }
     
-    bool setHasColor(char set[256*256*256/8], unsigned char *rgb) {
+    bool setHasColor(char set[256*256*256/8], unsigned char* rgb) {
         int i = int(rgb[0]) * 256 * 256 + int(rgb[1]) * 256 + int(rgb[2]);
         return ((set[i/8] & (1 << (i%8))) != 0);
     }
     
-    void addColorToSet(char set[256*256*256/8], unsigned char *rgb) {
+    void addColorToSet(char set[256*256*256/8], unsigned char* rgb) {
         int i = int(rgb[0]) * 256 * 256 + int(rgb[1]) * 256 + int(rgb[2]);
         set[i/8] |= (1 << (i%8));
     }
     
-    void calculatePaletteByMedianCut(GIF *gif) {
+    void calculatePaletteByMedianCut(GIF* gif) {
         MAYBE("Caculating palette by median cut");
-        unsigned char *uniqueColorArray = NULL;
+        unsigned char* uniqueColorArray = NULL;
         int uniqueColorCount = 0, idx = 0;
         
         static char colorBitSet[256*256*256/8];
@@ -331,8 +331,8 @@ namespace gif {
             std::memset(colorBitSet, 0, 256*256*256/8);
             for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
                 idx++;
-                unsigned char *end = frame->rgbImage + gif->width * gif->height * 3;
-                for (unsigned char *rgb = frame->rgbImage; rgb < end; rgb += 3) {
+                unsigned char* end = frame->rgbImage + gif->width * gif->height * 3;
+                for (unsigned char* rgb = frame->rgbImage; rgb < end; rgb += 3) {
                     if (!setHasColor(colorBitSet, rgb)) {
                         addColorToSet(colorBitSet, rgb);
                         uniqueColorCount++;
@@ -351,13 +351,13 @@ namespace gif {
         {
             idx = 0;
             std::memset(colorBitSet, 0, 256*256*256/8);
-            unsigned char *afterLastUnique = uniqueColorArray + uniqueColorCount * 3;
-            unsigned char *u = uniqueColorArray;
-            for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
+            unsigned char* afterLastUnique = uniqueColorArray + uniqueColorCount * 3;
+            unsigned char* u = uniqueColorArray;
+            for (Frame* frame = gif->frames; frame != NULL; frame = frame->next) {
                 idx++;
                 if (u >= afterLastUnique) { break; }
-                unsigned char *end = frame->rgbImage + gif->width * gif->height * 3;
-                for (unsigned char *rgb = frame->rgbImage; rgb < end; rgb += 3) {
+                unsigned char* end = frame->rgbImage + gif->width * gif->height * 3;
+                for (unsigned char* rgb = frame->rgbImage; rgb < end; rgb += 3) {
                     if (u >= afterLastUnique) { break; }
                     if (!setHasColor(colorBitSet, rgb)) {
                         addColorToSet(colorBitSet, rgb);
@@ -375,19 +375,19 @@ namespace gif {
         }
         
         struct ColorBox {
-            char splitAxis;
-            char splitValue;
-            ColorBox *child[2];
+            char splitAxis,
+                 splitValue;
+            ColorBox* child[2];
             int dim[3];
-            unsigned char *colors;
             int colorCount;
+            unsigned char* colors;
             
             bool isLeaf() { return child[0] == NULL && child[1] == NULL; }
             
             void calcDim() {
                 int minDim[3] = { 255, 255, 255 }, maxDim[3] = { 0, 0, 0 };
                 for (int i = 0; i < colorCount; i++) {
-                    unsigned char *rgb = colors + i * 3;
+                    unsigned char* rgb = colors + i * 3;
                     for (int a = 0; a < 3; a++) {
                         if (rgb[a] < minDim[a]) { minDim[a] = rgb[a]; }
                         if (maxDim[a] < rgb[a]) { maxDim[a] = rgb[a]; }
@@ -396,7 +396,7 @@ namespace gif {
                 for (int a = 0; a < 3; a++) { dim[a] = maxDim[a] - minDim[a]; }
             }
             
-            void calcColor(unsigned char *rgbOut) {
+            void calcColor(unsigned char* rgbOut) {
                 int r = 0, g = 0, b = 0;
                 for (int i = 0; i < colorCount; i++) {
                     r += (colors + i * 3)[0];
@@ -427,9 +427,9 @@ namespace gif {
                 idx++;
                 int maxDimAxis = 0;
                 int maxDim = 0;
-                ColorBox *maxDimBox = NULL;
+                ColorBox* maxDimBox = NULL;
                 for (int i = 0; i < colorBoxCount; i++) {
-                    ColorBox *box = colorBoxArray + i;
+                    ColorBox* box = colorBoxArray + i;
                     if (!box->isLeaf()) { continue; }
                     if (box->colorCount < 2) { continue; }
                     
@@ -447,8 +447,8 @@ namespace gif {
                     maxDimBox->splitAxis = maxDimAxis;
                     //maxDimBox->splitValue = ???;
                     sortColorsByAxis(maxDimBox->colors, maxDimBox->colorCount, maxDimAxis);
-                    ColorBox *L = maxDimBox->child[0] = &colorBoxArray[colorBoxCount++];
-                    ColorBox *R = maxDimBox->child[1] = &colorBoxArray[colorBoxCount++];
+                    ColorBox* L = maxDimBox->child[0] = &colorBoxArray[colorBoxCount++];
+                    ColorBox* R = maxDimBox->child[1] = &colorBoxArray[colorBoxCount++];
                     
                     L->colors = maxDimBox->colors;
                     L->colorCount = maxDimBox->colorCount / 2;
@@ -475,7 +475,7 @@ namespace gif {
                 MAYBE("Calculating palette from boxes");
                 gif->paletteSize = leafBoxCount;
                 gif->palette = new unsigned char[256*3];
-                unsigned char *rgbPal = gif->palette;
+                unsigned char* rgbPal = gif->palette;
                 for (int i = 0; i < colorBoxCount; i++) {
                     if (colorBoxArray[i].isLeaf()) {
                         colorBoxArray[i].calcColor(rgbPal);
@@ -483,7 +483,7 @@ namespace gif {
                     }
                 }
                 idx = 0;
-                for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
+                for (Frame* frame = gif->frames; frame != NULL; frame = frame->next) {
                     idx++;
                     frame->indexImage = new unsigned char[gif->width * gif->height];
                     indexizeImageFromPaletteFuzzy(
@@ -502,8 +502,8 @@ namespace gif {
         delete[] uniqueColorArray;
     }
     
-    void addFrame(GIF *gif, int W, int H, unsigned char *rgbImage, int delay) {
-        Frame *f = new Frame;
+    void addFrame(GIF* gif, int W, int H, unsigned char* rgbImage, int delay) {
+        Frame* f = new Frame;
         f->delay = (delay < 0) ? gif->frameDelay : delay;
         f->indexImage = NULL;
         f->rgbImage = new unsigned char[W*H*3];
@@ -528,7 +528,7 @@ namespace gif {
     
     /// this used to write to a filehandle -- now it does so internally
     /// and captures the results using memory::sink for return
-    std::vector<byte> write(GIF *gif) {
+    std::vector<byte> write(GIF* gif) {
         if (!gif->frames) {
             imread_raise(CannotWriteError, "Incomplete GIF passed to gif::write()");
         }
@@ -549,7 +549,7 @@ namespace gif {
         std::vector<byte> overflow(membufsize);
         std::unique_ptr<byte[]> membufstore = std::make_unique<byte[]>(membufsize);
         memory::buffer membuf = memory::sink(membufstore.get(), membufsize);
-        FILE *f = membuf.get();
+        FILE* f = membuf.get();
         
         const int ExtensionIntroducer = 0x21;
         const int ApplicationExtensionLabel = 0xff;
@@ -643,7 +643,7 @@ namespace gif {
                       fTop = 0,
                       fWidth = gif->width,
                       fHeight = gif->height;
-                unsigned char *image = frame->indexImage;
+                unsigned char* image = frame->indexImage;
                 if (prevFrame) {
                     image = new unsigned char[gif->width * gif->height];
                     writeTransparentPixelsWhereNotDifferent(
@@ -730,7 +730,7 @@ namespace gif {
             /// comment extension
             fputc(ExtensionIntroducer, f);
             fputc(CommentLabel, f);
-            const char *CommentText = "(c) Objects In Space And Time LLC";
+            const char* CommentText = "(c) Objects In Space And Time LLC";
             const int blockSize = strlen(CommentText);
             if (blockSize <= 255) {
                 fputc(blockSize, f);

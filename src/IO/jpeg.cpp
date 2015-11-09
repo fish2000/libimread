@@ -19,18 +19,18 @@ namespace im {
         
         struct jpeg_source_adaptor {
             jpeg_source_mgr mgr;
-            byte_source *s;
-            byte *buf;
+            byte_source* s;
+            byte* buf;
             
-            jpeg_source_adaptor(byte_source *s);
+            jpeg_source_adaptor(byte_source* s);
             ~jpeg_source_adaptor() { delete[] buf; }
         };
         struct jpeg_dst_adaptor {
             jpeg_destination_mgr mgr;
-            byte_sink *s;
-            byte *buf;
+            byte_sink* s;
+            byte* buf;
             
-            jpeg_dst_adaptor(byte_sink *s);
+            jpeg_dst_adaptor(byte_sink* s);
             ~jpeg_dst_adaptor() { delete[] buf; }
         };
         
@@ -38,8 +38,8 @@ namespace im {
         void nop_dst(j_compress_ptr cinfo) {}
         
         boolean fill_input_buffer(j_decompress_ptr cinfo) {
-            jpeg_source_adaptor *adaptor
-                = reinterpret_cast<jpeg_source_adaptor *>(cinfo->src);
+            jpeg_source_adaptor* adaptor
+                = reinterpret_cast<jpeg_source_adaptor*>(cinfo->src);
             adaptor->mgr.next_input_byte = adaptor->buf;
             adaptor->mgr.bytes_in_buffer = adaptor->s->read(adaptor->buf, buffer_size);
             return true;
@@ -47,7 +47,7 @@ namespace im {
         
         void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
             if (num_bytes <= 0) { return; }
-            jpeg_source_adaptor *adaptor = reinterpret_cast<jpeg_source_adaptor *>(cinfo->src);
+            jpeg_source_adaptor* adaptor = reinterpret_cast<jpeg_source_adaptor*>(cinfo->src);
             while (num_bytes > long(adaptor->mgr.bytes_in_buffer)) {
                 num_bytes -= adaptor->mgr.bytes_in_buffer;
                 fill_input_buffer(cinfo);
@@ -57,7 +57,7 @@ namespace im {
         }
         
         boolean empty_output_buffer(j_compress_ptr cinfo) {
-            jpeg_dst_adaptor *adaptor = reinterpret_cast<jpeg_dst_adaptor *>(cinfo->dest);
+            jpeg_dst_adaptor* adaptor = reinterpret_cast<jpeg_dst_adaptor*>(cinfo->dest);
             adaptor->s->write_check(
                 adaptor->buf,
                 buffer_size);
@@ -67,13 +67,13 @@ namespace im {
         }
         
         void flush_output_buffer(j_compress_ptr cinfo) {
-            jpeg_dst_adaptor *adaptor = reinterpret_cast<jpeg_dst_adaptor *>(cinfo->dest);
+            jpeg_dst_adaptor* adaptor = reinterpret_cast<jpeg_dst_adaptor*>(cinfo->dest);
             adaptor->s->write_check(
                 adaptor->buf,
                 adaptor->mgr.next_output_byte - adaptor->buf);
         }
         
-        jpeg_source_adaptor::jpeg_source_adaptor(byte_source *s)
+        jpeg_source_adaptor::jpeg_source_adaptor(byte_source* s)
             :s(s) 
             {
                 buf = new byte[buffer_size];
@@ -86,7 +86,7 @@ namespace im {
                 mgr.term_source = nop;
             }
         
-        jpeg_dst_adaptor::jpeg_dst_adaptor(byte_sink *s)
+        jpeg_dst_adaptor::jpeg_dst_adaptor(byte_sink* s)
             :s(s)
             {
                 buf = new byte[buffer_size];
@@ -117,7 +117,7 @@ namespace im {
         };
         
         void err_long_jump(j_common_ptr cinfo) {
-            error_mgr *err = reinterpret_cast<error_mgr *>(cinfo->err);
+            error_mgr* err = reinterpret_cast<error_mgr*>(cinfo->err);
             (*cinfo->err->format_message)(cinfo, err->error_message);
             longjmp(err->setjmp_buffer, 1);
         }
@@ -139,9 +139,9 @@ namespace im {
         
     } /// namespace
     
-    std::unique_ptr<Image> JPEGFormat::read(byte_source *src,
-                           ImageFactory *factory,
-                           const options_map &opts)  {
+    std::unique_ptr<Image> JPEGFormat::read(byte_source* src,
+                           ImageFactory* factory,
+                           const options_map& opts)  {
         
         jpeg_source_adaptor adaptor(src);
         jpeg_decompress_holder decompressor;
@@ -176,11 +176,11 @@ namespace im {
         
         /// Hardcoding uint8_t as the type for now
         int c_stride = (d == 1) ? 0 : output->stride(2);
-        uint8_t *ptr = output->rowp_as<uint8_t>(0);
+        uint8_t* ptr = output->rowp_as<uint8_t>(0);
         
         while (decompressor.info.output_scanline < decompressor.info.output_height) {
             jpeg_read_scanlines(&decompressor.info, samples, 1);
-            JSAMPLE *srcPtr = samples[0];
+            JSAMPLE* srcPtr = samples[0];
             for (int x = 0; x < w; x++) {
                 for (int c = 0; c < d; c++) {
                     /// theoretically you would want to scale this next bit,
@@ -200,9 +200,9 @@ namespace im {
         return output;
     }
     
-    void JPEGFormat::write(Image &input,
-                           byte_sink *output,
-                           const options_map &opts) {
+    void JPEGFormat::write(Image& input,
+                           byte_sink* output,
+                           const options_map& opts) {
         if (input.nbits() != 8) {
             imread_raise(CannotReadError,
                 FF("Image must be 8 bits for JPEG saving (got %i)", input.nbits()));
@@ -252,11 +252,11 @@ namespace im {
             imread_raise(CannotReadError, "libjpeg internal error:", jerr.error_message);
         }
         
-        JSAMPLE *rowbuf = new JSAMPLE[w * d]; /// width * channels
+        JSAMPLE* rowbuf = new JSAMPLE[w * d]; /// width * channels
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
         while (compressor.info.next_scanline < compressor.info.image_height) {
-            JSAMPLE *dstPtr = rowbuf;
+            JSAMPLE* dstPtr = rowbuf;
             for (int x = 0; x < w; x++) {
                 for (int c = 0; c < d; c++) {
                     pix::convert(

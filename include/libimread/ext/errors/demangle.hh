@@ -4,4 +4,4 @@
 
 #pragma once
 
-char const *get_demangled_name(char const* const symbol) noexcept;
+char const* get_demangled_name(char const* const symbol) noexcept;

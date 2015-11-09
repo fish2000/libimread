@@ -45,9 +45,9 @@ namespace im {
                                    H5MemoryBuffer::DONT_COPY &
                                    H5MemoryBuffer::DONT_RELEASE;
     
-    std::unique_ptr<Image> HDF5Format::read(byte_source *src,
-                                            ImageFactory *factory,
-                                            const options_map &opts) {
+    std::unique_ptr<Image> HDF5Format::read(byte_source* src,
+                                            ImageFactory* factory,
+                                            const options_map& opts) {
         
         /// load the raw sources' full data, and set some options:
         std::vector<byte> data = src->full_data();
@@ -111,9 +111,9 @@ namespace im {
         return output;
     }
     
-    void HDF5Format::write(Image &input,
-                           byte_sink *output,
-                           const options_map &opts) {
+    void HDF5Format::write(Image& input,
+                           byte_sink* output,
+                           const options_map& opts) {
         
         path h5imagepath = opts.cast<path>("hdf5:path",
                                         path("/image/raster"));

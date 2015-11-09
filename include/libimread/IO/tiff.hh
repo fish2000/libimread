@@ -23,15 +23,15 @@ namespace im {
             using can_read_metadata = std::true_type;
             using can_write = std::true_type;
             
-            static bool match_format(byte_source *src) {
+            static bool match_format(byte_source* src) {
                 return match_magic(src, "\x4d\x4d\x00\x2a", 4) ||
                        match_magic(src, "\x4d\x4d\x00\x2b", 4) ||
                        match_magic(src, "\x49\x49\x2a\x00", 4);
             }
             
             virtual std::unique_ptr<Image> read(
-                    byte_source *s,
-                    ImageFactory *f,
+                    byte_source* s,
+                    ImageFactory* f,
                     const options_map &opts) override {
                 std::unique_ptr<ImageList> pages = this->do_read(s, f, false);
                 if (pages->size() != 1) { throw ProgrammingError(); }
@@ -40,19 +40,19 @@ namespace im {
             }
             
             virtual std::unique_ptr<ImageList> read_multi(
-                    byte_source *s,
-                    ImageFactory *f,
-                    const options_map &opts) override {
+                    byte_source* s,
+                    ImageFactory* f,
+                    const options_map& opts) override {
                 return this->do_read(s, f, true);
             }
             
-            virtual void write(Image &input,
-                               byte_sink *output,
-                               const options_map &opts) override;
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               const options_map& opts) override;
             
         private:
-            std::unique_ptr<ImageList> do_read(byte_source *s,
-                                                ImageFactory *f,
+            std::unique_ptr<ImageList> do_read(byte_source* s,
+                                                ImageFactory* f,
                                                 bool is_multi);
     };
     
@@ -61,8 +61,8 @@ namespace im {
             using can_read_multi = std::true_type;
             
             virtual std::unique_ptr<ImageList> read_multi(
-                byte_source *s,
-                ImageFactory *f,
+                byte_source* s,
+                ImageFactory* f,
                 const options_map &opts) override;
     };
     

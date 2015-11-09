@@ -42,29 +42,29 @@ namespace im {
                 :HalImage<pT>(), Image(), MetaImage()
                 {}
             
-            HybridImage(int x, int y, int z, int w, const std::string &name="")
+            HybridImage(int x, int y, int z, int w, const std::string& name="")
                 :HalImage<pT>(x, y, z, w, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(int x, int y, int z, const std::string &name="")
+            HybridImage(int x, int y, int z, const std::string& name="")
                 :HalImage<pT>(x, y, z, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(int x, int y, const std::string &name="")
+            HybridImage(int x, int y, const std::string& name="")
                 :HalImage<pT>(x, y, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(int x, const std::string &name="")
+            HybridImage(int x, const std::string& name="")
                 :HalImage<pT>(x, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(const Buffer &buf)
+            HybridImage(const Buffer& buf)
                 :HalImage<pT>(buf), Image(), MetaImage()
                 {}
-            HybridImage(const Realization &r)
+            HybridImage(const Realization& r)
                 :HalImage<pT>(r), Image(), MetaImage()
                 {}
-            HybridImage(const buffer_t *b, const std::string &name="")
+            HybridImage(const buffer_t* b, const std::string& name="")
                 :HalImage<pT>(b, name), Image(), MetaImage(name)
                 {}
             
@@ -141,14 +141,14 @@ namespace im {
             HalideFactory()
                 :nm(std::string(""))
                 {}
-            HalideFactory(const std::string &n)
+            HalideFactory(const std::string& n)
                 :nm(std::string(n))
                 {}
             
             virtual ~HalideFactory() {}
             
-            std::string &name() { return nm; }
-            void name(std::string &nnm) { nm = nnm; }
+            std::string& name() { return nm; }
+            void name(std::string& nnm) { nm = nnm; }
             
         protected:
             virtual std::unique_ptr<Image> create(int nbits,
@@ -177,8 +177,8 @@ namespace im {
         static const options_map halide_default_opts;
         
         template <typename T = byte> inline
-        HybridImage<T> read(const std::string &filename,
-                            const options_map &opts = halide_default_opts) {
+        HybridImage<T> read(const std::string& filename,
+                            const options_map& opts = halide_default_opts) {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
@@ -189,23 +189,23 @@ namespace im {
         }
         
         template <typename T = byte> inline
-        void write(HybridImage<T> &input, const std::string &filename,
-                                          const options_map &opts = halide_default_opts) {
+        void write(HybridImage<T>& input, const std::string& filename,
+                                          const options_map& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write(dynamic_cast<Image&>(input), output.get(), opts);
         }
         
-        inline void write_multi(ImageList &input, const std::string &filename,
-                                           const options_map &opts = halide_default_opts) {
+        inline void write_multi(ImageList& input, const std::string& filename,
+                                                  const options_map& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write_multi(input, output.get(), opts);
         }
         
         template <typename Format, typename T = byte> inline
-        std::string tmpwrite(HybridImage<T> &input,
-                             const options_map &opts = halide_default_opts) {
+        std::string tmpwrite(HybridImage<T>& input,
+                             const options_map& opts = halide_default_opts) {
             im::fs::NamedTemporaryFile tf(Format::get_suffix(),         /// suffix
                                           FILESYSTEM_TEMP_FILENAME,     /// prefix (filename template)
                                           false); tf.remove();          /// cleanup on scope exit

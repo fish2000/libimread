@@ -153,12 +153,12 @@ namespace im {
         
         class LSMReader {
           public:
-            LSMReader(byte_source *s);
+            LSMReader(byte_source* s);
             ~LSMReader();
             
-            void PrintSelf(std::ostream &os, const char *indent = "");
-            std::unique_ptr<Image> read(ImageFactory *factory,
-                                      const options_map&);
+            void PrintSelf(std::ostream& os, const char* indent = "");
+            std::unique_ptr<Image> read(ImageFactory* factory,
+                                        const options_map&);
             void readHeader();
             
             int GetChannelColorComponent(int, int);
@@ -170,30 +170,29 @@ namespace im {
             int GetDataTypeForChannel(unsigned int channel);
             
           private:
-            unsigned long ReadImageDirectory(byte_source *, unsigned long);
-            void SetChannelName(const char *, int);
-            int FindChannelNameStart(const char *, int);
-            int ReadChannelName(const char *, int, char *);
-            int ReadChannelDataTypes(byte_source *, unsigned long);
-            int ReadChannelColorsAndNames(byte_source *, unsigned long);
-            int ReadTimeStampInformation(byte_source *, unsigned long);
-            int ReadLSMSpecificInfo(byte_source *, unsigned long);
-            int AnalyzeTag(byte_source *, unsigned long);
-            int ReadScanInformation(byte_source *, unsigned long);
+            unsigned long ReadImageDirectory(byte_source*, unsigned long);
+            void SetChannelName(const char*, int);
+            int FindChannelNameStart(const char*, int);
+            int ReadChannelName(const char*, int, char*);
+            int ReadChannelDataTypes(byte_source*, unsigned long);
+            int ReadChannelColorsAndNames(byte_source*, unsigned long);
+            int ReadTimeStampInformation(byte_source*, unsigned long);
+            int ReadLSMSpecificInfo(byte_source*, unsigned long);
+            int AnalyzeTag(byte_source*, unsigned long);
+            int ReadScanInformation(byte_source*, unsigned long);
             unsigned long GetOffsetToImage(int, int);
             
             void CalculateExtentAndSpacing(int extent[6], double spacing[3]);
-            void DecodeHorizontalDifferencing(unsigned char *, int);
-            void DecodeHorizontalDifferencingUnsignedShort(unsigned short *,
-                                                           int);
-            void DecodeLZWCompression(unsigned char *, int, int);
+            void DecodeHorizontalDifferencing(unsigned char*, int);
+            void DecodeHorizontalDifferencingUnsignedShort(unsigned short*, int);
+            void DecodeLZWCompression(unsigned char*, int, int);
             void ConstructSliceOffsets(int channel);
             unsigned int GetStripByteCount(unsigned int timepoint,
                                            unsigned int slice);
             unsigned int GetSliceOffset(unsigned int timepoint,
                                         unsigned int slice);
             
-            byte_source *src;
+            byte_source* src;
             bool swap_bytes_;
             
             unsigned long OffsetToLastAccessedImage;
@@ -235,82 +234,80 @@ namespace im {
             double TimeInterval;
         };
         
-        int ReadFile(byte_source *s, unsigned long *pos, int size, void *buf,
+        int ReadFile(byte_source* s, unsigned long* pos, int size, void* buf,
                      bool swap = false) {
             s->seek_absolute(*pos);
-            const unsigned ret = s->read(reinterpret_cast<byte *>(buf), size);
+            const unsigned ret = s->read(reinterpret_cast<byte*>(buf), size);
             #ifdef VTK_WORDS_BIGENDIAN
-                if (swap) {
-                    vtkByteSwap::SwapLERange(buf, size);
-                }
+                if (swap) { vtkByteSwap::SwapLERange(buf, size); }
             #endif
             *pos += ret;
             return ret;
         }
         
-        int ReadData(byte_source *s, unsigned long *pos, int size, char *buf) {
+        int ReadData(byte_source* s, unsigned long* pos, int size, char* buf) {
             return ReadFile(s, pos, size, buf, 1);
         }
         
-        std::string read_str(byte_source *s, unsigned long *pos,
+        std::string read_str(byte_source* s, unsigned long* pos,
                              const unsigned long len) {
-            char *buf = new char[len];
+            char* buf = new char[len];
             ReadData(s, pos, len, buf);
             std::string res(buf, len);
             delete[] buf;
             return res;
         }
         
-        unsigned char CharPointerToUnsignedChar(char *buf) {
-            return *((unsigned char *)(buf));
+        unsigned char CharPointerToUnsignedChar(char* buf) {
+            return *((unsigned char*)(buf));
         }
         
-        int CharPointerToInt(char *buf) { return *((int *)(buf)); }
+        int CharPointerToInt(char* buf) { return *((int*)(buf)); }
         
-        unsigned int CharPointerToUnsignedInt(char *buf) {
-            return *((unsigned int *)(buf));
+        unsigned int CharPointerToUnsignedInt(char* buf) {
+            return *((unsigned int*)(buf));
         }
         
-        short CharPointerToShort(char *buf) { return *((short *)(buf)); }
+        short CharPointerToShort(char* buf) { return *((short*)(buf)); }
         
-        unsigned short CharPointerToUnsignedShort(char *buf) {
-            return *((unsigned short *)(buf));
+        unsigned short CharPointerToUnsignedShort(char* buf) {
+            return *((unsigned short*)(buf));
         }
         
-        double CharPointerToDouble(char *buf) { return *((double *)(buf)); }
+        double CharPointerToDouble(char* buf) { return *((double*)(buf)); }
         
-        int ReadInt(byte_source *s, unsigned long *pos) {
+        int ReadInt(byte_source* s, unsigned long* pos) {
             char buff[4];
             ReadFile(s, pos, 4, buff);
             #ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LE((int *)buff);
+                vtkByteSwap::Swap4LE((int*)buff);
             #endif
             return CharPointerToInt(buff);
         }
         
-        unsigned int ReadUnsignedInt(byte_source *s, unsigned long *pos) {
+        unsigned int ReadUnsignedInt(byte_source* s, unsigned long* pos) {
             char buff[4];
             ReadFile(s, pos, 4, buff);
             #ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap4LE((unsigned int *)buff);
+                vtkByteSwap::Swap4LE((unsigned int*)buff);
             #endif
             return CharPointerToUnsignedInt(buff);
         }
         
-        short ReadShort(byte_source *s, unsigned long *pos) {
+        short ReadShort(byte_source* s, unsigned long* pos) {
             char buff[2];
             ReadFile(s, pos, 2, buff);
             #ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap2LE((short *)buff);
+                vtkByteSwap::Swap2LE((short*)buff);
             #endif
             return CharPointerToShort(buff);
         }
         
-        unsigned short ReadUnsignedShort(byte_source *s, unsigned long *pos) {
+        unsigned short ReadUnsignedShort(byte_source* s, unsigned long* pos) {
             char buff[2];
             ReadFile(s, pos, 2, buff);
             #ifdef VTK_WORDS_BIGENDIAN
-                vtkByteSwap::Swap2LE((unsigned short *)buff);
+                vtkByteSwap::Swap2LE((unsigned short*)buff);
             #endif
             return CharPointerToUnsignedShort(buff);
         }
@@ -351,7 +348,7 @@ namespace im {
             return 1;
         }
         
-        LSMReader::LSMReader(byte_source *s)
+        LSMReader::LSMReader(byte_source* s)
             : src(s),
               swap_bytes_(false),
               compression_(0),
@@ -414,14 +411,14 @@ namespace im {
             return this->channel_names_[chNum];
         }
         
-        void LSMReader::SetChannelName(const char *name, const int chNum) {
+        void LSMReader::SetChannelName(const char* name, const int chNum) {
             const int n_channels = this->dimensions_[4];
             if (!name || chNum > n_channels) { return; }
             this->channel_names_.resize(n_channels);
             this->channel_names_[chNum] = std::string(name);
         }
         
-        int LSMReader::FindChannelNameStart(const char *buf, const int length) {
+        int LSMReader::FindChannelNameStart(const char* buf, const int length) {
             for (int i = 0; i < length; ++i) {
                 char ch = buf[i];
                 if (ch > 32) { return i; }
@@ -429,9 +426,9 @@ namespace im {
             return length;
         }
         
-        int LSMReader::ReadChannelName(const char *nameBuff,
+        int LSMReader::ReadChannelName(const char* nameBuff,
                                        const int length,
-                                       char *buffer) {
+                                       char* buffer) {
             for (int i = 0; i < length; ++i) {
                 buffer[i] = nameBuff[i];
                 if (!buffer[i]) { return i; }
@@ -439,23 +436,25 @@ namespace im {
             return length;
         }
         
-        int LSMReader::ReadChannelDataTypes(byte_source *s,
-                                            unsigned long start) {
+        int LSMReader::ReadChannelDataTypes(byte_source* s, unsigned long start) {
             const unsigned int numOfChls = this->dimensions_[4];
             this->channel_data_types_.resize(numOfChls);
             unsigned long pos = start;
-            for (unsigned int i = 0; i < numOfChls; i++) {
+            for (int i = 0; i < numOfChls; i++) {
                 this->channel_data_types_[i] = ReadUnsignedInt(s, &pos);
             }
             return 0;
         }
         
-        int LSMReader::ReadChannelColorsAndNames(byte_source *s,
+        int LSMReader::ReadChannelColorsAndNames(byte_source* s,
                                                  unsigned long start) {
-            int colNum, nameNum, sizeOfStructure, sizeOfNames, nameLength,
+            int colNum, nameNum, sizeOfStructure,
+                sizeOfNames, nameLength,
                 nameSkip;
             unsigned long colorOffset, nameOffset, pos;
-            char *nameBuff, *name, *tempBuff;
+            char* nameBuff;
+            char* name;
+            char* tempBuff;
             unsigned char component;
             
             pos = start;
@@ -506,8 +505,7 @@ namespace im {
             return 0;
         }
         
-        int LSMReader::ReadTimeStampInformation(byte_source *s,
-                                                unsigned long offset) {
+        int LSMReader::ReadTimeStampInformation(byte_source* s, unsigned long offset) {
             // position is 0 for non-timeseries files!
             if (offset == 0) { return 0; }
             
@@ -526,7 +524,7 @@ namespace im {
          *
          *
          */
-        int LSMReader::ReadLSMSpecificInfo(byte_source *s, unsigned long pos) {
+        int LSMReader::ReadLSMSpecificInfo(byte_source* s, unsigned long pos) {
             unsigned long offset;
             
             pos += 2 * 4; // skip over the start of the LSMInfo
@@ -626,7 +624,8 @@ namespace im {
             
             return 1;
         }
-        int LSMReader::ReadScanInformation(byte_source *s, unsigned long pos) {
+        
+        int LSMReader::ReadScanInformation(byte_source* s, unsigned long pos) {
             unsigned int subblocksOpen = 0;
             double wavelength;
             int isOn = 0;
@@ -636,110 +635,110 @@ namespace im {
                 const unsigned int size = ReadUnsignedInt(s, &pos);
                 
                 if (type == TYPE_SUBBLOCK) {
-                    if (entry == SUBBLOCK_END)
+                    if (entry == SUBBLOCK_END) {
                         --subblocksOpen;
-                    else
+                    } else {
                         ++subblocksOpen;
+                    }
                 }
                 
                 switch (entry) {
-                case DETCHANNEL_ENTRY_DETECTOR_GAIN_FIRST:
-                    (void)ReadDouble(s, &pos);
-                    continue;
-                    break;
-                case DETCHANNEL_ENTRY_DETECTOR_GAIN_LAST:
-                    (void)ReadDouble(s, &pos);
-                    continue;
-                    break;
-                case DETCHANNEL_ENTRY_INTEGRATION_MODE:
-                    (void)ReadInt(s, &pos);
-                    continue;
-                    break;
-                case LASER_ENTRY_NAME:
-                    this->laser_names_.push_back(read_str(s, &pos, size));
-                    continue;
-                    break;
-                case ILLUMCHANNEL_ENTRY_WAVELENGTH:
-                    wavelength = ReadDouble(s, &pos);
-                    continue;
-                    break;
-                case ILLUMCHANNEL_DETCHANNEL_NAME:
-                    (void)read_str(s, &pos, size);
-                    continue;
-                    break;
-                case TRACK_ENTRY_ACQUIRE:
-                    (void)ReadInt(s, &pos);
-                    continue;
-                    break;
-                case TRACK_ENTRY_NAME:
-                    (void)read_str(s, &pos, size);
-                    continue;
-                    break;
-                case DETCHANNEL_DETECTION_CHANNEL_NAME:
-                    (void)read_str(s, &pos, size);
-                    continue;
-                    break;
-                case DETCHANNEL_ENTRY_ACQUIRE:
-                    (void)ReadInt(s, &pos);
-                    continue;
-                    break;
-                case ILLUMCHANNEL_ENTRY_AQUIRE:
-                    isOn = ReadInt(s, &pos);
-                    if (isOn) {
-                        this->track_wavelengths_.push_back(wavelength);
-                    }
-                    continue;
-                    break;
-                case RECORDING_ENTRY_DESCRIPTION:
-                    this->description_ = read_str(s, &pos, size);
-                    continue;
-                    break;
-                case RECORDING_ENTRY_OBJETIVE:
-                    this->objective_ = read_str(s, &pos, size);
-                    continue;
-                case SUBBLOCK_RECORDING:
-                    break;
-                case SUBBLOCK_LASERS:
-                    break;
-                case SUBBLOCK_LASER:
-                    break;
-                case SUBBLOCK_TRACKS:
-                    break;
-                case SUBBLOCK_TRACK:
-                    break;
-                case SUBBLOCK_DETECTION_CHANNELS:
-                    break;
-                case SUBBLOCK_DETECTION_CHANNEL:
-                    break;
-                case SUBBLOCK_ILLUMINATION_CHANNELS:
-                    break;
-                case SUBBLOCK_ILLUMINATION_CHANNEL:
-                    break;
-                case SUBBLOCK_BEAM_SPLITTERS:
-                    break;
-                case SUBBLOCK_BEAM_SPLITTER:
-                    break;
-                case SUBBLOCK_DATA_CHANNELS:
-                    break;
-                case SUBBLOCK_DATA_CHANNEL:
-                    break;
-                case SUBBLOCK_TIMERS:
-                    break;
-                case SUBBLOCK_TIMER:
-                    break;
-                case SUBBLOCK_MARKERS:
-                    break;
-                case SUBBLOCK_MARKER:
-                    break;
+                    case DETCHANNEL_ENTRY_DETECTOR_GAIN_FIRST:
+                        (void)ReadDouble(s, &pos);
+                        continue;
+                        break;
+                    case DETCHANNEL_ENTRY_DETECTOR_GAIN_LAST:
+                        (void)ReadDouble(s, &pos);
+                        continue;
+                        break;
+                    case DETCHANNEL_ENTRY_INTEGRATION_MODE:
+                        (void)ReadInt(s, &pos);
+                        continue;
+                        break;
+                    case LASER_ENTRY_NAME:
+                        this->laser_names_.push_back(read_str(s, &pos, size));
+                        continue;
+                        break;
+                    case ILLUMCHANNEL_ENTRY_WAVELENGTH:
+                        wavelength = ReadDouble(s, &pos);
+                        continue;
+                        break;
+                    case ILLUMCHANNEL_DETCHANNEL_NAME:
+                        (void)read_str(s, &pos, size);
+                        continue;
+                        break;
+                    case TRACK_ENTRY_ACQUIRE:
+                        (void)ReadInt(s, &pos);
+                        continue;
+                        break;
+                    case TRACK_ENTRY_NAME:
+                        (void)read_str(s, &pos, size);
+                        continue;
+                        break;
+                    case DETCHANNEL_DETECTION_CHANNEL_NAME:
+                        (void)read_str(s, &pos, size);
+                        continue;
+                        break;
+                    case DETCHANNEL_ENTRY_ACQUIRE:
+                        (void)ReadInt(s, &pos);
+                        continue;
+                        break;
+                    case ILLUMCHANNEL_ENTRY_AQUIRE:
+                        isOn = ReadInt(s, &pos);
+                        if (isOn) { this->track_wavelengths_.push_back(wavelength); }
+                        continue;
+                        break;
+                    case RECORDING_ENTRY_DESCRIPTION:
+                        this->description_ = read_str(s, &pos, size);
+                        continue;
+                        break;
+                    case RECORDING_ENTRY_OBJETIVE:
+                        this->objective_ = read_str(s, &pos, size);
+                        continue;
+                    case SUBBLOCK_RECORDING:
+                        break;
+                    case SUBBLOCK_LASERS:
+                        break;
+                    case SUBBLOCK_LASER:
+                        break;
+                    case SUBBLOCK_TRACKS:
+                        break;
+                    case SUBBLOCK_TRACK:
+                        break;
+                    case SUBBLOCK_DETECTION_CHANNELS:
+                        break;
+                    case SUBBLOCK_DETECTION_CHANNEL:
+                        break;
+                    case SUBBLOCK_ILLUMINATION_CHANNELS:
+                        break;
+                    case SUBBLOCK_ILLUMINATION_CHANNEL:
+                        break;
+                    case SUBBLOCK_BEAM_SPLITTERS:
+                        break;
+                    case SUBBLOCK_BEAM_SPLITTER:
+                        break;
+                    case SUBBLOCK_DATA_CHANNELS:
+                        break;
+                    case SUBBLOCK_DATA_CHANNEL:
+                        break;
+                    case SUBBLOCK_TIMERS:
+                        break;
+                    case SUBBLOCK_TIMER:
+                        break;
+                    case SUBBLOCK_MARKERS:
+                        break;
+                    case SUBBLOCK_MARKER:
+                        break;
                 }
                 pos += size;
             } while (subblocksOpen);
             return 0;
         }
-        int LSMReader::AnalyzeTag(byte_source *s, unsigned long startPos) {
+        
+        int LSMReader::AnalyzeTag(byte_source* s, unsigned long startPos) {
             int value, dataSize;
             char tempValue[4], tempValue2[4];
-            char *actualValue = NULL;
+            char* actualValue = NULL;
             const unsigned short tag = ReadUnsignedShort(s, &startPos);
             const unsigned short type = ReadUnsignedShort(s, &startPos);
             const unsigned short length = ReadUnsignedInt(s, &startPos);
@@ -757,6 +756,7 @@ namespace im {
             // value is an offset to the actual data
             dataSize = TIFF_BYTES(type);
             const unsigned long readSize = dataSize * length;
+            
             if (readSize > 4 && tag != TIF_CZ_LSMINFO) {
                 actualValue = new char[readSize];
                 startPos = value;
@@ -769,117 +769,118 @@ namespace im {
                 actualValue = new char[4];
                 for (int o = 0; o < 4; o++) { actualValue[o] = tempValue[o]; }
             }
+            
             switch (tag) {
-            case TIF_NEWSUBFILETYPE:
-                this->NewSubFileType = value;
-                break;
-            
-            case TIF_IMAGEWIDTH:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-                #endif
-                // this->dimensions_[0] =
-                // this->CharPointerToUnsignedInt(actualValue);
-                // this->dimensions_[0] = value;
-                break;
-            
-            case TIF_IMAGELENGTH:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-                    // this->dimensions_[1] = this->CharPointerToUnsignedInt(actualValue);
-                #endif
-                // this->dimensions_[1] = value;
-                break;
-            
-            case TIF_BITSPERSAMPLE:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-                #endif
-                this->bits_per_sample_.resize(length);
-                unsigned short bits_per_sample_;
-                for (int i = 0; i < length; i++) {
-                    bits_per_sample_ = CharPointerToUnsignedShort(
-                        actualValue + TIFF_BYTES(TIFF_SHORT) * i);
-                    this->bits_per_sample_[i] = bits_per_sample_;
-                }
-                break;
-            
-            case TIF_COMPRESSION:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-                #endif
-                this->compression_ = CharPointerToUnsignedShort(actualValue);
-                break;
-            
-            case TIF_PHOTOMETRICINTERPRETATION:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-                #endif
-                this->PhotometricInterpretation
-                    = CharPointerToUnsignedShort(actualValue);
-                break;
-            
-            case TIF_STRIPOFFSETS:
-                this->strip_offset_.resize(length);
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap4LERange((unsigned int *)actualValue, length);
-                #endif
-                if (length > 1) {
-                    for (int i = 0; i < length; ++i) {
-                        unsigned int *offsets = (unsigned int *)actualValue;
-                        this->strip_offset_[i] = offsets[i];
+                case TIF_NEWSUBFILETYPE:
+                    this->NewSubFileType = value;
+                    break;
+                
+                case TIF_IMAGEWIDTH:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap4LE((unsigned int*)actualValue);
+                    #endif
+                    // this->dimensions_[0] =
+                    // this->CharPointerToUnsignedInt(actualValue);
+                    // this->dimensions_[0] = value;
+                    break;
+                
+                case TIF_IMAGELENGTH:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap4LE((unsigned int*)actualValue);
+                        // this->dimensions_[1] = this->CharPointerToUnsignedInt(actualValue);
+                    #endif
+                    // this->dimensions_[1] = value;
+                    break;
+                
+                case TIF_BITSPERSAMPLE:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap2LE((unsigned short *)actualValue);
+                    #endif
+                    this->bits_per_sample_.resize(length);
+                    unsigned short bits_per_sample_;
+                    for (int i = 0; i < length; i++) {
+                        bits_per_sample_ = CharPointerToUnsignedShort(actualValue +
+                                                                      TIFF_BYTES(TIFF_SHORT) * i);
+                        this->bits_per_sample_[i] = bits_per_sample_;
                     }
-                } else {
-                    this->strip_offset_[0] = value;
-                }
-                break;
-            
-            case TIF_SAMPLESPERPIXEL:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-                #endif
-                this->sample_per_pixel_ = CharPointerToUnsignedInt(actualValue);
-                break;
-            
-            case TIF_STRIPBYTECOUNTS:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap4LERange((unsigned int *)actualValue, length);
-                #endif
-                this->strip_byte_count_.resize(length);
-                if (length > 1) {
-                    for (int i = 0; i < length; ++i) {
-                        this->strip_byte_count_[i] = CharPointerToUnsignedInt(
-                            actualValue + TIFF_BYTES(TIFF_LONG) * i);
+                    break;
+                
+                case TIF_COMPRESSION:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap2LE((unsigned short*)actualValue);
+                    #endif
+                    this->compression_ = CharPointerToUnsignedShort(actualValue);
+                    break;
+                
+                case TIF_PHOTOMETRICINTERPRETATION:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap2LE((unsigned short*)actualValue);
+                    #endif
+                    this->PhotometricInterpretation
+                        = CharPointerToUnsignedShort(actualValue);
+                    break;
+                
+                case TIF_STRIPOFFSETS:
+                    this->strip_offset_.resize(length);
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap4LERange((unsigned int*)actualValue, length);
+                    #endif
+                    if (length > 1) {
+                        for (int i = 0; i < length; ++i) {
+                            unsigned int *offsets = (unsigned int*)actualValue;
+                            this->strip_offset_[i] = offsets[i];
+                        }
+                    } else {
+                        this->strip_offset_[0] = value;
                     }
-                } else {
-                    this->strip_byte_count_[0] = value;
-                }
-                break;
-            
-            case TIF_PLANARCONFIGURATION:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-                #endif
-                this->PlanarConfiguration = CharPointerToUnsignedShort(actualValue);
-                break;
-            
-            case TIF_PREDICTOR:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap2LE((unsigned short *)actualValue);
-                #endif
-                this->Predictor = CharPointerToUnsignedShort(actualValue);
-                break;
-            
-            case TIF_COLORMAP:
-                #ifdef VTK_WORDS_BIGENDIAN
-                    vtkByteSwap::Swap4LE((unsigned int *)actualValue);
-                #endif
-                // this->ColorMapOffset = CharPointerToUnsignedInt(actualValue);
-                break;
-            
-            case TIF_CZ_LSMINFO:
-                this->LSMSpecificInfoOffset = value;
-                break;
+                    break;
+                
+                case TIF_SAMPLESPERPIXEL:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap4LE((unsigned int*)actualValue);
+                    #endif
+                    this->sample_per_pixel_ = CharPointerToUnsignedInt(actualValue);
+                    break;
+                
+                case TIF_STRIPBYTECOUNTS:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap4LERange((unsigned int*)actualValue, length);
+                    #endif
+                    this->strip_byte_count_.resize(length);
+                    if (length > 1) {
+                        for (int i = 0; i < length; ++i) {
+                            this->strip_byte_count_[i] = CharPointerToUnsignedInt(actualValue +
+                                                                                  TIFF_BYTES(TIFF_LONG) * i);
+                        }
+                    } else {
+                        this->strip_byte_count_[0] = value;
+                    }
+                    break;
+                
+                case TIF_PLANARCONFIGURATION:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap2LE((unsigned short*)actualValue);
+                    #endif
+                    this->PlanarConfiguration = CharPointerToUnsignedShort(actualValue);
+                    break;
+                
+                case TIF_PREDICTOR:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap2LE((unsigned short*)actualValue);
+                    #endif
+                    this->Predictor = CharPointerToUnsignedShort(actualValue);
+                    break;
+                
+                case TIF_COLORMAP:
+                    #ifdef VTK_WORDS_BIGENDIAN
+                        vtkByteSwap::Swap4LE((unsigned int*)actualValue);
+                    #endif
+                    // this->ColorMapOffset = CharPointerToUnsignedInt(actualValue);
+                    break;
+                
+                case TIF_CZ_LSMINFO:
+                    this->LSMSpecificInfoOffset = value;
+                    break;
             }
             
             if (actualValue) { delete[] actualValue; }
@@ -897,16 +898,16 @@ namespace im {
         }
         
         void LSMReader::ConstructSliceOffsets(int channel) {
-            this->image_offsets_.resize(this->dimensions_[2] * this->dimensions_[3]);
-            this->read_sizes_.resize(this->dimensions_[2] * this->dimensions_[3]);
+            int new_size = this->dimensions_[2] * this->dimensions_[3];
+            this->image_offsets_.resize(new_size);
+            this->read_sizes_.resize(new_size);
             
             for (int tp = 0; tp < this->dimensions_[3]; tp++) {
                 for (int slice = 0; slice < this->dimensions_[2]; slice++) {
+                    int idx = tp * this->dimensions_[2] + slice;
                     this->GetOffsetToImage(slice, tp);
-                    this->image_offsets_[tp * this->dimensions_[2] + slice]
-                        = this->strip_offset_[channel];
-                    this->read_sizes_[tp * this->dimensions_[2] + slice]
-                        = this->strip_byte_count_[channel];
+                    this->image_offsets_[idx] = this->strip_offset_[channel];
+                    this->read_sizes_[idx] = this->strip_byte_count_[channel];
                 }
             }
         }
@@ -940,7 +941,7 @@ namespace im {
             return finalOffset;
         }
         
-        unsigned long LSMReader::ReadImageDirectory(byte_source *s, unsigned long offset) {
+        unsigned long LSMReader::ReadImageDirectory(byte_source* s, unsigned long offset) {
             unsigned short numberOfTags = 0;
             unsigned long nextOffset = offset;
             
@@ -954,24 +955,24 @@ namespace im {
             return ReadUnsignedInt(s, &nextOffset);
         }
         
-        void LSMReader::DecodeHorizontalDifferencing(unsigned char *buffer, int size) {
+        void LSMReader::DecodeHorizontalDifferencing(unsigned char* buffer, int size) {
             for (int i = 1; i < size; i++) {
                 *(buffer + i) = *(buffer + i) + *(buffer + i - 1);
             }
         }
         
-        void LSMReader::DecodeHorizontalDifferencingUnsignedShort(unsigned short *buffer, int size) {
+        void LSMReader::DecodeHorizontalDifferencingUnsignedShort(unsigned short* buffer, int size) {
             for (int i = 1; i < size; i++) {
                 *(buffer + i) = *(buffer + i) + *(buffer + i - 1);
             }
         }
         
-        void LSMReader::DecodeLZWCompression(unsigned char *buffer,
+        void LSMReader::DecodeLZWCompression(unsigned char* buffer,
                                              int size,
                                              int bytes) {
             //throw ProgrammingError("Not tested");
             std::vector<unsigned char> decoded = lzw_decode(buffer, size);
-            unsigned char *outbufp = &decoded[0];
+            unsigned char* outbufp = &decoded[0];
             int width = this->dimensions_[0];
             int lines = size / (width * bytes);
             
@@ -980,7 +981,7 @@ namespace im {
                     if (bytes == 1) {
                         this->DecodeHorizontalDifferencing(outbufp, width * bytes);
                     } else {
-                        this->DecodeHorizontalDifferencingUnsignedShort((unsigned short *)outbufp, width);
+                        this->DecodeHorizontalDifferencingUnsignedShort((unsigned short*)outbufp, width);
                     }
                 }
                 outbufp += width * bytes;
@@ -1048,7 +1049,7 @@ namespace im {
             return this->channel_colors_[(ch * 3) + component];
         }
         
-        void LSMReader::PrintSelf(std::ostream &os, const char *indent) {
+        void LSMReader::PrintSelf(std::ostream& os, const char* indent) {
             os << indent << "dimensions_: " << this->dimensions_[0] << ","
                << this->dimensions_[1] << "," << this->dimensions_[2] << "\n";
             os << indent << "Time points: " << this->dimensions_[3] << "\n";
@@ -1096,8 +1097,8 @@ namespace im {
             }
         }
         
-        std::unique_ptr<Image> LSMReader::read(ImageFactory *factory,
-                                               const options_map &) {
+        std::unique_ptr<Image> LSMReader::read(ImageFactory* factory,
+                                               const options_map& opts) {
             this->readHeader();
             
             const int dataType = this->GetDataTypeForChannel(0); // This could vary by channel!
@@ -1107,18 +1108,17 @@ namespace im {
                 this->dimensions_[3], this->dimensions_[4],
                 this->dimensions_[0], this->dimensions_[1]);
             
-            byte *imstart = output->rowp_as<byte>(0);
+            byte* imstart = output->rowp_as<byte>(0);
             for (int z = 0; z < this->dimensions_[2]; ++z) {
                 for (int timepoint = 0; timepoint < this->dimensions_[3]; ++timepoint) {
                     for (int ch = 0; ch < this->dimensions_[4]; ++ch) {
                         this->ConstructSliceOffsets(ch);
-                        byte *imdata
-                            = imstart
-                              + (z
-                                 * (this->dimensions_[3] * this->dimensions_[4])
-                                 + timepoint * this->dimensions_[4] + ch)
+                        byte *imdata = imstart + (z
+                                * (this->dimensions_[3] * this->dimensions_[4])
+                                + timepoint * this->dimensions_[4] + ch)
                                 * this->dimensions_[0] * this->dimensions_[1]
                                 * BYTES_BY_DATA_TYPE(dataType);
+                        
                         unsigned long offset = this->GetSliceOffset(timepoint, z);
                         const int readSize = this->GetStripByteCount(timepoint, z);
                         std::fill(imdata, imdata + readSize, 0);
@@ -1139,12 +1139,13 @@ namespace im {
             return output;
         }
         
-    } // namespace
+    } /* namespace (anon.) */
     
-    std::unique_ptr<Image> LSMFormat::read(byte_source *s,
-                                           ImageFactory *factory,
-                                           const options_map &opts)  {
+    std::unique_ptr<Image> LSMFormat::read(byte_source* s,
+                                           ImageFactory* factory,
+                                           const options_map& opts)  {
         LSMReader reader(s);
         return reader.read(factory, opts);
     }
-}
+    
+} /* namespace im */

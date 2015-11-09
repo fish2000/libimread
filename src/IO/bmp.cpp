@@ -45,7 +45,7 @@ namespace im {
         /// they are primarily only of use in exactly one codec
         /// (which I think is bmp.cpp but I could be wrong,
         /// fuck opening another buffer to check dogg I am lazy)
-        uint8_t read8(byte_source &s) {
+        uint8_t read8(byte_source& s) {
             byte out;
             if (s.read(&out, 1) != 1) {
                 imread_raise(CannotReadError,
@@ -54,13 +54,13 @@ namespace im {
             return out;
         }
         
-        inline uint16_t read16_le(byte_source &s) {
+        inline uint16_t read16_le(byte_source& s) {
             uint8_t b0 = read8(s);
             uint8_t b1 = read8(s);
             return (uint16_t(b1) << 8) | uint16_t(b0);
         }
         
-        inline uint32_t read32_le(byte_source &s) {
+        inline uint32_t read32_le(byte_source& s) {
             uint16_t s0 = read16_le(s);
             uint16_t s1 = read16_le(s);
             return (uint32_t(s1) << 16) | uint32_t(s0);
@@ -70,7 +70,7 @@ namespace im {
     
     std::unique_ptr<Image> BMPFormat::read(byte_source* src,
                                            ImageFactory* factory,
-                                           const options_map &opts)  {
+                                           const options_map& opts)  {
         char magic[2];
         
         if (src->read(reinterpret_cast<byte*>(magic), 2) != 2) {

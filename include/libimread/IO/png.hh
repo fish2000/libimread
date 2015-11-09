@@ -26,17 +26,17 @@ namespace im {
                 "png",
                 "image/png");
             
-            virtual std::unique_ptr<Image> read(byte_source *src,
-                                                ImageFactory *factory,
-                                                const options_map &opts) override;
-            virtual void write(Image &input,
-                               byte_sink *output,
-                               const options_map &opts) override;
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
+                                                const options_map& opts) override;
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               const options_map& opts) override;
             
             /// NOT AN OVERRIDE:
-            virtual void write_ios(Image &input,
-                                   byte_sink *output,
-                                   const options_map &opts);
+            virtual void write_ios(Image& input,
+                                   byte_sink* output,
+                                   const options_map& opts);
     };
     
     namespace format {

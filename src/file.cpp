@@ -84,13 +84,13 @@ namespace im {
     bool fd_source_sink::exists() const noexcept {
         try {
             this->stat();
-        } catch (const CannotReadError &e) {
+        } catch (const CannotReadError& e) {
             return false;
         }
         return true;
     }
     
-    int fd_source_sink::open(char *cpath,
+    int fd_source_sink::open(char* cpath,
                              filesystem::mode fmode) {
         if (fmode == filesystem::mode::WRITE) {
             descriptor = open_write(cpath);

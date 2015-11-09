@@ -12,7 +12,7 @@ namespace im {
     
     namespace detail {
         
-        inline void __attribute__((unused)) setPixel(unsigned char *rgb, int r, int g, int b) {
+        inline void __attribute__((unused)) setPixel(unsigned char* rgb, int r, int g, int b) {
             rgb[0] = r; rgb[1] = g; rgb[2] = b;
         }
         
@@ -44,7 +44,7 @@ namespace im {
         };
     }
     
-    void GIFFormat::write_impl(Image &&input, detail::gifholder &g) {
+    void GIFFormat::write_impl(Image&& input, detail::gifholder& g) {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
@@ -70,10 +70,10 @@ namespace im {
         }
         
         /// Do the pixel loop to interleave RGB data
-        byte *data = gbuf.data();
+        byte* data = gbuf.data();
         pix::accessor<byte> at = input.access();
         
-        unsigned char *rgb;
+        unsigned char* rgb;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 rgb = data + 3 * (width * y + x);
@@ -90,9 +90,9 @@ namespace im {
             gbuf.data(), -1); /// delay=-1
     }
     
-    void GIFFormat::write(Image &input,
-                          byte_sink *output,
-                          const options_map &opts) {
+    void GIFFormat::write(Image& input,
+                          byte_sink* output,
+                          const options_map& opts) {
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(3);
@@ -105,14 +105,14 @@ namespace im {
             "gif::write() returned a size-zero byte vector!");
     }
     
-    void GIFFormat::write_multi(ImageList &input,
-                                byte_sink *output,
-                                const options_map &opts) {
+    void GIFFormat::write_multi(ImageList& input,
+                                byte_sink* output,
+                                const options_map& opts) {
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(3);
         ImageList::vector_t imagevec = input.release();
-        std::for_each(imagevec.begin(), imagevec.end(), [&](Image *image) {
+        std::for_each(imagevec.begin(), imagevec.end(), [&](Image* image) {
             write_impl(std::forward<Image>(*image), g);
         });
         

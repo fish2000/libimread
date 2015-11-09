@@ -18,7 +18,7 @@ namespace {
     
 }
 
-char const *get_demangled_name(char const* const symbol) noexcept {
+char const* get_demangled_name(char const* const symbol) noexcept {
     if (!symbol) { return "<null>"; }
     int status = -4;
     demangled_name.reset(

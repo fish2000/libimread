@@ -68,7 +68,7 @@ namespace im {
             }
             
         private:
-            byte *data;
+            byte* data;
             memory::buffer membuf;
             const std::size_t len;
     };
