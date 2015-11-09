@@ -59,11 +59,6 @@ namespace memory {
         return (fpos_t)pos;
     }
     
-    int closefn_malloc(void* handler) {
-        free(handler);
-        return 0;
-    }
-    
     int closefn(void* handler) {
         delete static_cast<fmem_t*>(handler);
         return 0;
@@ -71,10 +66,6 @@ namespace memory {
     
     /* simple, but portable version of fmemopen for OS X / BSD */
     FILE* fmemopen(void* buf, std::size_t size, const char* mode) {
-        //fmem_t* mem = (fmem_t*)malloc(sizeof(fmem_t));
-        //fmem_t* mem = new fmem_t{ 0 };
-        //std::memset(mem, 0, sizeof(fmem_t));
-        //mem->size = size, mem->buffer = (char*)buf;
         fmem_t* mem = new fmem_t{ 0, size,
                                   static_cast<char*>(buf) };
         return ::funopen(mem, readfn, writefn, seekfn, closefn);

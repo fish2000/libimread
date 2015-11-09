@@ -17,7 +17,7 @@ namespace im {
         public:
             virtual ~Image() {}
             
-            virtual void* rowp(int r) = 0;
+            virtual void* rowp(int r) const = 0;
             virtual const int nbits() const = 0;
             
             virtual const int nbytes() const {
@@ -35,12 +35,12 @@ namespace im {
             }
             
             template <typename T> inline
-            T* rowp_as(const int r) {
+            T* rowp_as(const int r) const {
                 return static_cast<T*>(this->rowp(r));
             }
             
             template <typename T = byte> inline
-            pix::accessor<T> access() {
+            pix::accessor<T> access() const {
                 return pix::accessor<T>(rowp_as<T>(0), stride(0),
                                                        stride(1),
                                                        stride(2));

@@ -95,11 +95,11 @@ namespace im {
                     return ByteImage::channels() == 1 ? 0 : off_t(ByteImage::stride(1));
                 }
                 
-                virtual void *rowp(int r) override {
+                virtual void* rowp(int r) const override {
                     /// WARNING: FREAKY POINTERMATH FOLLOWS
-                    uint8_t *host = (uint8_t *)ByteImage::data();
+                    uint8_t* host = (uint8_t*)ByteImage::data();
                     host += off_t(r * rowp_stride());
-                    return static_cast<void *>(host);
+                    return static_cast<void*>(host);
                 }
         };
         

@@ -32,8 +32,8 @@ namespace im {
                 
                 virtual ~gifbuffer() { data_ptr.release(); }
                 
-                byte *data() const { return data_ptr.get(); }
-                operator unsigned char *() const { return data(); }
+                byte* data() const { return data_ptr.get(); }
+                operator unsigned char*() const { return data(); }
                 
             private:
                 std::unique_ptr<byte[]> data_ptr;
@@ -44,7 +44,7 @@ namespace im {
         };
     }
     
-    void GIFFormat::write_impl(Image&& input, detail::gifholder& g) {
+    void GIFFormat::write_impl(Image& input, detail::gifholder& g) {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
@@ -85,8 +85,7 @@ namespace im {
         
         /// DO IT DOUG
         gif::addFrame(
-            g.get(),
-            gbuf.width, gbuf.height,
+            g.get(), gbuf.width, gbuf.height,
             gbuf.data(), -1); /// delay=-1
     }
     
@@ -96,7 +95,7 @@ namespace im {
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(3);
-        write_impl(std::forward<Image>(input), g);
+        write_impl(input, g);
         
         std::vector<byte> out = gif::write(g.get());
         output->write(&out[0], out.size());
@@ -113,7 +112,7 @@ namespace im {
         detail::gifholder g = detail::gifsink(3);
         ImageList::vector_t imagevec = input.release();
         std::for_each(imagevec.begin(), imagevec.end(), [&](Image* image) {
-            write_impl(std::forward<Image>(*image), g);
+            write_impl(*image, g);
         });
         
         std::vector<byte> out = gif::write(g.get());

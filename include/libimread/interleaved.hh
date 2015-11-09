@@ -375,7 +375,7 @@ namespace im {
                 return off_t(meta.strides[1]);
             }
             
-            virtual void* rowp(int r) override {
+            virtual void* rowp(int r) const override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
                 channel_t* host = data();
                 host += off_t(r * meta.strides[1]);

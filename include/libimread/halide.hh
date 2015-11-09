@@ -117,11 +117,11 @@ namespace im {
                 return HalImage<pT>::channels() == 1 ? 0 : off_t(HalImage<pT>::stride(1));
             }
             
-            virtual void *rowp(int r) override {
+            virtual void* rowp(int r) const override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
-                pT *host = (pT *)HalImage<pT>::data();
+                pT* host = (pT*)HalImage<pT>::data();
                 host += off_t(r * rowp_stride());
-                return static_cast<void *>(host);
+                return static_cast<void*>(host);
             }
             
     };

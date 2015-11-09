@@ -44,7 +44,7 @@ namespace im {
                                      const options_map& opts) override;
         
         private:
-            void write_impl(Image&& input, detail::gifholder& g);
+            void write_impl(Image& input, detail::gifholder& g);
     };
     
     namespace format {

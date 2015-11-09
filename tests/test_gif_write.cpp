@@ -19,19 +19,20 @@ namespace {
     using U8Image = im::HybridImage<uint8_t>;
     
     TEST_CASE("[gif-write] Read PNG files and write as individual GIF files", "[gif-write-individual-files]") {
-        TemporaryDirectory tdi("write-individual-gifs");
+        TemporaryDirectory td("write-individual-gifs");
         path individual_basedir(im::test::basedir);
         std::vector<path> individual_sequence = individual_basedir.list("output_*.png");
         std::for_each(individual_sequence.begin(), individual_sequence.end(), [&](path &p) {
             path fullpath = individual_basedir/p;
-            path newpath((tdi.dirpath/p).str() + ".gif");
+            path newpath((td.dirpath/p).str() + ".gif");
             U8Image halim = im::halide::read(fullpath.str());
             im::halide::write(halim, newpath.str());
+            CHECK(newpath.is_file());
         });
     }
     
     TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file", "[gif-write-multi-animated]") {
-        TemporaryDirectory td("write-individual-gifs");
+        TemporaryDirectory td("write-animated-gif");
         path basedir(im::test::basedir);
         std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
         path newpath(td.dirpath/"output_animated.gif");
@@ -41,6 +42,7 @@ namespace {
             outlist.push_back(&halim);
         });
         im::halide::write_multi(outlist, newpath.str());
+        CHECK(newpath.is_file());
     }
     
 }
