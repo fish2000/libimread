@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <sstream>
 #include <iostream>
 #include <algorithm>
 #include <type_traits>
@@ -49,7 +50,9 @@ class Base {
         using pathlist_t = std::array<path_t, PL>;
         using pathvec_t = std::vector<path_t>;
         
-        virtual ~Base() {}
+        virtual ~Base() {
+            // std::cout << "\t*** " << "Base::~Base()" << std::endl;
+        }
 };
 
 /// Curiouser And Curiouser!
@@ -64,8 +67,7 @@ class DataPointBase : Base<> {
         using Base<>::pathvec_t;
         using pointer_t = std::add_pointer_t<DataPoint>;
         using pointvec_t = std::vector<pointer_t>;
-        using comparator_t = std::function<path_t(const DataPoint&,
-                                                  const DataPoint&)>;
+        using comparator_t = std::function<path_t(pointer_t, pointer_t)>;
     
     std::string name;
     pathlist_t paths;
@@ -76,7 +78,7 @@ class DataPointBase : Base<> {
         DataPointBase()
             :name("")
             ,paths{{ 0.0f }}
-            ,comparator()
+            ,comparator(DataPoint::default_comparator)
             {}
         
         DataPointBase(const DataPointBase& other)
@@ -92,7 +94,7 @@ class DataPointBase : Base<> {
             {}
         
         void set_paths(pilist_t pilist) {
-            int idx = 0;
+            std::size_t idx = 0;
             for (auto it = pilist.begin();
                  it != pilist.end() && idx < PL;
                  ++it) { paths[idx] = *it;
@@ -103,15 +105,18 @@ class DataPointBase : Base<> {
         }
         
         inline path_t compare(DataPoint* other) {
-            return comparator(*this, *other);
+            std::cout << "\t*** " << "DataPointBase::compare()" << std::endl;
+            return comparator(static_cast<DataPoint*>(this), other);
         }
         
-        bool distance_range(pointvec_t& points, int lvl = 0) {
+        bool distance_range(pointvec_t& points, std::size_t lvl = 0) {
+            std::cout << "\t*** " << "DataPointBase::distance_range()" << std::endl;
             if (points.empty()) { return false; }
             std::size_t i, im = points.size();
             path_t d;
             for (i = 0; i < im; i++) {
-                d = comparator(*this, *points[i]);
+                d = comparator(static_cast<DataPoint*>(this),
+                               points[i]);
                 if (detail::isnan(d) || d < 0.0f) { return false; }
                 if (lvl < PL) {
                     points[i]->paths[lvl] = d;
@@ -122,29 +127,20 @@ class DataPointBase : Base<> {
         
         bool splits(const pointvec_t& points, pathvec_t& M,
                                               std::size_t offset = 0) {
+            std::cout << "\t*** " << "DataPointBase::splits()" << std::endl;
             if (points.empty()) { return false; }
             
-            pathvec_t distances(points.size());
+            pathvec_t distances(points.size(), 0.0f);
             std::transform(points.begin(), points.end(),
                            distances.begin(),
                            [&](DataPoint* p) {
-                return comparator(*this, *p);
+                return comparator(static_cast<DataPoint*>(this), p);
             });
             
             path_t tmp;
-            int i, j, min_pos, idx,
-                im = points.size(),
-                Mm = M.size();
-            
-            // using pair_t = std::pair<path_t, std::size_t>;
-            // using vec_t = std::vector<pair_t>;
-            // using greater_t = std::greater<typename vec_t::value_type>;
-            // using queue_t = std::priority_queue<pair_t, vec_t, greater_t>;
-            // queue_t queue;
-            // for (i = 0; i < distances.size(); ++i) {
-            //     queue.push(pair_t(distances[i], i));
-            // }
-            // min_pos = queue.top().second;
+            std::size_t i, j, min_pos, idx,
+                        im = points.size(),
+                        Mm = M.size();
             
             for (i = 0; i < im-1; i++) {
                 min_pos = i;
@@ -177,22 +173,26 @@ template <typename DataType,
           std::size_t PathLength = 5>
 class Datum : public DataPointBase<Datum<DataType, PathType,
                                          DataLength, PathLength>> {
+        
+    struct ComparisonOperator {
+        PathType operator()(Datum* d1, Datum* d2) {
+            std::cout << "\t--- " << "Datum::ComparisonOperator::operator()" << std::endl;
+            if (d1->datum == 0 || d2->datum == 0) {
+                return detail::kComparatorBadArguments;
+            }
+            return (PathType)std::abs((int)d1->datum - (int)d2->datum);
+        }
+    };
     
     public:
-        static constexpr std::size_t DL = 1; /// hardcoded
         using DPBase = DataPointBase<Datum<DataType, PathType,
                                            DataLength, PathLength>>;
+        using default_comparator_t = ComparisonOperator;
         using data_t = DataType;
-        data_t datum;
         
-        struct comparator_t : DPBase::comparator_t {
-            PathType operator()(const Datum& d1, const Datum& d2) {
-                if (d1.datum == 0 || d2.datum == 0) {
-                    return detail::kComparatorBadArguments;
-                }
-                return (PathType)std::abs((int)d1.datum - (int)d2.datum);
-            }
-        };
+        static constexpr std::size_t DL = 1; /// hardcoded
+        static constexpr default_comparator_t default_comparator{};
+        data_t datum;
         
         Datum() : DPBase()
             ,datum(0)
@@ -217,12 +217,12 @@ class Datum : public DataPointBase<Datum<DataType, PathType,
             datum = dptr[0];
         }
         
-        inline DataType* data(int idx = 0) {
+        inline DataType* data(std::size_t idx = 0) {
             return &datum;
         }
         
         template <typename CastType> inline
-        CastType* data_as(int idx = 0) {
+        CastType* data_as(std::size_t idx = 0) {
             return static_cast<CastType*>(&datum);
         }
         
@@ -241,35 +241,46 @@ template <typename DataType,
           std::size_t PathLength = 5>
 class Vector : public DataPointBase<Vector<DataType, PathType,
                                            DataLength, PathLength>> {
+        
+    struct ComparisonOperator {
+        PathType operator()(Vector* d1, Vector* d2) {
+            // std::cout << "\t--- " << "Vector::ComparisonOperator::operator()" << std::endl;
+            if (!d1 || !d2) {
+                // std::cout << "\t--- " << "Vector::ComparisonOperator::operator() [NULL POINTER ARGS]" << std::endl;
+                return detail::kComparatorBadArguments;
+            }
+            if (d1->datavec.empty() || d2->datavec.empty()) {
+                std::cout << "\t--- " << "Vector::ComparisonOperator::operator() [EMPTY DATA VECTORS]" << std::endl;
+                return detail::kComparatorBadArguments;
+            }
+            if (d1->datavec.size() != d2->datavec.size()) {
+                std::cout << "\t--- " << "Vector::ComparisonOperator::operator() [UNEQUAL DATA VECTORS]" << std::endl;
+                return detail::kComparatorUnequalDataVectorLengths;
+            }
+            std::size_t idx, sum = 0, max = d1->datavec.size();
+            for (idx = 0; idx < max; ++idx) {
+                sum += std::abs((int)d1->datavec[idx] - (int)d2->datavec[idx]);
+            }
+            // std::cout << "\t--- " << "Vector::ComparisonOperator::operator() [RETURNING SUCCESSFULLY]" << std::endl;
+            return (PathType)sum/(PathType)max;
+        }
+    };
     
     public:
-        static constexpr std::size_t DL = DataLength;
-        static constexpr std::size_t DS = sizeof(DataType);
         using DPBase = DataPointBase<Vector<DataType, PathType,
                                             DataLength, PathLength>>;
+        using default_comparator_t = ComparisonOperator;
         using data_t = DataType;
         using ilist_t = std::initializer_list<data_t>;
         using datavec_t = std::vector<data_t>;
+        
+        static constexpr std::size_t DL = DataLength;
+        static constexpr std::size_t DS = sizeof(DataType);
+        static constexpr default_comparator_t default_comparator{};
         datavec_t datavec;
         
-        struct comparator_t : DPBase::comparator_t {
-            PathType operator()(const Vector& d1, const Vector& d2) {
-                if (d1.datavec.empty() || d2.datavec.empty()) {
-                    return detail::kComparatorBadArguments;
-                }
-                if (d1.datavec.size() != d2.datavec.size()) {
-                    return detail::kComparatorUnequalDataVectorLengths;
-                }
-                unsigned int idx, sum = 0, max = d1.datavec.size();
-                for (idx = 0; idx < max; ++idx) {
-                    sum += std::abs((int)d1.datavec[idx] - (int)d2.datavec[idx]);
-                }
-                return (PathType)sum/(PathType)max;
-            }
-        };
-        
         Vector() : DPBase()
-            ,datavec(DL)
+            ,datavec(DL, 0)
             {}
         
         explicit Vector(ilist_t ilist) : DPBase()
@@ -293,21 +304,27 @@ class Vector : public DataPointBase<Vector<DataType, PathType,
                          (const void*)dptr, DS*length);
         }
         
-        inline DataType* data(int idx = 0) {
+        inline DataType* data(std::size_t idx = 0) {
             return &datavec[idx];
         }
         
         template <typename CastType> inline
-        CastType* data_as(int idx = 0) {
+        CastType* data_as(std::size_t idx = 0) {
             return static_cast<CastType*>(data(idx));
         }
         
         template <typename BinaryPredicate> inline
         bool binary_op(const Vector& rhs,
                        BinaryPredicate predicate = BinaryPredicate()) {
-            // if (datavec.size() != rhs.datavec.size()) { return false; }
-            return std::equal(datavec.begin(),      datavec.end(),
-                              rhs.datavec.begin(),  rhs.datavec.end(),
+            if (rhs.datavec.empty()) { return false; }
+            if (datavec.empty()) { return false; }
+            std::cout << "\t*** " << "Vector::binary_op()" << std::endl;
+            std::cout << "\t*** " << "Vector::binary_op() [datavec.size() = " << datavec.size() << "]" << std::endl;
+            std::cout << "\t*** " << "Vector::binary_op() [rhs.datavec.size() = " << rhs.datavec.size() << "]" << std::endl;
+            if (datavec.size() != rhs.datavec.size()) { return false; }
+            std::cout << "\t*** " << "Vector::binary_op() [RETURNING WITH ITERATOR]" << std::endl;
+            return std::equal(std::begin(datavec),      std::end(datavec),
+                              std::begin(rhs.datavec),  std::end(rhs.datavec),
                               predicate);
         }
         
@@ -347,8 +364,6 @@ class Tree {
         using data_t = DataType;
         using path_t = PathType;
         using datapoint_t = DataPoint;
-        // using datapointer_t = typename DataPoint::DPBase::pointer_t;
-        // using pointvec_t = typename DataPoint::DPBase::pointvec_t;
         using datapointer_t = std::add_pointer_t<DataPoint>;
         using pointvec_t = std::vector<datapointer_t>;
         using pathvec_t = std::vector<path_t>;
@@ -370,7 +385,9 @@ class Tree {
             NodeBase(NodeType ntype = NodeType::ABSTRACT)
                 :nodetype(ntype)
                 ,sv1(nullptr), sv2(nullptr)
-                {}
+                {
+                    std::cout << "\t*** " << "\t*** " << "NodeBase::NodeBase()" << std::endl;
+                }
             inline NodeType type() const { return nodetype; }
             inline bool isInternal() const { return nodetype == NodeType::INTERNAL; }
             inline bool isLeaf() const { return nodetype == NodeType::LEAF; }
@@ -385,7 +402,9 @@ class Tree {
             InternalNode() : NodeBase(NodeType::INTERNAL)
                 ,M1(LengthM1), M2(BranchFactor)
                 ,children{}
-                {}
+                {
+                    std::cout << "\t*** " << "\t*** " << "InternalNode::InternalNode()" << std::endl;
+                }
             virtual void clear(int lvl = 0) {
                 for (auto* node : children) {
                     node->clear(lvl+1);
@@ -399,16 +418,22 @@ class Tree {
             LeafNode() : NodeBase(NodeType::LEAF)
                 ,d1(LeafCap), d2(LeafCap)
                 ,points(LeafCap)
-                {}
+                {
+                    std::cout << "\t*** " << "\t*** " << "LeafNode::LeafNode()" << std::endl;
+                }
             // virtual void clear(int lvl = 0) { NodeBase::destroy(); }
         };
         struct Node : public InternalNode, public LeafNode {
             explicit Node(InternalTag x)
                 :InternalNode()
-                {}
+                {
+                    std::cout << "\t*** " << "\t*** " << "Node::Node(InternalTag)" << std::endl;
+                }
             explicit Node(LeafTag x)
                 :LeafNode()
-                {}
+                {
+                    std::cout << "\t*** " << "\t*** " << "Node::Node(LeafTag)" << std::endl;
+                }
         };
     
     protected:
@@ -424,17 +449,22 @@ class Tree {
                                 const pointvec_t& points,
                                 const vantagepoints_t& boundaries,
                                 const pathvec_t& pivots) {
+            std::cout << "\t*** " << "Tree<...>::sort_points()" << std::endl;
             
             histogram_t bins{};
             path_t d;
             std::size_t i, k,
                         im = points.size();
             
+            std::cout << "\t*** " << "Tree<...>::sort_points() [ENTERING LOOP]" << std::endl;
             for (i = 0; i < im; i++) {
-                if (*points[i] == *std::get<0>(boundaries)) { continue; }
-                if (*points[i] == *std::get<1>(boundaries)) { continue; }
+                /// WHY THE FUCK DOES THIS SEGFAULT
+                /// ... I mean OK I confess it is totally Rube Goldberg
+                /// but COME ON dogg
+                // if (*points[i] == *std::get<0>(boundaries)) { continue; }
+                // if (*points[i] == *std::get<1>(boundaries)) { continue; }
                 
-                d = comparator(*vantagepoint, *points[i]);
+                d = comparator(vantagepoint, points[i]);
                 for (k = 0; k < LM1; k++) {
                     if (d <= pivots[k]) {
                         bins[k].push_back(points[i]);
@@ -450,6 +480,7 @@ class Tree {
         }
         
         idx_t vantage_indexes(const pointvec_t& points) {
+            std::cout << "\t*** " << "Tree<...>::vantage_indexes()" << std::endl;
             std::size_t sv1pos = (points.size() >= 1) ? 0 : -1;
             std::size_t sv2pos = -1;
             PathType maxDist = 0.0f, d;
@@ -458,7 +489,10 @@ class Tree {
                         jm = points.size();
             for (i = 0; i < im; i++) {
                 for (j = i+1; j < jm; j++) {
-                    d = comparator(*points[i], *points[j]);
+                    d = comparator(points[i], points[j]);
+                    // if (d < 0) {
+                    //     std::cout << "\t*** " << "Tree<...>::vantage_indexes() [COMPARATOR ERROR]" << std::endl;
+                    // }
                     if (d > maxDist) {
                         maxDist = d;
                         sv1pos = i;
@@ -470,31 +504,39 @@ class Tree {
         }
         
         vantagepoints_t vantage_points(const pointvec_t& points) {
+            std::cout << "\t*** " << "Tree<...>::vantage_points()" << std::endl;
             std::size_t sv1pos, sv2pos;
             std::tie(sv1pos, sv2pos) = vantage_indexes(points);
             return std::make_tuple(points[sv1pos], points[sv2pos]);
         }
         
-        Node* addNode(Node* node, pointvec_t& points, int lvl = 0) {
+        Node* addNode(Node* node, pointvec_t& points, std::size_t lvl = 0) {
+            std::cout << "\t*** " << "Tree<...>::addNode()" << std::endl;
             if (points.empty()) {
                 return node;
             }
             
             Node* newNode = node;
-            int i, count = 0;
+            std::size_t i, count = 0,
+                          pcount = points.size(),
+                          ncount = 0,
+                             idx = 0,
+                               j = 0;
             
             if (newNode == NULL || newNode == nullptr) {
                 /// create new node
-                if (points.size() <= LCH) {
+                if (pcount <= LCH) {
                     /// create leaf node
                     newNode = new Node(LeafTag{});
                     std::tie(newNode->sv1, newNode->sv2) = vantage_points(points);
                     newNode->sv1->distance_range(points, lvl);
                     newNode->sv2->distance_range(points, lvl+1);
                     
-                    for (i = 0; i < points.size(); i++) {
-                        if (*points[i] == *(newNode->sv1)) { continue; }
-                        if (*points[i] == *(newNode->sv2)) { continue; }
+                    for (i = 0; i < pcount; i++) {
+                        if (points[i] && newNode->sv1 && newNode->sv2) {
+                            if (*points[i] == *(newNode->sv1)) { continue; }
+                            if (*points[i] == *(newNode->sv2)) { continue; }
+                        }
                         newNode->d1[count] = newNode->sv1->compare(points[i]);
                         newNode->d2[count] = newNode->sv2->compare(points[i]);
                         newNode->points.push_back(points[i]);
@@ -520,15 +562,63 @@ class Tree {
                 /// node already exists
                 if (newNode->isLeaf()) {
                     /// node is a leaf node
-                    if (newNode->points.size() + points.size() <= LCp) {
+                    if (newNode->points.size() + pcount <= LCp) {
                         /// add points into leaf ("plenty of room")
+                        newNode->sv1->distance_range(points, lvl);
+                        std::size_t pos = 0;
+                        if (newNode->sv2 == nullptr) {
+                            newNode->sv2 = points[0];
+                            pos = 1;
+                        }
+                        newNode->sv2->distance_range(points, lvl);
+                        count = newNode->points.size();
+                        for (; pos < pcount; pos++) {
+                            newNode->d1[count] = comparator(points[pos],
+                                                            newNode->sv1);
+                            newNode->d2[count] = comparator(points[pos],
+                                                            newNode->sv2);
+                            newNode->points[count++] = points[pos];
+                        }
+                        newNode->points.reserve(count);
                     } else {
                         /// not enough room in current leaf --
                         /// create new node
+                        ncount = newNode->points.size() + pcount;
+                        if (newNode->sv1) { ncount++; }
+                        if (newNode->sv2) { ncount++; }
+                        
+                        pointvec_t temporary(ncount);
+                        i = idx = 0;
+                        if (newNode->sv1) { temporary.push_back(newNode->sv1); }
+                        if (newNode->sv2) { temporary.push_back(newNode->sv2); }
+                        /// NOTE TO SELF: redo these two forloopies
+                        /// ...WITH ITERATORS!
+                        for (; i < newNode->points.size(); i++) {
+                            temporary.push_back(newNode->points[i]);
+                        }
+                        for (i = 0; i < pcount; i++) {
+                            temporary.push_back(points[i]);
+                        }
+                        
+                        // Node* oldNode = newNode;
+                        /// Need to DESTROY newNode here
+                        newNode = addNode(nullptr, temporary, lvl);
+                        
+                        /// temporary contains no new allocations --
+                        /// it can safely destruct on scope exit:
                     }
                 } else {
                     /// node is an internal node --
                     /// must recurse on subnodes
+                    newNode->sv1->distance_range(points, lvl);
+                    histogram_t bins = sort_points(newNode->sv1, points,
+                                                   std::make_tuple(nullptr, nullptr),
+                                                   newNode->M1);
+                    /// loop [0..BF) with bins
+                    for (i = 0; i < BF; i++) {
+                        newNode->sv2->distance_range(bins[i], lvl+1);
+                        
+                    }
                 }
             }
             
@@ -543,7 +633,7 @@ class Tree {
             :descriptor(0)
             ,knearest(0)
             ,top(nullptr)
-            ,comparator()
+            ,comparator(DataPoint::default_comparator)
             {}
         
         void clear() {}
@@ -551,23 +641,19 @@ class Tree {
             if (top) { delete top; }
         }
         
-        void add(pointvec_t points) {
+        void add(pointvec_t& points) {
+            std::cout << "\t*** " << "Tree<...>::add()" << std::endl;
             top = addNode(top, points);
         }
         
-        // select_vantage_points(); // Tree<T> method(s)
-        // find_splits(); // DataPoint method
-        // sort_points(); // Tree<T> method
-        // 
-        // find_distance_range_for_vp(); // DataPoint method!
-        //
+        // TODOODOO:
         // add()
         // retrieve()
         
 };
 
 using BasicTree = Tree<uint8_t>;
-using VectorTree = Tree<uint8_t, Vector>;
+using VectorTree = Tree<uint8_t, Vector, 10>;
 using VectorPoint = typename VectorTree::datapoint_t;
 using PointVector = typename VectorTree::pointvec_t;
 
@@ -576,32 +662,57 @@ using Randomizer = std::independent_bits_engine<
                    std::default_random_engine,
                    sizeof(DataType)*8, DataType>;
 
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
+    if (!v.empty()) {
+        out << "<0x" << std::hex;
+        std::copy(v.begin(), v.end(),
+                  std::ostream_iterator<T>(out, ""));
+        out << std::dec << "\b\b>";
+    }
+    return out;
+}
+
 int main() {
     
-    /// make up 100 VectorPoints with random data
+    #define A_BUNCH 30
+    
+    std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3, A_BUNCH = " << A_BUNCH << ") :: Starting Up" << std::endl;
+    
+    /// make up a bunch of VectorPoints with random data
     using data_t = typename VectorPoint::data_t;
     using randomizer_t = Randomizer<data_t>;
-    // data_t[VectorPoint::DL] randos = {0};
-    PointVector pv(100);
+    PointVector pv(A_BUNCH);
     randomizer_t randomizer;
     
-    for (int idx = 0; idx < 100; idx++) {
+    std::cout << "\t" << "Heap-allocating " << A_BUNCH << " random VectorPoint* instances" << std::endl;
+    
+    for (int idx = 0; idx < A_BUNCH; idx++) {
         VectorPoint* p = new VectorPoint();
-        // arc4random_buf(randos, VectorPoint::DL*VectorPoint::DS);
-        // p->assign(randos);
         std::generate(std::begin(p->datavec),
                       std::end(p->datavec),
                       std::ref(randomizer));
+        std::cout << "\t*** " << "Allocated point #" << idx << " of " << A_BUNCH
+                              << " with data: " << p->datavec << "" << std::endl;
         pv.push_back(p);
     }
     
+    std::cout << "\t" << "Stack-allocating VectorTree" << std::endl;
+    
     BasicTree btree;
     VectorTree vtree;
+    
+    std::cout << "\t" << "Passing heap VectorPoint container to VectorTree stack instance" << std::endl;
+    
     vtree.add(pv);
+    
+    std::cout << "\t" << "Deleting VectorPoint* instances from heap" << std::endl;
     
     /// delete random VectorPoints
     std::for_each(pv.begin(), pv.end(),
               [=](VectorPoint* p) { delete p; });
+ 
+    std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3) :: Return To Zero" << std::endl;
     
     return 0;
 }
