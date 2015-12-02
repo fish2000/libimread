@@ -673,46 +673,69 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
     return out;
 }
 
-int main() {
-    
-    #define A_BUNCH 30
-    
-    std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3, A_BUNCH = " << A_BUNCH << ") :: Starting Up" << std::endl;
-    
-    /// make up a bunch of VectorPoints with random data
-    using data_t = typename VectorPoint::data_t;
-    using randomizer_t = Randomizer<data_t>;
-    PointVector pv(A_BUNCH);
-    randomizer_t randomizer;
-    
-    std::cout << "\t" << "Heap-allocating " << A_BUNCH << " random VectorPoint* instances" << std::endl;
-    
-    for (int idx = 0; idx < A_BUNCH; idx++) {
-        VectorPoint* p = new VectorPoint();
-        std::generate(std::begin(p->datavec),
-                      std::end(p->datavec),
-                      std::ref(randomizer));
-        std::cout << "\t*** " << "Allocated point #" << idx << " of " << A_BUNCH
-                              << " with data: " << p->datavec << "" << std::endl;
-        pv.push_back(p);
-    }
-    
-    std::cout << "\t" << "Stack-allocating VectorTree" << std::endl;
-    
-    BasicTree btree;
-    VectorTree vtree;
-    
-    std::cout << "\t" << "Passing heap VectorPoint container to VectorTree stack instance" << std::endl;
-    
-    vtree.add(pv);
-    
-    std::cout << "\t" << "Deleting VectorPoint* instances from heap" << std::endl;
-    
-    /// delete random VectorPoints
-    std::for_each(pv.begin(), pv.end(),
-              [=](VectorPoint* p) { delete p; });
- 
-    std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3) :: Return To Zero" << std::endl;
-    
-    return 0;
-}
+/// Yo, so you are 'not allowed' to declare `main()` as static...
+/// but FYI, the following exemplary extemporaneousness wherein
+/// you extern-"C" that sucker inside an anonymous namespace
+/// evidently serves to accomplish the same basic idea --
+/// which, when this happens in a header file, is some handy shit
+
+namespace {
+    extern "C" {
+        int main(void) {
+            
+            #define A_BUNCH 30
+            
+            std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3, A_BUNCH = "
+                      << A_BUNCH << ") :: Starting Up"
+                      << std::endl;
+            
+            /// make up a bunch of VectorPoints with random data
+            using data_t = typename VectorPoint::data_t;
+            using randomizer_t = Randomizer<data_t>;
+            PointVector pv(A_BUNCH);
+            randomizer_t randomizer;
+            
+            std::cout << "\t" << "Heap-allocating "
+                              << A_BUNCH
+                              << " random VectorPoint* instances"
+                      << std::endl;
+            
+            for (int idx = 0; idx < A_BUNCH; idx++) {
+                VectorPoint* p = new VectorPoint();
+                std::generate(std::begin(p->datavec),
+                              std::end(p->datavec),
+                              std::ref(randomizer));
+                std::cout << "\t*** " << "Allocated point #" << idx
+                                      << " of " << A_BUNCH
+                                      << " with data: " << p->datavec
+                                      << ""
+                          << std::endl;
+                pv.push_back(p);
+            }
+            
+            std::cout << "\t" << "Stack-allocating VectorTree"
+                      << std::endl;
+            
+            BasicTree btree;
+            VectorTree vtree;
+            
+            std::cout << "\t" << "Passing heap VectorPoint container to VectorTree stack instance"
+                      << std::endl;
+            
+            vtree.add(pv);
+            
+            std::cout << "\t" << "Deleting VectorPoint* instances from heap"
+                      << std::endl;
+            
+            /// delete random VectorPoints
+            std::for_each(pv.begin(), pv.end(),
+                      [=](VectorPoint* p) { delete p; });
+            
+            std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3) :: Return To Zero"
+                      << std::endl;
+            
+            return 0;
+            
+        } /* main() */
+    } /* extern "C" */
+} /* namespace (anon.) */
