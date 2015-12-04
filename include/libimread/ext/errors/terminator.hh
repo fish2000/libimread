@@ -37,7 +37,7 @@ namespace {
     __attribute__((noreturn))
     void backtrace_on_terminate() noexcept {
         std::set_terminate(terminate_handler.release()); /// avoid infinite looping
-        backtrace(std::clog);
+        terminator::backtrace(std::clog);
         if (std::exception_ptr ep = std::current_exception()) {
             try {
                 std::rethrow_exception(ep);
@@ -46,7 +46,7 @@ namespace {
             } catch (...) {
                 if (std::type_info* et = abi::__cxa_current_exception_type()) {
                     std::clog << "backtrace: unhandled exception type: "
-                              << get_demangled_name(et->name())
+                              << terminator::demangle(et->name())
                               << std::endl;
                 } else {
                     std::clog << "backtrace: unhandled unknown exception" << std::endl;

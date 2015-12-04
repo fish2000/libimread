@@ -21,6 +21,6 @@ TEST_CASE("[terminator] Display an exception with imread_raise()", "[terminator-
 
 /// Uncomment this to manually test out libimread/ext/errors/terminator.hh
 
-// TEST_CASE("[terminator] Directly call std::exit(-1)", "[terminator-std-exit]") {
+// TEST_CASE("[terminator] Directly call std::terminate()", "[terminator-directly-call-std-terminate]") {
 //     std::terminate();
 // }

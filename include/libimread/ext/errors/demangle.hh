@@ -4,4 +4,8 @@
 
 #pragma once
 
-char const* get_demangled_name(char const* const symbol) noexcept;
+namespace terminator {
+    
+    char const* demangle(char const* const symbol) noexcept;
+    
+} /* namespace terminator */

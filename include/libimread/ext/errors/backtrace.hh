@@ -5,4 +5,9 @@
 #pragma once
 #include <ostream>
 
-void backtrace(std::ostream& _out) noexcept;
+namespace terminator {
+    
+    void backtrace(std::ostream& _out) noexcept;
+    
+} /* namespace terminator */
+
