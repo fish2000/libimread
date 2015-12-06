@@ -13,6 +13,7 @@
 
 using im::fs::path;
 using im::fs::switchdir;
+using im::fs::resolver;
 
 TEST_CASE("[filesystem] Check if `basedir` is a directory",
           "[fs-basedir-isdirectory]") {
@@ -185,4 +186,13 @@ TEST_CASE("[filesystem] Count both jpg and jpeg files with a regex",
         REQUIRE((basedir/p).is_file());
     });
 }
+
+TEST_CASE("[filesystem] Test the system path resolver",
+          "[fs-system-path-resolver]") {
+    resolver syspaths = resolver::system();
+    REQUIRE(syspaths.resolve(path("ls")) != path());
+    REQUIRE(syspaths.resolve(path("clang")) != path());
+    REQUIRE(syspaths.resolve(path("YoDogg")) == path());
+}
+
 

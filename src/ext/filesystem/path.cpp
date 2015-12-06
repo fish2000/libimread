@@ -46,6 +46,13 @@ namespace filesystem {
             return dirname;
         }
         
+        const char* syspaths() noexcept {
+            const char* syspaths;
+            syspaths = std::getenv("PATH");
+            if (NULL == syspaths) { syspaths = "/bin:/usr/bin"; }
+            return syspaths;
+        }
+        
     } /* namespace detail */
     
     static const std::regex::flag_type regex_flags        = std::regex::extended;

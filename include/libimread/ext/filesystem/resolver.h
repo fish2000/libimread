@@ -24,9 +24,27 @@ namespace filesystem {
             explicit resolver(P&& p)
                 { m_paths.push_back(path(std::forward<P>(p))); }
             
+            explicit resolver(const detail::pathvec_t& pv)
+                :m_paths(pv)
+                {}
+            
+            explicit resolver(const detail::stringvec_t& strings)
+                :m_paths(strings.size())
+                {
+                    std::transform(strings.begin(), strings.end(),
+                                   std::back_inserter(m_paths),
+                                   [](const std::string& s) {
+                        return path(s);
+                    });
+                }
+            
             explicit resolver(detail::pathlist_t list)
                 :m_paths(list)
                 {}
+            
+            static resolver system() {
+                return resolver(path::system());
+            }
             
             std::size_t size() const        { return m_paths.size(); }
             iterator begin()                { return m_paths.begin(); }

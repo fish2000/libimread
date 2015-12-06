@@ -32,6 +32,7 @@ namespace filesystem {
         // using std::getenv() and some guesswork -- originally cribbed from boost
         const char* tmpdir() noexcept;
         const char* userdir() noexcept;
+        const char* syspaths() noexcept;
         
         /// return type for path::list(), when called with a detail::list_separate_t tag
         using pathvec_t = std::vector<path>;
@@ -52,8 +53,10 @@ namespace filesystem {
         /// constants for path separators
         static constexpr char windows_extension_separator = '.';
         static constexpr char windows_path_separator      = '\\';
+        static constexpr char windows_pathvar_separator   = ';';
         static constexpr char posix_extension_separator   = '.';
         static constexpr char posix_path_separator        = '/';
+        static constexpr char posix_pathvar_separator     = ':';
     }
     
     /// The actual class for representing a path on the filesystem
@@ -387,6 +390,10 @@ namespace filesystem {
             static path tmp()                { return path(detail::tmpdir()); }
             static path home()               { return path(detail::userdir()); }
             static path user()               { return path(detail::userdir()); }
+            
+            static detail::stringvec_t system() {
+                return tokenize(detail::syspaths(), detail::posix_pathvar_separator);
+            }
             
             /// Conversion operators -- in theory you can pass your paths to functions
             /// expecting either std::strings or const char*s with these...
