@@ -70,6 +70,11 @@ namespace filesystem {
                 return resolve_impl(path(std::forward<P>(p)));
             }
             
+            template <typename P> inline
+            bool contains(P&& p) const {
+                return resolve_impl(path(std::forward<P>(p))) != path();
+            }
+            
             detail::pathvec_t resolve_all_impl(const path& value) const {
                 detail::pathvec_t out;
                 if (m_paths.empty()) { return out; }
