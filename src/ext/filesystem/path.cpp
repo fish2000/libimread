@@ -264,7 +264,7 @@ namespace filesystem {
     void path::walk(detail::walk_visitor_t&& walk_visitor) const {
         if (!is_directory()) {
             imread_raise(FileSystemError,
-                "Bad call to path::walk() from a non-directory:", str());
+                "Can't call path::walk() on a non-directory:", str());
         }
         
         /// list with tag dispatch for separate return vectors
@@ -336,8 +336,7 @@ namespace filesystem {
     std::size_t path::hash() const {
         std::size_t seed = static_cast<std::size_t>(is_absolute());
         return std::accumulate(m_path.begin(), m_path.end(),
-                               seed,
-                               detail::rehasher_t());
+                               seed, detail::rehasher_t());
     }
     
     void path::swap(path& other) noexcept {
@@ -349,8 +348,8 @@ namespace filesystem {
     /// path component vector
     detail::stringvec_t path::components() const {
         detail::stringvec_t out;
-        std::copy(m_path.begin(),
-                  m_path.end(), std::back_inserter(out));
+        std::copy(m_path.begin(), m_path.end(),
+                  std::back_inserter(out));
         return out;
     }
     

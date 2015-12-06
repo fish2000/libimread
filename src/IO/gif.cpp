@@ -44,7 +44,7 @@ namespace im {
         };
     }
     
-    void GIFFormat::write_impl(Image& input, detail::gifholder& g) {
+    void GIFFormat::write_impl(Image& input, detail::gifholder g) {
         
         const int width = input.dim(0);
         const int height = input.dim(1);

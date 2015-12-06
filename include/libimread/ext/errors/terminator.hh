@@ -42,14 +42,16 @@ namespace {
             try {
                 std::rethrow_exception(ep);
             } catch (std::exception const& e) {
-                std::clog << "backtrace: unhandled exception std::exception:what(): " << e.what() << std::endl;
+                std::clog << "backtrace: caught an unhandled exception: "
+                          << e.what()
+                          << std::endl;
             } catch (...) {
                 if (std::type_info* et = abi::__cxa_current_exception_type()) {
                     std::clog << "backtrace: unhandled exception type: "
                               << terminator::demangle(et->name())
                               << std::endl;
                 } else {
-                    std::clog << "backtrace: unhandled unknown exception" << std::endl;
+                    std::clog << "backtrace: unhandled exception of unknown type" << std::endl;
                 }
             }
         }

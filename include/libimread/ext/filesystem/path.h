@@ -35,6 +35,7 @@ namespace filesystem {
         
         /// return type for path::list(), when called with a detail::list_separate_t tag
         using pathvec_t = std::vector<path>;
+        using pathlist_t = std::initializer_list<path>;
         using stringvec_t = std::vector<std::string>;
         using stringlist_t = std::initializer_list<std::string>;
         using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
@@ -59,7 +60,7 @@ namespace filesystem {
     class path {
         
         public:
-            using size_type = std::size_t;
+            using size_type = std::string::size_type;
             using character_type = std::string::value_type;
             static constexpr character_type sep = detail::posix_path_separator;
             static constexpr character_type extsep = detail::posix_extension_separator;
@@ -204,11 +205,6 @@ namespace filesystem {
             detail::pathvec_t     list(const std::regex& pattern,
                                        bool case_sensitive=false,   bool full_paths=false) const;
             
-            /// Static function path::list(), without arguments, lists current working directory
-            // static detail::pathvec_t list(bool full_paths=false) {
-            //     return path::cwd().list(full_paths);
-            // }
-            
             /// Generic static forwarder for path::list<P>(p)
             // template <typename P> inline
             // static detail::pathvec_t list(P&& p, bool full_paths=false) {
@@ -235,12 +231,6 @@ namespace filesystem {
             ///         });
             ///     });
             void walk(detail::walk_visitor_t&& walk_visitor) const;
-            
-            /// static forwarder for path::walk<F>(f)
-            // template <typename F> inline
-            // static void walk(F&& f) {
-            //     path::cwd().walk(std::forward<F>(f));
-            // }
             
             /// static forwarder for path::walk<P, F>(p, f)
             template <typename P, typename F> inline
@@ -279,7 +269,7 @@ namespace filesystem {
             std::string extension() const {
                 if (empty()) { return ""; }
                 const std::string &last = m_path.back();
-                std::string::size_type pos = last.find_last_of(extsep);
+                size_type pos = last.find_last_of(extsep);
                 if (pos == std::string::npos) { return ""; }
                 return last.substr(pos+1);
             }
@@ -304,8 +294,8 @@ namespace filesystem {
                             "path::parent() can't get the parent of an empty absolute path");
                     }
                 } else {
-                    std::string::size_type idx = 0,
-                                           until = m_path.size() - 1;
+                    size_type idx = 0,
+                              until = m_path.size() - 1;
                     for (; idx < until; ++idx) {
                         result.m_path.push_back(m_path[idx]);
                     }
@@ -323,8 +313,8 @@ namespace filesystem {
                 }
                 
                 path result(*this);
-                std::string::size_type idx = 0,
-                                       max = other.m_path.size();
+                size_type idx = 0,
+                          max = other.m_path.size();
                 
                 for (; idx < max; ++idx) {
                     result.m_path.push_back(other.m_path[idx]);
@@ -378,8 +368,8 @@ namespace filesystem {
             std::string str() const {
                 std::string out = "";
                 if (m_absolute) { out += sep; }
-                std::string::size_type idx = 0,
-                                       siz = m_path.size();
+                size_type idx = 0,
+                          siz = m_path.size();
                 for (; idx < siz; ++idx) {
                     out += m_path[idx];
                     if (idx + 1 < siz) { out += sep; }
@@ -452,8 +442,8 @@ namespace filesystem {
             static detail::stringvec_t tokenize(const std::string& source,
                                                 const character_type delim) {
                 detail::stringvec_t tokens;
-                std::string::size_type lastPos = 0,
-                                       pos = source.find_first_of(delim, lastPos);
+                size_type lastPos = 0,
+                          pos = source.find_first_of(delim, lastPos);
                 
                 while (lastPos != std::string::npos) {
                     if (pos != lastPos) {

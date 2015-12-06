@@ -8,15 +8,25 @@
 #include <libimread/ext/filesystem/path.h>
 
 namespace filesystem {
-
+    
     class resolver {
         
         public:
-            typedef detail::pathvec_t::iterator iterator;
-            typedef detail::pathvec_t::const_iterator const_iterator;
+            using iterator       = detail::pathvec_t::iterator;
+            using const_iterator = detail::pathvec_t::const_iterator;
             
             resolver()
                 { m_paths.push_back(path::getcwd()); }
+            
+            template <typename P,
+                      typename = std::enable_if_t<
+                                 std::is_constructible<path, P>::value>>
+            explicit resolver(P&& p)
+                { m_paths.push_back(path(std::forward<P>(p))); }
+            
+            explicit resolver(detail::pathlist_t list)
+                :m_paths(list)
+                {}
             
             std::size_t size() const        { return m_paths.size(); }
             iterator begin()                { return m_paths.begin(); }
@@ -29,6 +39,7 @@ namespace filesystem {
             void append(const path& path)   { m_paths.push_back(path); }
             
             path resolve(const path& value) const {
+                if (m_paths.empty()) { return path(); }
                 for (const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
                     path combined = *it / value;
                     if (combined.exists()) { return combined; }
@@ -36,11 +47,22 @@ namespace filesystem {
                 return path();
             }
             
+            detail::pathvec_t resolve_all(const path& value) const {
+                detail::pathvec_t out;
+                if (m_paths.empty()) { return out; }
+                std::copy_if(m_paths.begin(), m_paths.end(),
+                             std::back_inserter(out),
+                             [&](const path& p) {
+                    return (p/value).exists();
+                });
+                return out;
+            }
+            
         private:
             detail::pathvec_t m_paths;
     
     };
-
+    
 }; /* namespace filesystem */
 
 #endif /// LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_
