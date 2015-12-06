@@ -56,7 +56,7 @@ namespace filesystem {
             void prepend(const path& path)  { m_paths.insert(m_paths.begin(), path); }
             void append(const path& path)   { m_paths.push_back(path); }
             
-            path resolve(const path& value) const {
+            path resolve_impl(const path& value) const {
                 if (m_paths.empty()) { return path(); }
                 for (const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
                     path combined = *it / value;
@@ -65,7 +65,12 @@ namespace filesystem {
                 return path();
             }
             
-            detail::pathvec_t resolve_all(const path& value) const {
+            template <typename P> inline
+            path resolve(P&& p) const {
+                return resolve_impl(path(std::forward<P>(p)));
+            }
+            
+            detail::pathvec_t resolve_all_impl(const path& value) const {
                 detail::pathvec_t out;
                 if (m_paths.empty()) { return out; }
                 std::copy_if(m_paths.begin(), m_paths.end(),
@@ -74,6 +79,11 @@ namespace filesystem {
                     return (p/value).exists();
                 });
                 return out;
+            }
+            
+            template <typename P> inline
+            detail::pathvec_t resolve_all(P&& p) const {
+                return resolve_all_impl(path(std::forward<P>(p)));
             }
             
         private:

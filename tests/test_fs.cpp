@@ -190,9 +190,9 @@ TEST_CASE("[filesystem] Count both jpg and jpeg files with a regex",
 TEST_CASE("[filesystem] Test the system path resolver",
           "[fs-system-path-resolver]") {
     resolver syspaths = resolver::system();
-    REQUIRE(syspaths.resolve(path("ls")) != path());
-    REQUIRE(syspaths.resolve(path("clang")) != path());
-    REQUIRE(syspaths.resolve(path("YoDogg")) == path());
+    REQUIRE(syspaths.resolve("ls") != path());
+    REQUIRE(syspaths.resolve("clang") != path());
+    REQUIRE(syspaths.resolve("YoDogg") == path());
 }
 
 
