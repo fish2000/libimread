@@ -33,6 +33,7 @@ namespace filesystem {
         const char* tmpdir() noexcept;
         const char* userdir() noexcept;
         const char* syspaths() noexcept;
+        std::string execpath() noexcept;
         
         /// return type for path::list(), when called with a detail::list_separate_t tag
         using pathvec_t = std::vector<path>;
@@ -271,7 +272,7 @@ namespace filesystem {
             /// at any given time, half my functions support it and half don't. BLEAH.
             std::string extension() const {
                 if (empty()) { return ""; }
-                const std::string &last = m_path.back();
+                const std::string& last = m_path.back();
                 size_type pos = last.find_last_of(extsep);
                 if (pos == std::string::npos) { return ""; }
                 return last.substr(pos+1);
@@ -309,7 +310,7 @@ namespace filesystem {
             inline path dirname() const { return parent(); }
             
             /// join a path with a new trailing path fragment
-            path join(const path &other) const {
+            path join(const path& other) const {
                 if (other.m_absolute) {
                     imread_raise(FileSystemError,
                         "path::join() expects a relative-path RHS");
@@ -390,6 +391,7 @@ namespace filesystem {
             static path tmp()                { return path(detail::tmpdir()); }
             static path home()               { return path(detail::userdir()); }
             static path user()               { return path(detail::userdir()); }
+            static path executable()         { return path(detail::execpath()); }
             
             static detail::stringvec_t system() {
                 return tokenize(detail::syspaths(), detail::posix_pathvar_separator);

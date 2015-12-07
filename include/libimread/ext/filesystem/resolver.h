@@ -16,16 +16,18 @@ namespace filesystem {
             using const_iterator = detail::pathvec_t::const_iterator;
             
             resolver()
-                { m_paths.push_back(path::getcwd()); }
+                :m_paths{ path::getcwd() }
+                {}
             
             template <typename P,
                       typename = std::enable_if_t<
                                  std::is_constructible<path, P>::value>>
             explicit resolver(P&& p)
-                { m_paths.push_back(path(std::forward<P>(p))); }
+                :m_paths{ path(std::forward<P>(p)) }
+                {}
             
-            explicit resolver(const detail::pathvec_t& pv)
-                :m_paths(pv)
+            explicit resolver(const detail::pathvec_t& paths)
+                :m_paths(paths)
                 {}
             
             explicit resolver(const detail::stringvec_t& strings)
@@ -33,18 +35,14 @@ namespace filesystem {
                 {
                     std::transform(strings.begin(), strings.end(),
                                    std::back_inserter(m_paths),
-                                   [](const std::string& s) {
-                        return path(s);
-                    });
+                                   [](const std::string& s) { return path(s); });
                 }
             
             explicit resolver(detail::pathlist_t list)
                 :m_paths(list)
                 {}
             
-            static resolver system() {
-                return resolver(path::system());
-            }
+            static resolver system()        { return resolver(path::system()); }
             
             std::size_t size() const        { return m_paths.size(); }
             iterator begin()                { return m_paths.begin(); }
@@ -80,9 +78,7 @@ namespace filesystem {
                 if (m_paths.empty()) { return out; }
                 std::copy_if(m_paths.begin(), m_paths.end(),
                              std::back_inserter(out),
-                             [&](const path& p) {
-                    return (p/value).exists();
-                });
+                             [&value](const path& p) { return (p/value).exists(); });
                 return out;
             }
             

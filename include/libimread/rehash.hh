@@ -4,6 +4,8 @@
 #ifndef LIBIMREAD_REHASH_HH_
 #define LIBIMREAD_REHASH_HH_
 
+#include <cstdlib>
+#include <type_traits>
 #include <functional>
 
 /// hashing trick cribbed from boost,
@@ -11,8 +13,8 @@
 /// the REHASHER() macro provides the actual hash-in implement.
 
 #ifndef REHASHER
-#define REHASHER(seed, hasher) \
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2)
+#define REHASHER(seed, hasher, value) \
+    seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2)
 #endif
 
 namespace hash {
@@ -23,7 +25,7 @@ namespace hash {
     template <typename T> inline
     void rehash(std::size_t& seed, const T& v) {
         std::hash<T> hasher;
-        REHASHER(seed, hasher);
+        REHASHER(seed, hasher, v);
     }
     
     /// BinaryOperation-style functor to "hash in" a thingy's hash value
@@ -40,7 +42,7 @@ namespace hash {
         hasher_t hasher; /// default construction
         
         seed_t operator()(seed_t seed, hashee_t v) {
-            REHASHER(seed, hasher);
+            REHASHER(seed, hasher, v);
             return seed;
         }
     };

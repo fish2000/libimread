@@ -7,6 +7,10 @@
 #include <glob.h>
 #include <fcntl.h>
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 #include <cerrno>
 #include <cstdlib>
 #include <numeric>
@@ -51,6 +55,19 @@ namespace filesystem {
             syspaths = std::getenv("PATH");
             if (NULL == syspaths) { syspaths = "/bin:/usr/bin"; }
             return syspaths;
+        }
+        
+        std::string execpath() noexcept {
+            char pbuf[PATH_MAX] = { 0 };
+            uint32_t size = sizeof(pbuf);
+            #ifdef __APPLE__
+                if (_NSGetExecutablePath(pbuf, &size) != 0) { return ""; }
+                ssize_t res = size;
+            #else
+                ssize_t res = ::readlink("/proc/self/exe", pbuf, size);
+                if (res == 0 || res == sizeof(pbuf)) { return "" }
+            #endif
+            return std::string(pbuf, res);
         }
         
     } /* namespace detail */
