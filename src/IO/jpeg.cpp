@@ -20,7 +20,7 @@ namespace im {
         struct jpeg_source_adaptor {
             jpeg_source_mgr mgr;
             byte_source* s;
-            byte* buf;
+            byte* __restrict__ buf;
             
             jpeg_source_adaptor(byte_source* s);
             ~jpeg_source_adaptor() { delete[] buf; }
@@ -28,7 +28,7 @@ namespace im {
         struct jpeg_dst_adaptor {
             jpeg_destination_mgr mgr;
             byte_sink* s;
-            byte* buf;
+            byte* __restrict__ buf;
             
             jpeg_dst_adaptor(byte_sink* s);
             ~jpeg_dst_adaptor() { delete[] buf; }
@@ -176,7 +176,7 @@ namespace im {
         
         /// Hardcoding uint8_t as the type for now
         int c_stride = (d == 1) ? 0 : output->stride(2);
-        uint8_t* ptr = output->rowp_as<uint8_t>(0);
+        uint8_t* __restrict__ ptr = output->rowp_as<uint8_t>(0);
         
         while (decompressor.info.output_scanline < decompressor.info.output_height) {
             jpeg_read_scanlines(&decompressor.info, samples, 1);
@@ -256,7 +256,7 @@ namespace im {
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
         while (compressor.info.next_scanline < compressor.info.image_height) {
-            JSAMPLE* dstPtr = rowbuf;
+            JSAMPLE* __restrict__ dstPtr = rowbuf;
             for (int x = 0; x < w; x++) {
                 for (int c = 0; c < d; c++) {
                     pix::convert(

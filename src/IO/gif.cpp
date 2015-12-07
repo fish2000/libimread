@@ -70,10 +70,10 @@ namespace im {
         }
         
         /// Do the pixel loop to interleave RGB data
-        byte* data = gbuf.data();
+        byte* __restrict__ data = gbuf.data();
         pix::accessor<byte> at = input.access();
         
-        unsigned char* rgb;
+        unsigned char* __restrict__ rgb;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 rgb = data + 3 * (width * y + x);

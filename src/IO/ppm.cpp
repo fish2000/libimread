@@ -60,14 +60,14 @@ namespace im {
         
         /// convert the data to T
         if (bit_depth == 8) {
-            uint8_t* data = new uint8_t[full_size];
+            uint8_t* __restrict__ data = new uint8_t[full_size];
             imread_assert(fread(static_cast<void*>(data),
                           sizeof(uint8_t), full_size, membuf.get()) == static_cast<std::size_t>(full_size),
                     "Could not read PPM 8-bit data\n");
             
-            uint8_t* im_data = im->rowp_as<uint8_t>(0);
+            uint8_t* __restrict__ im_data = im->rowp_as<uint8_t>(0);
             for (int y = 0; y < height; y++) {
-                uint8_t* row = static_cast<uint8_t*>(&data[(y*width)*channels]);
+                uint8_t* __restrict__ row = static_cast<uint8_t*>(&data[(y*width)*channels]);
                 for (int x = 0; x < width; x++) {
                     for (int c = 0; c < channels; c++) {
                         pix::convert(*row++, im_data[(c*height+y)*width+x]);
@@ -76,15 +76,15 @@ namespace im {
             }
             delete[] data;
         } else if (bit_depth == 16) {
-            uint16_t* data = new uint16_t[full_size];
+            uint16_t* __restrict__ data = new uint16_t[full_size];
             imread_assert(fread(static_cast<void*>(data),
                           sizeof(uint16_t), full_size, membuf.get()) == static_cast<std::size_t>(full_size),
                 "Could not read PPM 16-bit data\n");
             
-            uint16_t* im_data = im->rowp_as<uint16_t>(0);
+            uint16_t* __restrict__ im_data = im->rowp_as<uint16_t>(0);
             if (detail::is_little_endian()) {
                 for (int y = 0; y < height; y++) {
-                    uint16_t* row = static_cast<uint16_t*>(&data[(y*width)*channels]);
+                    uint16_t* __restrict__ row = static_cast<uint16_t*>(&data[(y*width)*channels]);
                     for (int x = 0; x < width; x++) {
                         uint16_t value;
                         for (int c = 0; c < channels; c++) {
@@ -96,7 +96,7 @@ namespace im {
                 }
             } else {
                 for (int y = 0; y < height; y++) {
-                    uint16_t* row = static_cast<uint16_t*>(&data[(y*width)*channels]);
+                    uint16_t* __restrict__ row = static_cast<uint16_t*>(&data[(y*width)*channels]);
                     for (int x = 0; x < width; x++) {
                         for (int c = 0; c < channels; c++) {
                             pix::convert(*row++, im_data[(c*height+y)*width+x]);
@@ -124,11 +124,11 @@ namespace im {
         
         /// write data
         if (bit_depth == 8) {
-            uint8_t* data = new uint8_t[full_size];
+            uint8_t* __restrict__ data = new uint8_t[full_size];
             pix::accessor<byte> at = input.access();
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    uint8_t* p = static_cast<uint8_t*>(&data[(y*width+x)*channels]);
+                    uint8_t* __restrict__ p = static_cast<uint8_t*>(&data[(y*width+x)*channels]);
                     for (int c = 0; c < channels; c++) {
                         pix::convert(at(x, y, c)[0], p[c]);
                     }
@@ -139,12 +139,12 @@ namespace im {
             delete[] data;
         } else if (bit_depth == 16) {
             pix::accessor<uint16_t> at = input.access<uint16_t>();
-            uint16_t* data = new uint16_t[full_size];
+            uint16_t* __restrict__ data = new uint16_t[full_size];
             if (detail::is_little_endian()) {
                 uint16_t value;
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
-                        uint16_t* p = static_cast<uint16_t *>(&data[(y*width+x)*channels]);
+                        uint16_t* __restrict__ p = static_cast<uint16_t *>(&data[(y*width+x)*channels]);
                         for (int c = 0; c < channels; c++) {
                             pix::convert(at(x, y, c)[0], value);
                             SWAP_ENDIAN16(value);
@@ -155,7 +155,7 @@ namespace im {
             } else {
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
-                        uint16_t* p = static_cast<uint16_t *>(&data[(y*width+x)*channels]);
+                        uint16_t* __restrict__ p = static_cast<uint16_t *>(&data[(y*width+x)*channels]);
                         for (int c = 0; c < channels; c++) {
                             pix::convert(at(x, y, c)[0], p[c]);
                         }

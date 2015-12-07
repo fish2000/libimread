@@ -183,8 +183,8 @@ namespace im {
     } /// namespace
     
     std::unique_ptr<ImageList> STKFormat::read_multi(byte_source* src,
-                                                      ImageFactory* factory,
-                                                      const options_map& opts)  {
+                                                     ImageFactory* factory,
+                                                     const options_map& opts)  {
         shift_source moved(src);
         stk_extend ext;
         tiff_warn_error twe;
@@ -201,7 +201,7 @@ namespace im {
         const int strip_size = TIFFStripSize(t.tif);
         const int n_strips = TIFFNumberOfStrips(t.tif);
         int32_t n_planes;
-        void* data;
+        void* __restrict__ data;
         
         TIFFGetField(t.tif, UIC3Tag, &n_planes, &data);
         int raw_strip_size = 0;
@@ -255,10 +255,10 @@ namespace im {
             if (bits_per_sample == 8) {
                 /// Hardcoding uint8_t as the type for now
                 int c_stride = (depth == 1) ? 0 : output->stride(2);
-                uint8_t* ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+                uint8_t* __restrict__ ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
                 
                 for (uint32_t r = 0; r != h; ++r) {
-                    byte* srcPtr = inter->rowp_as<byte>(r);
+                    byte* __restrict__ srcPtr = inter->rowp_as<byte>(r);
                     if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
                         imread_raise(CannotReadError, "Error reading scanline");
                     }
@@ -272,10 +272,10 @@ namespace im {
             } else if (bits_per_sample == 16) {
                 /// Hardcoding uint16_t as the type for now
                 int c_stride = (depth == 1) ? 0 : output->stride(2);
-                uint16_t* ptr = static_cast<uint16_t*>(output->rowp_as<uint16_t>(0));
+                uint16_t* __restrict__ ptr = static_cast<uint16_t*>(output->rowp_as<uint16_t>(0));
                 
                 for (uint32_t r = 0; r != h; ++r) {
-                    byte* srcPtr = inter->rowp_as<byte>(r);
+                    byte* __restrict__ srcPtr = inter->rowp_as<byte>(r);
                     if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
                         imread_raise(CannotReadError, "Error reading scanline");
                     }
@@ -311,7 +311,7 @@ namespace im {
                         NULL,
                         NULL);
         std::vector<byte> bufdata;
-        void* bufp = 0;
+        void* __restrict__ bufp = 0;
         bool copy_data = false;
         const uint32_t h = input.dim(0);
         const uint16_t photometric = ((input.ndims() == 3 && input.dim(2)) ?
@@ -363,7 +363,7 @@ namespace im {
         }
         
         for (uint32_t r = 0; r != h; ++r) {
-            void* rowp = input.rowp(r);
+            void* __restrict__ rowp = input.rowp(r);
             if (copy_data) {
                 std::memcpy(bufp, rowp, input.dim(1) * input.nbytes());
                 rowp = bufp;

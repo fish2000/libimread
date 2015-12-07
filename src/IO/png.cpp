@@ -216,7 +216,7 @@ namespace im {
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         
         volatile int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
-        png_bytep *row_pointers = new png_bytep[h];
+        png_bytep* __restrict__ row_pointers = new png_bytep[h];
         for (int y = 0; y < h; y++) {
             row_pointers[y] = new png_byte[row_bytes];
         }
@@ -230,7 +230,7 @@ namespace im {
         /// convert the data to T (fake it for now with uint8_t)
         //T *ptr = (T*)output->data();
         const int c_stride = (d == 1) ? 0 : output->stride(2);
-        uint8_t *ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+        uint8_t* __restrict__ ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
         
         // WTF("About to enter pixel access loop...",
         //     FF("w = %i, h = %i, channels = %i, bit_depth = %i, d = %i",
@@ -238,7 +238,7 @@ namespace im {
         
         if (bit_depth == 8) {
             for (int y = 0; y < h; y++) {
-                uint8_t *srcPtr = static_cast<uint8_t*>(row_pointers[y]);
+                uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (int x = 0; x < w; x++) {
                     for (int c = 0; c < d; c++) {
                         pix::convert(*srcPtr++, ptr[c*c_stride]);
@@ -248,7 +248,7 @@ namespace im {
             }
         } else if (bit_depth == 16) {
             for (int y = 0; y < h; y++) {
-                uint8_t *srcPtr = static_cast<uint8_t*>(row_pointers[y]);
+                uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (int x = 0; x < w; x++) {
                     for (int c = 0; c < d; c++) {
                         uint16_t hi = (*srcPtr++) << 8;
@@ -277,7 +277,7 @@ namespace im {
         const int channels = input.dim(2);
         const int bit_depth = input.nbits();
         
-        png_bytep *row_pointers;
+        png_bytep* __restrict__ row_pointers;
         const png_byte color_type = color_types[channels - 1];
         
         png_set_IHDR(p.png_ptr, p.png_info,
@@ -298,12 +298,12 @@ namespace im {
         const int c_stride = (channels == 1) ? 0 : input.stride(2);
         const int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
         int x = 0, y = 0, c = 0;
-        uint8_t *dstPtr;
+        uint8_t* __restrict__ dstPtr;
         uint8_t out;
         
         if (bit_depth == 16) {
             // downconvert to uint8_t from uint16_t-ish data
-            uint16_t *srcPtr = input.rowp_as<uint16_t>(0);
+            uint16_t* __restrict__ srcPtr = input.rowp_as<uint16_t>(0);
             
             for (y = 0; y < height; y++) {
                 row_pointers[y] = new png_byte[rowbytes];
@@ -318,7 +318,7 @@ namespace im {
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
-            uint8_t *srcPtr = input.rowp_as<uint8_t>(0);
+            uint8_t* __restrict__ srcPtr = input.rowp_as<uint8_t>(0);
             
             for (y = 0; y < height; y++) {
                 row_pointers[y] = new png_byte[rowbytes];
@@ -377,7 +377,7 @@ namespace im {
         const int channels = input.dim(2);
         const int bit_depth = input.nbits();
         
-        png_bytep *row_pointers;
+        png_bytep* __restrict__ row_pointers;
         png_byte color_type = color_types[channels - 1];
         
         if (!(color_type & PNG_COLOR_MASK_ALPHA)) {
@@ -428,12 +428,12 @@ namespace im {
         int c_stride = (channels == 1) ? 0 : input.stride(2);
         int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
         int x = 0, y = 0, c = 0;
-        uint8_t *dstPtr;
+        uint8_t* __restrict__ dstPtr;
         uint8_t out;
         
         if (bit_depth == 16) {
             // downconvert to uint8_t from uint16_t-ish data
-            uint16_t *srcPtr = input.rowp_as<uint16_t>(0);
+            uint16_t* __restrict__ srcPtr = input.rowp_as<uint16_t>(0);
             
             for (y = 0; y < height; y++) {
                 row_pointers[y] = new png_byte[rowbytes];
@@ -448,7 +448,7 @@ namespace im {
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
-            uint8_t *srcPtr = input.rowp_as<uint8_t>(0);
+            uint8_t* __restrict__ srcPtr = input.rowp_as<uint8_t>(0);
             
             for (y = 0; y < height; y++) {
                 row_pointers[y] = new png_byte[rowbytes];
