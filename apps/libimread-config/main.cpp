@@ -5,9 +5,7 @@
 #include "libimread-config.h"
 #include "docopt.h"
 
-static const char USAGE[] = 
-
-R"(Configuration for libimread
+static const char USAGE[] = R"(Configuration for libimread
 
     Usage:
       libimread-config (--prefix          |
@@ -36,11 +34,12 @@ R"(Configuration for libimread
 const std::string VERSION = "libimread-config ";
 
 int main(int argc, const char** argv) {
-    using optmap_t = std::map<std::string, docopt::value>;
-    using optpair_t = std::pair<std::string, docopt::value>;
+    using value_t = docopt::value;
+    using optmap_t = std::map<std::string, value_t>;
+    using optpair_t = std::pair<std::string, value_t>;
+    value_t truth(true);
     optmap_t args;
-    optmap_t raw_args = docopt::docopt(USAGE,
-                                       { argv + 1, argv + argc },
+    optmap_t raw_args = docopt::docopt(USAGE, { argv + 1, argv + argc },
                                        true, /// show help
                                        VERSION + im::config::version);
     
@@ -56,19 +55,26 @@ int main(int argc, const char** argv) {
     
     /// print the value for the truthy option flag
     for (auto const& arg : args) {
-        if (!bool(arg.second)) { continue; }
-        if (arg.first == "--prefix") {
-            std::cout << im::config::prefix << std::endl;
-        } else if (arg.first == "--exec-prefix") {
-            std::cout << im::config::exec_prefix << std::endl;
-        } else if (arg.first == "--includes") {
-            std::cout << im::config::includes << std::endl;
-        } else if (arg.first == "--libs") {
-            std::cout << im::config::libs << std::endl;
-        } else if (arg.first == "--cflags") {
-            std::cout << im::config::cflags << std::endl;
-        } else if (arg.first == "--ldflags") {
-            std::cout << im::config::ldflags << std::endl;
+        if (arg.second == truth) {
+            if (arg.first == "--prefix") {
+                std::cout << im::config::prefix << std::endl;
+                break;
+            } else if (arg.first == "--exec-prefix") {
+                std::cout << im::config::exec_prefix << std::endl;
+                break;
+            } else if (arg.first == "--includes") {
+                std::cout << im::config::includes << std::endl;
+                break;
+            } else if (arg.first == "--libs") {
+                std::cout << im::config::libs << std::endl;
+                break;
+            } else if (arg.first == "--cflags") {
+                std::cout << im::config::cflags << std::endl;
+                break;
+            } else if (arg.first == "--ldflags") {
+                std::cout << im::config::ldflags << std::endl;
+                break;
+            }
         }
     }
 

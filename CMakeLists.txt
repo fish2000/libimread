@@ -151,7 +151,7 @@ add_dependencies(imread "sszip")
 add_dependencies(imread "iod_symbolize")
 
 # deal with config variables
-get_target_property(IM_COMPILE_OPTIONS imread COMPILE_OPTIONS)
+get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
 get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
 get_target_property(IM_LINK_LIBRARIES imread LINK_LIBRARIES)
 get_target_property(IM_LINK_FLAGS imread LINK_FLAGS)
