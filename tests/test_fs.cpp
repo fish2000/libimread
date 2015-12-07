@@ -207,10 +207,10 @@ namespace {
               "[fs-default-resolver]") {
         path executable = path::executable();
         resolver dres(executable.parent());
-    
-        WTF("Current working dir:", path::getcwd().str());
-        WTF("Executable basename:", executable.basename());
-    
+        
+        // WTF("Current working dir:", path::getcwd().str());
+        // WTF("Executable basename:", executable.basename());
+        
         REQUIRE(dres.contains(executable.basename()));
     }
 
