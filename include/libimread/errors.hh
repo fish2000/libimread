@@ -241,7 +241,6 @@ namespace im {
     };
 #endif /// DECLARE_IMREAD_ERROR_SUBTYPE
 
-
 DECLARE_IMREAD_ERROR_TYPE(CannotReadError,          "Read Error");
 DECLARE_IMREAD_ERROR_TYPE(CannotWriteError,         "Write Error");
 DECLARE_IMREAD_ERROR_TYPE(NotImplementedError,      "Not Implemented");
@@ -254,7 +253,7 @@ DECLARE_IMREAD_ERROR_TYPE(FormatNotFound,           "File Format Not Found");
 DECLARE_IMREAD_ERROR_SUBTYPE(JSONParseError,
                              std::runtime_error,    "JSON parsing error");
 DECLARE_IMREAD_ERROR_SUBTYPE(JSONLogicError,
-                            std::logic_error,       "JSON operator logic error");
+                             std::logic_error,      "JSON operator logic error");
 
 DECLARE_IMREAD_ERROR_TYPE(JSONUseError,             "JSON library internal error");
 DECLARE_IMREAD_ERROR_TYPE(JSONInvalidSchema,        "JSON schema parsing error");
@@ -262,7 +261,7 @@ DECLARE_IMREAD_ERROR_TYPE(JSONOutOfRange,           "JSON index value out of ran
 DECLARE_IMREAD_ERROR_TYPE(JSONBadCast,              "Error casting JSON value");
 
 DECLARE_IMREAD_ERROR_TYPE(HDF5IOError,              "Error in HDF5 I/O");
-
+DECLARE_IMREAD_ERROR_TYPE(HaltWalk,                 "Halt Walking");
 
 }
 

@@ -217,7 +217,7 @@ namespace im {
                 }
             
             channel_t &operator()(int x, int y = 0, int z = 0, int w = 0) {
-                channel_t *ptr = contents.get();
+                channel_t* __restrict__ ptr = contents.get();
                 x -= meta.min[0];
                 y -= meta.min[1];
                 z -= meta.min[2];
@@ -230,7 +230,7 @@ namespace im {
             }
             
             const channel_t &operator()(int x, int y = 0, int z = 0, int w = 0) const {
-                channel_t *ptr = contents.get();
+                channel_t* __restrict__ ptr = contents.get();
                 x -= meta.min[0];
                 y -= meta.min[1];
                 z -= meta.min[2];
@@ -321,8 +321,8 @@ namespace im {
                 
                 WTF("Converting...");
                 
-                channel_t *data = destination.get();
-                channel_t *dest;
+                channel_t* data = destination.get();
+                channel_t* dest;
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
                         source_array_t source_colors = get(x, y).to_array();

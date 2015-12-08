@@ -285,7 +285,7 @@ namespace filesystem {
     //                                      detail::stringvec_t&,   /// directories
     //                                      detail::stringvec_t&)>; /// files
     
-    void path::walk(detail::walk_visitor_t&& walk_visitor) const {
+    void path::walk(detail::walk_visitor_t&& walk_visitor, std::size_t level) const {
         if (!is_directory()) {
             imread_raise(FileSystemError,
                 "Can't call path::walk() on a non-directory:", str());
@@ -301,14 +301,21 @@ namespace filesystem {
         detail::stringvec_t files = std::move(vector_pair.second);
         
         /// walk_visitor() may modify `directories`
-        std::forward<detail::walk_visitor_t>(walk_visitor)(abspath, directories, files);
+        try {
+            std::forward<detail::walk_visitor_t>(walk_visitor)(
+                abspath, directories, files);
+        } catch (im::HaltWalk const& user_halt) {
+            std::throw_with_nested(detail::halt_walk(level));
+        } catch (detail::halt_walk const& halt) {
+            std::throw_with_nested(halt);
+        }
         
         /// recursively walk into subdirs
         if (directories.empty()) { return; }
         std::for_each(directories.begin(), directories.end(),
                       [&](const std::string& subdir) {
             abspath.join(subdir).walk(
-                std::forward<detail::walk_visitor_t>(walk_visitor));
+                std::forward<detail::walk_visitor_t>(walk_visitor), level+1);
         });
     }
     

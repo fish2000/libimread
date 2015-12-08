@@ -13,6 +13,7 @@
 #include <stack>
 #include <sstream>
 #include <utility>
+#include <exception>
 #include <functional>
 #include <initializer_list>
 
@@ -45,6 +46,53 @@ namespace filesystem {
         /// tag for dispatching path::list() returning detail::vector_pair_t,
         /// instead of plain ol' pathvec_t
         struct list_separate_t {};
+        
+        /*
+        struct halt_walk : std::exception {
+            explicit halt_walk(std::size_t L = 0)
+                :std::exception(),
+                ,initial_level(L), level(L)
+                {}
+            halt_walk& operator++() noexcept {
+                level++;
+                return *this;
+            }
+            halt_walk& operator--() noexcept {
+                if (level > 0) { level--; }
+                return *this;
+            }
+            halt_walk operator++(int) noexcept {
+                ++level;
+                return *this;
+            }
+            halt_walk operator--(int) noexcept {
+                if (level > 0) { --level; }
+                return *this;
+            }
+            std::size_t& level() const noexcept { return &level; }
+            std::size_t const& initial_level() const noexcept { return &initial_level; }
+            char const* what() const noexcept {
+                std::ostringstream out;
+                out << "Walk halted, level: "         << level << ", " << std::endl
+                    << "             initial level: " << initial_level << std::endl;
+                return out.str().c_str();
+            }
+            private:
+                std::size_t level;
+                std::size_t initial_level;
+        };
+        */
+        
+        struct halt_walk : std::runtime_error {
+            explicit halt_walk(std::size_t level)
+                :initial_level(level)
+                ,liljon("Walk halted, level: ")
+                { liljon += std::to_string(level); }
+            char const* what() const noexcept { return liljon.c_str(); }
+            private:
+                std::size_t initial_level;
+                std::string liljon;
+        };
         
         /// user-provided callback function signature for path::walk()
         using walk_visitor_t = std::function<void(const path&,  /// root path
@@ -234,7 +282,8 @@ namespace filesystem {
             ///             std::cout << "File: " << p/f << std::endl;
             ///         });
             ///     });
-            void walk(detail::walk_visitor_t&& walk_visitor) const;
+            void walk(detail::walk_visitor_t&& walk_visitor,
+                      std::size_t level = 0) const;
             
             /// static forwarder for path::walk<P, F>(p, f)
             template <typename P, typename F> inline
