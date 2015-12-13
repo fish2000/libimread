@@ -75,11 +75,12 @@ namespace im {
             /// Stride values
             const pdiff_t stride0, stride1, stride2;
             
-            /// Pointer to data buffer
-            pdata_t* data_pointer;
+            /// Restricted pointer to data buffer
+            pdata_t* __restrict__ data_pointer;
             
             /// One-way constructor
-            explicit accessor(pdata_t* dp, pdiff_t s0, pdiff_t s1=0, pdiff_t s2=0)
+            explicit accessor(pdata_t* __restrict__ dp,
+                              pdiff_t s0, pdiff_t s1=0, pdiff_t s2=0)
                 :data_pointer(dp), stride0(s0), stride1(s1), stride2(s2)
                 {}
             

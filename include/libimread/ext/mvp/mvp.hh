@@ -9,7 +9,9 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <locale>
 #include <sstream>
+#include <iomanip>
 #include <iostream>
 #include <algorithm>
 #include <type_traits>
@@ -104,9 +106,9 @@ class DataPointBase : Base<> {
             paths = pathlist;
         }
         
-        inline path_t compare(DataPoint* other) {
+        inline path_t compare(pointer_t other) {
             std::cout << "\t*** " << "DataPointBase::compare()" << std::endl;
-            return comparator(static_cast<DataPoint*>(this), other);
+            return comparator(static_cast<pointer_t>(this), other);
         }
         
         bool distance_range(pointvec_t& points, std::size_t lvl = 0) {
@@ -115,7 +117,7 @@ class DataPointBase : Base<> {
             std::size_t i, im = points.size();
             path_t d;
             for (i = 0; i < im; i++) {
-                d = comparator(static_cast<DataPoint*>(this),
+                d = comparator(static_cast<pointer_t>(this),
                                points[i]);
                 if (detail::isnan(d) || d < 0.0f) { return false; }
                 if (lvl < PL) {
@@ -133,8 +135,8 @@ class DataPointBase : Base<> {
             pathvec_t distances(points.size(), 0.0f);
             std::transform(points.begin(), points.end(),
                            distances.begin(),
-                           [&](DataPoint* p) {
-                return comparator(static_cast<DataPoint*>(this), p);
+                           [&](pointer_t p) {
+                return comparator(static_cast<pointer_t>(this), p);
             });
             
             path_t tmp;
@@ -173,8 +175,8 @@ template <typename DataType,
           std::size_t PathLength = 5>
 class Datum : public DataPointBase<Datum<DataType, PathType,
                                          DataLength, PathLength>> {
-        
-    struct ComparisonOperator {
+    
+    struct ComparisonOperator { 
         PathType operator()(Datum* d1, Datum* d2) {
             std::cout << "\t--- " << "Datum::ComparisonOperator::operator()" << std::endl;
             if (d1->datum == 0 || d2->datum == 0) {
@@ -213,8 +215,8 @@ class Datum : public DataPointBase<Datum<DataType, PathType,
         void assign(data_t d) {
             datum = d;
         }
-        void assign(data_t* dptr) {
-            datum = dptr[0];
+        void assign(data_t* dptr, std::size_t idx = 0) {
+            datum = dptr[idx];
         }
         
         inline DataType* data(std::size_t idx = 0) {
@@ -298,10 +300,10 @@ class Vector : public DataPointBase<Vector<DataType, PathType,
         void assign(ilist_t ilist) {
             datavec = datavec_t(ilist);
         }
-        void assign(data_t* dptr, std::size_t length = DL) {
-            datavec.reserve(length);
+        void assign(data_t* dptr, std::size_t idx = DL) {
+            datavec.reserve(idx);
             std::memmove((void*)datavec.data(),
-                         (const void*)dptr, DS*length);
+                         (const void*)dptr, DS*idx);
         }
         
         inline DataType* data(std::size_t idx = 0) {
@@ -316,7 +318,7 @@ class Vector : public DataPointBase<Vector<DataType, PathType,
         template <typename BinaryPredicate> inline
         bool binary_op(const Vector& rhs,
                        BinaryPredicate predicate = BinaryPredicate()) {
-            if (rhs.datavec.empty()) { return false; }
+            if (rhs.datavec.empty()) { return datavec.empty(); }
             if (datavec.empty()) { return false; }
             std::cout << "\t*** " << "Vector::binary_op()" << std::endl;
             std::cout << "\t*** " << "Vector::binary_op() [datavec.size() = " << datavec.size() << "]" << std::endl;
@@ -364,10 +366,11 @@ class Tree {
         using data_t = DataType;
         using path_t = PathType;
         using datapoint_t = DataPoint;
-        using datapointer_t = std::add_pointer_t<DataPoint>;
+        using datapointer_t = std::add_pointer_t<datapoint_t>;
         using pointvec_t = std::vector<datapointer_t>;
         using pathvec_t = std::vector<path_t>;
-        using Comparator = typename DataPoint::comparator_t;
+        using Comparator = typename datapoint_t::comparator_t;
+        using comparator_t = typename datapoint_t::comparator_t;
         
         enum NodeType : std::size_t {
             ABSTRACT = 0,
@@ -380,8 +383,8 @@ class Tree {
     private:
         struct NodeBase {
             NodeType nodetype;
-            DataPoint* sv1;
-            DataPoint* sv2;
+            datapointer_t sv1;
+            datapointer_t sv2;
             NodeBase(NodeType ntype = NodeType::ABSTRACT)
                 :nodetype(ntype)
                 ,sv1(nullptr), sv2(nullptr)
@@ -398,7 +401,7 @@ class Tree {
         };
         struct InternalNode : virtual public NodeBase {
             pathvec_t M1, M2;
-            std::array<NodeBase*, FanOut> children;
+            std::array<std::add_pointer_t<NodeBase>, FanOut> children;
             InternalNode() : NodeBase(NodeType::INTERNAL)
                 ,M1(LengthM1), M2(BranchFactor)
                 ,children{}
@@ -421,7 +424,6 @@ class Tree {
                 {
                     std::cout << "\t*** " << "\t*** " << "LeafNode::LeafNode()" << std::endl;
                 }
-            // virtual void clear(int lvl = 0) { NodeBase::destroy(); }
         };
         struct Node : public InternalNode, public LeafNode {
             explicit Node(InternalTag x)
@@ -437,13 +439,15 @@ class Tree {
         };
     
     protected:
+        using node_t = Node;
+        using nodepointer_t = std::add_pointer_t<node_t>;
         using idx_t = std::tuple<std::size_t, std::size_t>;
         using vantagepoints_t = std::tuple<datapointer_t, datapointer_t>;
         using histogram_t = std::array<pointvec_t, BF>;
         int descriptor;
         int knearest;
-        Node* top;
-        Comparator comparator;
+        nodepointer_t top;
+        comparator_t comparator;
         
         histogram_t sort_points(datapoint_t* vantagepoint,
                                 const pointvec_t& points,
@@ -510,13 +514,15 @@ class Tree {
             return std::make_tuple(points[sv1pos], points[sv2pos]);
         }
         
-        Node* addNode(Node* node, pointvec_t& points, std::size_t lvl = 0) {
+        nodepointer_t addNode(nodepointer_t node,
+                              pointvec_t& points,
+                              std::size_t lvl = 0) {
             std::cout << "\t*** " << "Tree<...>::addNode()" << std::endl;
             if (points.empty()) {
                 return node;
             }
             
-            Node* newNode = node;
+            nodepointer_t newNode = node;
             std::size_t i, count = 0,
                           pcount = points.size(),
                           ncount = 0,
@@ -600,7 +606,7 @@ class Tree {
                             temporary.push_back(points[i]);
                         }
                         
-                        // Node* oldNode = newNode;
+                        // nodepointer_t oldNode = newNode;
                         /// Need to DESTROY newNode here
                         newNode = addNode(nullptr, temporary, lvl);
                         
@@ -662,14 +668,19 @@ using Randomizer = std::independent_bits_engine<
                    std::default_random_engine,
                    sizeof(DataType)*8, DataType>;
 
+using wc_t = std::ctype<wchar_t>;
+
 template <typename T>
-std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
-    if (!v.empty()) {
-        out << "<0x" << std::hex;
-        std::copy(v.begin(), v.end(),
-                  std::ostream_iterator<T>(out, ""));
-        out << std::dec << "\b\b>";
-    }
+std::ostream& operator<<(std::ostream& out, const std::vector<T>& vector) {
+    if (vector.empty()) { return out; }
+    auto const& facet = std::use_facet<wc_t>(std::locale());
+    out << "<0x" << std::hex;
+    std::transform(vector.begin(), vector.end(),
+                std::ostream_iterator<T>(out, ""),
+                [&facet](T const& t) {
+        return facet.narrow(t, t/4);
+    });
+    out << std::dec << "\b\b>";
     return out;
 }
 
@@ -685,7 +696,11 @@ namespace {
             
             #define A_BUNCH 30
             
-            std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3, A_BUNCH = "
+            std::locale::global(std::locale("en_US"));
+            std::cout.imbue(std::locale());
+            std::cerr.imbue(std::locale());
+            
+            std::cerr << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3, A_BUNCH = "
                       << A_BUNCH << ") :: Starting Up"
                       << std::endl;
             
@@ -731,7 +746,7 @@ namespace {
             std::for_each(pv.begin(), pv.end(),
                       [=](VectorPoint* p) { delete p; });
             
-            std::cout << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3) :: Return To Zero"
+            std::cerr << "TCZ-MVPTREE 0.1.0 (DoggNodeType 0.6.3) :: Return To Zero"
                       << std::endl;
             
             return 0;

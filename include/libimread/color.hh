@@ -65,7 +65,7 @@ namespace im {
         struct NonValueBase : public Base {
             using is_value = std::false_type;
             enum channels : typename Base::channel_t { None };
-            static constexpr uint8_t channel_count = 0;
+            static constexpr std::size_t channel_count = 0;
             static constexpr bool is_fp() noexcept { return false; }
             static constexpr bool is_int() noexcept { return false; }
             static constexpr bool is_signed() noexcept { return false; }
@@ -75,25 +75,25 @@ namespace im {
         template <typename Channel>
         struct Mono : public ChannelBase<Channel> {
             enum channels : Channel { Y, None };
-            static constexpr uint8_t channel_count = 1;
+            static constexpr std::size_t channel_count = 1;
         };
         
         template <typename Channel>
         struct RGB : public ChannelBase<Channel> {
             enum channels : Channel { R, G, B, None };
-            static constexpr uint8_t channel_count = 3;
+            static constexpr std::size_t channel_count = 3;
         };
         
         template <typename Channel>
         struct BGR : public ChannelBase<Channel> {
             enum channels : Channel { B, G, R, None };
-            static constexpr uint8_t channel_count = 3;
+            static constexpr std::size_t channel_count = 3;
         };
         
         template <typename Channel>
         struct RGBA : public ChannelBase<Channel> {
             enum channels : Channel { R, G, B, A, None };
-            static constexpr uint8_t channel_count = 4;
+            static constexpr std::size_t channel_count = 4;
         };
     }
     
@@ -105,7 +105,7 @@ namespace im {
         static_assert(sizeof(Composite) > sizeof(Channel),
                      "UniformColor needs a composite type larger than its channel type");
         
-        static constexpr uint8_t N = ChannelMeta<Channel>::channel_count;
+        static constexpr std::size_t N = ChannelMeta<Channel>::channel_count;
         using Meta = ChannelMeta<Channel>;
         using NonValue = meta::NonValueBase<UniformColor<ChannelMeta, Composite, Channel>>;
         
@@ -156,31 +156,31 @@ namespace im {
         constexpr Channel &operator[](std::size_t c) noexcept { return components[c]; }
         
         template <typename Color>
-        constexpr bool operator<(const Color& rhs) const noexcept { return bool(composite < rhs.composite); }
+        bool operator<(const Color& rhs) const { return binary_op<std::less<channel_t>>(rhs.components); }
         template <typename Color>
-        constexpr bool operator>(const Color& rhs) const noexcept { return bool(composite > rhs.composite); }
+        bool operator>(const Color& rhs) const { return binary_op<std::greater<channel_t>>(rhs.components); }
         template <typename Color>
-        constexpr bool operator<=(const Color& rhs) const noexcept { return bool(composite <= rhs.composite); }
+        bool operator<=(const Color& rhs) const { return binary_op<std::less_equal<channel_t>>(rhs.components); }
         template <typename Color>
-        constexpr bool operator>=(const Color& rhs) const noexcept { return bool(composite >= rhs.composite); }
+        bool operator>=(const Color& rhs) const { return binary_op<std::greater_equal<channel_t>>(rhs.components); }
         template <typename Color>
-        constexpr bool operator==(const Color& rhs) const noexcept { return bool(composite == rhs.composite); }
+        bool operator==(const Color& rhs) const { return binary_op<std::equal_to<channel_t>>(rhs.components); }
         template <typename Color>
-        constexpr bool operator!=(const Color& rhs) const noexcept { return bool(composite != rhs.composite); }
+        bool operator!=(const Color& rhs) const { return binary_op<std::not_equal_to<channel_t>>(rhs.components); }
         
-        constexpr bool operator<(const Composite& rhs) noexcept { return bool(composite < rhs); }
-        constexpr bool operator>(const Composite& rhs) noexcept { return bool(composite > rhs); }
-        constexpr bool operator<=(const Composite& rhs) noexcept { return bool(composite <= rhs); }
-        constexpr bool operator>=(const Composite& rhs) noexcept { return bool(composite >= rhs); }
-        constexpr bool operator==(const Composite& rhs) noexcept { return bool(composite == rhs); }
-        constexpr bool operator!=(const Composite& rhs) noexcept { return bool(composite != rhs); }
+        bool operator<(const Composite& rhs) const { return bool(composite < rhs); }
+        bool operator>(const Composite& rhs) const { return bool(composite > rhs); }
+        bool operator<=(const Composite& rhs) const { return bool(composite <= rhs); }
+        bool operator>=(const Composite& rhs) const { return bool(composite >= rhs); }
+        bool operator==(const Composite& rhs) const { return bool(composite == rhs); }
+        bool operator!=(const Composite& rhs) const { return bool(composite != rhs); }
         
-        constexpr bool operator<(const Components& rhs) noexcept { return bool(components < rhs); }
-        constexpr bool operator>(const Components& rhs) noexcept { return bool(components > rhs); }
-        constexpr bool operator<=(const Components& rhs) noexcept { return bool(components <= rhs); }
-        constexpr bool operator>=(const Components& rhs) noexcept { return bool(components >= rhs); }
-        constexpr bool operator==(const Components& rhs) noexcept { return bool(components == rhs); }
-        constexpr bool operator!=(const Components& rhs) noexcept { return bool(components != rhs); }
+        bool operator<(const Components& rhs) const { return binary_op<std::less<channel_t>>(rhs); }
+        bool operator>(const Components& rhs) const { return binary_op<std::greater<channel_t>>(rhs); }
+        bool operator<=(const Components& rhs) const { return binary_op<std::less_equal<channel_t>>(rhs); }
+        bool operator>=(const Components& rhs) const { return binary_op<std::greater_equal<channel_t>>(rhs); }
+        bool operator==(const Components& rhs) const { return binary_op<std::equal_to<channel_t>>(rhs); }
+        bool operator!=(const Components& rhs) const { return binary_op<std::not_equal_to<channel_t>>(rhs); }
         
         static constexpr std::size_t channels() noexcept { return N; }
         
@@ -201,6 +201,15 @@ namespace im {
         }
         
         private:
+            template <typename BinaryPredicate> inline
+            bool binary_op(const Components& rhs,
+                           BinaryPredicate predicate = BinaryPredicate()) const {
+                if (N != rhs.channels()) { return false; }
+                return std::equal(std::begin(components),  std::end(components),
+                                  std::begin(rhs),         std::end(rhs),
+                                  predicate);
+            }
+            
             template <std::size_t ...I> inline
             unsigned int distance_impl(const UniformColor& rhs,
                                        unsigned int out,
