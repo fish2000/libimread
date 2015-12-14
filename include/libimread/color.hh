@@ -221,7 +221,7 @@ namespace im {
             
             template <std::size_t ...I> inline
             void component_assign_impl(const Components c,
-                                       std::index_sequence<I...>) const noexcept {
+                                       std::index_sequence<I...>) noexcept {
                 unpack { (components[I] = c[I])... };
             }
             

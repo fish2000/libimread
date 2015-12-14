@@ -75,7 +75,16 @@ namespace im {
             :Index(other.indices)
             {}
         
+        Index(Index&& other)
+            :Index(std::move(other.indices))
+            {}
+        
         Index& operator=(const Index& other) {
+            Index(other).swap(*this);
+            return *this;
+        }
+        
+        Index& operator=(Index&& other) {
             Index(other).swap(*this);
             return *this;
         }
@@ -130,8 +139,9 @@ namespace im {
             
             template <std::size_t ...I> inline
             void assign_impl(const idx_t* indexes,
-                             std::index_sequence<I...>) const noexcept {
-                unpack { (indices[I] = indexes[I])... };
+                             std::index_sequence<I...>) noexcept {
+                indices = array_t{ indexes[I]... };
+                // unpack { (indices[I] = indexes[I])... };
             }
             
             template <std::size_t ...I> inline

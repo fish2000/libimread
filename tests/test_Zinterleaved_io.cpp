@@ -35,9 +35,13 @@ namespace {
     TEST_CASE("[interleaved-io] Test Meta and Index object attributes",
               "[interleaved-meta-index-object-attributes]")
     {
-        Index idx { 0, 1, 2 };
         MetaRGB meta = MetaRGB(1024, 768);
-        REQUIRE(meta.is_valid(idx));
+        Index idx0 { 0, 1, 2 };
+        REQUIRE(meta.is_valid(idx0));
+        Index idx1 { 0, 1 };
+        REQUIRE(meta.is_valid(idx1));
+        Index idx2 = idx0 + idx1;
+        REQUIRE(meta.is_valid(idx2));
     }
     
     
