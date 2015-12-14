@@ -232,8 +232,8 @@ namespace filesystem {
                     case DT_LNK:
                         files.push_back(std::move(t));
                         continue;
-                    // default:
-                    //     continue;
+                    default:
+                        continue;
                 }
             }
         } /// scope exit for d
