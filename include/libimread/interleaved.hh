@@ -9,6 +9,7 @@
 #include <limits>
 #include <array>
 #include <memory>
+#include <string>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -36,7 +37,7 @@ namespace im {
         using idx_t = std::ptrdiff_t;
         using idxlist_t = std::initializer_list<idx_t>;
         using array_t = std::array<idx_t, D>;
-        using index_t = std::make_index_sequence<D>;
+        using sequence_t = std::make_index_sequence<D>;
         
         array_t indices;
         
@@ -50,7 +51,7 @@ namespace im {
                 if (nd == 0) { nd = D; }
                 imread_assert(nd == D,
                               "Dimension mismatch");
-                assign_impl(indexes, index_t());
+                assign_impl(indexes, sequence_t());
             }
         
         Index(const array_t& indexes)
@@ -58,7 +59,7 @@ namespace im {
             {
                 imread_assert(indexes.size() == D,
                               "Dimension mismatch");
-                assign_impl(indexes.data(), index_t());
+                assign_impl(indexes.data(), sequence_t());
             }
         
         Index(idxlist_t initlist)
@@ -94,7 +95,6 @@ namespace im {
             return *this;
         }
         
-        // std::size_t ndim() const { return indices.max_size(); }
         constexpr std::size_t ndim() const { return D; }
         idx_t operator[](std::size_t idx) const { return indices[idx]; }
         
@@ -118,7 +118,7 @@ namespace im {
         }
         
         friend std::ostream& operator<<(std::ostream& out, const Index& idx) {
-            return out << idx.string_impl(index_t());
+            return out << idx.string_impl(sequence_t());
         }
         
         bool operator<(const Index& rhs) const { return binary_op<std::less<idx_t>>(rhs.indices); }
@@ -141,7 +141,6 @@ namespace im {
             void assign_impl(const idx_t* indexes,
                              std::index_sequence<I...>) noexcept {
                 indices = array_t{ indexes[I]... };
-                // unpack { (indices[I] = indexes[I])... };
             }
             
             template <std::size_t ...I> inline
@@ -187,8 +186,6 @@ namespace im {
         return out;
     }
     
-    
-    
     struct MetaBase {
         virtual ~MetaBase() {}
     };
@@ -199,16 +196,19 @@ namespace im {
         static constexpr std::size_t S = sizeof(typename Color::channel_t);
         static constexpr std::size_t D = Dimensions;
         friend struct Index<D>;
+        using index_t = Index<D>;
+        using idx_t = typename index_t::idx_t;
         using array_t = std::array<std::size_t, D>;
-        using index_t = std::make_index_sequence<D>;
+        using sequence_t = std::make_index_sequence<D>;
         
         std::size_t elem_size;
+        index_t max_idx;
         array_t extents;
         array_t strides;
         array_t min = { 0 };
         
         Meta(void)
-            :extents{ 0 }, strides{ 0 }, elem_size(0)
+            :extents{ 0 }, strides{ 0 }, max_idx{ 0 }, elem_size(0)
             {}
         
         explicit Meta(std::size_t x,
@@ -217,6 +217,9 @@ namespace im {
                       std::size_t s = S)
             :extents{ x,     y,   c }
             ,strides{ x*y*s, x*s, s }
+            ,max_idx{ static_cast<idx_t>(x-1),
+                      static_cast<idx_t>(y-1),
+                      static_cast<idx_t>(c-1) }
             ,elem_size(s)
             {}
         
@@ -229,14 +232,11 @@ namespace im {
             {}
         
         std::size_t size() const {
-            return size_impl(index_t());
+            return size_impl(sequence_t());
         }
         
-        bool is_valid(const Index<D>& idx) const {
-            using compare_t = typename Index<D>::idx_t;
-            return std::equal(std::begin(idx.indices), std::end(idx.indices),
-                              std::begin(extents),     std::end(extents),
-                              std::less<compare_t>());
+        bool contains(const index_t& idx) const {
+            return idx <= max_idx;
         }
         
         private:
@@ -252,6 +252,7 @@ namespace im {
     template <typename Color = color::RGBA,
               std::size_t Dimensions = 3>
     class InterleavedImage : public Image, public MetaImage {
+        
         public:
             static constexpr std::size_t C = Color::Meta::channel_count;
             static constexpr std::size_t D = Dimensions;
@@ -262,7 +263,7 @@ namespace im {
             using composite_t = typename Color::composite_t; /// integer-packed components
             using channel_t = typename Color::channel_t; /// single component value
             using array_t = std::array<std::size_t, D>;
-            using index_t = std::make_index_sequence<D>;
+            using sequence_t = std::make_index_sequence<D>;
             
             using bytestring_t = std::basic_string<channel_t>;
             using contents_t = std::shared_ptr<channel_t>;

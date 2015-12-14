@@ -37,11 +37,11 @@ namespace {
     {
         MetaRGB meta = MetaRGB(1024, 768);
         Index idx0 { 0, 1, 2 };
-        REQUIRE(meta.is_valid(idx0));
+        REQUIRE(meta.contains(idx0));
         Index idx1 { 0, 1 };
-        REQUIRE(meta.is_valid(idx1));
+        REQUIRE(meta.contains(idx1));
         Index idx2 = idx0 + idx1;
-        REQUIRE(meta.is_valid(idx2));
+        REQUIRE(meta.contains(idx2));
     }
     
     
