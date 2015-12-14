@@ -28,7 +28,22 @@ namespace {
     // using IRGB = std::unique_ptr<im::Image>;
     // using IRGBA = std::unique_ptr<im::Image>;
     
-    TEST_CASE("[interleaved-io] Read PNG files", "[interleaved-read-png]") {
+    using MetaRGB = im::Meta<RGB, 3>;
+    using MetaRGBA = im::Meta<RGBA, 3>;
+    using Index = im::Index<3>;
+    
+    TEST_CASE("[interleaved-io] Test Meta and Index object attributes",
+              "[interleaved-meta-index-object-attributes]")
+    {
+        Index idx { 0, 1, 2 };
+        MetaRGB meta = MetaRGB(1024, 768);
+        REQUIRE(meta.is_valid(idx));
+    }
+    
+    
+    TEST_CASE("[interleaved-io] Read PNG files",
+              "[interleaved-read-png]")
+    {
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
@@ -49,7 +64,9 @@ namespace {
     //     im::interleaved::write(rewrite_png_jpeg_leavedim3, td.dirpath/"jpgg_marci_512_srgb_YO_YO_YO.jpg");
     // }
     
-    TEST_CASE("[interleaved-io] Read JPEG files", "[interleaved-read-jpg]") {
+    TEST_CASE("[interleaved-io] Read JPEG files",
+              "[interleaved-read-jpg]")
+    {
         path basedir(im::test::basedir);
         const std::vector<path> jpgs = basedir.list("*.jpg");
         std::for_each(jpgs.begin(), jpgs.end(), [&basedir](const path &p) {

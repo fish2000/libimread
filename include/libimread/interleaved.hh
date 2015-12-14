@@ -30,6 +30,155 @@ namespace im {
     
     using MetaImage = ImageWithMetadata;
     
+    template <std::size_t Dimensions = 3>
+    struct Index {
+        static constexpr std::size_t D = Dimensions;
+        using idx_t = std::ptrdiff_t;
+        using idxlist_t = std::initializer_list<idx_t>;
+        using array_t = std::array<idx_t, D>;
+        using index_t = std::make_index_sequence<D>;
+        
+        array_t indices;
+        
+        Index(void)
+            :indices{ 0 }
+            {}
+        
+        Index(const idx_t* indexes, std::size_t nd = 0)
+            :indices{ 0 }
+            {
+                if (nd == 0) { nd = D; }
+                imread_assert(nd == D,
+                              "Dimension mismatch");
+                assign_impl(indexes, index_t());
+            }
+        
+        Index(const array_t& indexes)
+            :indices{ 0 }
+            {
+                imread_assert(indexes.size() == D,
+                              "Dimension mismatch");
+                assign_impl(indexes.data(), index_t());
+            }
+        
+        Index(idxlist_t initlist)
+            :indices{ 0 }
+            {
+                std::size_t idx = 0;
+                for (auto it = initlist.begin();
+                     it != initlist.end() && idx < D;
+                     ++it) { indices[idx] = *it;
+                             ++idx; }
+            }
+        
+        Index(const Index& other)
+            :Index(other.indices)
+            {}
+        
+        Index& operator=(const Index& other) {
+            Index(other).swap(*this);
+            return *this;
+        }
+        
+        Index& operator=(idxlist_t initlist) {
+            Index(initlist).swap(*this);
+            return *this;
+        }
+        
+        // std::size_t ndim() const { return indices.max_size(); }
+        constexpr std::size_t ndim() const { return D; }
+        idx_t operator[](std::size_t idx) const { return indices[idx]; }
+        
+        // bool operator==(const Index& other) {
+        //     return !std::memcmp(indices.data(),
+        //                         other.indices.data(),
+        //                         sizeof(idx_t) * D);
+        // }
+        //
+        // bool operator!=(const Index& other) {
+        //     return !(*this == other);
+        // }
+        
+        void swap(Index& other) noexcept {
+            using std::swap;
+            swap(indices, other.indices);
+        }
+        
+        friend void swap(Index& lhs, Index& rhs) noexcept {
+            lhs.swap(rhs);
+        }
+        
+        friend std::ostream& operator<<(std::ostream& out, const Index& idx) {
+            return out << idx.string_impl(index_t());
+        }
+        
+        bool operator<(const Index& rhs) const { return binary_op<std::less<idx_t>>(rhs.indices); }
+        bool operator>(const Index& rhs) const { return binary_op<std::greater<idx_t>>(rhs.indices); }
+        bool operator<=(const Index& rhs) const { return binary_op<std::less_equal<idx_t>>(rhs.indices); }
+        bool operator>=(const Index& rhs) const { return binary_op<std::greater_equal<idx_t>>(rhs.indices); }
+        bool operator==(const Index& rhs) const { return binary_op<std::equal_to<idx_t>>(rhs.indices); }
+        bool operator!=(const Index& rhs) const { return binary_op<std::not_equal_to<idx_t>>(rhs.indices); }
+        
+        private:
+            template <typename BinaryPredicate> inline
+            bool binary_op(const array_t& rhs,
+                           BinaryPredicate predicate = BinaryPredicate()) const {
+                return std::equal(std::begin(indices), std::end(indices),
+                                  std::begin(rhs),     std::end(rhs),
+                                  predicate);
+            }
+            
+            template <std::size_t ...I> inline
+            void assign_impl(const idx_t* indexes,
+                             std::index_sequence<I...>) const noexcept {
+                unpack { (indices[I] = indexes[I])... };
+            }
+            
+            template <std::size_t ...I> inline
+            std::string string_impl(std::index_sequence<I...>) const {
+                std::string out("( ");
+                unpack {
+                    (out += std::to_string(indices[I]) +
+                            (I == D-1 ? "" : ", "), 0)...
+                };
+                out += " )";
+                return out;
+            }
+            
+    };
+    
+    template <std::size_t D> inline
+    Index<D> operator+=(Index<D>& lhs, const Index<D>& rhs) {
+        for (std::size_t idx = 0; idx != D; ++idx) {
+            lhs.indices[idx] += rhs.indices[idx];
+        }
+        return lhs;
+    }
+    
+    template <std::size_t D> inline
+    Index<D> operator+(const Index<D>& lhs, const Index<D>& rhs) {
+        Index<D> out = lhs;
+        out += rhs;
+        return out;
+    }
+    
+    template <std::size_t D> inline
+    Index<D> operator-=(Index<D>& lhs, const Index<D>& rhs) {
+        for (std::size_t idx = 0; idx != D; ++idx) {
+            lhs.indices[idx] -= rhs.indices[idx];
+        }
+        return lhs;
+    }
+    
+    template <std::size_t D> inline
+    Index<D> operator-(const Index<D>& lhs, const Index<D>& rhs) {
+        Index<D> out = lhs;
+        out -= rhs;
+        return out;
+    }
+    
+    
+    
     struct MetaBase {
         virtual ~MetaBase() {}
     };
@@ -39,6 +188,7 @@ namespace im {
     struct Meta : public MetaBase {
         static constexpr std::size_t S = sizeof(typename Color::channel_t);
         static constexpr std::size_t D = Dimensions;
+        friend struct Index<D>;
         using array_t = std::array<std::size_t, D>;
         using index_t = std::make_index_sequence<D>;
         
@@ -72,13 +222,20 @@ namespace im {
             return size_impl(index_t());
         }
         
-        template <std::size_t ...I> inline
-        std::size_t size_impl(std::index_sequence<I...>) const {
-            std::size_t out = 1;
-            unpack { static_cast<int>(out *= extents[I])... };
-            return out;
+        bool is_valid(const Index<D>& idx) const {
+            using compare_t = typename Index<D>::idx_t;
+            return std::equal(std::begin(idx.indices), std::end(idx.indices),
+                              std::begin(extents),     std::end(extents),
+                              std::less<compare_t>());
         }
         
+        private:
+            template <std::size_t ...I> inline
+            std::size_t size_impl(std::index_sequence<I...>) const {
+                std::size_t out = 1;
+                unpack { static_cast<int>(out *= extents[I])... };
+                return out;
+            }
     };
     
     
