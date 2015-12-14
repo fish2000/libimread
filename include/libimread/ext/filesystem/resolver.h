@@ -21,26 +21,41 @@ namespace filesystem {
             
             template <typename P,
                       typename = std::enable_if_t<
-                                 std::is_constructible<path, P>::value>>
+                                 std::is_constructible<path, P>::value &&
+                                !std::is_same<detail::stringvec_t, P>::value>>
             explicit resolver(P&& p)
                 :m_paths{ path(std::forward<P>(p)) }
                 {}
             
             explicit resolver(const detail::pathvec_t& paths)
                 :m_paths(paths)
-                {}
+                {
+                    m_paths.erase(
+                        std::remove_if(m_paths.begin(), m_paths.end(),
+                                    [](const path& p) { return p == path(); }),
+                        m_paths.end());
+                }
             
             explicit resolver(const detail::stringvec_t& strings)
                 :m_paths(strings.size())
                 {
                     std::transform(strings.begin(), strings.end(),
                                    std::back_inserter(m_paths),
-                                   [](const std::string& s) { return path(s); });
+                                [](const std::string& s) { return path(s); });
+                    m_paths.erase(
+                        std::remove_if(m_paths.begin(), m_paths.end(),
+                                    [](const path& p) { return p == path(); }),
+                        m_paths.end());
                 }
             
             explicit resolver(detail::pathlist_t list)
                 :m_paths(list)
-                {}
+                {
+                    m_paths.erase(
+                        std::remove_if(m_paths.begin(), m_paths.end(),
+                                    [](const path& p) { return p == path(); }),
+                        m_paths.end());
+                }
             
             static resolver system()        { return resolver(path::system()); }
             
@@ -85,6 +100,15 @@ namespace filesystem {
             template <typename P> inline
             detail::pathvec_t resolve_all(P&& p) const {
                 return resolve_all_impl(path(std::forward<P>(p)));
+            }
+            
+            friend std::ostream& operator<<(std::ostream& out, const resolver& paths) {
+                if (paths.m_paths.empty()) { return out; }
+                std::for_each(paths.begin(), paths.end(),
+                       [&out](const path& p) {
+                    out << p.str() << ":";
+                });
+                return out;
             }
             
         private:

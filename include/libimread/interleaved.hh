@@ -267,6 +267,7 @@ namespace im {
             
             using bytestring_t = std::basic_string<channel_t>;
             using contents_t = std::shared_ptr<channel_t>;
+            using weak_t = std::weak_ptr<channel_t>; /// WEAK TEA see what I did there
             using deleter_t = std::default_delete<channel_t[]>;
             using meta_t = Meta<Color, Dimensions>;
             using Contents = contents_t;

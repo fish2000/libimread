@@ -89,19 +89,19 @@ namespace filesystem {
         /// as full paths in the `directorylist` vector
         detail::walk_visitor_t walk_visitor = [&out, &directorylist](
                                     const path& p,
-                                    detail::stringvec_t& files,
-                                    detail::stringvec_t& directories) {
-                                        if (!files.empty()) {
-                                            std::for_each(files.begin(), files.end(),
-                                                [&p, &out](const std::string& file) {
-                                                    out &= (p/file).remove(); });
-                                        }
-                                        if (!directories.empty()) {
-                                            std::for_each(directories.begin(), directories.end(),
-                                                [&p, &directorylist](const std::string& directory) {
-                                                    directorylist.push_back(p/directory); });
-                                        }
-                                     };
+                                    detail::stringvec_t& directories,
+                                    detail::stringvec_t& files) {
+            if (!directories.empty()) {
+                std::for_each(directories.begin(), directories.end(),
+                    [&p, &directorylist](const std::string& directory) {
+                        directorylist.push_back(p/directory); });
+            }
+            if (!files.empty()) {
+                std::for_each(files.begin(), files.end(),
+                    [&p, &out](const std::string& file) {
+                        out &= (p/file).remove(); });
+            }
+        };
         
         /// perform walk with visitor
         abspath.walk(std::forward<detail::walk_visitor_t>(walk_visitor));

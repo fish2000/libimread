@@ -90,6 +90,11 @@ namespace filesystem {
         }
     }
     
+    path::path(const detail::stringvec_t& vec, bool absolute)
+        :m_absolute(absolute), m_type(native_path)
+        ,m_path(vec)
+        {}
+    
     path::path(detail::stringlist_t list)
         :m_absolute(false), m_type(native_path)
         ,m_path(list)
@@ -227,8 +232,8 @@ namespace filesystem {
                     case DT_LNK:
                         files.push_back(std::move(t));
                         continue;
-                    default:
-                        continue;
+                    // default:
+                    //     continue;
                 }
             }
         } /// scope exit for d
@@ -345,6 +350,20 @@ namespace filesystem {
         if (is_file_or_link()) { return bool(::unlink(make_absolute().c_str()) != -1); }
         if (is_directory())    { return bool(::rmdir(make_absolute().c_str()) != -1); }
         return false;
+    }
+    
+    static const mode_t mkdir_flags = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
+    
+    bool path::makedir() const {
+        if (empty() || exists()) { return false; }
+        return bool(::mkdir(c_str(), mkdir_flags) != -1);
+    }
+    
+    bool path::rename(const path& newpath) {
+        if (!exists() || newpath.exists()) { return false; }
+        bool status = ::rename(c_str(), newpath.c_str()) != -1;
+        if (status) { set(newpath.make_absolute().str()); }
+        return status;
     }
     
     path path::getcwd() {

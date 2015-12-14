@@ -16,6 +16,7 @@ namespace {
     using im::fs::path;
     using im::fs::switchdir;
     using im::fs::resolver;
+    using im::fs::TemporaryDirectory;
     
     TEST_CASE("[filesystem] Check if `basedir` is a directory",
               "[fs-basedir-isdirectory]") {
@@ -193,11 +194,16 @@ namespace {
     TEST_CASE("[filesystem] Test the system path resolver",
               "[fs-system-path-resolver]") {
         resolver syspaths = resolver::system();
-    
+        
+        // std::ostringstream os;
+        // os << syspaths;
+        // WTF("System path value", filesystem::detail::syspaths());
+        // WTF("System path resolver", os.str(), FF("Resolver size: %i", syspaths.size()));
+        
         REQUIRE(syspaths.resolve("ls") != path());
         REQUIRE(syspaths.resolve("clang") != path());
         REQUIRE(syspaths.resolve("YoDogg") == path());
-    
+        
         REQUIRE(syspaths.contains("ls"));
         REQUIRE(syspaths.contains("clang"));
         REQUIRE(!syspaths.contains("YoDogg"));
@@ -212,6 +218,28 @@ namespace {
         // WTF("Executable basename:", executable.basename());
         
         REQUIRE(dres.contains(executable.basename()));
+    }
+    
+    TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct",
+              "[fs-temporarydirectory-raii]") {
+        TemporaryDirectory td("test-td");
+        (td.dirpath/"test-td-subdir0").makedir();
+        (td.dirpath/"test-td-subdir1").makedir();
+        
+        
+        
+        // td.dirpath.walk([](const path& p,
+        //                    std::vector<std::string>& directories,
+        //                    std::vector<std::string>& files) {
+        //     std::for_each(directories.begin(), directories.end(), [&](const std::string& d) {
+        //         std::cout << "Directory: " << p/d << std::endl;
+        //         REQUIRE((p/d).is_directory());
+        //     });
+        //     std::for_each(files.begin(), files.end(), [&](const std::string& f) {
+        //         std::cout << "File: " << p/f << std::endl;
+        //         REQUIRE((p/f).is_file());
+        //     });
+        // });
     }
 
 }

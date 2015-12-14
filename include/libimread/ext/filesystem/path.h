@@ -96,6 +96,7 @@ namespace filesystem {
             path(const std::string& st) { set(st); }
             
             explicit path(int descriptor);
+            explicit path(const detail::stringvec_t& vec, bool absolute = false);
             explicit path(detail::stringlist_t list);
             
             inline std::size_t size() const { return static_cast<std::size_t>(m_path.size()); }
@@ -254,6 +255,16 @@ namespace filesystem {
                 return path(std::forward<P>(p)).remove();
             }
             
+            /// attempt to create a directory at this path. same USE-WITH-CAUTION caveats
+            /// apply as per `path::remove()` (q.v. note supra).
+            bool makedir() const;
+            
+            /// Static forwarder for path::makedir<P>(p) -- again, USE WITH CAUTION people
+            template <typename P> inline
+            static bool makedir(P&& p) {
+                return path(std::forward<P>(p)).makedir();
+            }
+            
             /// get the basename -- i.e. for path /yo/dogg/iheardyoulike/basenames.jpg
             /// ... the basename returned is "basenames.jpg"
             std::string basename() const {
@@ -265,6 +276,18 @@ namespace filesystem {
             template <typename P> inline
             static std::string basename(P&& p) {
                 return path(std::forward<P>(p)).basename();
+            }
+            
+            /// rename a file (using ::rename()),
+            /// specifying the new name with a new path instance
+            bool rename(const path& newpath);
+            bool rename(const char* newpath)        { return rename(path(newpath)); }
+            bool rename(const std::string& newpath) { return rename(path(newpath)); }
+            
+            /// Static forwarder for path::rename<P, Q>(p, q)
+            template <typename P, typename Q> inline
+            static bool rename(P&& p, Q&& q) {
+                return path(std::forward<P>(p)).rename(std::forward<Q>(q));
             }
             
             /// Attempt to return the string extention (WITHOUT THE LEADING ".")
@@ -316,7 +339,7 @@ namespace filesystem {
                         "path::join() expects a relative-path RHS");
                 }
                 
-                path result(*this);
+                path result(m_path, m_absolute);
                 size_type idx = 0,
                           max = other.m_path.size();
                 
@@ -328,9 +351,9 @@ namespace filesystem {
             
             /// operator overloads to join paths with slashes -- you can be like this:
             ///     path p = "/yo/dogg";
-            ///     path q = p / "iheard";
-            ///     path r = q / "youlike";
-            ///     path s = r / "appending";
+            ///     path q = p / "i-heard";
+            ///     path r = q / "you-like";
+            ///     path s = r / "to-join-paths";
             path operator/(const path& other) const        { return join(other); }
             path operator/(const char* other) const        { return join(path(other)); }
             path operator/(const std::string& other) const { return join(path(other)); }
@@ -346,7 +369,7 @@ namespace filesystem {
             
             /// Simple string-append for the trailing path segment
             path append(const std::string& appendix) const {
-                path out = path(*this);
+                path out(m_path, m_absolute);
                 out.m_path.back().append(appendix);
                 return out;
             }
