@@ -116,7 +116,7 @@ namespace im {
         
         using bitset_t = std::bitset<sizeof(Composite) * 8>;
         using array_t = std::array<Channel, N>;
-        using index_t = std::make_index_sequence<N>;
+        using sequence_t = std::make_index_sequence<N>;
         using channel_list_t = std::initializer_list<Channel>;
         using component_t = Components;
         using composite_t = Composite;
@@ -134,7 +134,7 @@ namespace im {
             {}
         
         explicit constexpr UniformColor(const Components c) noexcept {
-            component_assign_impl(c, index_t());
+            component_assign_impl(c, sequence_t());
         }
         
         explicit constexpr UniformColor(channel_list_t initlist) noexcept {
@@ -146,12 +146,12 @@ namespace im {
         }
         
         explicit constexpr UniformColor(array_t array) noexcept {
-            component_assign_impl(array.data(), index_t());
+            component_assign_impl(array.data(), sequence_t());
         }
         
         constexpr operator Composite() const noexcept { return composite; }
-        constexpr operator array_t() const noexcept { return array_impl(index_t()); }
-        const operator std::string() const { return string_impl(index_t()); }
+        constexpr operator array_t() const noexcept { return array_impl(sequence_t()); }
+        const operator std::string() const { return string_impl(sequence_t()); }
         
         constexpr Channel &operator[](std::size_t c) noexcept { return components[c]; }
         
@@ -185,19 +185,19 @@ namespace im {
         static constexpr std::size_t channels() noexcept { return N; }
         
         constexpr unsigned int distance(const UniformColor& rhs) const noexcept {
-            return distance_impl(rhs, 0, index_t());
+            return distance_impl(rhs, 0, sequence_t());
         }
         
         const std::string to_string() const {
             std::ostringstream stream;
             stream <<  "(" << detail::to_hex(composite)
-                   << ") " << string_impl(index_t())
+                   << ") " << string_impl(sequence_t())
                    << "";
             return stream.str();
         }
         
         array_t to_array() const {
-            return array_impl(index_t());
+            return array_impl(sequence_t());
         }
         
         private:

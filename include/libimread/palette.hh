@@ -39,7 +39,7 @@ namespace im {
         using composite_t = typename Color::composite_t;
         using string_array_t = std::array<std::string, N>;
         using array_t = std::array<component_t, N>;
-        using index_t = std::make_index_sequence<N>;
+        using sequence_t = std::make_index_sequence<N>;
         
         using channel_list_t = typename Color::channel_list_t;
         using channel_listlist_t = std::initializer_list<channel_list_t>;

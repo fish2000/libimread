@@ -223,7 +223,7 @@ namespace objc {
     struct arguments {
         static constexpr std::size_t argc = sizeof...(Args);
         using is_argument_list_t = std::true_type;
-        using index_t = std::make_index_sequence<argc>;
+        using sequence_t = std::make_index_sequence<argc>;
         using return_t = Return;
         using tuple_t = std::tuple<Args...>;
         using prebound_t = std::function<return_t(types::ID, types::selector, Args...)>;
@@ -271,9 +271,9 @@ namespace objc {
             inline auto send(types::ID self, types::selector op) const -> return_t {
                 if (!std::is_void<Return>::value) {
                     /// dead code elimination collapses this conditional
-                    return send_impl(self, op, index_t());
+                    return send_impl(self, op, sequence_t());
                 }
-                void_impl(self, op, index_t());
+                void_impl(self, op, sequence_t());
             }
         
         private:
