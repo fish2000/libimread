@@ -171,7 +171,7 @@ namespace objc {
             return objc::bridge<CFStringRef>(ns_str());
         }
         
-        friend std::ostream &operator<<(std::ostream& os, const objc::selector& s) {
+        friend std::ostream& operator<<(std::ostream& os, const objc::selector& s) {
             return os << "@selector( " << s.str() << " )";
         }
         
@@ -295,15 +295,21 @@ namespace objc {
         using arguments_t::args;
         
         types::selector op;
-        types::ID self;
+        types::ID __unsafe_unretained self;
         
         explicit message(types::ID s, types::selector o, Args&&... a)
             :arguments_t(a...), self(s), op(o)
             {
-                [self retain];
+                #if __has_feature(objc_arc)
+                    [self retain];
+                #endif
             }
         
-        virtual ~message() { [self release]; }
+        virtual ~message() {
+            #if __has_feature(objc_arc)
+                [self release];
+            #endif
+        }
         
         private:
             message(const message&);
@@ -486,8 +492,8 @@ namespace objc {
     
     template <typename OCType>
     struct object {
-        using object_t = typename std::remove_pointer_t<std::decay_t<OCType>>;
-        using pointer_t = OCType;
+        using pointer_t = typename std::decay_t<OCType> __unsafe_unretained;
+        using object_t = typename std::remove_pointer_t<pointer_t>;
         
         static_assert(objc::traits::is_object<OCType>::value,
                       "objc::object<OCType> requires a pointer to objc_object");
@@ -508,14 +514,14 @@ namespace objc {
         
         ~object() { release(); }
         
-        object &operator=(const object& other) {
-            if (this != &other) {
+        object& operator=(const object& other) {
+            if ([self isEqual:other.self] == NO) {
                 object(other).swap(*this);
             }
             return *this;
         }
         
-        object &operator=(pointer_t other) {
+        object& operator=(pointer_t other) {
             if ([self isEqual:other] == NO) {
                 object(other).swap(*this);
             }
@@ -548,9 +554,15 @@ namespace objc {
             return objc::to_bool([self respondsToSelector:s]);
         }
         
-        inline void retain() const      { if (self != nil) { [self retain]; } }
-        inline void release() const     { if (self != nil) { [self release]; } }
-        inline void autorelease() const { if (self != nil) { [self autorelease]; } }
+        #if __has_feature(objc_arc)
+            inline void retain() const      { [self retain]; }
+            inline void release() const     { [self release]; }
+            inline void autorelease() const { [self autorelease]; }
+        #else
+            inline void retain() const      {}
+            inline void release() const     {}
+            inline void autorelease() const {}
+        #endif
         
         template <typename ...Args>
         types::ID operator()(types::selector s, Args... args) {
@@ -577,7 +589,7 @@ namespace objc {
             return [[self description] STLString];
         }
         
-        friend std::ostream &operator<<(std::ostream &os, const object& friendly) {
+        friend std::ostream& operator<<(std::ostream& os, const object& friendly) {
             return os << "<" << friendly.classname()   << "> "
                       << "(" << friendly.description() << ") "
                       << "[" << std::hex << "0x"
@@ -626,12 +638,6 @@ namespace objc {
         static types::cls lookup(const char* s) {
             return ::objc_lookUpClass(s);
         }
-        // static types::cls lookup(NSString* s) {
-        //     return ::NSClassFromString(s);
-        // }
-        // static types::cls lookup(CFStringRef s) {
-        //     return ::NSClassFromString(objc::bridge<NSString*>(s));
-        // }
         
         private:
             object(void);

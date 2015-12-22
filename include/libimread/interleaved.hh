@@ -98,16 +98,6 @@ namespace im {
         constexpr std::size_t ndim() const { return D; }
         idx_t operator[](std::size_t idx) const { return indices[idx]; }
         
-        // bool operator==(const Index& other) {
-        //     return !std::memcmp(indices.data(),
-        //                         other.indices.data(),
-        //                         sizeof(idx_t) * D);
-        // }
-        //
-        // bool operator!=(const Index& other) {
-        //     return !(*this == other);
-        // }
-        
         void swap(Index& other) noexcept {
             using std::swap;
             swap(indices, other.indices);

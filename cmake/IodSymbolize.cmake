@@ -5,6 +5,8 @@
 # macro(ADD_IOD_SYMBOLS)
 # endmacro()
 
+include(FindPythonInterp)
+
 macro(IOD_SYMBOLIZE dir0 dir1 header)
 add_custom_command(
     OUTPUT ${header}
