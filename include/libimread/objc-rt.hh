@@ -132,7 +132,7 @@ namespace objc {
         selector(const objc::selector& other)
             :sel(other.sel)
             {}
-        selector(objc::selector&& other)
+        selector(objc::selector&& other) noexcept
             :sel(other.sel)
             {}
         
@@ -492,11 +492,13 @@ namespace objc {
     
     template <typename OCType>
     struct object {
-        using pointer_t = typename std::decay_t<OCType> __unsafe_unretained;
+        using pointer_t = typename std::decay_t<std::conditional_t<
+                                                std::is_pointer<OCType>::value, OCType,
+                                                             std::add_pointer_t<OCType>>> __unsafe_unretained;
         using object_t = typename std::remove_pointer_t<pointer_t>;
         
-        static_assert(objc::traits::is_object<OCType>::value,
-                      "objc::object<OCType> requires a pointer to objc_object");
+        static_assert(objc::traits::is_object<pointer_t>::value,
+                      "objc::object<OCType> requires an Objective-C object type");
         
         pointer_t self;
         

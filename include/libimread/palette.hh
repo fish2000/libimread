@@ -49,19 +49,19 @@ namespace im {
         std::set<Color> items;
         
         constexpr Palette() noexcept = default;
-        constexpr Palette(const Palette& other)
+        Palette(const Palette& other)
             :items(other.items)
             {}
-        constexpr Palette(Palette&& other) {
+        Palette(Palette&& other) noexcept {
             items.swap(other.items);
         }
         
         explicit constexpr Palette(composite_list_t initlist)     { add_impl(initlist); }
         explicit constexpr Palette(channel_listlist_t initlist)   { add_impl(initlist); }
-        Palette &operator=(const Palette& other)        { items = other.items;                      return *this; }
-        Palette &operator=(Palette&& other)             { items.clear(); items.swap(other.items);   return *this; }
-        Palette &operator=(composite_list_t initlist)   { items.clear(); add_impl(initlist);        return *this; }
-        Palette &operator=(channel_listlist_t initlist) { items.clear(); add_impl(initlist);        return *this; }
+        Palette& operator=(const Palette& other)        { items = other.items;                      return *this; }
+        Palette& operator=(Palette&& other) noexcept    { items.clear(); items.swap(other.items);   return *this; }
+        Palette& operator=(composite_list_t initlist)   { items.clear(); add_impl(initlist);        return *this; }
+        Palette& operator=(channel_listlist_t initlist) { items.clear(); add_impl(initlist);        return *this; }
         
         constexpr bool add(const nonvalue_t& nonvalue)            { return false; }
         constexpr bool add(const Color& color)                    { return items.insert(color).second; }

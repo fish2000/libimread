@@ -76,7 +76,7 @@ namespace im {
             :Index(other.indices)
             {}
         
-        Index(Index&& other)
+        Index(Index&& other) noexcept
             :Index(std::move(other.indices))
             {}
         
@@ -85,7 +85,7 @@ namespace im {
             return *this;
         }
         
-        Index& operator=(Index&& other) {
+        Index& operator=(Index&& other) noexcept {
             Index(other).swap(*this);
             return *this;
         }
@@ -161,6 +161,25 @@ namespace im {
         return out;
     }
     
+    template <std::size_t D, typename I,
+                             typename X = std::enable_if_t<
+                                          std::is_integral<I>::value>> inline
+    Index<D> operator+=(Index<D>& lhs, const I& rhs) {
+        for (std::size_t idx = 0; idx != D; ++idx) {
+            lhs.indices[idx] += rhs;
+        }
+        return lhs;
+    }
+    
+    template <std::size_t D, typename I,
+                             typename X = std::enable_if_t<
+                                          std::is_integral<I>::value>> inline
+    Index<D> operator+(const Index<D>& lhs, const I& rhs) {
+        Index<D> out = lhs;
+        out += rhs;
+        return out;
+    }
+    
     template <std::size_t D> inline
     Index<D> operator-=(Index<D>& lhs, const Index<D>& rhs) {
         for (std::size_t idx = 0; idx != D; ++idx) {
@@ -171,6 +190,25 @@ namespace im {
     
     template <std::size_t D> inline
     Index<D> operator-(const Index<D>& lhs, const Index<D>& rhs) {
+        Index<D> out = lhs;
+        out -= rhs;
+        return out;
+    }
+    
+    template <std::size_t D, typename I,
+                             typename X = std::enable_if_t<
+                                          std::is_integral<I>::value>> inline
+    Index<D> operator-=(Index<D>& lhs, const I& rhs) {
+        for (std::size_t idx = 0; idx != D; ++idx) {
+            lhs.indices[idx] -= rhs;
+        }
+        return lhs;
+    }
+    
+    template <std::size_t D, typename I,
+                             typename X = std::enable_if_t<
+                                          std::is_integral<I>::value>> inline
+    Index<D> operator-(const Index<D>& lhs, const I& rhs) {
         Index<D> out = lhs;
         out -= rhs;
         return out;
@@ -308,17 +346,17 @@ namespace im {
             /// NB: is this really necessary?
             virtual ~InterleavedImage() {}
             
-            InterleavedImage &operator=(const InterleavedImage& other) {
+            InterleavedImage& operator=(const InterleavedImage& other) {
                 InterleavedImage(other).swap(*this);
                 return *this;
             }
             
-            friend void swap(InterleavedImage& lhs, InterleavedImage& rhs) {
+            friend void swap(InterleavedImage& lhs, InterleavedImage& rhs) noexcept {
                 std::exchange(lhs.contents, rhs.contents);
                 std::exchange(lhs.meta,     rhs.meta);
             }
             
-            void swap(InterleavedImage& other) {
+            void swap(InterleavedImage& other) noexcept {
                 using std::swap;
                 swap(other.contents, this->contents);
                 swap(other.meta,     this->meta);
@@ -375,7 +413,7 @@ namespace im {
                     }
                 }
             
-            channel_t &operator()(int x, int y = 0, int z = 0, int w = 0) {
+            channel_t& operator()(int x, int y = 0, int z = 0, int w = 0) {
                 channel_t *ptr = contents.get();
                 x -= meta.min[0];
                 y -= meta.min[1];
@@ -388,7 +426,7 @@ namespace im {
                 return ptr[s0 * x + s1 * y + s2 * z + s3 * w];
             }
             
-            const channel_t &operator()(int x, int y = 0, int z = 0, int w = 0) const {
+            const channel_t& operator()(int x, int y = 0, int z = 0, int w = 0) const {
                 channel_t *ptr = contents.get();
                 x -= meta.min[0];
                 y -= meta.min[1];

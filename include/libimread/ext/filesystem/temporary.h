@@ -5,6 +5,7 @@
 #define LIBIMREAD_EXT_FILESYSTEM_TEMPORARY_H_
 
 #include <string>
+#include <fstream>
 #include <cstring>
 #include <cstdlib>
 
@@ -17,44 +18,81 @@ namespace filesystem {
     struct NamedTemporaryFile {
         /// As per the eponymous tempfile.NamedTemporaryFile,
         /// of the Python standard library. NOW WITH RAII!!
+        using openmode = std::ios_base::openmode;
         
         static constexpr char tfp[] = FILESYSTEM_TEMP_FILENAME;
         static constexpr char tfs[] = FILESYSTEM_TEMP_SUFFIX;
         
-        mode mm;
+        int descriptor;
+        bool cleanup;
+        bool deallocate;
         char* suffix;
         char* prefix;
-        bool cleanup;
-        path filepath;
-        int descriptor;
+        filesystem::mode filemode;
+        filesystem::path filepath;
+        std::fstream stream;
         
-        explicit NamedTemporaryFile(const char* s = tfs, const char* p = tfp,
-                                    bool c = true, mode m = mode::WRITE, const path& td = path::tmp())
-                                        :mm(m), cleanup(c), suffix(::strdup(s)), prefix(::strdup(p))
+        explicit NamedTemporaryFile(const char* s = tfs, const char* p = tfp, bool c = true,
+                                    filesystem::mode m = filesystem::mode::WRITE,
+                                    const filesystem::path& td = filesystem::path::tmp())
+                                        :filemode(m), cleanup(c), deallocate(true)
+                                        ,suffix(::strdup(s)), prefix(::strdup(p))
                                         ,filepath(td/std::strcat(prefix, s))
+                                        ,stream()
                                         {
                                             create();
                                         }
-        explicit NamedTemporaryFile(const std::string& s, const std::string& p = tfp,
-                                    bool c = true, mode m = mode::WRITE, const path& td = path::tmp())
-                                        :mm(m), cleanup(c), suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
+        explicit NamedTemporaryFile(const std::string& s, const std::string& p = tfp, bool c = true,
+                                    filesystem::mode m = filesystem::mode::WRITE,
+                                    const filesystem::path& td = filesystem::path::tmp())
+                                        :filemode(m), cleanup(c), deallocate(true)
+                                        ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
                                         ,filepath(td/(p+s))
+                                        ,stream()
                                         {
                                             create();
                                         }
+        
+        NamedTemporaryFile(const NamedTemporaryFile& other)
+            :descriptor(other.descriptor)
+            ,filemode(other.filemode), cleanup(other.cleanup), deallocate(true)
+            ,suffix(::strdup(other.suffix)), prefix(::strdup(other.prefix))
+            ,filepath(other.filepath)
+            ,stream()
+            {}
+        
+        NamedTemporaryFile(NamedTemporaryFile&& other) noexcept
+            :descriptor(other.descriptor)
+            ,filemode(other.filemode), cleanup(other.cleanup), deallocate(true)
+            ,suffix(std::move(other.suffix)), prefix(std::move(other.prefix))
+            ,filepath(std::move(other.filepath))
+            ,stream(std::move(other.stream))
+            {
+                other.deallocate = false;
+            }
         
         inline std::string   str() const noexcept  { return filepath.str(); }
         inline const char* c_str() const noexcept  { return filepath.c_str(); }
         operator std::string() const noexcept      { return str(); }
         operator const char*() const noexcept      { return c_str(); }
         
+        inline openmode mode() const noexcept {
+            return filemode == filesystem::mode::WRITE ? std::ios::out : std::ios::in;
+        }
+        inline openmode mode(openmode additionally) const noexcept {
+            return this->mode() | additionally;
+        }
+        
+        bool open(openmode additionally = std::ios::trunc);
+        bool reopen(openmode additionally = std::ios::in);
+        bool close();
+        
         bool create();
         bool remove();
         
         ~NamedTemporaryFile() {
-            if (cleanup) { remove(); }
-            free(suffix);
-            free(prefix);
+            if (cleanup) { close(); remove(); }
+            if (deallocate) { free(suffix); free(prefix); }
         }
     
     };
@@ -67,19 +105,36 @@ namespace filesystem {
         
         char* tpl;
         bool cleanup;
-        path tplpath;
-        path dirpath;
+        bool deallocate;
+        filesystem::path tplpath;
+        filesystem::path dirpath;
         
         explicit TemporaryDirectory(const char* t = tdp, bool c = true)
-            :tpl(::strdup(t)), cleanup(c)
+            :tpl(::strdup(t)), cleanup(c), deallocate(true)
             {
                 create();
             }
         
         explicit TemporaryDirectory(const std::string& t, bool c = true)
-            :tpl(::strdup(t.c_str())), cleanup(c)
+            :tpl(::strdup(t.c_str())), cleanup(c), deallocate(true)
             {
                 create();
+            }
+        
+        TemporaryDirectory(const TemporaryDirectory& other)
+            :tpl(::strdup(other.tpl))
+            ,cleanup(other.cleanup), deallocate(true)
+            ,tplpath(other.tplpath)
+            ,dirpath(other.dirpath)
+            {}
+        
+        TemporaryDirectory(TemporaryDirectory&& other) noexcept
+            :tpl(std::move(other.tpl))
+            ,cleanup(other.cleanup), deallocate(true)
+            ,tplpath(std::move(other.tplpath))
+            ,dirpath(std::move(other.dirpath))
+            {
+                other.deallocate = false;
             }
         
         inline std::string   str() const noexcept   { return dirpath.str(); }
@@ -100,7 +155,7 @@ namespace filesystem {
         
         ~TemporaryDirectory() {
             if (cleanup) { clean(); remove(); }
-            free(tpl);
+            if (deallocate) { free(tpl); }
         }
     
     };

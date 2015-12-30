@@ -171,7 +171,7 @@ namespace filesystem {
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
-    bool path::compare(const path& other) const {
+    bool path::compare(const path& other) const noexcept {
         return bool(hash() == other.hash());
     }
     
@@ -376,7 +376,7 @@ namespace filesystem {
     }
     
     /// calculate the hash value for the path
-    std::size_t path::hash() const {
+    std::size_t path::hash() const noexcept {
         std::size_t seed = static_cast<std::size_t>(is_absolute());
         return std::accumulate(m_path.begin(), m_path.end(),
                                seed, detail::rehasher_t());
@@ -411,7 +411,7 @@ namespace filesystem {
 namespace std {
     
     template <>
-    void swap(filesystem::path& p0, filesystem::path& p1) {
+    void swap(filesystem::path& p0, filesystem::path& p1) noexcept {
         p0.swap(p1);
     }
     

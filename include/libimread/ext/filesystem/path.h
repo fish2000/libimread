@@ -85,7 +85,7 @@ namespace filesystem {
                 ,m_absolute(p.m_absolute)
                 {}
             
-            path(path&& p)
+            path(path&& p) noexcept
                 :m_type(native_path)
                 ,m_path(std::move(p.m_path))
                 ,m_absolute(p.m_absolute)
@@ -121,7 +121,7 @@ namespace filesystem {
             bool compare_debug(const path& other) const;        /// legacy, full of printf-debuggery
             bool compare_lexical(const path& other) const;      /// compare using std::strcmp(),
                                                                 /// fails for nonexistant paths
-            bool compare(const path& other) const;              /// compare using fast-as-fuck path::hash()
+            bool compare(const path& other) const noexcept;     /// compare using fast-as-fuck path::hash()
             
             /// static forwarder for path::compare<P>(p)
             template <typename P, typename Q> inline
@@ -441,7 +441,7 @@ namespace filesystem {
                 }
                 return *this;
             }
-            path &operator=(path&& p) {
+            path &operator=(path&& p) noexcept {
                 m_type = native_path;
                 m_absolute = p.m_absolute;
                 if (!compare(p, *this)) {
@@ -456,7 +456,7 @@ namespace filesystem {
             }
             
             /// calculate the hash value for the path
-            std::size_t hash() const;
+            std::size_t hash() const noexcept;
             
             /// Static forwarder for the hash function
             template <typename P> inline
@@ -607,7 +607,7 @@ namespace filesystem {
 namespace std {
     
     template <>
-    void swap(filesystem::path& p0, filesystem::path& p1);
+    void swap(filesystem::path& p0, filesystem::path& p1) noexcept;
     
     /// std::hash specialization for filesystem::path
     /// ... following the recipe found here:

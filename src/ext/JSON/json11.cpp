@@ -163,7 +163,7 @@ Json::Json(const Json& that) {
 }
 
 /** Move constructor. */
-Json::Json(Json&& that) {
+Json::Json(Json&& that) noexcept {
     root = that.root;
     that.root = nullptr;
 }
@@ -181,7 +181,7 @@ Json& Json::operator=(const Json& that) {
 }
 
 /** Move assignment */
-Json& Json::operator=(Json&& that) {
+Json& Json::operator=(Json&& that) noexcept {
     root->unref();
     root = that.root;
     that.root = nullptr;

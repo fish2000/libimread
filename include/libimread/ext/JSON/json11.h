@@ -304,13 +304,13 @@ class Json {
         /// constructors
         Json() { (root = &Node::null)->refcnt++; }
         Json(const Json& that);
-        Json(Json&& that);
+        Json(Json&& that) noexcept;
         Json(std::istream&, bool full=true); // parse
         virtual ~Json();
         
         /// assignment
         Json &operator=(const Json&);
-        Json &operator=(Json&&);
+        Json &operator=(Json&&) noexcept;
         
         /// more constructors
         Json(int x)                 { (root = new Number(x))->refcnt++; }

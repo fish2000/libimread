@@ -21,10 +21,32 @@ namespace filesystem {
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfp, FILESYSTEM_TEMP_FILENAME);
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfs, FILESYSTEM_TEMP_SUFFIX);
     
+    bool NamedTemporaryFile::open(openmode additionally) {
+        stream.open(filepath.str(), this->mode(additionally));
+        if (!stream.is_open()) {
+            stream.clear();
+            stream.open(filepath.str(), std::ios::out); /// TOUCH!
+            stream.close();
+            stream.open(filepath.str());
+        }
+        return stream.good();
+    }
+    
+    bool NamedTemporaryFile::reopen(openmode additionally) {
+        close();
+        return open(additionally);
+    }
+    
+    bool NamedTemporaryFile::close() {
+        if (!stream.is_open()) { return false; }
+        stream.close();
+        return true;
+    }
+    
     bool NamedTemporaryFile::create() {
         descriptor = ::mkstemps(const_cast<char*>(filepath.c_str()), std::strlen(suffix));
         if (descriptor == -1) { return false; }
-        filepath = path(descriptor);
+        filepath = filesystem::path(descriptor);
         if (::close(descriptor) == -1) {
             imread_raise(FileSystemError,
                 "NamedTemporaryFile::create(): error while closing descriptor:",
@@ -43,13 +65,13 @@ namespace filesystem {
     
     bool TemporaryDirectory::create() {
         if (!pystring::endswith(tpl, "XXX")) {
-            tplpath = path::join(path::gettmp(), path(tpl)).append("-XXXXXX");
+            tplpath = path::join(filesystem::path::gettmp(), filesystem::path(tpl)).append("-XXXXXX");
         } else {
-            tplpath = path::join(path::gettmp(), path(tpl));
+            tplpath = path::join(filesystem::path::gettmp(), filesystem::path(tpl));
         }
         const char* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
         if (dtemp == NULL) { return false; }
-        dirpath = path(dtemp);
+        dirpath = filesystem::path(dtemp);
         return true;
     }
     
@@ -57,7 +79,7 @@ namespace filesystem {
         /// scrub all files
         /// N.B. this will not recurse -- keep yr structures FLAAAT
         if (!dirpath.exists()) { return false; }
-        path abspath = dirpath.make_absolute();
+        filesystem::path abspath = dirpath.make_absolute();
         directory cleand = detail::ddopen(abspath.c_str());
         bool out = true;
         
@@ -83,12 +105,12 @@ namespace filesystem {
         if (!dirpath.exists()) { return false; }
         bool out = true;
         detail::pathvec_t directorylist;
-        path abspath = dirpath.make_absolute();
+        filesystem::path abspath = dirpath.make_absolute();
         
         /// walk_visitor_t recursively removes files while saving directories
         /// as full paths in the `directorylist` vector
         detail::walk_visitor_t walk_visitor = [&out, &directorylist](
-                                    const path& p,
+                                    const filesystem::path& p,
                                     detail::stringvec_t& directories,
                                     detail::stringvec_t& files) {
             if (!directories.empty()) {
@@ -109,7 +131,7 @@ namespace filesystem {
         /// remove emptied directories per saved list
         if (!directorylist.empty()) {
             std::for_each(directorylist.begin(), directorylist.end(),
-                   [&out](const path& p) { out &= p.remove(); });
+                   [&out](const filesystem::path& p) { out &= p.remove(); });
         }
         
         /// return as per logical sum of `remove()` call successes

@@ -16,6 +16,7 @@ namespace {
     using im::fs::path;
     using im::fs::switchdir;
     using im::fs::resolver;
+    using im::fs::NamedTemporaryFile;
     using im::fs::TemporaryDirectory;
     
     TEST_CASE("[filesystem] Check if `basedir` is a directory",
@@ -221,12 +222,11 @@ namespace {
     }
     
     TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct",
-              "[fs-temporarydirectory-raii]") {
+              "[fs-temporarydirectory-raii]")
+    {
         TemporaryDirectory td("test-td");
         (td.dirpath/"test-td-subdir0").makedir();
         (td.dirpath/"test-td-subdir1").makedir();
-        
-        
         
         // td.dirpath.walk([](const path& p,
         //                    std::vector<std::string>& directories,
@@ -241,5 +241,19 @@ namespace {
         //     });
         // });
     }
-
+    
+    
+    TEST_CASE("[filesystem] Test the NamedTemporaryFile RAII struct's stream interface",
+              "[fs-namedtemporaryfile-raii-stream-interface]")
+    {
+        NamedTemporaryFile tf(".txt");
+        CHECK(tf.open());
+        tf.stream << "Yo Dogg" << std::endl;
+        tf.stream << "I Heard You Like" << std::endl;
+        tf.stream << "The C++ Standard Library's" << std::endl;
+        tf.stream << "Weird-Ass File I/O Interface" << std::endl;
+        CHECK(tf.close());
+    }
+    
+    
 }
