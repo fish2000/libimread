@@ -27,87 +27,41 @@ namespace objc {
         
         types::selector sel;
         
-        explicit selector(const std::string& name)
-            :sel(::sel_registerName(name.c_str()))
-            {}
-        explicit selector(const char* name)
-            :sel(::sel_registerName(name))
-            {}
-        explicit selector(NSString* name)
-            :sel(::NSSelectorFromString(name))
-            {}
+        explicit selector(const std::string& name);
+        explicit selector(const char* name);
+        explicit selector(NSString* name);
         
-        selector(types::selector s)
-            :sel(s)
-            {}
-        selector(const objc::selector& other)
-            :sel(other.sel)
-            {}
-        selector(objc::selector&& other) noexcept
-            :sel(other.sel)
-            {}
+        selector(types::selector s);
+        selector(const objc::selector& other);
+        selector(objc::selector&& other) noexcept;
         
-        objc::selector& operator=(const objc::selector& other) {
-            objc::selector(other).swap(*this);
-            return *this;
-        }
-        objc::selector& operator=(types::selector other) {
-            objc::selector(other).swap(*this);
-            return *this;
-        }
+        objc::selector& operator=(const objc::selector& other);
+        objc::selector& operator=(types::selector other);
         
-        bool operator==(const objc::selector& s) const {
-            return objc::to_bool(::sel_isEqual(sel, s.sel));
-        }
-        bool operator!=(const objc::selector& s) const {
-            return !objc::to_bool(::sel_isEqual(sel, s.sel));
-        }
-        bool operator==(const types::selector& s) const {
-            return objc::to_bool(::sel_isEqual(sel, s));
-        }
-        bool operator!=(const types::selector& s) const {
-            return !objc::to_bool(::sel_isEqual(sel, s));
-        }
+        bool operator==(const objc::selector& s) const;
+        bool operator!=(const objc::selector& s) const;
+        bool operator==(const types::selector& s) const;
+        bool operator!=(const types::selector& s) const;
         
-        inline const char* c_str() const {
-            return ::sel_getName(sel);
-        }
-        inline std::string str() const {
-            return c_str();
-        }
-        inline NSString* ns_str() const {
-            return ::NSStringFromSelector(sel);
-        }
-        inline CFStringRef cf_str() const {
-            return objc::bridge<CFStringRef>(ns_str());
-        }
+        const char* c_str() const;
+        std::string str() const;
+        NSString* ns_str() const;
+        CFStringRef cf_str() const;
         
         friend std::ostream& operator<<(std::ostream& os, const objc::selector& s) {
             return os << "@selector( " << s.str() << " )";
         }
         
-        std::size_t hash() const {
-            std::hash<std::string> hasher;
-            return hasher(str());
-        }
+        std::size_t hash() const;
+        void swap(objc::selector& other) noexcept;
+        void swap(types::selector& other) noexcept;
         
-        void swap(objc::selector& other) noexcept {
-            using std::swap;
-            using objc::swap;
-            swap(this->sel, other.sel);
-        }
-        void swap(types::selector& other) noexcept {
-            using std::swap;
-            using objc::swap;
-            swap(this->sel, other);
-        }
-        
-        operator types::selector() const { return sel; }
-        operator std::string() const { return str(); }
-        operator const char*() const { return c_str(); }
-        operator char*() const { return const_cast<char*>(c_str()); }
-        operator NSString*() const { return ::NSStringFromSelector(sel); }
-        operator CFStringRef() const { return objc::bridge<CFStringRef>(ns_str()); }
+        operator types::selector() const;
+        operator std::string() const;
+        operator const char*() const;
+        operator char*() const;
+        operator NSString*() const;
+        operator CFStringRef() const;
         
         static objc::selector register_name(const std::string& name) {
             return objc::selector(name);
@@ -130,9 +84,6 @@ namespace objc {
 /// ... e.g. create an inline wrapper for a `yoDogg:` selector like so:
 ///     objc::selector yodogg = "yoDogg:"_SEL;
 
-inline objc::selector operator"" _SEL(const char* name) {
-    return objc::selector(name);
-}
-
+objc::selector operator"" _SEL(const char* name);
 
 #endif /// LIBIMREAD_OBJC_RT_SELECTOR_HH

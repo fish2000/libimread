@@ -210,8 +210,9 @@ set(srcs
     ${srcs_dir}/process/jitresize.cpp
     ${srcs_dir}/process/neuquant.cpp
     
-    ${srcs_dir}/objc-rt/types.mm
     ${srcs_dir}/objc-rt/namespace-std.mm
+    ${srcs_dir}/objc-rt/selector.mm
+    ${srcs_dir}/objc-rt/types.mm
     
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp
