@@ -15,6 +15,7 @@
 #include <type_traits>
 
 #include "types.hh"
+#import <Foundation/Foundation.h> /// This shit needs to skedaddle
 
 namespace objc {
     

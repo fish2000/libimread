@@ -38,7 +38,8 @@ namespace im {
         stringify(S s) {
             const objc::id self(s);
             if (self[@"STLString"]) {
-                return [*self STLString];
+                // return [*self STLString];
+                return [*self UTF8String];
             } else if (self[@"UTF8String"]) {
                 return [*self UTF8String];
             }
