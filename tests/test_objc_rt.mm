@@ -5,7 +5,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/objc-rt.hh>
+#include <libimread/objc-rt/objc-rt.hh>
 #include <libimread/fs.hh>
 
 #include "include/catch.hpp"

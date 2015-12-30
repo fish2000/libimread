@@ -1,7 +1,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/objc-rt.hh>
+#include <libimread/objc-rt/objc-rt.hh>
 
 #import "IMTestReceiver.h"
 

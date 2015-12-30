@@ -2,7 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #import <libimread/ext/classes/AXInterleavedImageRep.hh>
-#import <libimread/objc-rt.hh>
+#import <libimread/objc-rt/objc-rt.hh>
 
 #import <Foundation/Foundation.h>
 #import <AppKit/NSGraphics.h>

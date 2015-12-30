@@ -8,7 +8,7 @@
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
-#include <libimread/objc-rt.hh>
+#include <libimread/objc-rt/objc-rt.hh>
 #endif
 
 #include <libimread/libimread.hpp>

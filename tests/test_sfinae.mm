@@ -1,7 +1,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
-#include <libimread/objc-rt.hh>
+#include <libimread/objc-rt/objc-rt.hh>
 
 #include <libimread/IO/png.hh>
 #include <libimread/IO/jpeg.hh>

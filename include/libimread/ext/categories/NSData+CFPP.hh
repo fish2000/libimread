@@ -15,7 +15,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
 #include <libimread/ext/categories/NSString+STL.hh>
-#include <libimread/objc-rt.hh>
+#include <libimread/objc-rt/objc-rt.hh>
 
 namespace im {
     

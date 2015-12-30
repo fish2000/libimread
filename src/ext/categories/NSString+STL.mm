@@ -5,7 +5,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSString+STL.hh>
-#include <libimread/objc-rt.hh>
+#include <libimread/objc-rt/objc-rt.hh>
 
 #ifdef __OBJC__
 
@@ -17,7 +17,7 @@
 
 + (instancetype) stringWithSTLWideString:(const std::wstring&)wstr {
     unsigned siz = wstr.size() * sizeof(wchar_t);
-    const char *bytes = reinterpret_cast<const char*>(wstr.data());
+    const char* bytes = reinterpret_cast<const char*>(wstr.data());
     return [[NSString alloc] initWithBytes:bytes
                                     length:siz
                                   encoding:kSTLWideStringEncoding];
@@ -29,14 +29,14 @@
 
 - initWithSTLWideString:(const std::wstring&)wstr {
     unsigned siz = wstr.size() * sizeof(wchar_t);
-    const char *bytes = reinterpret_cast<const char*>(wstr.data());
+    const char* bytes = reinterpret_cast<const char*>(wstr.data());
     return [self initWithBytes:bytes
                         length:siz
                       encoding:kSTLWideStringEncoding];
 }
 
 - (std::string) STLString {
-    return [self STLStringUsingEncoding:NSUTF8StringEncoding];
+    return [self cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
 - (std::string) STLStringUsingEncoding:(NSStringEncoding)encoding {
@@ -44,7 +44,7 @@
 }
 
 - (std::wstring) STLWideString {
-    NSData *enc = [self dataUsingEncoding:kSTLWideStringEncoding];
+    NSData* enc = [self dataUsingEncoding:kSTLWideStringEncoding];
     return std::wstring(
         static_cast<const wchar_t*>([enc bytes]),
         static_cast<unsigned>([enc length]) / sizeof(wchar_t));

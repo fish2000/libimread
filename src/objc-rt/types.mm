@@ -2,7 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
-#include <libimread/objc-rt.hh>
+#include <libimread/objc-rt/types.hh>
 
 namespace objc {
     
@@ -11,20 +11,5 @@ namespace objc {
     
     // __attribute__((__always_inline__))
     bool to_bool(types::boolean value) { return bool(value == YES); }
-    
-}
-
-namespace std {
-    
-    template <>
-    void swap(objc::selector& s0, objc::selector& s1) {
-        s0.swap(s1);
-    }
-    
-    template <>
-    void swap(objc::id& s0, objc::id& s1) {
-        s0.swap(s1);
-    }
-    
     
 }

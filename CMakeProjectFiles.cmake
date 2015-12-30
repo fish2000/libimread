@@ -133,6 +133,16 @@ set(hdrs
     ${hdrs_dir}/process/neuquant.hh
     ${hdrs_dir}/process/neuquant.inl
     
+    ${hdrs_dir}/objc-rt/objc-rt.hh
+    ${hdrs_dir}/objc-rt/types.hh
+    ${hdrs_dir}/objc-rt/selector.hh
+    ${hdrs_dir}/objc-rt/message-args.hh
+    ${hdrs_dir}/objc-rt/traits.hh
+    ${hdrs_dir}/objc-rt/object.hh
+    ${hdrs_dir}/objc-rt/message.hh
+    ${hdrs_dir}/objc-rt/namespace-std.hh
+    ${hdrs_dir}/objc-rt/namespace-im.hh
+    
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
     ${hdrs_dir}/color.hh
@@ -147,7 +157,7 @@ set(hdrs
     ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/interleaved.hh
     ${hdrs_dir}/memory.hh
-    ${hdrs_dir}/objc-rt.hh
+    # ${hdrs_dir}/objc-rt.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/palette.hh
     ${hdrs_dir}/pixels.hh
@@ -200,6 +210,9 @@ set(srcs
     ${srcs_dir}/process/jitresize.cpp
     ${srcs_dir}/process/neuquant.cpp
     
+    ${srcs_dir}/objc-rt/types.mm
+    ${srcs_dir}/objc-rt/namespace-std.mm
+    
     ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/base.cpp
     ${srcs_dir}/color.cpp
@@ -214,7 +227,7 @@ set(srcs
     ${srcs_dir}/imageformat.cpp
     ${srcs_dir}/interleaved.cpp
     ${srcs_dir}/memory.cpp
-    ${srcs_dir}/objc-rt.mm
+    # ${srcs_dir}/objc-rt.mm
     ${srcs_dir}/options.cpp
     ${srcs_dir}/palette.cpp
     ${srcs_dir}/symbols.cpp
