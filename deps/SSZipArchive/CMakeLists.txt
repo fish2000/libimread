@@ -16,7 +16,9 @@ include_directories(
     ${ZLIB_INCLUDE_DIR}
     ${BZIP2_INCLUDE_DIR}
     ${FOUNDATION_INCLUDE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR})
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/minizip
+    ${CMAKE_CURRENT_SOURCE_DIR}/aes)
 
 add_definitions(
     -Wall -Werror -fstack-protector-all
@@ -35,15 +37,38 @@ set(srcs
     "minizip/ioapi.c"
     "minizip/mztools.c"
     "minizip/unzip.c"
-    "minizip/zip.c")
+    "minizip/zip.c"
+    "aes/aescrypt.c"
+    "aes/aeskey.c"
+    "aes/aestab.c"
+    "aes/entropy.c"
+    "aes/fileenc.c"
+    "aes/hmac.c"
+    "aes/prng.c"
+    "aes/pwd2key.c"
+    "aes/sha1.c")
 
 set(hdrs
+    "ZipArchive.h"
     "SSZipArchive.h"
     "minizip/crypt.h"
     "minizip/ioapi.h"
     "minizip/mztools.h"
     "minizip/unzip.h"
-    "minizip/zip.h")
+    "minizip/zip.h"
+    "aes/aes_via_ace.h"
+    "aes/aes.h"
+    "aes/aesopt.h"
+    "aes/aestab.h"
+    "aes/brg_endian.h"
+    "aes/brg_types.h"
+    "aes/entropy.h"
+    "aes/fileenc.h"
+    "aes/hmac.h"
+    "aes/prng.h"
+    "aes/pwd2key.h"
+    "aes/sha1.h")
+    
 
 # add_library(libsszip STATIC ${srcs} ${hdrs})
 add_library(sszip SHARED ${srcs} ${hdrs})
@@ -60,4 +85,6 @@ install(TARGETS sszip DESTINATION lib)
 install(DIRECTORY SSZipArchive/ DESTINATION include/libsszip
     FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY SSZipArchive/minizip/ DESTINATION include/libsszip/minizip
+    FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY SSZipArchive/aes/ DESTINATION include/libsszip/aes
     FILES_MATCHING PATTERN "*.h")
