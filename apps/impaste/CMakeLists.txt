@@ -24,6 +24,7 @@ add_definitions(
     -Wall -Werror -O3
     -std=c++14 -stdlib=libc++
     -fstack-protector-all
+    -fobjc-arc
     -fobjc-abi-version=3
     -fobjc-call-cxx-cdtors
     -mtune=native -fstrict-aliasing
