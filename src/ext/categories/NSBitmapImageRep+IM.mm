@@ -9,6 +9,8 @@ using im::byte;
 using im::Image;
 using im::ImageFactory;
 
+#ifdef __OBJC__
+
 @implementation NSBitmapImageRep (AXBitmapImageRepAdditions)
 
 + (NSBitmapImageRep *) imageRepWithByteVector:(const std::vector<byte>&)byteVector {
@@ -61,3 +63,4 @@ using im::ImageFactory;
 
 @end
 
+#endif /// __OBJC__

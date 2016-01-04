@@ -7,7 +7,6 @@
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSData+IM.hh>
 #include <libimread/ext/categories/NSString+STL.hh>
-// #include <libimread/objc-rt/objc-rt.hh>
 
 using im::byte;
 using im::byte_source;

@@ -24,11 +24,11 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
 
 @interface AXCoreGraphicsImageRep : NSImageRep {
     CGImageRef cgImage;
-    NSString *colorSpaceName;
+    NSString* colorSpaceName;
     id<NSObject> heldObject;
 }
 
-- initWithImageRef:(CGImageRef)myImage colorSpaceName:(NSString *)space;
+- initWithImageRef:(CGImageRef)myImage colorSpaceName:(NSString*)space;
 - (void)setColorSpaceHolder:(id<NSObject>)anObject;
 - (void)setImage:(CGImageRef)newImage;
 @end

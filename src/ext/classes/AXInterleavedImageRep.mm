@@ -1,9 +1,10 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#import <libimread/ext/classes/AXInterleavedImageRep.hh>
-#import <libimread/objc-rt/objc-rt.hh>
+#include <libimread/ext/classes/AXInterleavedImageRep.hh>
+#include <libimread/objc-rt/types.hh>
 
+#ifdef __OBJC__
 #import <Foundation/Foundation.h>
 #import <AppKit/NSGraphics.h>
 #import <AppKit/NSGraphicsContext.h>
@@ -20,7 +21,7 @@
 }
 
 + (instancetype) imageRepWithInterleaved:(const InterleavedImage&)interleaved
-                          colorSpaceName:(NSString *)space {
+                          colorSpaceName:(NSString*)space {
     return [[AXInterleavedImageRep alloc] initWithInterleaved:interleaved
                                                colorSpaceName:space];
 }
@@ -55,7 +56,7 @@ CGImageRef CGImageFromInterleaved(const InterleavedImage& interleaved,
         interleaved,
         CGColorSpaceCreateDeviceRGB());
     
-    NSString *space = objc::bridge<NSString*>(
+    NSString* space = objc::bridge<NSString*>(
         kCGColorSpaceGenericRGB);
     
     return [self initWithImageRef:imageref
@@ -63,7 +64,7 @@ CGImageRef CGImageFromInterleaved(const InterleavedImage& interleaved,
 }
 
 - initWithInterleaved:(const InterleavedImage&)interleaved
-       colorSpaceName:(NSString *)space {
+       colorSpaceName:(NSString*)space {
     
     if (!(self = [super init])) { return nil; }
     interleavedImage = interleaved;
@@ -89,6 +90,8 @@ CGImageRef CGImageFromInterleaved(const InterleavedImage& interleaved,
 }
 
 @end
+
+#endif /// __OBJC__
 
 // /// Init and dealloc
 // - initWithImageRef:(CGImageRef)myImage colorSpaceName:(NSString *)space {

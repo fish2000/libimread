@@ -4,14 +4,13 @@
 #ifndef LIBIMREAD_EXT_CATEGORIES_NSURL_PLUS_IM_HH_
 #define LIBIMREAD_EXT_CATEGORIES_NSURL_PLUS_IM_HH_
 
-#include <string>
-
 #ifdef __OBJC__
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <Cocoa/Cocoa.h>
 #endif /// __OBJC__
 
+#include <string>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>

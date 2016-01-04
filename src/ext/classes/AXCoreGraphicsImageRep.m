@@ -10,10 +10,11 @@
 
 #import <libimread/ext/classes/AXCoreGraphicsImageRep.h>
 
+#ifdef __OBJC__
 #import <Foundation/Foundation.h>
 #import <AppKit/NSGraphics.h>
 #import <AppKit/NSGraphicsContext.h>
-
+#endif /// __OBJC__
 
 inline CGRect CGRectWithRect(NSRect rect) {
     CGRect out;
@@ -33,6 +34,8 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return out;
 }
 
+#ifdef __OBJC__
+
 @implementation AXCoreGraphicsImageRep
 
 + (void)initialize {
@@ -41,7 +44,7 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
 }
 
 /// Init and dealloc
-- initWithImageRef:(CGImageRef)myImage colorSpaceName:(NSString *)space {
+- initWithImageRef:(CGImageRef)myImage colorSpaceName:(NSString*)space {
     if (!(self = [super init])) { return nil; }
     
     cgImage = myImage;
@@ -88,7 +91,7 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return 0;
 }
 
-- (NSString *)colorSpaceName {
+- (NSString*)colorSpaceName {
     return colorSpaceName;
 }
 
@@ -153,3 +156,5 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
 }
 
 @end
+
+#endif /// __OBJC__

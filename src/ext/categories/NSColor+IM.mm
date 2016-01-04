@@ -3,7 +3,6 @@
 
 #include <array>
 #include <algorithm>
-
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSColor+IM.hh>
 

@@ -5,26 +5,27 @@
 #define LPC_APPLE_HH_INCLUDE_GUARD_
 
 #ifdef __OBJC__
-#import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
-#endif
-
-#include <memory>
-#include <cstdio>
-#include <cstring>
+#endif /// __OBJC__
 
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
 
+#ifndef __OBJC__
+
+/// forward-declare CFTypeRef type
+struct CFTypeRef;
+
+/// forward-declare CFRelease()
+void CFRelease(CFTypeRef ref);
+
+#endif
+
 namespace im {
     
-    #ifdef __OBJC__
     namespace cf {
-        
-        /// NOTE TO SELF: replace this with CF++ and the like;
-        /// see also objc-rt.hh
         
         template <typename C = CFTypeRef>
         struct unref {
@@ -37,7 +38,6 @@ namespace im {
         using REF = std::unique_ptr<typename std::decay<Ref>::type, unref<Ref>>;
         
     }
-    #endif
     
     class NSImageFormat : public ImageFormat {
         

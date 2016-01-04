@@ -16,6 +16,8 @@ namespace objc {
     }
 }
 
+#ifdef __OBJC__
+
 @implementation NSURL (IMURLAdditions)
 
 + (instancetype) fileURLWithFilesystemPath:(const filesystem::path&)path {
@@ -70,3 +72,5 @@ namespace objc {
 }
 
 @end
+
+#endif /// __OBJC__

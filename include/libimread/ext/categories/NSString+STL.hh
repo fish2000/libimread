@@ -4,11 +4,9 @@
 #ifndef LIBIMREAD_EXT_CATEGORIES_NSSTRING_PLUS_STL_HH_
 #define LIBIMREAD_EXT_CATEGORIES_NSSTRING_PLUS_STL_HH_
 
-#include <string>
-
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
-
+#include <string>
 #include <libimread/libimread.hpp>
 
 #ifndef FUNC_NAME_WTF
