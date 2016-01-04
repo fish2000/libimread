@@ -1,18 +1,21 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <cstring>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSBitmapImageRep+IM.hh>
 
-using namespace im;
+using im::byte;
+using im::Image;
+using im::ImageFactory;
 
-@implementation NSBitmapImageRep (IMBitmapImageRepAdditions)
+@implementation NSBitmapImageRep (AXBitmapImageRepAdditions)
 
 + (NSBitmapImageRep *) imageRepWithByteVector:(const std::vector<byte>&)byteVector {
-    NSBitmapImageRep *rep;
+    NSBitmapImageRep* rep;
     @autoreleasepool {
-        NSData *datum;
-        datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
+        NSData* datum;
+        datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
                                        length:(NSInteger)byteVector.size()];
         rep = [[NSBitmapImageRep alloc] initWithData:datum];
         #if !__has_feature(objc_arc)
@@ -23,8 +26,8 @@ using namespace im;
 }
 
 - initWithByteVector:(const std::vector<byte>&)byteVector {
-    NSData *datum;
-    datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
+    NSData* datum;
+    datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
                                    length:(NSInteger)byteVector.size()];
     [self initWithData:datum];
     #if !__has_feature(objc_arc)
@@ -44,11 +47,13 @@ using namespace im;
         bps, height, width, channels));
     
     if ([self bitmapFormat] & NSFloatingPointSamplesBitmapFormat) {
-        float *frowp = output->rowp_as<float>(0);
-        std::memcpy(frowp, (float *)[self bitmapData], siz*height*width*channels);
+        float* frowp = output->rowp_as<float>(0);
+        std::memcpy(frowp, reinterpret_cast<float*>([self bitmapData]),
+                           siz*height*width*channels);
     } else {
-        byte *rowp = output->rowp_as<byte>(0);
-        std::memcpy(rowp, static_cast<byte*>([self bitmapData]), siz*height*width*channels);
+        byte* irowp = output->rowp_as<byte>(0);
+        std::memcpy(irowp, static_cast<byte*>([self bitmapData]),
+                           siz*height*width*channels);
     }
     
     return output;

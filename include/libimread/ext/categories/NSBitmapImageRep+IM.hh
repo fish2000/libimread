@@ -6,17 +6,17 @@
 
 #include <vector>
 #include <memory>
-#include <cstdio>
-#include <cstring>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 
-using namespace im;
+using im::byte;
+using im::Image;
+using im::ImageFactory;
 
-@interface NSBitmapImageRep (IMBitmapImageRepAdditions)
+@interface NSBitmapImageRep (AXBitmapImageRepAdditions)
 + (NSBitmapImageRep *)     imageRepWithByteVector:(const std::vector<byte>&)byteVector;
 -                          initWithByteVector:(const std::vector<byte>&)byteVector;
 - (std::unique_ptr<Image>) imageUsingImageFactory:(ImageFactory*)factory;

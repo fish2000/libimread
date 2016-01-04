@@ -3,8 +3,18 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSURL+IM.hh>
-#include <libimread/ext/categories/NSString+STL.hh>
-#include <libimread/objc-rt/objc-rt.hh>
+#include <libimread/objc-rt/types.hh>
+
+namespace objc {
+    namespace image {
+        DECLARE_CONSTEXPR_CHAR(suffix_t<NSTIFFFileType>::str,       "tiff");
+        DECLARE_CONSTEXPR_CHAR(suffix_t<NSBMPFileType>::str,        "bmp");
+        DECLARE_CONSTEXPR_CHAR(suffix_t<NSGIFFileType>::str,        "gif");
+        DECLARE_CONSTEXPR_CHAR(suffix_t<NSJPEGFileType>::str,       "jpg");
+        DECLARE_CONSTEXPR_CHAR(suffix_t<NSPNGFileType>::str,        "png");
+        DECLARE_CONSTEXPR_CHAR(suffix_t<NSJPEG2000FileType>::str,   "jp2");
+    }
+}
 
 @implementation NSURL (IMURLAdditions)
 
@@ -25,15 +35,15 @@
 }
 
 - (instancetype) URLByAppendingFilesystemPath:(const filesystem::path&)path {
-    NSURL *url = [self copy];
-    for (auto component : path.components()) {
+    NSURL* url = [self copy];
+    for (auto const& component : path.components()) {
         url = [url URLByAppendingSTLPathComponent:component];
     }
     return url;
 }
 
 - (BOOL) openWithApplication:(NSString *)application {
-    NSString *filePath = [[NSString alloc] initWithUTF8String:[self fileSystemRepresentation]];
+    NSString* filePath = [[NSString alloc] initWithUTF8String:[self fileSystemRepresentation]];
     return [[NSWorkspace sharedWorkspace] openFile:filePath
                                    withApplication:application];
 }

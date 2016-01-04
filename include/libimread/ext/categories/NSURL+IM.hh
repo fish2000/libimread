@@ -13,23 +13,24 @@
 #endif /// __OBJC__
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/categories/NSString+STL.hh>
-#include <libimread/objc-rt/objc-rt.hh>
 
 namespace objc {
     
     namespace image {
         
         template <NSBitmapImageFileType t>
-        struct suffix;
+        struct suffix_t;
         
-        #define DEFINE_SUFFIX(endstring, nstype)                                \
-        template <>                                                             \
-        struct suffix<nstype> {                                                 \
-            using NSImageType = NSBitmapImageFileType;                          \
-            static constexpr char const* str = endstring;                       \
-            static constexpr NSImageType type = nstype;                         \
+        #define DEFINE_SUFFIX(endstring, nstype)                                        \
+        template <>                                                                     \
+        struct suffix_t<nstype> {                                                       \
+            using NSImageType = NSBitmapImageFileType;                                  \
+            static constexpr std::size_t N = im::static_strlen(endstring);              \
+            static constexpr char const str[N] = endstring;                             \
+            static constexpr NSImageType type = nstype;                                 \
         };
         
         DEFINE_SUFFIX("tiff", NSTIFFFileType);
@@ -38,6 +39,19 @@ namespace objc {
         DEFINE_SUFFIX("jpg",  NSJPEGFileType);
         DEFINE_SUFFIX("png",  NSPNGFileType);
         DEFINE_SUFFIX("jp2",  NSJPEG2000FileType);
+        
+        template <NSBitmapImageFileType nstype>
+        char const* suffix_value = suffix_t<nstype>::str;
+        
+        inline std::string suffix(NSBitmapImageFileType nstype) {
+            if (nstype == NSTIFFFileType)     { return suffix_t<NSTIFFFileType>::str;     }
+            if (nstype == NSBMPFileType)      { return suffix_t<NSBMPFileType>::str;      }
+            if (nstype == NSGIFFileType)      { return suffix_t<NSGIFFileType>::str;      }
+            if (nstype == NSJPEGFileType)     { return suffix_t<NSJPEGFileType>::str;     }
+            if (nstype == NSPNGFileType)      { return suffix_t<NSPNGFileType>::str;      }
+            if (nstype == NSJPEG2000FileType) { return suffix_t<NSJPEG2000FileType>::str; }
+            return "";
+        }
         
         inline NSInteger filetype(std::string const& suffix) {
             if (suffix == "tiff" || suffix == ".tiff" ||

@@ -124,10 +124,10 @@ namespace filesystem {
         char temp[PATH_MAX];
         if (::realpath(c_str(), temp) == NULL) {
             imread_raise(FileSystemError,
-                "FATAL internal error raised during path::make_absolute() call to ::realpath():",
-            FF("\t%s (%d)", std::strerror(errno), errno),
                 "In reference to path value:",
-            FF("\t%s", c_str()));
+                c_str(),
+                "FATAL internal error raised during path::make_absolute() call to ::realpath():",
+                std::strerror(errno));
         }
         return path(temp);
     }
