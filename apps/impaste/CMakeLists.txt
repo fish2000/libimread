@@ -21,7 +21,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_definitions(
-    -Wall -Werror -O3
+    -Wall -Wno-reorder -O3
     -std=c++14 -stdlib=libc++
     -fstack-protector-all
     -fobjc-arc

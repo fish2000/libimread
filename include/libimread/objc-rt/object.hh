@@ -39,9 +39,15 @@ namespace objc {
     
     template <typename OCType>
     struct object {
-        using pointer_t = typename std::decay_t<std::conditional_t<
-                                                std::is_pointer<OCType>::value, OCType,
-                                                             std::add_pointer_t<OCType>>> __unsafe_unretained;
+        #if !__has_feature(objc_arc)
+            using pointer_t = typename std::decay_t<std::conditional_t<
+                                                    std::is_pointer<OCType>::value, OCType,
+                                                                 std::add_pointer_t<OCType>>> __unsafe_unretained;
+        #else
+            using pointer_t = typename std::decay_t<std::conditional_t<
+                                                    std::is_pointer<OCType>::value, OCType,
+                                                                 std::add_pointer_t<OCType>>>;
+        #endif
         using object_t = typename std::remove_pointer_t<pointer_t>;
         
         static_assert(objc::traits::is_object<pointer_t>::value,
@@ -103,7 +109,7 @@ namespace objc {
             return objc::to_bool([self respondsToSelector:s]);
         }
         
-        #if __has_feature(objc_arc)
+        #if !__has_feature(objc_arc)
             inline void retain() const      { [self retain]; }
             inline void release() const     { [self release]; }
             inline void autorelease() const { [self autorelease]; }

@@ -1,20 +1,17 @@
 
+#include "impaste.hh"
 #include <cstdlib>
-
 #include <map>
 #include <atomic>
 #include <utility>
 #include <iostream>
 #include <algorithm>
-
-#include "impaste.hh"
 #include "docopt.h"
 
 /// return value as static global (ugh I know I know)
 static std::atomic<int> return_value(EXIT_SUCCESS);
 
 /// App delegate
-
 @implementation AXAppDelegate
 - (void) applicationWillTerminate:(NSApplication *)application {
     
@@ -25,10 +22,20 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
 }
 @end
 
+/// Base thread implementation
+@implementation AXThread
+@synthesize options;
+- (instancetype) initWithOptions:(NSDictionary *)optionsDict {
+    self = [self init];
+    self.options = [optionsDict copy];
+    return self;
+}
+@end
+
 /// NSThread declarations and definitions,
 /// one(ish) for each CLI option
 
-@implementation AXCheckThread : NSThread
+@implementation AXCheckThread : AXThread
 - (void) main {
     
     std::cout << "Checking default NSPasteboard for images ..."
@@ -57,7 +64,7 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
 }
 @end
 
-@implementation AXDryRunThread : NSThread
+@implementation AXDryRunThread : AXThread
 - (void) main {
     
     std::cout << "Dry run not implemented yet, exiting"
@@ -71,7 +78,7 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
 }
 @end
 
-@implementation AXImageSaveThread : NSThread
+@implementation AXImageSaveThread : AXThread
 - (void) main {
     
     std::cout << "Image save not implemented yet, exiting"
@@ -87,7 +94,6 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
 
 
 /// The docopt help string defines the options available:
-
 static const char USAGE[] = R"(Paste image data to imgur.com or to a file
 
     Usage:
@@ -116,6 +122,7 @@ int main(int argc, const char** argv) {
     using optmap_t = std::map<std::string, value_t>;
     using optpair_t = std::pair<std::string, value_t>;
     value_t truth(1);
+    value_t empty(NULL);
     optmap_t args;
     optmap_t raw_args = docopt::docopt(USAGE, { argv + 1, argv + argc },
                                        true, /// show help
@@ -154,9 +161,14 @@ int main(int argc, const char** argv) {
                 /* DO DRY RUN */
                 objc::run_thread<AXDryRunThread>();
                 break;
-            } else if (arg.first == "--output") {
+            }
+        }
+        if (arg.second != empty) {
+            if (arg.first == "--output") {
                 /* DO FILE OUTPUT */
-                objc::run_thread<AXImageSaveThread>();
+                objc::run_thread<AXImageSaveThread>(@{
+                    @"path" : [NSString stringWithSTLString:arg.second.asString()]
+                });
                 break;
             }
         }

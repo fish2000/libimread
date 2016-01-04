@@ -6,60 +6,51 @@
 
 #include <string>
 #include <type_traits>
-
-#ifdef __APPLE__
+#include <exception>
+#include <stdexcept>
+#include <libimread/libimread.hpp>
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
-#endif
-
-#include <libimread/libimread.hpp>
+#import <libimread/ext/categories/NSString+STL.hh>
+#import <libimread/ext/categories/NSURL+IM.hh>
 
 /// printffery
 #define IMPASTE_DEBUG 0
 
 /// App delegate only implements `applicationWillTerminate:`
-
 @interface AXAppDelegate : NSObject <NSApplicationDelegate> {}
 - (void) applicationWillTerminate:(NSApplication *)application;
 @end
 
+/// Base thread class with options
+@interface AXThread : NSThread {}
+@property (nonatomic, strong) NSDictionary* options;
+- (instancetype) initWithOptions:(NSDictionary *)optionsDict;
+@end
+
+
 /// NSThread declarations and definitions,
 /// one(ish) for each CLI option
 
-@interface AXCheckThread : NSThread {}
+@interface AXCheckThread : AXThread {}
 - (void) main;
 @end
 
-@interface AXDryRunThread : NSThread {}
+@interface AXDryRunThread : AXThread {}
 - (void) main;
 @end
 
-@interface AXImageSaveThread : NSThread {}
+@interface AXImageSaveThread : AXThread {}
 - (void) main;
 @end
-
-/// boilerplate reduction strategem one:
-/// macro + naming convention
-
-#define AXTHREADRUN(threadName)                                                 \
-    @autoreleasepool {                                                          \
-        [NSApplication sharedApplication];                                      \
-        [[[AX##threadName##Thread alloc] init] start];                          \
-        [NSApp run];                                                            \
-    };
-
-@class AXAppDelegate;
 
 namespace objc {
     
-    /// boilerplate reduction strategem two:
-    /// inlined function template
-    
     template <typename OCThreadType> inline
-    void run_thread(void) {
+    void run_thread(NSDictionary* options = @{}) {
         @autoreleasepool {
             [NSApplication sharedApplication];
-            [[[OCThreadType alloc] init] start];
+            [[[OCThreadType alloc] initWithOptions:options] start];
             AXAppDelegate* delegate = [[AXAppDelegate alloc] init];
             NSApp.delegate = delegate;
             [NSApp run];

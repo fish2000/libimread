@@ -42,9 +42,21 @@
     return [self openWithApplication:@"Preview.app"];
 }
 
+- (BOOL) isImage {
+    return objc::boolean(
+        objc::image::filetype(
+            [[self.pathExtension lowercaseString] STLString]) != -1);
+}
+
+- (NSBitmapImageFileType) imageFileType {
+    return static_cast<NSBitmapImageFileType>(
+        objc::image::filetype(
+            [[self.pathExtension lowercaseString] STLString]));
+}
+
 - (filesystem::path) filesystemPath {
     filesystem::path out([self fileSystemRepresentation]);
-    return std::move(out);
+    return out;
 }
 
 @end

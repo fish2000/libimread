@@ -254,7 +254,7 @@ DECLARE_IMREAD_ERROR_TYPE(FormatNotFound,           "File Format Not Found");
 DECLARE_IMREAD_ERROR_SUBTYPE(JSONParseError,
                              std::runtime_error,    "JSON parsing error");
 DECLARE_IMREAD_ERROR_SUBTYPE(JSONLogicError,
-                            std::logic_error,       "JSON operator logic error");
+                             std::logic_error,      "JSON operator logic error");
 
 DECLARE_IMREAD_ERROR_TYPE(JSONUseError,             "JSON library internal error");
 DECLARE_IMREAD_ERROR_TYPE(JSONInvalidSchema,        "JSON schema parsing error");
