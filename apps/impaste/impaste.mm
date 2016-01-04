@@ -1,14 +1,29 @@
 
+#include <cstdlib>
+
 #include <map>
 #include <atomic>
-#include <string>
+#include <utility>
 #include <iostream>
+#include <algorithm>
 
 #include "impaste.hh"
 #include "docopt.h"
 
 /// return value as static global (ugh I know I know)
 static std::atomic<int> return_value(EXIT_SUCCESS);
+
+/// App delegate
+
+@implementation AXAppDelegate
+- (void) applicationWillTerminate:(NSApplication *)application {
+    
+    std::cout << "Exiting with status: "
+              << return_value.load()
+              << std::endl;
+    
+}
+@end
 
 /// NSThread declarations and definitions,
 /// one(ish) for each CLI option
@@ -76,9 +91,9 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
 static const char USAGE[] = R"(Paste image data to imgur.com or to a file
 
     Usage:
-        impaste       (-c      | --check)
-        impaste       (-d      | --dry-run)
-        impaste       (-o FILE | --output=FILE)
+        impaste       (-c      | --check)           [options]
+        impaste       (-d      | --dry-run)         [options]
+        impaste       (-o FILE | --output=FILE)     [options]
         impaste       (-h      | --help)
         impaste                  --version
     
@@ -87,6 +102,7 @@ static const char USAGE[] = R"(Paste image data to imgur.com or to a file
         -d --dry-run        Don't actually do anything, but pretend.
         -o FILE,
         --output=FILE       Save pasteboard image to a file.
+        -v --verbose        Print more information.
         -h --help           Show this help screen.
         --version           Show version.
 
@@ -146,6 +162,7 @@ int main(int argc, const char** argv) {
         }
     }
     
+    /// doesn't get called from threads
     std::exit(return_value.load());
 
 }

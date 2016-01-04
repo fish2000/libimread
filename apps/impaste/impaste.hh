@@ -4,6 +4,7 @@
 #ifndef APPS_IMPASTE_HH_
 #define APPS_IMPASTE_HH_
 
+#include <string>
 #include <type_traits>
 
 #ifdef __APPLE__
@@ -16,16 +17,25 @@
 /// printffery
 #define IMPASTE_DEBUG 0
 
+/// App delegate only implements `applicationWillTerminate:`
+
+@interface AXAppDelegate : NSObject <NSApplicationDelegate> {}
+- (void) applicationWillTerminate:(NSApplication *)application;
+@end
+
 /// NSThread declarations and definitions,
 /// one(ish) for each CLI option
 
 @interface AXCheckThread : NSThread {}
+- (void) main;
 @end
 
 @interface AXDryRunThread : NSThread {}
+- (void) main;
 @end
 
 @interface AXImageSaveThread : NSThread {}
+- (void) main;
 @end
 
 /// boilerplate reduction strategem one:
@@ -38,6 +48,7 @@
         [NSApp run];                                                            \
     };
 
+@class AXAppDelegate;
 
 namespace objc {
     
@@ -49,6 +60,8 @@ namespace objc {
         @autoreleasepool {
             [NSApplication sharedApplication];
             [[[OCThreadType alloc] init] start];
+            AXAppDelegate* delegate = [[AXAppDelegate alloc] init];
+            NSApp.delegate = delegate;
             [NSApp run];
         };
     }
@@ -75,6 +88,19 @@ namespace objc {
             return out == nil ? nil : out[0];
         }
         
+        template <typename ...OCTypes>
+        BOOL copy_to(NSPasteboard* board, OCTypes... objects) noexcept {
+            if (!board) { board = [NSPasteboard generalPasteboard]; }
+            __attribute__((__unused__))
+            NSInteger changecount = [board clearContents];
+            return [board writeObjects:@[ objects... ]];
+        }
+        
+        template <typename ...OCTypes> inline
+        BOOL copy(OCTypes... objects) noexcept {
+            return copy_to<OCTypes...>([NSPasteboard generalPasteboard],
+                                        objects...);
+        }
         
     }
     
