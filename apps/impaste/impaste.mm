@@ -13,19 +13,20 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
 
 /// App delegate
 @implementation AXAppDelegate
-- (void) applicationWillTerminate:(NSApplication *)application {
+- (void) applicationWillTerminate:(NSApplication*)application {
     
     std::cout << "Exiting with status: "
               << return_value.load()
               << std::endl;
     
+    std::exit(return_value.load());
 }
 @end
 
 /// Base thread implementation
 @implementation AXThread
 @synthesize options;
-- (instancetype) initWithOptions:(NSDictionary *)optionsDict {
+- (instancetype) initWithOptions:(NSDictionary*)optionsDict {
     self = [self init];
     self.options = [optionsDict copy];
     return self;
@@ -70,7 +71,7 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
     std::cout << "Dry run not implemented yet, exiting"
               << std::endl;
     return_value.store(EXIT_FAILURE);
-    
+
     /// exit from thread
     [NSApp terminate:self];
     return;
@@ -81,11 +82,62 @@ static std::atomic<int> return_value(EXIT_SUCCESS);
 @implementation AXImageSaveThread : AXThread
 - (void) main {
     
-    std::cout << "Image save not implemented yet, exiting"
-              << std::endl;
-    return_value.store(EXIT_FAILURE);
+    BOOL ok = objc::appkit::can_paste<NSImage>();
     
-    /// exit from thread
+    if (!ok) {
+        std::cout << "[error] No image data was found on the pasteboard"
+                  << std::endl;
+        return_value.store(EXIT_FAILURE);
+        [NSApp terminate:self];
+        return;
+    }
+    
+    NSString* pathstring = self.options[@"path"];
+    NSURL* pathurl = [NSURL fileURLWithPath:pathstring.stringByExpandingTildeInPath];
+    filesystem::path abspath = [pathurl filesystemPath].make_absolute();
+    
+    if (abspath.exists()) {
+        std::cout << "[error] File already exists at path: "
+                  << [pathstring STLString]
+                  << " (" << abspath << ")"
+                  << std::endl;
+        return_value.store(EXIT_FAILURE);
+        [NSApp terminate:self];
+        return;
+    }
+    
+    if (![pathurl isImage]) {
+        std::cout << "[error] Can't determine output format from filename"
+                  << std::endl;
+        return_value.store(EXIT_FAILURE);
+        [NSApp terminate:self];
+        return;
+    }
+    
+    NSImage* pasted = objc::appkit::paste<NSImage>();
+    NSBitmapImageRep* bitmap = [[NSBitmapImageRep alloc] initWithData:[pasted TIFFRepresentation]];
+    NSData* data = [bitmap representationUsingType:[pathurl imageFileType]
+                                        properties:@{}];
+    
+    std::cout << "Saving "
+              << [[pathurl.pathExtension uppercaseString] STLString]
+              << " image to path: "
+              << [pathstring STLString]
+              << " (" << abspath << ")"
+              << std::endl;
+    
+    BOOL saved = [data writeToURL:pathurl atomically:YES];
+    
+    if (saved) {
+        std::cout << "Success!"
+                  << std::endl;
+        return_value.store(EXIT_SUCCESS);
+    } else {
+        std::cout << "[error] Failure when writing image data"
+                  << std::endl;
+        return_value.store(EXIT_FAILURE);
+    }
+    
     [NSApp terminate:self];
     return;
     

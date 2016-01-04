@@ -24,15 +24,23 @@ namespace im {
             NSDataSource(NSData *d)
                 :data(d), pos(0)
                 {
-                    [data retain];
+                    #if !__has_feature(objc_arc)
+                        [data retain];
+                    #endif
                 }
             NSDataSource(NSMutableData *d)
-                :data(objc::bridge<NSData*>(d)), pos(0)
+                :data((NSData*)d), pos(0)
                 {
-                    [data retain];
+                    #if !__has_feature(objc_arc)
+                        [data retain];
+                    #endif
                 }
             
-            virtual ~NSDataSource() { [data release]; }
+            virtual ~NSDataSource() {
+                #if !__has_feature(objc_arc)
+                    [data release];
+                #endif
+            }
             
             virtual std::size_t read(byte *buffer, std::size_t n) {
                 if (pos + n > data.length) { n = data.length-pos; }
@@ -56,10 +64,16 @@ namespace im {
             NSDataSink(NSMutableData *d)
                 :data(d), pos(0)
                 {
-                    [data retain];
+                    #if !__has_feature(objc_arc)
+                        [data retain];
+                    #endif
                 }
             
-            virtual ~NSDataSink() { [data release]; }
+            virtual ~NSDataSink() {
+                #if !__has_feature(objc_arc)
+                    [data release];
+                #endif
+            }
             
             virtual bool can_seek() const noexcept { return true; }
             virtual std::size_t seek_absolute(std::size_t p) { return pos = p; }

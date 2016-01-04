@@ -13,19 +13,22 @@
 #import <AppKit/AppKit.h>
 #import <libimread/ext/categories/NSString+STL.hh>
 #import <libimread/ext/categories/NSURL+IM.hh>
+#import <libimread/ext/categories/NSBitmapImageRep+IM.hh>
+#import <libimread/ext/categories/NSData+CFPP.hh>
+#include <libimread/ext/filesystem/path.h>
 
 /// printffery
 #define IMPASTE_DEBUG 0
 
 /// App delegate only implements `applicationWillTerminate:`
 @interface AXAppDelegate : NSObject <NSApplicationDelegate> {}
-- (void) applicationWillTerminate:(NSApplication *)application;
+- (void) applicationWillTerminate:(NSApplication*)application;
 @end
 
 /// Base thread class with options
 @interface AXThread : NSThread {}
 @property (nonatomic, strong) NSDictionary* options;
-- (instancetype) initWithOptions:(NSDictionary *)optionsDict;
+- (instancetype) initWithOptions:(NSDictionary*)optionsDict;
 @end
 
 
