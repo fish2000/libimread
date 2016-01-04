@@ -1,9 +1,7 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#include <memory>
 #include <algorithm>
-
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSData+IM.hh>
 #include <libimread/ext/categories/NSString+STL.hh>
@@ -39,10 +37,6 @@ using im::NSDataSink;
     return datum;
 }
 
-- (NSDataSource) dataSource {
-    return NSDataSource(self);
-}
-
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink {
     return static_cast<NSUInteger>(byteSink->write((byte*)self.bytes,
                                                    (std::size_t)self.length));
@@ -54,22 +48,16 @@ using im::NSDataSink;
                                                    (std::size_t)bytes));
 }
 
-// + (NSData *) dataWithCFData:(const CF::Data&)cfdata {
-//     CF::Data out(cfdata);
-//     return objc::bridge<NSData*>(out.GetCFObject());
-// }
-
-// - (CF::Data) cf {
-//     return CF::Data(objc::bridge<CFDataRef>(self));
-// }
-
+- (std::unique_ptr<NSDataSource>) dataSource {
+    return std::make_unique<NSDataSource>(self);
+}
 
 @end
 
 @implementation NSMutableData (AXMutableDataAdditions)
 
-- (NSDataSink) dataSink {
-    return NSDataSink(self);
+- (std::unique_ptr<NSDataSink>) dataSink {
+    return std::make_unique<NSDataSink>(self);
 }
 
 @end

@@ -4,14 +4,14 @@
 #ifndef LIBIMREAD_EXT_CATEGORIES_NSDATA_PLUS_CFPP_HH_
 #define LIBIMREAD_EXT_CATEGORIES_NSDATA_PLUS_CFPP_HH_
 
-#include <cstdlib>
-#include <vector>
-
 #ifdef __OBJC__
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 #endif /// __OBJC__
 
+#include <cstdlib>
+#include <memory>
+#include <vector>
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
 #include <libimread/ext/categories/NSString+STL.hh>
@@ -111,17 +111,14 @@ using im::NSDataSink;
 + (NSData *)            dataWithByteSource:(byte_source*)byteSource;
 + (NSData *)            dataWithByteSource:(byte_source*)byteSource
                                     length:(NSUInteger)bytes;
-- (NSDataSource)        dataSource;
 - (NSUInteger)          writeUsingByteSink:(byte_sink*)byteSink;
 - (NSUInteger)          writeUsingByteSink:(byte_sink*)byteSink
                                     length:(NSUInteger)bytes;
-
-// + (NSData *)            dataWithCFData:(const CF::Data&)cfdata;
-// - (CF::Data)            cf;
+- (std::unique_ptr<NSDataSource>) dataSource;
 @end
 
 @interface NSMutableData (AXMutableDataAdditions)
-- (NSDataSink)          dataSink;
+- (std::unique_ptr<NSDataSink>) dataSink;
 @end
 
 #endif /// __OBJC__
