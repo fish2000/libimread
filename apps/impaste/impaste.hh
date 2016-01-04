@@ -14,7 +14,7 @@
 #import <libimread/ext/categories/NSString+STL.hh>
 #import <libimread/ext/categories/NSURL+IM.hh>
 #import <libimread/ext/categories/NSBitmapImageRep+IM.hh>
-#import <libimread/ext/categories/NSData+CFPP.hh>
+#import <libimread/ext/categories/NSData+IM.hh>
 #include <libimread/ext/filesystem/path.h>
 
 /// printffery

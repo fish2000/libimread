@@ -88,7 +88,7 @@ set(hdrs
     
     ${hdrs_dir}/ext/categories/NSBitmapImageRep+IM.hh
     ${hdrs_dir}/ext/categories/NSColor+IM.hh
-    ${hdrs_dir}/ext/categories/NSData+CFPP.hh
+    ${hdrs_dir}/ext/categories/NSData+IM.hh
     ${hdrs_dir}/ext/categories/NSString+STL.hh
     ${hdrs_dir}/ext/categories/NSURL+IM.hh
     ${hdrs_dir}/ext/classes/AXCoreGraphicsImageRep.h
@@ -157,7 +157,6 @@ set(hdrs
     ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/interleaved.hh
     ${hdrs_dir}/memory.hh
-    # ${hdrs_dir}/objc-rt.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/palette.hh
     ${hdrs_dir}/pixels.hh
@@ -172,7 +171,7 @@ set(hdrs
 set(srcs
     ${srcs_dir}/ext/categories/NSBitmapImageRep+IM.mm
     ${srcs_dir}/ext/categories/NSColor+IM.mm
-    ${srcs_dir}/ext/categories/NSData+CFPP.mm
+    ${srcs_dir}/ext/categories/NSData+IM.mm
     ${srcs_dir}/ext/categories/NSString+STL.mm
     ${srcs_dir}/ext/categories/NSURL+IM.mm
     ${srcs_dir}/ext/classes/AXCoreGraphicsImageRep.m
@@ -228,7 +227,6 @@ set(srcs
     ${srcs_dir}/imageformat.cpp
     ${srcs_dir}/interleaved.cpp
     ${srcs_dir}/memory.cpp
-    # ${srcs_dir}/objc-rt.mm
     ${srcs_dir}/options.cpp
     ${srcs_dir}/palette.cpp
     ${srcs_dir}/symbols.cpp
@@ -278,18 +276,18 @@ IF(APPLE)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
-    FIND_LIBRARY(CFPP_LIBRARY CF++
-        PATHS /usr/local/Frameworks)
+    # FIND_LIBRARY(CFPP_LIBRARY CF++
+    #     PATHS /usr/local/Frameworks)
+    
     MARK_AS_ADVANCED(SYSTEM_LIBRARY
                      COCOA_LIBRARY
                      FOUNDATION_LIBRARY
-                     COREFOUNDATION_LIBRARY
-                     CFPP_LIBRARY)
-    SET(EXTRA_LIBS
-        ${EXTRA_LIBS}
+                     COREFOUNDATION_LIBRARY)
+    SET(EXTRA_LIBS ${EXTRA_LIBS}
         ${SYSTEM_LIBRARY}
-        ${COCOA_LIBRARY} ${FOUNDATION_LIBRARY}
-        ${COREFOUNDATION_LIBRARY} ${CFPP_LIBRARY})
+        ${COCOA_LIBRARY}
+        ${FOUNDATION_LIBRARY}
+        ${COREFOUNDATION_LIBRARY})
     
 ENDIF(APPLE)
 

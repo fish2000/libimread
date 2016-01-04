@@ -1,21 +1,26 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#include <array>
+#include <memory>
 #include <algorithm>
 
 #include <libimread/libimread.hpp>
-#include <libimread/ext/categories/NSData+CFPP.hh>
+#include <libimread/ext/categories/NSData+IM.hh>
 #include <libimread/ext/categories/NSString+STL.hh>
-#include <libimread/objc-rt/objc-rt.hh>
+// #include <libimread/objc-rt/objc-rt.hh>
 
-using namespace im;
+using im::byte;
+using im::byte_source;
+using im::byte_sink;
+using im::NSDataSource;
+using im::NSDataSink;
 
-@implementation NSData (IMDataAdditions)
+
+@implementation NSData (AXDataAdditions)
 
 + (NSData *) dataWithByteVector:(const std::vector<byte>&)byteVector {
-    NSData *datum;
-    datum = [[NSData alloc] initWithBytes:(const void *)&byteVector[0]
+    NSData* datum;
+    datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
                                    length:(NSInteger)byteVector.size()];
     return datum;
 }
@@ -26,22 +31,13 @@ using namespace im;
 
 + (NSData *) dataWithByteSource:(byte_source*)byteSource
                          length:(NSUInteger)bytes {
-    NSData *datum;
+    NSData* datum;
     std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);
     int idx = byteSource->read(buffer.get(),
                                static_cast<std::size_t>(bytes));
-    datum = [[NSData alloc] initWithBytes:(const void *)buffer.get()
+    datum = [[NSData alloc] initWithBytes:(const void*)buffer.get()
                                    length:(NSInteger)bytes];
     return datum;
-}
-
-+ (NSData *) dataWithCFData:(const CF::Data&)cfdata {
-    CF::Data out(cfdata);
-    return objc::bridge<NSData*>(out.GetCFObject());
-}
-
-- (CF::Data) cf {
-    return CF::Data(objc::bridge<CFDataRef>(self));
 }
 
 - (NSDataSource) dataSource {
@@ -49,19 +45,29 @@ using namespace im;
 }
 
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink {
-    return static_cast<NSUInteger>(byteSink->write((byte *)self.bytes,
+    return static_cast<NSUInteger>(byteSink->write((byte*)self.bytes,
                                                    (std::size_t)self.length));
 }
 
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink
                            length:(NSUInteger)bytes {
-    return static_cast<NSUInteger>(byteSink->write((byte *)self.bytes,
+    return static_cast<NSUInteger>(byteSink->write((byte*)self.bytes,
                                                    (std::size_t)bytes));
 }
 
+// + (NSData *) dataWithCFData:(const CF::Data&)cfdata {
+//     CF::Data out(cfdata);
+//     return objc::bridge<NSData*>(out.GetCFObject());
+// }
+
+// - (CF::Data) cf {
+//     return CF::Data(objc::bridge<CFDataRef>(self));
+// }
+
+
 @end
 
-@implementation NSMutableData (IMMutableDataAdditions)
+@implementation NSMutableData (AXMutableDataAdditions)
 
 - (NSDataSink) dataSink {
     return NSDataSink(self);

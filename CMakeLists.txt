@@ -173,7 +173,6 @@ configure_file(
 #     ${HDF5_LIBRARIES})
 target_link_libraries(imread
     guid maBlockClosure
-    # docopt
     sszip png z
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
@@ -204,7 +203,6 @@ add_dependencies("test_data_header" imread)
 add_dependencies(imread_tests "test_data_header")
 add_dependencies(imread_tests "iod_symbolize")
 add_dependencies(imread_tests "guid")
-# add_dependencies(imread_tests "docopt")
 add_dependencies(imread_tests "maBlockClosure")
 add_dependencies(imread_tests "sszip")
 add_dependencies(imread_tests "imread")
@@ -212,7 +210,6 @@ link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries(imread_tests
     imread sszip
     maBlockClosure
-    # docopt
     guid png z
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
