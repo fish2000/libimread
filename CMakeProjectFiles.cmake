@@ -89,6 +89,7 @@ set(hdrs
     ${hdrs_dir}/ext/categories/NSBitmapImageRep+IM.hh
     ${hdrs_dir}/ext/categories/NSColor+IM.hh
     ${hdrs_dir}/ext/categories/NSData+IM.hh
+    ${hdrs_dir}/ext/categories/NSImage+CGImage.h
     ${hdrs_dir}/ext/categories/NSImage+QuickLook.h
     ${hdrs_dir}/ext/categories/NSImage+Resize.h
     ${hdrs_dir}/ext/categories/NSImage+ResizeBestFit.h
@@ -175,6 +176,7 @@ set(srcs
     ${srcs_dir}/ext/categories/NSBitmapImageRep+IM.mm
     ${srcs_dir}/ext/categories/NSColor+IM.mm
     ${srcs_dir}/ext/categories/NSData+IM.mm
+    ${srcs_dir}/ext/categories/NSImage+CGImage.m
     ${srcs_dir}/ext/categories/NSImage+QuickLook.m
     ${srcs_dir}/ext/categories/NSImage+Resize.m
     ${srcs_dir}/ext/categories/NSImage+ResizeBestFit.m
