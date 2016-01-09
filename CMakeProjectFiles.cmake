@@ -90,6 +90,8 @@ set(hdrs
     ${hdrs_dir}/ext/categories/NSColor+IM.hh
     ${hdrs_dir}/ext/categories/NSData+IM.hh
     ${hdrs_dir}/ext/categories/NSImage+QuickLook.h
+    ${hdrs_dir}/ext/categories/NSImage+Resize.h
+    ${hdrs_dir}/ext/categories/NSImage+ResizeBestFit.h
     ${hdrs_dir}/ext/categories/NSString+STL.hh
     ${hdrs_dir}/ext/categories/NSURL+IM.hh
     ${hdrs_dir}/ext/classes/AXCoreGraphicsImageRep.h
@@ -174,6 +176,8 @@ set(srcs
     ${srcs_dir}/ext/categories/NSColor+IM.mm
     ${srcs_dir}/ext/categories/NSData+IM.mm
     ${srcs_dir}/ext/categories/NSImage+QuickLook.m
+    ${srcs_dir}/ext/categories/NSImage+Resize.m
+    ${srcs_dir}/ext/categories/NSImage+ResizeBestFit.m
     ${srcs_dir}/ext/categories/NSString+STL.mm
     ${srcs_dir}/ext/categories/NSURL+IM.mm
     ${srcs_dir}/ext/classes/AXCoreGraphicsImageRep.m
