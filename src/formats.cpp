@@ -1,10 +1,11 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <cstring>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-
 #include <libimread/formats.hh>
+
 #include <libimread/IO/apple.hh>
 #include <libimread/IO/bmp.hh>
 #include <libimread/IO/gif.hh>
@@ -19,6 +20,14 @@
 //#include <libimread/IO/xcassets.hh>
 
 namespace im {
+    
+    namespace detail {
+        
+        bool ext(const char* format, const char* suffix) {
+            return !std::strcmp(format, suffix);
+        }
+        
+    } /* namespace detail */
     
     std::unique_ptr<ImageFormat> get_format(const char* format) {
         using format_ptr = std::unique_ptr<ImageFormat>;

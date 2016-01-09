@@ -19,11 +19,8 @@
 #define LIBIMREAD_EXT_FMEMOPEN_HH_
 
 #include <memory>
-#include <functional>
-
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <libimread/libimread.hpp>
 
 /**

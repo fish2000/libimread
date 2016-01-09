@@ -182,7 +182,8 @@ namespace im {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
+            options_map default_opts = format->get_options();
+            std::unique_ptr<Image> output = format->read(input.get(), &factory, default_opts);
             HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output.get()));
             image.set_host_dirty();
             return image;
@@ -193,14 +194,16 @@ namespace im {
                                           const options_map& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            format->write(dynamic_cast<Image&>(input), output.get(), opts);
+            options_map default_opts = format->get_options();
+            format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
         }
         
         inline void write_multi(ImageList& input, const std::string& filename,
                                                   const options_map& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            format->write_multi(input, output.get(), opts);
+            options_map default_opts = format->get_options();
+            format->write_multi(input, output.get(), default_opts);
         }
         
         template <typename Format, typename T = byte> inline
@@ -211,7 +214,8 @@ namespace im {
                                           false); tf.remove();          /// cleanup on scope exit
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
-            format->write(dynamic_cast<Image&>(input), output.get(), opts);
+            options_map default_opts = Format::get_options();
+            format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
             return tf.str();
         }
         

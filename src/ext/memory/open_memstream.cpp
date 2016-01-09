@@ -2,6 +2,8 @@
 /// License: MIT (see COPYING.MIT file)
 /// Use funopen(3) to provide open_memstream(3) like functionality.
 
+#include <cstring>
+#include <cerrno>
 #include <libimread/ext/memory/open_memstream.hh>
 
 namespace memory {

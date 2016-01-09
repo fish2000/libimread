@@ -5,22 +5,13 @@
 #define LIBIMREAD_FORMATS_HH_
 
 #include <memory>
-#include <string>
-#include <cstring>
+#include <utility>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/imageformat.hh>
 
 namespace im {
-    
-    namespace detail {
-        
-        inline bool ext(const char* format, const char* suffix) {
-            return !std::strcmp(format, suffix);
-        }
-        
-    } /* namespace detail */
     
     std::unique_ptr<ImageFormat> get_format(const char*);
     

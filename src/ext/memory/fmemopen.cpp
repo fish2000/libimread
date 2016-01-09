@@ -3,7 +3,8 @@
  * 20081017 AF (orig)
  * 20150115 Alexander Fucking Bohn (this totally awesome c++11'd iteration)
  */
-
+#include <functional>
+#include <cstring>
 #include <libimread/ext/memory/fmemopen.hh>
 
 namespace memory {

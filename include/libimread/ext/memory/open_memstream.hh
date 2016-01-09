@@ -1,10 +1,8 @@
 #ifndef LIBIMREAD_EXT_OPEN_MEMSTREAM_HH_
 #define LIBIMREAD_EXT_OPEN_MEMSTREAM_HH_
 
-#include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <cerrno>
+#include <cstdio>
 #include <libimread/libimread.hpp>
 
 namespace memory {

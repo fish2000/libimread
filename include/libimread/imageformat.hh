@@ -6,7 +6,6 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <memory>
 #include <type_traits>
 
@@ -18,17 +17,8 @@
 
 namespace im {
     
-    inline bool match_magic(byte_source* src, const char* magic, const std::size_t n) {
-        if (!src->can_seek()) { return false; }
-        std::vector<byte> buf;
-        buf.resize(n);
-        const int n_read = static_cast<int>(src->read(&buf.front(), n));
-        src->seek_relative(-n_read);
-        return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
-    }
-    inline bool match_magic(byte_source* src, const std::string& magic) {
-        return match_magic(src, magic.c_str(), magic.size());
-    }
+    bool match_magic(byte_source*, const char*, const std::size_t);
+    bool match_magic(byte_source*, const std::string&);
     
     #define DECLARE_OPTIONS(...)                                                    \
         static const options_t OPTS() {                                             \
@@ -63,14 +53,9 @@ namespace im {
             );
             
             /// NOT AN OVERRIDE:
-            static bool match_format(byte_source* src) {
-                return match_magic(src, options.signature);
-            }
-            
-            static std::string get_suffix() {
-                return "." + options.suffix;
-            }
-            
+            static bool match_format(byte_source*);
+            static std::string get_suffix();
+            static options_map get_options();
             virtual ~ImageFormat() {}
             
             virtual std::unique_ptr<Image> read(byte_source* src,

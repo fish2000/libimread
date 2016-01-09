@@ -48,7 +48,7 @@
     NSError* error;
     NSData* datum = [NSJSONSerialization dataWithJSONObject:self
                                                     options:static_cast<NSJSONWritingOptions>(0)
-                                                    error:&error];
+                                                      error:&error];
     NSString* json = [[NSString alloc] initWithData:datum
                                            encoding:NSUTF8StringEncoding];
     options_map out = options_map::parse([json STLString]);

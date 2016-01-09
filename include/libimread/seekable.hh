@@ -4,14 +4,11 @@
 #ifndef LIBIMREAD_SEEKABLE_HH_
 #define LIBIMREAD_SEEKABLE_HH_
 
-#include <inttypes.h>
-#include <cassert>
 #include <memory>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <cstdio>
-#include <cstdarg>
 #include <unistd.h>
 
 #include <libimread/libimread.hpp>
