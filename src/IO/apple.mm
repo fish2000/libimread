@@ -7,16 +7,14 @@
 
 namespace im {
     
-    std::unique_ptr<Image> NSImageFormat::read(byte_source *src,
-                                               ImageFactory *factory,
-                                               const options_map &opts)  {
-        std::vector<byte> data = src->full_data();
-        NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithByteVector:data];
-        std::unique_ptr<Image> output = [rep imageUsingImageFactory:factory];
-        #if !__has_feature(objc_arc)
-            [rep release];
-        #endif
-        return output;
+    std::unique_ptr<Image> NSImageFormat::read(byte_source* src,
+                                               ImageFactory* factory,
+                                               options_map const& opts)  {
+        @autoreleasepool {
+            NSBitmapImageRep* rep = [NSBitmapImageRep imageRepWithByteVector:src->full_data()];
+            std::unique_ptr<Image> output = [rep imageUsingImageFactory:factory];
+            return output;
+        }
     }
     
 }

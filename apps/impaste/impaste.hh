@@ -6,8 +6,6 @@
 
 #include <string>
 #include <type_traits>
-#include <exception>
-#include <stdexcept>
 #include <libimread/libimread.hpp>
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>

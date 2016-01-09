@@ -22,8 +22,8 @@ using im::ImageFactory;
 #ifdef __OBJC__
 
 @interface NSBitmapImageRep (AXBitmapImageRepAdditions)
-+ (NSBitmapImageRep *)     imageRepWithByteVector:(const std::vector<byte>&)byteVector;
--                          initWithByteVector:(const std::vector<byte>&)byteVector;
++ (NSBitmapImageRep *)     imageRepWithByteVector:(std::vector<byte> const&)byteVector;
+-                          initWithByteVector:(std::vector<byte> const&)byteVector;
 - (std::unique_ptr<Image>) imageUsingImageFactory:(ImageFactory*)factory;
 @end
 

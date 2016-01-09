@@ -13,28 +13,24 @@ using im::ImageFactory;
 
 @implementation NSBitmapImageRep (AXBitmapImageRepAdditions)
 
-+ (NSBitmapImageRep *) imageRepWithByteVector:(const std::vector<byte>&)byteVector {
++ (NSBitmapImageRep *) imageRepWithByteVector:(std::vector<byte> const&)byteVector {
     NSBitmapImageRep* rep;
     @autoreleasepool {
         NSData* datum;
         datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
                                        length:(NSInteger)byteVector.size()];
         rep = [[NSBitmapImageRep alloc] initWithData:datum];
-        #if !__has_feature(objc_arc)
-            [datum release];
-        #endif
     };
     return rep;
 }
 
-- initWithByteVector:(const std::vector<byte>&)byteVector {
-    NSData* datum;
-    datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
-                                   length:(NSInteger)byteVector.size()];
-    [self initWithData:datum];
-    #if !__has_feature(objc_arc)
-        [datum release];
-    #endif
+- initWithByteVector:(std::vector<byte> const&)byteVector {
+    @autoreleasepool {
+        NSData* datum;
+        datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
+                                       length:(NSInteger)byteVector.size()];
+        [self initWithData:datum];
+    }
     return self;
 }
 

@@ -80,10 +80,10 @@ namespace objc {
 #ifdef __OBJC__
 
 @interface NSURL (IMURLAdditions)
-+ (instancetype)            fileURLWithFilesystemPath:(const filesystem::path&)path;
--                           initFileURLWithFilesystemPath:(const filesystem::path&)path;
-- (instancetype)            URLByAppendingSTLPathComponent:(const std::string&)component;
-- (instancetype)            URLByAppendingFilesystemPath:(const filesystem::path&)path;
++ (instancetype)            fileURLWithFilesystemPath:(filesystem::path const&)path;
+-                           initFileURLWithFilesystemPath:(filesystem::path const&)path;
+- (instancetype)            URLByAppendingSTLPathComponent:(std::string const&)component;
+- (instancetype)            URLByAppendingFilesystemPath:(filesystem::path const&)path;
 - (BOOL)                    openWithApplication:(NSString *)application;
 - (BOOL)                    preview;
 - (BOOL)                    isImage;

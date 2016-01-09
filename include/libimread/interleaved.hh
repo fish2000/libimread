@@ -125,6 +125,16 @@ namespace im {
         bool operator==(const Index& rhs) const { return binary_op<std::equal_to<idx_t>>(rhs.indices); }
         bool operator!=(const Index& rhs) const { return binary_op<std::not_equal_to<idx_t>>(rhs.indices); }
         
+        std::ptrdiff_t flatten_with(array_t const& dimensions) {
+            std::ptrdiff_t out = 0,
+                           cummulative = 1;
+            for (std::size_t idx = D - 1; idx != 0; --idx) {
+                out += indices[idx] * cummulative;
+                cummulative *= dimensions[idx];
+            }
+            return out;
+        }
+        
         private:
             template <typename BinaryPredicate> inline
             bool binary_op(array_t const& rhs,
@@ -148,22 +158,6 @@ namespace im {
                             (I == D-1 ? "" : ", "), 0)...
                 };
                 out += " )";
-                return out;
-            }
-            
-            std::ptrdiff_t flatten_with(array_t const& dimensions) {
-                std::ptrdiff_t out = 0,
-                               cummulative = 1;
-                // unpack {
-                //     (out += indices[D - I - 1] * cummulative),
-                //     (cummulative *= dimensions[D - I - 1])...
-                // };
-                
-                for (std::size_t idx = D - 1; idx != 0; --idx) {
-                    out += indices[idx] * cummulative;
-                    cummulative *= dimensions[idx];
-                }
-                
                 return out;
             }
             

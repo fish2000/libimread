@@ -20,23 +20,23 @@ namespace objc {
 
 @implementation NSURL (IMURLAdditions)
 
-+ (instancetype) fileURLWithFilesystemPath:(const filesystem::path&)path {
++ (instancetype) fileURLWithFilesystemPath:(filesystem::path const&)path {
     return [NSURL fileURLWithPath:[NSString
               stringWithSTLString:path.make_absolute().str()]
                       isDirectory:objc::boolean(path.is_directory())];
 }
 
-- initFileURLWithFilesystemPath:(const filesystem::path&)path {
+- initFileURLWithFilesystemPath:(filesystem::path const&)path {
     return [self initFileURLWithPath:[NSString
                  stringWithSTLString:path.make_absolute().str()]
                          isDirectory:objc::boolean(path.is_directory())];
 }
 
-- (instancetype) URLByAppendingSTLPathComponent:(const std::string&)component {
+- (instancetype) URLByAppendingSTLPathComponent:(std::string const&)component {
     return [self URLByAppendingPathComponent:[NSString stringWithSTLString:component]];
 }
 
-- (instancetype) URLByAppendingFilesystemPath:(const filesystem::path&)path {
+- (instancetype) URLByAppendingFilesystemPath:(filesystem::path const&)path {
     NSURL* url = [self copy];
     for (auto const& component : path.components()) {
         url = [url URLByAppendingSTLPathComponent:component];

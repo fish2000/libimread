@@ -31,7 +31,7 @@ namespace im {
         struct unref {
             constexpr unref() noexcept = default;
             template <typename U> unref(const unref<U>&) noexcept {};
-            void operator()(C ref) { if (ref) CFRelease(ref); }
+            void operator()(C ref) { if (ref) { CFRelease(ref); } }
         };
         
         template <typename Ref>
@@ -46,7 +46,7 @@ namespace im {
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                const options_map& opts) override;
+                                                options_map const& opts) override;
     };
     
     namespace format {
