@@ -4,9 +4,21 @@
 #include <string>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/JSON/json11.h>
 #include <libimread/options.hh>
 
 namespace im {
+    
+    options_map options_map::parse(const std::string& str) {
+        std::istringstream is(str);
+        options_map parsed(is);
+        if (is.peek() == std::char_traits<char>::eof()) { return parsed; }
+        while (std::isspace(is.get()))
+            /* skip */;
+        if (is.eof()) { return parsed; }
+        throw Json::parse_error("JSON format error", is);
+    }
+    
     
     std::string           get_optional_string(const options_map& opts,
                                               const std::string& key) {

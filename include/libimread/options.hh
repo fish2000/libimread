@@ -17,9 +17,15 @@ namespace im {
             
             options_map()
                 :Json()
-                {
-                    set("metadata", "");
-                }
+                { set("metadata", ""); }
+            
+            options_map(std::istream& is, bool full=true)
+                :Json(is, full)
+                {}
+            
+            static options_map parse(const std::string&);
+            static options_map parse(const char* json) { return parse(std::string(json)); }
+            
     };
     
     std::string get_optional_string(const options_map& opts,  const std::string& key);
