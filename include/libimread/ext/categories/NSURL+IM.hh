@@ -42,36 +42,8 @@ namespace objc {
         template <NSBitmapImageFileType nstype>
         char const* suffix_value = suffix_t<nstype>::str;
         
-        inline std::string suffix(NSBitmapImageFileType nstype) {
-            if (nstype == NSTIFFFileType)     { return suffix_t<NSTIFFFileType>::str;     }
-            if (nstype == NSBMPFileType)      { return suffix_t<NSBMPFileType>::str;      }
-            if (nstype == NSGIFFileType)      { return suffix_t<NSGIFFileType>::str;      }
-            if (nstype == NSJPEGFileType)     { return suffix_t<NSJPEGFileType>::str;     }
-            if (nstype == NSPNGFileType)      { return suffix_t<NSPNGFileType>::str;      }
-            if (nstype == NSJPEG2000FileType) { return suffix_t<NSJPEG2000FileType>::str; }
-            return "";
-        }
-        
-        inline NSInteger filetype(std::string const& suffix) {
-            if (suffix == "tiff" || suffix == ".tiff" ||
-                suffix == "tif"  || suffix == ".tif") {
-                return static_cast<NSInteger>(NSTIFFFileType);
-            } else if (suffix == "bmp" || suffix == ".bmp") {
-                return static_cast<NSInteger>(NSBMPFileType);
-            } else if (suffix == "gif" || suffix == ".gif") {
-                return static_cast<NSInteger>(NSGIFFileType);
-            } else if (suffix == "jpg"  || suffix == ".jpg" ||
-                       suffix == "jpeg" || suffix == ".jpeg") {
-                return static_cast<NSInteger>(NSJPEGFileType);
-            } else if (suffix == "png" || suffix == ".png") {
-                return static_cast<NSInteger>(NSPNGFileType);
-            } else if (suffix == "jp2" || suffix == ".jp2") {
-                return static_cast<NSInteger>(NSJPEG2000FileType);
-            } else {
-                /// NO MATCH
-                return -1;
-            }
-        }
+        std::string suffix(NSBitmapImageFileType nstype);
+        NSInteger filetype(std::string const& suffix);
         
     };
     
@@ -79,7 +51,7 @@ namespace objc {
 
 #ifdef __OBJC__
 
-@interface NSURL (IMURLAdditions)
+@interface NSURL (AXURLAdditions)
 + (instancetype)            fileURLWithFilesystemPath:(filesystem::path const&)path;
 -                           initFileURLWithFilesystemPath:(filesystem::path const&)path;
 - (instancetype)            URLByAppendingSTLPathComponent:(std::string const&)component;

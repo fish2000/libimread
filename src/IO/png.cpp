@@ -19,7 +19,9 @@ namespace im {
     
     namespace {
         
-        void throw_error(png_structp png_ptr, png_const_charp msg) { imread_raise(CannotReadError, msg); }
+        void throw_error(png_structp png_ptr, png_const_charp msg) {
+            imread_raise(PNGIOError, msg);
+        }
         
         // This checks how 16-bit uints are stored in the current platform.
         inline bool is_big_endian() {
@@ -66,7 +68,7 @@ namespace im {
         void write_to_source(png_structp png_ptr, png_byte* buffer, std::size_t n) {
             byte_sink* s = static_cast<byte_sink*>(png_get_io_ptr(png_ptr));
             const std::size_t actual = s->write(reinterpret_cast<byte*>(buffer), n);
-            if (actual != n) { imread_raise_default(CannotReadError); }
+            if (actual != n) { imread_raise_default(CannotWriteError); }
         }
         
         void flush_source(png_structp png_ptr) {
@@ -74,6 +76,7 @@ namespace im {
             s->flush();
         }
         
+        __attribute__((unused))
         int color_type_of(Image* im) {
             if (im->nbits() != 8 && im->nbits() != 16) {
                 imread_raise(CannotWriteError,
@@ -124,6 +127,7 @@ namespace im {
                 std::vector<void*> data;
         };
         
+        __attribute__((unused))
         void swap_bytes_inplace(std::vector<png_bytep>& data, const int ncols,
                                 stack_based_memory_pool& mem) {
             for (unsigned int r = 0; r != data.size(); ++r) {
@@ -137,7 +141,8 @@ namespace im {
             }
         }
         
-        int __attribute__((unused)) unknown_chunk_read_cb(png_structp ptr, png_unknown_chunkp chunk) {
+        __attribute__((unused))
+        int unknown_chunk_read_cb(png_structp ptr, png_unknown_chunkp chunk) {
             if (!strncmp(reinterpret_cast<char*>(chunk->name), "CgBI", 4)) {
                 WTF("This file is already crushed and how the hell did you get here?");
                 // std::exit(1);

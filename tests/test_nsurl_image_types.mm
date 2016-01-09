@@ -23,6 +23,7 @@ namespace {
         NSTIFFFileType, NSBMPFileType, NSGIFFileType,
         NSJPEGFileType, NSPNGFileType, NSJPEG2000FileType
     };
+    
     std::array<std::string, 6> suffixes = {
         "tiff",     "bmp",      "gif",
         "jpg",      "png",      "jp2"
@@ -37,7 +38,7 @@ namespace {
         std::transform(types.begin(), types.end(),
                        suffixes.begin(),
                        std::inserter(typemap, typemap.begin()),
-                       [&](NSTYPE type, std::string const& sufx) {
+                       [](NSTYPE type, std::string const& sufx) {
             CHECK(type == objc::image::filetype(sufx));
             CHECK(sufx == objc::image::suffix(type));
             return std::make_pair(type, sufx);
@@ -49,19 +50,17 @@ namespace {
               "[nsurl-check-isimage-imagefiletype-category-methods]")
     {
         path basedir(im::test::basedir);
-        std::vector<path> v = basedir.list("*.*");
+        std::vector<path> files = basedir.list("*.*", true); /// full_paths=true
         
         @autoreleasepool {
             
-            std::for_each(v.begin(), v.end(),
+            std::for_each(files.begin(), files.end(),
                           [&](path const& p) {
-                if (!(basedir/p).is_file()) { return; }
-                path abspath = (basedir/p).make_absolute();
-                NSURL* urlpath = [NSURL fileURLWithFilesystemPath:abspath];
-                
+                if (!p.is_file()) { return; }
+                NSURL* urlpath = [NSURL fileURLWithFilesystemPath:p];
                 CHECK([urlpath isImage] == YES);
-                CHECK([urlpath imageFileType] == objc::image::filetype(abspath.extension()));
-                //CHECK(objc::image::suffix([urlpath imageFileType]) == abspath.extension());
+                CHECK([urlpath imageFileType] == objc::image::filetype(p.extension()));
+                //CHECK(objc::image::suffix([urlpath imageFileType]) == p.extension());
             });
             
         };

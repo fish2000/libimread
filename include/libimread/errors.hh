@@ -206,13 +206,13 @@ namespace im {
     static constexpr char default_message[MsgLen] = ST(DefaultMsg);                     \
     template <typename S>                                                               \
     TypeName(S s)                                                                       \
-        :w(im::stringify(s))                                                            \
-        ,BaseTypeName(w)                                                                \
+        :BaseTypeName(w)                                                                \
+        ,w(im::stringify(s))                                                            \
         { }                                                                             \
     template <typename S, typename ...Args>                                             \
     TypeName(S s, Args&& ...args)                                                       \
-        :w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...))             \
-        ,BaseTypeName(w)                                                                \
+        :BaseTypeName(w)                                                                \
+        ,w(im::stringify(s) + im::stringmerge(std::forward<Args>(args)...))             \
         { }                                                                             \
     TypeName()                                                                          \
         :BaseTypeName(DefaultMsg), w(DefaultMsg)                                        \
@@ -262,6 +262,7 @@ DECLARE_IMREAD_ERROR_TYPE(JSONOutOfRange,           "JSON index value out of ran
 DECLARE_IMREAD_ERROR_TYPE(JSONBadCast,              "Error casting JSON value");
 
 DECLARE_IMREAD_ERROR_TYPE(HDF5IOError,              "Error in HDF5 I/O");
+DECLARE_IMREAD_ERROR_TYPE(PNGIOError,               "Error in PNG libpng I/O");
 
 
 }
