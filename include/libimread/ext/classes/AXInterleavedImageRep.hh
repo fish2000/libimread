@@ -13,22 +13,32 @@
 #import <AppKit/NSGraphicsContext.h>
 
 using im::color::RGB;
-using Meta = im::Meta<RGB, 3>;
-using InterleavedImage = im::InterleavedImage<RGB, 3>;
+using im::color::RGBA;
+using im::color::Monochrome;
+
+using Meta = im::Meta<RGB>;
+using Interleaved = im::InterleavedImage<RGB>;
+
+template <typename Color = RGB>
+__attribute__((cf_returns_not_retained))
+CGImageRef CGImageFromInterleaved(
+    const im::InterleavedImage<Color>& interleaved,
+    __attribute__((cf_consumed))
+        CGColorSpaceRef colorspace);
 
 @interface AXInterleavedImageRep : AXCoreGraphicsImageRep {
-    InterleavedImage interleavedImage;
+    Interleaved interleavedImage;
 }
 
-+ (instancetype)        imageRepWithInterleaved:(const InterleavedImage&)interleaved;
-+ (instancetype)        imageRepWithInterleaved:(const InterleavedImage&)interleaved
++ (instancetype)        imageRepWithInterleaved:(const Interleaved&)interleaved;
++ (instancetype)        imageRepWithInterleaved:(const Interleaved&)interleaved
                                  colorSpaceName:(NSString*)space;
--                       initWithInterleaved:(const InterleavedImage&)interleaved;
--                       initWithInterleaved:(const InterleavedImage&)interleaved
+-                       initWithInterleaved:(const Interleaved&)interleaved;
+-                       initWithInterleaved:(const Interleaved&)interleaved
                              colorSpaceName:(NSString*)space;
-- (void)                setInterleaved:(const InterleavedImage&)interleaved;
-- (InterleavedImage)    interleaved;
-- (const Meta&)         imageMeta;
+- (void)                setInterleaved:(const Interleaved&)interleaved;
+- (Interleaved const&)  interleaved;
+- (Meta const&)         imageMeta;
 
 @end
 

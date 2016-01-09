@@ -36,9 +36,9 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
 
 #ifdef __OBJC__
 
-@implementation AXCoreGraphicsImageRep
+@implementation AXCoreGraphicsImageRep : NSImageRep
 
-+ (void)initialize {
++ (void) initialize {
     OBJC_INITIALIZE;
     [self registerImageRepClass:self];
 }
@@ -54,23 +54,25 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return self;
 }
 
-- (void)dealloc {
+- (void) dealloc {
     if (cgImage != NULL) { CGImageRelease(cgImage); }
     
-    [colorSpaceName release];
-    [heldObject release];
+    #if !__has_feature(objc_arc)
+        [colorSpaceName release];
+        [heldObject release];
+    #endif
     [super dealloc];
 }
 
 /// API
-- (void)setImage:(CGImageRef)newImage {
+- (void) setImage:(CGImageRef)newImage {
     if (cgImage != newImage) {
         if (cgImage != NULL) { CGImageRelease(cgImage); }
         cgImage = CGImageRetain(newImage);
     }
 }
 
-- (void)setColorSpaceHolder:(id<NSObject>)anObject {
+- (void) setColorSpaceHolder:(id<NSObject, NSCopying>)anObject {
     /* The reason for this is a little obscure. We never actually use the color space object
        (an OIICCProfile instance). It's mainly just a wrapper around a CGColorSpaceRef, and
        the CGImage holds on to that by itself. However, if we keep the OIICCProfile from
@@ -78,24 +80,30 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
        to use the same CGColorSpace for identical color profiles read from different images.
        Is this actually a performance gain? I have no idea. It seems like it ought to be, though.
     */
-    [heldObject autorelease];
-    heldObject = [anObject retain];
+    @autoreleasepool {
+        heldObject = [anObject copyWithZone:nil];
+        #if !__has_feature(objc_arc)
+            [heldObject retain];
+        #endif
+    }
+}
+
+- (void) setColorSpaceName:(NSString*)space {
+    colorSpaceName = [space copy];
 }
 
 /// NSImageRep attributes
 
-- (NSInteger)bitsPerSample {
-    if (cgImage) {
-        return CGImageGetBitsPerComponent(cgImage);
-    }
+- (NSInteger) bitsPerSample {
+    if (cgImage) { return CGImageGetBitsPerComponent(cgImage); }
     return 0;
 }
 
-- (NSString*)colorSpaceName {
+- (NSString*) colorSpaceName {
     return colorSpaceName;
 }
 
-- (BOOL)draw {
+- (BOOL) draw {
     if (cgImage == NULL) { return NO; }
     CGRect where = CGRectWithPointAndSize({0, 0},
                                           CGImageGetWidth(cgImage),
@@ -106,7 +114,7 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return YES;
 }
 
-- (BOOL)drawAtPoint:(NSPoint)point {
+- (BOOL) drawAtPoint:(NSPoint)point {
     if (cgImage == NULL) { return NO; }
     CGRect where = CGRectWithPointAndSize(point,
                                           CGImageGetWidth(cgImage),
@@ -117,7 +125,7 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return YES;
 }
 
-- (BOOL)drawInRect:(NSRect)rect {
+- (BOOL) drawInRect:(NSRect)rect {
     if (cgImage == NULL) { return NO; }
     CGRect where = CGRectWithRect(rect);
     
@@ -126,7 +134,7 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return YES;
 }
 
-- (BOOL)hasAlpha {
+- (BOOL) hasAlpha {
     if (cgImage == NULL) { return NO; }
     switch(CGImageGetAlphaInfo(cgImage)) {
         case kCGImageAlphaNone:
@@ -145,12 +153,12 @@ inline CGRect CGRectWithPointAndSize(NSPoint point, NSInteger width, NSInteger h
     return NO;
 }
 
-- (NSInteger)pixelsHigh {
+- (NSInteger) pixelsHigh {
     if (cgImage) { return CGImageGetHeight(cgImage); }
     return 0;
 }
 
-- (NSInteger)pixelsWide {
+- (NSInteger) pixelsWide {
     if (cgImage) { return CGImageGetWidth(cgImage); }
     return 0;
 }
