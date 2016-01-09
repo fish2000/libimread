@@ -38,6 +38,8 @@ namespace im {
         using idxlist_t = std::initializer_list<idx_t>;
         using array_t = std::array<idx_t, D>;
         using sequence_t = std::make_index_sequence<D>;
+        using iterator = typename array_t::iterator;
+        using const_iterator = typename array_t::const_iterator;
         
         array_t indices;
         
@@ -98,6 +100,11 @@ namespace im {
         constexpr std::size_t ndim() const { return D; }
         idx_t operator[](std::size_t idx) const { return indices[idx]; }
         
+        iterator begin() { return iterator(indices); }
+        const_iterator begin() const { return const_iterator(indices); }
+        iterator end() { return begin() + D - 1; }
+        const_iterator end() const { return begin() + D - 1; }
+        
         void swap(Index& other) noexcept {
             using std::swap;
             swap(indices, other.indices);
@@ -120,7 +127,7 @@ namespace im {
         
         private:
             template <typename BinaryPredicate> inline
-            bool binary_op(const array_t& rhs,
+            bool binary_op(array_t const& rhs,
                            BinaryPredicate predicate = BinaryPredicate()) const {
                 return std::equal(std::begin(indices), std::end(indices),
                                   std::begin(rhs),     std::end(rhs),
@@ -128,7 +135,7 @@ namespace im {
             }
             
             template <std::size_t ...I> inline
-            void assign_impl(const idx_t* indexes,
+            void assign_impl(idx_t const* indexes,
                              std::index_sequence<I...>) noexcept {
                 indices = array_t{ indexes[I]... };
             }
@@ -141,6 +148,22 @@ namespace im {
                             (I == D-1 ? "" : ", "), 0)...
                 };
                 out += " )";
+                return out;
+            }
+            
+            std::ptrdiff_t flatten_with(array_t const& dimensions) {
+                std::ptrdiff_t out = 0,
+                               cummulative = 1;
+                // unpack {
+                //     (out += indices[D - I - 1] * cummulative),
+                //     (cummulative *= dimensions[D - I - 1])...
+                // };
+                
+                for (std::size_t idx = D - 1; idx != 0; --idx) {
+                    out += indices[idx] * cummulative;
+                    cummulative *= dimensions[idx];
+                }
+                
                 return out;
             }
             
@@ -224,6 +247,7 @@ namespace im {
         static constexpr std::size_t S = sizeof(typename Color::channel_t);
         static constexpr std::size_t D = Dimensions;
         friend struct Index<D>;
+        // static const Index<D> ZERO = { 0 };
         using index_t = Index<D>;
         using idx_t = typename index_t::idx_t;
         using array_t = std::array<std::size_t, D>;
@@ -276,7 +300,6 @@ namespace im {
             }
     };
     
-    
     template <typename Color = color::RGBA,
               std::size_t Dimensions = 3>
     class InterleavedImage : public Image, public MetaImage {
@@ -293,19 +316,112 @@ namespace im {
             using array_t = std::array<std::size_t, D>;
             using sequence_t = std::make_index_sequence<D>;
             
-            using bytestring_t = std::basic_string<channel_t>;
             using contents_t = std::shared_ptr<channel_t>;
             using weak_t = std::weak_ptr<channel_t>; /// WEAK TEA see what I did there
             using deleter_t = std::default_delete<channel_t[]>;
             using meta_t = Meta<Color, Dimensions>;
             using Contents = contents_t;
+            using ContentsRef = weak_t;
             using Meta = meta_t;
+            using MetaRef = std::add_rvalue_reference_t<meta_t>;
             
             using channel_list_t = typename Color::channel_list_t;
             using channel_listlist_t = std::initializer_list<channel_list_t>;
             using composite_list_t = std::initializer_list<composite_t>;
             using composite_listlist_t = std::initializer_list<composite_list_t>;
-        
+            
+            template <typename Channel>
+            using forward_iterator_t = std::iterator<std::forward_iterator_tag, Channel>;
+            
+            template <std::size_t HyperDimensions = 3>
+            struct Plinth : public forward_iterator_t<channel_t> {
+                
+                static constexpr std::size_t HD = HyperDimensions;
+                static constexpr std::size_t S = sizeof(channel_t);
+                using index_t = Index<HD>;
+                using array_t = std::array<std::size_t, HD>;
+                static const index_t ZERO = { 0 };
+                
+                /// OK, see - the subsequent `index_t position` doesn't *actually*
+                /// store the motherfucking position. It stores the quote-unquote
+                /// “REVERSE” of the position. I, personally, actually do not get this.
+                /// How, you may ask, could I possibly not get this? Didn’t I fucking
+                /// *write* this? Well actually, truth be told, I basically ripped
+                /// this entire `position` thing off, more-or-less wholesale, from
+                /// the implementation found in Luis Pedro’s `mahotas` package (specifically,
+                /// as written in `numpypp/array.hpp`, for the morbidly curious. 
+                ///
+                /// … now, the estute amongst you may have picked up on the fact that the
+                /// very fundaments of the `imread` project itself are ripped clean off from
+                /// the `imread` python extension library -- itself another Luis Pedro production
+                /// -- and so you estute motherfuckers probably want to know: why is it that I,
+                /// Alexander Böhn, can’t seem to push up a diff that isn’t crammed full of
+                /// Luis Pedro copypasta??
+                #define REVERSE(Idx) HD - Idx - 1
+                
+                protected:
+                    ContentsRef cref;
+                    MetaRef mref;
+                    array_t steps{ 0 };
+                    array_t dimensions{ 0 };
+                    index_t position{ 0 };
+                
+                public:
+                    Plinth(contents_t c, meta_t m)
+                        :cref(c), mref(m)
+                        {
+                            std::size_t cummulative = 0;
+                            for (std::size_t idx = 0; idx != HD; idx++) {
+                                dimensions[idx] = mref.extents[REVERSE(idx)];
+                                steps[idx] = mref.strides[REVERSE(idx)] / S - cummulative;
+                                cummulative *= mref.extents[REVERSE(idx)];
+                                cummulative += steps[idx] * mref.extents[REVERSE(idx)];
+                            }
+                        }
+                    
+                    Plinth& operator++() {
+                        for (std::size_t idx = 0; idx != HD; idx++) {
+                            ++position[idx];
+                            if (position[idx] != dimensions[idx]) {
+                                return *this;
+                            }
+                            position[idx] = 0;
+                        }
+                        return *this;
+                    }
+                    
+                    int index(std::size_t idx) const { return index_reverse(REVERSE(idx)); }
+                    int index_reverse(std::size_t idx) const { return position[idx]; }
+                    std::size_t dimension(std::size_t idx) const { return dimension_rev(REVERSE(idx)); }
+                    std::size_t dimension_rev(std::size_t idx) const { return dimensions[idx]; }
+                    
+                    bool operator==(Plinth const& other) { return position == other.position; }
+                    bool operator!=(Plinth const& other) { return position != other.position; }
+                    
+                    index_t get_position() const {
+                        index_t out{ 0 };
+                        std::reverse_copy(std::begin(position),
+                                          std::end(position),
+                                          std::begin(out));
+                        return out;
+                    }
+                    
+                    bool is_valid() const {
+                        index_t pp = get_position();
+                        return pp <= mref.max_idx &&
+                               pp >= ZERO &&
+                               !cref.expired();
+                    }
+                    
+                    channel_t operator*() const {
+                        imread_assert(is_valid(), "Invalid plinth positition");
+                        if (contents_t share = cref.lock()) {
+                            return share.get();
+                        }
+                    }
+                
+            };
+            
         private:
             
             Contents contents;
