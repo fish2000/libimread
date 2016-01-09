@@ -18,7 +18,7 @@
     std::string optionsJSONString = optionsMap.format();
     NSError* error;
     NSData* optionsJSON = [[NSData alloc] initWithBytes:(const void*)optionsJSONString.data()
-                                                length:(NSInteger)optionsJSONString.size()];
+                                                 length:(NSInteger)optionsJSONString.size()];
     optionsDict = (NSDictionary*)[NSJSONSerialization JSONObjectWithData:optionsJSON
                                                                  options:static_cast<NSJSONReadingOptions>(0)
                                                                    error:&error];
@@ -33,7 +33,7 @@
     std::string optionsJSONString = optionsMap.format();
     NSError* error;
     NSData* optionsJSON = [[NSData alloc] initWithBytes:(const void*)optionsJSONString.data()
-                                                length:(NSInteger)optionsJSONString.size()];
+                                                 length:(NSInteger)optionsJSONString.size()];
     optionsDict = (NSDictionary*)[NSJSONSerialization JSONObjectWithData:optionsJSON
                                                                  options:static_cast<NSJSONReadingOptions>(0)
                                                                    error:&error];
