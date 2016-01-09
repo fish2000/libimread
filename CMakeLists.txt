@@ -78,11 +78,6 @@ set_property(DIRECTORY ${IOD_TEST_DIR}
 set_property(DIRECTORY ${IOD_TEST_DIR}
              PROPERTY TEST)
 
-execute_process(
-    WORKING_DIRECTORY ${TEST_INCLUDE_DIR}
-    COMMAND "rm -f ./test_data.hpp"
-    COMMENT "Deleting generated test data header")
-
 # Load the project configuration file. CMake will search in the directory setted
 # above for a module file named libimreadConfig.cmake. The configuration
 # file will set the different directories and libraries required by the library

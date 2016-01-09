@@ -22,10 +22,15 @@ namespace im { namespace test {
     
     static const std::string basedir = "/Users/fish/Dropbox/libimread/tests/data";
     
-    static const int num_jpg = 4;
+    static const int num_jpg = 9;
     static const std::string jpg[] = {
+        "10350540_10152447396343587_37416966729730477_n.jpg",
         "10954288_342637995941364_1354507656_n.jpg",
+        "c64error.jpg",
+        "HANG-IN-THERE.jpg",
+        "hang_in_there_baby_by_bytor137-d5u6r1q.jpg",
         "IMG_4332.jpg",
+        "keep-your-power-gloves-off-her-OK.jpg",
         "Rd4lKZq.jpg",
         "tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"
     };
@@ -37,8 +42,10 @@ namespace im { namespace test {
         "taylor-omg.jpeg"
     };
     
-    static const int num_png = 13;
+    static const int num_png = 15;
     static const std::string png[] = {
+        "atkinson-me.png",
+        "BINARY-OP.png",
         "grad_32_rrt_srgb.png",
         "marci_512_srgb.png",
         "marci_512_srgb8.png",

@@ -13,7 +13,6 @@ set(impaste_VERSION_PATCH "0")
 
 find_path(LIBDOCOPT_INCLUDE_DIR NAMES docopt.h
                                 PATHS ${DOCOPT_DIR})
-# find_library(LIBDOCOPT_LIBRARY docopt)
 
 include_directories(
     ${libimread_include_dir}
@@ -23,11 +22,12 @@ include_directories(
 add_definitions(
     -Wall -O3
     -std=c++14 -stdlib=libc++
+    -fstrict-aliasing
     -fstack-protector-all
     -fobjc-arc
     -fobjc-abi-version=3
     -fobjc-call-cxx-cdtors
-    -mtune=native -fstrict-aliasing
+    -mtune=native
     -x objective-c++)
 
 FIND_LIBRARY(COCOA_LIBRARY Cocoa)
@@ -44,8 +44,9 @@ set(EXTRA_LIBS
     ${COREFOUNDATION_LIBRARY}
     imread docopt)
 
+set(hdrs "impaste.hh")
 set(srcs "impaste.mm")
-add_executable("impaste" ${srcs})
+add_executable("impaste" ${srcs} ${hdrs})
 target_link_libraries("impaste" ${EXTRA_LIBS})
 add_dependencies("impaste" imread)
 install(TARGETS "impaste" DESTINATION bin)
