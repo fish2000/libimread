@@ -20,8 +20,8 @@
     NSData* optionsJSON = [[NSData alloc] initWithBytes:(const void*)optionsJSONString.data()
                                                 length:(NSInteger)optionsJSONString.size()];
     optionsDict = (NSDictionary*)[NSJSONSerialization JSONObjectWithData:optionsJSON
-                                                                options:static_cast<NSJSONReadingOptions>(0)
-                                                                error:&error];
+                                                                 options:static_cast<NSJSONReadingOptions>(0)
+                                                                   error:&error];
     imread_assert(optionsDict != nil,
                 "NSDictionary error in dictionaryWithOptionsMap:",
                 [error.localizedDescription STLString]);
@@ -35,8 +35,8 @@
     NSData* optionsJSON = [[NSData alloc] initWithBytes:(const void*)optionsJSONString.data()
                                                 length:(NSInteger)optionsJSONString.size()];
     optionsDict = (NSDictionary*)[NSJSONSerialization JSONObjectWithData:optionsJSON
-                                                                options:static_cast<NSJSONReadingOptions>(0)
-                                                                error:&error];
+                                                                 options:static_cast<NSJSONReadingOptions>(0)
+                                                                   error:&error];
     imread_assert(optionsDict != nil,
                 "NSDictionary error in initWithOptionsMap:",
                 [error.localizedDescription STLString]);
@@ -50,7 +50,7 @@
                                                     options:static_cast<NSJSONWritingOptions>(0)
                                                     error:&error];
     NSString* json = [[NSString alloc] initWithData:datum
-                                        encoding:NSUTF8StringEncoding];
+                                           encoding:NSUTF8StringEncoding];
     options_map out = options_map::parse([json STLString]);
     return out;
 }
