@@ -380,6 +380,21 @@ class Tree {
         struct InternalTag {};
         struct LeafTag {};
     
+        /// TODO:
+        /// + Implement serialization to JSON by making `Tree` a subclass of `Json` (from `json11.h`)
+        ///     * `Tree::Node` and friends become subclasses of `Json::Node`
+        ///     * … each implementing the Json API -- `print()`, `traverse()`, `typestr()`, `validate()` etc
+        ///     * `Tree::Node` can implement e.g. binary codecs via `parse()`/`format()` overloads
+        ///     * … harnessing `Json` to walk the tree but once for fast-as-shit serialization IO
+        /// + Finish `Tree::addNode(Node*)` implementation
+        ///     * wrap with API-facing `Tree::add(DataPointBase&)` function
+        ///     * N.B. current `Tree::add()` function is a stub -- expand on it
+        /// + Implement analogue for `mvptree_retrieve()` as `Tree::retrieveNode()`
+        ///     * … wrapped as above with e.g. `Tree::retrieve(DataPointBase&)`
+        /// + Trivially reimplement `write_datapoint()` using `im::memory::sink<FILE>`
+        ///     * … possibly add other MVPTree function reimplementations if need be
+        ///     * Aim for dead-on binary compatibility with MVPTree, for testing and transition
+    
     private:
         struct NodeBase {
             NodeType nodetype;
