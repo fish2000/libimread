@@ -243,6 +243,7 @@ namespace im {
     };
     
     
+    
     #define STATIC_ASSERT_SAME()                                                    \
         static_assert(detail::same<color_t, dest_color_t>(),                        \
                      "Color types color_t and dest_color_t must be the same");

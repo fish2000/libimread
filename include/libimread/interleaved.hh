@@ -231,13 +231,9 @@ namespace im {
         return out;
     }
     
-    struct MetaBase {
-        virtual ~MetaBase() {}
-    };
-    
     template <typename Color = color::RGBA,
               std::size_t Dimensions = 3>
-    struct Meta : public MetaBase {
+    struct Meta {
         static constexpr std::size_t S = sizeof(typename Color::channel_t);
         static constexpr std::size_t D = Dimensions;
         friend struct Index<D>;

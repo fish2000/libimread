@@ -10,8 +10,8 @@
 
 @interface NSImage (QuickLook)
 
-
-+ (NSImage *)imageWithPreviewOfFileAtPath:(NSString *)path ofSize:(NSSize)size asIcon:(BOOL)icon;
-
++ (instancetype) imageWithPreviewOfFileAtPath:(NSString *)path
+                                       ofSize:(NSSize)size
+                                       asIcon:(BOOL)icon;
 
 @end

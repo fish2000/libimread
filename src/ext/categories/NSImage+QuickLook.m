@@ -10,46 +10,46 @@
 
 @implementation NSImage (QuickLook)
 
-
-+ (NSImage *)imageWithPreviewOfFileAtPath:(NSString *)path ofSize:(NSSize)size asIcon:(BOOL)icon
-{
-    NSURL *fileURL = [NSURL fileURLWithPath:path];
-    if (!path || !fileURL) {
-        return nil;
++ (instancetype) imageWithPreviewOfFileAtPath:(NSString *)path
+                                       ofSize:(NSSize)size
+                                       asIcon:(BOOL)icon {
+    
+    NSURL* fileURL = [NSURL fileURLWithPath:path];
+    if (!path || !fileURL) { return nil; }
+    
+    CGImageRef ref = QLThumbnailImageCreate(
+        kCFAllocatorDefault,
+        (CFURLRef)fileURL,
+        CGSizeMake(size.width, size.height),
+        (CFDictionaryRef)@{ 
+            (NSString*)kQLThumbnailOptionIconModeKey : [NSNumber numberWithBool:icon]
+        }
+    );
+    
+    if (ref == NULL) {
+        /// If we couldn't get a Quick Look preview,
+        /// fall back on the file's Finder icon.
+        NSImage* iicon = [[NSWorkspace sharedWorkspace] iconForFile:path];
+        if (iicon) { [iicon setSize:size]; }
+        return iicon;
     }
     
-    NSDictionary *dict = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:icon] 
-                                                     forKey:(NSString *)kQLThumbnailOptionIconModeKey];
-    CGImageRef ref = QLThumbnailImageCreate(kCFAllocatorDefault, 
-                                            (CFURLRef)fileURL, 
-                                            CGSizeMake(size.width, size.height),
-                                            (CFDictionaryRef)dict);
+    // Take advantage of NSBitmapImageRep's -initWithCGImage: initializer, new in Leopard,
+    // which is a lot more efficient than copying pixel data into a brand new NSImage.
+    // Thanks to Troy Stephens @ Apple for pointing this new method out to me.
+    NSBitmapImageRep* bitmap = [[NSBitmapImageRep alloc] initWithCGImage:ref];
+    NSImage* newImage = nil;
     
-    if (ref != NULL) {
-        // Take advantage of NSBitmapImageRep's -initWithCGImage: initializer, new in Leopard,
-        // which is a lot more efficient than copying pixel data into a brand new NSImage.
-        // Thanks to Troy Stephens @ Apple for pointing this new method out to me.
-        NSBitmapImageRep *bitmapImageRep = [[NSBitmapImageRep alloc] initWithCGImage:ref];
-        NSImage *newImage = nil;
-        if (bitmapImageRep) {
-            newImage = [[NSImage alloc] initWithSize:[bitmapImageRep size]];
-            [newImage addRepresentation:bitmapImageRep];
-            [bitmapImageRep release];
-            
-            if (newImage) {
-                return [newImage autorelease];
-            }
+    if (bitmap) {
+        newImage = [[NSImage alloc] initWithSize:[bitmap size]];
+        if (newImage) {
+            [newImage addRepresentation:bitmap];
+            CFRelease(ref);
+            return newImage;
         }
-        CFRelease(ref);
-    } else {
-        // If we couldn't get a Quick Look preview, fall back on the file's Finder icon.
-        NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:path];
-        if (icon) {
-            [icon setSize:size];
-        }
-        return icon;
     }
     
+    CFRelease(ref);
     return nil;
 }
 
