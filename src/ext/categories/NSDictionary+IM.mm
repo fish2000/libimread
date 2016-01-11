@@ -4,6 +4,7 @@
 #include <string>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/ext/categories/NSData+IM.hh>
 #include <libimread/ext/categories/NSString+STL.hh>
 #include <libimread/ext/categories/NSDictionary+IM.hh>
 
@@ -17,10 +18,8 @@ static const NSJSONWritingOptions writingOptions = static_cast<NSJSONWritingOpti
 
 + (instancetype) dictionaryWithOptionsMap:(options_map const&)optionsMap {
     NSDictionary* optionsDict;
-    std::string optionsJSONString = optionsMap.format();
     NSError* error;
-    NSData* optionsJSON = [[NSData alloc] initWithBytes:(const void*)optionsJSONString.data()
-                                                 length:(NSInteger)optionsJSONString.size()];
+    NSData* optionsJSON = [[NSData alloc] initWithSTLString:optionsMap.format()];
     optionsDict = (NSDictionary*)[NSJSONSerialization JSONObjectWithData:optionsJSON
                                                                  options:readingOptions
                                                                    error:&error];
@@ -32,10 +31,8 @@ static const NSJSONWritingOptions writingOptions = static_cast<NSJSONWritingOpti
 
 - initWithOptionsMap:(options_map const&)optionsMap {
     NSDictionary* optionsDict;
-    std::string optionsJSONString = optionsMap.format();
     NSError* error;
-    NSData* optionsJSON = [[NSData alloc] initWithBytes:(const void*)optionsJSONString.data()
-                                                 length:(NSInteger)optionsJSONString.size()];
+    NSData* optionsJSON = [[NSData alloc] initWithSTLString:optionsMap.format()];
     optionsDict = (NSDictionary*)[NSJSONSerialization JSONObjectWithData:optionsJSON
                                                                  options:readingOptions
                                                                    error:&error];
@@ -56,8 +53,7 @@ static const NSJSONWritingOptions writingOptions = static_cast<NSJSONWritingOpti
                   [error.localizedDescription STLString]);
     NSString* json = [[NSString alloc] initWithData:datum
                                            encoding:NSUTF8StringEncoding];
-    options_map out = options_map::parse([json STLString]);
-    return out;
+    return options_map::parse([json STLString]);
 }
 
 @end

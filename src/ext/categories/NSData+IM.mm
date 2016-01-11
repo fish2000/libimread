@@ -22,12 +22,19 @@ using im::NSDataSink;
     return datum;
 }
 
++ (instancetype) dataWithSTLString:(std::string const&)string {
+    NSData* datum;
+    datum = [[NSData alloc] initWithBytes:(const void*)string.data()
+                                   length:(NSInteger)string.size()];
+    return datum;
+}
+
 + (instancetype) dataWithByteSource:(byte_source*)byteSource {
     return [NSData dataWithByteVector:byteSource->full_data()];
 }
 
 + (instancetype) dataWithByteSource:(byte_source*)byteSource
-                         length:(NSUInteger)bytes {
+                             length:(NSUInteger)bytes {
     NSData* datum;
     std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);
     int idx = byteSource->read(buffer.get(),
@@ -35,6 +42,28 @@ using im::NSDataSink;
     datum = [[NSData alloc] initWithBytes:(const void*)buffer.get()
                                    length:(NSInteger)bytes];
     return datum;
+}
+- initWithByteVector:(std::vector<byte> const&)byteVector {
+    return [self initWithBytes:(const void*)&byteVector[0]
+                        length:(NSInteger)byteVector.size()];
+}
+
+- initWithSTLString:(std::string const&)string {
+    return [self initWithBytes:(const void*)string.data()
+                        length:(NSInteger)string.size()];
+}
+
+- initWithByteSource:(byte_source*)byteSource {
+    return [self initWithByteVector:byteSource->full_data()];
+}
+
+- initWithByteSource:(byte_source*)byteSource
+              length:(NSUInteger)bytes {
+    std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);
+    int idx = byteSource->read(buffer.get(),
+                               static_cast<std::size_t>(bytes));
+    return [self initWithBytes:(const void*)buffer.get()
+                        length:(NSInteger)bytes];
 }
 
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink {

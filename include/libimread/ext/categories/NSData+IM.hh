@@ -108,8 +108,14 @@ using im::NSDataSink;
 
 @interface NSData (AXDataAdditions)
 + (instancetype)        dataWithByteVector:(std::vector<byte> const&)byteVector;
++ (instancetype)        dataWithSTLString:(std::string const&)string;
 + (instancetype)        dataWithByteSource:(byte_source*)byteSource;
 + (instancetype)        dataWithByteSource:(byte_source*)byteSource
+                                    length:(NSUInteger)bytes;
+-                       initWithByteVector:(std::vector<byte> const&)byteVector;
+-                       initWithSTLString:(std::string const&)string;
+-                       initWithByteSource:(byte_source*)byteSource;
+-                       initWithByteSource:(byte_source*)byteSource
                                     length:(NSUInteger)bytes;
 - (NSUInteger)          writeUsingByteSink:(byte_sink*)byteSink;
 - (NSUInteger)          writeUsingByteSink:(byte_sink*)byteSink
