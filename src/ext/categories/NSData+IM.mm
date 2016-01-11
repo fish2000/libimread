@@ -15,18 +15,18 @@ using im::NSDataSink;
 
 @implementation NSData (AXDataAdditions)
 
-+ (NSData *) dataWithByteVector:(const std::vector<byte>&)byteVector {
++ (instancetype) dataWithByteVector:(std::vector<byte> const&)byteVector {
     NSData* datum;
     datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
                                    length:(NSInteger)byteVector.size()];
     return datum;
 }
 
-+ (NSData *) dataWithByteSource:(byte_source*)byteSource {
++ (instancetype) dataWithByteSource:(byte_source*)byteSource {
     return [NSData dataWithByteVector:byteSource->full_data()];
 }
 
-+ (NSData *) dataWithByteSource:(byte_source*)byteSource
++ (instancetype) dataWithByteSource:(byte_source*)byteSource
                          length:(NSUInteger)bytes {
     NSData* datum;
     std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);

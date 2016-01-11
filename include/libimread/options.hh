@@ -17,7 +17,9 @@ namespace im {
             
             options_map()
                 :Json()
-                { set("metadata", ""); }
+                {
+                    mkobject();
+                }
             
             options_map(std::istream& is, bool full=true)
                 :Json(is, full)

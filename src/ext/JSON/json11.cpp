@@ -28,6 +28,23 @@ std::set<std::string> Json::keyset;
 int Json::indent;
 int Json::level;
 
+namespace tc {
+    
+    char const* typestr(Type t) {
+        switch (t) {
+            case Type::JSNULL:  return "NULL";
+            case Type::BOOLEAN: return "BOOLEAN";
+            case Type::NUMBER:  return "NUMBER";
+            case Type::STRING:  return "STRING";
+            case Type::ARRAY:   return "ARRAY";
+            case Type::OBJECT:  return "OBJECT";
+            case Type::SCHEMA:  return "SCHEMA";
+        }
+        imread_raise_default(JSONOutOfRange);
+    }
+    
+}
+
 namespace detail {
     
     unsigned currpos(std::istream& in, unsigned* pos) {
@@ -237,11 +254,12 @@ Json& Json::operator<<(const Json& that) {
     return *this;
 }
 
-void Json::insert(int index, const Json& that) {
+Json& Json::insert(int index, const Json& that) {
     if (that.root->contains(root)) {
         imread_raise(JSONUseError,
             "cyclic dependency"); }
     mkarray()->ins(index, that.root);
+    return *this;
 }
 
 Json& Json::replace(int index, const Json& that) {
@@ -253,9 +271,72 @@ Json& Json::replace(int index, const Json& that) {
     return *this;
 }
 
-void Json::erase(int index) {
+Json& Json::erase(int index) {
     mkarray()->del(index);
+    return *this;
 }
+
+Json Json::extend(Json const& other) const {
+    if (other.root == nullptr) {
+        imread_raise(JSONUseError,
+            "Json::extend(other): invalid operand",
+            "\t(other->root        == nullptr)");
+    }
+    if (root->type()       != Type::ARRAY ||
+        other.root->type() != Type::ARRAY) {
+        imread_raise(JSONUseError,
+            "Json::get(key) method not applicable",
+         FF("\troot->type()        == Type::%s", root->typestr()),
+         FF("\tother->root->type() == Type::%s", other.root->typestr()),
+            "\t(Requires both of Type::ARRAY)");
+    }
+    if (other.root->contains(root)) {
+        imread_raise(JSONUseError,
+            "cyclic dependency");
+    }
+    Json out = Json{};
+    auto const& a = static_cast<Array*>(root)->list;
+    auto const& b = static_cast<Array*>(other.root)->list;
+    auto ap = out.mkarray();
+    std::for_each(a.begin(), a.end(),
+              [&](Node* item) { ap->add(item); });
+    std::for_each(b.begin(), b.end(),
+              [&](Node* item) { ap->add(item); });
+    return out;
+}
+
+Json& Json::append(Json const& other) {
+    if (other.root->contains(root)) {
+        imread_raise(JSONUseError,
+            "cyclic dependency"); }
+    mkarray()->ins(-1, other.root);
+    return *this;
+}
+
+int Json::index(Json const& other) const {
+    if (root->type() != Type::ARRAY)
+        imread_raise(JSONUseError,
+            "Json::index(Json const&) method not applicable",
+         FF("\troot->type() == Type::%s", root->typestr()),
+            "\t(Requires Type::ARRAY)");
+    auto const& arlist = static_cast<Array*>(root)->list;
+    if (!root->contains(other.root)) { return -1; }
+    int idx = 0;
+    for (auto it = arlist.begin();
+         it != arlist.end();
+         ++it) { if (other.root == *it) { return idx; }
+                 ++idx; }
+    return -1;
+}
+
+Json Json::pop() {
+    auto const& arlist = mkarray()->list;
+    if (arlist.empty()) { return null; }
+    Json out(arlist.back());
+    erase(-1);
+    return out;
+}
+
 
 Json Json::Property::operator=(const Json& that) {
     if (host->type() == Type::OBJECT) {
@@ -302,6 +383,39 @@ Json Json::get(const std::string& key) const {
     }
     Node* n = ((Object*)root)->get(key);
     return n == nullptr ? undefined : Json(n);
+}
+
+Json Json::update(Json const& other) const {
+    if (other.root == nullptr) {
+        imread_raise(JSONUseError,
+            "Json::update(other) invalid operand",
+            "\t(other->root        == nullptr)");
+    }
+    if (root->type()       != Type::OBJECT ||
+        other.root->type() != Type::OBJECT) {
+        imread_raise(JSONUseError,
+            "Json::get(key) method not applicable",
+         FF("\troot->type()        == Type::%s", root->typestr()),
+         FF("\tother->root->type() == Type::%s", other.root->typestr()),
+            "\t(Requires both of Type::OBJECT)");
+    }
+    if (other.root->contains(root)) {
+        imread_raise(JSONUseError,
+            "cyclic dependency");
+    }
+    Json out = Json{};
+    auto const& a = static_cast<Object*>(root)->map;
+    auto const& b = static_cast<Object*>(other.root)->map;
+    auto op = out.mkobject();
+    std::for_each(b.begin(), b.end(),
+              [&](auto const& pair) {
+        op->set(*pair.first, pair.second);
+    });
+    std::for_each(a.begin(), a.end(),
+              [&](auto const& pair) {
+        op->set(*pair.first, pair.second);
+    });
+    return out;
 }
 
 bool Json::has(const std::string& key) const {

@@ -31,23 +31,16 @@
 using Base = std::integral_constant<uint8_t, 1>;
 using BaseType = Base::value_type;
 
-class Json; /// FORWARD!!!
+/// FORWARD!!!
+class Json;
+class Schema;
 
-enum Type : BaseType { JSNULL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT };
+enum Type : BaseType { JSNULL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT, SCHEMA };
 
 namespace tc {
     
-    inline const char* typestr(Type t) {
-        switch (t) {
-            case Type::JSNULL:          return "NULL";
-            case Type::BOOLEAN:         return "BOOLEAN";
-            case Type::NUMBER:          return "NUMBER";
-            case Type::STRING:          return "STRING";
-            case Type::ARRAY:           return "ARRAY";
-            case Type::OBJECT:          return "OBJECT";
-        }
-        imread_raise_default(JSONOutOfRange);
-    }
+    /// Return a string description of the typecode
+    char const* typestr(Type t);
     
     namespace idx {
         
@@ -60,30 +53,13 @@ namespace tc {
         template <Type t>
         struct helper;
         
-        template <>
-        struct helper<Type::JSNULL> {
-            typedef Json value_type;
-        };
-        template <>
-        struct helper<Type::BOOLEAN> {
-            typedef bool value_type;
-        };
-        template <>
-        struct helper<Type::NUMBER> {
-            typedef long double value_type;
-        };
-        template <>
-        struct helper<Type::STRING> {
-            typedef std::string value_type;
-        };
-        template <>
-        struct helper<Type::ARRAY> {
-            typedef Json value_type;
-        };
-        template <>
-        struct helper<Type::OBJECT> {
-            typedef Json value_type;
-        };
+        template <> struct helper<Type::JSNULL>  { using value_type = Json; };
+        template <> struct helper<Type::BOOLEAN> { using value_type = bool; };
+        template <> struct helper<Type::NUMBER>  { using value_type = long double; };
+        template <> struct helper<Type::STRING>  { using value_type = std::string; };
+        template <> struct helper<Type::ARRAY>   { using value_type = Json; };
+        template <> struct helper<Type::OBJECT>  { using value_type = Json; };
+        template <> struct helper<Type::SCHEMA>  { using value_type = Schema; };
         
         template <Type t>
         using helper_t = typename helper<t>::value_type;
@@ -97,6 +73,7 @@ class Json {
         /// schema is forward-declared:
         struct Schema;
         struct Node {
+            static constexpr Type typecode = Type::JSNULL;
             unsigned refcnt;
             Node(unsigned init = 0);
             virtual ~Node();
@@ -116,6 +93,7 @@ class Json {
         };
         
         struct Bool : Node {
+            static constexpr Type typecode = Type::BOOLEAN;
             Bool(bool x) { refcnt = 1; }
             Type type() const override { return Type::BOOLEAN; }
             void print(std::ostream &out) const override;
@@ -124,6 +102,7 @@ class Json {
         };
         
         struct Number : Node {
+            static constexpr Type typecode = Type::NUMBER;
             long double value;
             int prec;
             Number(int x) {
@@ -175,6 +154,7 @@ class Json {
         };
         
         struct String : Node {
+            static constexpr Type typecode = Type::STRING;
             std::string value;
             String(const std::string& s) { value = s; }
             String(const char* cs) { value = cs; }
@@ -187,6 +167,7 @@ class Json {
         };
         
         struct Array : Node {
+            static constexpr Type typecode = Type::ARRAY;
             std::vector<Node*> list;
             virtual ~Array();
             Type type() const override { return Type::ARRAY; }
@@ -203,6 +184,7 @@ class Json {
         };
         
         struct Object : Node {
+            static constexpr Type typecode = Type::OBJECT;
             std::map<const std::string*, Node*> map;
             virtual ~Object();
             Type type() const override { return Type::OBJECT; }
@@ -217,6 +199,7 @@ class Json {
         };
         
         struct Schema : Node {
+            static constexpr Type typecode = Type::SCHEMA;
             Schema(Node*);
             virtual ~Schema();
             std::string uri;
@@ -246,7 +229,8 @@ class Json {
             Object* deps = nullptr;
             Object* defs = nullptr;
             Node* deflt = nullptr;
-            bool is_schema() const { return true; }
+            Type type() const override { return Type::SCHEMA; }
+            bool is_schema() const override { return true; }
         };
         
         class Property {
@@ -288,9 +272,6 @@ class Json {
             friend Json;
         };
         
-        Array* mkarray();
-        Object* mkobject();
-        
         static std::set<std::string> keyset; /// all propery names
         static int level;                    /// for pretty printing
         
@@ -331,6 +312,8 @@ class Json {
         explicit Json(int16_t x)    { (root = new Number(x))->refcnt++; }
         
         /// dynamic type info
+        Array* mkarray();
+        Object* mkobject();
         Type type() const                   { return root->type(); }
         const char* typestr() const         { return root->typestr(); }
         std::string typestring() const      { return std::string(root->typestr()); }
@@ -350,12 +333,13 @@ class Json {
         explicit operator long double() const;
         
         /// dictionary operations (or "object properties" in JS-Ville)
-        Json &set(std::string key, const Json& val);
-        Json get(const std::string& key) const;
-        bool has(const std::string& key) const;
-        Json &set(const char* key, const Json& val) { return set(std::string(key), val); }
-        Json get(const char* key) const             { return get(std::string(key)); }
-        bool has(const char* key) const             { return has(std::string(key)); }
+        Json& set(std::string key, const Json& val);
+        Json  get(const std::string& key) const;
+        bool  has(const std::string& key) const;
+        Json& set(const char* key, const Json& val) { return set(std::string(key), val); }
+        Json  get(const char* key) const            { return get(std::string(key)); }
+        bool  has(const char* key) const            { return has(std::string(key)); }
+        Json  update(const Json& other) const;
         std::vector<std::string> keys();
         
         /// traverse
@@ -394,9 +378,13 @@ class Json {
         
         /// array operations
         Json& operator<<(const Json&);
-        void insert(int index, const Json&);
-        void erase(int index);
+        Json&  insert(int index, const Json&);
+        Json&   erase(int index);
         Json& replace(int index, const Json&);
+        Json  extend(Json const&) const;
+        Json& append(Json const&);
+        int    index(Json const&) const;
+        Json     pop();
         
         /// subscripting
         std::size_t size() const;
@@ -447,7 +435,11 @@ class Json {
                 :im::JSONUseError(msg)
                 {}
         };
+        
+        using JSONSchema = Schema;
 };
+
+// using Schema = Json::JSONSchema;
 
 template <> inline
 decltype(auto) Json::cast<filesystem::path>(const std::string& key) const {

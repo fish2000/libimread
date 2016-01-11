@@ -14,10 +14,10 @@
 
 using namespace im;
 
-@interface NSColor (IMColorAdditions)
-+ (NSColor *)           colorWithUniformRGBA:(const color::RGBA&)rgba;
-+ (NSColor *)           colorWithUniformRGB:(const color::RGB&)rgb;
-+ (NSColor *)           colorWithUniformMonochrome:(const color::Monochrome&)mono;
+@interface NSColor (AXColorAdditions)
++ (instancetype)        colorWithUniformRGBA:(color::RGBA const&)rgba;
++ (instancetype)        colorWithUniformRGB:(color::RGB const&)rgb;
++ (instancetype)        colorWithUniformMonochrome:(color::Monochrome const&)mono;
 - (color::RGBA)         uniformRGBA;
 - (color::RGB)          uniformRGB;
 - (color::Monochrome)   uniformMonochrome;

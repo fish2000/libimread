@@ -10,8 +10,9 @@
 
 using namespace im;
 
-@implementation NSColor (IMColorAdditions)
-+ (NSColor *) colorWithUniformRGBA:(const color::RGBA&)rgba {
+@implementation NSColor (AXColorAdditions)
+
++ (instancetype) colorWithUniformRGBA:(color::RGBA const&)rgba {
     using Color = color::RGBA;
     using Channel = Color::channel_t;
     Color::array_t array = rgba.to_array();
@@ -25,7 +26,8 @@ using namespace im;
                             blue:farray[2]
                            alpha:farray[3]];
 }
-+ (NSColor *) colorWithUniformRGB:(const color::RGB&)rgb {
+
++ (instancetype) colorWithUniformRGB:(color::RGB const&)rgb {
     using Color = color::RGB;
     using Channel = Color::channel_t;
     Color::array_t array = rgb.to_array();
@@ -39,7 +41,8 @@ using namespace im;
                             blue:farray[2]
                            alpha:(CGFloat)0.0f];
 }
-+ (NSColor *) colorWithUniformMonochrome:(const color::Monochrome&)mono {
+
++ (instancetype) colorWithUniformMonochrome:(color::Monochrome const&)mono {
     using Color = color::Monochrome;
     CGFloat white = (CGFloat)((float)mono.components[0] / (float)Color::max());
     return [NSColor colorWithWhite:white
@@ -55,6 +58,7 @@ using namespace im;
         static_cast<Channel>([self alphaComponent]  * Color::max()) };
     return out;
 }
+
 - (color::RGB) uniformRGB {
     using Color = color::RGB;
     using Channel = Color::channel_t;
@@ -64,6 +68,7 @@ using namespace im;
         static_cast<Channel>([self blueComponent]   * Color::max()) };
     return out;
 }
+
 - (color::Monochrome) uniformMonochrome {
     using Color = color::Monochrome;
     using Channel = Color::channel_t;
@@ -71,6 +76,6 @@ using namespace im;
         static_cast<Channel>([self brightnessComponent] * Color::max()) };
     return out;
 }
-@end
 
+@end
 #endif /// __OBJC__

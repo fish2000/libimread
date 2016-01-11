@@ -9,11 +9,9 @@
 #import <Cocoa/Cocoa.h>
 #endif /// __OBJC__
 
-#include <cstdlib>
 #include <libimread/libimread.hpp>
 #include <libimread/options.hh>
 
-using im::byte;
 using im::options_map;
 
 #ifdef __OBJC__

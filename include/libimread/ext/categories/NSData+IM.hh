@@ -107,9 +107,9 @@ using im::NSDataSink;
 #ifdef __OBJC__
 
 @interface NSData (AXDataAdditions)
-+ (NSData *)            dataWithByteVector:(const std::vector<byte>&)byteVector;
-+ (NSData *)            dataWithByteSource:(byte_source*)byteSource;
-+ (NSData *)            dataWithByteSource:(byte_source*)byteSource
++ (instancetype)        dataWithByteVector:(std::vector<byte> const&)byteVector;
++ (instancetype)        dataWithByteSource:(byte_source*)byteSource;
++ (instancetype)        dataWithByteSource:(byte_source*)byteSource
                                     length:(NSUInteger)bytes;
 - (NSUInteger)          writeUsingByteSink:(byte_sink*)byteSink;
 - (NSUInteger)          writeUsingByteSink:(byte_sink*)byteSink
