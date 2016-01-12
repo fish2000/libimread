@@ -68,6 +68,7 @@ SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(CROSSGUID_DIR "${DEPS_DIR}/crossguid")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
+SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
 SET(MABLOCKCLOSURE_DIR "${DEPS_DIR}/MABlockClosure")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
 SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
@@ -139,6 +140,8 @@ set_target_properties(imread
 add_dependencies(imread "guid")
 # add_dependencies(libimread "libdocopt")
 add_dependencies(imread "docopt")
+# add_dependencies(libimread "libimagecompression")
+add_dependencies(imread "imagecompression")
 # add_dependencies(libimread "libmaBlockClosure")
 add_dependencies(imread "maBlockClosure")
 # add_dependencies(libimread "libsszip")
@@ -167,8 +170,10 @@ configure_file(
 #     ${WEBP_LIBRARIES}
 #     ${HALIDE_LIBRARIES}
 #     ${HDF5_LIBRARIES})
+
 target_link_libraries(imread
     guid maBlockClosure
+    imagecompression
     sszip png z
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
@@ -199,6 +204,7 @@ add_dependencies("test_data_header" imread)
 add_dependencies(imread_tests "test_data_header")
 add_dependencies(imread_tests "iod_symbolize")
 add_dependencies(imread_tests "guid")
+add_dependencies(imread_tests "imagecompression")
 add_dependencies(imread_tests "maBlockClosure")
 add_dependencies(imread_tests "sszip")
 add_dependencies(imread_tests "imread")
@@ -206,6 +212,7 @@ link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries(imread_tests
     imread sszip
     maBlockClosure
+    imagecompression
     guid png z
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
