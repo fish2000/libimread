@@ -2,6 +2,7 @@
 /dist/
 /deps/*/build/
 /python/build/
+/python/imread.egg-info/
 *.dylib
 *.a
 *.so

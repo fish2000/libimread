@@ -9,6 +9,26 @@ namespace im {
     
     namespace detail {
         
+        char const* structcode(NPY_TYPES dtype) {
+            switch (dtype) {
+                case NPY_BOOL:       return "?";
+                case NPY_UINT8:      return "B";
+                case NPY_UINT16:     return "H";
+                case NPY_UINT32:     return "I";
+                case NPY_UINT64:     return "L";
+                case NPY_INT8:       return "b";
+                case NPY_HALF:       return "e";
+                case NPY_INT16:      return "h";
+                case NPY_INT32:      return "i";
+                case NPY_INT64:      return "l";
+                case NPY_FLOAT:      return "f";
+                case NPY_DOUBLE:     return "d";
+                case NPY_LONGDOUBLE: return "g";
+                default:             return "B";
+            }
+            return "B";
+        }
+        
         Halide::Type for_dtype(NPY_TYPES dtype) {
             switch (dtype) {
                 case NPY_BOOL: return Halide::Bool();
@@ -20,12 +40,12 @@ namespace im {
                 case NPY_INT32: return Halide::Int(32);
                 case NPY_FLOAT: return Halide::Float(32);
                 case NPY_DOUBLE: return Halide::Float(64);
-                case NPY_LONGDOUBLE: return Halide::Float(128);
+                case NPY_LONGDOUBLE: return Halide::Float(64);
                 default: Halide::Handle();
             }
             return Halide::Handle();
         }
-    
+        
         NPY_TYPES for_nbits(int nbits, bool signed_type) {
             if (signed_type) {
                 switch (nbits) {
@@ -47,29 +67,39 @@ namespace im {
         
     }
     
-    void PythonBufferImage::populate_buffer(Py_buffer* buffer, int flags) {
-        buffer->buf = Image::rowp(0);
-        buffer->format = ::strdup("b");
-        buffer->ndim = (Py_ssize_t)Image::ndims();
-        buffer->shape = new Py_ssize_t[Image::ndims()];
-        buffer->strides = new Py_ssize_t[Image::ndims()];
-        // buffer->suboffsets = new Py_ssize_t[Image::ndims()];
-        buffer->suboffsets = NULL;
+    int PythonBufferImage::populate_buffer(Py_buffer* view,
+                                           NPY_TYPES dtype,
+                                           int flags) {
+        view->buf = Image::rowp(0);
+        view->ndim = Image::ndims();
+        view->format = ::strdup(detail::structcode(dtype));
+        view->shape = new Py_ssize_t[Image::ndims()];
+        view->strides = new Py_ssize_t[Image::ndims()];
+        view->itemsize = (Py_ssize_t)Image::nbytes();
+        view->suboffsets = NULL;
         
         int len = 1;
-        for (int idx = 0; idx < buffer->ndim; idx++) {
+        for (int idx = 0; idx < view->ndim; idx++) {
             len *= Image::dim_or(idx, 1);
-            buffer->shape[idx] = Image::dim_or(idx, 1);
-            buffer->strides[idx] = Image::stride(idx);
-            // buffer->suboffsets[idx] = Image:: ???
+            view->shape[idx] = Image::dim_or(idx, 1);
+            view->strides[idx] = Image::stride(idx);
         }
         
-        buffer->len = len;
-        buffer->itemsize = Image::nbytes();
+        view->len = len * Image::nbytes();
+        view->readonly = 1; /// true
+        view->internal = (void*)"YO DOGG";
+        view->obj = NULL;
         
-        buffer->readonly = true;
-        // buffer->internal = NULL;
-        buffer->obj = NULL;
+        /// per the Python API:
+        return 0;
+    }
+    
+    void PythonBufferImage::release_buffer(Py_buffer* view) {
+        if (std::string((const char*)view->internal) == "YO DOGG") {
+            if (view->format)   { free(view->format); }
+            if (view->shape)    { delete[] view->shape; }
+            if (view->strides)  { delete[] view->strides; }
+        }
     }
     
     HybridArray::HybridArray()
@@ -111,15 +141,16 @@ namespace im {
     }
     
     Halide::Type HybridArray::type() const {
-        return detail::for_dtype(dtype_);
+        //return detail::for_dtype(dtype_);
+        return HalBase::buffer.type();
     }
     
     int HybridArray::nbits() const {
-        return detail::for_dtype(dtype_).bits;
+        return detail::for_dtype(dtype_).bits();
     }
     
     int HybridArray::nbytes() const {
-        const int bits = detail::for_dtype(dtype_).bits;
+        const int bits = detail::for_dtype(dtype_).bits();
         return (bits / 8) + bool(bits % 8);
     }
     
@@ -173,8 +204,7 @@ namespace im {
                                                 int d3, int d4) {
         return std::unique_ptr<Image>(
             new HybridArray(
-                detail::for_nbits(nbits),
-                xWIDTH, xHEIGHT, xDEPTH));
+                detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
     }
     
     std::shared_ptr<Image> ArrayFactory::shared(int nbits,
@@ -182,8 +212,7 @@ namespace im {
                                                 int d3, int d4) {
         return std::shared_ptr<Image>(
             new HybridArray(
-                detail::for_nbits(nbits),
-                xWIDTH, xHEIGHT, xDEPTH));
+                detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
     }
     
 #undef xWIDTH

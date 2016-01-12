@@ -1,4 +1,8 @@
 
+#include <iostream>
+#include <sstream>
+#include <cctype>
+#include <tuple>
 #include "structcode.hpp"
 
 namespace structcode {
@@ -21,7 +25,13 @@ namespace structcode {
         return shape_elems;
     }
     
-    structcode_t parse(std::string structcode, bool toplevel) {
+    // struct ParseResult {
+    //     std::string byteorder;
+    //     stringvec_t tokens;
+    //     structcode_t fields;
+    // };
+    
+    parse_result_t parse(std::string structcode, bool toplevel) {
         stringvec_t tokens;
         structcode_t fields;
         field_namer field_names;
@@ -29,7 +39,7 @@ namespace structcode {
         std::string byteorder = "@";
         std::size_t itemsize = 1;
         shapevec_t shape = { 0 };
-        const shapevec_t noshape = shape;
+        const shapevec_t noshape = { 0 };
         
         while (true) {
             if (structcode.size() == 0) { break; }
@@ -44,7 +54,12 @@ namespace structcode {
                     }
                     if (pos) { break; } /// too many open-brackets
                     std::string temp = structcode.substr(0, siz-1);
-                    structcode_t pairvec = parse(temp, toplevel=false);
+                    
+                    std::string endianness;
+                    stringvec_t parsetokens;
+                    structcode_t pairvec;
+                    std::tie(endianness, parsetokens, pairvec) = parse(temp, toplevel=false);
+                    
                     structcode.erase(0, siz+1);
                     for (std::size_t idx = 0; idx < pairvec.size(); ++idx) {
                         fields.push_back(pairvec[idx]);
@@ -92,7 +107,7 @@ namespace structcode {
                     }
                     structcode.erase(0, 1);
                     tokens.push_back(byteorder);
-                    fields.push_back(std::make_pair("__byteorder__", byteorder));
+                    // fields.push_back(std::make_pair("__byteorder__", byteorder));
                 }    
                 break;
                 case ' ':
@@ -117,12 +132,12 @@ namespace structcode {
                     int still_digits = 1;
                     for (siz = 0; still_digits && (siz < structcode.size()); siz++) {
                         digit = structcode.c_str()[siz];
-                        still_digits = isdigit(digit) && digit != '(';
+                        still_digits = std::isdigit(digit) && digit != '(';
                     }
-                    std::string numstr = std::string(structcode.substr(0, siz));
-                    itemsize = static_cast<size_t>(std::stol(numstr));
+                    std::string numstr = structcode.substr(0, siz);
+                    itemsize = static_cast<std::size_t>(std::stol(numstr));
                     structcode.erase(0, siz);
-                    if (!isdigit(numstr.back())) {
+                    if (!std::isdigit(numstr.back())) {
                         structcode = std::string(&numstr.back()) + structcode;
                     }
                 }
@@ -138,7 +153,7 @@ namespace structcode {
                     codelen++;
                 }
                 
-                code += std::string(structcode.substr(0, codelen));
+                code += structcode.substr(0, codelen);
                 structcode.erase(0, codelen);
                 
                 /// field name
@@ -219,7 +234,6 @@ namespace structcode {
                 fields.push_back(std::make_pair(name, dtypechar));
                 tokens.push_back(dtypechar);
                 
-                //byteorder = "@";
                 itemsize = 1;
                 shape = noshape;
                 
@@ -227,7 +241,15 @@ namespace structcode {
             }
         }
         
-        return fields;
+        // ParseResult out{ std::move(byteorder),
+        //                  std::move(tokens),
+        //                  std::move(fields) };
+        
+        return std::make_tuple(std::move(byteorder),
+                               std::move(tokens),
+                               std::move(fields));
+        
+        // return fields;
     }
 
 } /// namespace structcode

@@ -2,8 +2,6 @@
 #define PyImgC_STRUCTCODE_H
 
 #include <cstdio>
-#include <iostream>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -110,7 +108,7 @@ namespace structcode {
             char str[5];
             while (true) {
                 std::sprintf(str, "f%i", next());
-                std::string dummy_name = std::string(str);
+                std::string dummy_name(str);
                 if (!has(dummy_name)) {
                     add(dummy_name);
                     return dummy_name;
@@ -122,8 +120,10 @@ namespace structcode {
     using shapevec_t = std::vector<int>;
     using structcode_t = std::vector<std::pair<std::string, std::string>>;
     
+    using parse_result_t = std::tuple<std::string, stringvec_t, structcode_t>;
+    
     shapevec_t parse_shape(std::string shapecode);
-    structcode_t parse(std::string structcode, bool toplevel=true);
+    parse_result_t parse(std::string structcode, bool toplevel=true);
 
 } /// namespace structcode
 

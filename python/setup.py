@@ -93,8 +93,11 @@ include_dirs = [
 
 deps_dir = os.path.join(os.path.dirname(__file__), '..', 'deps')
 for dep in os.listdir(deps_dir):
-    include_dirs.append(
-        os.path.join(os.path.dirname(__file__), '..', 'deps', dep))
+    if dep.lower() == ".ds_store":
+        continue
+    dep_pth = os.path.join(os.path.dirname(__file__), '..', 'deps', dep)
+    if os.path.isdir(dep_pth):
+        include_dirs.append(dep_pth)
 
 library_dirs = [
     '/usr/local/opt/halide/lib',                                # EERRRRRR WELLL
@@ -251,12 +254,12 @@ for key, sources in extensions.iteritems():
             '-x', 'c++',
             '-std=c++14',
             '-stdlib=libc++',
-            '-Werror=unused-command-line-argument',
-            '-Wno-unused-function',
-            '-Wno-delete-non-virtual-dtor',
-            '-Wno-overloaded-virtual', # WARNING WARNING WARNING
-            '-Wno-dynamic-class-memaccess', # WARNING WARNING etc
-            '-Wno-deprecated-writable-strings',
+            # '-Werror=unused-command-line-argument',
+            # '-Wno-unused-function',
+            # '-Wno-delete-non-virtual-dtor',
+            # '-Wno-overloaded-virtual', # WARNING WARNING WARNING
+            # '-Wno-dynamic-class-memaccess', # WARNING WARNING etc
+            # '-Wno-deprecated-writable-strings',
             '-Qunused-arguments',
         ] + other_flags))
 

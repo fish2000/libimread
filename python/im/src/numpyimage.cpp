@@ -46,7 +46,6 @@ using ImagePtr = std::unique_ptr<im::HybridArray>;
 struct NumpyImage {
     PyObject_HEAD
     std::unique_ptr<im::HybridArray> image;
-    // im::HybridArray* image = nullptr;
     PyArray_Descr* dtype = NULL;
     
     void cleanup() {
@@ -114,16 +113,33 @@ static PyObject* NumpyImage_Repr(NumpyImage* im) {
     return PyString_FromFormat("<NumpyImage @ %p>", im);
 }
 
-// static const char *NumpyImage_ReprCString(NumpyImage *im) {
-//     PyObject *out = NumpyImage_Repr(im);
-//     const char *outstr = PyString_AS_STRING(out);
-//     Py_DECREF(out);
-//     return outstr;
-// }
-//
-// static std::string NumpyImage_ReprString(NumpyImage *im) {
-//     return std::string(NumpyImage_ReprCString(im));
-// }
+int NumpyImage_GetBuffer(PyObject* self, Py_buffer* view, int flags) {
+    NumpyImage* pyim = reinterpret_cast<NumpyImage*>(self);
+    int out = pyim->image->populate_buffer(view, (NPY_TYPES)pyim->dtype->type_num,
+                                           flags);
+    Py_INCREF(self);
+    view->obj = self;
+    return out;
+}
+
+void NumpyImage_ReleaseBuffer(PyObject* self, Py_buffer* view) {
+    NumpyImage* pyim = reinterpret_cast<NumpyImage*>(self);
+    pyim->image->release_buffer(view);
+    if (view->obj) {
+        Py_DECREF(view->obj);
+        view->obj = NULL;
+    }
+    PyBuffer_Release(view);
+}
+
+static PyBufferProcs NumpyImage_Buffer3000Methods = {
+    0, /* (readbufferproc) */
+    0, /* (writebufferproc) */
+    0, /* (segcountproc) */
+    0, /* (charbufferproc) */
+    (getbufferproc)NumpyImage_GetBuffer,
+    (releasebufferproc)NumpyImage_ReleaseBuffer,
+};
 
 /// DEALLOCATE
 static void NumpyImage_dealloc(NumpyImage* self) {
@@ -137,13 +153,6 @@ static PyObject*    NumpyImage_GET_dtype(NumpyImage* self, void* closure) {
 }
 
 static PyObject*    NumpyImage_GET_shape(NumpyImage* self, void* closure) {
-    // int ndims = self->image->ndims();
-    // std::vector<int> dims(ndims);
-    // std::string return_code("");
-    // for (int idx = 0; idx < ndims; idx++) {
-    //     dims.push_back(self->image->dim(idx));
-    //     return_code += "i";
-    // }
     switch (self->image->ndims()) {
         case 1:
             return Py_BuildValue("(i)",     self->image->dim(0));
@@ -216,7 +225,7 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                          /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                      /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                      /* tp_setattro */
-    0,                                                          /* tp_as_buffer */
+    &NumpyImage_Buffer3000Methods,                              /* tp_as_buffer */
     NumpyImage_TypeFlags,                                       /* tp_flags */
     "Python bindings for NumPy Halide bridge",                  /* tp_doc */
     0,                                                          /* tp_traverse */

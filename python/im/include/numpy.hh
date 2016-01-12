@@ -31,7 +31,10 @@ namespace im {
     
     class PythonBufferImage : public Image {
         
-        void populate_buffer(Py_buffer* buffer, int flags = 0);
+        public:
+            int populate_buffer(Py_buffer* buffer, NPY_TYPES dtype = NPY_UINT8,
+                                                   int flags = 0);
+            void release_buffer(Py_buffer* buffer);
         
     };
     
@@ -62,7 +65,7 @@ namespace im {
             /// This returns the same type of data as buffer_t.host
             virtual uint8_t* data(int s = 0) const;
             
-            inline Halide::Type type() const;
+            Halide::Type type() const;
             virtual int nbits() const override;
             virtual int nbytes() const override;
             virtual int ndims() const override;
