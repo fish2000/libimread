@@ -35,7 +35,7 @@ pkg_check_modules(WEBP libwebp)
 if (NOT(WEBP_FOUND))
     # Older installations of libwebp do not install a pkgconfig file, so we fall
     # back to a manual search for a libwebp header file.
-    CHECK_INCLUDE_FILES("webp/decode.h" WEBP_FOUND_HEADER)
+    CHECK_INCLUDE_FILE("webp/decode.h" WEBP_FOUND_HEADER)
     if (WEBP_FOUND_HEADER)
         set(WEBP_LIBRARIES "-lwebp")
         set(WEBP_FOUND TRUE)
