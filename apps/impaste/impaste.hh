@@ -9,6 +9,7 @@
 #include <libimread/libimread.hpp>
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
+#include <libimread/objc-rt/appkit.hh>
 #import <libimread/ext/categories/NSString+STL.hh>
 #import <libimread/ext/categories/NSURL+IM.hh>
 #import <libimread/ext/categories/NSBitmapImageRep+IM.hh>
@@ -56,44 +57,6 @@ namespace objc {
             NSApp.delegate = delegate;
             [NSApp run];
         };
-    }
-    
-    namespace appkit {
-        
-        template <typename OCType>
-        BOOL can_paste(NSPasteboard* board = nil) noexcept {
-            if (!board) { board = [NSPasteboard generalPasteboard]; }
-            return [board canReadObjectForClasses:@[ [OCType class] ]
-                                          options:@{}];
-        }
-        
-        template <typename OCType>
-        __attribute__((ns_returns_retained))
-        typename std::add_pointer_t<OCType> paste(NSPasteboard* board = nil) noexcept {
-            if (!board) { board = [NSPasteboard generalPasteboard]; }
-            if (!can_paste<OCType>(board)) { return nil; }
-            NSArray* out = [board readObjectsForClasses:@[ [OCType class] ]
-                                                options:@{}];
-            
-            /// array is nil on error -- but empty if the call to
-            /// `readObjectsForClasses:options:` comes up short… SOOO:
-            return out == nil ? nil : out[0];
-        }
-        
-        template <typename ...OCTypes>
-        BOOL copy_to(NSPasteboard* board, OCTypes... objects) noexcept {
-            if (!board) { board = [NSPasteboard generalPasteboard]; }
-            __attribute__((__unused__))
-            NSInteger changecount = [board clearContents];
-            return [board writeObjects:@[ objects... ]];
-        }
-        
-        template <typename ...OCTypes> inline
-        BOOL copy(OCTypes... objects) noexcept {
-            return copy_to<OCTypes...>([NSPasteboard generalPasteboard],
-                                        objects...);
-        }
-        
     }
     
 }

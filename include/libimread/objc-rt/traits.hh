@@ -130,7 +130,10 @@ namespace objc {
             /// objc::traits::detail::is_object_pointer<T> checks using
             /// objc::traits::detail::has_common_type<T, objc::types::ID>
             template <typename Target>
-            using is_object_pointer = has_common_type<std::decay_t<Target>, types::ID>;
+            using is_object_pointer = has_common_type<types::ID, std::decay_t<Target>>;
+            
+            template <typename ...Targets>
+            using are_object_pointers = has_common_type<types::ID, Targets...>;
         
         } /* namespace detail */
         
@@ -159,6 +162,14 @@ namespace objc {
             typename std::enable_if_t<
                  std::is_pointer<T>::value,
                  bool>> : detail::is_object_pointer<T> {};
+        
+        // template <typename ...Types, typename V = bool>
+        // struct are_objects : std::false_type {};
+        // template <typename ...Types>
+        // struct are_objects<Types...,
+        //     typename std::enable_if_t<
+        //         detail::are_object_pointers<Types...>::value,
+        //         bool>> : std::true_type {};
         
         /// test for a selector struct
         template <typename T, typename V = bool>

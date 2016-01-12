@@ -51,9 +51,10 @@ static const NSJSONWritingOptions writingOptions = static_cast<NSJSONWritingOpti
     imread_assert(datum != nil,
                   "NSDictionary error in asOptionsMap",
                   [error.localizedDescription STLString]);
-    NSString* json = [[NSString alloc] initWithData:datum
-                                           encoding:NSUTF8StringEncoding];
-    return options_map::parse([json STLString]);
+    // NSString* json = [[NSString alloc] initWithData:datum
+    //                                        encoding:NSUTF8StringEncoding];
+    // return options_map::parse([json STLString]);
+    return options_map::parse([datum STLString]);
 }
 
 @end

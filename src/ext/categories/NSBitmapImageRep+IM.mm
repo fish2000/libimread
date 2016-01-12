@@ -15,29 +15,19 @@ using im::ImageFactory;
 @implementation NSBitmapImageRep (AXBitmapImageRepAdditions)
 
 + (instancetype) imageRepWithByteVector:(std::vector<byte> const&)byteVector {
-    NSBitmapImageRep* rep;
-    @autoreleasepool {
-        NSData* datum;
-        datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
-                                       length:(NSInteger)byteVector.size()];
-        rep = [[NSBitmapImageRep alloc] initWithData:datum];
-    };
-    return rep;
+    NSData* datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
+                                           length:(NSInteger)byteVector.size()];
+    return [[NSBitmapImageRep alloc] initWithData:datum];
 }
 
 + (instancetype) imageRepWithImage:(Image const&)image {
-    NSBitmapImageRep* rep = [[NSBitmapImageRep alloc] initWithImage:image];
-    return rep;
+    return [[NSBitmapImageRep alloc] initWithImage:image];
 }
 
 - initWithByteVector:(std::vector<byte> const&)byteVector {
-    @autoreleasepool {
-        NSData* datum;
-        datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
-                                       length:(NSInteger)byteVector.size()];
-        [self initWithData:datum];
-    }
-    return self;
+    NSData* datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
+                                           length:(NSInteger)byteVector.size()];
+    return [self initWithData:datum];
 }
 
 - initWithImage:(Image const&)image {

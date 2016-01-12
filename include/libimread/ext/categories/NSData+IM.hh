@@ -121,6 +121,7 @@ using im::NSDataSink;
 - (NSUInteger)          writeUsingByteSink:(byte_sink*)byteSink
                                     length:(NSUInteger)bytes;
 - (std::unique_ptr<NSDataSource>) dataSource;
+- (std::string)         STLString;
 @end
 
 @interface NSMutableData (AXMutableDataAdditions)

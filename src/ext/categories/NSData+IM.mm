@@ -81,6 +81,11 @@ using im::NSDataSink;
     return std::make_unique<NSDataSource>(self);
 }
 
+- (std::string) STLString {
+    return std::string(static_cast<const char*>(self.bytes),
+                       static_cast<std::size_t>(self.length));
+}
+
 @end
 
 @implementation NSMutableData (AXMutableDataAdditions)
