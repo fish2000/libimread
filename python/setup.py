@@ -41,20 +41,20 @@ except ImportError:
     numpy = FakeNumpy()
 
 # VERSION & METADATA
-__version__ = "<undefined>"
-exec(compile(open('imread-version.py').read(),
-             'imread-version.py', 'exec'))
-
+# __version__ = "<undefined>"
+# exec(compile(open('imread-version.py').read(),
+#              'imread-version.py', 'exec'))
+__version__ = "0.1.0"
 long_description = open('README.md').read()
 
 # COMPILATION
 DEBUG = os.environ.get('DEBUG', '1')
 USE_PNG = os.environ.get('USE_PNG', '16')
 USE_JPEG = os.environ.get('USE_JPEG', '1')
-USE_TIFF = os.environ.get('USE_TIFF', '0')
+USE_TIFF = os.environ.get('USE_TIFF', '1')
 USE_LLVM = os.environ.get('USE_LLVM', '1')
 USE_WEBP = os.environ.get('USE_WEBP', '1')
-USE_EIGEN = os.environ.get('USE_EIGEN', '1')
+USE_EIGEN = os.environ.get('USE_EIGEN', '0')
 
 undef_macros = []
 auxilliary_macros = []
@@ -87,11 +87,19 @@ include_dirs = [
     get_python_inc(plat_specific=1),
     os.path.join(os.path.dirname(__file__), '..', 'include'),                 # FOR DEVELOPMENT
     os.path.join(os.path.dirname(__file__), '..', 'include', 'libimread'),    # ALSO FOR DEVELOPMENT
+    os.path.join(os.path.dirname(__file__), '..', 'build'),
+    os.path.join(os.path.dirname(__file__), '..', 'build', 'libimread'),
     os.path.join(os.path.dirname(__file__), 'im', 'include')]
+
+deps_dir = os.path.join(os.path.dirname(__file__), '..', 'deps')
+for dep in os.listdir(deps_dir):
+    include_dirs.append(
+        os.path.join(os.path.dirname(__file__), '..', 'deps', dep))
 
 library_dirs = [
     '/usr/local/opt/halide/lib',                                # EERRRRRR WELLL
-    '/usr/local/opt/llvm/lib']
+    '/usr/local/opt/llvm/lib',
+    '../build']
 
 other_flags = []
 
@@ -102,6 +110,7 @@ for pth in (
         include_dirs.append(pth)
 
 for pth in (
+    '/usr/lib',
     '/usr/local/lib',
     '/usr/X11/lib'):
     if os.path.isdir(pth):
@@ -109,13 +118,15 @@ for pth in (
 
 extensions = {
     'im': [
+        "im/src/structcode.cpp",
         "im/src/typecode.cpp",
         "im/src/numpy.cpp",
+        "im/src/numpyimage.cpp",
     ],
 }
 
 # the basics
-libraries = ['jpeg', 'png', 'z', 'm', 'Halide']
+libraries = ['jpeg', 'png', 'z', 'm', 'Halide', 'imread', 'c++']
 PKG_CONFIG = which('pkg-config')
 
 # the addenda
@@ -228,17 +239,17 @@ for key, sources in extensions.iteritems():
         library_dirs=library_dirs,
         include_dirs=include_dirs,
         sources=sources,
-        language="objc++",
+        language="c++",
         undef_macros=undef_macros,
         define_macros=define_macros,
-        extra_link_args=[
-            '-framework', 'Quartz',
-            '-framework', 'CoreFoundation',
-            '-framework', 'Foundation'],
+        # extra_link_args=[
+        #     '-framework', 'Quartz',
+        #     '-framework', 'CoreFoundation',
+        #     '-framework', 'Foundation'],
         extra_compile_args=[
             '-O3',
-            '-ObjC++',
-            '-std=c++11',
+            '-x', 'c++',
+            '-std=c++14',
             '-stdlib=libc++',
             '-Werror=unused-command-line-argument',
             '-Wno-unused-function',

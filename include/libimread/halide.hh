@@ -93,11 +93,11 @@ namespace im {
                 return (*this)(Halide::_);
             }
             
-            virtual const int nbits() const override {
+            virtual int nbits() const override {
                 return sizeof(pT) * 8;
             }
             
-            virtual const int nbytes() const override {
+            virtual int nbytes() const override {
                 return sizeof(pT);
             }
             

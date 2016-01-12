@@ -9,6 +9,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <functional>
 #include <unordered_map>
 
 #ifndef NPY_NO_DEPRECATED_API
@@ -17,6 +18,24 @@
 
 #include <Python.h>
 #include <numpy/ndarraytypes.h>
+
+
+namespace std {
+    
+    template <>
+    struct hash<NPY_TYPES> {
+        
+        typedef NPY_TYPES argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& typecode) const {
+            return static_cast<result_type>(typecode);
+        }
+        
+    };
+    
+}
+
 
 namespace typecode {
     
@@ -137,8 +156,8 @@ namespace typecode {
     NPY_TYPECHAR typechar(NPY_TYPES typecode);
     NPY_TYPECHAR typechar(unsigned int typecode);
     
-    string name(NPY_TYPES typecode);
-    string name(unsigned int typecode);
+    std::string name(NPY_TYPES typecode);
+    std::string name(unsigned int typecode);
 }
 
 

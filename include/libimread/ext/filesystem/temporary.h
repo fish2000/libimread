@@ -35,8 +35,9 @@ namespace filesystem {
         explicit NamedTemporaryFile(const char* s = tfs, const char* p = tfp, bool c = true,
                                     filesystem::mode m = filesystem::mode::WRITE,
                                     const filesystem::path& td = filesystem::path::tmp())
-                                        :filemode(m), cleanup(c), deallocate(true)
+                                        :cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s)), prefix(::strdup(p))
+                                        ,filemode(m)
                                         ,filepath(td/std::strcat(prefix, s))
                                         ,stream()
                                         {
@@ -45,8 +46,9 @@ namespace filesystem {
         explicit NamedTemporaryFile(const std::string& s, const std::string& p = tfp, bool c = true,
                                     filesystem::mode m = filesystem::mode::WRITE,
                                     const filesystem::path& td = filesystem::path::tmp())
-                                        :filemode(m), cleanup(c), deallocate(true)
+                                        :cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
+                                        ,filemode(m)
                                         ,filepath(td/(p+s))
                                         ,stream()
                                         {
@@ -55,16 +57,18 @@ namespace filesystem {
         
         NamedTemporaryFile(const NamedTemporaryFile& other)
             :descriptor(other.descriptor)
-            ,filemode(other.filemode), cleanup(other.cleanup), deallocate(true)
+            ,cleanup(other.cleanup), deallocate(true)
             ,suffix(::strdup(other.suffix)), prefix(::strdup(other.prefix))
+            ,filemode(other.filemode)
             ,filepath(other.filepath)
             ,stream()
             {}
         
         NamedTemporaryFile(NamedTemporaryFile&& other) noexcept
             :descriptor(other.descriptor)
-            ,filemode(other.filemode), cleanup(other.cleanup), deallocate(true)
+            ,cleanup(other.cleanup), deallocate(true)
             ,suffix(std::move(other.suffix)), prefix(std::move(other.prefix))
+            ,filemode(other.filemode)
             ,filepath(std::move(other.filepath))
             ,stream(std::move(other.stream))
             {

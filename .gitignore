@@ -1,10 +1,13 @@
 /build/
 /dist/
 /deps/*/build/
+/python/build/
 *.dylib
 *.a
 *.so
 *.o
 *.db
 *.bii
+*.pyc
+*.pyo
 .tm_properties

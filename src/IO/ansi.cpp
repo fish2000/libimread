@@ -70,12 +70,12 @@ namespace im {
                 
                 virtual ~UnicodeByteArray() {}
                 
-                virtual const int nbits() const override {
+                virtual int nbits() const override {
                     /// elem_size is in BYTES, so:
                     return sizeof(uint8_t) * 8;
                 }
                 
-                virtual const int nbytes() const override {
+                virtual int nbytes() const override {
                     return sizeof(uint8_t);
                 }
                 

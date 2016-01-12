@@ -18,9 +18,9 @@ namespace im {
             virtual ~Image() {}
             
             virtual void* rowp(int r) const = 0;
-            virtual const int nbits() const = 0;
+            virtual int nbits() const = 0;
             
-            virtual const int nbytes() const {
+            virtual int nbytes() const {
                 const int bits = this->nbits();
                 return (bits / 8) + bool(bits % 8);
             }
@@ -29,7 +29,7 @@ namespace im {
             virtual int dim(int) const = 0;
             virtual int stride(int) const = 0;
             
-            virtual int dim_or(int dim, int default_value) const {
+            virtual int dim_or(int dim, int default_value = 1) const {
                 if (dim >= this->ndims()) { return default_value; }
                 return this->dim(dim);
             }

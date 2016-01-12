@@ -7,6 +7,15 @@
 
 #include "numpy.hh"
 
+#ifndef SENTINEL
+#define SENTINEL {NULL}
+#endif
+
+#ifndef PyMODINIT_FUNC
+#define PyMODINIT_FUNC void
+#endif
+
+
 namespace im {
     
     namespace detail {
@@ -36,8 +45,8 @@ using ImagePtr = std::unique_ptr<im::HybridArray>;
 
 struct NumpyImage {
     PyObject_HEAD
-    //std::shared_ptr<im::HybridArray> image = std::shared_ptr<im::HybridArray>(nullptr);
-    im::HybridArray* image = nullptr;
+    std::unique_ptr<im::HybridArray> image;
+    // im::HybridArray* image = nullptr;
     PyArray_Descr* dtype = NULL;
     
     void cleanup() {
@@ -51,26 +60,26 @@ struct NumpyImage {
 };
 
 /// ALLOCATE / __new__ implementation
-static PyObject *NumpyImage_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
-    NumpyImage *self;
+static PyObject* NumpyImage_new(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
+    NumpyImage* self;
     self = reinterpret_cast<NumpyImage*>(type->tp_alloc(type, 0));
     /// initialize with defaults
     if (self != NULL) {
-        self->image = nullptr;
+        self->image = std::unique_ptr<im::HybridArray>(nullptr);
         self->dtype = NULL;
     }
     return reinterpret_cast<PyObject*>(self); /// all is well, return self
 }
 
 /// __init__ implementation
-static int NumpyImage_init(NumpyImage *self, PyObject *args, PyObject *kwargs) {
-    PyArray_Descr *dtype = NULL;
-    const char *filename = NULL;
-    static char *keywords[] = { "file", "dtype", NULL };
+static int NumpyImage_init(NumpyImage* self, PyObject* args, PyObject* kwargs) {
+    PyArray_Descr* dtype = NULL;
+    char const* filename = NULL;
+    char const* keywords[] = { "file", "dtype", NULL };
     static const im::options_map opts; /// not currently used when reading
     
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwargs, "s|O&", keywords,
+        args, kwargs, "s|O&", const_cast<char**>(keywords),
         &filename,
         PyArray_DescrConverter, &dtype)) {
             PyErr_SetString(PyExc_ValueError,
@@ -95,45 +104,85 @@ static int NumpyImage_init(NumpyImage *self, PyObject *args, PyObject *kwargs) {
     std::unique_ptr<im::ImageFormat> format(im::for_filename(filename));
     std::unique_ptr<im::FileSource> input(new im::FileSource(filename));
     std::unique_ptr<im::Image> output = format->read(input.get(), &factory, opts);
-    self->image = im::detail::dynamic_cast_unique<im::HybridArray>(output);
+    self->image = im::detail::dynamic_cast_unique<im::HybridArray>(std::move(output));
     
     return 0;
 }
 
 /// __repr__ implementations
-static PyObject *NumpyImage_Repr(NumpyImage *im) {
+static PyObject* NumpyImage_Repr(NumpyImage* im) {
     return PyString_FromFormat("<NumpyImage @ %p>", im);
 }
 
-static const char *NumpyImage_ReprCString(NumpyImage *im) {
-    PyObject *out = NumpyImage_Repr(im);
-    const char *outstr = PyString_AS_STRING(out);
-    Py_DECREF(out);
-    return outstr;
-}
-
-static std::string NumpyImage_ReprString(NumpyImage *im) {
-    return std::string(NumpyImage_ReprCString(im));
-}
+// static const char *NumpyImage_ReprCString(NumpyImage *im) {
+//     PyObject *out = NumpyImage_Repr(im);
+//     const char *outstr = PyString_AS_STRING(out);
+//     Py_DECREF(out);
+//     return outstr;
+// }
+//
+// static std::string NumpyImage_ReprString(NumpyImage *im) {
+//     return std::string(NumpyImage_ReprCString(im));
+// }
 
 /// DEALLOCATE
-static void NumpyImage_dealloc(NumpyImage *self) {
+static void NumpyImage_dealloc(NumpyImage* self) {
     self->cleanup();
-    self->ob_type->tp_free((PyObject *)self);
+    self->ob_type->tp_free((PyObject*)self);
 }
 
 /// NumpyImage.datatype getter
-static PyObject     *NumpyImage_GET_dtype(NumpyImage *self, void *closure) {
+static PyObject*    NumpyImage_GET_dtype(NumpyImage* self, void* closure) {
     return Py_BuildValue("O", self->dtype);
+}
+
+static PyObject*    NumpyImage_GET_shape(NumpyImage* self, void* closure) {
+    // int ndims = self->image->ndims();
+    // std::vector<int> dims(ndims);
+    // std::string return_code("");
+    // for (int idx = 0; idx < ndims; idx++) {
+    //     dims.push_back(self->image->dim(idx));
+    //     return_code += "i";
+    // }
+    switch (self->image->ndims()) {
+        case 1:
+            return Py_BuildValue("(i)",     self->image->dim(0));
+        case 2:
+            return Py_BuildValue("(ii)",    self->image->dim(0),
+                                            self->image->dim(1));
+        case 3:
+            return Py_BuildValue("(iii)",   self->image->dim(0),
+                                            self->image->dim(1),
+                                            self->image->dim(2));
+        case 4:
+            return Py_BuildValue("(iiii)",  self->image->dim(0),
+                                            self->image->dim(1),
+                                            self->image->dim(2),
+                                            self->image->dim(3));
+        case 5:
+            return Py_BuildValue("(iiiii)", self->image->dim(0),
+                                            self->image->dim(1),
+                                            self->image->dim(2),
+                                            self->image->dim(3),
+                                            self->image->dim(4));
+        default:
+            return Py_BuildValue("");
+    }
+    return Py_BuildValue("");
 }
 
 static PyGetSetDef NumpyImage_getset[] = {
     {
-        "dtype",
+        (char*)"dtype",
             (getter)NumpyImage_GET_dtype,
             NULL,
-            "NumpyImage dtype", NULL },
-    SENTINEL
+            (char*)"NumpyImage dtype", NULL },
+    {
+        (char*)"shape",
+            (getter)NumpyImage_GET_shape,
+            NULL,
+            (char*)"NumpyImage shape tuple", NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 };
 
 // static PyMethodDef NumpyImage_methods[] = {
@@ -176,7 +225,7 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                          /* tp_weaklistoffset */
     0,                                                          /* tp_iter */
     0,                                                          /* tp_iternext */
-    0, /*NumpyImage_methods*/,                                  /* tp_methods */
+    0, /*NumpyImage_methods*/                                   /* tp_methods */
     0,                                                          /* tp_members */
     NumpyImage_getset,                                          /* tp_getset */
     0,                                                          /* tp_base */
@@ -187,6 +236,16 @@ static PyTypeObject NumpyImage_Type = {
     (initproc)NumpyImage_init,                                  /* tp_init */
     0,                                                          /* tp_alloc */
     NumpyImage_new,                                             /* tp_new */
+    0,                                                          /* tp_free */
+    0,                                                          /* tp_is_gc */
+    0,                                                          /* tp_bases */
+    0,                                                          /* tp_mro */
+    0,                                                          /* tp_cache */
+    0,                                                          /* tp_subclasses */
+    0,                                                          /* tp_weaklist */
+    0,                                                          /* tp_del */
+    0,                                                          /* tp_version_tag */
+    
 };
 
 
@@ -199,7 +258,7 @@ PyMODINIT_FUNC init_im(void) {
     module = Py_InitModule3(
         "im._im", NULL,
         "libimread python bindings");
-    if (module == None) { return; }
+    if (module == NULL) { return; }
     
     /// Bring in NumPy
     import_array();
