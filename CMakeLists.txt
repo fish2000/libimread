@@ -2,7 +2,7 @@
 # © 2011.10 -- GPL, Motherfuckers
 
 # The minimum CMake version required to build this project
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3)
 
 # Set a new CMake project
 project(libimread)
@@ -14,6 +14,13 @@ if(IM_USE_GCC)
     # hardcode homebrew path for now
     set(CMAKE_C_COMPILER    "/usr/local/opt/gcc/bin/gcc-5")
     set(CMAKE_CXX_COMPILER  "/usr/local/opt/gcc/bin/g++-5")
+endif()
+
+# C++ standard
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
 endif()
 
 if(IM_RESYMBOLIZE)
@@ -138,8 +145,6 @@ set_target_properties(imread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 # add_dependencies(libimread "libguid")
 add_dependencies(imread "guid")
-# add_dependencies(libimread "libdocopt")
-add_dependencies(imread "docopt")
 # add_dependencies(libimread "libimagecompression")
 add_dependencies(imread "imagecompression")
 # add_dependencies(libimread "libmaBlockClosure")
