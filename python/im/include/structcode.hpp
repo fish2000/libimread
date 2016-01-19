@@ -84,37 +84,15 @@ namespace structcode {
         static const stringmap_t native;
         static const stringmap_t standard;
     };
-
-    //const stringmap_t structcodemaps::byteorder = structcodemaps::init_byteorder();
-    //const stringmap_t structcodemaps::native = structcodemaps::init_native();
-    //const stringmap_t structcodemaps::standard = structcodemaps::init_standard();
-
+    
     struct field_namer {
         int idx;
         stringvec_t field_name_vector;
-        field_namer():idx(0) {}
-        int next() { return idx++; }
-        void add(std::string const& field_name) { field_name_vector.push_back(field_name); }
-        bool has(std::string const& field_name) {
-            for (auto fn = std::begin(field_name_vector);
-                      fn != std::end(field_name_vector); ++fn) {
-                if (std::string(*fn) == field_name) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        std::string operator()() {
-            char str[5];
-            while (true) {
-                std::sprintf(str, "f%i", next());
-                std::string dummy_name(str);
-                if (!has(dummy_name)) {
-                    add(dummy_name);
-                    return dummy_name;
-                }
-            }
-        }
+        field_namer();
+        int next();
+        void add(std::string const&);
+        bool has(std::string const&);
+        std::string operator()();
     };
     
     using shapevec_t = std::vector<int>;

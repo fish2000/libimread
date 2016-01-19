@@ -7,6 +7,38 @@
 
 namespace structcode {
     
+    field_namer::field_namer()
+        :idx(0)
+        {}
+    
+    int field_namer::next() { return idx++; }
+    
+    void field_namer::add(std::string const& field_name) {
+        field_name_vector.push_back(field_name);
+    }
+    
+    bool field_namer::has(std::string const& field_name) {
+        for (auto fn = std::begin(field_name_vector);
+                  fn != std::end(field_name_vector); ++fn) {
+            if (std::string(*fn) == field_name) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    std::string field_namer::operator()() {
+        char str[5];
+        while (true) {
+            std::sprintf(str, "f%i", next());
+            std::string dummy_name(str);
+            if (!has(dummy_name)) {
+                add(dummy_name);
+                return dummy_name;
+            }
+        }
+    }
+    
     /// static initializers
     const stringmap_t structcodemaps::byteorder = structcodemaps::init_byteorder();
     const stringmap_t structcodemaps::native = structcodemaps::init_native();
@@ -36,7 +68,8 @@ namespace structcode {
         structcode_t fields;
         field_namer field_names;
         
-        std::string byteorder = "@";
+        // std::string byteorder = "@";
+        std::string byteorder = "";
         std::size_t itemsize = 1;
         shapevec_t shape = { 0 };
         const shapevec_t noshape = { 0 };

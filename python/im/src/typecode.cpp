@@ -4,9 +4,9 @@
 namespace typecode {
     
     /// static initializers
-    const std::unordered_map<int, NPY_TYPES> typecodemaps::integral = typecodemaps::init_integral_map();
-    const std::unordered_map<NPY_TYPES, NPY_TYPECHAR> typecodemaps::character = typecodemaps::init_typecode_character_map();
-    const std::unordered_map<NPY_TYPES, std::string> typecodemaps::literal = typecodemaps::init_typecode_literal_map();
+    const intmap_t typecodemaps::integral = typecodemaps::init_integral_map();
+    const charmap_t typecodemaps::character = typecodemaps::init_typecode_character_map();
+    const stringmap_t typecodemaps::literal = typecodemaps::init_typecode_literal_map();
     
     NPY_TYPECHAR typechar(NPY_TYPES typecode) {
         try {

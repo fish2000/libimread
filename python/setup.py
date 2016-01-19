@@ -28,10 +28,10 @@ except ImportError:
     numpy = FakeNumpy()
 
 # VERSION & METADATA
-# __version__ = "<undefined>"
-# exec(compile(open('imread-version.py').read(),
-#              'imread-version.py', 'exec'))
-__version__ = "0.1.0"
+__version__ = "<undefined>"
+exec(compile(
+    open(os.path.join(os.path.dirname(__file__), '__version__.py')).read(),
+    '__version__.py', 'exec'))
 long_description = open('README.md').read()
 libimread = Install()
 libhalide = HomebrewInstall('halide')
@@ -50,14 +50,17 @@ undef_macros = []
 auxilliary_macros = []
 define_macros = []
 define_macros.append(
+    ('VERSION', __version__))
+define_macros.append(
     ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'))
+
 # define_macros.append(
 #     ('__OBJC__', '1'))
 # define_macros.append(
 #     ('__OBJC2__', '1'))
 
 if DEBUG:
-    undef_macros = ['NDEBUG']
+    undef_macros = ['NDEBUG', '__OBJC__', '__OBJC2__']
     if int(DEBUG) > 2:
         define_macros.append(
             ('IM_DEBUG', DEBUG))
