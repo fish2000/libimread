@@ -75,15 +75,14 @@ using ImagePtr = std::unique_ptr<im::HybridArray>;
 struct NumpyImage {
     PyObject_HEAD
     std::unique_ptr<im::HybridArray> image;
-    PyArray_Descr* dtype = NULL;
+    PyArray_Descr* dtype = nullptr;
     
     void cleanup() {
         image.release();
-        if (dtype) {
-            PyObject_Del(dtype);
-            dtype = NULL;
-        }
+        Py_XDECREF(dtype);
+        dtype = nullptr;
     }
+    
     ~NumpyImage() { cleanup(); }
 };
 
@@ -107,7 +106,7 @@ namespace {
         char const* filename = NULL;
         char const* keywords[] = { "file", "dtype", NULL };
         static const im::options_map opts; /// not currently used when reading
-    
+        
         if (!PyArg_ParseTupleAndKeywords(
             args, kwargs, "s|O&", const_cast<char**>(keywords),
             &filename,
@@ -116,30 +115,53 @@ namespace {
                     "bad arguments to NumpyImage_init");
                 return -1;
         }
-    
+        
+        im::ArrayFactory factory;
+        std::unique_ptr<im::ImageFormat> format;
+        std::unique_ptr<im::FileSource> input;
+        std::unique_ptr<im::Image> output;
+        
+        if (!filename) {
+            PyErr_SetString(PyExc_ValueError,
+                "No filename");
+            return -1;
+        }
+        
+        try {
+            format = std::unique_ptr<im::ImageFormat>(
+                im::for_filename(filename));
+        } catch (im::FormatNotFound& exc) {
+            PyErr_SetString(PyExc_ValueError,
+                "Can't find an I/O format for filename");
+            return -1;
+        }
+        
+        input = std::unique_ptr<im::FileSource>(
+            new im::FileSource(filename));
+        
+        if (!input->exists()) {
+            PyErr_SetString(PyExc_ValueError,
+                "Can't find an image file for filename");
+            return -1;
+        }
+        
+        output = std::unique_ptr<im::Image>(
+            format->read(input.get(), &factory, opts));
+        
         if (dtype) {
             self->dtype = dtype;
         } else {
             self->dtype = PyArray_DescrFromType(NPY_UINT8);
         }
         Py_INCREF(self->dtype);
-    
-        if (!filename) {
-            PyErr_SetString(PyExc_ValueError,
-                "No filename");
-            return -1;
-        }
-    
-        im::ArrayFactory factory;
-        std::unique_ptr<im::ImageFormat> format(im::for_filename(filename));
-        std::unique_ptr<im::FileSource> input(new im::FileSource(filename));
-        std::unique_ptr<im::Image> output = format->read(input.get(), &factory, opts);
+        
         self->image = im::detail::dynamic_cast_unique<im::HybridArray>(std::move(output));
-    
+        
+        /// ALL IS WELL:
         return 0;
     }
     
-    /// __repr__ implementations
+    /// __repr__ implementation
     PyObject* NumpyImage_Repr(NumpyImage* im) {
         return PyString_FromFormat("<NumpyImage @ %p>", im);
     }
@@ -149,16 +171,16 @@ namespace {
         int out = pyim->image->populate_buffer(view,
                                                (NPY_TYPES)pyim->dtype->type_num,
                                                flags);
-        Py_INCREF(self);
-        view->obj = self;
+        // Py_INCREF(self);
+        // view->obj = self;
         return out;
     }
     
     void NumpyImage_ReleaseBuffer(PyObject* self, Py_buffer* view) {
         NumpyImage* pyim = reinterpret_cast<NumpyImage*>(self);
         pyim->image->release_buffer(view);
-        Py_XDECREF(view->obj);
-        view->obj = NULL;
+        // Py_XDECREF(view->obj);
+        // view->obj = NULL;
         PyBuffer_Release(view);
     }
     
@@ -236,7 +258,9 @@ static PyGetSetDef NumpyImage_getset[] = {
 //     SENTINEL
 // };
 
-static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT         | 
+                                         Py_TPFLAGS_BASETYPE        | 
+                                         Py_TPFLAGS_HAVE_NEWBUFFER;
 
 static PyTypeObject NumpyImage_Type = {
     PyObject_HEAD_INIT(NULL)

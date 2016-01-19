@@ -80,7 +80,7 @@ include_dirs = [
     libhalide.include(),
     libimread.dependency('imagecompression'),
     libimread.dependency('iod'),
-    libimread.dependency('libdocopt'),
+    # libimread.dependency('libdocopt'),
     libimread.dependency('libguid'),
     libimread.dependency('libsszip'),
     libimread.dependency('libmaBlockClosure'),

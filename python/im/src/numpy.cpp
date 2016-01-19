@@ -96,9 +96,10 @@ namespace im {
     
     void PythonBufferImage::release_buffer(Py_buffer* view) {
         if (std::string((const char*)view->internal) == "YO DOGG") {
-            if (view->format)   { free(view->format); }
-            if (view->shape)    { delete[] view->shape; }
-            if (view->strides)  { delete[] view->strides; }
+            if (view->format)   { free(view->format);     view->format  = nullptr; }
+            if (view->shape)    { delete[] view->shape;   view->shape   = nullptr; }
+            if (view->strides)  { delete[] view->strides; view->strides = nullptr; }
+            view->internal = nullptr;
         }
     }
     

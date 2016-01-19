@@ -3,9 +3,9 @@ clean: clean-pyc clean-so
 
 distclean: clean-all-pyc clean-so clean-build-artifacts
 
-ext: distclean buildext test
+ext: buildext test
 
-prepare: distclean build test
+prepare: build test
 
 dist: ext upload
 
@@ -21,10 +21,10 @@ clean-so:
 clean-build-artifacts:
 	rm -rf build dist imread.egg-info
 
-buildext:
+buildext: distclean
 	python setup.py build_ext --inplace
 
-build:
+build: distclean
 	python setup.py build_ext --inplace
 
 test:
