@@ -46,7 +46,7 @@ namespace im {
         DEFINE_TYPE_MAPPING(float,          Float(32));
         DEFINE_TYPE_MAPPING(double,         Float(64));
         DEFINE_TYPE_MAPPING(long double,    Float(64));
-        DEFINE_TYPE_MAPPING(PixelType*,     Handle());
+        // DEFINE_TYPE_MAPPING(PixelType*,     Handle());
         
         template <typename PixelType> inline
         Halide::Type halide_t() { return for_type<std::remove_pointer_t<
