@@ -2,7 +2,7 @@
 from __future__ import print_function
 from unittest2 import TestCase
 
-from im.im import _im as im
+import im
 
 class StructCodeTests(TestCase):
     

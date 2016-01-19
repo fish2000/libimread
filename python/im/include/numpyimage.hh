@@ -169,7 +169,8 @@ namespace py {
                 py::gil::release nogil;
                 output = std::unique_ptr<im::Image>(
                     format->read(input.get(), &factory, opts));
-                self->image = im::detail::dynamic_cast_unique<ImageType>(std::move(output));
+                self->image = im::detail::dynamic_cast_unique<ImageType>(
+                    std::move(output));
             }
             
             if (dtype) {
