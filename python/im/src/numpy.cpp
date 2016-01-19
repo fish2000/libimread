@@ -70,22 +70,22 @@ namespace im {
     int PythonBufferImage::populate_buffer(Py_buffer* view,
                                            NPY_TYPES dtype,
                                            int flags) {
-        view->buf = Image::rowp(0);
-        view->ndim = Image::ndims();
+        view->buf = rowp(0);
+        view->ndim = ndims();
         view->format = ::strdup(detail::structcode(dtype));
-        view->shape = new Py_ssize_t[Image::ndims()];
-        view->strides = new Py_ssize_t[Image::ndims()];
-        view->itemsize = (Py_ssize_t)Image::nbytes();
+        view->shape = new Py_ssize_t[ndims()];
+        view->strides = new Py_ssize_t[ndims()];
+        view->itemsize = (Py_ssize_t)nbytes();
         view->suboffsets = NULL;
         
         int len = 1;
         for (int idx = 0; idx < view->ndim; idx++) {
-            len *= Image::dim_or(idx, 1);
-            view->shape[idx] = Image::dim_or(idx, 1);
-            view->strides[idx] = Image::stride(idx);
+            len *= dim_or(idx, 1);
+            view->shape[idx] = dim_or(idx, 1);
+            view->strides[idx] = stride(idx);
         }
         
-        view->len = len * Image::nbytes();
+        view->len = len * nbytes();
         view->readonly = 1; /// true
         view->internal = (void*)"YO DOGG";
         view->obj = NULL;

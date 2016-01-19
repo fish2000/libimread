@@ -146,7 +146,8 @@ namespace {
     
     int NumpyImage_GetBuffer(PyObject* self, Py_buffer* view, int flags) {
         NumpyImage* pyim = reinterpret_cast<NumpyImage*>(self);
-        int out = pyim->image->populate_buffer(view, (NPY_TYPES)pyim->dtype->type_num,
+        int out = pyim->image->populate_buffer(view,
+                                               (NPY_TYPES)pyim->dtype->type_num,
                                                flags);
         Py_INCREF(self);
         view->obj = self;
@@ -156,10 +157,8 @@ namespace {
     void NumpyImage_ReleaseBuffer(PyObject* self, Py_buffer* view) {
         NumpyImage* pyim = reinterpret_cast<NumpyImage*>(self);
         pyim->image->release_buffer(view);
-        if (view->obj) {
-            Py_DECREF(view->obj);
-            view->obj = NULL;
-        }
+        Py_XDECREF(view->obj);
+        view->obj = NULL;
         PyBuffer_Release(view);
     }
     
@@ -242,7 +241,7 @@ static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYP
 static PyTypeObject NumpyImage_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                          /* ob_size */
-    "_im.NumpyImage",                                           /* tp_name */
+    "im.NumpyImage",                                            /* tp_name */
     sizeof(NumpyImage),                                         /* tp_basicsize */
     0,                                                          /* tp_itemsize */
     (destructor)NumpyImage_dealloc,                             /* tp_dealloc */
@@ -316,14 +315,14 @@ static PyMethodDef NumpyImage_module_functions[] = {
     { NULL, NULL, 0, NULL }
 };
 
-PyMODINIT_FUNC init_im(void) {
+PyMODINIT_FUNC initim(void) {
     PyObject *module;
     
     PyEval_InitThreads();
     if (PyType_Ready(&NumpyImage_Type) < 0) { return; }
     
     module = Py_InitModule3(
-        "im._im", NumpyImage_module_functions,
+        "im.im", NumpyImage_module_functions,
         "libimread python bindings");
     if (module == NULL) { return; }
     
