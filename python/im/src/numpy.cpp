@@ -11,37 +11,37 @@ namespace im {
         
         char const* structcode(NPY_TYPES dtype) {
             switch (dtype) {
-                case NPY_BOOL:       return "?";
-                case NPY_UINT8:      return "B";
-                case NPY_UINT16:     return "H";
-                case NPY_UINT32:     return "I";
-                case NPY_UINT64:     return "L";
-                case NPY_INT8:       return "b";
-                case NPY_HALF:       return "e";
-                case NPY_INT16:      return "h";
-                case NPY_INT32:      return "i";
-                case NPY_INT64:      return "l";
-                case NPY_FLOAT:      return "f";
-                case NPY_DOUBLE:     return "d";
-                case NPY_LONGDOUBLE: return "g";
-                default:             return "B";
+                case NPY_BOOL:          return "?";
+                case NPY_UINT8:         return "B";
+                case NPY_UINT16:        return "H";
+                case NPY_UINT32:        return "I";
+                case NPY_UINT64:        return "L";
+                case NPY_INT8:          return "b";
+                case NPY_HALF:          return "e";
+                case NPY_INT16:         return "h";
+                case NPY_INT32:         return "i";
+                case NPY_INT64:         return "l";
+                case NPY_FLOAT:         return "f";
+                case NPY_DOUBLE:        return "d";
+                case NPY_LONGDOUBLE:    return "g";
+                default:                return "B";
             }
             return "B";
         }
         
         Halide::Type for_dtype(NPY_TYPES dtype) {
             switch (dtype) {
-                case NPY_BOOL: return Halide::Bool();
-                case NPY_UINT8: return Halide::UInt(8);
-                case NPY_UINT16: return Halide::UInt(16);
-                case NPY_UINT32: return Halide::UInt(32);
-                case NPY_INT8: return Halide::Int(8);
-                case NPY_INT16: return Halide::Int(16);
-                case NPY_INT32: return Halide::Int(32);
-                case NPY_FLOAT: return Halide::Float(32);
-                case NPY_DOUBLE: return Halide::Float(64);
-                case NPY_LONGDOUBLE: return Halide::Float(64);
-                default: Halide::Handle();
+                case NPY_BOOL:          return Halide::Bool();
+                case NPY_UINT8:         return Halide::UInt(8);
+                case NPY_UINT16:        return Halide::UInt(16);
+                case NPY_UINT32:        return Halide::UInt(32);
+                case NPY_INT8:          return Halide::Int(8);
+                case NPY_INT16:         return Halide::Int(16);
+                case NPY_INT32:         return Halide::Int(32);
+                case NPY_FLOAT:         return Halide::Float(32);
+                case NPY_DOUBLE:        return Halide::Float(64);
+                case NPY_LONGDOUBLE:    return Halide::Float(64);
+                default:                return Halide::Handle();
             }
             return Halide::Handle();
         }
@@ -49,17 +49,17 @@ namespace im {
         NPY_TYPES for_nbits(int nbits, bool signed_type) {
             if (signed_type) {
                 switch (nbits) {
-                    case 1: return NPY_BOOL;
-                    case 8: return NPY_INT8;
-                    case 16: return NPY_INT16;
-                    case 32: return NPY_INT32;
+                    case 1:             return NPY_BOOL;
+                    case 8:             return NPY_INT8;
+                    case 16:            return NPY_INT16;
+                    case 32:            return NPY_INT32;
                 }
             } else {
                 switch (nbits) {
-                    case 1: return NPY_BOOL;
-                    case 8: return NPY_UINT8;
-                    case 16: return NPY_UINT16;
-                    case 32: return NPY_UINT32;
+                    case 1:             return NPY_BOOL;
+                    case 8:             return NPY_UINT8;
+                    case 16:            return NPY_UINT16;
+                    case 32:            return NPY_UINT32;
                 }
             }
             return NPY_USERDEF;

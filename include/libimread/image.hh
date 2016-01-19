@@ -13,7 +13,9 @@
 #include <libimread/pixels.hh>
 
 namespace im {
+    
     class Image {
+        
         public:
             virtual ~Image() {}
             
@@ -58,15 +60,18 @@ namespace im {
     };
     
     class ImageFactory {
+        
         public:
+            using image_t = Image;
+            
             virtual ~ImageFactory() { }
             
-            virtual std::unique_ptr<Image>
+            virtual std::unique_ptr<image_t>
                 create(int nbits,
                     int d0, int d1, int d2,
                     int d3=-1, int d4=-1) = 0;
             
-            virtual std::shared_ptr<Image>
+            virtual std::shared_ptr<image_t>
                 shared(int nbits,
                     int d0, int d1, int d2,
                     int d3=-1, int d4=-1) = 0;

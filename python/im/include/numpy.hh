@@ -89,10 +89,13 @@ namespace im {
 #define xDEPTH d2
     
     class ArrayFactory : public ImageFactory {
+        
         private:
             std::string nm;
         
         public:
+            using image_t = HybridArray;
+            
             ArrayFactory();
             ArrayFactory(const std::string& n);
             

@@ -3,7 +3,8 @@ from __future__ import division, print_function
 
 import sys, os
 from pprint import pformat
-from clint.textui.colored import red, cyan, white
+# from clint.textui.colored import red, cyan, white
+from clint.textui.colored import red, cyan
 
 # SETUPTOOLS
 try:
@@ -17,8 +18,8 @@ On linux, the package is often called python-setuptools''')
 
 # PYTHON & NUMPY INCLUDES
 from utils import Install, HomebrewInstall, gosub
-from distutils.sysconfig import get_python_inc
-from distutils.spawn import find_executable as which
+# from distutils.sysconfig import get_python_inc
+# from distutils.spawn import find_executable as which
 try:
     import numpy
 except ImportError:
@@ -82,10 +83,10 @@ include_dirs = [
     libimread.dependency('iod'),
     # libimread.dependency('libdocopt'),
     libimread.dependency('libguid'),
-    libimread.dependency('libsszip'),
-    libimread.dependency('libmaBlockClosure'),
+    # libimread.dependency('libsszip'),
+    # libimread.dependency('libmaBlockClosure'),
     numpy.get_include(),
-    get_python_inc(plat_specific=1),
+    # get_python_inc(plat_specific=1),
     os.path.join(os.path.dirname(__file__), 'im', 'include')]
 
 library_dirs = [
@@ -95,18 +96,18 @@ library_dirs = [
 
 other_flags = []
 
-for pth in (
-    '/usr/local/include',
-    '/usr/X11/include'):
-    if os.path.isdir(pth):
-        include_dirs.append(pth)
-
-for pth in (
-    '/usr/lib',
-    '/usr/local/lib',
-    '/usr/X11/lib'):
-    if os.path.isdir(pth):
-        library_dirs.append(pth)
+# for pth in (
+#     '/usr/local/include',
+#     '/usr/X11/include'):
+#     if os.path.isdir(pth):
+#         include_dirs.append(pth)
+#
+# for pth in (
+#     '/usr/lib',
+#     '/usr/local/lib',
+#     '/usr/X11/lib'):
+#     if os.path.isdir(pth):
+#         library_dirs.append(pth)
 
 extensions = {
     'im': [
@@ -118,8 +119,9 @@ extensions = {
 }
 
 # the basics
-libraries = ['jpeg', 'png', 'z', 'm', 'Halide', 'imread', 'c++']
-PKG_CONFIG = which('pkg-config')
+# libraries = ['jpeg', 'png', 'z', 'm', 'Halide', 'imread', 'c++']
+libraries = ['m', 'Halide', 'imread', 'c++']
+# PKG_CONFIG = which('pkg-config')
 
 # the addenda
 def parse_config_flags(config, config_flags=None):
@@ -158,48 +160,48 @@ def parse_config_flags(config, config_flags=None):
 
 print('')
 
-# if we're using it, ask it how to fucking work it
-if int(USE_EIGEN):
-    print(white(""" imread.ext: Eigen3 support enabled """))
-    parse_config_flags(
-        PKG_CONFIG,
-        ('eigen3 --libs', 'eigen3 --cflags'))
-
-if int(USE_WEBP):
-    print(white(""" imread.IO: WebP support enabled """))
-    parse_config_flags(
-        PKG_CONFIG,
-        ('libwebp --libs', 'libwebp --cflags'))
-
-if int(USE_TIFF):
-    print(white(""" imread.IO: LibTIFF support enabled """))
-    parse_config_flags(
-        PKG_CONFIG,
-        ('libtiff-4 --libs', 'libtiff-4 --cflags'))
-
-if int(USE_JPEG):
-    print(white(""" imread.IO: jpeglib support enabled """))
-
-if int(USE_PNG):
-    print(white(""" imread.IO: libpng16 support enabled """))
-    libpng_pkg = 'libpng'
-    if USE_PNG.strip().endswith('6'):
-        libpng_pkg += '16' # use 1.6
-    elif USE_PNG.strip().endswith('5'):
-        libpng_pkg += '15' # use 1.5
-    parse_config_flags(
-        PKG_CONFIG, (
-            '%s --libs' % libpng_pkg,
-            '%s --cflags' % libpng_pkg))
-
-if int(USE_LLVM):
-    print(white(""" <setup.py>: LibLLVM/Clang++ support enabled """))
-    parse_config_flags(
-        which('llvm-config', "%s%s%s" % (
-            os.environ['PATH'], os.pathsep,
-            '/usr/local/opt/llvm/bin')),
-        ('--ldflags', '--cxxflags',
-         '--libs', '--includedir'))
+# # if we're using it, ask it how to fucking work it
+# if int(USE_EIGEN):
+#     print(white(""" imread.ext: Eigen3 support enabled """))
+#     parse_config_flags(
+#         PKG_CONFIG,
+#         ('eigen3 --libs', 'eigen3 --cflags'))
+#
+# if int(USE_WEBP):
+#     print(white(""" imread.IO: WebP support enabled """))
+#     parse_config_flags(
+#         PKG_CONFIG,
+#         ('libwebp --libs', 'libwebp --cflags'))
+#
+# if int(USE_TIFF):
+#     print(white(""" imread.IO: LibTIFF support enabled """))
+#     parse_config_flags(
+#         PKG_CONFIG,
+#         ('libtiff-4 --libs', 'libtiff-4 --cflags'))
+#
+# if int(USE_JPEG):
+#     print(white(""" imread.IO: jpeglib support enabled """))
+#
+# if int(USE_PNG):
+#     print(white(""" imread.IO: libpng16 support enabled """))
+#     libpng_pkg = 'libpng'
+#     if USE_PNG.strip().endswith('6'):
+#         libpng_pkg += '16' # use 1.6
+#     elif USE_PNG.strip().endswith('5'):
+#         libpng_pkg += '15' # use 1.5
+#     parse_config_flags(
+#         PKG_CONFIG, (
+#             '%s --libs' % libpng_pkg,
+#             '%s --cflags' % libpng_pkg))
+#
+# if int(USE_LLVM):
+#     print(white(""" <setup.py>: LibLLVM/Clang++ support enabled """))
+#     parse_config_flags(
+#         which('llvm-config', "%s%s%s" % (
+#             os.environ['PATH'], os.pathsep,
+#             '/usr/local/opt/llvm/bin')),
+#         ('--ldflags', '--cxxflags',
+#          '--libs', '--includedir'))
 
 print('')
 

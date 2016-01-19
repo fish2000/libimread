@@ -22,6 +22,38 @@
 
 namespace im {
     
+    namespace detail {
+        
+        template <typename PixelType>
+        struct for_type;
+        
+        #define DEFINE_TYPE_MAPPING(PixelType, StructType)                  \
+        template <>                                                         \
+        struct for_type<PixelType> {                                        \
+            using type = PixelType;                                         \
+            static Halide::Type get() { return Halide::StructType; }        \
+        };
+        
+        DEFINE_TYPE_MAPPING(bool,           Bool());
+        DEFINE_TYPE_MAPPING(uint8_t,        UInt(8));
+        DEFINE_TYPE_MAPPING(uint16_t,       UInt(16));
+        DEFINE_TYPE_MAPPING(uint32_t,       UInt(32));
+        DEFINE_TYPE_MAPPING(uint64_t,       UInt(64));
+        DEFINE_TYPE_MAPPING(int8_t,         Int(8));
+        DEFINE_TYPE_MAPPING(int16_t,        Int(16));
+        DEFINE_TYPE_MAPPING(int32_t,        Int(32));
+        DEFINE_TYPE_MAPPING(int64_t,        Int(64));
+        DEFINE_TYPE_MAPPING(float,          Float(32));
+        DEFINE_TYPE_MAPPING(double,         Float(64));
+        DEFINE_TYPE_MAPPING(long double,    Float(64));
+        DEFINE_TYPE_MAPPING(PixelType*,     Handle());
+        
+        template <typename PixelType> inline
+        Halide::Type halide_t() { return for_type<std::remove_pointer_t<
+                                                  std::decay_t<PixelType>>>::get(); }
+        
+    } /* namespace detail */
+    
     template <typename T>
     using HalImage = Halide::Image<typename std::decay<T>::type>;
     using MetaImage = ImageWithMetadata;
@@ -39,58 +71,62 @@ namespace im {
             using halide_image_t = HalImage<pT>;
             
             HybridImage()
-                :HalImage<pT>(), Image(), MetaImage()
+                :halide_image_t(), Image(), MetaImage()
                 {}
             
             HybridImage(int x, int y, int z, int w, const std::string& name="")
-                :HalImage<pT>(x, y, z, w, name), Image(), MetaImage(name)
+                :halide_image_t(x, y, z, w, name), Image(), MetaImage(name)
                 {}
             
             HybridImage(int x, int y, int z, const std::string& name="")
-                :HalImage<pT>(x, y, z, name), Image(), MetaImage(name)
+                :halide_image_t(x, y, z, name), Image(), MetaImage(name)
                 {}
             
             HybridImage(int x, int y, const std::string& name="")
-                :HalImage<pT>(x, y, name), Image(), MetaImage(name)
+                :halide_image_t(x, y, name), Image(), MetaImage(name)
                 {}
             
             HybridImage(int x, const std::string& name="")
-                :HalImage<pT>(x, name), Image(), MetaImage(name)
+                :halide_image_t(x, name), Image(), MetaImage(name)
                 {}
             
             HybridImage(const Buffer& buf)
-                :HalImage<pT>(buf), Image(), MetaImage()
+                :halide_image_t(buf), Image(), MetaImage()
                 {}
             HybridImage(const Realization& r)
-                :HalImage<pT>(r), Image(), MetaImage()
+                :halide_image_t(r), Image(), MetaImage()
                 {}
             HybridImage(const buffer_t* b, const std::string& name="")
-                :HalImage<pT>(b, name), Image(), MetaImage(name)
+                :halide_image_t(b, name), Image(), MetaImage(name)
                 {}
             
-            using HalImage<pT>::operator();
-            using HalImage<pT>::defined;
-            using HalImage<pT>::dimensions;
-            using HalImage<pT>::extent;
-            using HalImage<pT>::stride;
-            using HalImage<pT>::channels;
-            using HalImage<pT>::data;
-            using HalImage<pT>::buffer;
+            using halide_image_t::operator();
+            using halide_image_t::defined;
+            using halide_image_t::dimensions;
+            using halide_image_t::extent;
+            using halide_image_t::stride;
+            using halide_image_t::channels;
+            using halide_image_t::data;
+            using halide_image_t::buffer;
             
             virtual ~HybridImage() {}
             
-            operator Buffer() const { return HalImage<pT>::buffer; }
+            operator Buffer() const { return halide_image_t::buffer; }
             
             operator Argument() const {
-                return Argument(HalImage<pT>::buffer);
+                return Argument(halide_image_t::buffer);
             }
             
             operator ExternFuncArgument() const {
-                return ExternFuncArgument(HalImage<pT>::buffer);
+                return ExternFuncArgument(halide_image_t::buffer);
             }
             
             operator Expr() const {
                 return (*this)(Halide::_);
+            }
+            
+            Halide::Type type() const {
+                return halide_image_t::buffer.type();
             }
             
             virtual int nbits() const override {
@@ -102,24 +138,24 @@ namespace im {
             }
             
             virtual int ndims() const override {
-                return HalImage<pT>::dimensions();
+                return halide_image_t::dimensions();
             }
             
             virtual int dim(int d) const override {
-                return HalImage<pT>::extent(d);
+                return halide_image_t::extent(d);
             }
             
             virtual int stride(int s) const override {
-                return HalImage<pT>::stride(s);
+                return halide_image_t::stride(s);
             }
             
             inline off_t rowp_stride() const {
-                return HalImage<pT>::channels() == 1 ? 0 : off_t(HalImage<pT>::stride(1));
+                return halide_image_t::channels() == 1 ? 0 : off_t(halide_image_t::stride(1));
             }
             
             virtual void* rowp(int r) const override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
-                pT* host = (pT*)HalImage<pT>::data();
+                pT* host = (pT*)halide_image_t::data();
                 host += off_t(r * rowp_stride());
                 return static_cast<void*>(host);
             }
@@ -136,13 +172,14 @@ namespace im {
             std::string nm;
         
         public:
-            using pixel_type = T;
+            using pixel_t = T;
+            using image_t = HybridImage<T>;
             
             HalideFactory()
-                :nm(std::string(""))
+                :nm("")
                 {}
             HalideFactory(const std::string& n)
-                :nm(std::string(n))
+                :nm(n)
                 {}
             
             virtual ~HalideFactory() {}
@@ -152,19 +189,17 @@ namespace im {
             
         protected:
             virtual std::unique_ptr<Image> create(int nbits,
-                                          int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) override {
+                                                  int xHEIGHT, int xWIDTH, int xDEPTH,
+                                                  int d3, int d4) override {
                 return std::unique_ptr<Image>(
-                    new HybridImage<T>(
-                        xWIDTH, xHEIGHT, xDEPTH));
+                    new image_t(xWIDTH, xHEIGHT, xDEPTH));
             }
             
             virtual std::shared_ptr<Image> shared(int nbits,
-                                          int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) override {
+                                                  int xHEIGHT, int xWIDTH, int xDEPTH,
+                                                  int d3, int d4) override {
                 return std::shared_ptr<Image>(
-                    new HybridImage<T>(
-                        xWIDTH, xHEIGHT, xDEPTH));
+                    new image_t(xWIDTH, xHEIGHT, xDEPTH));
             }
     };
 
