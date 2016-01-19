@@ -1,4 +1,7 @@
 
+#ifndef LIBIMREAD_PYTHON_IM_INCLUDE_STRUCTCODE_HPP_
+#define LIBIMREAD_PYTHON_IM_INCLUDE_STRUCTCODE_HPP_
+
 #include <memory>
 #include <string>
 #include <tuple>
@@ -8,6 +11,8 @@
 
 #include "structcode.hpp"
 #include "numpy.hh"
+#include "gil.hh"
+
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/hashing.hh>
 
@@ -39,16 +44,21 @@ namespace im {
             std::string endianness;
             stringvec_t parsetokens;
             structcode_t pairvec;
-            std::tie(endianness, parsetokens, pairvec) = structcode::parse(code);
+            Py_ssize_t imax = 0;
             
-            if (!pairvec.size()) {
+            {
+                py::gil::release nogil;
+                std::tie(endianness, parsetokens, pairvec) = structcode::parse(code);
+                imax = static_cast<Py_ssize_t>(pairvec.size());
+            }
+            
+            if (!bool(imax)) {
                 PyErr_Format(PyExc_ValueError,
                     "Structcode %.200s parsed to zero-length", code);
                 return NULL;
             }
             
             /// Make python list of tuples
-            Py_ssize_t imax = static_cast<Py_ssize_t>(pairvec.size());
             PyObject* tuple = PyTuple_New(imax);
             for (Py_ssize_t idx = 0; idx < imax; idx++) {
                 PyTuple_SET_ITEM(tuple, idx, PyTuple_Pack(2,
@@ -115,7 +125,7 @@ namespace py {
                 &filename,
                 PyArray_DescrConverter, &dtype)) {
                     PyErr_SetString(PyExc_ValueError,
-                        "bad arguments to image_init");
+                        "Bad arguments to image_init");
                     return -1;
             }
             
@@ -123,6 +133,7 @@ namespace py {
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
             std::unique_ptr<im::Image> output;
+            bool exists = false;
             
             if (!filename) {
                 PyErr_SetString(PyExc_ValueError,
@@ -134,22 +145,32 @@ namespace py {
                 format = std::unique_ptr<im::ImageFormat>(
                     im::for_filename(filename));
             } catch (im::FormatNotFound& exc) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Can't find an I/O format for filename");
+                PyErr_Format(PyExc_ValueError,
+                    "Can't find I/O format for file: %.200s",
+                    filename);
                 return -1;
             }
             
-            input = std::unique_ptr<im::FileSource>(
-                new im::FileSource(filename));
+            {
+                py::gil::release nogil;
+                input = std::unique_ptr<im::FileSource>(
+                    new im::FileSource(filename));
+                exists = input->exists();
+            }
             
-            if (!input->exists()) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Can't find an image file for filename");
+            if (!exists) {
+                PyErr_Format(PyExc_ValueError,
+                    "Can't find image file: %.200s",
+                    filename);
                 return -1;
             }
             
-            output = std::unique_ptr<im::Image>(
-                format->read(input.get(), &factory, opts));
+            {
+                py::gil::release nogil;
+                output = std::unique_ptr<im::Image>(
+                    format->read(input.get(), &factory, opts));
+                self->image = im::detail::dynamic_cast_unique<ImageType>(std::move(output));
+            }
             
             if (dtype) {
                 self->dtype = dtype;
@@ -157,8 +178,6 @@ namespace py {
                 self->dtype = PyArray_DescrFromType(NPY_UINT8);
             }
             Py_INCREF(self->dtype);
-            
-            self->image = im::detail::dynamic_cast_unique<ImageType>(std::move(output));
             
             /// ALL IS WELL:
             return 0;
@@ -174,23 +193,35 @@ namespace py {
         /// __hash__ implementation
         template <typename PythonImageType = NumpyImage>
         long hash(PythonImageType* im) {
-            auto bithash = blockhash::blockhash_quick(*im->image);
-            return static_cast<long>(bithash.to_ulong());
+            long out;
+            {
+                py::gil::release nogil;
+                auto bithash = blockhash::blockhash_quick(*im->image);
+                out = static_cast<long>(bithash.to_ulong());
+            }
+            return out;
         }
         
         template <typename PythonImageType = NumpyImage>
         int getbuffer(PyObject* self, Py_buffer* view, int flags) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            int out = pyim->image->populate_buffer(view,
+            int out;
+            {
+                py::gil::release nogil;
+                out = pyim->image->populate_buffer(view,
                                                    (NPY_TYPES)pyim->dtype->type_num,
                                                    flags);
+            }
             return out;
         }
         
         template <typename PythonImageType = NumpyImage>
         void releasebuffer(PyObject* self, Py_buffer* view) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            pyim->image->release_buffer(view);
+            {
+                py::gil::release nogil;
+                pyim->image->release_buffer(view);
+            }
             PyBuffer_Release(view);
         }
         
@@ -239,3 +270,5 @@ namespace py {
     } /* namespace image */
         
 } /* namespace py */
+
+#endif /// LIBIMREAD_PYTHON_IM_INCLUDE_STRUCTCODE_HPP_
