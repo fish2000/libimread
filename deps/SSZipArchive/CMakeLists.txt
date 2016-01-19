@@ -82,9 +82,9 @@ target_link_libraries(sszip ${EXTRA_LIBS})
 
 # install(TARGETS libsszip DESTINATION lib)
 install(TARGETS sszip DESTINATION lib)
-install(DIRECTORY SSZipArchive/ DESTINATION include/libsszip
+install(DIRECTORY ./ DESTINATION include/libsszip
     FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY SSZipArchive/minizip/ DESTINATION include/libsszip/minizip
+install(DIRECTORY ./minizip/ DESTINATION include/libsszip/minizip
     FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY SSZipArchive/aes/ DESTINATION include/libsszip/aes
+install(DIRECTORY ./aes/ DESTINATION include/libsszip/aes
     FILES_MATCHING PATTERN "*.h")

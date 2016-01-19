@@ -49,5 +49,5 @@ target_link_libraries(maBlockClosure ${EXTRA_LIBS})
 
 # install(TARGETS libmaBlockClosure DESTINATION lib)
 install(TARGETS maBlockClosure DESTINATION lib)
-install(DIRECTORY MABlockClosure/ DESTINATION include/libmaBlockClosure
+install(DIRECTORY ./ DESTINATION include/libmaBlockClosure
     FILES_MATCHING PATTERN "*.h")

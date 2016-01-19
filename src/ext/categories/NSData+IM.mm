@@ -16,17 +16,13 @@ using im::NSDataSink;
 @implementation NSData (AXDataAdditions)
 
 + (instancetype) dataWithByteVector:(std::vector<byte> const&)byteVector {
-    NSData* datum;
-    datum = [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
-                                   length:(NSInteger)byteVector.size()];
-    return datum;
+    return [[NSData alloc] initWithBytes:(const void*)&byteVector[0]
+                                  length:(NSInteger)byteVector.size()];
 }
 
 + (instancetype) dataWithSTLString:(std::string const&)string {
-    NSData* datum;
-    datum = [[NSData alloc] initWithBytes:(const void*)string.data()
-                                   length:(NSInteger)string.size()];
-    return datum;
+    return [[NSData alloc] initWithBytes:(const void*)string.data()
+                                  length:(NSInteger)string.size()];
 }
 
 + (instancetype) dataWithByteSource:(byte_source*)byteSource {
@@ -35,13 +31,11 @@ using im::NSDataSink;
 
 + (instancetype) dataWithByteSource:(byte_source*)byteSource
                              length:(NSUInteger)bytes {
-    NSData* datum;
     std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);
     int idx = byteSource->read(buffer.get(),
                                static_cast<std::size_t>(bytes));
-    datum = [[NSData alloc] initWithBytes:(const void*)buffer.get()
-                                   length:(NSInteger)bytes];
-    return datum;
+    return [[NSData alloc] initWithBytes:(const void*)buffer.get()
+                                  length:(NSInteger)bytes];
 }
 - initWithByteVector:(std::vector<byte> const&)byteVector {
     return [self initWithBytes:(const void*)&byteVector[0]

@@ -15,21 +15,8 @@ setuptools not found.
 On linux, the package is often called python-setuptools''')
     sys.exit(1)
 
-# GOSUB: basicaly `backticks` (cribbed from plotdevice)
-def gosub(cmd, on_err=True):
-    """ Run a shell command and return the output """
-    from subprocess import Popen, PIPE
-    shell = isinstance(cmd, basestring)
-    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=shell)
-    out, err = proc.communicate()
-    ret = proc.returncode
-    if on_err:
-        msg = '%s:\n' % on_err if isinstance(on_err, basestring) else ''
-        assert ret==0, msg + (err or out)
-    return out, err, ret
-
-
 # PYTHON & NUMPY INCLUDES
+from utils import Install, HomebrewInstall, gosub
 from distutils.sysconfig import get_python_inc
 from distutils.spawn import find_executable as which
 try:
@@ -46,6 +33,9 @@ except ImportError:
 #              'imread-version.py', 'exec'))
 __version__ = "0.1.0"
 long_description = open('README.md').read()
+libimread = Install()
+libhalide = HomebrewInstall('halide')
+libllvm = HomebrewInstall('llvm')
 
 # COMPILATION
 DEBUG = os.environ.get('DEBUG', '1')
@@ -61,10 +51,10 @@ auxilliary_macros = []
 define_macros = []
 define_macros.append(
     ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'))
-define_macros.append(
-    ('__OBJC__', '1'))
-define_macros.append(
-    ('__OBJC2__', '1'))
+# define_macros.append(
+#     ('__OBJC__', '1'))
+# define_macros.append(
+#     ('__OBJC2__', '1'))
 
 if DEBUG:
     undef_macros = ['NDEBUG']
@@ -83,26 +73,22 @@ print('')
 print(red(""" %(s)s DEBUGGG LEVEL: %(lv)s %(s)s """ % dict(s='*' * 65, lv=DEBUG)))
 
 include_dirs = [
+    libimread.include(),
+    libhalide.include(),
+    libimread.dependency('imagecompression'),
+    libimread.dependency('iod'),
+    libimread.dependency('libdocopt'),
+    libimread.dependency('libguid'),
+    libimread.dependency('libsszip'),
+    libimread.dependency('libmaBlockClosure'),
     numpy.get_include(),
     get_python_inc(plat_specific=1),
-    os.path.join(os.path.dirname(__file__), '..', 'include'),                 # FOR DEVELOPMENT
-    os.path.join(os.path.dirname(__file__), '..', 'include', 'libimread'),    # ALSO FOR DEVELOPMENT
-    os.path.join(os.path.dirname(__file__), '..', 'build'),
-    os.path.join(os.path.dirname(__file__), '..', 'build', 'libimread'),
     os.path.join(os.path.dirname(__file__), 'im', 'include')]
 
-deps_dir = os.path.join(os.path.dirname(__file__), '..', 'deps')
-for dep in os.listdir(deps_dir):
-    if dep.lower() == ".ds_store":
-        continue
-    dep_pth = os.path.join(os.path.dirname(__file__), '..', 'deps', dep)
-    if os.path.isdir(dep_pth):
-        include_dirs.append(dep_pth)
-
 library_dirs = [
-    '/usr/local/opt/halide/lib',                                # EERRRRRR WELLL
-    '/usr/local/opt/llvm/lib',
-    '../build']
+    libimread.lib(),
+    libhalide.lib(),
+    libllvm.lib()]
 
 other_flags = []
 
@@ -245,21 +231,11 @@ for key, sources in extensions.iteritems():
         language="c++",
         undef_macros=undef_macros,
         define_macros=define_macros,
-        # extra_link_args=[
-        #     '-framework', 'Quartz',
-        #     '-framework', 'CoreFoundation',
-        #     '-framework', 'Foundation'],
         extra_compile_args=[
             '-O3',
             '-x', 'c++',
             '-std=c++14',
             '-stdlib=libc++',
-            # '-Werror=unused-command-line-argument',
-            # '-Wno-unused-function',
-            # '-Wno-delete-non-virtual-dtor',
-            # '-Wno-overloaded-virtual', # WARNING WARNING WARNING
-            # '-Wno-dynamic-class-memaccess', # WARNING WARNING etc
-            # '-Wno-deprecated-writable-strings',
             '-Qunused-arguments',
         ] + other_flags))
 
