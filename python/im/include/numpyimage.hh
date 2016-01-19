@@ -9,6 +9,7 @@
 #include "structcode.hpp"
 #include "numpy.hh"
 #include <libimread/ext/errors/demangle.hh>
+#include <libimread/hashing.hh>
 
 namespace im {
     
@@ -166,8 +167,15 @@ namespace py {
         /// __repr__ implementation
         template <typename PythonImageType = NumpyImage>
         PyObject* repr(PythonImageType* im) {
-            return PyString_FromFormat("<%s @ %p>",
+            return PyString_FromFormat("< %s @ %p >",
                 terminator::demangle(typeid(*im).name()), im);
+        }
+        
+        /// __hash__ implementation
+        template <typename PythonImageType = NumpyImage>
+        long hash(PythonImageType* im) {
+            auto bithash = blockhash::blockhash_quick(*im->image);
+            return static_cast<long>(bithash.to_ulong());
         }
         
         template <typename PythonImageType = NumpyImage>

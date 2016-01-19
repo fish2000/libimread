@@ -72,16 +72,19 @@ namespace im {
             using pdiff_t = OffsetType;
             using pdata_t = PixelType;
             
-            /// Stride values
-            const pdiff_t stride0, stride1, stride2;
-            
             /// Restricted pointer to data buffer
             pdata_t* __restrict__ data_pointer;
+            
+            /// Stride values
+            const pdiff_t stride0, stride1, stride2;
             
             /// One-way constructor
             explicit accessor(pdata_t* __restrict__ dp,
                               pdiff_t s0, pdiff_t s1=0, pdiff_t s2=0)
-                :data_pointer(dp), stride0(s0), stride1(s1), stride2(s2)
+                :data_pointer(dp)
+                ,stride0(s0)
+                ,stride1(s1)
+                ,stride2(s2)
                 {}
             
             /// Inline operator accessor function

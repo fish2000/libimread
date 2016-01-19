@@ -1,18 +1,9 @@
 
 #include "numpyimage.hh"
 
-#ifndef SENTINEL
-#define SENTINEL {NULL}
-#endif
-
-#ifndef PyMODINIT_FUNC
-#define PyMODINIT_FUNC void
-#endif
-
 using im::HybridArray;
 using im::ArrayFactory;
 using py::image::NumpyImage;
-// using ImagePtr = std::unique_ptr<HybridArray>;
 
 static PyBufferProcs NumpyImage_Buffer3000Methods = {
     0, /* (readbufferproc) */
@@ -65,7 +56,7 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                                  /* tp_as_number */
     0,                                                                  /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
-    0, /*(hashfunc)py::image::hash<NumpyImage>,*/                       /* tp_hash */
+    (hashfunc)py::image::hash<NumpyImage>,                              /* tp_hash */
     0,                                                                  /* tp_call */
     0,                                                                  /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
@@ -126,6 +117,10 @@ static PyMethodDef NumpyImage_module_functions[] = {
             "Parse struct code into list of dtype-string tuples" },
     { NULL, NULL, 0, NULL }
 };
+
+#ifndef PyMODINIT_FUNC
+#define PyMODINIT_FUNC void
+#endif
 
 PyMODINIT_FUNC initim(void) {
     PyObject* module;
