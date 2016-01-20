@@ -36,6 +36,10 @@ namespace im {
                 return this->dim(dim);
             }
             
+            virtual int size() const {
+                return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
+            }
+            
             template <typename T> inline
             T* rowp_as(const int r) const {
                 return static_cast<T*>(this->rowp(r));

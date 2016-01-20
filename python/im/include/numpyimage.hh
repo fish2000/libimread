@@ -77,6 +77,7 @@ namespace py {
     
     namespace image {
         
+        using im::byte;
         using im::HybridArray;
         using im::ArrayFactory;
         
@@ -99,7 +100,7 @@ namespace py {
         
         /// ALLOCATE / __new__ implementation
         template <typename ImageType = HybridArray,
-                  typename PythonImageType = NumpyImage>
+                  typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
             PythonImageType* self = reinterpret_cast<PythonImageType*>(type->tp_alloc(type, 0));
             /// initialize with defaults
@@ -113,7 +114,7 @@ namespace py {
         /// __init__ implementation
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory,
-                  typename PythonImageType = NumpyImage>
+                  typename PythonImageType = PythonImageBase<ImageType>>
         int init(PythonImageType* self, PyObject* args, PyObject* kwargs) {
             PyArray_Descr* dtype = NULL;
             char const* filename = NULL;
@@ -142,6 +143,7 @@ namespace py {
             }
             
             try {
+                py::gil::release nogil;
                 format = std::unique_ptr<im::ImageFormat>(
                     im::for_filename(filename));
             } catch (im::FormatNotFound& exc) {
@@ -185,25 +187,104 @@ namespace py {
         }
         
         /// __repr__ implementation
-        template <typename PythonImageType = NumpyImage>
-        PyObject* repr(PythonImageType* im) {
-            return PyString_FromFormat("< %s @ %p >",
-                terminator::demangle(typeid(*im).name()), im);
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject* repr(PythonImageType* pyim) {
+            decltype(terminator::nameof<*pyim>) pytypename;
+            {
+                py::gil::release nogil;
+                pytypename = terminator::nameof(*pyim);
+            }
+            return PyString_FromFormat(
+                "< %s @ %p >",
+                pytypename, pyim);
+        }
+        
+        /// __str__ implementaton -- return bytes of image
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject* str(PythonImageType* pyim) {
+            Py_ssize_t string_size;
+            {
+                py::gil::release nogil;
+                string_size = pyim->image->size();
+            }
+            return PyString_FromStringAndSize(
+                pyim->image->template rowp_as<char const*>(0),
+                string_size);
         }
         
         /// __hash__ implementation
-        template <typename PythonImageType = NumpyImage>
-        long hash(PythonImageType* im) {
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        long hash(PythonImageType* pyim) {
             long out;
             {
                 py::gil::release nogil;
-                auto bithash = blockhash::blockhash_quick(*im->image);
+                auto bithash = blockhash::blockhash_quick(*pyim->image);
                 out = static_cast<long>(bithash.to_ulong());
             }
             return out;
         }
         
-        template <typename PythonImageType = NumpyImage>
+        /// __len__ implementation
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        Py_ssize_t length(PythonImageType* pyim) {
+            Py_ssize_t out;
+            {
+                py::gil::release nogil;
+                out = pyim->image->size();
+            }
+            return out;
+        }
+        
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject* atindex(PythonImageType* pyim, Py_ssize_t idx) {
+            if (pyim->image->size() <= idx) {
+                PyErr_SetString(PyExc_IndexError,
+                    "index out of range");
+                return NULL;
+            }
+            int tc = static_cast<int>(pyim->dtype->type_num);
+            std::size_t nidx = static_cast<std::size_t>(idx);
+            switch (tc) {
+                case NPY_FLOAT: {
+                    float op = pyim->image->template rowp_as<float>(0)[nidx];
+                    return Py_BuildValue("f", op);
+                }
+                break;
+                case NPY_DOUBLE:
+                case NPY_LONGDOUBLE: {
+                    double op = pyim->image->template rowp_as<double>(0)[nidx];
+                    return Py_BuildValue("d", op);
+                }
+                break;
+                case NPY_USHORT:
+                case NPY_UBYTE: {
+                    byte op = pyim->image->template rowp_as<byte>(0)[nidx];
+                    return Py_BuildValue("B", op);
+                }
+                break;
+                case NPY_UINT: {
+                    uint32_t op = pyim->image->template rowp_as<uint32_t>(0)[nidx];
+                    return Py_BuildValue("I", op);
+                }
+                break;
+                case NPY_ULONG:
+                case NPY_ULONGLONG: {
+                    uint64_t op = pyim->image->template rowp_as<uint64_t>(0)[nidx];
+                    return Py_BuildValue("Q", op);
+                }
+                break;
+            }
+            uint32_t op = pyim->image->template rowp_as<uint32_t>(0)[nidx];
+            return Py_BuildValue("I", op);
+        }
+        
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
         int getbuffer(PyObject* self, Py_buffer* view, int flags) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             int out;
@@ -216,7 +297,8 @@ namespace py {
             return out;
         }
         
-        template <typename PythonImageType = NumpyImage>
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
         void releasebuffer(PyObject* self, Py_buffer* view) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             {
@@ -227,19 +309,22 @@ namespace py {
         }
         
         /// DEALLOCATE
-        template <typename PythonImageType = NumpyImage>
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
         void dealloc(PythonImageType* self) {
             self->cleanup();
             self->ob_type->tp_free((PyObject*)self);
         }
         
         /// NumpyImage.datatype getter
-        template <typename PythonImageType = NumpyImage>
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_dtype(PythonImageType* self, void* closure) {
             return Py_BuildValue("O", self->dtype);
         }
         
-        template <typename PythonImageType = NumpyImage>
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_shape(PythonImageType* self, void* closure) {
             switch (self->image->ndims()) {
                 case 1:

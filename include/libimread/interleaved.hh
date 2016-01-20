@@ -585,7 +585,8 @@ namespace im {
                 return b;
             }
             
-            inline const std::size_t size() const { return meta.size(); }
+            // inline const std::size_t size() const { return meta.size(); }
+            virtual int size() const override { return meta.size(); }
             int dimensions() const { return Dimensions; }
             
             int width() const { return meta.extents[0]; }

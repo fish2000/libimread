@@ -9,6 +9,7 @@ project(libimread)
 
 option(IM_USE_GCC           "Compile using GCC"                             OFF)
 option(IM_RESYMBOLIZE       "Regenerate include/libimread/symbols.hpp"      OFF)
+option(IM_GENERATE_HEADER   "Only generate libimread.hpp (do not compile)"  OFF)
 
 if(IM_USE_GCC)
     # hardcode homebrew path for now
@@ -143,6 +144,8 @@ set_target_properties(imread
 #     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 set_target_properties(imread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
+# add_dependencies(libimread "project_header")
+add_dependencies(imread "project_header")
 # add_dependencies(libimread "libguid")
 add_dependencies(imread "guid")
 # add_dependencies(libimread "libimagecompression")
@@ -161,9 +164,19 @@ get_target_property(IM_LINK_LIBRARIES imread LINK_LIBRARIES)
 get_target_property(IM_LINK_FLAGS imread LINK_FLAGS)
 
 # Configure the project-settings header file
+set(PROJECT_HEADER
+    "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
 configure_file(
     "${hdrs_dir}/libimread.hpp.in"
-    "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
+    ${PROJECT_HEADER})
+add_custom_target("project_header"
+    DEPENDS ${PROJECT_HEADER})
+set_source_files_properties(
+    ${PROJECT_HEADER}
+    PROPERTIES GENERATED TRUE)
+# if(IM_GENERATE_HEADER)
+#     return()
+# endif(IM_GENERATE_HEADER)
 
 # target_link_libraries(libimread
 #     libguid libdocopt
@@ -206,6 +219,7 @@ set_target_properties(imread_tests
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 # add_dependencies("test_data_header" libimread)
 add_dependencies("test_data_header" imread)
+add_dependencies(imread_tests "project_header")
 add_dependencies(imread_tests "test_data_header")
 add_dependencies(imread_tests "iod_symbolize")
 add_dependencies(imread_tests "guid")

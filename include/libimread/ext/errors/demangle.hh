@@ -3,6 +3,7 @@
 /// Adapted from http://stackoverflow.com/a/31633962/298171
 
 #pragma once
+#include <typeinfo>
 
 namespace terminator {
     
@@ -13,5 +14,15 @@ namespace terminator {
     
     /// actual function to demangle an allegedly mangled thing
     char const* demangle(char const* const symbol) noexcept;
+    
+    /// convenience function to get the name of a type
+    template <typename Arg>
+    char const* nameof(Arg argument) {
+        try {
+            return demangle(typeid(argument).name());
+        } catch (std::bad_typeid const&) {
+            return "<unknown>";
+        }
+    }
     
 } /* namespace terminator */

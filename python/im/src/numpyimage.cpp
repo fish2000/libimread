@@ -10,19 +10,30 @@ static PyBufferProcs NumpyImage_Buffer3000Methods = {
     0, /* (writebufferproc) */
     0, /* (segcountproc) */
     0, /* (charbufferproc) */
-    (getbufferproc)py::image::getbuffer<NumpyImage>,
-    (releasebufferproc)py::image::releasebuffer<NumpyImage>,
+    (getbufferproc)py::image::getbuffer<HybridArray>,
+    (releasebufferproc)py::image::releasebuffer<HybridArray>,
+};
+
+static PySequenceMethods NumpyImage_SequenceMethods = {
+    (lenfunc)py::image::length<HybridArray>,        /* sq_length */
+    0,                                              /* sq_concat */
+    0,                                              /* sq_repeat */
+    (ssizeargfunc)py::image::atindex<HybridArray>,  /* sq_item */
+    0,                                              /* sq_slice */
+    0,                                              /* sq_ass_item HAHAHAHA */
+    0,                                              /* sq_ass_slice HEHEHE ASS <snort> HA */
+    0                                               /* sq_contains */
 };
 
 static PyGetSetDef NumpyImage_getset[] = {
     {
         (char*)"dtype",
-            (getter)py::image::get_dtype<NumpyImage>,
+            (getter)py::image::get_dtype<HybridArray>,
             NULL,
             (char*)"NumpyImage dtype", NULL },
     {
         (char*)"shape",
-            (getter)py::image::get_shape<NumpyImage>,
+            (getter)py::image::get_shape<HybridArray>,
             NULL,
             (char*)"NumpyImage shape tuple", NULL },
     { NULL, NULL, NULL, NULL, NULL }
@@ -47,16 +58,16 @@ static PyTypeObject NumpyImage_Type = {
     "im.NumpyImage",                                                    /* tp_name */
     sizeof(NumpyImage),                                                 /* tp_basicsize */
     0,                                                                  /* tp_itemsize */
-    (destructor)py::image::dealloc<NumpyImage>,                         /* tp_dealloc */
+    (destructor)py::image::dealloc<HybridArray>,                        /* tp_dealloc */
     0,                                                                  /* tp_print */
     0,                                                                  /* tp_getattr */
     0,                                                                  /* tp_setattr */
     0,                                                                  /* tp_compare */
-    (reprfunc)py::image::repr<NumpyImage>,                              /* tp_repr */
+    (reprfunc)py::image::repr<HybridArray>,                             /* tp_repr */
     0,                                                                  /* tp_as_number */
-    0,                                                                  /* tp_as_sequence */
+    &NumpyImage_SequenceMethods,                                        /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
-    (hashfunc)py::image::hash<NumpyImage>,                              /* tp_hash */
+    (hashfunc)py::image::hash<HybridArray>,                             /* tp_hash */
     0,                                                                  /* tp_call */
     0,                                                                  /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
@@ -78,9 +89,9 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                                  /* tp_descr_get */
     0,                                                                  /* tp_descr_set */
     0,                                                                  /* tp_dictoffset */
-    (initproc)py::image::init<HybridArray, ArrayFactory, NumpyImage>,   /* tp_init */
+    (initproc)py::image::init<HybridArray, ArrayFactory>,               /* tp_init */
     0,                                                                  /* tp_alloc */
-    py::image::createnew<HybridArray, NumpyImage>,                      /* tp_new */
+    py::image::createnew<HybridArray>,                                  /* tp_new */
     0,                                                                  /* tp_free */
     0,                                                                  /* tp_is_gc */
     0,                                                                  /* tp_bases */
