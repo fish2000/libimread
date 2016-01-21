@@ -20,8 +20,8 @@ pushd $PROJECT_PATH
             -DCMAKE_INSTALL_PREFIX=./dist
         anybar yellow
         make -j4 install && \
-            anybar white
-        ctest -j4 --output-on-failure && \
+            anybar white && \
+        ctest -j4 -D Experimental --output-on-failure && \
             anybar green || anybar red
 
 popd

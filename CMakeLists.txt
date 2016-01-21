@@ -239,8 +239,10 @@ target_link_libraries(imread_tests
     ${HALIDE_LIBRARIES}
     ${HDF5_LIBRARIES})
 
-# set up ctest
+# set up ctest and cdash
+# … the add_imread_test() macro is defined in tests/CMakeLists.txt
 enable_testing()
+include(CTest)
 add_imread_test("apple-io")
 add_imread_test("blockhash")
 add_imread_test("filesystem")
