@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Parallel tests just means 'make -j4' at least this week
-
 echo "*** TEST RUN COMMENCING"
 
 : ${THISDIR:=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)}
@@ -22,11 +20,13 @@ pushd $PROJECT_PATH
             -DCMAKE_INSTALL_PREFIX=./dist
         anybar yellow
         make -j4 install && \
-            anybar white && \
-        ./imread_tests --success --durations yes --abortx 10 && \
+            anybar white
+        ctest -j4 --output-on-failure && \
             anybar green || anybar red
 
 popd
+rm -rf ./Testing
+
 popd
 
 echo "*** TEST RUN COMPLETE"

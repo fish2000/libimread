@@ -176,9 +176,6 @@ add_custom_target("project_header"
 set_source_files_properties(
     ${PROJECT_HEADER}
     PROPERTIES GENERATED TRUE)
-# if(IM_GENERATE_HEADER)
-#     return()
-# endif(IM_GENERATE_HEADER)
 
 # target_link_libraries(libimread
 #     libguid libdocopt
@@ -205,7 +202,7 @@ target_link_libraries(imread
 # Add the apps
 add_subdirectory(${APPS_DIR})
 
-# Run the tests
+# Build the tests
 add_subdirectory(${TEST_SOURCE_DIR})
 add_custom_command(
     OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
@@ -241,6 +238,25 @@ target_link_libraries(imread_tests
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES}
     ${HDF5_LIBRARIES})
+
+# set up ctest
+enable_testing()
+add_imread_test("apple-io")
+add_imread_test("blockhash")
+add_imread_test("filesystem")
+add_imread_test("gif-write")
+add_imread_test("halide-io")
+add_imread_test("hdf5-io")
+add_imread_test("json-block-traverse")
+add_imread_test("libguid")
+add_imread_test("nsdictionary-options-map")
+add_imread_test("nsurl-image-types")
+add_imread_test("objc-rt")
+# add_imread_test("refcount")
+add_imread_test("sfinae")
+add_imread_test("libsszip")
+add_imread_test("terminator")
+add_imread_test("interleaved-io")
 
 # install(TARGETS libimread DESTINATION lib)
 install(TARGETS imread DESTINATION lib)

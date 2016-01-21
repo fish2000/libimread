@@ -29,7 +29,7 @@ namespace {
         "jpg",      "png",      "jp2"
     };
     
-    TEST_CASE("[NSURL] Check suffixes and image type functions",
+    TEST_CASE("[nsurl-image-types] Check suffixes and image type functions",
               "[nsurl-check-suffixes-image-type-functions]")
     {
         
@@ -46,7 +46,7 @@ namespace {
     }
     
     
-    TEST_CASE("[NSURL] Check `isImage` and `imageFileType` NSURL category methods",
+    TEST_CASE("[nsurl-image-types] Check `isImage` and `imageFileType` NSURL category methods",
               "[nsurl-check-isimage-imagefiletype-category-methods]")
     {
         path basedir(im::test::basedir);

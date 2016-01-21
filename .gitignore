@@ -3,6 +3,7 @@
 /deps/*/build/
 /python/build/
 /python/imread.egg-info/
+/Testing/
 *.dylib
 *.a
 *.so
