@@ -1,0 +1,17 @@
+appkit-copy-paste 1 1.3556
+apple-io 1 7.48748
+blockhash 1 0.466853
+filesystem 1 0.0634348
+gif-write 1 3.68797
+halide-io 1 1.68818
+hdf5-io 1 1.1548
+json-block-traverse 1 0.0535259
+libguid 1 0.052109
+nsdictionary-options-map 1 0.0501051
+nsurl-image-types 1 0.047945
+objc-rt 1 0.0555978
+sfinae 1 0.0471549
+libsszip 1 0.0427599
+terminator 1 0.059413
+interleaved-io 1 0.502111
+---

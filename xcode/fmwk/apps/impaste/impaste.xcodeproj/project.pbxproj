@@ -1,0 +1,973 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		48045D635DCC43D69893F43F /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 1192FEB9A1DA4E4395F6581F /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				43C070AE05B44E988E74D3FE /* CMake Rules */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		A1FA06D175C74421A1FBF5DD /* RUN_TESTS */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = B244989448C645AEBA5E2A52 /* Build configuration list for PBXAggregateTarget "RUN_TESTS" */;
+			buildPhases = (
+				90CDFB52E4B6400DAE9E133D /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+			);
+			name = RUN_TESTS;
+			productName = RUN_TESTS;
+		};
+		A70A27226AE44958B49C59AF /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 6E985E9045D6473EBE080922 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				F47653E3FFC345D9B64158E0 /* CMake Rules */,
+			);
+			dependencies = (
+				60469F61C583468FAE8B1395 /* PBXTargetDependency */,
+				A38DA30EC9D249179253DAFF /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		C224C0106DC84366A2AA7D14 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 7EA8AE6138EA4DE2B6C4A0B2 /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				74B32B095E4242919CE082F4 /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				9D8E43D96D554351BD260A75 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		5741F80293364F8B961D68EC /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.mm */ = {isa = PBXBuildFile; fileRef = 4CF9F6443F5C4B4CB7875768 /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.mm */; settings = {COMPILER_FLAGS = ""; }; };
+		D233CA646293445FBABA9B2C /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.hh */ = {isa = PBXBuildFile; fileRef = DB8C176E543044E8A7CE81F6 /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.hh */; settings = {COMPILER_FLAGS = ""; }; };
+		FC16CADEF9954CA3996E60D8 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 0BD4EAA0B4EC47FC8CF253C9 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */; settings = {COMPILER_FLAGS = ""; }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		409B4452B5EF4281B7035C53 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		6688AFCE61924D9599393F04 /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		B119B2EF40A446C3853344C5 /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		BA0149F2B8D948CBA375E90D /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+		BBD367EF4A6E4861AC2B916A = {
+			isa = PBXBuildStyle;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		6B4A008B698B46DE933A7DD4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D37AD2A775EA445BA2A3020F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0CB6AFDC16CC4B2DB0918042;
+			remoteInfo = impaste;
+		};
+		BF160176D9E64B03868C6A08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D37AD2A775EA445BA2A3020F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A70A27226AE44958B49C59AF;
+			remoteInfo = ALL_BUILD;
+		};
+		E47AA66139BF484EAE8C6283 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D37AD2A775EA445BA2A3020F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48045D635DCC43D69893F43F;
+			remoteInfo = ZERO_CHECK;
+		};
+		F8DCEB8998364CB19F01F933 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D37AD2A775EA445BA2A3020F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48045D635DCC43D69893F43F;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0BD4EAA0B4EC47FC8CF253C9 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		2862E978E0B549F89270F317 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		4CF9F6443F5C4B4CB7875768 /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = impaste.mm; path = impaste.mm; sourceTree = SOURCE_ROOT; };
+		6A794697F1244812A92A693E /* impaste */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = impaste; refType = 0; sourceTree = BUILT_PRODUCTS_DIR; };
+		823BECAFA73A4338ABDEEA22 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		DB8C176E543044E8A7CE81F6 /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.hh */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = impaste.hh; path = impaste.hh; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		15309D2025334866A9CF82C5 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				F10A7DE2C481454C9E779C7B /* ZERO_CHECK */,
+				E7F4BE539B054DA6917157A4 /* ALL_BUILD */,
+				AE8A8BA1B3144B64B8837B96 /* impaste */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		4D82F16DB53D4323B1BBD63F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		5DD208B255684ACABEFFF876 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				4CF9F6443F5C4B4CB7875768 /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.mm */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		7CA5FEB45C4E419D821E9C22 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6A794697F1244812A92A693E /* impaste */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A3FFC99A60214AB4ADA7A5EE /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				DB8C176E543044E8A7CE81F6 /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.hh */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		AACD0A5C64CB4445B1AB7E02 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		AE8A8BA1B3144B64B8837B96 /* impaste */ = {
+			isa = PBXGroup;
+			children = (
+				5DD208B255684ACABEFFF876 /* Source Files */,
+				A3FFC99A60214AB4ADA7A5EE /* Header Files */,
+				0BD4EAA0B4EC47FC8CF253C9 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */,
+			);
+			name = impaste;
+			sourceTree = "<group>";
+		};
+		C7A6E3E7EB2840CDB0E435DE /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		E7F4BE539B054DA6917157A4 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				AACD0A5C64CB4445B1AB7E02 /* CMake Rules */,
+				823BECAFA73A4338ABDEEA22 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		F10A7DE2C481454C9E779C7B /* ZERO_CHECK */ = {
+			isa = PBXGroup;
+			children = (
+				C7A6E3E7EB2840CDB0E435DE /* CMake Rules */,
+				2862E978E0B549F89270F317 /* /Users/fish/Dropbox/libimread/apps/impaste/CMakeLists.txt */,
+			);
+			name = ZERO_CHECK;
+			sourceTree = "<group>";
+		};
+		F846C70D28904A56B65E7D83 = {
+			isa = PBXGroup;
+			children = (
+				15309D2025334866A9CF82C5 /* Sources */,
+				4D82F16DB53D4323B1BBD63F /* Resources */,
+				7CA5FEB45C4E419D821E9C22 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0CB6AFDC16CC4B2DB0918042 /* impaste */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AD90941D27154EA59D6B79EF /* Build configuration list for PBXNativeTarget "impaste" */;
+			buildPhases = (
+				9A87F3A161B045F480E843AC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				658122869EC34751AB1DDF66 /* PBXTargetDependency */,
+			);
+			name = impaste;
+			productName = impaste;
+			productReference = 6A794697F1244812A92A693E /* impaste */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D37AD2A775EA445BA2A3020F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+			};
+			buildConfigurationList = E0EF8FE48E354C75862562EC /* Build configuration list for PBXProject "impaste" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				6688AFCE61924D9599393F04 /* Debug */,
+				409B4452B5EF4281B7035C53 /* Release */,
+				B119B2EF40A446C3853344C5 /* MinSizeRel */,
+				BA0149F2B8D948CBA375E90D /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = F846C70D28904A56B65E7D83;
+			projectDirPath = ../../../../apps/impaste;
+			projectRoot = "";
+			targets = (
+				A70A27226AE44958B49C59AF /* ALL_BUILD */,
+				A1FA06D175C74421A1FBF5DD /* RUN_TESTS */,
+				48045D635DCC43D69893F43F /* ZERO_CHECK */,
+				0CB6AFDC16CC4B2DB0918042 /* impaste */,
+				C224C0106DC84366A2AA7D14 /* install */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0594B6A33C1449F4B670975D = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		43C070AE05B44E988E74D3FE /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste -f /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/CMakeScripts/ZERO_CHECK_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		74B32B095E4242919CE082F4 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste -f /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/CMakeScripts/install_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		90CDFB52E4B6400DAE9E133D /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste -f /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/CMakeScripts/RUN_TESTS_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		920E0931581843CD897307C8 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		BB6CEFE10FA34A34B1619EE8 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		D3485D1929F24F8C8AD81ED0 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		F47653E3FFC345D9B64158E0 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste -f /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/CMakeScripts/ALL_BUILD_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9A87F3A161B045F480E843AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5741F80293364F8B961D68EC /* /Users/fish/Dropbox/libimread/apps/impaste/impaste.mm */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		60469F61C583468FAE8B1395 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48045D635DCC43D69893F43F /* ZERO_CHECK */;
+			targetProxy = E47AA66139BF484EAE8C6283 /* PBXContainerItemProxy */;
+		};
+		658122869EC34751AB1DDF66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48045D635DCC43D69893F43F /* ZERO_CHECK */;
+			targetProxy = F8DCEB8998364CB19F01F933 /* PBXContainerItemProxy */;
+		};
+		9D8E43D96D554351BD260A75 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A70A27226AE44958B49C59AF /* ALL_BUILD */;
+			targetProxy = BF160176D9E64B03868C6A08 /* PBXContainerItemProxy */;
+		};
+		A38DA30EC9D249179253DAFF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0CB6AFDC16CC4B2DB0918042 /* impaste */;
+			targetProxy = 6B4A008B698B46DE933A7DD4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0B60A4C29A26416ABF71591E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		0BE75273FBD54D469A8FFA11 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		1D0895168F3B476A9734A04C /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/build;
+			};
+			name = MinSizeRel;
+		};
+		1EBDEDA039BB408D9887FF81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		27A3956DE07641699FA0D75C /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", WITH_SCHEMA, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = "/usr/local/lib /Users/fish/Dropbox/libimread/xcode/fmwk/RelWithDebInfo /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/RelWithDebInfo /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/RelWithDebInfo /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/RelWithDebInfo /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/RelWithDebInfo /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/RelWithDebInfo";
+				LIBRARY_SEARCH_PATHS = " /usr/local/lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) /usr/local/lib";
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++14'   -fstack-protector -fobjc-abi-version=3 -fno-objc-arc -fobjc-legacy-dispatch -fobjc-call-cxx-cdtors -std=c++14 -stdlib=libc++ -x objective-c++ -O3 -mtune=native -fstrict-aliasing -Wall -O3 -std=c++14 -stdlib=libc++ -fstrict-aliasing -fstack-protector-all -fobjc-arc -fobjc-abi-version=3 -fobjc-call-cxx-cdtors -mtune=native -x objective-c++";
+				OTHER_LDFLAGS = " -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook -framework Cocoa -framework Foundation -framework CoreFoundation /Users/fish/Dropbox/libimread/xcode/fmwk/RelWithDebInfo/libimread.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/RelWithDebInfo/libdocopt.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/RelWithDebInfo/libguid.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/RelWithDebInfo/libmaBlockClosure.dylib /usr/lib/libffi.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/RelWithDebInfo/libimagecompression.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/RelWithDebInfo/libsszip.dylib /usr/lib/libbz2.dylib -lpng -lz -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook /usr/local/lib/libtiff.dylib /usr/local/lib/libjpeg.dylib -lwebp /usr/local/lib/libHalide.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/lib/libz.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = impaste;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		57FF3B7D05FB41648E3522D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", WITH_SCHEMA, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = "/usr/local/lib /Users/fish/Dropbox/libimread/xcode/fmwk/Debug /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/Debug /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/Debug /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/Debug /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/Debug /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/Debug";
+				LIBRARY_SEARCH_PATHS = " /usr/local/lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) /usr/local/lib";
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++14'   -fstack-protector -fobjc-abi-version=3 -fno-objc-arc -fobjc-legacy-dispatch -fobjc-call-cxx-cdtors -std=c++14 -stdlib=libc++ -x objective-c++ -O3 -mtune=native -fstrict-aliasing -Wall -O3 -std=c++14 -stdlib=libc++ -fstrict-aliasing -fstack-protector-all -fobjc-arc -fobjc-abi-version=3 -fobjc-call-cxx-cdtors -mtune=native -x objective-c++";
+				OTHER_LDFLAGS = " -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook -framework Cocoa -framework Foundation -framework CoreFoundation /Users/fish/Dropbox/libimread/xcode/fmwk/Debug/libimread.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/Debug/libdocopt.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/Debug/libguid.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/Debug/libmaBlockClosure.dylib /usr/lib/libffi.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/Debug/libimagecompression.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/Debug/libsszip.dylib /usr/lib/libbz2.dylib -lpng -lz -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook /usr/local/lib/libtiff.dylib /usr/local/lib/libjpeg.dylib -lwebp /usr/local/lib/libHalide.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/lib/libz.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = impaste;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		7069E02B47FD4443AB2F1631 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		765D360BFB394DA19722DC0C /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/build;
+			};
+			name = RelWithDebInfo;
+		};
+		830225CBEC5448E38B2B93B4 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		8A3601C2B3B942DE9F007BF4 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		8FBBBEB9A8EF4B74922FB73A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		A4DF0463C5E54261BFD01FFE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		A5E3471B9B994D6293B979FA /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		AFC6D13008A943B390E52610 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		B523B4291A6E489E9221904C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", WITH_SCHEMA, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = "/usr/local/lib /Users/fish/Dropbox/libimread/xcode/fmwk/Release /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/Release /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/Release /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/Release /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/Release /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/Release";
+				LIBRARY_SEARCH_PATHS = " /usr/local/lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) /usr/local/lib";
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++14'   -fstack-protector -fobjc-abi-version=3 -fno-objc-arc -fobjc-legacy-dispatch -fobjc-call-cxx-cdtors -std=c++14 -stdlib=libc++ -x objective-c++ -O3 -mtune=native -fstrict-aliasing -Wall -O3 -std=c++14 -stdlib=libc++ -fstrict-aliasing -fstack-protector-all -fobjc-arc -fobjc-abi-version=3 -fobjc-call-cxx-cdtors -mtune=native -x objective-c++";
+				OTHER_LDFLAGS = " -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook -framework Cocoa -framework Foundation -framework CoreFoundation /Users/fish/Dropbox/libimread/xcode/fmwk/Release/libimread.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/Release/libdocopt.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/Release/libguid.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/Release/libmaBlockClosure.dylib /usr/lib/libffi.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/Release/libimagecompression.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/Release/libsszip.dylib /usr/lib/libbz2.dylib -lpng -lz -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook /usr/local/lib/libtiff.dylib /usr/local/lib/libjpeg.dylib -lwebp /usr/local/lib/libHalide.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/lib/libz.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = impaste;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		C3095D1E09A84CA6AA7C0798 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/build;
+			};
+			name = Debug;
+		};
+		DF5246BC473B40E38979AA48 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		DFA0A01D671B4B46BB8E85FA /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		E316E4516C6A42A0897060CD /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		E4289042B34941D7B2507C57 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		EA291D2A30764C54BC496DB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		EDF6847E3FB44CFE986050DB /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", WITH_SCHEMA, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = "/usr/local/lib /Users/fish/Dropbox/libimread/xcode/fmwk/MinSizeRel /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/MinSizeRel /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/MinSizeRel /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/MinSizeRel /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/MinSizeRel /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/MinSizeRel";
+				LIBRARY_SEARCH_PATHS = " /usr/local/lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) /usr/local/lib";
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++14'   -fstack-protector -fobjc-abi-version=3 -fno-objc-arc -fobjc-legacy-dispatch -fobjc-call-cxx-cdtors -std=c++14 -stdlib=libc++ -x objective-c++ -O3 -mtune=native -fstrict-aliasing -Wall -O3 -std=c++14 -stdlib=libc++ -fstrict-aliasing -fstack-protector-all -fobjc-arc -fobjc-abi-version=3 -fobjc-call-cxx-cdtors -mtune=native -x objective-c++";
+				OTHER_LDFLAGS = " -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook -framework Cocoa -framework Foundation -framework CoreFoundation /Users/fish/Dropbox/libimread/xcode/fmwk/MinSizeRel/libimread.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/docopt/MinSizeRel/libdocopt.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/crossguid/MinSizeRel/libguid.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/MinSizeRel/libmaBlockClosure.dylib /usr/lib/libffi.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/imagecompression/MinSizeRel/libimagecompression.dylib /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/MinSizeRel/libsszip.dylib /usr/lib/libbz2.dylib -lpng -lz -framework System -framework Cocoa -framework Foundation -framework CoreFoundation -framework QuickLook /usr/local/lib/libtiff.dylib /usr/local/lib/libjpeg.dylib -lwebp /usr/local/lib/libHalide.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5.dylib /usr/local/opt/szip/lib/libsz.dylib /usr/lib/libdl.dylib /usr/lib/libm.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_cpp.dylib /usr/local/Cellar/hdf5/1.8.16_1/lib/libhdf5_hl.dylib /usr/lib/libz.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = impaste;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		FC39E5D0F63146EDAB2D7B93 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/include/libimread, /Users/fish/Dropbox/libimread/xcode/fmwk/../include, /Users/fish/Dropbox/libimread/xcode/fmwk, /Users/fish/Dropbox/libimread/deps/crossguid, /Users/fish/Dropbox/libimread/deps/docopt, /Users/fish/Dropbox/libimread/deps/MABlockClosure, /Users/fish/Dropbox/libimread/deps/iod, /Users/fish/Dropbox/libimread/deps/SG14, /Users/fish/Dropbox/libimread/deps/SSZipArchive, /usr/local/include, /usr/local/Cellar/hdf5/1.8.16_1/include, /Users/fish/Dropbox/libimread/apps/impaste, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		FE51F7DA31E74F3BA14DD628 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/apps/impaste/build;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1192FEB9A1DA4E4395F6581F /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0B60A4C29A26416ABF71591E /* Debug */,
+				1EBDEDA039BB408D9887FF81 /* Release */,
+				E316E4516C6A42A0897060CD /* MinSizeRel */,
+				E4289042B34941D7B2507C57 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6E985E9045D6473EBE080922 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A4DF0463C5E54261BFD01FFE /* Debug */,
+				AFC6D13008A943B390E52610 /* Release */,
+				A5E3471B9B994D6293B979FA /* MinSizeRel */,
+				FC39E5D0F63146EDAB2D7B93 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7EA8AE6138EA4DE2B6C4A0B2 /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF5246BC473B40E38979AA48 /* Debug */,
+				8FBBBEB9A8EF4B74922FB73A /* Release */,
+				830225CBEC5448E38B2B93B4 /* MinSizeRel */,
+				8A3601C2B3B942DE9F007BF4 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AD90941D27154EA59D6B79EF /* Build configuration list for PBXNativeTarget "impaste" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				57FF3B7D05FB41648E3522D7 /* Debug */,
+				B523B4291A6E489E9221904C /* Release */,
+				EDF6847E3FB44CFE986050DB /* MinSizeRel */,
+				27A3956DE07641699FA0D75C /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B244989448C645AEBA5E2A52 /* Build configuration list for PBXAggregateTarget "RUN_TESTS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA291D2A30764C54BC496DB0 /* Debug */,
+				7069E02B47FD4443AB2F1631 /* Release */,
+				DFA0A01D671B4B46BB8E85FA /* MinSizeRel */,
+				0BE75273FBD54D469A8FFA11 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E0EF8FE48E354C75862562EC /* Build configuration list for PBXProject "impaste" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3095D1E09A84CA6AA7C0798 /* Debug */,
+				FE51F7DA31E74F3BA14DD628 /* Release */,
+				1D0895168F3B476A9734A04C /* MinSizeRel */,
+				765D360BFB394DA19722DC0C /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D37AD2A775EA445BA2A3020F /* Project object */;
+}

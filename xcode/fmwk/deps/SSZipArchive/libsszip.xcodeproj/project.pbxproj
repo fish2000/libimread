@@ -1,0 +1,1119 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		48045D635DCC43D69893F43F /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = A0F0CAFDBC1142CFA15F5078 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				3BDE6EB1848E4794A6411397 /* CMake Rules */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		A1FA06D175C74421A1FBF5DD /* RUN_TESTS */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 0015D75030624E4EB179671B /* Build configuration list for PBXAggregateTarget "RUN_TESTS" */;
+			buildPhases = (
+				FF178C22C9E14936BEF2FACB /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+			);
+			name = RUN_TESTS;
+			productName = RUN_TESTS;
+		};
+		A70A27226AE44958B49C59AF /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9841E268EF28474FB7FDBCAC /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				2DA00DFC443A445FB3B97C00 /* CMake Rules */,
+			);
+			dependencies = (
+				6E8A7429F3CC4F2B8CAC6C5A /* PBXTargetDependency */,
+				4D789194CA4B4250AAA1E3BA /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		C224C0106DC84366A2AA7D14 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F64EB5FE5CE148DE885103AD /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				1B02B489C1234D5CBB6C110B /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				7283E8D0072B468E9459C4A4 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		01B0F0B7E5C447EEBF498099 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aescrypt.c */ = {isa = PBXBuildFile; fileRef = 04AE0F920AB84776AD2994C0 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aescrypt.c */; settings = {COMPILER_FLAGS = ""; }; };
+		03F4F1F6F8304160A6E97EA9 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.h */ = {isa = PBXBuildFile; fileRef = 329527D7AAB440C9B852933F /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.h */; settings = {COMPILER_FLAGS = ""; }; };
+		0B5CD2CCBFD14B98AC478479 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.c */ = {isa = PBXBuildFile; fileRef = 1C5336960CFD4AB18909BB49 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.c */; settings = {COMPILER_FLAGS = ""; }; };
+		0F0F472EEC66427CB774B6F9 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aesopt.h */ = {isa = PBXBuildFile; fileRef = 1395727A91A740559B189572 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aesopt.h */; settings = {COMPILER_FLAGS = ""; }; };
+		1358A79EC6064787A6E2270A /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/ZipArchive.h */ = {isa = PBXBuildFile; fileRef = 7BE2177F95F0401AAA6B2780 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/ZipArchive.h */; settings = {COMPILER_FLAGS = ""; }; };
+		1A18B818AC0246678451882C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.c */ = {isa = PBXBuildFile; fileRef = 9236426ACD6646ADBE7AE431 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.c */; settings = {COMPILER_FLAGS = ""; }; };
+		1B6B52C0355E4529857E3009 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.c */ = {isa = PBXBuildFile; fileRef = 5AD7F41FE2C94669986F72F7 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.c */; settings = {COMPILER_FLAGS = ""; }; };
+		1C9D7D4A174F427E93362E42 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.h */ = {isa = PBXBuildFile; fileRef = 6BCB5F4107854985A457174C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.h */; settings = {COMPILER_FLAGS = ""; }; };
+		1CF5851C7A7441D89007B5F0 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.h */ = {isa = PBXBuildFile; fileRef = A66743E7C38D4FA3B2C72C39 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.h */; settings = {COMPILER_FLAGS = ""; }; };
+		22DBED201B464133B8D9B1EE /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.c */ = {isa = PBXBuildFile; fileRef = 2B1F7DE7CDF64AD2BE1B1AA2 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.c */; settings = {COMPILER_FLAGS = ""; }; };
+		247E8FA2E0784CC28F900C0C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.c */ = {isa = PBXBuildFile; fileRef = 623D1FD5ADCD46099AB08DC3 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.c */; settings = {COMPILER_FLAGS = ""; }; };
+		30B99DCB1D434313B0CFEBD3 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.h */ = {isa = PBXBuildFile; fileRef = C0C9379D1E5544689CD46F22 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.h */; settings = {COMPILER_FLAGS = ""; }; };
+		361C9D2BE62C4F61A8D6B515 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.h */ = {isa = PBXBuildFile; fileRef = 6AEEFD8EFE0A49E3AA54DC68 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.h */; settings = {COMPILER_FLAGS = ""; }; };
+		36C5E77DF33D4DC784524F8A /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.c */ = {isa = PBXBuildFile; fileRef = 4671C53B8ACD4BC7A2CF53AB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.c */; settings = {COMPILER_FLAGS = ""; }; };
+		38EC7215C391455AB6ED5D07 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.h */ = {isa = PBXBuildFile; fileRef = 59F00EDC885D44D2A8404A1E /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.h */; settings = {COMPILER_FLAGS = ""; }; };
+		480AFD4639754A2AA0DF08E1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.c */ = {isa = PBXBuildFile; fileRef = CDC8C07F7AD74EB8A4A5DEB1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.c */; settings = {COMPILER_FLAGS = ""; }; };
+		6446334ADC9C452BB4FDE559 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.c */ = {isa = PBXBuildFile; fileRef = 4324C25821F345589A777237 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.c */; settings = {COMPILER_FLAGS = ""; }; };
+		6DBD77D2C93F4CE2B0911F9B /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes_via_ace.h */ = {isa = PBXBuildFile; fileRef = 7AE84DFB016548A895952F51 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes_via_ace.h */; settings = {COMPILER_FLAGS = ""; }; };
+		6FA32964EE854A25B05C4D64 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.h */ = {isa = PBXBuildFile; fileRef = 23CC507B83AE459B946DA671 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.h */; settings = {COMPILER_FLAGS = ""; }; };
+		70F810BE44024FBF93137726 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/crypt.h */ = {isa = PBXBuildFile; fileRef = B65BB118619E4087AB92291B /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/crypt.h */; settings = {COMPILER_FLAGS = ""; }; };
+		83E9AEC7AAA549CB987C0800 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = E205F3FAC8BF48439D36D1F1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */; settings = {COMPILER_FLAGS = ""; }; };
+		90283DE2A0DD47A1B5F1D951 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.h */ = {isa = PBXBuildFile; fileRef = AA8F9DDBC0B24D8A9AFA15C8 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.h */; settings = {COMPILER_FLAGS = ""; }; };
+		95214EB68D7F47B9996D2599 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_types.h */ = {isa = PBXBuildFile; fileRef = A539D517B7F5472C9808723E /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_types.h */; settings = {COMPILER_FLAGS = ""; }; };
+		97D6E1B68891461C9484DA01 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.m */ = {isa = PBXBuildFile; fileRef = F805A6A6AB2843EFA8E511CB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.m */; settings = {COMPILER_FLAGS = ""; }; };
+		984EB1FC70524BD093BBD09A /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.h */ = {isa = PBXBuildFile; fileRef = 314BAE42FDE44161A89DF96D /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.h */; settings = {COMPILER_FLAGS = ""; }; };
+		A3BC9A63122645ECAE80AD08 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.c */ = {isa = PBXBuildFile; fileRef = F0CA57EF0C834B518FCD92BE /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.c */; settings = {COMPILER_FLAGS = ""; }; };
+		B007B30E5B5D4E178030705D /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.h */ = {isa = PBXBuildFile; fileRef = 4148905E3ED444519B88EC7F /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.h */; settings = {COMPILER_FLAGS = ""; }; };
+		C4EB7C67D1B7470793159836 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_endian.h */ = {isa = PBXBuildFile; fileRef = 7EC7387DE10F46ABB28EE062 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_endian.h */; settings = {COMPILER_FLAGS = ""; }; };
+		DE53852C66DC47AD96A172B2 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.c */ = {isa = PBXBuildFile; fileRef = D4507EAA5870423E8158CABC /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.c */; settings = {COMPILER_FLAGS = ""; }; };
+		E41F01C1BCE54546B97CE4CF /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aeskey.c */ = {isa = PBXBuildFile; fileRef = 4A62F39CC34B495DB5000566 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aeskey.c */; settings = {COMPILER_FLAGS = ""; }; };
+		E5CFD34CDCAB414FBE150E3B /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes.h */ = {isa = PBXBuildFile; fileRef = C29D50635A4B49819ACFC43C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes.h */; settings = {COMPILER_FLAGS = ""; }; };
+		E69AC80966F24CB18151A04F /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.h */ = {isa = PBXBuildFile; fileRef = 14A898FD88784564A58905FB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.h */; settings = {COMPILER_FLAGS = ""; }; };
+		FA6EE6058DE34DCF85442FEB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.c */ = {isa = PBXBuildFile; fileRef = 46E56B6D31AC48A3BD3BC477 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.c */; settings = {COMPILER_FLAGS = ""; }; };
+		FFCCF1A1DB904555828C7151 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.h */ = {isa = PBXBuildFile; fileRef = BCD8CD27678C4C6BB77A7300 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.h */; settings = {COMPILER_FLAGS = ""; }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		1CF2E23AEA1B4CCCA67C5FB5 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		37B647C9A11F4B56B5F6835D /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		426A40C35E5E42B6BE3291E4 = {
+			isa = PBXBuildStyle;
+		};
+		8F99ACF2FA154E1288A6EDED /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+		C8443DC6291744F6866E57F3 /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		4F08054EF3E544E18B355FCF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 508AC5DD3FF2436A9279447D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48045D635DCC43D69893F43F;
+			remoteInfo = ZERO_CHECK;
+		};
+		601F72B93D0549C0A2517A77 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 508AC5DD3FF2436A9279447D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A70A27226AE44958B49C59AF;
+			remoteInfo = ALL_BUILD;
+		};
+		9F55EBABD1D7467BB66CF3FA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 508AC5DD3FF2436A9279447D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 67517F0B6D7041E6AF0DAB92;
+			remoteInfo = sszip;
+		};
+		A91E48CBBD1D420D8C5B02B6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 508AC5DD3FF2436A9279447D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48045D635DCC43D69893F43F;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00B1517AD1B44B3A96E6E213 /* sszip */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libsszip.dylib; refType = 0; sourceTree = BUILT_PRODUCTS_DIR; };
+		04AE0F920AB84776AD2994C0 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aescrypt.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = aescrypt.c; path = aes/aescrypt.c; sourceTree = SOURCE_ROOT; };
+		1395727A91A740559B189572 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aesopt.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = aesopt.h; path = aes/aesopt.h; sourceTree = SOURCE_ROOT; };
+		14A898FD88784564A58905FB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = hmac.h; path = aes/hmac.h; sourceTree = SOURCE_ROOT; };
+		1C5336960CFD4AB18909BB49 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = sha1.c; path = aes/sha1.c; sourceTree = SOURCE_ROOT; };
+		23CC507B83AE459B946DA671 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = unzip.h; path = minizip/unzip.h; sourceTree = SOURCE_ROOT; };
+		2B1F7DE7CDF64AD2BE1B1AA2 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = entropy.c; path = aes/entropy.c; sourceTree = SOURCE_ROOT; };
+		314BAE42FDE44161A89DF96D /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = mztools.h; path = minizip/mztools.h; sourceTree = SOURCE_ROOT; };
+		329527D7AAB440C9B852933F /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = zip.h; path = minizip/zip.h; sourceTree = SOURCE_ROOT; };
+		33B7B65FCA334D10A39A3FCB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		4148905E3ED444519B88EC7F /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = prng.h; path = aes/prng.h; sourceTree = SOURCE_ROOT; };
+		4324C25821F345589A777237 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = hmac.c; path = aes/hmac.c; sourceTree = SOURCE_ROOT; };
+		4671C53B8ACD4BC7A2CF53AB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = aestab.c; path = aes/aestab.c; sourceTree = SOURCE_ROOT; };
+		46E56B6D31AC48A3BD3BC477 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = zip.c; path = minizip/zip.c; sourceTree = SOURCE_ROOT; };
+		4A62F39CC34B495DB5000566 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aeskey.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = aeskey.c; path = aes/aeskey.c; sourceTree = SOURCE_ROOT; };
+		59F00EDC885D44D2A8404A1E /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = fileenc.h; path = aes/fileenc.h; sourceTree = SOURCE_ROOT; };
+		5AD7F41FE2C94669986F72F7 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = mztools.c; path = minizip/mztools.c; sourceTree = SOURCE_ROOT; };
+		623D1FD5ADCD46099AB08DC3 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = pwd2key.c; path = aes/pwd2key.c; sourceTree = SOURCE_ROOT; };
+		6AEEFD8EFE0A49E3AA54DC68 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = aestab.h; path = aes/aestab.h; sourceTree = SOURCE_ROOT; };
+		6BCB5F4107854985A457174C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = SSZipArchive.h; path = SSZipArchive.h; sourceTree = SOURCE_ROOT; };
+		7715DA78E9CE4F7CA9022A44 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		7AE84DFB016548A895952F51 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes_via_ace.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = aes_via_ace.h; path = aes/aes_via_ace.h; sourceTree = SOURCE_ROOT; };
+		7BE2177F95F0401AAA6B2780 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/ZipArchive.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ZipArchive.h; path = ZipArchive.h; sourceTree = SOURCE_ROOT; };
+		7EC7387DE10F46ABB28EE062 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_endian.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = brg_endian.h; path = aes/brg_endian.h; sourceTree = SOURCE_ROOT; };
+		9236426ACD6646ADBE7AE431 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = ioapi.c; path = minizip/ioapi.c; sourceTree = SOURCE_ROOT; };
+		A539D517B7F5472C9808723E /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_types.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = brg_types.h; path = aes/brg_types.h; sourceTree = SOURCE_ROOT; };
+		A66743E7C38D4FA3B2C72C39 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = pwd2key.h; path = aes/pwd2key.h; sourceTree = SOURCE_ROOT; };
+		AA8F9DDBC0B24D8A9AFA15C8 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ioapi.h; path = minizip/ioapi.h; sourceTree = SOURCE_ROOT; };
+		B65BB118619E4087AB92291B /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/crypt.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = crypt.h; path = minizip/crypt.h; sourceTree = SOURCE_ROOT; };
+		BCD8CD27678C4C6BB77A7300 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = entropy.h; path = aes/entropy.h; sourceTree = SOURCE_ROOT; };
+		C0C9379D1E5544689CD46F22 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = sha1.h; path = aes/sha1.h; sourceTree = SOURCE_ROOT; };
+		C29D50635A4B49819ACFC43C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = aes.h; path = aes/aes.h; sourceTree = SOURCE_ROOT; };
+		CDC8C07F7AD74EB8A4A5DEB1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = unzip.c; path = minizip/unzip.c; sourceTree = SOURCE_ROOT; };
+		D4507EAA5870423E8158CABC /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = fileenc.c; path = aes/fileenc.c; sourceTree = SOURCE_ROOT; };
+		E205F3FAC8BF48439D36D1F1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		F0CA57EF0C834B518FCD92BE /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = prng.c; path = aes/prng.c; sourceTree = SOURCE_ROOT; };
+		F805A6A6AB2843EFA8E511CB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.m */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; name = SSZipArchive.m; path = SSZipArchive.m; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		009E568FD79A40289B19BB26 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		1756EED183B543E7B400C8A6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				00B1517AD1B44B3A96E6E213 /* sszip */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		19B9AAFD2B854877A3A7160C /* ZERO_CHECK */ = {
+			isa = PBXGroup;
+			children = (
+				DAAC4F930CC2472791E5C09C /* CMake Rules */,
+				7715DA78E9CE4F7CA9022A44 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */,
+			);
+			name = ZERO_CHECK;
+			sourceTree = "<group>";
+		};
+		23BC0B2EF7DF407DB2622B45 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		39BC62FFAB4C4134BF8F8228 /* sszip */ = {
+			isa = PBXGroup;
+			children = (
+				D98648CEEE0E4F308AEF4F46 /* Source Files */,
+				ED2E44AF21C140EE923F5536 /* Header Files */,
+				E205F3FAC8BF48439D36D1F1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */,
+			);
+			name = sszip;
+			sourceTree = "<group>";
+		};
+		410C09D77E8447B2874EF4C7 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				19B9AAFD2B854877A3A7160C /* ZERO_CHECK */,
+				75B88D1F4B4848CD8F19E47A /* ALL_BUILD */,
+				39BC62FFAB4C4134BF8F8228 /* sszip */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		75B88D1F4B4848CD8F19E47A /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				23BC0B2EF7DF407DB2622B45 /* CMake Rules */,
+				33B7B65FCA334D10A39A3FCB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		C33B3471A77F4DC5971413B6 = {
+			isa = PBXGroup;
+			children = (
+				410C09D77E8447B2874EF4C7 /* Sources */,
+				009E568FD79A40289B19BB26 /* Resources */,
+				1756EED183B543E7B400C8A6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D98648CEEE0E4F308AEF4F46 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				F805A6A6AB2843EFA8E511CB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.m */,
+				04AE0F920AB84776AD2994C0 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aescrypt.c */,
+				4A62F39CC34B495DB5000566 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aeskey.c */,
+				4671C53B8ACD4BC7A2CF53AB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.c */,
+				2B1F7DE7CDF64AD2BE1B1AA2 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.c */,
+				D4507EAA5870423E8158CABC /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.c */,
+				4324C25821F345589A777237 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.c */,
+				F0CA57EF0C834B518FCD92BE /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.c */,
+				623D1FD5ADCD46099AB08DC3 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.c */,
+				1C5336960CFD4AB18909BB49 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.c */,
+				9236426ACD6646ADBE7AE431 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.c */,
+				5AD7F41FE2C94669986F72F7 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.c */,
+				CDC8C07F7AD74EB8A4A5DEB1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.c */,
+				46E56B6D31AC48A3BD3BC477 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.c */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		DAAC4F930CC2472791E5C09C /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		ED2E44AF21C140EE923F5536 /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				6BCB5F4107854985A457174C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.h */,
+				7BE2177F95F0401AAA6B2780 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/ZipArchive.h */,
+				C29D50635A4B49819ACFC43C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes.h */,
+				7AE84DFB016548A895952F51 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aes_via_ace.h */,
+				1395727A91A740559B189572 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aesopt.h */,
+				6AEEFD8EFE0A49E3AA54DC68 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.h */,
+				7EC7387DE10F46ABB28EE062 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_endian.h */,
+				A539D517B7F5472C9808723E /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/brg_types.h */,
+				BCD8CD27678C4C6BB77A7300 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.h */,
+				59F00EDC885D44D2A8404A1E /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.h */,
+				14A898FD88784564A58905FB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.h */,
+				4148905E3ED444519B88EC7F /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.h */,
+				A66743E7C38D4FA3B2C72C39 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.h */,
+				C0C9379D1E5544689CD46F22 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.h */,
+				B65BB118619E4087AB92291B /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/crypt.h */,
+				AA8F9DDBC0B24D8A9AFA15C8 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.h */,
+				314BAE42FDE44161A89DF96D /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.h */,
+				23CC507B83AE459B946DA671 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.h */,
+				329527D7AAB440C9B852933F /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		67517F0B6D7041E6AF0DAB92 /* sszip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5979132FE934EE7B4FAC6F5 /* Build configuration list for PBXNativeTarget "sszip" */;
+			buildPhases = (
+				6E97EE7D8AE941859C114D48 /* Sources */,
+				5F822DC730FE45D98211C617 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3869E953C4024030AAB60DD1 /* PBXTargetDependency */,
+			);
+			name = sszip;
+			productName = sszip;
+			productReference = 00B1517AD1B44B3A96E6E213 /* sszip */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		508AC5DD3FF2436A9279447D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+			};
+			buildConfigurationList = A7AC31BF50C7430CBF1ADBBD /* Build configuration list for PBXProject "libsszip" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				C8443DC6291744F6866E57F3 /* Debug */,
+				1CF2E23AEA1B4CCCA67C5FB5 /* Release */,
+				37B647C9A11F4B56B5F6835D /* MinSizeRel */,
+				8F99ACF2FA154E1288A6EDED /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = C33B3471A77F4DC5971413B6;
+			projectDirPath = ../../../../deps/SSZipArchive;
+			projectRoot = "";
+			targets = (
+				A70A27226AE44958B49C59AF /* ALL_BUILD */,
+				A1FA06D175C74421A1FBF5DD /* RUN_TESTS */,
+				48045D635DCC43D69893F43F /* ZERO_CHECK */,
+				C224C0106DC84366A2AA7D14 /* install */,
+				67517F0B6D7041E6AF0DAB92 /* sszip */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1B02B489C1234D5CBB6C110B /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/CMakeScripts/install_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		2DA00DFC443A445FB3B97C00 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/CMakeScripts/ALL_BUILD_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		3BDE6EB1848E4794A6411397 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/CMakeScripts/ZERO_CHECK_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		5744AD4E01BA4294B0D68A48 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		5F822DC730FE45D98211C617 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/CMakeScripts/sszip_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		718B14D60C104687BFDCC2F5 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		DB937AC1E15E44658408C032 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		DE52C6E827BA41AB8000BFFB = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		FF178C22C9E14936BEF2FACB /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/CMakeScripts/RUN_TESTS_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6E97EE7D8AE941859C114D48 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				97D6E1B68891461C9484DA01 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/SSZipArchive.m */,
+				01B0F0B7E5C447EEBF498099 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aescrypt.c */,
+				E41F01C1BCE54546B97CE4CF /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aeskey.c */,
+				36C5E77DF33D4DC784524F8A /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/aestab.c */,
+				22DBED201B464133B8D9B1EE /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/entropy.c */,
+				DE53852C66DC47AD96A172B2 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/fileenc.c */,
+				6446334ADC9C452BB4FDE559 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/hmac.c */,
+				A3BC9A63122645ECAE80AD08 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/prng.c */,
+				247E8FA2E0784CC28F900C0C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/pwd2key.c */,
+				0B5CD2CCBFD14B98AC478479 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes/sha1.c */,
+				1A18B818AC0246678451882C /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/ioapi.c */,
+				1B6B52C0355E4529857E3009 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/mztools.c */,
+				480AFD4639754A2AA0DF08E1 /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/unzip.c */,
+				FA6EE6058DE34DCF85442FEB /* /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip/zip.c */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3869E953C4024030AAB60DD1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48045D635DCC43D69893F43F /* ZERO_CHECK */;
+			targetProxy = 4F08054EF3E544E18B355FCF /* PBXContainerItemProxy */;
+		};
+		4D789194CA4B4250AAA1E3BA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 67517F0B6D7041E6AF0DAB92 /* sszip */;
+			targetProxy = 9F55EBABD1D7467BB66CF3FA /* PBXContainerItemProxy */;
+		};
+		6E8A7429F3CC4F2B8CAC6C5A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48045D635DCC43D69893F43F /* ZERO_CHECK */;
+			targetProxy = A91E48CBBD1D420D8C5B02B6 /* PBXContainerItemProxy */;
+		};
+		7283E8D0072B468E9459C4A4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A70A27226AE44958B49C59AF /* ALL_BUILD */;
+			targetProxy = 601F72B93D0549C0A2517A77 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		022C83364501489381257AFA /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		09EB9BE39FDA4C1E9F7D9001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		12D37B4F45E941C89C01CCC4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		1A18D8ECAE314CFCBE8EF173 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", sszip_EXPORTS, HAVE_BZIP2, HAS_STDINT_H, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "   -fPIC   -Wall -Werror -fstack-protector-all -fobjc-abi-version=3 -fobjc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libz.dylib /usr/lib/libbz2.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = sszip;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		1D91DB326498432C87458D77 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/build;
+			};
+			name = MinSizeRel;
+		};
+		1D9A3BFDF9BE46A086CA95A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/build;
+			};
+			name = Debug;
+		};
+		265E2DAA3F8F44478F784854 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/build;
+			};
+			name = Release;
+		};
+		2F07ACC047B049759BFAE59E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		40FCE94258474B7680B18DE1 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", sszip_EXPORTS, HAVE_BZIP2, HAS_STDINT_H, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "       -DNDEBUG -fPIC   -Wall -Werror -fstack-protector-all -fobjc-abi-version=3 -fobjc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libz.dylib /usr/lib/libbz2.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = sszip;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		4201BDEBC65C4F639D6910C4 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		46207C0D92F14F698353972F /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		70C1C3ECDF7647BCBAA63B5D /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		75294E8CC1254462BADC69A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		771552643B6F4FCE9AE8EE15 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		A0C7F3A44A474862ACC2CC32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", sszip_EXPORTS, HAVE_BZIP2, HAS_STDINT_H, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "    -DNDEBUG -fPIC   -Wall -Werror -fstack-protector-all -fobjc-abi-version=3 -fobjc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libz.dylib /usr/lib/libbz2.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = sszip;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		B2F3DB129783477FB67C16F1 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		B4A3628A3BC7496CA0D2A5D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		B5060A6A88B04F61AD24B695 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		B74863967D274F4BB453C4F7 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", sszip_EXPORTS, HAVE_BZIP2, HAS_STDINT_H, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "    -DNDEBUG -fPIC   -Wall -Werror -fstack-protector-all -fobjc-abi-version=3 -fobjc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libz.dylib /usr/lib/libbz2.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = sszip;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		B9A5E6F5F6474CF1BE8D367B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		BBB6B3EC48AF4B8AAE23D121 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive/build;
+			};
+			name = RelWithDebInfo;
+		};
+		CD141DE805554F3F8560CD8A /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		D4E6092738624658B557ADB0 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		DAD27C0C34B74DFC978CCE95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/SSZipArchive, /Users/fish/Dropbox/libimread/deps/SSZipArchive/minizip, /Users/fish/Dropbox/libimread/deps/SSZipArchive/aes, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/SSZipArchive;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0015D75030624E4EB179671B /* Build configuration list for PBXAggregateTarget "RUN_TESTS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DAD27C0C34B74DFC978CCE95 /* Debug */,
+				B9A5E6F5F6474CF1BE8D367B /* Release */,
+				022C83364501489381257AFA /* MinSizeRel */,
+				70C1C3ECDF7647BCBAA63B5D /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9841E268EF28474FB7FDBCAC /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12D37B4F45E941C89C01CCC4 /* Debug */,
+				09EB9BE39FDA4C1E9F7D9001 /* Release */,
+				B5060A6A88B04F61AD24B695 /* MinSizeRel */,
+				B2F3DB129783477FB67C16F1 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A0F0CAFDBC1142CFA15F5078 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4A3628A3BC7496CA0D2A5D4 /* Debug */,
+				75294E8CC1254462BADC69A4 /* Release */,
+				4201BDEBC65C4F639D6910C4 /* MinSizeRel */,
+				46207C0D92F14F698353972F /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5979132FE934EE7B4FAC6F5 /* Build configuration list for PBXNativeTarget "sszip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A18D8ECAE314CFCBE8EF173 /* Debug */,
+				A0C7F3A44A474862ACC2CC32 /* Release */,
+				B74863967D274F4BB453C4F7 /* MinSizeRel */,
+				40FCE94258474B7680B18DE1 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A7AC31BF50C7430CBF1ADBBD /* Build configuration list for PBXProject "libsszip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D9A3BFDF9BE46A086CA95A0 /* Debug */,
+				265E2DAA3F8F44478F784854 /* Release */,
+				1D91DB326498432C87458D77 /* MinSizeRel */,
+				BBB6B3EC48AF4B8AAE23D121 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F64EB5FE5CE148DE885103AD /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2F07ACC047B049759BFAE59E /* Debug */,
+				771552643B6F4FCE9AE8EE15 /* Release */,
+				D4E6092738624658B557ADB0 /* MinSizeRel */,
+				CD141DE805554F3F8560CD8A /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 508AC5DD3FF2436A9279447D /* Project object */;
+}

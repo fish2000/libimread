@@ -1,0 +1,1023 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		48045D635DCC43D69893F43F /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 5471588C5A39401A9A297BB9 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				264AC85886024744BED2E40A /* CMake Rules */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		A1FA06D175C74421A1FBF5DD /* RUN_TESTS */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 3B02CD41185E4DAFAF32CE95 /* Build configuration list for PBXAggregateTarget "RUN_TESTS" */;
+			buildPhases = (
+				6CD659A52A1F4FF4913B07C6 /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+			);
+			name = RUN_TESTS;
+			productName = RUN_TESTS;
+		};
+		A70A27226AE44958B49C59AF /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 42117ED7BC3A4CA8BCA174F7 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				01A8375B88914565B94618B1 /* CMake Rules */,
+			);
+			dependencies = (
+				4450D935F9004115A5C96A77 /* PBXTargetDependency */,
+				372A061B2892464C9989147E /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		C224C0106DC84366A2AA7D14 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 3043E2E92B7E4ED7A84D129B /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				12C00410593441A3B9BDF90E /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				42F82350E6AD4D0CA670F808 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		087530432BE24AE4B15FA904 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 10380DC70D4E4320BDD881F6 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */; settings = {COMPILER_FLAGS = ""; }; };
+		2442256B12E146748D7F2382 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.h */ = {isa = PBXBuildFile; fileRef = 17B0EAB08D5F4F72845D249A /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.h */; settings = {COMPILER_FLAGS = ""; }; };
+		2C883FC813224DCC8E1A82E0 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.m */ = {isa = PBXBuildFile; fileRef = 26B65F40BC954D209669A599 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.m */; settings = {COMPILER_FLAGS = ""; }; };
+		CBCDA29DA4E04D78BF89A193 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.h */ = {isa = PBXBuildFile; fileRef = 56C78D17E9724046B22EA6F1 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.h */; settings = {COMPILER_FLAGS = ""; }; };
+		D71A364F1B0C47339B4CAA35 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockClosure.h */ = {isa = PBXBuildFile; fileRef = 1F27B32436274946A5F4C4DE /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockClosure.h */; settings = {COMPILER_FLAGS = ""; }; };
+		FFF7BDD886F5409A9099E5E3 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.m */ = {isa = PBXBuildFile; fileRef = 3F8A042A43BF4F438C610065 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.m */; settings = {COMPILER_FLAGS = ""; }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		055C48CB44E141C290F08022 /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		4BE0829F8E274E66831D33FC = {
+			isa = PBXBuildStyle;
+		};
+		7339AE17435940CC81E726AD /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		C05C4D3293174435A35C7DB0 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		CF321BFC07544A359E3F7358 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		580AB5BCE17742309F79D8DA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0AA058B68FBD483FBBE303CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A70A27226AE44958B49C59AF;
+			remoteInfo = ALL_BUILD;
+		};
+		AB0020238BE14F4890C1DBA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0AA058B68FBD483FBBE303CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C27EFC6AB14C45558FBCB14E;
+			remoteInfo = maBlockClosure;
+		};
+		AE59143B7E3A4333BFD16958 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0AA058B68FBD483FBBE303CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48045D635DCC43D69893F43F;
+			remoteInfo = ZERO_CHECK;
+		};
+		B4A3902E63034DF98E2BA7A9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0AA058B68FBD483FBBE303CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48045D635DCC43D69893F43F;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		10380DC70D4E4320BDD881F6 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		17B0EAB08D5F4F72845D249A /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BlockFptr.h; path = BlockFptr.h; sourceTree = SOURCE_ROOT; };
+		1F27B32436274946A5F4C4DE /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockClosure.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BlockClosure.h; path = BlockClosure.h; sourceTree = SOURCE_ROOT; };
+		26B65F40BC954D209669A599 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.m */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; name = BlockFptr.m; path = BlockFptr.m; sourceTree = SOURCE_ROOT; };
+		3F8A042A43BF4F438C610065 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.m */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; name = MABlockClosure.m; path = MABlockClosure.m; sourceTree = SOURCE_ROOT; };
+		56C78D17E9724046B22EA6F1 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MABlockClosure.h; path = MABlockClosure.h; sourceTree = SOURCE_ROOT; };
+		7D933D43C3B546EE95DFECA7 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		FC3604E534AA40A58A10391A /* maBlockClosure */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libmaBlockClosure.dylib; refType = 0; sourceTree = BUILT_PRODUCTS_DIR; };
+		FF82D6C8337E48C696ADA964 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		09673155B98547AAAC913CC9 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				BD5913DD661B46DA8B51474F /* ZERO_CHECK */,
+				2E9DE412915D4E58BA416066 /* ALL_BUILD */,
+				4E60B3D3548C4F09A272CB72 /* maBlockClosure */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		2E9DE412915D4E58BA416066 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				C009A7E06E3944AF814B1F82 /* CMake Rules */,
+				FF82D6C8337E48C696ADA964 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		4E60B3D3548C4F09A272CB72 /* maBlockClosure */ = {
+			isa = PBXGroup;
+			children = (
+				5C3753AA2EAC46A18A0F0A70 /* Source Files */,
+				6A0043035AE545E78404152A /* Header Files */,
+				10380DC70D4E4320BDD881F6 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */,
+			);
+			name = maBlockClosure;
+			sourceTree = "<group>";
+		};
+		5C3753AA2EAC46A18A0F0A70 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				26B65F40BC954D209669A599 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.m */,
+				3F8A042A43BF4F438C610065 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.m */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		67A74B361EA245AA9E64FD93 = {
+			isa = PBXGroup;
+			children = (
+				09673155B98547AAAC913CC9 /* Sources */,
+				B0552DE3C43543CAB25B4A14 /* Resources */,
+				8EF14656E2A14EB0A4716BC1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6A0043035AE545E78404152A /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				1F27B32436274946A5F4C4DE /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockClosure.h */,
+				17B0EAB08D5F4F72845D249A /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.h */,
+				56C78D17E9724046B22EA6F1 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		8EF14656E2A14EB0A4716BC1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FC3604E534AA40A58A10391A /* maBlockClosure */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B0552DE3C43543CAB25B4A14 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		BD5913DD661B46DA8B51474F /* ZERO_CHECK */ = {
+			isa = PBXGroup;
+			children = (
+				D68671CBC0704EE9AE9202A5 /* CMake Rules */,
+				7D933D43C3B546EE95DFECA7 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/CMakeLists.txt */,
+			);
+			name = ZERO_CHECK;
+			sourceTree = "<group>";
+		};
+		C009A7E06E3944AF814B1F82 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		D68671CBC0704EE9AE9202A5 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C27EFC6AB14C45558FBCB14E /* maBlockClosure */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 91E24E94F2BD4B22B973037F /* Build configuration list for PBXNativeTarget "maBlockClosure" */;
+			buildPhases = (
+				DFEFBCEDF3E64130ADDD75B1 /* Sources */,
+				47ED5C577CBF4B729A7F009B /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				21DAC2CC085E47688717D1D8 /* PBXTargetDependency */,
+			);
+			name = maBlockClosure;
+			productName = maBlockClosure;
+			productReference = FC3604E534AA40A58A10391A /* maBlockClosure */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0AA058B68FBD483FBBE303CB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+			};
+			buildConfigurationList = 032CF0C2835E491CBB3D39E4 /* Build configuration list for PBXProject "maBlockClosure" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				7339AE17435940CC81E726AD /* Debug */,
+				C05C4D3293174435A35C7DB0 /* Release */,
+				055C48CB44E141C290F08022 /* MinSizeRel */,
+				CF321BFC07544A359E3F7358 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = 67A74B361EA245AA9E64FD93;
+			projectDirPath = ../../../../deps/MABlockClosure;
+			projectRoot = "";
+			targets = (
+				A70A27226AE44958B49C59AF /* ALL_BUILD */,
+				A1FA06D175C74421A1FBF5DD /* RUN_TESTS */,
+				48045D635DCC43D69893F43F /* ZERO_CHECK */,
+				C224C0106DC84366A2AA7D14 /* install */,
+				C27EFC6AB14C45558FBCB14E /* maBlockClosure */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		01A8375B88914565B94618B1 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/CMakeScripts/ALL_BUILD_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		12C00410593441A3B9BDF90E /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/CMakeScripts/install_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		264AC85886024744BED2E40A /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/CMakeScripts/ZERO_CHECK_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		433B0E399F31480688E05631 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		47ED5C577CBF4B729A7F009B /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/CMakeScripts/maBlockClosure_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		5D8CBC8F245E4A999C1612C2 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		6CD659A52A1F4FF4913B07C6 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure -f /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/CMakeScripts/RUN_TESTS_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		A1F62DBF9CFB4C6E87D11147 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		D694D558408C4D1A9E604063 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DFEFBCEDF3E64130ADDD75B1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C883FC813224DCC8E1A82E0 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/BlockFptr.m */,
+				FFF7BDD886F5409A9099E5E3 /* /Users/fish/Dropbox/libimread/deps/MABlockClosure/MABlockClosure.m */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		21DAC2CC085E47688717D1D8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48045D635DCC43D69893F43F /* ZERO_CHECK */;
+			targetProxy = B4A3902E63034DF98E2BA7A9 /* PBXContainerItemProxy */;
+		};
+		372A061B2892464C9989147E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C27EFC6AB14C45558FBCB14E /* maBlockClosure */;
+			targetProxy = AB0020238BE14F4890C1DBA5 /* PBXContainerItemProxy */;
+		};
+		42F82350E6AD4D0CA670F808 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A70A27226AE44958B49C59AF /* ALL_BUILD */;
+			targetProxy = 580AB5BCE17742309F79D8DA /* PBXContainerItemProxy */;
+		};
+		4450D935F9004115A5C96A77 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48045D635DCC43D69893F43F /* ZERO_CHECK */;
+			targetProxy = AE59143B7E3A4333BFD16958 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0B738F31E5204405AA7FE110 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		0CD0D5E3B75449C5876AF6D8 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		155A58DB99B34E759531F15A /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		1F4227D18CAE4FD8ADBCDDCE /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		31154DC242D947BDA26F8E46 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		5FB1C296391C4766B75806A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", maBlockClosure_EXPORTS, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "   -fPIC   -fstack-protector-all -fobjc-abi-version=3 -fno-objc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libffi.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = maBlockClosure;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		6E238E733A184F9BAB3525B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		6F6B0F4DA70B446EBD06067A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		79C2B77699264C349218F2AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", maBlockClosure_EXPORTS, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "    -DNDEBUG -fPIC   -fstack-protector-all -fobjc-abi-version=3 -fno-objc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libffi.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = maBlockClosure;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		79E644EF07974C76AF740C2C /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		7C612FACB852433BB504DA72 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		89FF6AF2E5FF4D5DBA9F7352 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		901620BD34BB46E9B6EFC5B8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		9A0EC823AE7D4A48832956AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Debug;
+		};
+		A0B66367E35944B481853DB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/build;
+			};
+			name = Debug;
+		};
+		B054D9F579544F2FB4C51331 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/build;
+			};
+			name = RelWithDebInfo;
+		};
+		B4DDD98FF37D41B0BC7F9394 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		BA338F6F23F34D639CBC4C32 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", maBlockClosure_EXPORTS, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "       -DNDEBUG -fPIC   -fstack-protector-all -fobjc-abi-version=3 -fno-objc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libffi.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = maBlockClosure;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		D61A1FBCBB3F4B19ADB03A63 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = RelWithDebInfo;
+		};
+		E258BB09591D49A9962F4DE3 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", maBlockClosure_EXPORTS, );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "    -DNDEBUG -fPIC   -fstack-protector-all -fobjc-abi-version=3 -fno-objc-arc -std=c99 -x objective-c";
+				OTHER_LDFLAGS = " -dynamiclib -Wl,-headerpad_max_install_names  -framework Foundation /usr/lib/libffi.dylib";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = maBlockClosure;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = MinSizeRel;
+		};
+		E34619516CF64EB48DC30204 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/build;
+			};
+			name = Release;
+		};
+		EA1FB49993C243BC9ECE15BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RUN_TESTS;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		EB678651FAED48529BEF1FAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks, );
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'", );
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Users/fish/Dropbox/libimread/deps/MABlockClosure, );
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("-Wmost", "-Wno-four-char-constants", "-Wno-unknown-pragmas", "$(inherited)", );
+			};
+			name = Release;
+		};
+		EC3EC2C509A94194AEAC8133 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk;
+				SYMROOT = /Users/fish/Dropbox/libimread/xcode/fmwk/deps/MABlockClosure/build;
+			};
+			name = MinSizeRel;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		032CF0C2835E491CBB3D39E4 /* Build configuration list for PBXProject "maBlockClosure" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A0B66367E35944B481853DB2 /* Debug */,
+				E34619516CF64EB48DC30204 /* Release */,
+				EC3EC2C509A94194AEAC8133 /* MinSizeRel */,
+				B054D9F579544F2FB4C51331 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3043E2E92B7E4ED7A84D129B /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0B738F31E5204405AA7FE110 /* Debug */,
+				EB678651FAED48529BEF1FAF /* Release */,
+				79E644EF07974C76AF740C2C /* MinSizeRel */,
+				155A58DB99B34E759531F15A /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3B02CD41185E4DAFAF32CE95 /* Build configuration list for PBXAggregateTarget "RUN_TESTS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A0EC823AE7D4A48832956AF /* Debug */,
+				EA1FB49993C243BC9ECE15BD /* Release */,
+				31154DC242D947BDA26F8E46 /* MinSizeRel */,
+				89FF6AF2E5FF4D5DBA9F7352 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		42117ED7BC3A4CA8BCA174F7 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E238E733A184F9BAB3525B7 /* Debug */,
+				6F6B0F4DA70B446EBD06067A /* Release */,
+				1F4227D18CAE4FD8ADBCDDCE /* MinSizeRel */,
+				D61A1FBCBB3F4B19ADB03A63 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5471588C5A39401A9A297BB9 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7C612FACB852433BB504DA72 /* Debug */,
+				901620BD34BB46E9B6EFC5B8 /* Release */,
+				B4DDD98FF37D41B0BC7F9394 /* MinSizeRel */,
+				0CD0D5E3B75449C5876AF6D8 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		91E24E94F2BD4B22B973037F /* Build configuration list for PBXNativeTarget "maBlockClosure" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5FB1C296391C4766B75806A5 /* Debug */,
+				79C2B77699264C349218F2AD /* Release */,
+				E258BB09591D49A9962F4DE3 /* MinSizeRel */,
+				BA338F6F23F34D639CBC4C32 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0AA058B68FBD483FBBE303CB /* Project object */;
+}

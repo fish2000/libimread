@@ -1,0 +1,815 @@
+Start testing: Jan 21 05:50 EST
+----------------------------------------------------------
+1/16 Testing: appkit-copy-paste
+1/16 Test: appkit-copy-paste
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*appkit-copy-paste*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"appkit-copy-paste" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[appkit-copy-paste] Copy and paste PNG image data completed in 0.528852s
+[appkit-copy-paste] Copy and paste JPEG image data completed in 0.409303s
+===============================================================================
+All tests passed (96 assertions in 2 test cases)
+
+<end of output>
+Test time =   1.36 sec
+----------------------------------------------------------
+Test Passed.
+"appkit-copy-paste" end time: Jan 21 05:50 EST
+"appkit-copy-paste" time elapsed: 00:00:01
+----------------------------------------------------------
+
+2/16 Testing: apple-io
+2/16 Test: apple-io
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*apple-io*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"apple-io" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[apple-io] Read a JPEG and rewrite it as a PNG via image_io.h completed in 0.520617s
+[apple-io] Read a PNG and rewrite it as a PNG via image_io.h completed in 3.55282s
+[apple-io] Read a TIFF and rewrite it as a PNG via image_io.h completed in 0.253882s
+[apple-io] Read a JPEG completed in 0.005171s
+[apple-io] Check dimensions of JPEG images completed in 0.012551s
+[apple-io] Read PNG and JPEG files and write as PNGs with im::apple::write() completed in 3.07293s
+===============================================================================
+All tests passed (49 assertions in 6 test cases)
+
+<end of output>
+Test time =   7.49 sec
+----------------------------------------------------------
+Test Passed.
+"apple-io" end time: Jan 21 05:50 EST
+"apple-io" time elapsed: 00:00:07
+----------------------------------------------------------
+
+3/16 Testing: blockhash
+3/16 Test: blockhash
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*blockhash*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"blockhash" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[blockhash] Calculate blockhash_quick for HybridImage PNG instances completed in 0.168631s
+[blockhash] Calculate blockhash for HybridImage PNG instances completed in 0.211726s
+===============================================================================
+test cases: 2 | 2 passed
+assertions: - none -
+
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"blockhash" end time: Jan 21 05:50 EST
+"blockhash" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/16 Testing: filesystem
+4/16 Test: filesystem
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*filesystem*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"filesystem" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[filesystem] Check if `basedir` is a directory completed in 4.7e-05s
+[filesystem] Ensure `switchdir()` changes back on scope exit completed in 0.002629s
+[filesystem] Test path::hash() and std::hash<path> specialization integrity completed in 0.000119s
+[filesystem] Check count and names of test jpg files completed in 0.0003s
+Directory: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs
+File: /Users/fish/Dropbox/libimread/tests/data/10350540_10152447396343587_37416966729730477_n.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/10954288_342637995941364_1354507656_n.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/atkinson-me.png
+File: /Users/fish/Dropbox/libimread/tests/data/BINARY-OP.png
+File: /Users/fish/Dropbox/libimread/tests/data/c64error.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/grad_32_rrt_srgb.png
+File: /Users/fish/Dropbox/libimread/tests/data/HANG-IN-THERE.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/hang_in_there_baby_by_bytor137-d5u6r1q.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/IMG_4332.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/IMG_7333.jpeg
+File: /Users/fish/Dropbox/libimread/tests/data/keep-your-power-gloves-off-her-OK.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/marci_512_srgb.png
+File: /Users/fish/Dropbox/libimread/tests/data/marci_512_srgb8.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00100.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00200.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00300.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00400.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00500.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00600.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00700.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00800.png
+File: /Users/fish/Dropbox/libimread/tests/data/output_00900.png
+File: /Users/fish/Dropbox/libimread/tests/data/ptlobos.tif
+File: /Users/fish/Dropbox/libimread/tests/data/Rd4lKZq.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/roses_512_rrt_srgb.png
+File: /Users/fish/Dropbox/libimread/tests/data/tara-bruno-NO-YOU-DONT-SEE-ME-almost-two-years-ago.jpeg
+File: /Users/fish/Dropbox/libimread/tests/data/taylor-omg.jpeg
+File: /Users/fish/Dropbox/libimread/tests/data/tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg
+File: /Users/fish/Dropbox/libimread/tests/data/tumblr_my25uwFv8e1rkaxdko1_1280.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00100.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00200.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00300.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00400.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00500.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00600.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00700.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00800.png.gif
+File: /Users/fish/Dropbox/libimread/tests/data/write-individual-gifs/output_00900.png.gif
+[filesystem] Test `path::walk()` on `im::test::basedir` completed in 0.001391s
+[filesystem] Check count of test jpeg files completed in 0.000144s
+[filesystem] Check count of test png files completed in 0.000317s
+[filesystem] Check count of test tif files completed in 9.7e-05s
+[filesystem] Check count of test tiff files (should be 0) completed in 7.3e-05s
+[filesystem] Count both jpg and jpeg files with a regex completed in 0.001873s
+[filesystem] Test the system path resolver completed in 0.0079s
+[filesystem] Test the default resolver completed in 3.3e-05s
+[filesystem] Test the TemporaryDirectory RAII struct completed in 0.000512s
+[filesystem] Test the NamedTemporaryFile RAII struct's stream interface completed in 0.000322s
+===============================================================================
+All tests passed (143 assertions in 14 test cases)
+
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"filesystem" end time: Jan 21 05:50 EST
+"filesystem" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/16 Testing: gif-write
+5/16 Test: gif-write
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*gif-write*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"gif-write" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[gif-write] Read PNG files and write as individual GIF files completed in 3.47297s
+[gif-write] Read PNG files and write as a single animated GIF file completed in 0.160339s
+===============================================================================
+All tests passed (10 assertions in 2 test cases)
+
+<end of output>
+Test time =   3.69 sec
+----------------------------------------------------------
+Test Passed.
+"gif-write" end time: Jan 21 05:50 EST
+"gif-write" time elapsed: 00:00:03
+----------------------------------------------------------
+
+6/16 Testing: halide-io
+6/16 Test: halide-io
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*halide-io*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"halide-io" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[halide-io] Read PNG files completed in 0.020819s
+[halide-io] Read a PNG and rewrite it as a JPEG using tmpwrite() completed in 0.055262s
+[halide-io] Read JPEG files completed in 0.103248s
+[halide-io] Read a JPEG and rewrite it as a PNG using tmpwrite() completed in 1.17249s
+[halide-io] Read a TIFF, rewrite it as a PNG using tmpwrite() completed in 0.062469s
+[halide-io] Write multiple formats as PPM completed in 0.207426s
+[halide-io] Check the dimensions of an image completed in 0.021569s
+===============================================================================
+All tests passed (8 assertions in 7 test cases)
+
+<end of output>
+Test time =   1.69 sec
+----------------------------------------------------------
+Test Passed.
+"halide-io" end time: Jan 21 05:50 EST
+"halide-io" time elapsed: 00:00:01
+----------------------------------------------------------
+
+7/16 Testing: hdf5-io
+7/16 Test: hdf5-io
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*hdf5-io*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"hdf5-io" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[hdf5-io] Read PNG and JPEG files and write as individual HDF5 binary store files completed in 1.10411s
+===============================================================================
+All tests passed (49 assertions in 1 test case)
+
+<end of output>
+Test time =   1.15 sec
+----------------------------------------------------------
+Test Passed.
+"hdf5-io" end time: Jan 21 05:50 EST
+"hdf5-io" time elapsed: 00:00:01
+----------------------------------------------------------
+
+8/16 Testing: json-block-traverse
+8/16 Test: json-block-traverse
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*json-block-traverse*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"json-block-traverse" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+
+
+	Traversing dict:
+		{"one":"one.","two":"two.","three":[435,345987,238746,21]}
+
+[97m	[0] STRING node found: 
+[0m
+		"one."
+
+[97m	[1] STRING node found: 
+[0m
+		"two."
+
+[97m	[2] NUMBER node found: 
+[0m
+		435
+
+[97m	[3] NUMBER node found: 
+[0m
+		345987
+
+[97m	[4] NUMBER node found: 
+[0m
+		238746
+
+[97m	[5] NUMBER node found: 
+[0m
+		21
+
+
+
+[json-block-traverse] Traverse JSON tree with a block literal via MABlockClosure completed in 0.009485s
+===============================================================================
+test cases: 1 | 1 passed
+assertions: - none -
+
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"json-block-traverse" end time: Jan 21 05:50 EST
+"json-block-traverse" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/16 Testing: libguid
+9/16 Test: libguid
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*libguid*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"libguid" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[libguid] Run bundled tests completed in 0.002161s
+===============================================================================
+All tests passed (8 assertions in 1 test case)
+
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"libguid" end time: Jan 21 05:50 EST
+"libguid" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/16 Testing: nsdictionary-options-map
+10/16 Test: nsdictionary-options-map
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*nsdictionary-options-map*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"nsdictionary-options-map" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[nsdictionary-options-map] Convert NSDictionary to options_map completed in 0.001951s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_nsdictionary_options_map.mm[0m : [31m83[0m ]:
+	Inner dict value ('four'):
+	dogg
+	heard
+	like
+	IN YOUR DICTS IN YOUR DICTS!!
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_nsdictionary_options_map.mm[0m : [31m88[0m ]:
+	Key value for 'four':
+	yo
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_nsdictionary_options_map.mm[0m : [31m88[0m ]:
+	Key value for 'four':
+	i
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_nsdictionary_options_map.mm[0m : [31m88[0m ]:
+	Key value for 'four':
+	you
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_nsdictionary_options_map.mm[0m : [31m88[0m ]:
+	Key value for 'four':
+	dicts
+
+[nsdictionary-options-map] Convert options_map to NSDictionary completed in 0.001799s
+===============================================================================
+All tests passed (18 assertions in 2 test cases)
+
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"nsdictionary-options-map" end time: Jan 21 05:50 EST
+"nsdictionary-options-map" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/16 Testing: nsurl-image-types
+11/16 Test: nsurl-image-types
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*nsurl-image-types*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"nsurl-image-types" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[nsurl-image-types] Check suffixes and image type functions completed in 8.8e-05s
+[nsurl-image-types] Check `isImage` and `imageFileType` NSURL category methods completed in 0.003704s
+===============================================================================
+All tests passed (70 assertions in 2 test cases)
+
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"nsurl-image-types" end time: Jan 21 05:50 EST
+"nsurl-image-types" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/16 Testing: objc-rt
+12/16 Test: objc-rt
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*objc-rt*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"objc-rt" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/helpers/IMTestReceiver.m[0m : [31m32[0m ]:
+	WTF output from within method:
+	[96m
+	[imtsInstance callMethod]
+	[0m
+	... dogg.
+
+[objc-rt] Call an instance method via objc::msg::send() completed in 0.001915s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/helpers/IMTestReceiver.m[0m : [31m39[0m ]:
+	WTF output from within method:
+	[96m
+	[imtsInstance callMethodWithInt:42]
+	[0m
+	... dogg.
+
+[objc-rt] Call an instance method with an integer argument via objc::msg::send() completed in 0.000333s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/helpers/IMTestReceiver.m[0m : [31m49[0m ]:
+	WTF output from within method:
+	[96m
+	[imtsInstance callMethodWithInt:(42)
+                          andObjCString:(OH SHIT DOGG PARDON MY STRING PASSING)]
+	[0m
+	... dogg.
+
+[objc-rt] Call an instance method with int and NSString arguments via objc::msg::send() completed in 0.000482s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/helpers/IMTestReceiver.m[0m : [31m60[0m ]:
+	WTF output from within method:
+	[96m
+	[imtsInstance callMethodWithInt:(42)
+                          andVoidPointer:(OH SHIT DOGG PARDON MY STRING PASSING)]
+	[0m
+	... dogg.
+
+[objc-rt] Call an instance method with int and (__bridge void*)NSString arguments via objc::msg::send() completed in 0.000541s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/helpers/IMTestReceiver.m[0m : [31m67[0m ]:
+	WTF output from within method:
+	[96m
+	[imtsInstance returnFloat]
+	[0m
+	... dogg.
+
+[objc-rt] Call an instance method via objc::msg::get<Return, ...>() returning a float value completed in 0.000304s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/helpers/IMTestReceiver.m[0m : [31m74[0m ]:
+	WTF output from within method:
+	[96m
+	[imtsInstance returnStruct]
+	[0m
+	... dogg.
+
+[objc-rt] Call an instance method via objc::msg::get<Return, ...>() returning a struct value completed in 0.000413s
+[objc-rt] Confirm correct behavior of objc::boolean(bool) and objc::to_bool(BOOL) completed in 6.1e-05s
+[objc-rt] Test objc::id equality completed in 0.000127s
+[objc-rt] Test objc::selector equality completed in 0.000125s
+[objc-rt] Send a message via objc::msg::send() completed in 0.002547s
+===============================================================================
+All tests passed (28 assertions in 10 test cases)
+
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"objc-rt" end time: Jan 21 05:50 EST
+"objc-rt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/16 Testing: sfinae
+13/16 Test: sfinae
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*sfinae*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"sfinae" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[SFINAE] Check if PNG can read completed in 0.001626s
+[SFINAE] Check if JPEG can read completed in 1.1e-05s
+[SFINAE] Confirm WebP can NOT write completed in 4e-06s
+[SFINAE] Confirm PVR can NOT write completed in 9e-06s
+[SFINAE] Confirm results of objc::traits::is_object<objc::types::ID>::value completed in 1.3e-05s
+[SFINAE] Confirm results of objc::traits::is_object<NSObject*>::value completed in 6e-06s
+===============================================================================
+All tests passed (12 assertions in 6 test cases)
+
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"sfinae" end time: Jan 21 05:50 EST
+"sfinae" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/16 Testing: libsszip
+14/16 Test: libsszip
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*libsszip*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"libsszip" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+===============================================================================
+No tests ran
+
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"libsszip" end time: Jan 21 05:50 EST
+"libsszip" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/16 Testing: terminator
+15/16 Test: terminator
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*terminator*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"terminator" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[terminator] Display an exception with imread_raise_default() completed in 0.001798s
+[terminator] Display an exception with imread_raise() completed in 0.000476s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_terminator.mm[0m : [31m48[0m ]:
+	Demangling name 01:		
+	N2im12UniformColorINS_4meta3RGBEjhEE
+	im::UniformColor<im::meta::RGB, unsigned int, unsigned char>
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_terminator.mm[0m : [31m49[0m ]:
+	Demangling name 02:		
+	N2im12UniformColorINS_4meta4RGBAEjhEE
+	im::UniformColor<im::meta::RGBA, unsigned int, unsigned char>
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_terminator.mm[0m : [31m50[0m ]:
+	Demangling name 03:		
+	N2im16InterleavedImageINS_12UniformColorINS_4meta3RGBEjhEELm3EEE
+	im::InterleavedImage<im::UniformColor<im::meta::RGB, unsigned int, unsigned char>, 3ul>
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/tests/test_terminator.mm[0m : [31m51[0m ]:
+	Demangling name 04:		
+	N2im16InterleavedImageINS_12UniformColorINS_4meta4RGBAEjhEELm3EEE
+	im::InterleavedImage<im::UniformColor<im::meta::RGBA, unsigned int, unsigned char>, 3ul>
+
+[terminator] Demangle some mangled-up shit completed in 0.004508s
+===============================================================================
+All tests passed (2 assertions in 3 test cases)
+
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"terminator" end time: Jan 21 05:50 EST
+"terminator" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/16 Testing: interleaved-io
+16/16 Test: interleaved-io
+Command: "/Users/fish/Dropbox/libimread/build/imread_tests" "*interleaved-io*" "--durations" "yes" "--abortx" "10"
+Directory: /Users/fish/Dropbox/libimread
+"interleaved-io" start time: Jan 21 05:50 EST
+Output:
+----------------------------------------------------------
+[interleaved-io] Test Meta and Index object attributes completed in 1.9e-05s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[interleaved-io] Read PNG files completed in 0.17083s
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m778[0m ]:
+	LEAVING ALPHAVILLE.
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m626[0m ]:
+	Converting...
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m639[0m ]:
+	Returning from conversion
+
+[91m
+(WTF!!!)[0m [ [33m/Users/fish/Dropbox/libimread/build/../include/libimread/interleaved.hh[0m : [31m653[0m ]:
+	Returning from conversion operator
+
+[interleaved-io] Read JPEG files completed in 0.288221s
+===============================================================================
+All tests passed (51 assertions in 3 test cases)
+
+<end of output>
+Test time =   0.50 sec
+----------------------------------------------------------
+Test Passed.
+"interleaved-io" end time: Jan 21 05:50 EST
+"interleaved-io" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jan 21 05:50 EST

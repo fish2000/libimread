@@ -243,10 +243,10 @@ namespace im {
         using array_t = std::array<std::size_t, D>;
         using sequence_t = std::make_index_sequence<D>;
         
-        std::size_t elem_size;
-        index_t max_idx;
         array_t extents;
         array_t strides;
+        index_t max_idx;
+        std::size_t elem_size;
         array_t min = { 0 };
         
         Meta(void)

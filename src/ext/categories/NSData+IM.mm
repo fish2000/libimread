@@ -32,6 +32,7 @@ using im::NSDataSink;
 + (instancetype) dataWithByteSource:(byte_source*)byteSource
                              length:(NSUInteger)bytes {
     std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);
+    __attribute__((unused))
     int idx = byteSource->read(buffer.get(),
                                static_cast<std::size_t>(bytes));
     return [[NSData alloc] initWithBytes:(const void*)buffer.get()
@@ -54,6 +55,7 @@ using im::NSDataSink;
 - initWithByteSource:(byte_source*)byteSource
               length:(NSUInteger)bytes {
     std::unique_ptr<byte[]> buffer = std::make_unique<byte[]>(bytes);
+    __attribute__((unused))
     int idx = byteSource->read(buffer.get(),
                                static_cast<std::size_t>(bytes));
     return [self initWithBytes:(const void*)buffer.get()
