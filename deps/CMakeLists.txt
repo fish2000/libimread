@@ -1,4 +1,5 @@
 
+add_subdirectory(AFNetworking)
 add_subdirectory(crossguid)
 add_subdirectory(docopt)
 add_subdirectory(imagecompression)
