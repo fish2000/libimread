@@ -10,12 +10,8 @@
 #include <libimread/objc-rt/objc-rt.hh>
 #include <libimread/objc-rt/appkit.hh>
 #include <libimread/ext/filesystem/path.h>
-#import  <libimread/ext/categories/NSBitmapImageRep+IM.hh>
 #import  <libimread/ext/categories/NSURL+IM.hh>
 #include <libimread/image.hh>
-// #include <libimread/interleaved.hh>
-#include <libimread/halide.hh>
-#include <libimread/hashing.hh>
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
