@@ -19,6 +19,10 @@ test:
 		@test -d build || echo "Can't run tests: no build folder\n"
 		@test -d build && pushd build && ctest -j4 -D Experimental --output-on-failure && popd
 
+check:
+		@test -d build || echo "Can't run tests: no build folder\n"
+		@test -d build && pushd build && imread_tests --success --durations yes --abortx 10 && popd
+
 clean:
 		mgmt/clean.sh
 
