@@ -22,18 +22,18 @@ namespace im {
         
         /// XXX: remind me why in fuck did I write this shit originally
         template <typename T, typename pT>
-        std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT>&& src) {
+        std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT>&& source) {
             /// Force a dynamic_cast upon a unique_ptr via interim swap
             /// ... danger, will robinson: DELETERS/ALLOCATORS NOT WELCOME
             /// ... from http://stackoverflow.com/a/14777419/298171
-            if (!src) { return std::unique_ptr<T>(); }
+            if (!source) { return std::unique_ptr<T>(); }
             
             /// Throws a std::bad_cast() if this doesn't work out
-            T *dst = &dynamic_cast<T&>(*src.get());
+            T *destination = &dynamic_cast<T&>(*source.get());
             
-            src.release();
-            std::unique_ptr<T> ret(dst);
-            return ret;
+            source.release();
+            std::unique_ptr<T> out(destination);
+            return out;
         }
         
         PyObject* structcode_to_dtype(char const* code) {
@@ -115,12 +115,13 @@ namespace py {
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        int init(PythonImageType* self, PyObject* args, PyObject* kwargs) {
+        int init(PyObject* self, PyObject* args, PyObject* kwargs) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             PyArray_Descr* dtype = NULL;
             char const* filename = NULL;
             char const* keywords[] = { "file", "dtype", NULL };
             static const im::options_map opts; /// not currently used when reading
-        
+            
             if (!PyArg_ParseTupleAndKeywords(
                 args, kwargs, "s|O&", const_cast<char**>(keywords),
                 &filename,
@@ -171,16 +172,16 @@ namespace py {
                 py::gil::release nogil;
                 output = std::unique_ptr<im::Image>(
                     format->read(input.get(), &factory, opts));
-                self->image = im::detail::dynamic_cast_unique<ImageType>(
+                pyim->image = im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             }
             
             if (dtype) {
-                self->dtype = dtype;
+                pyim->dtype = dtype;
             } else {
-                self->dtype = PyArray_DescrFromType(NPY_UINT8);
+                pyim->dtype = PyArray_DescrFromType(NPY_UINT8);
             }
-            Py_INCREF(self->dtype);
+            Py_INCREF(pyim->dtype);
             
             /// ALL IS WELL:
             return 0;
@@ -190,7 +191,7 @@ namespace py {
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* repr(PythonImageType* pyim) {
-            decltype(terminator::nameof<*pyim>) pytypename;
+            char const* pytypename;
             {
                 py::gil::release nogil;
                 pytypename = terminator::nameof(*pyim);
@@ -217,7 +218,8 @@ namespace py {
         /// __hash__ implementation
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        long hash(PythonImageType* pyim) {
+        long hash(PyObject* self) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             long out;
             {
                 py::gil::release nogil;
@@ -230,7 +232,8 @@ namespace py {
         /// __len__ implementation
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        Py_ssize_t length(PythonImageType* pyim) {
+        Py_ssize_t length(PyObject* self) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             Py_ssize_t out;
             {
                 py::gil::release nogil;
@@ -241,8 +244,14 @@ namespace py {
         
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        PyObject* atindex(PythonImageType* pyim, Py_ssize_t idx) {
-            if (pyim->image->size() <= idx) {
+        PyObject* atindex(PyObject* self, Py_ssize_t idx) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            Py_ssize_t siz;
+            {
+                py::gil::release nogil;
+                siz = pyim->image->size();
+            }
+            if (siz <= idx || idx < 0) {
                 PyErr_SetString(PyExc_IndexError,
                     "index out of range");
                 return NULL;
@@ -311,42 +320,46 @@ namespace py {
         /// DEALLOCATE
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        void dealloc(PythonImageType* self) {
-            self->cleanup();
-            self->ob_type->tp_free((PyObject*)self);
+        void dealloc(PyObject* self) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            pyim->cleanup();
+            self->ob_type->tp_free(self);
         }
         
         /// NumpyImage.datatype getter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        PyObject*    get_dtype(PythonImageType* self, void* closure) {
-            return Py_BuildValue("O", self->dtype);
+        PyObject*    get_dtype(PyObject* self, void* closure) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            return Py_BuildValue("O", pyim->dtype);
         }
         
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        PyObject*    get_shape(PythonImageType* self, void* closure) {
-            switch (self->image->ndims()) {
+        PyObject*    get_shape(PyObject* self, void* closure) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            auto image = pyim->image.get();
+            switch (image->ndims()) {
                 case 1:
-                    return Py_BuildValue("(i)",     self->image->dim(0));
+                    return Py_BuildValue("(i)",     image->dim(0));
                 case 2:
-                    return Py_BuildValue("(ii)",    self->image->dim(0),
-                                                    self->image->dim(1));
+                    return Py_BuildValue("(ii)",    image->dim(0),
+                                                    image->dim(1));
                 case 3:
-                    return Py_BuildValue("(iii)",   self->image->dim(0),
-                                                    self->image->dim(1),
-                                                    self->image->dim(2));
+                    return Py_BuildValue("(iii)",   image->dim(0),
+                                                    image->dim(1),
+                                                    image->dim(2));
                 case 4:
-                    return Py_BuildValue("(iiii)",  self->image->dim(0),
-                                                    self->image->dim(1),
-                                                    self->image->dim(2),
-                                                    self->image->dim(3));
+                    return Py_BuildValue("(iiii)",  image->dim(0),
+                                                    image->dim(1),
+                                                    image->dim(2),
+                                                    image->dim(3));
                 case 5:
-                    return Py_BuildValue("(iiiii)", self->image->dim(0),
-                                                    self->image->dim(1),
-                                                    self->image->dim(2),
-                                                    self->image->dim(3),
-                                                    self->image->dim(4));
+                    return Py_BuildValue("(iiiii)", image->dim(0),
+                                                    image->dim(1),
+                                                    image->dim(2),
+                                                    image->dim(3),
+                                                    image->dim(4));
                 default:
                     return Py_BuildValue("");
             }

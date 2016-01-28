@@ -142,16 +142,15 @@ namespace im {
     }
     
     Halide::Type HybridArray::type() const {
-        //return detail::for_dtype(dtype_);
         return HalBase::buffer.type();
     }
     
     int HybridArray::nbits() const {
-        return detail::for_dtype(dtype_).bits();
+        return type().bits();
     }
     
     int HybridArray::nbytes() const {
-        const int bits = detail::for_dtype(dtype_).bits();
+        const int bits = nbits();
         return (bits / 8) + bool(bits % 8);
     }
     

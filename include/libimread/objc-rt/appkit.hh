@@ -42,7 +42,7 @@ namespace objc {
         template <typename ...OCTypes>
         BOOL copy_to(NSPasteboard* board, OCTypes... objects) noexcept {
             static_assert(objc::traits::detail::are_object_pointers<OCTypes...>::value,
-                          "objc::appkit::paste<OCType> requires an Objective-C object type");
+                          "objc::appkit::copy_to<...OCTypes> requires Objective-C object types");
             if (!board) { board = [NSPasteboard generalPasteboard]; }
             __attribute__((__unused__))
             NSInteger changecount = [board clearContents];
@@ -52,7 +52,7 @@ namespace objc {
         template <typename ...OCTypes> inline
         BOOL copy(OCTypes... objects) noexcept {
             static_assert(objc::traits::detail::are_object_pointers<OCTypes...>::value,
-                          "objc::appkit::paste<OCType> requires an Objective-C object type");
+                          "objc::appkit::copy<...OCTypes> requires Objective-C object types");
             return copy_to<OCTypes...>([NSPasteboard generalPasteboard],
                                         objects...);
         }

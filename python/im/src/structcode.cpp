@@ -57,12 +57,6 @@ namespace structcode {
         return shape_elems;
     }
     
-    // struct ParseResult {
-    //     std::string byteorder;
-    //     stringvec_t tokens;
-    //     structcode_t fields;
-    // };
-    
     parse_result_t parse(std::string structcode, bool toplevel) {
         stringvec_t tokens;
         structcode_t fields;
@@ -274,15 +268,10 @@ namespace structcode {
             }
         }
         
-        // ParseResult out{ std::move(byteorder),
-        //                  std::move(tokens),
-        //                  std::move(fields) };
-        
         return std::make_tuple(std::move(byteorder),
                                std::move(tokens),
                                std::move(fields));
         
-        // return fields;
     }
 
 } /// namespace structcode

@@ -18,7 +18,7 @@ On linux, the package is often called python-setuptools''')
 
 # PYTHON & NUMPY INCLUDES
 from utils import Install, HomebrewInstall, gosub
-# from distutils.sysconfig import get_python_inc
+from distutils.sysconfig import get_python_inc
 # from distutils.spawn import find_executable as which
 try:
     import numpy
@@ -86,7 +86,7 @@ include_dirs = [
     # libimread.dependency('libsszip'),
     # libimread.dependency('libmaBlockClosure'),
     numpy.get_include(),
-    # get_python_inc(plat_specific=1),
+    get_python_inc(plat_specific=1),
     os.path.join(os.path.dirname(__file__), 'im', 'include')]
 
 library_dirs = [
