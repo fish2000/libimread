@@ -42,6 +42,7 @@ namespace im { namespace test {
     %(tif)s
     %(tiff)s
     %(hdf5)s
+    %(pvr)s
     
 } } /// namespaces
 
@@ -65,6 +66,7 @@ def include(**kwargs):
             tiffs:      string, output from filetype() for tiff files
                                 (likely empty)
             hdf5s:      string, output from filetype() for hdf5 files
+            pvrs:       string, output from filetype() for pvr files
     """
     return include_tpl % kwargs
 
@@ -91,7 +93,8 @@ if __name__ == '__main__':
         png    = [f for f in files if f.endswith('png')],
         tif    = [f for f in files if f.endswith('tif')],
         tiff   = [f for f in files if f.endswith('tiff')],
-        hdf5   = [f for f in files if f.endswith('hdf5')])
+        hdf5   = [f for f in files if f.endswith('hdf5')],
+        pvr    = [f for f in files if f.endswith('pvr')])
     
     for suffix, filelist in filemap.iteritems():
         filetpls.update({ suffix: filetype(suffix, filelist) })

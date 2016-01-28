@@ -192,6 +192,19 @@ namespace {
         });
     }
     
+    TEST_CASE("[filesystem] Check count of test pvr files",
+              "[fs-count-pvr]") {
+        path basedir(im::test::basedir);
+        std::vector<path> v = basedir.list("*.pvr");
+        REQUIRE(v.size() == im::test::num_pvr);
+        std::for_each(v.begin(), v.end(), [&](path &p){
+            REQUIRE((basedir/p).is_file());
+        });
+        for (int idx = 0; idx < im::test::num_pvr; idx++) {
+            REQUIRE((basedir/im::test::pvr[idx]).is_file());
+        }
+    }
+    
     TEST_CASE("[filesystem] Test the system path resolver",
               "[fs-system-path-resolver]") {
         resolver syspaths = resolver::system();

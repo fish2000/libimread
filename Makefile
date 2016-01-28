@@ -23,6 +23,10 @@ check:
 		@test -d build || echo "Can't run tests: no build folder\n"
 		@test -d build && pushd build && imread_tests --success --durations yes --abortx 10 && popd
 
+checkbad:
+		@test -d build || echo "Can't run tests: no build folder\n"
+		@test -d build && pushd build && imread_tests --durations yes --abortx 20 && popd
+
 clean:
 		mgmt/clean.sh
 

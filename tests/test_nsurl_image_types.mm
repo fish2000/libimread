@@ -57,6 +57,7 @@ namespace {
             std::for_each(files.begin(), files.end(),
                           [&](path const& p) {
                 if (!p.is_file()) { return; }
+                if (p.extension() == "pvr") { return; } /// TEMPORARY. NB Tim Cook, These Are Also Images Dogg
                 NSURL* urlpath = [NSURL fileURLWithFilesystemPath:p];
                 CHECK([urlpath isImage] == YES);
                 CHECK([urlpath imageFileType] == objc::image::filetype(p.extension()));
