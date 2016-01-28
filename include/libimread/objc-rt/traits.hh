@@ -15,12 +15,12 @@
 #include <type_traits>
 
 #ifdef __APPLE__
-// #import <libimread/ext/categories/NSString+STL.hh>
-#import <CoreFoundation/CoreFoundation.h>
-#import <Foundation/Foundation.h>
-#import <Cocoa/Cocoa.h>
-#import <objc/message.h>
-#import <objc/runtime.h>
+#import  <CoreFoundation/CoreFoundation.h>
+#import  <Foundation/Foundation.h>
+#import  <Cocoa/Cocoa.h>
+#import  <objc/message.h>
+#import  <objc/runtime.h>
+#include "types.hh"
 #endif /// __APPLE__
 
 namespace objc {
@@ -37,6 +37,9 @@ namespace objc {
                                                         std::true_type, std::false_type>;
             
             /// detail test defs for overwrought argument-list check (see below)
+            
+            #pragma clang diagnostic push
+            #pragma clang diagnostic ignored "-Wnullability-completeness"
             
             template <typename T, typename ...Args>
             static auto test_is_argument_list(int) -> typename T::is_argument_list_t;
@@ -98,6 +101,8 @@ namespace objc {
                     enum { value = sizeof(test<composite>(0)) == 2 };
             };
             
+            #pragma clang diagnostic pop
+            
             /// All of this following hoohah is a SFINAE-compatible reimplementation
             /// of std::common_type<T>, taken right from this document:
             ///     http://open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3843.pdf
@@ -130,10 +135,10 @@ namespace objc {
             /// objc::traits::detail::is_object_pointer<T> checks using
             /// objc::traits::detail::has_common_type<T, objc::types::ID>
             template <typename Target>
-            using is_object_pointer = has_common_type<types::ID, std::decay_t<Target>>;
+            using is_object_pointer = has_common_type<objc::types::ID, std::decay_t<Target>>;
             
             template <typename ...Targets>
-            using are_object_pointers = has_common_type<types::ID, Targets...>;
+            using are_object_pointers = has_common_type<objc::types::ID, Targets...>;
         
         } /* namespace detail */
         
@@ -188,6 +193,46 @@ namespace objc {
             typename std::enable_if_t<
                 detail::has_superclass<T>::value,
                 bool>> : std::true_type {};
+        
+        
+        /// convenience shortcuts for making something _Nullable / _Nonnull / _Null_unspecified
+        
+        template <typename Q>
+        using strip_t = std::remove_pointer_t<std::decay_t<Q>>;
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wnullability-completeness"
+        #define DEFINE_NULL_SPECIFIER_TRAITS(name, signifier)                                   \
+            template <typename T = void*,                                                       \
+                      typename U = objc::traits::strip_t<T>>                                    \
+            struct name##_ptr {                                                                 \
+                 _Pragma("clang diagnostic push")                                               \
+                 _Pragma("clang diagnostic ignored \"-Wnullability-completeness\"")             \
+                static_assert(std::is_pointer<T>::value,                                        \
+                    "objc::traits::" #name "_ptr<T> requires a pointer type");                  \
+                template <typename Q>                                                           \
+                using festoon_t = Q* signifier;                                                 \
+                using base_type = U;                                                            \
+                using type = festoon_t<U>;                                                      \
+                template <typename V,                                                           \
+                          typename W = objc::traits::strip_t<V>>                                \
+                festoon_t<W> signifier operator()(V&& operand) const {                          \
+                    return static_cast<festoon_t<W>>(std::forward<V>(operand));                 \
+                }                                                                               \
+                _Pragma("clang diagnostic pop")                                                 \
+            };                                                                                  \
+                                                                                                \
+            _Pragma("clang diagnostic push")                                                    \
+            _Pragma("clang diagnostic ignored \"-Wnullability-completeness\"")                  \
+            template <typename T>                                                               \
+            using name##_ptr_t = typename name##_ptr<T>::type;                                  \
+                                                                                                \
+            extern const name##_ptr<> name##_cast;                                              \
+            _Pragma("clang diagnostic pop")
+        
+        DEFINE_NULL_SPECIFIER_TRAITS(nullable,      _Nullable);
+        DEFINE_NULL_SPECIFIER_TRAITS(nonnull,       _Nonnull);
+        DEFINE_NULL_SPECIFIER_TRAITS(unspecified,   _Null_unspecified);
+        #pragma clang diagnostic pop
         
     } /* namespace traits */
     

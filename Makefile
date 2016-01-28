@@ -14,7 +14,10 @@ guard:
 re:
 		@test -d build || echo "Can't resume: no build folder\n"
 		@test -d build && pushd build && make -j4 && popd
-#		@test -d build && pushd build && anybar white && make && anybar blue || anybar yellow && popd
+
+test:
+		@test -d build || echo "Can't run tests: no build folder\n"
+		@test -d build && pushd build && ctest -j4 -D Experimental --output-on-failure && popd
 
 clean:
 		mgmt/clean.sh

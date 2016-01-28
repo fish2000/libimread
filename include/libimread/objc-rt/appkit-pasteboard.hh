@@ -201,15 +201,18 @@ namespace objc {
                 using Base::self;
                 using Base::typemap;
                 
-                DataSource(NSData* _Nonnull datum, NSString* _Nonnull type)
+                DataSource(objc::traits::nonnull_ptr<NSData*>::type datum,
+                           objc::traits::nonnull_ptr<NSString*>::type type)
                     :Base(
                         [NSPasteboard pasteboardByFilteringData:datum
                                                          ofType:type])
                     {}
-                DataSource(NSData* _Nonnull datum, std::string const& type)
+                DataSource(objc::traits::nonnull_ptr<NSData*>::type datum,
+                           std::string const& type)
                     :Base(
                         [NSPasteboard pasteboardByFilteringData:datum
-                                                         ofType:const_cast<NSString* _Nonnull>(typemap.at(
+                                                         ofType:objc::traits::nonnull_cast(
+                                                                typemap.at(
                                                                 pystring::lower(type)))])
                     {}
                 
@@ -218,6 +221,7 @@ namespace objc {
                 }
             
         };
+        
         
     }
     
