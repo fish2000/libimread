@@ -309,6 +309,7 @@ ENDIF(APPLE)
 
 add_definitions(
     ${OBJCXX_OPTIONS}
+    -Wno-nullability-completeness
     -DWITH_SCHEMA
     -O3 -mtune=native
     -fstrict-aliasing)

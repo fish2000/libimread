@@ -1,11 +1,11 @@
 # Author: Alexander Böhn (with Félix C. Morency)
 # © 2011.10 -- GPL, Motherfuckers
 cmake_minimum_required(VERSION 3.1)
-project(maBlockClosure)
+project(MABlockClosure)
 
-set(maBlockClosure_VERSION_MAJOR "0")
-set(maBlockClosure_VERSION_MINOR "1")
-set(maBlockClosure_VERSION_PATCH "0")
+set(MABlockClosure_VERSION_MAJOR "0")
+set(MABlockClosure_VERSION_MINOR "1")
+set(MABlockClosure_VERSION_PATCH "0")
 
 list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/libffi/lib/pkgconfig)
 include(FindLibFFI.cmake)
@@ -37,17 +37,17 @@ set(hdrs
     "BlockFptr.h"
     "BlockClosure.h")
 
-# add_library(libmaBlockClosure STATIC ${srcs} ${hdrs})
-add_library(maBlockClosure SHARED ${srcs} ${hdrs})
+# add_library(libMABlockClosure STATIC ${srcs} ${hdrs})
+add_library(MABlockClosure SHARED ${srcs} ${hdrs})
 
-# set_target_properties(libmaBlockClosure
-#     PROPERTIES OUTPUT_NAME "maBlockClosure")
-set_target_properties(maBlockClosure
-    PROPERTIES OUTPUT_NAME "maBlockClosure")
-# target_link_libraries(libmaBlockClosure ${EXTRA_LIBS})
-target_link_libraries(maBlockClosure ${EXTRA_LIBS})
+# set_target_properties(libMABlockClosure
+#     PROPERTIES OUTPUT_NAME "MABlockClosure")
+set_target_properties(MABlockClosure
+    PROPERTIES OUTPUT_NAME "MABlockClosure")
+# target_link_libraries(libMABlockClosure ${EXTRA_LIBS})
+target_link_libraries(MABlockClosure ${EXTRA_LIBS})
 
-# install(TARGETS libmaBlockClosure DESTINATION lib)
-install(TARGETS maBlockClosure DESTINATION lib)
-install(DIRECTORY ./ DESTINATION include/libmaBlockClosure
+# install(TARGETS libMABlockClosure DESTINATION lib)
+install(TARGETS MABlockClosure DESTINATION lib)
+install(DIRECTORY ./ DESTINATION include/MABlockClosure
     FILES_MATCHING PATTERN "*.h")
