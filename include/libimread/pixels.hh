@@ -64,7 +64,7 @@ namespace im {
         inline void convert(uint32_t in,    float& out)         { out = in / 16711425.0f; }
         inline void convert(uint32_t in,    double& out)        { out = in / 16711425.0f; }
         
-        template <typename PixelType = byte,
+        template <typename PixelType  = byte,
                   typename OffsetType = std::ptrdiff_t>
         struct alignas(alignof(PixelType) * 16) accessor {
             

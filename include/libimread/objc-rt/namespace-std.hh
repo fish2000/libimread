@@ -29,7 +29,9 @@ namespace std {
     void swap(objc::selector& s0, objc::selector& s1);
     
     template <>
-    void swap(objc::id& s0, objc::id& s1);
+    void swap(objc::id& s0, objc::id& s1)
+         noexcept(is_nothrow_move_constructible<objc::id>::value &&
+                  is_nothrow_move_assignable<objc::id>::value);
     
     /// std::hash specializations for objc::selector and objc::id
     /// ... following the recipe found here:

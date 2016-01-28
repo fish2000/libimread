@@ -12,7 +12,9 @@ namespace std {
     }
     
     template <>
-    void swap(objc::id& s0, objc::id& s1) {
+    void swap(objc::id& s0, objc::id& s1)
+         noexcept(is_nothrow_move_constructible<objc::id>::value &&
+                  is_nothrow_move_assignable<objc::id>::value) {
         s0.swap(s1);
     }
     

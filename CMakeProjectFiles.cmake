@@ -147,6 +147,8 @@ set(hdrs
     ${hdrs_dir}/objc-rt/message.hh
     ${hdrs_dir}/objc-rt/namespace-std.hh
     ${hdrs_dir}/objc-rt/namespace-im.hh
+    ${hdrs_dir}/objc-rt/appkit.hh
+    ${hdrs_dir}/objc-rt/appkit-pasteboard.hh
     
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
@@ -219,6 +221,7 @@ set(srcs
     ${srcs_dir}/process/jitresize.cpp
     ${srcs_dir}/process/neuquant.cpp
     
+    ${srcs_dir}/objc-rt/appkit-pasteboard.mm
     ${srcs_dir}/objc-rt/namespace-std.mm
     ${srcs_dir}/objc-rt/selector.mm
     ${srcs_dir}/objc-rt/types.mm
@@ -306,4 +309,5 @@ ENDIF(APPLE)
 add_definitions(
     ${OBJCXX_OPTIONS}
     -DWITH_SCHEMA
-    -O3 -mtune=native -fstrict-aliasing)
+    -O3 -mtune=native
+    -fstrict-aliasing)

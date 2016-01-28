@@ -78,11 +78,6 @@ namespace objc {
         using xSEL = std::add_lvalue_reference_t<selector>;
         using tSEL = std::remove_reference_t<rSEL>;
         
-        inline decltype(auto) pass_id(rID r)          { return std::forward<tID>(r); }
-        inline decltype(auto) pass_selector(rSEL r)   { return std::forward<tSEL>(r); }
-        inline decltype(auto) pass_id(xID r)          { return std::forward<tID>(r); }
-        inline decltype(auto) pass_selector(xSEL r)   { return std::forward<tSEL>(r); }
-        
     }
     
     /// function-pointer templates for wrapping objc_msgSend() with a bunch of possible sigs
@@ -96,6 +91,8 @@ namespace objc {
     template <typename ...Args>
     using object_sender_t = std::add_pointer_t<types::ID(types::ID, types::selector, Args...)>;
     
+    /// Helpers for Objective-C's highly particular boolean-value
+    /// macro typedef'd whatever the fuck type stuff
     /// objc::boolean(bool_value) -> YES or NO
     /// objc::to_bool(BOOL_value) -> true or false
     

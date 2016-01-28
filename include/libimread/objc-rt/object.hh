@@ -29,7 +29,7 @@ namespace objc {
     /// + boolean selector-response test via operator[](T t) e.g.
     ///
     ///     objc::object<NSYoDogg*> yodogg([[NSYoDogg alloc] init]);
-    ///     if (yodogg[@"iHeardYouRespondTo:"]) {
+    ///     if (yodogg["iHeardYouRespondTo:"]) {
     ///         [*yodogg iHeardYouRespondTo:argsInYourArgs];
     ///     }
     ///
@@ -67,7 +67,20 @@ namespace objc {
                 retain();
             }
         
-        ~object() { release(); }
+        object(object&& other) noexcept
+            :self(other.self)
+            {
+                retain();
+            }
+        
+        virtual ~object() { release(); }
+        
+        object& operator=(pointer_t other) {
+            if ([self isEqual:other] == NO) {
+                object(other).swap(*this);
+            }
+            return *this;
+        }
         
         object& operator=(const object& other) {
             if ([self isEqual:other.self] == NO) {
@@ -76,9 +89,9 @@ namespace objc {
             return *this;
         }
         
-        object& operator=(pointer_t other) {
-            if ([self isEqual:other] == NO) {
-                object(other).swap(*this);
+        object& operator=(object&& other) noexcept {
+            if ([self isEqual:other.self] == NO) {
+                object(std::move(other)).swap(*this);
             }
             return *this;
         }
@@ -101,9 +114,7 @@ namespace objc {
         }
         
         template <typename T> inline
-        T bridge() {
-            return objc::bridge<T>(self);
-        }
+        T bridge() { return objc::bridge<T>(self); }
         
         inline bool responds_to(types::selector s) const {
             return objc::to_bool([self respondsToSelector:s]);
@@ -119,15 +130,6 @@ namespace objc {
             inline void autorelease() const {}
         #endif
         
-        template <typename ...Args>
-        types::ID operator()(types::selector s, Args... args) {
-            arguments<types::ID, Args...> ARGS(args...);
-            retain();
-            types::ID out = ARGS.send(self, s);
-            release();
-            return out;
-        }
-        
         bool operator[](types::selector s) const       { return responds_to(s); }
         bool operator[](const objc::selector& s) const { return responds_to(s.sel); }
         bool operator[](const char* s) const           { return responds_to(::sel_registerName(s)); }
@@ -136,12 +138,24 @@ namespace objc {
         bool operator[](CFStringRef s) const           { return responds_to(::NSSelectorFromString(
                                                                         objc::bridge<NSString*>(s))); }
         
+        std::size_t hash() const {
+            return static_cast<std::size_t>([self hash]);
+        }
+        
+        types::cls getclass() const {
+            return [self class];
+        }
+        
         std::string classname() const {
-            return [::NSStringFromClass([self class]) UTF8String];
+            return ::class_getName([self class]);
         }
         
         std::string description() const {
-            return [[self description] UTF8String];
+            return [[[self class] description] UTF8String];
+        }
+        
+        types::cls lookup() const {
+            return ::objc_lookUpClass(::object_getClassName(self));
         }
         
         friend std::ostream& operator<<(std::ostream& os, const object& friendly) {
@@ -152,46 +166,16 @@ namespace objc {
                              << std::dec << "]";
         }
         
-        types::cls lookup() const {
-            return ::objc_lookUpClass(::object_getClassName(self));
-        }
-        types::cls getclass() const {
-            return ::objc_getClass(::object_getClassName(self));
-        }
-        
-        std::size_t hash() const {
-            return static_cast<std::size_t>([self hash]);
-        }
-        
         void swap(object& other) noexcept {
             using std::swap;
             using objc::swap;
             swap(this->self, other.self);
         }
+        
         void swap(pointer_t& other) noexcept {
             using std::swap;
             using objc::swap;
             swap(this->self, other);
-        }
-        
-        /// STATIC METHODS
-        static std::string classname(pointer_t ii) {
-            return [::NSStringFromClass([ii class]) UTF8String];
-        }
-        
-        static std::string description(pointer_t ii) {
-            return [[ii description] UTF8String];
-        }
-        
-        static types::cls lookup(pointer_t&& ii) {
-            return ::objc_lookUpClass(
-                ::object_getClassName(std::forward<pointer_t>(ii)));
-        }
-        static types::cls lookup(const std::string& s) {
-            return ::objc_lookUpClass(s.c_str());
-        }
-        static types::cls lookup(const char* s) {
-            return ::objc_lookUpClass(s);
         }
         
         private:

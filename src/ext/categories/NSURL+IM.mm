@@ -107,6 +107,10 @@ namespace objc {
     return out;
 }
 
+- (std::string) STLString {
+    return [self fileSystemRepresentation];
+}
+
 @end
 
 #endif /// __OBJC__

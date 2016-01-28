@@ -37,10 +37,10 @@ namespace im {
         const std::string>
         stringify(S s) {
             const objc::id self(s);
-            if (self[@"STLString"]) {
+            if (self["STLString"]) {
                 // return [*self STLString];
                 return [*self UTF8String];
-            } else if (self[@"UTF8String"]) {
+            } else if (self["UTF8String"]) {
                 return [*self UTF8String];
             }
             return self.description();

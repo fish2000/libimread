@@ -61,6 +61,7 @@ namespace objc {
 - (BOOL)                    isImage;
 - (NSBitmapImageFileType)   imageFileType;
 - (filesystem::path)        filesystemPath;
+- (std::string)             STLString;
 @end
 
 #endif /// __OBJC__
