@@ -22,7 +22,7 @@ namespace im { namespace test {
     
     static const std::string basedir = "/Users/fish/Dropbox/libimread/tests/data";
     
-    static const int num_jpg = 42;
+    static const int num_jpg = 46;
     static const std::string jpg[] = {
         "10350540_10152447396343587_37416966729730477_n.jpg",
         "10954288_342637995941364_1354507656_n.jpg",
@@ -35,16 +35,20 @@ namespace im { namespace test {
         "1acad38a0-747f-485b-a6e5-4c02cca8f804.jpg",
         "1aef1426f-848d-455f-8ea5-c143c7eb5139.jpg",
         "1b031bc60-e67d-4904-92da-433b1057ed29.jpg",
-        "1b06f217d-7e43-49e1-820a-5156fff4c0b7.jpg",
         "1b4ca8c13-288f-43ab-8ebb-dc0f00196cb9.2.jpg",
         "1b74c6b88-9b36-43ae-a2ee-dc4ca29cddf2.2.jpg",
         "1b7eefeff-2cb5-401e-b344-0a89ff47f0b7.jpg",
         "2340367304_19afc284dd_o.jpg",
+        "4592101968_4fd8106161_o-SMALL.jpg",
+        "4592101968_4fd8106161_o-SMALLER.jpg",
+        "4592101968_4fd8106161_o-SMALLEST.jpg",
         "5716535667_6e38bef86a_o.jpg",
+        "58157_450715217350_41528_n.jpg",
         "7655660314_5633d8d261_o.jpg",
         "7ef12cd7f6ef544d4cfcf9e1e51c8ed2.jpg",
         "8141435491_a3016aca8f_o.jpg",
         "8410078919_6ef8bbbe81_o.jpg",
+        "benatar002.jpg",
         "butterflies-in-stomach.jpg",
         "c64error.jpg",
         "CBS-FOX-VIDEO.jpg",
@@ -75,10 +79,11 @@ namespace im { namespace test {
         "taylor-omg.jpeg"
     };
     
-    static const int num_png = 16;
+    static const int num_png = 20;
     static const std::string png[] = {
         "atkinson-me.png",
         "BINARY-OP.png",
+        "crypto343343.png",
         "grad_32_rrt_srgb.png",
         "marci_512_srgb.png",
         "marci_512_srgb8.png",
@@ -92,7 +97,10 @@ namespace im { namespace test {
         "output_00800.png",
         "output_00900.png",
         "pngreference.png",
-        "roses_512_rrt_srgb.png"
+        "roses_512_rrt_srgb.png",
+        "st-in-parens.png",
+        "yo-dogg-bleah.png",
+        "yo-dogg-OHHH-DOGGGG.png"
     };
     
     static const int num_tif = 1;
