@@ -111,37 +111,16 @@ namespace py {
             return reinterpret_cast<PyObject*>(self); /// all is well, return self
         }
         
-        /// __init__ implementation
         template <typename ImageType = HybridArray,
-                  typename FactoryType = ArrayFactory,
-                  typename PythonImageType = PythonImageBase<ImageType>>
-        int init(PyObject* self, PyObject* args, PyObject* kwargs) {
-            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            PyArray_Descr* dtype = NULL;
-            char const* filename = NULL;
-            char const* keywords[] = { "file", "dtype", NULL };
+                  typename FactoryType = ArrayFactory>
+        std::unique_ptr<ImageType> load(char const* filename) {
             static const im::options_map opts; /// not currently used when reading
-            
-            if (!PyArg_ParseTupleAndKeywords(
-                args, kwargs, "s|O&", const_cast<char**>(keywords),
-                &filename,
-                PyArray_DescrConverter, &dtype)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Bad arguments to image_init");
-                    return -1;
-            }
-            
+            // static const std::unique_ptr<ImageType> unique_null_ptr = std::unique_ptr<ImageType>(nullptr);
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
             std::unique_ptr<im::Image> output;
             bool exists = false;
-            
-            if (!filename) {
-                PyErr_SetString(PyExc_ValueError,
-                    "No filename");
-                return -1;
-            }
             
             try {
                 py::gil::release nogil;
@@ -151,7 +130,7 @@ namespace py {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find I/O format for file: %.200s",
                     filename);
-                return -1;
+                return std::unique_ptr<ImageType>(nullptr);
             }
             
             {
@@ -165,15 +144,48 @@ namespace py {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find image file: %.200s",
                     filename);
-                return -1;
+                return std::unique_ptr<ImageType>(nullptr);
             }
             
             {
                 py::gil::release nogil;
                 output = std::unique_ptr<im::Image>(
                     format->read(input.get(), &factory, opts));
-                pyim->image = im::detail::dynamic_cast_unique<ImageType>(
+                return im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
+            }
+        }
+        
+        /// __init__ implementation
+        template <typename ImageType = HybridArray,
+                  typename FactoryType = ArrayFactory,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        int init(PyObject* self, PyObject* args, PyObject* kwargs) {
+            static const std::unique_ptr<ImageType> unique_null_ptr = std::unique_ptr<ImageType>(nullptr);
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            PyArray_Descr* dtype = NULL;
+            char const* filename = NULL;
+            char const* keywords[] = { "file", "dtype", NULL };
+            
+            if (!PyArg_ParseTupleAndKeywords(
+                args, kwargs, "s|O&", const_cast<char**>(keywords),
+                &filename,
+                PyArray_DescrConverter, &dtype)) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Bad arguments to image_init");
+                    return -1;
+            }
+            
+            if (!filename) {
+                PyErr_SetString(PyExc_ValueError,
+                    "No filename");
+                return -1;
+            }
+            
+            pyim->image = py::image::load<ImageType, FactoryType>(filename);
+            if (pyim->image == unique_null_ptr) {
+                /// if this is true, PyErr will have been set
+                return -1;
             }
             
             if (dtype) {

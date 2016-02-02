@@ -210,7 +210,7 @@ add_subdirectory(${APPS_DIR})
 add_subdirectory(${TEST_SOURCE_DIR})
 add_custom_command(
     OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
-    COMMAND ${TEST_SCRIPT_DIR}/scan-test-data.py > ${TEST_INCLUDE_DIR}/test_data.hpp)
+    COMMAND ${TEST_SCRIPT_DIR}/generate-test-header.py > ${TEST_INCLUDE_DIR}/test_data.hpp)
 add_custom_target("test_data_header"
     DEPENDS ${TEST_INCLUDE_DIR}/test_data.hpp)
 set_source_files_properties(
