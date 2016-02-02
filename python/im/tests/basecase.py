@@ -26,7 +26,7 @@ class BaseCase(TestCase):
 #             lambda image_path: imgc.PyCImage(image_path,
 #                 dtype=imgc.uint8), self.image_paths)
 
-def main():
+def main(config=None):
     import nose
     return nose.main()
 

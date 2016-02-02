@@ -1,11 +1,10 @@
 
 from __future__ import print_function
-# from unittest2 import TestCase
-from basecase import BaseCase
+from unittest2 import TestCase
 
 import im
 
-class StructCodeTests(BaseCase):
+class StructCodeTests(TestCase):
     
     @staticmethod
     def singletup(dtypechar):
