@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#       scan-test-data.py
+#       generate-test-header.py
 #
 #       Scan test data folder and write out a header file
 #       For, like, tests and stuff
@@ -10,6 +10,7 @@
 from __future__ import print_function
 from os import chdir, listdir, getcwd
 from os.path import dirname
+from filemap import filemapper
 
 datadir = "../data"
 
@@ -87,14 +88,7 @@ if __name__ == '__main__':
     files = listdir(basedir)
     
     filetpls = dict()
-    filemap = dict(
-        jpg    = [f for f in files if f.endswith('jpg')],
-        jpeg   = [f for f in files if f.endswith('jpeg')],
-        png    = [f for f in files if f.endswith('png')],
-        tif    = [f for f in files if f.endswith('tif')],
-        tiff   = [f for f in files if f.endswith('tiff')],
-        hdf5   = [f for f in files if f.endswith('hdf5')],
-        pvr    = [f for f in files if f.endswith('pvr')])
+    filemap = filemapper(files)
     
     for suffix, filelist in filemap.iteritems():
         filetpls.update({ suffix: filetype(suffix, filelist) })
