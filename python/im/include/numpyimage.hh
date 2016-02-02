@@ -115,7 +115,6 @@ namespace py {
                   typename FactoryType = ArrayFactory>
         std::unique_ptr<ImageType> load(char const* filename) {
             static const im::options_map opts; /// not currently used when reading
-            // static const std::unique_ptr<ImageType> unique_null_ptr = std::unique_ptr<ImageType>(nullptr);
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
