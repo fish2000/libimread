@@ -1,6 +1,7 @@
 
-#include "options.hh"
+#include <string>
 #include <libimread/errors.hh>
+#include "options.hpp"
 
 namespace py {
     
@@ -31,9 +32,10 @@ namespace py {
         
         options_list parse_option_list(PyObject* list) {
             options_list out;
+            if (!list) { return out; }
             if (!PySequence_Check(list)) { return out; }
             PyObject* sequence = PySequence_Fast(list, "Sequence expected");
-            int idx = 0, len = PySequence_Size(list);
+            int idx = 0, len = PySequence_Fast_GET_SIZE(sequence);
             for (; idx < len; idx++) {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                 if (PyDict_Check(item)) {
@@ -69,6 +71,7 @@ namespace py {
         
         options_map parse_options(PyObject* dict) {
             options_map out;
+            if (!dict) { return out; }
             if (!PyDict_Check(dict)) { return out; }
             PyObject* key;
             PyObject* value;

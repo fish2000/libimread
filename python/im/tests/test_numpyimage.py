@@ -11,3 +11,8 @@ class NumpyImageTests(BaseCase):
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
     
+    def test_load_image_from_filename_with_default_options(self):
+        for image_path in self.image_paths:
+            image = im.NumpyImage(image_path, options={})
+            self.assertIsNotNone(image)
+    

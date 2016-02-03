@@ -2,7 +2,6 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_OPTIONS_HH_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_OPTIONS_HH_
 
-#include <string>
 #include <cstddef>
 #include <Python.h>
 #include <structmember.h>

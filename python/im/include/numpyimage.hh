@@ -10,6 +10,7 @@
 #include <structmember.h>
 
 #include "structcode.hpp"
+#include "options.hpp"
 #include "numpy.hh"
 #include "gil.hh"
 
@@ -78,6 +79,7 @@ namespace py {
     namespace image {
         
         using im::byte;
+        using im::options_map;
         using im::HybridArray;
         using im::ArrayFactory;
         
@@ -86,11 +88,25 @@ namespace py {
             PyObject_HEAD
             std::unique_ptr<ImageType> image;
             PyArray_Descr* dtype = nullptr;
+            PyObject* readoptDict = nullptr;
+            PyObject* writeoptDict = nullptr;
+            
+            options_map readopts() {
+                return py::options::parse_options(readoptDict);
+            }
+            
+            options_map writeopts() {
+                return py::options::parse_options(writeoptDict);
+            }
             
             void cleanup() {
                 image.release();
                 Py_XDECREF(dtype);
+                Py_XDECREF(readoptDict);
+                Py_XDECREF(writeoptDict);
                 dtype = nullptr;
+                readoptDict = nullptr;
+                writeoptDict = nullptr;
             }
             
             ~PythonImageBase() { cleanup(); }
@@ -113,8 +129,7 @@ namespace py {
         
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory>
-        std::unique_ptr<ImageType> load(char const* filename) {
-            static const im::options_map opts; /// not currently used when reading
+        std::unique_ptr<ImageType> load(char const* filename, options_map const& opts) {
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
@@ -163,12 +178,13 @@ namespace py {
             static const std::unique_ptr<ImageType> unique_null_ptr = std::unique_ptr<ImageType>(nullptr);
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             PyArray_Descr* dtype = NULL;
+            PyObject* options = NULL;
             char const* filename = NULL;
-            char const* keywords[] = { "file", "dtype", NULL };
+            char const* keywords[] = { "file", "options", "dtype", NULL };
             
             if (!PyArg_ParseTupleAndKeywords(
-                args, kwargs, "s|O&", const_cast<char**>(keywords),
-                &filename,
+                args, kwargs, "s|OO&", const_cast<char**>(keywords),
+                &filename, &options,
                 PyArray_DescrConverter, &dtype)) {
                     PyErr_SetString(PyExc_ValueError,
                         "Bad arguments to image_init");
@@ -176,23 +192,27 @@ namespace py {
             }
             
             if (!filename) {
-                PyErr_SetString(PyExc_ValueError,
-                    "No filename");
+                PyErr_SetString(PyExc_ValueError, "No filename");
                 return -1;
             }
             
-            pyim->image = py::image::load<ImageType, FactoryType>(filename);
+            try {
+                pyim->image = py::image::load<ImageType, FactoryType>(
+                    filename, py::options::parse_options(options));
+            } catch (im::OptionsError& exc) {
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return -1;
+            }
             if (pyim->image == unique_null_ptr) {
                 /// if this is true, PyErr will have been set
                 return -1;
             }
             
-            if (dtype) {
-                pyim->dtype = dtype;
-            } else {
-                pyim->dtype = PyArray_DescrFromType(NPY_UINT8);
-            }
+            pyim->dtype = dtype ? dtype : PyArray_DescrFromType(NPY_UINT8);
             Py_INCREF(pyim->dtype);
+            
+            pyim->readoptDict = options ? options : PyDict_New();
+            Py_INCREF(pyim->readoptDict);
             
             /// ALL IS WELL:
             return 0;
@@ -337,7 +357,7 @@ namespace py {
             self->ob_type->tp_free(self);
         }
         
-        /// NumpyImage.datatype getter
+        /// NumpyImage.dtype getter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_dtype(PyObject* self, void* closure) {
@@ -345,6 +365,7 @@ namespace py {
             return Py_BuildValue("O", pyim->dtype);
         }
         
+        /// NumpyImage.shape getter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_shape(PyObject* self, void* closure) {
@@ -376,6 +397,23 @@ namespace py {
             }
             return Py_BuildValue("");
         }
+        
+        /// NumpyImage.read_opts getter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    get_read_opts(PyObject* self, void* closure) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            return Py_BuildValue("O", pyim->readoptDict);
+        }
+        
+        /// NumpyImage.write_opts getter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    get_write_opts(PyObject* self, void* closure) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            return Py_BuildValue("O", pyim->writeoptDict);
+        }
+        
         
     } /* namespace image */
         

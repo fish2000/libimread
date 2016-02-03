@@ -36,6 +36,16 @@ static PyGetSetDef NumpyImage_getset[] = {
             (getter)py::image::get_shape<HybridArray>,
             NULL,
             (char*)"NumpyImage shape tuple", NULL },
+    {
+        (char*)"read_opts",
+            (getter)py::image::get_read_opts<HybridArray>,
+            NULL,
+            (char*)"Read options dict", NULL },
+    {
+        (char*)"write_opts",
+            (getter)py::image::get_write_opts<HybridArray>,
+            NULL,
+            (char*)"Write options dict", NULL },
     { NULL, NULL, NULL, NULL, NULL }
 };
 
