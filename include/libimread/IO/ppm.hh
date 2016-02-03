@@ -8,11 +8,16 @@
 #include <libimread/base.hh>
 
 namespace im {
-
+    
     class PPMFormat : public ImageFormat {
         public:
             using can_read = std::true_type;
             using can_write = std::true_type;
+            
+            DECLARE_OPTIONS(
+                "P6",
+                "ppm",
+                "image/x-portable-pixmap");
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,

@@ -13,6 +13,11 @@ namespace im {
         public:
             using can_read = std::true_type;
             
+            DECLARE_OPTIONS(
+                "RIFF", /// see https://en.wikipedia.org/wiki/WebP
+                "webp",
+                "image/webp");
+            
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
                                                 const options_map& opts) override;

@@ -13,6 +13,11 @@ namespace im {
         public:
             using can_read = std::true_type;
             
+            DECLARE_OPTIONS(
+                "4\x00\x00\x00", /// PVRTC "magic" tag is internal
+                "pvr",
+                "image/x-pvr");
+            
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
                                                 const options_map& opts) override;

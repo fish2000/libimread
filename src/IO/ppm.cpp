@@ -24,6 +24,8 @@ namespace im {
         }
     }
     
+    DECLARE_FORMAT_OPTIONS(PPMFormat);
+    
     std::unique_ptr<Image> PPMFormat::read(byte_source* src,
                                            ImageFactory* factory,
                                            const options_map& opts) {
