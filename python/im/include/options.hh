@@ -13,9 +13,11 @@ namespace py {
     namespace options {
         
         using im::options_map;
+        using im::options_list;
         
         const char* get_blob(PyObject* data, std::size_t& len);
         const char* get_cstring(PyObject* stro);
+        options_list parse_option_list(PyObject* list);
         options_map parse_options(PyObject* dict);
         
     }

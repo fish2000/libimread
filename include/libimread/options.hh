@@ -30,6 +30,15 @@ namespace im {
             
     };
     
+    struct options_list : public Json {
+        public:
+            options_list()
+                :Json()
+                {
+                    mkarray();
+                }
+    };
+    
     std::string get_optional_string(const options_map& opts,  const std::string& key);
     const char *get_optional_cstring(const options_map& opts, const std::string& key);
     
