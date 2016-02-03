@@ -237,7 +237,7 @@ namespace py {
                     py::buffer::source source(view);
                     std::string source_str = source.str();
                     pyim->image = py::image::load<ImageType, FactoryType>(
-                      source_str.c_str(), py::options::parse_options(options));
+                        source_str.c_str(), py::options::parse_options(options));
                 }
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
