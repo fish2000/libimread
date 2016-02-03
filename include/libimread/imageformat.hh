@@ -97,6 +97,11 @@ namespace im {
                 return ImageFormat::encode_options(FormatType::options);
             }
             
+            static options_map add_options(options_map const& opts) {
+                options_map result = ImageFormat::encode_options(FormatType::options);
+                return result.update(opts);
+            }
+            
     };
 
 }

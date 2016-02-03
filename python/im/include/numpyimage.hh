@@ -122,7 +122,7 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
             PythonImageType* self = reinterpret_cast<PythonImageType*>(type->tp_alloc(type, 0));
-            /// initialize with defaults
+            /// initialize everything to empty values
             if (self != NULL) {
                 self->image = std::unique_ptr<ImageType>(nullptr);
                 self->dtype = nullptr;
@@ -132,9 +132,12 @@ namespace py {
             return reinterpret_cast<PyObject*>(self); /// all is well, return self
         }
         
+        /// Load an instance of the templated image type
+        /// from a file source, with specified reading options
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory>
-        std::unique_ptr<ImageType> load(char const* source, options_map const& opts) {
+        std::unique_ptr<ImageType> load(char const* source,
+                                        options_map const& opts) {
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
@@ -167,17 +170,20 @@ namespace py {
             
             {
                 py::gil::release nogil;
-                default_opts = format->get_options();
+                default_opts = format->add_options(opts);
                 output = std::unique_ptr<im::Image>(
-                    format->read(input.get(), &factory, opts.update(default_opts)));
+                    format->read(input.get(), &factory, default_opts));
                 return im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             }
         }
         
+        /// Load an instance of the templated image type from a Py_buffer
+        /// describing an in-memory source, with specified reading options
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory>
-        std::unique_ptr<ImageType> loadblob(Py_buffer const& view, options_map const& opts) {
+        std::unique_ptr<ImageType> loadblob(Py_buffer const& view,
+                                            options_map const& opts) {
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<py::buffer::source> input;
@@ -190,9 +196,9 @@ namespace py {
                     new py::buffer::source(view));
                 format = std::unique_ptr<im::ImageFormat>(
                     im::for_source(input.get()));
-                default_opts = format->get_options();
+                default_opts = format->add_options(opts);
                 output = std::unique_ptr<im::Image>(
-                    format->read(input.get(), &factory, opts.update(default_opts)));
+                    format->read(input.get(), &factory, default_opts));
                 return im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             } catch (im::FormatNotFound& exc) {
@@ -211,49 +217,62 @@ namespace py {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             PyObject* py_is_blob = NULL;
             PyObject* options = NULL;
-            bool is_blob = false;
             Py_buffer view;
             char const* keywords[] = { "source", "is_blob", "options", NULL };
+            bool is_blob = false;
             
             if (!PyArg_ParseTupleAndKeywords(
                 args, kwargs, "s*|OO", const_cast<char**>(keywords),
-                &view,
-                &py_is_blob,
-                &options)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Bad arguments to image_init");
-                    return -1;
+                &view,                      /// "source", buffer with file path or image data
+                &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
+                &options))                  /// "options", read-options dict
+            {
+                PyErr_SetString(PyExc_ValueError,
+                    "Bad arguments to image_init");
+                return -1;
             } else {
                 if (py_is_blob) {
+                    /// test is necessary, the next line chokes on NULL:
                     is_blob = PyObject_IsTrue(py_is_blob);
                 }
             }
             
             try {
                 if (is_blob) {
+                    /// load as blob -- pass the buffer along
                     pyim->image = py::image::loadblob<ImageType, FactoryType>(
                             view, py::options::parse_options(options));
                 } else {
+                    /// load as file -- extract the filename from the buffer
+                    /// into a temporary c-string for passing
                     py::buffer::source source(view);
-                    std::string source_str = source.str();
+                    std::string srcstr = source.str();
+                    char const* srccstr = srcstr.c_str();
                     pyim->image = py::image::load<ImageType, FactoryType>(
-                        source_str.c_str(), py::options::parse_options(options));
+                         srccstr, py::options::parse_options(options));
                 }
             } catch (im::OptionsError& exc) {
+                /// there was something weird in the `options` dict
                 PyErr_SetString(PyExc_AttributeError, exc.what());
                 return -1;
             } catch (im::NotImplementedError& exc) {
+                /// this shouldn't happen -- a generic ImageFormat pointer
+                /// was returned when determining the blob image type
                 PyErr_SetString(PyExc_AttributeError, exc.what());
                 return -1;
             }
             if (pyim->image == unique_null_ptr) {
-                /// if this is true, PyErr has already been set
+                /// If this is true, PyErr has already been set
+                /// ... presumably by problems loading an ImageFormat
+                /// or opening the file at the specified image path
                 return -1;
             }
             
+            /// create and set a dtype based on the loaded image data's type
             pyim->dtype = PyArray_DescrFromType(pyim->image->dtype());
             Py_INCREF(pyim->dtype);
             
+            /// store the read options dict
             pyim->readoptDict = options ? options : PyDict_New();
             Py_INCREF(pyim->readoptDict);
             
