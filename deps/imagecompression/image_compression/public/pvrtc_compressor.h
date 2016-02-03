@@ -57,7 +57,7 @@
 #ifndef IMAGE_COMPRESSION_PUBLIC_PVRTC_COMPRESSOR_H_
 #define IMAGE_COMPRESSION_PUBLIC_PVRTC_COMPRESSOR_H_
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "base/integral_types.h"

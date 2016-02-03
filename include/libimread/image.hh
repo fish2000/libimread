@@ -36,6 +36,12 @@ namespace im {
                 return this->dim(dim);
             }
             
+            virtual int stride_or(int dim, int default_value = 1) const {
+                if (dim >= this->ndims()) { return default_value; }
+                return this->stride(dim);
+            }
+            
+            virtual int planes() const { return this->dim_or(2); }
             virtual int size() const {
                 return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
             }

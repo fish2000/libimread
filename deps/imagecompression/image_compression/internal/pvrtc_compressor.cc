@@ -14,7 +14,7 @@
 
 #include "image_compression/public/pvrtc_compressor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <vector>
 

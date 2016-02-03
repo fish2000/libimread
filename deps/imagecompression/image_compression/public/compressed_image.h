@@ -15,7 +15,7 @@
 #ifndef IMAGE_COMPRESSION_PUBLIC_COMPRESSED_IMAGE_H_
 #define IMAGE_COMPRESSION_PUBLIC_COMPRESSED_IMAGE_H_
 
-#include <stddef.h>
+#include <cstddef>
 #include <cstring>
 #include <string>
 
