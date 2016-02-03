@@ -82,7 +82,7 @@ namespace im {
         for (int idx = 0; idx < view->ndim; idx++) {
             len *= dim_or(idx, 1);
             view->shape[idx] = dim_or(idx, 1);
-            view->strides[idx] = stride(idx);
+            view->strides[idx] = stride_or(idx, 0);
         }
         
         view->len = len * nbytes();
@@ -96,9 +96,9 @@ namespace im {
     
     void PythonBufferImage::release_buffer(Py_buffer* view) {
         if (std::string((const char*)view->internal) == "YO DOGG") {
-            if (view->format)   { free(view->format);     view->format  = nullptr; }
-            if (view->shape)    { delete[] view->shape;   view->shape   = nullptr; }
-            if (view->strides)  { delete[] view->strides; view->strides = nullptr; }
+            if (view->format)   { std::free(view->format);  view->format  = nullptr; }
+            if (view->shape)    { delete[] view->shape;     view->shape   = nullptr; }
+            if (view->strides)  { delete[] view->strides;   view->strides = nullptr; }
             view->internal = nullptr;
         }
     }
