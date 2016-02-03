@@ -131,7 +131,7 @@ namespace py {
         
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory>
-        std::unique_ptr<ImageType> load(char const* filename, options_map const& opts) {
+        std::unique_ptr<ImageType> load(char const* source, options_map const& opts) {
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
@@ -142,25 +142,23 @@ namespace py {
             try {
                 py::gil::release nogil;
                 format = std::unique_ptr<im::ImageFormat>(
-                    im::for_filename(filename));
+                    im::for_filename(source));
             } catch (im::FormatNotFound& exc) {
                 PyErr_Format(PyExc_ValueError,
-                    "Can't find I/O format for file: %.200s",
-                    filename);
+                    "Can't find I/O format for file: %.200s", source);
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
             {
                 py::gil::release nogil;
                 input = std::unique_ptr<im::FileSource>(
-                    new im::FileSource(filename));
+                    new im::FileSource(source));
                 exists = input->exists();
             }
             
             if (!exists) {
                 PyErr_Format(PyExc_ValueError,
-                    "Can't find image file: %.200s",
-                    filename);
+                    "Can't find image file: %.200s", source);
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
