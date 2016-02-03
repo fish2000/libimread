@@ -29,20 +29,12 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(ImageFormat);
     
-    bool ImageFormat::match_format(byte_source* src) const {
-        return match_magic(src, this->options.signature);
-    }
-    
-    std::string ImageFormat::get_suffix() {
-        return "." + options.suffix;
-    }
-    
     /// including <iod/json.hh> along with Halide.h will cause a conflict --
     /// -- some macro called `user_error` I believe -- that won't compile.
     /// This static method is defined in here for this reason.
-    options_map ImageFormat::get_options() {
-        return options_map::parse(iod::json_encode(options));
+    options_map ImageFormat::encode_options(options_t which_options) {
+        return options_map::parse(iod::json_encode(which_options));
     }
-    
+
     
 }

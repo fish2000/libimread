@@ -17,7 +17,7 @@ namespace im {
         
     }
     
-    class ANSIFormat : public ImageFormat {
+    class ANSIFormat : public ImageFormatBase<ANSIFormat> {
         public:
             using can_write = std::true_type;
             using can_write_multi = std::true_type;

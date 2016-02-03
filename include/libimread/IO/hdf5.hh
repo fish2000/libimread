@@ -70,7 +70,7 @@ namespace im {
     }
     
     
-    class HDF5Format : public ImageFormat {
+    class HDF5Format : public ImageFormatBase<HDF5Format> {
         
         public:
             using can_read = std::true_type;

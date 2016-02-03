@@ -9,14 +9,14 @@
 
 namespace im {
     
-    class BMPFormat : public ImageFormat {
+    class BMPFormat : public ImageFormatBase<BMPFormat> {
         public:
             using can_read = std::true_type;
             
             DECLARE_OPTIONS(
                 "\x42\x4d",
-                "png",
-                "image/png");
+                "bmp",
+                "image/x-bmp");
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,

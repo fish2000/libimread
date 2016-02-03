@@ -9,7 +9,7 @@
 
 namespace im {
     
-    class PVRTCFormat : public ImageFormat {
+    class PVRTCFormat : public ImageFormatBase<PVRTCFormat> {
         public:
             using can_read = std::true_type;
             

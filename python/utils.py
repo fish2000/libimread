@@ -1,4 +1,5 @@
 
+from __future__ import print_function
 import os
 
 # GOSUB: basicaly `backticks` (cribbed from plotdevice)
@@ -21,6 +22,8 @@ class Install(object):
         out, err, ret = gosub(cmd, on_err=False)
         if ret == 0:
             self.prefix = out.strip()
+        else:
+            print("WHAT THE FUCK PREFIX: %s" % out)
         if out == '':
             return # `imread-config --prefix` failed
     

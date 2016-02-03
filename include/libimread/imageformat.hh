@@ -51,11 +51,9 @@ namespace im {
                 "image",                    /// suffix
                 "application/octet-stream"  /// mimetype
             );
-            
-            /// NOT AN OVERRIDE:
-            virtual bool match_format(byte_source*) const;
-            static std::string get_suffix();
-            static options_map get_options();
+                
+            static options_map encode_options(options_t which_options = options);
+            static options_map get_options() { return options_map(); }
             virtual ~ImageFormat() {}
             
             virtual std::unique_ptr<Image> read(byte_source* src,
@@ -80,6 +78,23 @@ namespace im {
                                      byte_sink* output,
                                      const options_map& opts) {
                 imread_raise_default(NotImplementedError);
+            }
+    };
+    
+    template <typename FormatType>
+    class ImageFormatBase : public ImageFormat {
+        
+        public:
+            static bool match_format(byte_source* src) {
+                return match_magic(src, FormatType::options.signature);
+            }
+            
+            static std::string get_suffix() {
+                return "." + FormatType::options.suffix;
+            }
+            
+            static options_map get_options() {
+                return ImageFormat::encode_options(FormatType::options);
             }
             
     };

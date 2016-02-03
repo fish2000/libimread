@@ -9,7 +9,7 @@
 
 namespace im {
     
-    class PPMFormat : public ImageFormat {
+    class PPMFormat : public ImageFormatBase<PPMFormat> {
         public:
             using can_read = std::true_type;
             using can_write = std::true_type;

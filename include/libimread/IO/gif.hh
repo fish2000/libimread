@@ -25,7 +25,7 @@ namespace im {
         
     }
     
-    class GIFFormat : public ImageFormat {
+    class GIFFormat : public ImageFormatBase<GIFFormat> {
         public:
             using can_write = std::true_type;
             using can_write_multi = std::true_type;

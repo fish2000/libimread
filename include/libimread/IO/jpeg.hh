@@ -12,7 +12,7 @@
 
 namespace im {
 
-    class JPEGFormat : public ImageFormat {
+    class JPEGFormat : public ImageFormatBase<JPEGFormat> {
         public:
             using can_read = std::true_type;
             using can_write = std::true_type;

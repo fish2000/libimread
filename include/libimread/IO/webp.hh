@@ -9,7 +9,7 @@
 
 namespace im {
     
-    class WebPFormat : public ImageFormat {
+    class WebPFormat : public ImageFormatBase<WebPFormat> {
         public:
             using can_read = std::true_type;
             

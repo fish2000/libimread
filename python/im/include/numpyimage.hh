@@ -16,6 +16,7 @@
 #include "gil.hh"
 
 #include <libimread/ext/errors/demangle.hh>
+#include <libimread/errors.hh>
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
 
@@ -234,10 +235,14 @@ namespace py {
                             view, py::options::parse_options(options));
                 } else {
                     py::buffer::source source(view);
+                    std::string source_str = source.str();
                     pyim->image = py::image::load<ImageType, FactoryType>(
-                        source.str().c_str(), py::options::parse_options(options));
+                      source_str.c_str(), py::options::parse_options(options));
                 }
             } catch (im::OptionsError& exc) {
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return -1;
+            } catch (im::NotImplementedError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
                 return -1;
             }

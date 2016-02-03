@@ -9,18 +9,14 @@ source "${PRAXONS}/gmalloc.sh"
 
 PROJECT_PATH="/Users/fish/Dropbox/libimread"
 
-anybar yellow
 pushd $PROJECT_PATH
     rm -rf ./build ./dist
     mkdir -p ./build ./dist
     pushd ./build
-        anybar white
         cmake .. \
             -Wno-dev \
-            -DCMAKE_INSTALL_PREFIX=./dist
-        anybar yellow
+            -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist"
         make -j4 install && \
-            anybar white && \
         ctest -j4 -D Experimental --output-on-failure && \
             anybar green || anybar red
 

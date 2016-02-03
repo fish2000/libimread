@@ -39,7 +39,7 @@ namespace im {
         
     }
     
-    class NSImageFormat : public ImageFormat {
+    class NSImageFormat : public ImageFormatBase<NSImageFormat> {
         
         public:
             using can_read = std::true_type;

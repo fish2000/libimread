@@ -15,14 +15,18 @@
 
 namespace im {
     
-    class PNGFormat : public ImageFormat {
+    class PNGFormat : public ImageFormatBase<PNGFormat> {
         
         public:
             using can_read = std::true_type;
             using can_write = std::true_type;
             
+            /// left off the following bit from the signature:
+            ///         \x0D\x0A\x1A\x0A
+            /// ... due to complaints of a 'control character in std::string'
+            
             DECLARE_OPTIONS(
-                "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
+                "\x89\x50\x4E\x47",
                 "png",
                 "image/png");
             

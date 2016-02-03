@@ -19,7 +19,7 @@ On linux, the package is often called python-setuptools''')
 # PYTHON & NUMPY INCLUDES
 from utils import Install, HomebrewInstall, gosub
 from distutils.sysconfig import get_python_inc
-# from distutils.spawn import find_executable as which
+
 try:
     import numpy
 except ImportError:
@@ -34,6 +34,10 @@ exec(compile(
     open(os.path.join(os.path.dirname(__file__), '__version__.py')).read(),
     '__version__.py', 'exec'))
 long_description = open('README.md').read()
+# local_command = os.path.join('..', 'dist', 'bin', 'imread-config')
+# local_command +=  " --prefix"
+# print(local_command)
+# libimread = Install(local_command)
 libimread = Install()
 libhalide = HomebrewInstall('halide')
 libllvm = HomebrewInstall('llvm')
