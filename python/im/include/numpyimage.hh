@@ -448,7 +448,7 @@ namespace py {
         /// NumpyImage.read_opts setter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        int         set_read_opts(PyObject* self, PyObject* value, void* closure) {
+        int          set_read_opts(PyObject* self, PyObject* value, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             if (!value) { return 0; }
             Py_XDECREF(pyim->readoptDict);
@@ -467,7 +467,7 @@ namespace py {
         /// NumpyImage.write_opts setter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        int         set_write_opts(PyObject* self, PyObject* value, void* closure) {
+        int          set_write_opts(PyObject* self, PyObject* value, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             if (!value) { return 0; }
             Py_XDECREF(pyim->writeoptDict);

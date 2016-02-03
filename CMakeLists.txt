@@ -208,6 +208,16 @@ add_subdirectory(${APPS_DIR})
 
 # Build the tests
 add_subdirectory(${TEST_SOURCE_DIR})
+# add_custom_command(
+#     OUTPUT ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist
+#     COMMAND ${TEST_SCRIPT_DIR}/generate-test-filemap.py > ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
+# add_custom_target("test_data_plist"
+#     DEPENDS ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
+# set_target_properties("test_data_plist"
+#     PROPERTIES GENERATED TRUE)
+# set_target_properties("test_data_plist"
+#     PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
+# add_dependencies("test_data_plist" imread)
 add_custom_command(
     OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
     COMMAND ${TEST_SCRIPT_DIR}/generate-test-header.py > ${TEST_INCLUDE_DIR}/test_data.hpp)

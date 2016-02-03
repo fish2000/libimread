@@ -27,6 +27,9 @@ checkbad:
 		@test -d build || echo "Can't run tests: no build folder\n"
 		@test -d build && pushd build && imread_tests --durations yes --abortx 20 && popd
 
+scantests:
+		tests/scripts/generate-test-filemap.py > apps/TestDataViewer/TestDataViewer/TestData.plist
+
 clean:
 		mgmt/clean.sh
 
