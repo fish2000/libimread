@@ -11,6 +11,9 @@
 		CF1903FC1C61C479000974D4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CF1903FB1C61C479000974D4 /* main.m */; };
 		CF1903FE1C61C479000974D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CF1903FD1C61C479000974D4 /* Assets.xcassets */; };
 		CF1904011C61C479000974D4 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = CF1903FF1C61C479000974D4 /* MainMenu.xib */; };
+		CF19040A1C61D2FE000974D4 /* TestData.plist in Resources */ = {isa = PBXBuildFile; fileRef = CF1904091C61D2FE000974D4 /* TestData.plist */; };
+		CF19040E1C61D63C000974D4 /* MasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CF19040C1C61D63C000974D4 /* MasterViewController.m */; };
+		CF19040F1C61D63C000974D4 /* MasterViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CF19040D1C61D63C000974D4 /* MasterViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +24,10 @@
 		CF1903FD1C61C479000974D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CF1904001C61C479000974D4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		CF1904021C61C479000974D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CF1904091C61D2FE000974D4 /* TestData.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = TestData.plist; sourceTree = "<group>"; };
+		CF19040B1C61D63C000974D4 /* MasterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MasterViewController.h; sourceTree = "<group>"; };
+		CF19040C1C61D63C000974D4 /* MasterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MasterViewController.m; sourceTree = "<group>"; };
+		CF19040D1C61D63C000974D4 /* MasterViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MasterViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +63,9 @@
 				CF1904081C61C4A8000974D4 /* Resources */,
 				CF1903F71C61C479000974D4 /* AppDelegate.h */,
 				CF1903F81C61C479000974D4 /* AppDelegate.m */,
+				CF19040B1C61D63C000974D4 /* MasterViewController.h */,
+				CF19040C1C61D63C000974D4 /* MasterViewController.m */,
+				CF19040D1C61D63C000974D4 /* MasterViewController.xib */,
 				CF1903FF1C61C479000974D4 /* MainMenu.xib */,
 				CF1903FA1C61C479000974D4 /* Supporting Files */,
 			);
@@ -73,6 +83,7 @@
 		CF1904081C61C4A8000974D4 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CF1904091C61D2FE000974D4 /* TestData.plist */,
 				CF1904021C61C479000974D4 /* Info.plist */,
 				CF1903FD1C61C479000974D4 /* Assets.xcassets */,
 			);
@@ -136,8 +147,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF19040F1C61D63C000974D4 /* MasterViewController.xib in Resources */,
 				CF1903FE1C61C479000974D4 /* Assets.xcassets in Resources */,
 				CF1904011C61C479000974D4 /* MainMenu.xib in Resources */,
+				CF19040A1C61D2FE000974D4 /* TestData.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CF1903FC1C61C479000974D4 /* main.m in Sources */,
+				CF19040E1C61D63C000974D4 /* MasterViewController.m in Sources */,
 				CF1903F91C61C479000974D4 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

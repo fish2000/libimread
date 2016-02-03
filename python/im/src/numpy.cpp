@@ -82,7 +82,7 @@ namespace im {
         for (int idx = 0; idx < view->ndim; idx++) {
             len *= dim_or(idx, 1);
             view->shape[idx] = dim_or(idx, 1);
-            view->strides[idx] = stride_or(idx, 0);
+            view->strides[idx] = stride_or(idx, 1);
         }
         
         view->len = len * nbytes();

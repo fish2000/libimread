@@ -181,28 +181,35 @@ namespace py {
         int init(PyObject* self, PyObject* args, PyObject* kwargs) {
             static const std::unique_ptr<ImageType> unique_null_ptr = std::unique_ptr<ImageType>(nullptr);
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            PyArray_Descr* dtype = NULL;
+            // PyArray_Descr* dtype = NULL;
+            PyObject* py_is_blob = NULL;
             PyObject* options = NULL;
-            char const* filename = NULL;
-            char const* keywords[] = { "file", "options", "dtype", NULL };
+            bool is_blob = false;
+            char const* source = NULL;
+            char const* keywords[] = { "source", "is_blob", "options", NULL };
             
             if (!PyArg_ParseTupleAndKeywords(
-                args, kwargs, "s|OO&", const_cast<char**>(keywords),
-                &filename, &options,
-                PyArray_DescrConverter, &dtype)) {
+                args, kwargs, "s|O!O", const_cast<char**>(keywords),
+                &source,
+                &PyBool_Type, &py_is_blob,
+                &options)) {
                     PyErr_SetString(PyExc_ValueError,
                         "Bad arguments to image_init");
                     return -1;
+            } else {
+                if (py_is_blob) {
+                    is_blob = PyObject_IsTrue(py_is_blob);
+                }
             }
             
-            if (!filename) {
+            if (!source) {
                 PyErr_SetString(PyExc_ValueError, "No filename");
                 return -1;
             }
             
             try {
                 pyim->image = py::image::load<ImageType, FactoryType>(
-                    filename, py::options::parse_options(options));
+                      source, py::options::parse_options(options));
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
                 return -1;
@@ -212,7 +219,8 @@ namespace py {
                 return -1;
             }
             
-            pyim->dtype = dtype ? dtype : PyArray_DescrFromType(NPY_UINT8);
+            // pyim->dtype = dtype ? dtype : PyArray_DescrFromType(pyim->image->dtype());
+            pyim->dtype = PyArray_DescrFromType(pyim->image->dtype());
             Py_INCREF(pyim->dtype);
             
             pyim->readoptDict = options ? options : PyDict_New();
