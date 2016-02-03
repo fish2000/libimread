@@ -37,6 +37,11 @@ static PyGetSetDef NumpyImage_getset[] = {
             NULL,
             (char*)"NumpyImage shape tuple", NULL },
     {
+        (char*)"strides",
+            (getter)py::image::get_strides<HybridArray>,
+            NULL,
+            (char*)"NumpyImage strides tuple", NULL },
+    {
         (char*)"read_opts",
             (getter)py::image::get_read_opts<HybridArray>,
             (setter)py::image::set_read_opts<HybridArray>,
@@ -79,7 +84,7 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                                  /* tp_as_mapping */
     (hashfunc)py::image::hash<HybridArray>,                             /* tp_hash */
     0,                                                                  /* tp_call */
-    0,                                                                  /* tp_str */
+    (reprfunc)py::image::str<HybridArray>,                              /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
     &NumpyImage_Buffer3000Methods,                                      /* tp_as_buffer */

@@ -122,7 +122,9 @@ namespace py {
             /// initialize with defaults
             if (self != NULL) {
                 self->image = std::unique_ptr<ImageType>(nullptr);
-                self->dtype = NULL;
+                self->dtype = nullptr;
+                self->readoptDict = nullptr;
+                self->writeoptDict = nullptr;
             }
             return reinterpret_cast<PyObject*>(self); /// all is well, return self
         }
@@ -223,11 +225,12 @@ namespace py {
         /// __repr__ implementation
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        PyObject* repr(PythonImageType* pyim) {
+        PyObject* repr(PyObject* self) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             char const* pytypename;
             {
                 py::gil::release nogil;
-                pytypename = terminator::nameof(*pyim);
+                pytypename = terminator::nameof(pyim);
             }
             return PyString_FromFormat(
                 "< %s @ %p >",
@@ -237,14 +240,15 @@ namespace py {
         /// __str__ implementaton -- return bytes of image
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        PyObject* str(PythonImageType* pyim) {
+        PyObject* str(PyObject* self) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             Py_ssize_t string_size;
             {
                 py::gil::release nogil;
                 string_size = pyim->image->size();
             }
             return PyString_FromStringAndSize(
-                pyim->image->template rowp_as<char const*>(0),
+                pyim->image->template rowp_as<char const>(0),
                 string_size);
         }
         
@@ -394,6 +398,39 @@ namespace py {
                                                     image->dim(2),
                                                     image->dim(3),
                                                     image->dim(4));
+                default:
+                    return Py_BuildValue("");
+            }
+            return Py_BuildValue("");
+        }
+        
+        /// NumpyImage.strides getter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    get_strides(PyObject* self, void* closure) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            auto image = pyim->image.get();
+            switch (image->ndims()) {
+                case 1:
+                    return Py_BuildValue("(i)",     image->stride(0));
+                case 2:
+                    return Py_BuildValue("(ii)",    image->stride(0),
+                                                    image->stride(1));
+                case 3:
+                    return Py_BuildValue("(iii)",   image->stride(0),
+                                                    image->stride(1),
+                                                    image->stride(2));
+                case 4:
+                    return Py_BuildValue("(iiii)",  image->stride(0),
+                                                    image->stride(1),
+                                                    image->stride(2),
+                                                    image->stride(3));
+                case 5:
+                    return Py_BuildValue("(iiiii)", image->stride(0),
+                                                    image->stride(1),
+                                                    image->stride(2),
+                                                    image->stride(3),
+                                                    image->stride(4));
                 default:
                     return Py_BuildValue("");
             }
