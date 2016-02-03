@@ -14,12 +14,12 @@ namespace im {
         public:
             using can_write = PNGFormat::can_write;
             
-            static bool match_format(byte_source *src) {
+            virtual bool match_format(byte_source *src) const override {
                 /// not sure how this will actually work,
                 /// since this "format" is actually
                 /// a folder full of PNGs; not something
                 /// easily ready in as a byte_source...
-                return PNGFormat::match_format(src);
+                return PNGFormat().match_format(src);
             }
             
             virtual void write(Image& input,

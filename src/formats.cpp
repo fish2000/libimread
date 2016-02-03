@@ -61,16 +61,16 @@ namespace im {
     }
     
     const char* magic_format(byte_source* src) {
-        if (format::JPG::match_format(src))  { return "jpg";  }
-        if (format::PNG::match_format(src))  { return "png";  }
-        if (format::BMP::match_format(src))  { return "bmp";  }
-        if (format::GIF::match_format(src))  { return "gif";  }
-        if (format::HDF5::match_format(src)) { return "hdf5"; }
-        if (format::TIFF::match_format(src)) { return "tif";  }
-        if (format::WebP::match_format(src)) { return "webp"; }
-        if (format::PPM::match_format(src))  { return "ppm";  }
+        if (format::JPG().match_format(src))  { return "jpg";  }
+        if (format::PNG().match_format(src))  { return "png";  }
+        if (format::BMP().match_format(src))  { return "bmp";  }
+        if (format::GIF().match_format(src))  { return "gif";  }
+        if (format::HDF5().match_format(src)) { return "hdf5"; }
+        if (format::TIFF().match_format(src)) { return "tif";  }
+        if (format::WebP().match_format(src)) { return "webp"; }
+        if (format::PPM().match_format(src))  { return "ppm";  }
         
-        // if (format::PVR::match_format(src)) { return "pvr"; }
+        // if (format::PVR().match_format(src)) { return "pvr"; }
         // return 0;
         
         imread_raise(FormatNotFound,

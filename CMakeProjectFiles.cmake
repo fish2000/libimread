@@ -126,7 +126,7 @@ set(hdrs
     ${hdrs_dir}/IO/pvrtc.hh
     ${hdrs_dir}/IO/tiff.hh
     ${hdrs_dir}/IO/webp.hh
-    ${hdrs_dir}/IO/xcassets.hh
+    # ${hdrs_dir}/IO/xcassets.hh
     
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
@@ -134,7 +134,7 @@ set(hdrs
     ${hdrs_dir}/private/static_image.h
     ${hdrs_dir}/private/vpp_symbols.hh
     
-    ${hdrs_dir}/process/jitresize.hh
+    # ${hdrs_dir}/process/jitresize.hh
     ${hdrs_dir}/process/neuquant.hh
     ${hdrs_dir}/process/neuquant.inl
     
@@ -216,10 +216,10 @@ set(srcs
     ${srcs_dir}/IO/pvrtc.cpp
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp
-    ${srcs_dir}/IO/xcassets.cpp
+    # ${srcs_dir}/IO/xcassets.cpp
     
-    ${srcs_dir}/process/jitresize.cpp
-    ${srcs_dir}/process/neuquant.cpp
+    # ${srcs_dir}/process/jitresize.cpp
+    # ${srcs_dir}/process/neuquant.cpp
     
     ${srcs_dir}/objc-rt/appkit-pasteboard.mm
     ${srcs_dir}/objc-rt/namespace-std.mm

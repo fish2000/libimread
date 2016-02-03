@@ -53,7 +53,7 @@ namespace im {
             );
             
             /// NOT AN OVERRIDE:
-            static bool match_format(byte_source*);
+            virtual bool match_format(byte_source*) const;
             static std::string get_suffix();
             static options_map get_options();
             virtual ~ImageFormat() {}

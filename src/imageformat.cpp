@@ -29,8 +29,8 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(ImageFormat);
     
-    bool ImageFormat::match_format(byte_source* src) {
-        return match_magic(src, options.signature);
+    bool ImageFormat::match_format(byte_source* src) const {
+        return match_magic(src, this->options.signature);
     }
     
     std::string ImageFormat::get_suffix() {
