@@ -195,8 +195,7 @@ namespace py {
                 return im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             } catch (im::FormatNotFound& exc) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Can't find I/O format for blob source");
+                PyErr_SetString(PyExc_ValueError, exc.what());
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
@@ -212,7 +211,6 @@ namespace py {
             PyObject* py_is_blob = NULL;
             PyObject* options = NULL;
             bool is_blob = false;
-            // char const* source = NULL;
             Py_buffer view;
             char const* keywords[] = { "source", "is_blob", "options", NULL };
             

@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/imageformat.hh>
 #include <iod/json.hh>
 
@@ -15,6 +16,10 @@ namespace im {
         buf.resize(n);
         const int n_read = static_cast<int>(src->read(&buf.front(), n));
         src->seek_relative(-n_read);
+        WTF("About to return from match_magic()",
+            FF(">>> magic = %s", magic),
+            FF(">>> n = %u", n),
+            FF(">>> std::memcmp(&buf.front(), magic, n) = %i", std::memcmp(&buf.front(), magic, n)));
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
     }
     
