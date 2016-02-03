@@ -20,6 +20,7 @@ namespace im {
     
     namespace apple {
         
+        using filesystem::path;
         static const options_map apple_default_opts;
         
         template <typename T>
@@ -33,12 +34,11 @@ namespace im {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, opts);
+            options_map default_opts = format->get_options();
+            std::unique_ptr<Image> output = format->read(input.get(), &factory, default_opts.update(opts));
             ImageType<T> image(dynamic_cast<ImageType<T>&>(*output));
             return image;
         }
-        
-        using filesystem::path;
         
         template <typename T = byte> inline
         void write(HybridImage<T>& input, const std::string& filename,

@@ -21,6 +21,13 @@ namespace im {
                     mkobject();
                 }
             
+            options_map(Json const& other)
+                :Json(other)
+                {}
+            options_map(Json&& other) noexcept
+                :Json(other)
+                {}
+            
             options_map(std::istream& is, bool full=true)
                 :Json(is, full)
                 {}

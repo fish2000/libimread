@@ -135,6 +135,7 @@ namespace py {
             std::unique_ptr<im::FileSource> input;
             std::unique_ptr<im::Image> output;
             bool exists = false;
+            options_map default_opts;
             
             try {
                 py::gil::release nogil;
@@ -163,8 +164,9 @@ namespace py {
             
             {
                 py::gil::release nogil;
+                default_opts = format->get_options();
                 output = std::unique_ptr<im::Image>(
-                    format->read(input.get(), &factory, opts));
+                    format->read(input.get(), &factory, opts.update(default_opts)));
                 return im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             }

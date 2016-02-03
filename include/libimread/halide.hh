@@ -218,7 +218,7 @@ namespace im {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
             options_map default_opts = format->get_options();
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, default_opts);
+            std::unique_ptr<Image> output = format->read(input.get(), &factory, opts.update(default_opts));
             HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output.get()));
             image.set_host_dirty();
             return image;
@@ -230,7 +230,7 @@ namespace im {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             options_map default_opts = format->get_options();
-            format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
+            format->write(dynamic_cast<Image&>(input), output.get(), opts.update(default_opts));
         }
         
         inline void write_multi(ImageList& input, const std::string& filename,
@@ -238,7 +238,7 @@ namespace im {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             options_map default_opts = format->get_options();
-            format->write_multi(input, output.get(), default_opts);
+            format->write_multi(input, output.get(), default_opts.update(opts));
         }
         
         template <typename Format, typename T = byte> inline
@@ -250,7 +250,7 @@ namespace im {
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
             options_map default_opts = Format::get_options();
-            format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
+            format->write(dynamic_cast<Image&>(input), output.get(), opts.update(default_opts));
             return tf.str();
         }
         
