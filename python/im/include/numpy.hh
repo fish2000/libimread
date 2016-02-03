@@ -16,10 +16,6 @@
 #include <libimread/base.hh>
 #include <libimread/halide.hh>
 
-// #if PY_MAJOR_VERSION < 3
-// #define PyBytes_FromString(string) PyString_FromString(string)
-// #endif
-
 namespace im {
     
     namespace detail {
