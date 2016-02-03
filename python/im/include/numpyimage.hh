@@ -408,6 +408,17 @@ namespace py {
             return Py_BuildValue("O", pyim->readoptDict);
         }
         
+        /// NumpyImage.read_opts setter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        int         set_read_opts(PyObject* self, PyObject* value, void* closure) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            if (!value) { return 0; }
+            Py_XDECREF(pyim->readoptDict);
+            pyim->readoptDict = Py_BuildValue("O", value);
+            return 0;
+        }
+        
         /// NumpyImage.write_opts getter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
@@ -416,6 +427,16 @@ namespace py {
             return Py_BuildValue("O", pyim->writeoptDict);
         }
         
+        /// NumpyImage.write_opts setter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        int         set_write_opts(PyObject* self, PyObject* value, void* closure) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            if (!value) { return 0; }
+            Py_XDECREF(pyim->writeoptDict);
+            pyim->writeoptDict = Py_BuildValue("O", value);
+            return 0;
+        }
         
     } /* namespace image */
         

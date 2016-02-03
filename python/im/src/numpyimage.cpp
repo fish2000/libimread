@@ -39,12 +39,12 @@ static PyGetSetDef NumpyImage_getset[] = {
     {
         (char*)"read_opts",
             (getter)py::image::get_read_opts<HybridArray>,
-            NULL,
+            (setter)py::image::set_read_opts<HybridArray>,
             (char*)"Read options dict", NULL },
     {
         (char*)"write_opts",
             (getter)py::image::get_write_opts<HybridArray>,
-            NULL,
+            (setter)py::image::set_write_opts<HybridArray>,
             (char*)"Write options dict", NULL },
     { NULL, NULL, NULL, NULL, NULL }
 };

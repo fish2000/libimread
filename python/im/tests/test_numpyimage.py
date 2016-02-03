@@ -16,4 +16,7 @@ class NumpyImageTests(BaseCase):
             image = im.NumpyImage(image_path, options=dict(yo="dogg"))
             self.assertIsNotNone(image)
             self.assertEqual(image.read_opts['yo'], "dogg")
+            image.read_opts = dict(iheard="you like options dicts")
+            self.assertFalse('yo' in image.read_opts)
+            self.assertEqual(image.read_opts['iheard'], "you like options dicts")
     
