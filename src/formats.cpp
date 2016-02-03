@@ -69,8 +69,18 @@ namespace im {
         if (format::TIFF::match_format(src)) { return "tif";  }
         if (format::WebP::match_format(src)) { return "webp"; }
         if (format::PPM::match_format(src))  { return "ppm";  }
+        
         // if (format::PVR::match_format(src)) { return "pvr"; }
-        return 0;
+        // return 0;
+        
+        imread_raise(FormatNotFound,
+            "Format Error:",
+            "\tFile suffix not found for byte source");
     }
+    
+    std::unique_ptr<ImageFormat> for_source(byte_source* source) {
+        return get_format(magic_format(source));
+    }
+    
 
 } /* namespace im */

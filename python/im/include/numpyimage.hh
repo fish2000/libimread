@@ -172,6 +172,35 @@ namespace py {
             }
         }
         
+        template <typename ImageType = HybridArray,
+                  typename FactoryType = ArrayFactory>
+        std::unique_ptr<ImageType> loadblob(char const* source, options_map const& opts) {
+            FactoryType factory;
+            std::unique_ptr<im::ImageFormat> format;
+            std::unique_ptr<im::byte_source> input;
+            std::unique_ptr<im::Image> output;
+            options_map default_opts;
+            
+            try {
+                py::gil::release nogil;
+                input = std::unique_ptr<im::byte_source>(
+                    new im::byte_source(reinterpret_cast<const byte*>(source),
+                                        std::strlen(source)));
+                format = std::unique_ptr<im::ImageFormat>(
+                    im::for_source(source));
+                default_opts = format->get_options();
+                output = std::unique_ptr<im::Image>(
+                    format->read(input.get(), &factory, opts.update(default_opts)));
+                return im::detail::dynamic_cast_unique<ImageType>(
+                    std::move(output));
+            } catch (im::FormatNotFound& exc) {
+                PyErr_SetString(PyExc_ValueError,
+                    "Can't find I/O format for blob source");
+                return std::unique_ptr<ImageType>(nullptr);
+            }
+            
+        }
+        
         /// __init__ implementation
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory,
@@ -179,7 +208,6 @@ namespace py {
         int init(PyObject* self, PyObject* args, PyObject* kwargs) {
             static const std::unique_ptr<ImageType> unique_null_ptr = std::unique_ptr<ImageType>(nullptr);
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            // PyArray_Descr* dtype = NULL;
             PyObject* py_is_blob = NULL;
             PyObject* options = NULL;
             bool is_blob = false;
@@ -201,23 +229,27 @@ namespace py {
             }
             
             if (!source) {
-                PyErr_SetString(PyExc_ValueError, "No filename");
+                PyErr_SetString(PyExc_ValueError, "No filename or blob data");
                 return -1;
             }
             
             try {
-                pyim->image = py::image::load<ImageType, FactoryType>(
-                      source, py::options::parse_options(options));
+                if (is_blob) {
+                    pyim->image = py::image::loadblob<ImageType, FactoryType>(
+                        source, py::options::parse_options(options));
+                } else {
+                    pyim->image = py::image::load<ImageType, FactoryType>(
+                        source, py::options::parse_options(options));
+                }
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
                 return -1;
             }
             if (pyim->image == unique_null_ptr) {
-                /// if this is true, PyErr will have been set
+                /// if this is true, PyErr has already been set
                 return -1;
             }
             
-            // pyim->dtype = dtype ? dtype : PyArray_DescrFromType(pyim->image->dtype());
             pyim->dtype = PyArray_DescrFromType(pyim->image->dtype());
             Py_INCREF(pyim->dtype);
             
