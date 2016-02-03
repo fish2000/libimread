@@ -29,3 +29,10 @@ class NumpyImageTests(BaseCase):
             self.assertEqual(image.strides, array.strides)
             self.assertEqual(len(image),    array.size)
     
+    def test_load_image_blob(self):
+        for image_path in self.image_paths:
+            with open(image_path, 'rb') as image_fh:
+                image_blob = image_fh.read()
+                image = im.NumpyImage(image_blob, is_blob=True)
+                self.assertIsNotNone(image)
+    

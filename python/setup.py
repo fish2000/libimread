@@ -114,6 +114,7 @@ extensions = {
         "im/src/numpy.cpp",
         "im/src/numpyimage.cpp",
         "im/src/options.cpp",
+        "im/src/pybuffer.cpp",
         "im/src/structcode.cpp",
         "im/src/typecode.cpp",
     ],

@@ -11,6 +11,7 @@
 
 #include "structcode.hpp"
 #include "options.hpp"
+#include "pybuffer.hpp"
 #include "numpy.hh"
 #include "gil.hh"
 
@@ -175,18 +176,17 @@ namespace py {
         
         template <typename ImageType = HybridArray,
                   typename FactoryType = ArrayFactory>
-        std::unique_ptr<ImageType> loadblob(char const* source, options_map const& opts) {
+        std::unique_ptr<ImageType> loadblob(Py_buffer const& view, options_map const& opts) {
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
-            std::unique_ptr<im::memory_source> input;
+            std::unique_ptr<py::buffer::source> input;
             std::unique_ptr<im::Image> output;
             options_map default_opts;
             
             try {
                 py::gil::release nogil;
-                input = std::unique_ptr<im::memory_source>(
-                    new im::memory_source(reinterpret_cast<const byte*>(source),
-                                          std::strlen(source)));
+                input = std::unique_ptr<py::buffer::source>(
+                    new py::buffer::source(view));
                 format = std::unique_ptr<im::ImageFormat>(
                     im::for_source(input.get()));
                 default_opts = format->get_options();
@@ -212,13 +212,14 @@ namespace py {
             PyObject* py_is_blob = NULL;
             PyObject* options = NULL;
             bool is_blob = false;
-            char const* source = NULL;
+            // char const* source = NULL;
+            Py_buffer view;
             char const* keywords[] = { "source", "is_blob", "options", NULL };
             
             if (!PyArg_ParseTupleAndKeywords(
-                args, kwargs, "s|O!O", const_cast<char**>(keywords),
-                &source,
-                &PyBool_Type, &py_is_blob,
+                args, kwargs, "s*|OO", const_cast<char**>(keywords),
+                &view,
+                &py_is_blob,
                 &options)) {
                     PyErr_SetString(PyExc_ValueError,
                         "Bad arguments to image_init");
@@ -229,18 +230,14 @@ namespace py {
                 }
             }
             
-            if (!source) {
-                PyErr_SetString(PyExc_ValueError, "No filename or blob data");
-                return -1;
-            }
-            
             try {
                 if (is_blob) {
                     pyim->image = py::image::loadblob<ImageType, FactoryType>(
-                        source, py::options::parse_options(options));
+                            view, py::options::parse_options(options));
                 } else {
+                    py::buffer::source source(view);
                     pyim->image = py::image::load<ImageType, FactoryType>(
-                        source, py::options::parse_options(options));
+                        source.str().c_str(), py::options::parse_options(options));
                 }
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
