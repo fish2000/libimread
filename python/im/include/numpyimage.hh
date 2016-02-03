@@ -15,6 +15,7 @@
 #include "gil.hh"
 
 #include <libimread/ext/errors/demangle.hh>
+#include <libimread/memory.hh>
 #include <libimread/hashing.hh>
 
 namespace im {
@@ -177,17 +178,17 @@ namespace py {
         std::unique_ptr<ImageType> loadblob(char const* source, options_map const& opts) {
             FactoryType factory;
             std::unique_ptr<im::ImageFormat> format;
-            std::unique_ptr<im::byte_source> input;
+            std::unique_ptr<im::memory_source> input;
             std::unique_ptr<im::Image> output;
             options_map default_opts;
             
             try {
                 py::gil::release nogil;
-                input = std::unique_ptr<im::byte_source>(
-                    new im::byte_source(reinterpret_cast<const byte*>(source),
-                                        std::strlen(source)));
+                input = std::unique_ptr<im::memory_source>(
+                    new im::memory_source(reinterpret_cast<const byte*>(source),
+                                          std::strlen(source)));
                 format = std::unique_ptr<im::ImageFormat>(
-                    im::for_source(source));
+                    im::for_source(input.get()));
                 default_opts = format->get_options();
                 output = std::unique_ptr<im::Image>(
                     format->read(input.get(), &factory, opts.update(default_opts)));
