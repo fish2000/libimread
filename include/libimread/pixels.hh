@@ -94,6 +94,11 @@ namespace im {
                                      z * stride2];
             }
             
+            inline pdata_t get(pdiff_t x, pdiff_t y, pdiff_t z,
+                               pdiff_t idx = 0) {
+                return operator()(x, y, z)[idx];
+            }
+            
         };
         
         
