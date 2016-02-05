@@ -43,6 +43,7 @@ namespace im {
     class HybridArray : public HalBase, public PythonBufferImage, public MetaImage {
         public:
             HybridArray();
+            HybridArray(NPY_TYPES d, const buffer_t* b, const std::string& name="");
             HybridArray(NPY_TYPES d, int x, int y, int z, int w, const std::string& name="");
             HybridArray(NPY_TYPES d, int x, int y, int z, const std::string& name="");
             HybridArray(NPY_TYPES d, int x, int y, const std::string& name="");
@@ -62,6 +63,7 @@ namespace im {
             virtual uint8_t* data(int s = 0) const;
             
             Halide::Type type() const;
+            buffer_t* buffer_ptr() const;
             virtual int nbits() const override;
             virtual int nbytes() const override;
             virtual int ndims() const override;

@@ -238,18 +238,17 @@ namespace py {
             }
             
             try {
+                options_map opts = py::options::parse_options(options);
                 if (is_blob) {
                     /// load as blob -- pass the buffer along
-                    pyim->image = py::image::loadblob<ImageType, FactoryType>(
-                            view, py::options::parse_options(options));
+                    pyim->image = py::image::loadblob<ImageType, FactoryType>(view, opts);
                 } else {
                     /// load as file -- extract the filename from the buffer
                     /// into a temporary c-string for passing
                     py::buffer::source source(view);
                     std::string srcstr = source.str();
                     char const* srccstr = srcstr.c_str();
-                    pyim->image = py::image::load<ImageType, FactoryType>(
-                         srccstr, py::options::parse_options(options));
+                    pyim->image = py::image::load<ImageType, FactoryType>(srccstr, opts);
                 }
             } catch (im::OptionsError& exc) {
                 /// there was something weird in the `options` dict

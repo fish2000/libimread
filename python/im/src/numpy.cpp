@@ -108,6 +108,11 @@ namespace im {
         ,dtype_(NPY_UINT8)
         {}
     
+    HybridArray::HybridArray(NPY_TYPES d, const buffer_t* b, const std::string& name)
+        :HalBase(detail::for_dtype(d), b, name), PythonBufferImage(), MetaImage(name)
+        ,dtype_(d)
+        {}
+    
     HybridArray::HybridArray(NPY_TYPES d, int x, int y, int z, int w, const std::string& name)
         :HalBase(detail::for_dtype(d), x, y, z, w, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
@@ -143,6 +148,10 @@ namespace im {
     
     Halide::Type HybridArray::type() const {
         return HalBase::buffer.type();
+    }
+    
+    buffer_t* HybridArray::buffer_ptr() const {
+        return HalBase::raw_buffer();
     }
     
     int HybridArray::nbits() const {
