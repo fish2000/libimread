@@ -1,7 +1,6 @@
 #ifndef PyImgC_STRUCTCODE_H
 #define PyImgC_STRUCTCODE_H
 
-#include <cstdio>
 #include <string>
 #include <utility>
 #include <vector>

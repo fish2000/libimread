@@ -3,9 +3,6 @@
 
 /// This was originally part of PLIIO/PyImgC
 
-#include <cstdio>
-#include <iostream>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -18,7 +15,6 @@
 
 #include <Python.h>
 #include <numpy/ndarraytypes.h>
-
 
 namespace std {
     

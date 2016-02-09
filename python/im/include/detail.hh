@@ -4,9 +4,6 @@
 
 #include <memory>
 #include <Python.h>
-#include <structmember.h>
-#include "gil.hh"
-#include "structcode.hpp"
 
 namespace im {
     

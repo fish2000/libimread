@@ -7,6 +7,7 @@
 #include <Python.h>
 #include <structmember.h>
 
+#include "gil.hh"
 #include "detail.hh"
 #include "options.hpp"
 #include "pybuffer.hpp"

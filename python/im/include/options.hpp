@@ -4,7 +4,6 @@
 
 #include <cstddef>
 #include <Python.h>
-#include <structmember.h>
 #include <libimread/options.hh>
 
 namespace py {

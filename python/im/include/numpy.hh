@@ -6,12 +6,8 @@
 
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
-
-#include <cstring>
 #include <vector>
 #include <memory>
-#include <sstream>
-
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/halide.hh>
@@ -20,6 +16,7 @@ namespace im {
     
     namespace detail {
         
+        char const* structcode(NPY_TYPES dtype);
         Halide::Type for_dtype(NPY_TYPES dtype);
         NPY_TYPES for_nbits(int nbits, bool signed_type = false);
         

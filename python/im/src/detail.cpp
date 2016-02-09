@@ -2,6 +2,8 @@
 #include <string>
 #include <tuple>
 #include "detail.hh"
+#include "structcode.hpp"
+#include "gil.hh"
 
 namespace im {
     

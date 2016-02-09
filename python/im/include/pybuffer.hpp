@@ -4,7 +4,6 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_PYBUFFER_HPP_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_PYBUFFER_HPP_
 
-#include <cstring>
 #include <string>
 #include <vector>
 #include <Python.h>

@@ -1,6 +1,7 @@
 
 #define NO_IMPORT_ARRAY
 
+#include <cstring>
 #include "numpy.hh"
 #include "structcode.hpp"
 #include "typecode.hpp"

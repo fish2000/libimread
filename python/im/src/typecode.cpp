@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include "typecode.hpp"
 
 namespace typecode {
@@ -11,7 +12,7 @@ namespace typecode {
     NPY_TYPECHAR typechar(NPY_TYPES typecode) {
         try {
             return typecodemaps::character.at(typecode);
-        } catch (const std::out_of_range &err) {
+        } catch (const std::out_of_range& err) {
             std::cerr    << ">>> Type character not found for typecode: "
                          << typecode << std::endl << ">>> Exception message: "
                          << err.what() << std::endl;
@@ -26,7 +27,7 @@ namespace typecode {
     std::string name(NPY_TYPES typecode) {
         try {
             return typecodemaps::literal.at(typecode);
-        } catch (const std::out_of_range &err) {
+        } catch (const std::out_of_range& err) {
             std::cerr    << ">>> Typecode literal not found for typecode: "
                          << typecode << std::endl << ">>> Exception message: "
                          << err.what() << std::endl;
