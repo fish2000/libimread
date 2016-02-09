@@ -116,6 +116,7 @@ other_flags = []
 
 extensions = {
     'im': [
+        "im/src/detail.cpp",
         "im/src/numpy.cpp",
         "im/src/numpyimage.cpp",
         "im/src/options.cpp",
