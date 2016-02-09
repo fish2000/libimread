@@ -596,26 +596,19 @@ static PyTypeObject NumpyImage_Type = {
     
 };
 
-namespace {
+namespace py {
     
-    PyObject* structcode_parse(PyObject* self, PyObject* args) {
-        char const* code;
+    namespace methods {
         
-        if (!PyArg_ParseTuple(args, "s", &code)) {
-            PyErr_SetString(PyExc_ValueError,
-                "cannot get structcode string");
-            return NULL;
-        }
+        PyObject* structcode_parse(PyObject* self, PyObject* args);
         
-        return Py_BuildValue("O",
-            im::detail::structcode_to_dtype(code));
     }
 }
 
 static PyMethodDef NumpyImage_module_functions[] = {
     {
         "structcode_parse",
-            (PyCFunction)structcode_parse,
+            (PyCFunction)py::methods::structcode_parse,
             METH_VARARGS,
             "Parse struct code into list of dtype-string tuples" },
     { NULL, NULL, 0, NULL }

@@ -123,6 +123,7 @@ extensions = {
         "im/src/pybuffer.cpp",
         "im/src/structcode.cpp",
         "im/src/typecode.cpp",
+        "im/src/module.cpp"
     ],
 }
 
