@@ -4,78 +4,18 @@
 
 #include <memory>
 #include <string>
-#include <tuple>
-
 #include <Python.h>
 #include <structmember.h>
 
-#include "structcode.hpp"
+#include "detail.hh"
 #include "options.hpp"
 #include "pybuffer.hpp"
 #include "numpy.hh"
-#include "gil.hh"
 
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/errors.hh>
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
-
-namespace im {
-    
-    namespace detail {
-        
-        /// XXX: remind me why in fuck did I write this shit originally
-        template <typename T, typename pT>
-        std::unique_ptr<T> dynamic_cast_unique(std::unique_ptr<pT>&& source) {
-            /// Force a dynamic_cast upon a unique_ptr via interim swap
-            /// ... danger, will robinson: DELETERS/ALLOCATORS NOT WELCOME
-            /// ... from http://stackoverflow.com/a/14777419/298171
-            if (!source) { return std::unique_ptr<T>(); }
-            
-            /// Throws a std::bad_cast() if this doesn't work out
-            T *destination = &dynamic_cast<T&>(*source.get());
-            
-            source.release();
-            std::unique_ptr<T> out(destination);
-            return out;
-        }
-        
-        PyObject* structcode_to_dtype(char const* code) {
-            using structcode::stringvec_t;
-            using structcode::structcode_t;
-            using structcode::parse_result_t;
-            
-            std::string endianness;
-            stringvec_t parsetokens;
-            structcode_t pairvec;
-            Py_ssize_t imax = 0;
-            
-            {
-                py::gil::release nogil;
-                std::tie(endianness, parsetokens, pairvec) = structcode::parse(code);
-                imax = static_cast<Py_ssize_t>(pairvec.size());
-            }
-            
-            if (!bool(imax)) {
-                PyErr_Format(PyExc_ValueError,
-                    "Structcode %.200s parsed to zero-length", code);
-                return NULL;
-            }
-            
-            /// Make python list of tuples
-            PyObject* tuple = PyTuple_New(imax);
-            for (Py_ssize_t idx = 0; idx < imax; idx++) {
-                PyTuple_SET_ITEM(tuple, idx, PyTuple_Pack(2,
-                    PyString_FromString(pairvec[idx].first.c_str()),
-                    PyString_FromString((endianness + pairvec[idx].second).c_str())));
-            }
-            
-            return tuple;
-        }
-        
-    }
-    
-}
 
 namespace py {
     
@@ -535,5 +475,150 @@ namespace py {
     } /* namespace image */
         
 } /* namespace py */
+
+/// PYTHON TYPE DEFINITION
+
+using im::HybridArray;
+using im::ArrayFactory;
+using py::image::NumpyImage;
+
+static PyBufferProcs NumpyImage_Buffer3000Methods = {
+    0, /* (readbufferproc) */
+    0, /* (writebufferproc) */
+    0, /* (segcountproc) */
+    0, /* (charbufferproc) */
+    (getbufferproc)py::image::getbuffer<HybridArray>,
+    (releasebufferproc)py::image::releasebuffer<HybridArray>,
+};
+
+static PySequenceMethods NumpyImage_SequenceMethods = {
+    (lenfunc)py::image::length<HybridArray>,        /* sq_length */
+    0,                                              /* sq_concat */
+    0,                                              /* sq_repeat */
+    (ssizeargfunc)py::image::atindex<HybridArray>,  /* sq_item */
+    0,                                              /* sq_slice */
+    0,                                              /* sq_ass_item HAHAHAHA */
+    0,                                              /* sq_ass_slice HEHEHE ASS <snort> HA */
+    0                                               /* sq_contains */
+};
+
+static PyGetSetDef NumpyImage_getset[] = {
+    {
+        (char*)"dtype",
+            (getter)py::image::get_dtype<HybridArray>,
+            NULL,
+            (char*)"NumpyImage dtype", NULL },
+    {
+        (char*)"shape",
+            (getter)py::image::get_shape<HybridArray>,
+            NULL,
+            (char*)"NumpyImage shape tuple", NULL },
+    {
+        (char*)"strides",
+            (getter)py::image::get_strides<HybridArray>,
+            NULL,
+            (char*)"NumpyImage strides tuple", NULL },
+    {
+        (char*)"read_opts",
+            (getter)py::image::get_read_opts<HybridArray>,
+            (setter)py::image::set_read_opts<HybridArray>,
+            (char*)"Read options dict", NULL },
+    {
+        (char*)"write_opts",
+            (getter)py::image::get_write_opts<HybridArray>,
+            (setter)py::image::set_write_opts<HybridArray>,
+            (char*)"Write options dict", NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+};
+
+// static PyMethodDef NumpyImage_methods[] = {
+//     {
+//         "as_array",
+//             (PyCFunction)NumpyImage_AsArray,
+//             METH_VARARGS | METH_KEYWORDS,
+//             "Get an ndarray for a NumpyImage" },
+//     SENTINEL
+// };
+
+static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT         | 
+                                         Py_TPFLAGS_BASETYPE        | 
+                                         Py_TPFLAGS_HAVE_NEWBUFFER;
+
+static PyTypeObject NumpyImage_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                                                                  /* ob_size */
+    "im.NumpyImage",                                                    /* tp_name */
+    sizeof(NumpyImage),                                                 /* tp_basicsize */
+    0,                                                                  /* tp_itemsize */
+    (destructor)py::image::dealloc<HybridArray>,                        /* tp_dealloc */
+    0,                                                                  /* tp_print */
+    0,                                                                  /* tp_getattr */
+    0,                                                                  /* tp_setattr */
+    0,                                                                  /* tp_compare */
+    (reprfunc)py::image::repr<HybridArray>,                             /* tp_repr */
+    0,                                                                  /* tp_as_number */
+    &NumpyImage_SequenceMethods,                                        /* tp_as_sequence */
+    0,                                                                  /* tp_as_mapping */
+    (hashfunc)py::image::hash<HybridArray>,                             /* tp_hash */
+    0,                                                                  /* tp_call */
+    (reprfunc)py::image::str<HybridArray>,                              /* tp_str */
+    (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
+    (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
+    &NumpyImage_Buffer3000Methods,                                      /* tp_as_buffer */
+    NumpyImage_TypeFlags,                                               /* tp_flags */
+    "Python bindings for NumPy Halide bridge",                          /* tp_doc */
+    0,                                                                  /* tp_traverse */
+    0,                                                                  /* tp_clear */
+    0,                                                                  /* tp_richcompare */
+    0,                                                                  /* tp_weaklistoffset */
+    0,                                                                  /* tp_iter */
+    0,                                                                  /* tp_iternext */
+    0, /*NumpyImage_methods*/                                           /* tp_methods */
+    0,                                                                  /* tp_members */
+    NumpyImage_getset,                                                  /* tp_getset */
+    0,                                                                  /* tp_base */
+    0,                                                                  /* tp_dict */
+    0,                                                                  /* tp_descr_get */
+    0,                                                                  /* tp_descr_set */
+    0,                                                                  /* tp_dictoffset */
+    (initproc)py::image::init<HybridArray, ArrayFactory>,               /* tp_init */
+    0,                                                                  /* tp_alloc */
+    py::image::createnew<HybridArray>,                                  /* tp_new */
+    0,                                                                  /* tp_free */
+    0,                                                                  /* tp_is_gc */
+    0,                                                                  /* tp_bases */
+    0,                                                                  /* tp_mro */
+    0,                                                                  /* tp_cache */
+    0,                                                                  /* tp_subclasses */
+    0,                                                                  /* tp_weaklist */
+    0,                                                                  /* tp_del */
+    0,                                                                  /* tp_version_tag */
+    
+};
+
+namespace {
+    
+    PyObject* structcode_parse(PyObject* self, PyObject* args) {
+        char const* code;
+        
+        if (!PyArg_ParseTuple(args, "s", &code)) {
+            PyErr_SetString(PyExc_ValueError,
+                "cannot get structcode string");
+            return NULL;
+        }
+        
+        return Py_BuildValue("O",
+            im::detail::structcode_to_dtype(code));
+    }
+}
+
+static PyMethodDef NumpyImage_module_functions[] = {
+    {
+        "structcode_parse",
+            (PyCFunction)structcode_parse,
+            METH_VARARGS,
+            "Parse struct code into list of dtype-string tuples" },
+    { NULL, NULL, 0, NULL }
+};
 
 #endif /// LIBIMREAD_PYTHON_IM_INCLUDE_NUMPYIMAGE_HH_
