@@ -4,11 +4,10 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_PYBUFFER_HPP_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_PYBUFFER_HPP_
 
-#include <cstdio>
-#include <vector>
+#include <cstring>
 #include <string>
+#include <vector>
 #include <Python.h>
-#include <structmember.h>
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
 

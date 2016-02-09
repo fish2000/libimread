@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include "pybuffer.hpp"
+// #include <structmember.h>
 
 namespace py {
     

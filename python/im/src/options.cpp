@@ -8,7 +8,7 @@ namespace py {
     namespace options {
         
         const char* get_blob(PyObject* data,
-                             std::size_t& len) {
+                             std::size_t& len) noexcept {
             #if PY_MAJOR_VERSION < 3
                 if (!PyString_Check(data)) { return 0; }
                 len = PyString_Size(data);
@@ -20,7 +20,7 @@ namespace py {
             #endif
         }
         
-        const char* get_cstring(PyObject* stro) {
+        const char* get_cstring(PyObject* stro) noexcept {
             #if PY_MAJOR_VERSION < 3
                 if (!PyString_Check(stro)) { return 0; }
                 return PyString_AsString(stro);
@@ -76,7 +76,6 @@ namespace py {
             PyObject* key;
             PyObject* value;
             Py_ssize_t pos = 0;
-            
             while (PyDict_Next(dict, &pos, &key, &value)) {
                 std::string k = py::options::get_cstring(key);
                 if (PyDict_Check(value)) {
@@ -108,7 +107,6 @@ namespace py {
             }
             return out;
         }
-        
         
     }
     
