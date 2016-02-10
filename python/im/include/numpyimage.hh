@@ -111,7 +111,7 @@ namespace py {
             
             {
                 py::gil::release nogil;
-                // default_opts = format->add_options(opts);
+                default_opts = format->add_options(opts);
                 output = std::unique_ptr<im::Image>(
                     format->read(input.get(), &factory, opts));
                 return im::detail::dynamic_cast_unique<ImageType>(
@@ -137,7 +137,7 @@ namespace py {
                     new py::buffer::source(view));
                 format = std::unique_ptr<im::ImageFormat>(
                     im::for_source(input.get()));
-                // default_opts = format->add_options(opts);
+                default_opts = format->add_options(opts);
                 output = std::unique_ptr<im::Image>(
                     format->read(input.get(), &factory, opts));
                 return im::detail::dynamic_cast_unique<ImageType>(
