@@ -460,6 +460,9 @@ namespace py {
             
             try {
                 options_map opts = py::options::parse_options(options);
+                if (pyim->writeoptDict) {
+                    opts = opts.update(pyim->writeopts());
+                }
                 if (as_blob) {
                     /// save as blob -- pass the buffer along
                     if (!opts.has("format")) {
@@ -481,7 +484,7 @@ namespace py {
                     py::buffer::source dest(view);
                     dststr = std::string(dest.str());
                 }
-                did_save = py::image::save<ImageType>(*pyim->image.get(), dststr.c_str(), opts);
+                did_save = py::image::save(*pyim->image.get(), dststr.c_str(), opts);
             } catch (im::OptionsError& exc) {
                 /// there was something weird in the `options` dict
                 PyErr_SetString(PyExc_AttributeError, exc.what());
