@@ -21,7 +21,7 @@ namespace im {
     namespace apple {
         
         using filesystem::path;
-        static const options_map apple_default_opts;
+        // static const options_map apple_default_opts;
         
         template <typename T>
         using ImageType = HybridImage<typename std::decay_t<T>>;
@@ -30,22 +30,22 @@ namespace im {
         
         template <typename T = byte> inline
         ImageType<T> read(const std::string &filename,
-                          const options_map &opts = apple_default_opts) {
+                          const options_map &opts = options_map()) {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            options_map default_opts = format->get_options();
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, default_opts.update(opts));
+            options_map default_opts = format->add_options(opts);
+            std::unique_ptr<Image> output = format->read(input.get(), &factory, default_opts);
             ImageType<T> image(dynamic_cast<ImageType<T>&>(*output));
             return image;
         }
         
         template <typename T = byte> inline
         void write(HybridImage<T>& input, const std::string& filename,
-                                          const options_map& opts = apple_default_opts) {
+                                          const options_map& opts = options_map()) {
             std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            options_map writeopts(opts);
+            options_map writeopts(format->add_options(opts));
             writeopts.set("filename", filename);
             writeopts.set("extension", path::extension(filename));
             format->write(dynamic_cast<Image&>(input), output.get(), writeopts);
@@ -53,10 +53,10 @@ namespace im {
         
         template <typename Color = color::RGBA> inline
         void write(InterleavedImage<Color>& input, const std::string& filename,
-                                                   const options_map& opts = apple_default_opts) {
+                                                   const options_map& opts = options_map()) {
             std::unique_ptr<ImageFormat> format(get_format("objc"));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            options_map writeopts(opts);
+            options_map writeopts(format->add_options(opts));
             writeopts.set("filename", filename);
             writeopts.set("extension", path::extension(filename));
             format->write(dynamic_cast<Image&>(input), output.get(), writeopts);
