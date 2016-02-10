@@ -49,7 +49,7 @@ namespace py {
             }
             
             void cleanup() {
-                image.release();
+                image.reset(nullptr);
                 Py_XDECREF(dtype);
                 Py_XDECREF(readoptDict);
                 Py_XDECREF(writeoptDict);
