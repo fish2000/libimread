@@ -7,6 +7,7 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include <libimread/libimread.hpp>
 
 namespace ansi {
     
@@ -51,10 +52,18 @@ namespace ansi {
                 {}
             friend std::ostream&
             operator<<(std::ostream& os, const ANSI& ansi) {
-                return os << "\033[" << ansi.code << "m";
+                #if IM_COLOR_TRACE == 1
+                    return os << "\033[" << ansi.code << "m";
+                #else
+                    return os;
+                #endif
             }
             std::string str() const {
-                return "\033[" + std::to_string(code) + "m";
+                #if IM_COLOR_TRACE == 1
+                    return "\033[" + std::to_string(code) + "m";
+                #else
+                    return "";
+                #endif
             }
             const char *c_str() const {
                 return str().c_str();

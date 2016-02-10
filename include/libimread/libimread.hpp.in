@@ -22,8 +22,13 @@
 #define IM_LINK_LIBRARIES               "@IM_LINK_LIBRARIES@"
 #define IM_LINK_FLAGS                   "@IM_LINK_FLAGS@"
 
+#ifndef IM_COLOR_TRACE
 #define IM_COLOR_TRACE                  1
+#endif
+
+#ifndef IM_VERBOSE
 #define IM_VERBOSE                      0
+#endif
 
 #define FILESYSTEM_TEMP_SUFFIX          ".imdata"
 #define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"

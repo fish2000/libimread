@@ -58,11 +58,10 @@ define_macros.append(
     ('VERSION', __version__))
 define_macros.append(
     ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'))
-
-# define_macros.append(
-#     ('__OBJC__', '1'))
-# define_macros.append(
-#     ('__OBJC2__', '1'))
+define_macros.append(
+    ('IM_COLOR_TRACE', '0'))
+define_macros.append(
+    ('IM_VERBOSE', '0'))
 
 if DEBUG:
     undef_macros = ['NDEBUG', '__OBJC__', '__OBJC2__']
@@ -71,10 +70,14 @@ if DEBUG:
             ('IM_DEBUG', DEBUG))
         define_macros.append(
             ('_GLIBCXX_DEBUG', '1'))
+        define_macros.append(
+            ('IM_VERBOSE', '1'))
         auxilliary_macros.append(
             ('IM_DEBUG', DEBUG))
         auxilliary_macros.append(
             ('_GLIBCXX_DEBUG', '1'))
+        auxilliary_macros.append(
+            ('IM_VERBOSE', '1'))
 
 print('')
 print('')
