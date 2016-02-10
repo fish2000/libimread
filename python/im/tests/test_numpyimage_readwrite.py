@@ -43,6 +43,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
             image2 = im.NumpyImage(data, is_blob=True)
             self.assertIsNotNone(image2)
+            self.assertEqual(image.shape, image2.shape)
     
     def test_load_image_png_write_blob_png_readback(self):
         for image_path in self.pngs:
@@ -52,8 +53,9 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
             image2 = im.NumpyImage(data, is_blob=True)
             self.assertIsNotNone(image2)
+            self.assertEqual(image.shape[:2], image2.shape[:2])
     
-    def test_load_image_jpg_write_blob_png_readback(self):
+    def test_load_image_jpg_write_blob_jpg_readback(self):
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -61,8 +63,9 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
             image2 = im.NumpyImage(data, is_blob=True)
             self.assertIsNotNone(image2)
+            self.assertEqual(image.shape, image2.shape)
     
-    def test_load_image_png_write_blob_png_readback(self):
+    def test_load_image_png_write_blob_jpg_readback(self):
         for image_path in self.pngs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -70,6 +73,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
             image2 = im.NumpyImage(data, is_blob=True)
             self.assertIsNotNone(image2)
+            self.assertEqual(image.shape[:2], image2.shape[:2])
     
     '''
     def test_load_image_jpg_check_dimensions(self):
