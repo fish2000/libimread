@@ -439,7 +439,6 @@ namespace py {
             Py_buffer view;
             char const* keywords[] = { "destination", "as_blob", "options", NULL };
             std::string dststr;
-            char const* dstcstr;
             bool as_blob = false;
             bool did_save = false;
             
@@ -469,25 +468,20 @@ namespace py {
                         return NULL;
                     }
                     {
-                        // py::gil::release nogil;
-                        // did_save = py::image::saveblob<ImageType>(pyim->image, view, opts);
+                        py::gil::release nogil;
                         NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
                                               FILESYSTEM_TEMP_FILENAME,                /// prefix (filename template)
                                               false);                                  /// cleanup on scope exit
                         dststr = std::string(tf.filepath.make_absolute().str());
-                        dstcstr = dststr.c_str();
-                        // dstcstr = tf.c_str();
-                        did_save = py::image::save<ImageType>(*pyim->image.get(), dstcstr, opts);
                     }
                 } else {
                     /// load as file -- extract the filename from the buffer
-                    /// into a temporary c-string for passing
-                    // py::gil::release nogil;
+                    /// into a temporary string for passing
+                    py::gil::release nogil;
                     py::buffer::source dest(view);
                     dststr = std::string(dest.str());
-                    dstcstr = dststr.c_str();
-                    did_save = py::image::save<ImageType>(*pyim->image.get(), dstcstr, opts);
                 }
+                did_save = py::image::save<ImageType>(*pyim->image.get(), dststr.c_str(), opts);
             } catch (im::OptionsError& exc) {
                 /// there was something weird in the `options` dict
                 PyErr_SetString(PyExc_AttributeError, exc.what());
@@ -507,6 +501,7 @@ namespace py {
             
             if (as_blob && dststr.size()) {
                 std::vector<byte> data;
+                bool removed = false;
                 {
                     py::gil::release nogil;
                     std::unique_ptr<im::FileSource> readback(
@@ -518,7 +513,10 @@ namespace py {
                 PyObject* out = PyString_FromStringAndSize(
                     (char const*)&data[0],
                     data.size());
-                bool removed = path::remove(dststr);
+                {
+                    py::gil::release nogil;
+                    removed = path::remove(dststr);
+                }
                 if (!removed) {
                     PyErr_Format(PyExc_ValueError,
                         "Failed to remove temporary file %s", dststr.c_str());
