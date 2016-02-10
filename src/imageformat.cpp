@@ -31,6 +31,41 @@ namespace im {
     options_map ImageFormat::encode_options(options_t which_options) {
         return options_map::parse(iod::json_encode(which_options));
     }
-
+    
+    options_map ImageFormat::get_options() const {
+        return options_map();
+    }
+    
+    options_map ImageFormat::add_options(options_map const& opts) const {
+        return options_map().update(opts);
+    }
+    
+    ImageFormat::~ImageFormat() {}
+    
+    std::unique_ptr<Image> ImageFormat::read(byte_source* src,
+                                             ImageFactory* factory,
+                                             const options_map &opts) {
+        imread_raise_default(NotImplementedError);
+    }
+    
+    std::unique_ptr<ImageList> ImageFormat::read_multi(byte_source* src,
+                                                       ImageFactory* factory,
+                                                       const options_map& opts) {
+        imread_raise_default(NotImplementedError);
+    }
+    
+    void ImageFormat::write(Image& input,
+                            byte_sink* output,
+                            const options_map& opts) {
+        imread_raise_default(NotImplementedError);
+    }
+    
+    void ImageFormat::write_multi(ImageList& input,
+                                  byte_sink* output,
+                                  const options_map& opts) {
+        imread_raise_default(NotImplementedError);
+    }
+    
+    
     
 }

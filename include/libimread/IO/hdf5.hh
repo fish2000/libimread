@@ -76,8 +76,10 @@ namespace im {
             using can_read = std::true_type;
             using can_write = std::true_type;
             
+            /// \x0d\x0a\x1a\x0a
+            
             DECLARE_OPTIONS(
-                "\x89\x48\x44\x46\x0d\x0a\x1a\x0a", /// [0]
+                "\x89\x48\x44\x46", /// [0]
                 "hdf5",
                 "image/hdf5");
             

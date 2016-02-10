@@ -53,32 +53,26 @@ namespace im {
             );
                 
             static options_map encode_options(options_t which_options = options);
-            static options_map get_options() { return options_map(); }
-            virtual ~ImageFormat() {}
+            virtual options_map get_options() const;
+            virtual options_map add_options(options_map const& opts) const;
+            
+            virtual ~ImageFormat();
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                const options_map &opts) {
-                imread_raise_default(NotImplementedError);
-            }
+                                                const options_map &opts);
             
             virtual std::unique_ptr<ImageList> read_multi(byte_source* src,
                                                           ImageFactory* factory,
-                                                          const options_map& opts) {
-                imread_raise_default(NotImplementedError);
-            }
+                                                          const options_map& opts);
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               const options_map& opts) {
-                imread_raise_default(NotImplementedError);
-            }
+                               const options_map& opts);
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     const options_map& opts) {
-                imread_raise_default(NotImplementedError);
-            }
+                                     const options_map& opts);
     };
     
     template <typename FormatType>
@@ -93,11 +87,11 @@ namespace im {
                 return "." + FormatType::options.suffix;
             }
             
-            static options_map get_options() {
+            virtual options_map get_options() const override {
                 return ImageFormat::encode_options(FormatType::options);
             }
             
-            static options_map add_options(options_map const& opts) {
+            virtual options_map add_options(options_map const& opts) const override {
                 options_map result = ImageFormat::encode_options(FormatType::options);
                 return result.update(opts);
             }

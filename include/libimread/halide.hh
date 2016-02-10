@@ -249,7 +249,7 @@ namespace im {
                                           false); tf.remove();          /// cleanup on scope exit
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
-            options_map default_opts = Format::get_options();
+            options_map default_opts = format->get_options();
             format->write(dynamic_cast<Image&>(input), output.get(), opts.update(default_opts));
             return tf.str();
         }
