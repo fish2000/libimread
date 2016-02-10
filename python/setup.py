@@ -18,6 +18,7 @@ On linux, the package is often called python-setuptools''')
 
 # PYTHON & NUMPY INCLUDES
 from utils import Install, HomebrewInstall, gosub
+from setuptools import setup, Extension, find_packages
 from distutils.sysconfig import get_python_inc
 
 try:
@@ -64,7 +65,7 @@ define_macros.append(
     ('IM_VERBOSE', '0'))
 
 if DEBUG:
-    undef_macros = ['NDEBUG', '__OBJC__', '__OBJC2__']
+    # undef_macros = ['NDEBUG', '__OBJC__', '__OBJC2__']
     if int(DEBUG) > 2:
         define_macros.append(
             ('IM_DEBUG', DEBUG))
@@ -86,8 +87,8 @@ print(red(""" %(s)s DEBUGGG LEVEL: %(lv)s %(s)s """ % dict(s='*' * 65, lv=DEBUG)
 include_dirs = [
     libimread.include(),
     libhalide.include(),
-    libimread.dependency('imagecompression'),
-    libimread.dependency('iod'),
+    # libimread.dependency('imagecompression'),
+    # libimread.dependency('iod'),
     # libimread.dependency('libdocopt'),
     # libimread.dependency('libguid'),
     # libimread.dependency('libsszip'),
@@ -102,7 +103,7 @@ library_dirs = [
     libhalide.lib(),
     libllvm.lib()]
 
-other_flags = []
+other_flags = ['-Qunused-arguments']
 
 # for pth in (
 #     '/usr/local/include',
@@ -233,8 +234,8 @@ print(red(""" %(s)s BUILD COMMENCING: %(s)s """ % dict(s='*' * 65)))
 
 print('')
 
-from distutils.extension import Extension
-from distutils.core import setup
+# from distutils.extension import Extension
+# from distutils.core import setup
 
 ext_modules = []
 for key, sources in extensions.iteritems():
@@ -244,20 +245,18 @@ for key, sources in extensions.iteritems():
                 libraries),
         library_dirs=library_dirs,
         include_dirs=include_dirs,
-        sources=sources,
-        language="c++",
         undef_macros=undef_macros,
         define_macros=define_macros,
+        sources=sources,
+        language="c++",
         extra_compile_args=[
-            '-O3',
             '-x', 'c++',
             '-std=c++14',
-            '-stdlib=libc++',
-            '-Qunused-arguments',
+            '-stdlib=libc++'
         ] + other_flags))
 
-packages = setuptools.find_packages()
-package_dir = { 
+packages = find_packages()
+package_dir = {
     'im': 'im',
 }
 #package_data = { 'im/tools': ['im/tools/*.*'] }

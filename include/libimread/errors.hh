@@ -92,8 +92,8 @@ namespace im {
     
     template <typename ...Args> inline
     void __attribute__((nonnull (1, 3)))
-         srsly(const char* title, const ansi::ANSI color,
-               const char* file, int line, Args&& ...args) {
+         srsly(char const* title, ansi::ANSI const& color,
+               char const* file, int line, Args&& ...args) {
         std::cerr  << color << im::stringify(title) << ansi::reset
           << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
           << " : " << ansi::red << im::stringify(line) << ansi::reset
@@ -104,8 +104,8 @@ namespace im {
     
     template <typename ...Args> inline
     std::string __attribute__((nonnull (1, 3)))
-         emerg(const char* title, const ansi::ANSI color,
-               const char* file, int line, Args&& ...args) {
+         emerg(char const* title, ansi::ANSI const& color,
+               char const* file, int line, Args&& ...args) {
         std::ostringstream errstream;
         errstream  << color << im::stringify(title) << ansi::reset
           << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
@@ -117,7 +117,7 @@ namespace im {
     }
     
     template <typename ...Args> inline
-    void norly(const ansi::ANSI color, Args&& ...args) {
+    void norly(ansi::ANSI const& color, Args&& ...args) {
         std::cerr  << color 
                    << im::stringmerge(std::forward<Args>(args)...)
                    << ansi::reset << std::endl;
