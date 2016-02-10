@@ -212,10 +212,12 @@ namespace py {
             }
             
             /// create and set a dtype based on the loaded image data's type
+            Py_XDECREF(pyim->dtype);
             pyim->dtype = PyArray_DescrFromType(pyim->image->dtype());
             Py_INCREF(pyim->dtype);
             
             /// store the read options dict
+            Py_XDECREF(pyim->readoptDict);
             pyim->readoptDict = options ? options : PyDict_New();
             Py_INCREF(pyim->readoptDict);
             
@@ -624,6 +626,11 @@ namespace py {
         int          set_read_opts(PyObject* self, PyObject* value, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             if (!value) { return 0; }
+            if (!PyMapping_Check(value)) {
+                PyErr_SetString(PyExc_AttributeError,
+                    "read_opts must be dict-ish");
+                return -1;
+            }
             Py_XDECREF(pyim->readoptDict);
             pyim->readoptDict = Py_BuildValue("O", value);
             return 0;
@@ -643,6 +650,11 @@ namespace py {
         int          set_write_opts(PyObject* self, PyObject* value, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             if (!value) { return 0; }
+            if (!PyMapping_Check(value)) {
+                PyErr_SetString(PyExc_AttributeError,
+                    "write_opts must be dict-ish");
+                return -1;
+            }
             Py_XDECREF(pyim->writeoptDict);
             pyim->writeoptDict = Py_BuildValue("O", value);
             return 0;
