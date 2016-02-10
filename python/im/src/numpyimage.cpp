@@ -4,7 +4,7 @@
 
 namespace py {
     
-    namespace methods {
+    namespace functions {
         
         PyObject* structcode_parse(PyObject* self, PyObject* args) {
             char const* code;

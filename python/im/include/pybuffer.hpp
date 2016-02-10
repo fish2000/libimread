@@ -19,6 +19,7 @@ namespace py {
         class source : public im::byte_source {
             public:
                 source(Py_buffer const& pb);
+                source(Py_buffer const& pb, bool r);
                 virtual ~source();
                 virtual std::size_t read(byte* buffer, std::size_t n);
                 
@@ -33,11 +34,13 @@ namespace py {
             private:
                 Py_buffer view;
                 std::size_t pos;
+                bool release;
         };
         
         class sink : public im::byte_sink {
             public:
-                sink(Py_buffer const& pb);
+                sink(Py_buffer& pb);
+                sink(Py_buffer& pb, bool r);
                 virtual ~sink();
                 
                 virtual bool can_seek() const noexcept;
@@ -47,7 +50,7 @@ namespace py {
                 
                 virtual std::size_t write(const void* buffer, std::size_t n);
                 virtual void flush();
-                virtual std::vector<byte> contents();
+                virtual std::vector<byte> contents() const;
                 
                 operator Py_buffer() const { return view; }
                 std::string str() const;
@@ -55,6 +58,7 @@ namespace py {
             private:
                 Py_buffer view;
                 std::size_t pos;
+                bool release;
         };
     }
     

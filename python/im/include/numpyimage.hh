@@ -14,6 +14,8 @@
 #include "numpy.hh"
 
 #include <libimread/ext/errors/demangle.hh>
+#include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/temporary.h>
 #include <libimread/errors.hh>
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
@@ -26,6 +28,9 @@ namespace py {
         using im::options_map;
         using im::HybridArray;
         using im::ArrayFactory;
+        
+        using filesystem::path;
+        using filesystem::NamedTemporaryFile;
         
         template <typename ImageType>
         struct PythonImageBase {
@@ -92,7 +97,7 @@ namespace py {
                     im::for_filename(source));
             } catch (im::FormatNotFound& exc) {
                 PyErr_Format(PyExc_ValueError,
-                    "Can't find I/O format for file: %.200s", source);
+                    "Can't find I/O format for file: %s", source);
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
@@ -105,7 +110,7 @@ namespace py {
             
             if (!exists) {
                 PyErr_Format(PyExc_ValueError,
-                    "Can't find image file: %.200s", source);
+                    "Can't find image file: %s", source);
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
@@ -130,7 +135,6 @@ namespace py {
             std::unique_ptr<py::buffer::source> input;
             std::unique_ptr<im::Image> output;
             options_map default_opts;
-            
             try {
                 py::gil::release nogil;
                 input = std::unique_ptr<py::buffer::source>(
@@ -146,7 +150,6 @@ namespace py {
                 PyErr_SetString(PyExc_ValueError, exc.what());
                 return std::unique_ptr<ImageType>(nullptr);
             }
-            
         }
         
         /// __init__ implementation
@@ -361,6 +364,177 @@ namespace py {
             self->ob_type->tp_free(self);
         }
         
+        template <typename ImageType = HybridArray>
+        bool save(ImageType& input, char const* destination,
+                                    options_map const& opts) {
+            std::unique_ptr<im::ImageFormat> format;
+            bool exists = false;
+            bool overwrite = true;
+            options_map default_opts;
+            
+            try {
+                py::gil::release nogil;
+                format = std::unique_ptr<im::ImageFormat>(
+                    im::for_filename(destination));
+            } catch (im::FormatNotFound& exc) {
+                PyErr_Format(PyExc_ValueError,
+                    "Can't find I/O format for file: %s", destination);
+                return false;
+            }
+            
+            {
+                py::gil::release nogil;
+                exists = path::exists(destination);
+                overwrite = opts.cast<bool>("overwrite", true);
+            }
+            
+            if (exists && !overwrite) {
+                PyErr_Format(PyExc_ValueError,
+                    "File exists (opts['overwrite'] == true): %s", destination);
+                return false;
+            }
+            {
+                py::gil::release nogil;
+                if (exists && overwrite) {
+                    path::remove(destination);
+                }
+                std::unique_ptr<im::FileSink> output(new im::FileSink(destination));
+                default_opts = format->add_options(opts);
+                format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
+            }
+            return true;
+        }
+        
+        /// Save an instance of the templated image from a Py_buffer
+        /// describing an in-memory source, with specified reading options
+        // template <typename ImageType = HybridArray>
+        // std::unique_ptr<ImageType> saveblob(ImageType& input,
+        //                                     Py_buffer& view,
+        //                                     options_map const& opts) {
+        //     std::unique_ptr<im::ImageFormat> format;
+        //     std::unique_ptr<py::buffer::sink> output;
+        //     options_map default_opts;
+        //     try {
+        //         py::gil::release nogil;
+        //         output = std::unique_ptr<py::buffer::sink>(
+        //             new py::buffer::sink(view));
+        //         format = std::unique_ptr<im::ImageFormat>(
+        //             im::get_format(opts.cast<char const*>("format")));
+        //         default_opts = format->add_options(opts);
+        //         format->write(dynamic_cast<Image&>(input),
+        //                       output.get(), default_opts);
+        //         return true;
+        //     } catch (im::FormatNotFound& exc) {
+        //         PyErr_SetString(PyExc_ValueError, exc.what());
+        //         return false;
+        //     }
+        // }
+        
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            PyObject* py_as_blob = NULL;
+            PyObject* options = NULL;
+            Py_buffer view;
+            char const* keywords[] = { "destination", "as_blob", "options", NULL };
+            std::string dststr;
+            char const* dstcstr;
+            bool as_blob = false;
+            bool did_save = false;
+            
+            if (!PyArg_ParseTupleAndKeywords(
+                args, kwargs, "|s*OO", const_cast<char**>(keywords),
+                &view,                      /// "destination", buffer with file path
+                &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
+                &options))                  /// "options", read-options dict
+            {
+                PyErr_SetString(PyExc_ValueError,
+                    "Bad arguments to write");
+                return NULL;
+            } else {
+                if (py_as_blob) {
+                    /// test is necessary, the next line chokes on NULL:
+                    as_blob = PyObject_IsTrue(py_as_blob);
+                }
+            }
+            
+            try {
+                options_map opts = py::options::parse_options(options);
+                if (as_blob) {
+                    /// save as blob -- pass the buffer along
+                    if (!opts.has("format")) {
+                        PyErr_SetString(PyExc_AttributeError,
+                            "Output format unspecified in options dict");
+                        return NULL;
+                    }
+                    {
+                        // py::gil::release nogil;
+                        // did_save = py::image::saveblob<ImageType>(pyim->image, view, opts);
+                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
+                                              FILESYSTEM_TEMP_FILENAME,                /// prefix (filename template)
+                                              false);                                  /// cleanup on scope exit
+                        dststr = std::string(tf.filepath.make_absolute().str());
+                        dstcstr = dststr.c_str();
+                        // dstcstr = tf.c_str();
+                        did_save = py::image::save<ImageType>(*pyim->image.get(), dstcstr, opts);
+                    }
+                } else {
+                    /// load as file -- extract the filename from the buffer
+                    /// into a temporary c-string for passing
+                    // py::gil::release nogil;
+                    py::buffer::source dest(view);
+                    dststr = std::string(dest.str());
+                    dstcstr = dststr.c_str();
+                    did_save = py::image::save<ImageType>(*pyim->image.get(), dstcstr, opts);
+                }
+            } catch (im::OptionsError& exc) {
+                /// there was something weird in the `options` dict
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return NULL;
+            } catch (im::NotImplementedError& exc) {
+                /// this shouldn't happen -- a generic ImageFormat pointer
+                /// was returned when determining the blob image type
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return NULL;
+            }
+            if (!did_save) {
+                /// If this is false, PyErr has already been set
+                /// ... presumably by problems loading an ImageFormat
+                /// or opening the file at the specified image path
+                return NULL;
+            }
+            
+            if (as_blob && dststr.size()) {
+                std::vector<byte> data;
+                {
+                    py::gil::release nogil;
+                    std::unique_ptr<im::FileSource> readback(
+                        new im::FileSource(dststr.c_str()));
+                    data = readback->full_data();
+                    readback->close();
+                    readback.reset(nullptr);
+                }
+                PyObject* out = PyString_FromStringAndSize(
+                    (char const*)&data[0],
+                    data.size());
+                bool removed = path::remove(dststr);
+                if (!removed) {
+                    PyErr_Format(PyExc_ValueError,
+                        "Failed to remove temporary file %s", dststr.c_str());
+                    return NULL;
+                }
+                if (out == NULL) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Failed converting output to Python string");
+                }
+                return out;
+            } else if (dststr.size()) {
+                return PyString_FromString(dststr.c_str());
+            }
+            return Py_BuildValue("");
+        }
+        
         /// NumpyImage.dtype getter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
@@ -532,14 +706,14 @@ static PyGetSetDef NumpyImage_getset[] = {
     { NULL, NULL, NULL, NULL, NULL }
 };
 
-// static PyMethodDef NumpyImage_methods[] = {
-//     {
-//         "as_array",
-//             (PyCFunction)NumpyImage_AsArray,
-//             METH_VARARGS | METH_KEYWORDS,
-//             "Get an ndarray for a NumpyImage" },
-//     SENTINEL
-// };
+static PyMethodDef NumpyImage_methods[] = {
+    {
+        "write",
+            (PyCFunction)py::image::write<HybridArray>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Format and write image data to file or blob" },
+    { NULL, NULL, 0, NULL }
+};
 
 static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT         | 
                                          Py_TPFLAGS_BASETYPE        | 
@@ -574,7 +748,7 @@ static PyTypeObject NumpyImage_Type = {
     0,                                                                  /* tp_weaklistoffset */
     0,                                                                  /* tp_iter */
     0,                                                                  /* tp_iternext */
-    0, /*NumpyImage_methods*/                                           /* tp_methods */
+    NumpyImage_methods,                                                 /* tp_methods */
     0,                                                                  /* tp_members */
     NumpyImage_getset,                                                  /* tp_getset */
     0,                                                                  /* tp_base */
@@ -599,7 +773,7 @@ static PyTypeObject NumpyImage_Type = {
 
 namespace py {
     
-    namespace methods {
+    namespace functions {
         
         PyObject* structcode_parse(PyObject* self, PyObject* args);
         
@@ -609,7 +783,7 @@ namespace py {
 static PyMethodDef NumpyImage_module_functions[] = {
     {
         "structcode_parse",
-            (PyCFunction)py::methods::structcode_parse,
+            (PyCFunction)py::functions::structcode_parse,
             METH_VARARGS,
             "Parse struct code into list of dtype-string tuples" },
     { NULL, NULL, 0, NULL }

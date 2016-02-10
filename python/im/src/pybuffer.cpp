@@ -9,10 +9,18 @@ namespace py {
     namespace buffer {
             
             source::source(Py_buffer const& pb)
-                :view(pb), pos(0)
+                :view(pb), pos(0), release(true)
                 {}
             
-            source::~source() { PyBuffer_Release(&view); }
+            source::source(Py_buffer const& pb, bool r)
+                :view(pb), pos(0), release(r)
+                {}
+            
+            source::~source() {
+                if (release) {
+                    PyBuffer_Release(&view);
+                }
+            }
             
             std::size_t source::read(byte* buffer, std::size_t n) {
                 if (pos + n > view.len) { n = view.len - pos; }
@@ -38,11 +46,19 @@ namespace py {
             }
             
             
-            sink::sink(Py_buffer const& pb)
-                :view(pb), pos(0)
+            sink::sink(Py_buffer& pb)
+                :view(pb), pos(0), release(false)
                 {}
             
-            sink::~sink() { PyBuffer_Release(&view); }
+            sink::sink(Py_buffer& pb, bool r)
+                :view(pb), pos(0), release(r)
+                {}
+            
+            sink::~sink() {
+                if (release) {
+                    PyBuffer_Release(&view);
+                }
+            }
             
             bool sink::can_seek() const noexcept { return true; }
             
@@ -64,7 +80,7 @@ namespace py {
             
             void sink::flush() {}
             
-            std::vector<byte> sink::contents() {
+            std::vector<byte> sink::contents() const {
                 std::vector<byte> out(view.len);
                 std::memcpy(&out[0], view.buf, view.len);
                 return out;
