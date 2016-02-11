@@ -442,10 +442,10 @@ namespace filesystem {
                 return *this;
             }
             path &operator=(path&& p) noexcept {
-                m_type = native_path;
-                m_absolute = p.m_absolute;
                 if (!compare(p, *this)) {
+                    // m_type = native_path;
                     m_path = std::move(p.m_path);
+                    m_absolute = p.m_absolute;
                 }
                 return *this;
             }
