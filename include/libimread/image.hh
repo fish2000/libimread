@@ -103,11 +103,10 @@ namespace im {
                 const int planecount = std::min(planes(), lastplane);
                 pixvec_t out(planecount);
                 for (int idx = 0; idx < planecount; idx++) {
-                    out.push_back(plane<T, U>(idx));
+                    out.push_back(std::move(plane<T, U>(idx)));
                 }
                 return out;
             }
-            
             
     };
     

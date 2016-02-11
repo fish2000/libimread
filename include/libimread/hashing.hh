@@ -13,7 +13,6 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
-#include <libimread/ext/butteraugli.hh>
 #include <libimread/image.hh>
 #include <libimread/pixels.hh>
 
@@ -264,58 +263,9 @@ namespace butteraugli {
         error_augli_not_buttered = 18           /// ERROR: ButteraugliInterface() returned false
     };
     
-    const pixel_t EXPONENT = 1.0f / 2.2f;
-    
-    planevec_t auglize(planevec_t const& in) {
-        /// Gamma correction, as per butteraugli source:
-        /// https://github.com/google/butteraugli/blob/master/src/butteraugli.h#L40-L44
-        const int N = in.size();
-        planevec_t out(N);
-        auto planerator = out.begin();
-        int idx = 0;
-        for (auto it = in.begin();
-             it != in.end() && idx < N;
-             ++it) { planerator = out.emplace(planerator,
-                         static_cast<pixel_t>(255.0f * std::pow(*it, EXPONENT)));
-                     ++idx; }
-        return out;
-    }
-    
-    pixvec_t auglize(pixvec_t const& in) {
-        pixvec_t out(in.size());
-        std::for_each(in.begin(), in.end(),
-                      [&out](planevec_t plane) {
-            out.push_back(auglize(plane));
-        });
-        return out;
-    }
-    
-    comparison_t compare(Image& lhs, Image& rhs) {
-        double diffvalue;
-        planevec_t diffmap; /// not currently used
-        bool augli_buttered = false;
-        const int w = lhs.dim(0),
-                  h = lhs.dim(1);
-        
-        if (w != rhs.dim(0) || h != rhs.dim(0)) {
-            return error_images_incomprable;
-        }
-        
-        pixvec_t rgb0 = auglize(lhs.allplanes<double>(3)); /// lastplane=3
-        pixvec_t rgb1 = auglize(rhs.allplanes<double>(3)); /// lastplane=3
-        
-        if (rgb0.size() != 3 || rgb1.size() != 3) {
-            return error_unexpected_channel_count;
-        }
-        
-        augli_buttered = ButteraugliInterface(w, h, rgb0, rgb1,
-                                              diffmap, diffvalue);
-        
-        if (!augli_buttered) { return error_augli_not_buttered; }
-        return diffvalue < kButteraugliGood ? same : 
-               diffvalue < kButteraugliBad  ? subtle : different;
-        
-    }
+    planevec_t auglize(planevec_t const& in);
+    pixvec_t auglize(pixvec_t const& in);
+    comparison_t compare(Image& lhs, Image& rhs);
     
 } /* namespace butteraugli */
 
