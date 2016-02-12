@@ -158,27 +158,111 @@ namespace im {
     
     /// This class *owns* its members and will delete them if destroyed
     struct ImageList {
-        using vector_t = std::vector<Image*>;
-        using vector_size_t = vector_t::size_type;
+        using pointer_t      = std::add_pointer_t<Image>;
+        using unique_t       = std::unique_ptr<Image>;
+        using vector_t       = std::vector<pointer_t>;
+        using pointerlist_t  = std::initializer_list<pointer_t>;
+        using vector_size_t  = vector_t::size_type;
+        using iterator       = vector_t::iterator;
+        using const_iterator = vector_t::const_iterator;
         
-        ImageList() {}
+        /// default constructor
+        ImageList() noexcept = default;
         
-        vector_size_t size() const {
-            return content.size();
+        /// initializer list construction
+        explicit ImageList(pointerlist_t pointerlist)
+            :content(pointerlist)
+            {
+                content.erase(
+                    std::remove_if(content.begin(), content.end(),
+                                [](pointer_t p) { return p == nullptr; }),
+                    content.end());
+            }
+        
+        /// construct from multiple arguments
+        /// ... using boolean tag for first arg
+        template <typename ...Pointers>
+        explicit ImageList(bool pointerargs, Pointers ...pointers)
+            :content{ pointers... }
+            {
+                content.erase(
+                    std::remove_if(content.begin(), content.end(),
+                                [](pointer_t p) { return p == nullptr; }),
+                    content.end());
+            }
+        
+        /// move-construct from pointer vector
+        explicit ImageList(vector_t&& vector)
+            :content(std::move(vector))
+            {
+                content.erase(
+                    std::remove_if(content.begin(), content.end(),
+                                [](pointer_t p) { return p == nullptr; }),
+                    content.end());
+            }
+        
+        /// noexcept move constructor
+        ImageList(ImageList&& other) noexcept
+            :content(std::move(other.release()))
+            {}
+        
+        /// noexcept move assignment operator
+        ImageList& operator=(ImageList&& other) noexcept {
+            if (content != other.content) {
+                content = std::move(other.release());
+            }
+            return *this;
         }
         
-        void push_back(std::unique_ptr<Image> p) {
-            content.push_back(p.get());
-        }
-        void push_back(Image* p) {
-            content.push_back(p);
+        vector_size_t size() const          { return content.size(); }
+        iterator begin()                    { return content.begin(); }
+        iterator end()                      { return content.end(); }
+        const_iterator begin() const        { return content.begin(); }
+        const_iterator end()   const        { return content.end(); }
+        
+        void erase(iterator it)             { content.erase(it); }
+        void prepend(pointer_t image)       { content.insert(content.begin(), image); }
+        void push_front(pointer_t image)    { content.insert(content.begin(), image); }
+        void append(pointer_t image)        { content.push_back(image); }
+        void push_back(pointer_t image)     { content.push_back(image); }
+        
+        void push_back(unique_t unique) {
+            content.push_back(unique.release());
         }
         
-        ~ImageList() {
-            unsigned i = 0,
-                     x = static_cast<unsigned>(content.size());
-            for (; i != x; ++i) { delete content[i]; }
+        pointer_t get(vector_size_t idx) const   { return content[idx]; }
+        pointer_t at(vector_size_t idx) const    { return content.at(idx); }
+        
+        unique_t yank(vector_size_t idx) {
+            /// remove the pointer at idx, resizing the internal vector;
+            /// return it as managed by a new unique_ptr
+            /// ... this'll throw std::out_of_range if idx > content.size()
+            pointer_t outptr = content.at(idx);
+            content.erase(
+                std::remove_if(content.begin(), content.end(),
+                      [outptr](pointer_t p) { return p == outptr || p == nullptr; }),
+                content.end());
+            content.shrink_to_fit();
+            return unique_t(outptr);
         }
+        
+        unique_t pop() {
+            pointer_t outptr = content.back();
+            content.pop_back();
+            return unique_t(outptr);
+        }
+        
+        void reset() {
+            vector_size_t idx = 0,
+                          max = content.size();
+            for (; idx != max; ++idx) { delete content[idx]; }
+        }
+        void reset(vector_t&& vector) {
+            reset();
+            content = std::move(vector);
+        }
+        
+        ~ImageList() { reset(); }
         
         /// After calling release(), ownership of the content image ponters
         /// is transferred to the caller, who must figure out how to delete them.
@@ -189,13 +273,40 @@ namespace im {
             return out;
         }
         
+        void swap(ImageList& other) noexcept {
+            content.swap(other.content);
+        }
+        
         private:
-            ImageList(ImageList&&);
             ImageList(const ImageList&);
-            ImageList &operator=(ImageList&&);
             ImageList &operator=(const ImageList&);
             vector_t content;
     };
-}
+    
+} /* namespace im */
+
+namespace std {
+    
+    template <>
+    void swap(im::ImageList& p0, im::ImageList& p1) noexcept;
+    
+    /// std::hash specialization for filesystem::path
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    // template <>
+    // struct hash<filesystem::path> {
+    //
+    //     typedef filesystem::path argument_type;
+    //     typedef std::size_t result_type;
+    //
+    //     result_type operator()(argument_type const& p) const {
+    //         return static_cast<result_type>(p.hash());
+    //     }
+    //
+    // };
+    
+}; /* namespace std */
+
 
 #endif /// LIBIMREAD_IMAGE_HH_

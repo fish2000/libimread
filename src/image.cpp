@@ -5,3 +5,12 @@
 #include <libimread/image.hh>
 
 namespace im {}
+
+namespace std {
+    
+    template <>
+    void swap(im::ImageList& p0, im::ImageList& p1) noexcept {
+        p0.swap(p1);
+    }
+    
+}; /* namespace std */

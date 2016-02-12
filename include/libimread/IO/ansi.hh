@@ -22,13 +22,13 @@ namespace im {
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
             
-            virtual void write(Image &input,
-                               byte_sink *output,
-                               const options_map &opts) override;
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               const options_map& opts) override;
             
-            virtual void write_multi(ImageList &input,
+            virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     const options_map &opts) override;
+                                     const options_map& opts) override;
     };
     
     namespace format {
