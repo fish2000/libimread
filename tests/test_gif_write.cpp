@@ -42,6 +42,7 @@ namespace {
             outlist.push_back(&halim);
         });
         im::halide::write_multi(outlist, newpath.str());
+        outlist.release(); /// outlist will otherwise try to delete pointers to stack-allocated images
         CHECK(newpath.is_file());
     }
     

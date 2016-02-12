@@ -62,9 +62,9 @@ namespace im {
                                                 ImageFactory* factory,
                                                 const options_map &opts);
             
-            virtual std::unique_ptr<ImageList> read_multi(byte_source* src,
-                                                          ImageFactory* factory,
-                                                          const options_map& opts);
+            virtual ImageList read_multi(byte_source* src,
+                                         ImageFactory* factory,
+                                         const options_map& opts);
             
             virtual void write(Image& input,
                                byte_sink* output,

@@ -48,9 +48,9 @@ namespace im {
         imread_raise_default(NotImplementedError);
     }
     
-    std::unique_ptr<ImageList> ImageFormat::read_multi(byte_source* src,
-                                                       ImageFactory* factory,
-                                                       const options_map& opts) {
+    ImageList ImageFormat::read_multi(byte_source* src,
+                                      ImageFactory* factory,
+                                      const options_map& opts) {
         imread_raise_default(NotImplementedError);
     }
     

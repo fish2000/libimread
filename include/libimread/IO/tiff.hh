@@ -29,20 +29,18 @@ namespace im {
                        match_magic(src, "\x49\x49\x2a\x00", 4);
             }
             
-            virtual std::unique_ptr<Image> read(
-                    byte_source* s,
-                    ImageFactory* f,
-                    const options_map &opts) override {
-                std::unique_ptr<ImageList> pages = this->do_read(s, f, false);
-                if (pages->size() != 1) { throw ProgrammingError(); }
-                std::vector<Image*> ims = pages->release();
+            virtual std::unique_ptr<Image> read(byte_source* s,
+                                                ImageFactory* f,
+                                                const options_map &opts) override {
+                ImageList pages = this->do_read(s, f, false);
+                if (pages.size() != 1) { throw ProgrammingError(); }
+                std::vector<Image*> ims = pages.release();
                 return std::unique_ptr<Image>(ims[0]);
             }
             
-            virtual std::unique_ptr<ImageList> read_multi(
-                    byte_source* s,
-                    ImageFactory* f,
-                    const options_map& opts) override {
+            virtual ImageList read_multi(byte_source* s,
+                                         ImageFactory* f,
+                                         const options_map& opts) override {
                 return this->do_read(s, f, true);
             }
             
@@ -51,19 +49,18 @@ namespace im {
                                const options_map& opts) override;
             
         private:
-            std::unique_ptr<ImageList> do_read(byte_source* s,
-                                                ImageFactory* f,
-                                                bool is_multi);
+            ImageList do_read(byte_source* s,
+                              ImageFactory* f,
+                              bool is_multi);
     };
     
     class STKFormat : public ImageFormatBase<STKFormat> {
         public:
             using can_read_multi = std::true_type;
             
-            virtual std::unique_ptr<ImageList> read_multi(
-                byte_source* s,
-                ImageFactory* f,
-                const options_map &opts) override;
+            virtual ImageList read_multi(byte_source* s,
+                                         ImageFactory* f,
+                                         const options_map &opts) override;
     };
     
     namespace format {
