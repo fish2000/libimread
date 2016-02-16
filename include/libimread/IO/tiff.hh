@@ -34,8 +34,7 @@ namespace im {
                                                 const options_map &opts) override {
                 ImageList pages = this->do_read(s, f, false);
                 if (pages.size() != 1) { throw ProgrammingError(); }
-                std::vector<Image*> ims = pages.release();
-                return std::unique_ptr<Image>(ims[0]);
+                return pages.pop();
             }
             
             virtual ImageList read_multi(byte_source* s,

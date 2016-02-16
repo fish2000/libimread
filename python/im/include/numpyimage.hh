@@ -480,7 +480,7 @@ namespace py {
                         dststr = std::string(tf.filepath.make_absolute().str());
                     }
                 } else {
-                    /// load as file -- extract the filename from the buffer
+                    /// save as file -- extract the filename from the buffer
                     /// into a temporary string for passing
                     py::gil::release nogil;
                     py::buffer::source dest(view);
