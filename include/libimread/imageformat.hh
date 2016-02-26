@@ -87,6 +87,10 @@ namespace im {
                 return "." + FormatType::options.suffix;
             }
             
+            static std::string get_mimetype() {
+                return FormatType::options.mimetype;
+            }
+            
             virtual options_map get_options() const override {
                 return ImageFormat::encode_options(FormatType::options);
             }
@@ -95,6 +99,13 @@ namespace im {
                 options_map result = ImageFormat::encode_options(FormatType::options);
                 return result.update(opts);
             }
+            
+            static inline bool format_can_read()           { return FormatType::can_read(); }
+            static inline bool format_can_read_multi()     { return FormatType::can_read_multi(); }
+            static inline bool format_can_read_metadata()  { return FormatType::can_read_metadata(); }
+            static inline bool format_can_write()          { return FormatType::can_write(); }
+            static inline bool format_can_write_multi()    { return FormatType::can_write_multi(); }
+            static inline bool format_can_write_metadata() { return FormatType::can_write_metadata(); }
             
     };
 

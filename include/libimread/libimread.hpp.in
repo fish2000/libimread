@@ -7,8 +7,8 @@
 #include <cstdint>
 #include <vector>
 
-#ifndef __has_feature                       // Optional.
-#define __has_feature(x)                0   // Compatibility with non-clang compilers.
+#ifndef __has_feature                       /// Optional
+#define __has_feature(x)                0   /// Compatibility with non-clang compilers
 #endif
 
 #define IM_VERSION_MAJOR                @libimread_VERSION_MAJOR@
@@ -22,13 +22,16 @@
 #define IM_LINK_LIBRARIES               "@IM_LINK_LIBRARIES@"
 #define IM_LINK_FLAGS                   "@IM_LINK_FLAGS@"
 
-#ifndef IM_COLOR_TRACE
-#define IM_COLOR_TRACE                  1
-#endif
+// #ifndef IM_COLOR_TRACE
+// #define IM_COLOR_TRACE                  1
+// #endif
 
-#ifndef IM_VERBOSE
-#define IM_VERBOSE                      0
-#endif
+// #ifndef IM_VERBOSE
+// #define IM_VERBOSE                      0
+// #endif
+
+#cmakedefine IM_COLOR_TRACE             1
+#cmakedefine IM_VERBOSE                 1
 
 #define FILESYSTEM_TEMP_SUFFIX          ".imdata"
 #define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"
@@ -41,34 +44,33 @@ namespace im {
     
     using byte = uint8_t;
     
-    /// `unpack` is a sleazy trick for -- YOU GUESSED IT -- 
-    /// expanding variadic template parameter packs. USAGE:
-    ///
-    ///     unpack {
-    ///         (out += std::to_string(array[I]))...
-    ///     };
-    
-    #define unpack                     __attribute__((unused)) int unpacker[]
-    
-    /// Use `warn_unused` like a trailing function-definition keyword:
-    ///
-    ///     void yodogg(std::string const& s) const warn_unused { … }
-    
-    #define warn_unused                __attribute__((__warn_unused_result__))
-    
-    /// The following fake function-definition keywords may be of use
-    /// to the future generations of programmers who will serve this 
-    /// great and mighty codebase (personally I could not give AF
-    /// and I think macros are low-class):
-    
-    // #define alias(source)           __attribute__((weak, alias ( #source )))
-    // #define required(idx, ...)      __attribute__((__nonnull__(idx, ##__VA_ARGS__)))
-    // #define unused                  __attribute__((__unused__))
-    // #define always_inline           __attribute__((__always_inline__))
-    // #define overloadable            __attribute__((__overloadable__))
-    // #define always_const            __attribute__((__const__))
-    // #define always_pure             __attribute__((__pure__))
-     
-}
+    /// string length at compile time -- http://stackoverflow.com/a/26082447/298171
+    template <std::size_t N> inline
+    constexpr std::size_t static_strlen(char const (&)[N]) { return N; }
+
+#ifndef DECLARE_CONSTEXPR_CHAR
+#define DECLARE_CONSTEXPR_CHAR(decl, token) constexpr char decl[im::static_strlen(token)]
+#endif
+
+#ifndef ST
+#define ST(s) "" #s 
+#endif /// ST
+
+/// `unpack` is a sleazy trick for -- YOU GUESSED IT -- 
+/// expanding variadic template parameter packs. USAGE:
+///
+///     unpack {
+///         (out += std::to_string(array[I]))...
+///     };
+
+#define unpack                     __attribute__((unused)) int unpacker[]
+
+/// Use `warn_unused` like a trailing function-definition keyword:
+///
+///     void yodogg(std::string const& s) const warn_unused { … }
+
+#define warn_unused                __attribute__((__warn_unused_result__))
+
+} /* namespace im */
 
 #endif /// LIBIMREAD_CMAKE_HPP_IN_

@@ -43,13 +43,13 @@ namespace py {
                 } else if (PyTuple_Check(item) || PyList_Check(item)) {
                     out.append(py::options::parse_option_list(item));
                 } else if (PyLong_Check(item)) {
-                    out.append(static_cast<int>(PyLong_AsLong(item)));
+                    out.append(PyLong_AsLong(item));
             #if PY_MAJOR_VERSION < 3
                 } else if (PyInt_Check(item)) {
                     out.append(static_cast<int>(PyInt_AS_LONG(item)));
             #endif
                 } else if (PyFloat_Check(item)) {
-                    out.append(static_cast<double>(PyFloat_AS_DOUBLE(item)));
+                    out.append(PyFloat_AS_DOUBLE(item));
             #if PY_MAJOR_VERSION >= 3
                 } else if (PyBytes_Check(item)) {
                     std::size_t len;
@@ -83,13 +83,13 @@ namespace py {
                 } else if (PyTuple_Check(value) || PyList_Check(value)) {
                     out.set(k, py::options::parse_option_list(value));
                 } else if (PyLong_Check(value)) {
-                    out.set(k, static_cast<int>(PyLong_AsLong(value)));
+                    out.set(k, PyLong_AsLong(value));
             #if PY_MAJOR_VERSION < 3
                 } else if (PyInt_Check(value)) {
                     out.set(k, static_cast<int>(PyInt_AS_LONG(value)));
             #endif
                 } else if (PyFloat_Check(value)) {
-                    out.set(k, static_cast<double>(PyFloat_AS_DOUBLE(value)));
+                    out.set(k, PyFloat_AS_DOUBLE(value));
             #if PY_MAJOR_VERSION >= 3
                 } else if (PyBytes_Check(value)) {
                     std::size_t len;

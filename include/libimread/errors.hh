@@ -123,19 +123,6 @@ namespace im {
                    << ansi::reset << std::endl;
     }
     
-    /// string length at compile time -- http://stackoverflow.com/a/26082447/298171
-    template <std::size_t N> inline
-    constexpr std::size_t static_strlen(char const (&)[N]) { return N; }
-
-
-#ifndef DECLARE_CONSTEXPR_CHAR
-#define DECLARE_CONSTEXPR_CHAR(decl, token) constexpr char decl[im::static_strlen(token)]
-#endif
-
-#ifndef ST
-#define ST(s) "" #s 
-#endif /// ST
-
 #ifndef FF
 #define FF(...) std::forward_as_tuple(__VA_ARGS__)
 #endif /// FF
@@ -150,6 +137,17 @@ namespace im {
         ansi::lightred,                                                                 \
         __FILE__, __LINE__, __VA_ARGS__)
 #endif /// WTF
+
+#ifndef IM_VERBOSE
+#define IM_VERBOSE 0
+#endif
+
+#if IM_VERBOSE == 1
+/*
+  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> VERBOSE ERROR MACROS
+  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+*/
 
 #ifndef imread_assert
 #define imread_assert(condition, ...)                                                   \
@@ -180,6 +178,39 @@ namespace im {
                 ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),          \
             __VA_ARGS__));
 #endif /// imread_raise
+
+#else /// IM_VERBOSE == 0
+/*
+  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  >>>>>>>>>>>>>>> MILD-MANNERED, ECONOMICALLY-SPOKEN, GOOD-TURN-OF-PHRASE ERROR MACROS
+  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+*/
+
+#ifndef imread_assert
+#define imread_assert(condition, ...)                                                   \
+    if (!(condition)) {                                                                 \
+        im::srsly("(ASSERT FAILURE) [ " ST(condition) " ]\n",                           \
+            ansi::lightyellow, __FILE__, __LINE__,                                      \
+                __VA_ARGS__);                                                           \
+        std::exit(-1);                                                                  \
+    }
+#endif /// imread_assert
+
+#ifndef imread_raise_default
+#define imread_raise_default(Exception)                                                 \
+    throw im::Exception("[ EXCEPTION (default) ]\n",                                    \
+        FF("[ " ST(Exception) " > %s : %i ]", __FILE__, __LINE__),                      \
+        FF("\t%s", im::Exception::default_message));
+#endif /// imread_raise_default
+
+#ifndef imread_raise
+#define imread_raise(Exception, ...)                                                    \
+    throw im::Exception("[ EXCEPTION ]\n",                                              \
+        FF("[ " ST(Exception) " > %s : %i ]", __FILE__, __LINE__),                      \
+        __VA_ARGS__);
+#endif /// imread_raise
+
+#endif /// IM_VERBOSE == 1
 
 #ifndef DECLARE_IMREAD_ERROR_INNARDS
 #define DECLARE_IMREAD_ERROR_INNARDS(TypeName, DefaultMsg, MsgLen)                      \

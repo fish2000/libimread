@@ -104,47 +104,37 @@ class Json {
         struct Number : Node {
             static constexpr Type typecode = Type::NUMBER;
             long double value;
-            int prec;
-            Number(int x) {
-                prec = -1;
-                value = x;
-            }
-            Number(float x) {
-                prec = FLT_DIG;
-                value = x;
-            }
-            explicit Number(long double x) {
-                prec = LDBL_DIG;
-                value = x;
-            }
-            explicit Number(double x) {
-                prec = DBL_DIG;
-                value = x;
-            }
-            explicit Number(long long x) {
-                prec = DBL_DIG;
-                value = x;
-            }
-            explicit Number(long x) {
-                prec = -1;
-                value = x;
-            }
-            explicit Number(uint8_t x) {
-                prec = -1;
-                value = static_cast<int>(x);
-            }
-            explicit Number(uint16_t x) {
-                prec = -1;
-                value = static_cast<int>(x);
-            }
-            explicit Number(int8_t x) {
-                prec = -1;
-                value = static_cast<int>(x);
-            }
-            explicit Number(int16_t x) {
-                prec = -1;
-                value = static_cast<int>(x);
-            }
+            int prec = -1;
+            Number(int x)
+                :value(x)
+                {}
+            Number(float x)
+                :value(x), prec(FLT_DIG)
+                {}
+            explicit Number(long double x)
+                :value(x), prec(LDBL_DIG)
+                {}
+            explicit Number(double x)
+                :value(x), prec(DBL_DIG)
+                {}
+            explicit Number(long long x)
+                :value(x)
+                {}
+            explicit Number(long x)
+                :value(x)
+                {}
+            explicit Number(uint8_t x)
+                :value(static_cast<int>(x))
+                {}
+            explicit Number(uint16_t x)
+                :value(static_cast<int>(x))
+                {}
+            explicit Number(int8_t x)
+                :value(static_cast<int>(x))
+                {}
+            explicit Number(int16_t x)
+                :value(static_cast<int>(x))
+                {}
             Number(std::istream&);
             Type type() const override { return Type::NUMBER; }
             void print(std::ostream& out) const override;
@@ -156,8 +146,12 @@ class Json {
         struct String : Node {
             static constexpr Type typecode = Type::STRING;
             std::string value;
-            String(const std::string& s) { value = s; }
-            String(const char* cs) { value = cs; }
+            String(std::string const& s)
+                :value(s)
+                {}
+            String(char const* cs)
+                :value(cs)
+                {}
             String(std::istream&);
             Type type() const override { return Type::STRING; }
             void print(std::ostream& out) const override;

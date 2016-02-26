@@ -50,12 +50,9 @@ namespace py {
             
             void cleanup() {
                 image.reset(nullptr);
-                Py_XDECREF(dtype);
-                Py_XDECREF(readoptDict);
-                Py_XDECREF(writeoptDict);
-                dtype = nullptr;
-                readoptDict = nullptr;
-                writeoptDict = nullptr;
+                Py_CLEAR(dtype);
+                Py_CLEAR(readoptDict);
+                Py_CLEAR(writeoptDict);
             }
             
             ~PythonImageBase() { cleanup(); }
@@ -88,16 +85,24 @@ namespace py {
             std::unique_ptr<im::ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
             std::unique_ptr<im::Image> output;
-            bool exists = false;
+            bool exists = false,
+                 can_read = false;
             options_map default_opts;
             
             try {
                 py::gil::release nogil;
-                format = std::unique_ptr<im::ImageFormat>(
-                    im::for_filename(source));
+                format = im::for_filename(source);
+                can_read = format->format_can_read();
             } catch (im::FormatNotFound& exc) {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find I/O format for file: %s", source);
+                return std::unique_ptr<ImageType>(nullptr);
+            }
+            
+            if (!can_read) {
+                PyErr_Format(PyExc_ValueError,
+                    "Unimplemented read() in I/O format %s",
+                    format->get_mimetype());
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
@@ -117,8 +122,7 @@ namespace py {
             {
                 py::gil::release nogil;
                 default_opts = format->add_options(opts);
-                output = std::unique_ptr<im::Image>(
-                    format->read(input.get(), &factory, opts));
+                output = format->read(input.get(), &factory, default_opts);
                 return im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             }
@@ -135,20 +139,33 @@ namespace py {
             std::unique_ptr<py::buffer::source> input;
             std::unique_ptr<im::Image> output;
             options_map default_opts;
+            bool can_read = false;
+            
             try {
                 py::gil::release nogil;
                 input = std::unique_ptr<py::buffer::source>(
                     new py::buffer::source(view));
-                format = std::unique_ptr<im::ImageFormat>(
-                    im::for_source(input.get()));
+                format = im::for_source(input.get());
+                can_read = format->format_can_read();
+            } catch (im::FormatNotFound& exc) {
+                PyErr_SetString(PyExc_ValueError,
+                    "Can't match blob data to a suitable I/O format");
+                return std::unique_ptr<ImageType>(nullptr);
+            }
+            
+            if (!can_read) {
+                PyErr_Format(PyExc_ValueError,
+                    "Unimplemented read() in I/O format %s",
+                    format->get_mimetype());
+                return std::unique_ptr<ImageType>(nullptr);
+            }
+            
+            {
+                py::gil::release nogil;
                 default_opts = format->add_options(opts);
-                output = std::unique_ptr<im::Image>(
-                    format->read(input.get(), &factory, opts));
+                output = format->read(input.get(), &factory, default_opts);
                 return im::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
-            } catch (im::FormatNotFound& exc) {
-                PyErr_SetString(PyExc_ValueError, exc.what());
-                return std::unique_ptr<ImageType>(nullptr);
             }
         }
         
@@ -212,12 +229,12 @@ namespace py {
             }
             
             /// create and set a dtype based on the loaded image data's type
-            Py_XDECREF(pyim->dtype);
+            Py_CLEAR(pyim->dtype);
             pyim->dtype = PyArray_DescrFromType(pyim->image->dtype());
             Py_INCREF(pyim->dtype);
             
             /// store the read options dict
-            Py_XDECREF(pyim->readoptDict);
+            Py_CLEAR(pyim->readoptDict);
             pyim->readoptDict = options ? options : PyDict_New();
             Py_INCREF(pyim->readoptDict);
             
@@ -370,17 +387,25 @@ namespace py {
         bool save(ImageType& input, char const* destination,
                                     options_map const& opts) {
             std::unique_ptr<im::ImageFormat> format;
-            bool exists = false;
-            bool overwrite = true;
             options_map default_opts;
+            bool exists = false,
+                 can_write = false,
+                 overwrite = true;
             
             try {
                 py::gil::release nogil;
-                format = std::unique_ptr<im::ImageFormat>(
-                    im::for_filename(destination));
+                format = im::for_filename(destination);
+                can_write = format->format_can_write();
             } catch (im::FormatNotFound& exc) {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find I/O format for file: %s", destination);
+                return false;
+            }
+            
+            if (!can_write) {
+                PyErr_Format(PyExc_ValueError,
+                    "Unimplemented write() in I/O format %s",
+                    format->get_mimetype());
                 return false;
             }
             
@@ -631,7 +656,7 @@ namespace py {
                     "read_opts must be dict-ish");
                 return -1;
             }
-            Py_XDECREF(pyim->readoptDict);
+            Py_CLEAR(pyim->readoptDict);
             pyim->readoptDict = Py_BuildValue("O", value);
             return 0;
         }
@@ -655,7 +680,7 @@ namespace py {
                     "write_opts must be dict-ish");
                 return -1;
             }
-            Py_XDECREF(pyim->writeoptDict);
+            Py_CLEAR(pyim->writeoptDict);
             pyim->writeoptDict = Py_BuildValue("O", value);
             return 0;
         }

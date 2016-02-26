@@ -9,16 +9,20 @@ source "${PRAXONS}/gmalloc.sh"
 
 PROJECT_PATH="/Users/fish/Dropbox/libimread"
 
+: ${COLOR_TRACE:="ON"}
+: ${VERBOSE:="ON"}
+
 pushd $PROJECT_PATH
     rm -rf ./build ./dist
     mkdir -p ./build ./dist
     pushd ./build
         cmake .. \
-            -Wno-dev \
-            -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist"
+            -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist" \
+            -DIM_COLOR_TRACE=$COLOR_TRACE \
+            -DIM_VERBOSE=$VERBOSE \
+            -Wno-dev && \
         make -j4 install && \
-        ctest -j4 -D Experimental --output-on-failure && \
-            anybar green || anybar red
+        ctest -j4 -D Experimental --output-on-failure
 
 popd
 rm -rf ./Testing

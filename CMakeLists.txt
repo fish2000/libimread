@@ -7,9 +7,11 @@ cmake_minimum_required(VERSION 3.3)
 # Set a new CMake project
 project(libimread)
 
-option(IM_USE_GCC           "Compile using GCC"                             OFF)
-option(IM_RESYMBOLIZE       "Regenerate include/libimread/symbols.hpp"      OFF)
-option(IM_GENERATE_HEADER   "Only generate libimread.hpp (do not compile)"  OFF)
+option(IM_USE_GCC           "Compile using GCC"                                 OFF)
+option(IM_RESYMBOLIZE       "Regenerate include/libimread/symbols.hpp"          OFF)
+option(IM_GENERATE_HEADER   "Only generate libimread.hpp (do not compile)"      OFF)
+option(IM_COLOR_TRACE       "Use ANSI color in debug and error trace output"    OFF)
+option(IM_VERBOSE           "Print (highly nerd-oriented) verbose debug output" OFF)
 
 if(IM_USE_GCC)
     # hardcode homebrew path for now

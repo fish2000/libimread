@@ -54,6 +54,7 @@ namespace im {
                     case 8:             return NPY_INT8;
                     case 16:            return NPY_INT16;
                     case 32:            return NPY_INT32;
+                    case 64:            return NPY_INT64;
                 }
             } else {
                 switch (nbits) {
@@ -61,6 +62,7 @@ namespace im {
                     case 8:             return NPY_UINT8;
                     case 16:            return NPY_UINT16;
                     case 32:            return NPY_UINT32;
+                    case 64:            return NPY_UINT64;
                 }
             }
             return NPY_USERDEF;
