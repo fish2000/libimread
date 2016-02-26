@@ -1,10 +1,18 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <numeric>
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 
-namespace im {}
+namespace im {
+    
+    std::size_t ImageList::hash(std::size_t seed) const noexcept {
+        return std::accumulate(content.begin(), content.end(),
+                               seed, ImageList::rehasher_t());
+    }
+    
+}
 
 namespace std {
     

@@ -12,6 +12,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
 #include <libimread/pixels.hh>
+#include <libimread/rehash.hh>
 
 namespace im {
     
@@ -162,6 +163,7 @@ namespace im {
         using unique_t       = std::unique_ptr<Image>;
         using vector_t       = std::vector<pointer_t>;
         using pointerlist_t  = std::initializer_list<pointer_t>;
+        using rehasher_t     = hash::rehasher<pointer_t>;
         using vector_size_t  = vector_t::size_type;
         using iterator       = vector_t::iterator;
         using const_iterator = vector_t::const_iterator;
@@ -277,6 +279,8 @@ namespace im {
             content.swap(other.content);
         }
         
+        std::size_t hash(std::size_t seed = 0) const noexcept;
+        
         private:
             ImageList(const ImageList&);
             ImageList &operator=(const ImageList&);
@@ -294,17 +298,17 @@ namespace std {
     /// ... following the recipe found here:
     ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
     
-    // template <>
-    // struct hash<filesystem::path> {
-    //
-    //     typedef filesystem::path argument_type;
-    //     typedef std::size_t result_type;
-    //
-    //     result_type operator()(argument_type const& p) const {
-    //         return static_cast<result_type>(p.hash());
-    //     }
-    //
-    // };
+    template <>
+    struct hash<im::ImageList> {
+        
+        typedef im::ImageList argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& list) const {
+            return static_cast<result_type>(list.hash());
+        }
+        
+    };
     
 }; /* namespace std */
 
