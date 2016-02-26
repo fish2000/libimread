@@ -248,7 +248,7 @@ namespace im {
         template <typename Format, typename T = byte> inline
         std::string tmpwrite(HybridImage<T>& input,
                              const options_map& opts = halide_default_opts) {
-            im::fs::NamedTemporaryFile tf(Format::get_suffix(),         /// suffix
+            im::fs::NamedTemporaryFile tf(Format::suffix(),         /// suffix
                                           FILESYSTEM_TEMP_FILENAME,     /// prefix (filename template)
                                           false); tf.remove();          /// cleanup on scope exit
             std::unique_ptr<ImageFormat> format(new Format);

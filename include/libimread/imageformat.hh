@@ -51,7 +51,10 @@ namespace im {
                 "image",                    /// suffix
                 "application/octet-stream"  /// mimetype
             );
-                
+            
+            virtual std::string get_suffix() const   { return "." + ImageFormat::options.suffix; }
+            virtual std::string get_mimetype() const { return ImageFormat::options.mimetype; }
+            
             static options_map encode_options(options_t which_options = options);
             virtual options_map get_options() const;
             virtual options_map add_options(options_map const& opts) const;
@@ -73,6 +76,14 @@ namespace im {
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
                                      const options_map& opts);
+            
+            virtual bool format_can_read() const noexcept           { return false; }
+            virtual bool format_can_read_multi() const noexcept     { return false; }
+            virtual bool format_can_read_metadata() const noexcept  { return false; }
+            virtual bool format_can_write() const noexcept          { return false; }
+            virtual bool format_can_write_multi() const noexcept    { return false; }
+            virtual bool format_can_write_metadata() const noexcept { return false; }
+    
     };
     
     template <typename FormatType>
@@ -83,11 +94,19 @@ namespace im {
                 return match_magic(src, FormatType::options.signature);
             }
             
-            static std::string get_suffix() {
+            static std::string suffix() {
                 return "." + FormatType::options.suffix;
             }
             
-            static std::string get_mimetype() {
+            static std::string mimetype() {
+                return FormatType::options.mimetype;
+            }
+            
+            virtual std::string get_suffix() const override {
+                return "." + FormatType::options.suffix;
+            }
+            
+            virtual std::string get_mimetype() const override {
                 return FormatType::options.mimetype;
             }
             
@@ -100,13 +119,13 @@ namespace im {
                 return result.update(opts);
             }
             
-            static inline bool format_can_read()           { return FormatType::can_read(); }
-            static inline bool format_can_read_multi()     { return FormatType::can_read_multi(); }
-            static inline bool format_can_read_metadata()  { return FormatType::can_read_metadata(); }
-            static inline bool format_can_write()          { return FormatType::can_write(); }
-            static inline bool format_can_write_multi()    { return FormatType::can_write_multi(); }
-            static inline bool format_can_write_metadata() { return FormatType::can_write_metadata(); }
-            
+            virtual bool format_can_read() const noexcept override           { return FormatType::can_read::value; }
+            virtual bool format_can_read_multi() const noexcept override     { return FormatType::can_read_multi::value; }
+            virtual bool format_can_read_metadata() const noexcept override  { return FormatType::can_read_metadata::value; }
+            virtual bool format_can_write() const noexcept override          { return FormatType::can_write::value; }
+            virtual bool format_can_write_multi() const noexcept override    { return FormatType::can_write_multi::value; }
+            virtual bool format_can_write_metadata() const noexcept override { return FormatType::can_write_metadata::value; }
+    
     };
 
 }
