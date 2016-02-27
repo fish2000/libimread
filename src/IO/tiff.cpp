@@ -3,6 +3,7 @@
 
 #define NO_IMPORT_ARRAY
 
+#include <type_traits>
 #include <libimread/IO/tiff.hh>
 
 extern "C" {
@@ -17,6 +18,12 @@ namespace im {
             std::fprintf(stderr, "%s: ", module);
             std::vfprintf(stderr, fmt, ap);
             std::fprintf(stderr, "\n");
+        }
+        
+        void tiff_error(const char* module, const char* fmt, va_list ap) {
+            char buffer[4096];
+            vsnprintf(buffer, sizeof(buffer), fmt, ap);
+            imread_raise(CannotReadError, "TIFF library error:", buffer);
         }
         
         tsize_t tiff_read(thandle_t handle, void* data, tsize_t n) {
@@ -34,68 +41,72 @@ namespace im {
         }
         
         tsize_t tiff_no_write(thandle_t, void*, tsize_t) {
-            imread_raise(ProgrammingError, "tiff_write called when reading");
+            imread_raise(ProgrammingError,
+                "tiff_write called when reading");
         }
         
-        template <typename T>
+        template <typename Seekable>
         toff_t tiff_seek(thandle_t handle, toff_t off, int whence) {
-            T* s = static_cast<T*>(handle);
+            using pointer_t = std::add_pointer_t<Seekable>;
+            pointer_t seek = static_cast<pointer_t>(handle);
             switch (whence) {
-                case SEEK_SET: return s->seek_absolute(off);
-                case SEEK_CUR: return s->seek_relative(off);
-                case SEEK_END: return s->seek_end(off);
+                case SEEK_SET: return seek->seek_absolute(off);
+                case SEEK_CUR: return seek->seek_relative(off);
+                case SEEK_END: return seek->seek_end(off);
             }
             return -1;
         }
         
-        int tiff_close(thandle_t handle) { return 0; }
-        
-        template <typename T>
+        template <typename Seekable>
         toff_t tiff_size(thandle_t handle) {
-            T* s = static_cast<T*>(handle);
-            const std::size_t curpos = s->seek_relative(0);
-            const std::size_t size = s->seek_end(0);
-            s->seek_absolute(curpos);
+            using pointer_t = std::add_pointer_t<Seekable>;
+            pointer_t seek = static_cast<pointer_t>(handle);
+            const std::size_t curpos = seek->seek_relative(0);
+            const std::size_t size = seek->seek_end(0);
+            seek->seek_absolute(curpos);
             return toff_t(size);
         }
         
-        void tiff_error(const char* module, const char* fmt, va_list ap) {
-            char buffer[4096];
-            vsnprintf(buffer, sizeof(buffer), fmt, ap);
-            imread_raise(CannotReadError, "TIFF library error:", buffer);
-        }
+        int tiff_close(thandle_t handle) { return 0; }
         
         struct tif_holder {
             TIFF* tif;
             
-            tif_holder(TIFF* tif)
-                :tif(tif)
+            tif_holder(TIFF* t)
+                :tif(t)
                 {}
             
-            ~tif_holder() { TIFFClose(tif); }
+            ~tif_holder() {
+                TIFFClose(tif);
+            }
             
         };
         
         struct tiff_warn_error {
-            tiff_warn_error()
-                :warning_handler_(TIFFSetWarningHandler(show_tiff_warning))
-                ,error_handler_(TIFFSetErrorHandler(tiff_error))
-            { }
-            ~tiff_warn_error() {
-                TIFFSetWarningHandler(warning_handler_);
-                TIFFSetErrorHandler(error_handler_);
-            }
-            
             /// Newer versions of TIFF seem to call this TIFFWarningHandler,
             /// but older versions do not have this type
-            typedef void (*tiff_handler_type)(const char* module, const char* fmt, va_list ap);
-            tiff_handler_type warning_handler_;
-            tiff_handler_type error_handler_;
+            using tiff_handler_type = std::add_pointer_t<void(char const* module,
+                                                              char const* fmt,
+                                                              va_list ap)>;
+            
+            tiff_handler_type warning_handle;
+            tiff_handler_type error_handle;
+            
+            tiff_warn_error()
+                :warning_handle(TIFFSetWarningHandler(show_tiff_warning))
+                ,error_handle(TIFFSetErrorHandler(tiff_error))
+            { }
+            
+            ~tiff_warn_error() {
+                TIFFSetWarningHandler(warning_handle);
+                TIFFSetErrorHandler(error_handle);
+            }
+            
         };
         
-        template <typename T>
-        inline T tiff_get(const tif_holder& t, const int tag) {
-            T val;
+        template <typename ReadType> inline
+        ReadType tiff_get(const tif_holder& t, const int tag) {
+            ReadType val;
             if (!TIFFGetField(t.tif, tag, &val)) {
                 imread_raise(CannotReadError,
                     "Cannot find necessary tag:",
@@ -103,18 +114,24 @@ namespace im {
             }
             return val;
         }
-    
-        template <typename T>
-        inline T tiff_get(const tif_holder& t, const int tag, const T def) {
-            T val;
-            if (!TIFFGetField(t.tif, tag, &val)) { return def; }
+        
+        template <typename ReadType> inline
+        ReadType tiff_get(const tif_holder& t, const int tag,
+                          const ReadType default_value) {
+            ReadType val;
+            if (!TIFFGetField(t.tif, tag, &val)) {
+                return default_value;
+            }
             return val;
         }
-    
-        template <>
-        inline std::string tiff_get<std::string>(const tif_holder& t, const int tag, const std::string def) {
+        
+        template <> inline
+        std::string tiff_get<std::string>(const tif_holder& t, const int tag,
+                                          const std::string default_value) {
             char* val;
-            if (!TIFFGetField(t.tif, tag, &val)) { return def; }
+            if (!TIFFGetField(t.tif, tag, &val)) {
+                return default_value;
+            }
             return val;
         }
         
@@ -190,22 +207,20 @@ namespace im {
         tiff_warn_error twe;
         
         tif_holder t = read_client(&moved);
-        // std::unique_ptr<ImageList> images(new ImageList);
         ImageList images;
-        const uint32_t h = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
-        const uint32_t w = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
+        const uint32_t h                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
+        const uint32_t w                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
+        const uint16_t nr_samples           = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, 1);
+        const uint16_t bits_per_sample      = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE, 8);
         
-        const uint16_t nr_samples = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, 1);
-        const uint16_t bits_per_sample = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE, 8);
         const int depth = nr_samples > 1 ? nr_samples : -1;
-        
         const int strip_size = TIFFStripSize(t.tif);
         const int n_strips = TIFFNumberOfStrips(t.tif);
+        int raw_strip_size = 0;
         int32_t n_planes;
         void* __restrict__ data;
         
         TIFFGetField(t.tif, UIC3Tag, &n_planes, &data);
-        int raw_strip_size = 0;
         
         for (int st = 0; st != n_strips; ++st) {
             raw_strip_size += TIFFRawStripSize(t.tif, st);
@@ -235,13 +250,13 @@ namespace im {
                                   bool is_multi)  {
         tiff_warn_error twe;
         tif_holder t = read_client(src);
-        // std::unique_ptr<ImageList> images(new ImageList);
         ImageList images;
         do {
-            const uint32_t h = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
-            const uint32_t w = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
-            const uint16_t nr_samples = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL);
-            const uint16_t bits_per_sample = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE);
+            const uint32_t h                = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
+            const uint32_t w                = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
+            const uint16_t nr_samples       = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL);
+            const uint16_t bits_per_sample  = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE);
+            
             const int depth = nr_samples > 1 ? nr_samples : -1;
             
             std::unique_ptr<Image> inter = factory->create(bits_per_sample, h, w, depth);
@@ -346,23 +361,27 @@ namespace im {
             }
         }
         
-        TIFFSetField(t.tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-        
-        const char* meta = opts.cast<std::string>("metadata", "<TIFF METADATA STRING>").c_str();
-        TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta);
-        
-        if (opts.has("tiff:XResolution")) {
+        /// NB. Get this from Image object ImageWithMetadata ancestor -- or else
+        /// why the fuck are we even using that shit?
+        if (opts.cast<bool>("tiff:metadata", false)) {
+            const char* meta = opts.cast<std::string>("metadata",
+                                                      "<TIFF METADATA STRING>").c_str();
+            const char* ssig = opts.cast<std::string>("tiff:software-signature",
+                                                      "libimread (OST-MLOBJ/747)").c_str();
+            
+            TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta);
+            TIFFSetField(t.tif, TIFFTAG_SOFTWARE, ssig);
+            
             TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,
-                opts.cast<int>("tiff:XResolution"));
-        }
-        if (opts.has("tiff:YResolution")) {
+                opts.cast<int>("tiff:x-resolution", 72));
             TIFFSetField(t.tif, TIFFTAG_YRESOLUTION,
-                opts.cast<int>("tiff:YResolution"));
-        }
-        if (opts.has("tiff:XResolutionUnit")) {
+                opts.cast<int>("tiff:y-resolution", 72));
             TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT,
-                opts.cast<int>("tiff:XResolutionUnit"));
+                opts.cast<int>("tiff:resolution-unit", RESUNIT_INCH));
+            TIFFSetField(t.tif, TIFFTAG_ORIENTATION,
+                opts.cast<int>("tiff:orientation", ORIENTATION_TOPLEFT));
         }
+        
         
         for (uint32_t r = 0; r != h; ++r) {
             void* __restrict__ rowp = input.rowp(r);

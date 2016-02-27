@@ -25,6 +25,9 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(ImageFormat);
     
+    std::string ImageFormat::get_suffix() const   { return ImageFormat::options.suffix; }
+    std::string ImageFormat::get_mimetype() const { return ImageFormat::options.mimetype; }
+    
     /// including <iod/json.hh> along with Halide.h will cause a conflict --
     /// -- some macro called `user_error` I believe -- that won't compile.
     /// This static method is defined in here for this reason.
@@ -66,6 +69,11 @@ namespace im {
         imread_raise_default(NotImplementedError);
     }
     
-    
+    bool ImageFormat::format_can_read() const noexcept           { return false; }
+    bool ImageFormat::format_can_read_multi() const noexcept     { return false; }
+    bool ImageFormat::format_can_read_metadata() const noexcept  { return false; }
+    bool ImageFormat::format_can_write() const noexcept          { return false; }
+    bool ImageFormat::format_can_write_multi() const noexcept    { return false; }
+    bool ImageFormat::format_can_write_metadata() const noexcept { return false; }
     
 }

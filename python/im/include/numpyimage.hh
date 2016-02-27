@@ -54,8 +54,6 @@ namespace py {
                 Py_CLEAR(readoptDict);
                 Py_CLEAR(writeoptDict);
             }
-            
-            ~PythonImageBase() { cleanup(); }
         };
         
         using NumpyImage = PythonImageBase<HybridArray>;
@@ -74,6 +72,9 @@ namespace py {
             }
             return reinterpret_cast<PyObject*>(self); /// all is well, return self
         }
+        
+        template <typename ImageType = HybridArray>
+        static const std::unique_ptr<ImageType> unique_null_t = { nullptr, nullptr };
         
         /// Load an instance of the templated image type
         /// from a file source, with specified reading options
@@ -96,14 +97,14 @@ namespace py {
             } catch (im::FormatNotFound& exc) {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find I/O format for file: %s", source);
-                return std::unique_ptr<ImageType>(nullptr);
+                return unique_null_t<ImageType>;
             }
             
             if (!can_read) {
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
                     format->get_mimetype().c_str());
-                return std::unique_ptr<ImageType>(nullptr);
+                return unique_null_t<ImageType>;
             }
             
             {
@@ -116,7 +117,7 @@ namespace py {
             if (!exists) {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find image file: %s", source);
-                return std::unique_ptr<ImageType>(nullptr);
+                return unique_null_t<ImageType>;
             }
             
             {
@@ -150,14 +151,14 @@ namespace py {
             } catch (im::FormatNotFound& exc) {
                 PyErr_SetString(PyExc_ValueError,
                     "Can't match blob data to a suitable I/O format");
-                return std::unique_ptr<ImageType>(nullptr);
+                return unique_null_t<ImageType>;
             }
             
             if (!can_read) {
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
                     format->get_mimetype().c_str());
-                return std::unique_ptr<ImageType>(nullptr);
+                return unique_null_t<ImageType>;
             }
             
             {
@@ -174,7 +175,6 @@ namespace py {
                   typename FactoryType = ArrayFactory,
                   typename PythonImageType = PythonImageBase<ImageType>>
         int init(PyObject* self, PyObject* args, PyObject* kwargs) {
-            static const std::unique_ptr<ImageType> unique_null_ptr = std::unique_ptr<ImageType>(nullptr);
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             PyObject* py_is_blob = NULL;
             PyObject* options = NULL;
@@ -184,7 +184,7 @@ namespace py {
             
             if (!PyArg_ParseTupleAndKeywords(
                 args, kwargs, "s*|OO", const_cast<char**>(keywords),
-                &view,                      /// "source", buffer with file path or image data
+                &view,                      /// "view", buffer with file path or image data
                 &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
                 &options))                  /// "options", read-options dict
             {
@@ -221,7 +221,7 @@ namespace py {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
                 return -1;
             }
-            if (pyim->image == unique_null_ptr) {
+            if (pyim->image == unique_null_t<ImageType>) {
                 /// If this is true, PyErr has already been set
                 /// ... presumably by problems loading an ImageFormat
                 /// or opening the file at the specified image path
@@ -417,7 +417,8 @@ namespace py {
             
             if (exists && !overwrite) {
                 PyErr_Format(PyExc_ValueError,
-                    "File exists (opts['overwrite'] == true): %s", destination);
+                    "File exists (opts['overwrite'] == False): %s",
+                    destination);
                 return false;
             }
             {
@@ -522,6 +523,7 @@ namespace py {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
                 return NULL;
             }
+            
             if (!did_save) {
                 /// If this is false, PyErr has already been set
                 /// ... presumably by problems loading an ImageFormat
@@ -529,8 +531,21 @@ namespace py {
                 return NULL;
             }
             
-            if (as_blob && dststr.size()) {
+            if (!dststr.size()) {
+                if (as_blob) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Blob output unexpectedly returned zero-length bytestring");
+                    return NULL;
+                } else {
+                    PyErr_SetString(PyExc_ValueError,
+                        "File output destination path is unexpectedly zero-length");
+                    return NULL;
+                }
+            }
+            
+            if (as_blob) {
                 std::vector<byte> data;
+                PyObject* out = NULL;
                 bool removed = false;
                 {
                     py::gil::release nogil;
@@ -539,28 +554,25 @@ namespace py {
                     data = readback->full_data();
                     readback->close();
                     readback.reset(nullptr);
-                }
-                PyObject* out = PyString_FromStringAndSize(
-                    (char const*)&data[0],
-                    data.size());
-                {
-                    py::gil::release nogil;
                     removed = path::remove(dststr);
                 }
                 if (!removed) {
                     PyErr_Format(PyExc_ValueError,
-                        "Failed to remove temporary file %s", dststr.c_str());
+                        "Failed to remove temporary file %s",
+                        dststr.c_str());
                     return NULL;
                 }
+                out = PyString_FromStringAndSize(
+                    (char const*)&data[0],
+                    data.size());
                 if (out == NULL) {
                     PyErr_SetString(PyExc_ValueError,
                         "Failed converting output to Python string");
                 }
                 return out;
-            } else if (dststr.size()) {
-                return PyString_FromString(dststr.c_str());
             }
-            return Py_BuildValue("");
+            /// "else":
+            return PyString_FromString(dststr.c_str());
         }
         
         /// NumpyImage.dtype getter

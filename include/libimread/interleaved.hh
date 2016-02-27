@@ -814,7 +814,7 @@ namespace im {
         std::string tmpwrite(InterleavedImage<Color>& input,
                              const options_map& opts) {
             // if (input.dim(2) > 3) { return ""; }
-            im::fs::NamedTemporaryFile tf(Format::get_suffix());
+            im::fs::NamedTemporaryFile tf("." + Format::suffix());
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
             options_map default_opts = format->add_options(opts);

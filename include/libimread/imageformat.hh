@@ -52,8 +52,8 @@ namespace im {
                 "application/octet-stream"  /// mimetype
             );
             
-            virtual std::string get_suffix() const   { return "." + ImageFormat::options.suffix; }
-            virtual std::string get_mimetype() const { return ImageFormat::options.mimetype; }
+            virtual std::string get_suffix() const;
+            virtual std::string get_mimetype() const;
             
             static options_map encode_options(options_t which_options = options);
             virtual options_map get_options() const;
@@ -77,12 +77,12 @@ namespace im {
                                      byte_sink* output,
                                      const options_map& opts);
             
-            virtual bool format_can_read() const noexcept           { return false; }
-            virtual bool format_can_read_multi() const noexcept     { return false; }
-            virtual bool format_can_read_metadata() const noexcept  { return false; }
-            virtual bool format_can_write() const noexcept          { return false; }
-            virtual bool format_can_write_multi() const noexcept    { return false; }
-            virtual bool format_can_write_metadata() const noexcept { return false; }
+            virtual bool format_can_read() const noexcept;
+            virtual bool format_can_read_multi() const noexcept;
+            virtual bool format_can_read_metadata() const noexcept;
+            virtual bool format_can_write() const noexcept;
+            virtual bool format_can_write_multi() const noexcept;
+            virtual bool format_can_write_metadata() const noexcept;
     
     };
     
@@ -95,7 +95,7 @@ namespace im {
             }
             
             static std::string suffix() {
-                return "." + FormatType::options.suffix;
+                return FormatType::options.suffix;
             }
             
             static std::string mimetype() {
@@ -103,7 +103,7 @@ namespace im {
             }
             
             virtual std::string get_suffix() const override {
-                return "." + FormatType::options.suffix;
+                return FormatType::options.suffix;
             }
             
             virtual std::string get_mimetype() const override {
@@ -125,6 +125,25 @@ namespace im {
             virtual bool format_can_write() const noexcept override          { return FormatType::can_write::value; }
             virtual bool format_can_write_multi() const noexcept override    { return FormatType::can_write_multi::value; }
             virtual bool format_can_write_metadata() const noexcept override { return FormatType::can_write_metadata::value; }
+            
+            /// LONGCAT IS LOOOOOOOOOONG erm I mean
+            /// SAME CLASS IS SAME
+            template <typename OtherFormatType,
+                      typename X = std::enable_if_t<
+                                   std::is_base_of<ImageFormat, OtherFormatType>::value>> inline
+            bool operator==(OtherFormatType const& other) const noexcept {
+                return std::is_same<std::remove_cv_t<FormatType>,
+                                    std::remove_cv_t<OtherFormatType>>::value;
+            }
+            
+            /// DIFFERENT CLASS IS DIFFERENT
+            template <typename OtherFormatType,
+                      typename X = std::enable_if_t<
+                                   std::is_base_of<ImageFormat, OtherFormatType>::value>> inline
+            bool operator!=(OtherFormatType const& other) const noexcept {
+                return !std::is_same<std::remove_cv_t<FormatType>,
+                                     std::remove_cv_t<OtherFormatType>>::value;
+            }
     
     };
 
