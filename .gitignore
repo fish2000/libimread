@@ -13,6 +13,8 @@
 *.pyc
 *.pyo
 .tm_properties
+.cache/
+.prof/
 
 /xcode/fmwk/
 !/xcode/fmwk/libimread.xcodeproj/

@@ -11,7 +11,9 @@ SET(COMMON_LINK_FLAGS
 
 # language-specific compile options
 SET(C_OPTIONS
-    -std=c99 -Wno-incompatible-pointer-types -Wno-char-subscripts
+    -std=c99
+    -Wno-incompatible-pointer-types
+    -Wno-char-subscripts
     -x c)
 
 SET(CXX_OPTIONS

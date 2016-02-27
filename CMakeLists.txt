@@ -80,13 +80,16 @@ SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(CROSSGUID_DIR "${DEPS_DIR}/crossguid")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
+SET(INTERPOL_DIR "${DEPS_DIR}/interpol")
 SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
 SET(AFNETWORKING_DIR "${DEPS_DIR}/AFNetworking")
 SET(MABLOCKCLOSURE_DIR "${DEPS_DIR}/MABlockClosure")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
 SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
+
 SET(LIBIMREAD_CONFIG_DIR "${APPS_DIR}/libimread-config")
 SET(IMPASTE_DIR "${APPS_DIR}/impaste")
+
 add_subdirectory(${DEPS_DIR})
 set_property(DIRECTORY ${IOD_TEST_DIR}
              PROPERTY EXCLUDE_FROM_ALL TRUE)
@@ -116,6 +119,8 @@ include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${CROSSGUID_DIR}")
 include_directories("${DOCOPT_DIR}")
+include_directories("${IMAGECOMPRESSION_DIR}")
+include_directories("${INTERPOL_DIR}")
 include_directories("${AFNETWORKING_DIR}")
 include_directories("${MABLOCKCLOSURE_DIR}")
 include_directories("${IOD_DIR}")
@@ -156,6 +161,8 @@ add_dependencies(imread "project_header")
 add_dependencies(imread "guid")
 # add_dependencies(libimread "libimagecompression")
 add_dependencies(imread "imagecompression")
+# add_dependencies(libimread "libinterpol")
+add_dependencies(imread "interpol")
 # add_dependencies(libimread "libAFNetworking")
 add_dependencies(imread "AFNetworking")
 # add_dependencies(libimread "libMABlockClosure")
@@ -186,7 +193,8 @@ set_source_files_properties(
 # target_link_libraries(libimread
 #     libguid libdocopt
 #     libMABlockClosure
-#     libsszip
+#     libimagecompression
+#     libsszip libinterpol
 #     png z ${EXTRA_LIBS}
 #     ${TIFF_LIBRARIES}
 #     ${JPEG_LIBRARIES}
@@ -198,6 +206,7 @@ target_link_libraries(imread
     png z guid
     MABlockClosure
     imagecompression
+    interpol
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -239,6 +248,7 @@ add_dependencies(imread_tests "test_data_header")
 add_dependencies(imread_tests "iod_symbolize")
 add_dependencies(imread_tests "guid")
 add_dependencies(imread_tests "imagecompression")
+add_dependencies(imread_tests "interpol")
 add_dependencies(imread_tests "MABlockClosure")
 add_dependencies(imread_tests "AFNetworking")
 add_dependencies(imread_tests "sszip")
@@ -249,6 +259,7 @@ target_link_libraries(imread_tests
     AFNetworking
     MABlockClosure
     imagecompression
+    interpol
     guid png z
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
