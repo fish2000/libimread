@@ -1,0 +1,9 @@
+wheel
+#nose
+#nose-rednose
+#nose2
+unittest2
+py.test
+pytest-osxnotify
+pytest-profiling
+clint

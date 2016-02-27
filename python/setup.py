@@ -15,6 +15,10 @@ setuptools not found.
 
 On linux, the package is often called python-setuptools''')
     sys.exit(1)
+else:
+    print('''
+%s found.
+    ''' % setuptools.__name__)
 
 # PYTHON & NUMPY INCLUDES
 from utils import Install, HomebrewInstall, gosub

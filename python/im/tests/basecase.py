@@ -5,7 +5,6 @@ from unittest2 import TestCase
 import sys
 from os import listdir
 from os.path import join, abspath, expanduser, dirname
-# from pprint import pprint
 
 class BaseCase(TestCase):
     
@@ -21,9 +20,12 @@ class BaseCase(TestCase):
         self.pvrs = set([pth for pth in self._image_paths if pth.lower().endswith('pvr')])
         
 
-def main(config=None):
-    import nose
-    return nose.main()
+def main(discover=False):
+    import nose2
+    if discover:
+        return nose2.discover()
+    else:
+        return nose2.main()
 
 if __name__ == '__main__':
     sys.exit(main())

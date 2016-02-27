@@ -27,8 +27,14 @@ buildext: distclean
 build: distclean
 	python setup.py build_ext --inplace
 
-test:
+nosetests:
 	NOSE_REDNOSE=1 python runtests.py
+
+test:
+	py.test --color=yes --verbose -r a --full-trace
+
+profile:
+	py.test --color=yes --verbose -r a --profile-svg
 
 upload:
 	python setup.py sdist upload
