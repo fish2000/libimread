@@ -239,6 +239,11 @@ namespace py {
             pyim->readoptDict = options ? options : PyDict_New();
             Py_INCREF(pyim->readoptDict);
             
+            /// ... and now OK, store an empty write options dict
+            Py_CLEAR(pyim->writeoptDict);
+            pyim->writeoptDict = PyDict_New();
+            Py_INCREF(pyim->writeoptDict);
+            
             /// ALL IS WELL:
             return 0;
         }
@@ -675,14 +680,11 @@ namespace py {
         }
         
         /// NumpyImage.write_opts getter
-        /// We have to check for NULL/nullptr here -- but not in its read_opts counterpart --
-        /// because we can't count on write_opts being anything (vs read_opts which are
-        /// set to at least an empty dict in py::image::init<…>(), q.v. the above)
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_write_opts(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            return Py_BuildValue("O", pyim->writeoptDict ? pyim->writeoptDict : PyDict_New());
+            return Py_BuildValue("O", pyim->writeoptDict);
         }
         
         /// NumpyImage.write_opts setter

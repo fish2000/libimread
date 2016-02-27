@@ -35,7 +35,7 @@ namespace py {
         options_list parse_option_list(PyObject* list) {
             options_list out;
             if (!list) { return out; }
-            //if (!PySequence_Check(list)) { return out; }
+            if (!PySequence_Check(list)) { return out; }
             PyObject* sequence = PySequence_Fast(list, "Sequence expected");
             int idx = 0, len = PySequence_Fast_GET_SIZE(sequence);
             for (; idx < len; idx++) {
