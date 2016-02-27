@@ -7,7 +7,18 @@ import im
 
 class NumpyImageReadWriteTests(BaseCase):
     
+    def test_numpyimage_check(self):
+        # ''' Re-using `test_load_image_jpg_write_blob_jpg` here '''
+        for image_path in self.jpgs:
+            image = im.NumpyImage(image_path)
+            self.assertIsNotNone(image)
+            self.assertTrue(im.numpyimage_check(image))
+            data = image.write(as_blob=True, options={ 'format' : "jpg" })
+            self.assertIsNotNone(data)
+            self.assertFalse(im.numpyimage_check(data))
+    
     def test_load_image_jpg_write_blob_jpg(self):
+        ''' Load JPG files, write JPG blobs '''
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -15,6 +26,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
     
     def test_load_image_png_write_blob_jpg(self):
+        ''' Load PNG files, write JPG blobs '''
         for image_path in self.pngs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -22,6 +34,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
     
     def test_load_image_jpg_write_blob_png(self):
+        ''' Load JPG files, write PNG blobs '''
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -29,6 +42,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
     
     def test_load_image_png_write_blob_png(self):
+        ''' Load PNG files, write PNG blobs '''
         for image_path in self.pngs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -36,6 +50,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
     
     def test_load_image_jpg_write_blob_tif(self):
+        ''' Load JPG files, write TIF blobs '''
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -43,6 +58,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
     
     def test_load_image_jpg_write_blob_png_readback(self):
+        ''' Load JPG files, write PNG blobs with readback '''
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -53,6 +69,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertEqual(image.shape, image2.shape)
     
     def test_load_image_png_write_blob_png_readback(self):
+        ''' Load PNG files, write PNG blobs with readback '''
         for image_path in self.pngs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -63,6 +80,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertEqual(image.shape[:2], image2.shape[:2])
     
     def test_load_image_jpg_write_blob_jpg_readback(self):
+        ''' Load JPG files, write PNG blobs with readback '''
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -73,6 +91,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertEqual(image.shape, image2.shape)
     
     def test_load_image_png_write_blob_jpg_readback(self):
+        ''' Load PNG files, write PNG blobs with readback '''
         for image_path in self.pngs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -83,6 +102,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertEqual(image.shape[:2], image2.shape[:2])
     
     def test_load_image_jpg_write_blob_tif_readback(self):
+        ''' Load JPG files, write TIF blobs with readback '''
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
@@ -93,6 +113,7 @@ class NumpyImageReadWriteTests(BaseCase):
             # self.assertEqual(image.shape[:2], image2.shape[:2])
     
     def test_load_image_jpg_write_blob_tif_options_readback(self):
+        ''' Load JPG files, write TIF blobs with readback + metadata options '''
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)

@@ -20,6 +20,10 @@
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
 
+/// forward type declaration
+extern PyTypeObject NumpyImage_Type;
+#define NumpyImage_Check(op) (Py_TYPE(op) == &NumpyImage_Type)
+
 namespace py {
     
     namespace image {
@@ -189,8 +193,7 @@ namespace py {
                 &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
                 &options))                  /// "options", read-options dict
             {
-                PyErr_SetString(PyExc_ValueError,
-                    "Bad arguments to image_init");
+                // PyErr_SetString(PyExc_ValueError, "Bad arguments to image_init");
                 return -1;
             } else {
                 if (py_is_blob) {
@@ -482,8 +485,7 @@ namespace py {
                 &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
                 &options))                  /// "options", read-options dict
             {
-                PyErr_SetString(PyExc_ValueError,
-                    "Bad arguments to write");
+                // PyErr_SetString(PyExc_ValueError, "Bad arguments to write");
                 return NULL;
             } else {
                 if (py_as_blob) {
@@ -660,7 +662,7 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_read_opts(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            return Py_BuildValue("O", pyim->readoptDict);
+            return Py_BuildValue("O", pyim->readoptDict ? pyim->readoptDict : Py_None);
         }
         
         /// NumpyImage.read_opts setter
@@ -684,7 +686,7 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_write_opts(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            return Py_BuildValue("O", pyim->writeoptDict);
+            return Py_BuildValue("O", pyim->writeoptDict ? pyim->writeoptDict : Py_None);
         }
         
         /// NumpyImage.write_opts setter
@@ -774,65 +776,12 @@ static PyMethodDef NumpyImage_methods[] = {
 static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT         | 
                                          Py_TPFLAGS_BASETYPE        | 
                                          Py_TPFLAGS_HAVE_NEWBUFFER;
-
-static PyTypeObject NumpyImage_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                                                  /* ob_size */
-    "im.NumpyImage",                                                    /* tp_name */
-    sizeof(NumpyImage),                                                 /* tp_basicsize */
-    0,                                                                  /* tp_itemsize */
-    (destructor)py::image::dealloc<HybridArray>,                        /* tp_dealloc */
-    0,                                                                  /* tp_print */
-    0,                                                                  /* tp_getattr */
-    0,                                                                  /* tp_setattr */
-    0,                                                                  /* tp_compare */
-    (reprfunc)py::image::repr<HybridArray>,                             /* tp_repr */
-    0,                                                                  /* tp_as_number */
-    &NumpyImage_SequenceMethods,                                        /* tp_as_sequence */
-    0,                                                                  /* tp_as_mapping */
-    (hashfunc)py::image::hash<HybridArray>,                             /* tp_hash */
-    0,                                                                  /* tp_call */
-    (reprfunc)py::image::str<HybridArray>,                              /* tp_str */
-    (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
-    (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
-    &NumpyImage_Buffer3000Methods,                                      /* tp_as_buffer */
-    NumpyImage_TypeFlags,                                               /* tp_flags */
-    "Python bindings for NumPy Halide bridge",                          /* tp_doc */
-    0,                                                                  /* tp_traverse */
-    0,                                                                  /* tp_clear */
-    0,                                                                  /* tp_richcompare */
-    0,                                                                  /* tp_weaklistoffset */
-    0,                                                                  /* tp_iter */
-    0,                                                                  /* tp_iternext */
-    NumpyImage_methods,                                                 /* tp_methods */
-    0,                                                                  /* tp_members */
-    NumpyImage_getset,                                                  /* tp_getset */
-    0,                                                                  /* tp_base */
-    0,                                                                  /* tp_dict */
-    0,                                                                  /* tp_descr_get */
-    0,                                                                  /* tp_descr_set */
-    0,                                                                  /* tp_dictoffset */
-    (initproc)py::image::init<HybridArray, ArrayFactory>,               /* tp_init */
-    0,                                                                  /* tp_alloc */
-    py::image::createnew<HybridArray>,                                  /* tp_new */
-    0,                                                                  /* tp_free */
-    0,                                                                  /* tp_is_gc */
-    0,                                                                  /* tp_bases */
-    0,                                                                  /* tp_mro */
-    0,                                                                  /* tp_cache */
-    0,                                                                  /* tp_subclasses */
-    0,                                                                  /* tp_weaklist */
-    0,                                                                  /* tp_del */
-    0,                                                                  /* tp_version_tag */
-    
-};
-
 namespace py {
     
     namespace functions {
         
         PyObject* structcode_parse(PyObject* self, PyObject* args);
-        
+        PyObject* numpyimage_check(PyObject* self, PyObject* args);
     }
 }
 
@@ -842,6 +791,11 @@ static PyMethodDef NumpyImage_module_functions[] = {
             (PyCFunction)py::functions::structcode_parse,
             METH_VARARGS,
             "Parse struct code into list of dtype-string tuples" },
+    {
+        "numpyimage_check",
+            (PyCFunction)py::functions::numpyimage_check,
+            METH_VARARGS,
+            "Boolean function to test for NumpyImage instances" },
     { NULL, NULL, 0, NULL }
 };
 
