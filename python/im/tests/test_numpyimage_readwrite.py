@@ -35,6 +35,13 @@ class NumpyImageReadWriteTests(BaseCase):
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
     
+    def test_load_image_jpg_write_blob_tif(self):
+        for image_path in self.jpgs:
+            image = im.NumpyImage(image_path)
+            self.assertIsNotNone(image)
+            data = image.write(as_blob=True, options={ 'format' : "tif" })
+            self.assertIsNotNone(data)
+    
     def test_load_image_jpg_write_blob_png_readback(self):
         for image_path in self.jpgs:
             image = im.NumpyImage(image_path)
@@ -70,6 +77,28 @@ class NumpyImageReadWriteTests(BaseCase):
             image = im.NumpyImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
+            self.assertIsNotNone(data)
+            image2 = im.NumpyImage(data, is_blob=True)
+            self.assertIsNotNone(image2)
+            self.assertEqual(image.shape[:2], image2.shape[:2])
+    
+    def test_load_image_jpg_write_blob_tif_readback(self):
+        for image_path in self.jpgs:
+            image = im.NumpyImage(image_path)
+            self.assertIsNotNone(image)
+            data = image.write(as_blob=True, options={ 'format' : "tif" })
+            self.assertIsNotNone(data)
+            image2 = im.NumpyImage(data, is_blob=True)
+            self.assertIsNotNone(image2)
+            self.assertEqual(image.shape[:2], image2.shape[:2])
+    
+    def test_load_image_jpg_write_blob_tif_options_readback(self):
+        for image_path in self.jpgs:
+            image = im.NumpyImage(image_path)
+            self.assertIsNotNone(image)
+            data = image.write(as_blob=True, options={ 'format' : "tif", 'tiff:metadata'            : True,
+                                                                         'metadata'                 : "YO DOGG",
+                                                                         'tiff:software-signature'  : "I HEARD YOU LIKE METADATA" })
             self.assertIsNotNone(data)
             image2 = im.NumpyImage(data, is_blob=True)
             self.assertIsNotNone(image2)

@@ -42,6 +42,8 @@ namespace py {
                     out.append(py::options::parse_options(item));
                 } else if (PyTuple_Check(item) || PyList_Check(item)) {
                     out.append(py::options::parse_option_list(item));
+                } else if (PyBool_Check(item)) {
+                    out.append(PyObject_IsTrue(item) == 1);
                 } else if (PyLong_Check(item)) {
                     out.append(PyLong_AsLong(item));
             #if PY_MAJOR_VERSION < 3
@@ -82,6 +84,8 @@ namespace py {
                     out.set(k, py::options::parse_options(value));
                 } else if (PyTuple_Check(value) || PyList_Check(value)) {
                     out.set(k, py::options::parse_option_list(value));
+                } else if (PyBool_Check(item)) {
+                    out.set(k, PyObject_IsTrue(item) == 1);
                 } else if (PyLong_Check(value)) {
                     out.set(k, PyLong_AsLong(value));
             #if PY_MAJOR_VERSION < 3

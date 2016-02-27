@@ -848,11 +848,17 @@ Json::operator int16_t() const {
 }
 
 Json::operator bool() const {
-    if (root->type() == Type::BOOLEAN) { return root == &Bool::T; }
+    switch (root->type()) {
+        case Type::BOOLEAN: return root == &Bool::T;
+        case Type::NUMBER:  return static_cast<bool>(int(((Number*)root)->value));
+        case Type::STRING:  return static_cast<bool>(((String*)root)->value.size());
+        case Type::JSNULL:  return false;
+        default:            imread_raise_default(JSONBadCast);
+    }
     imread_raise_default(JSONBadCast);
 }
 
-bool Json::operator == (const Json& that) const {
+bool Json::operator==(const Json& that) const {
     if (root == that.root) { return true; }
     return *root == *that.root;
 }
