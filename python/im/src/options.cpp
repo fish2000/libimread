@@ -1,6 +1,7 @@
 
 #include <string>
 #include <libimread/errors.hh>
+#include "check.hh"
 #include "gil.hh"
 #include "pybuffer.hpp"
 #include "options.hpp"
@@ -41,9 +42,19 @@ namespace py {
             for (; idx < len; idx++) {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                 if (PyDict_Check(item)) {
-                    out.append(py::options::parse_options(item));
+                    try {
+                        out.append(py::options::parse_options(item));
+                    } catch (im::OptionsError& exc) {
+                        Py_DECREF(sequence);
+                        throw;
+                    }
                 } else if (PyTuple_Check(item) || PyList_Check(item) || PyAnySet_Check(item)) {
-                    out.append(py::options::parse_option_list(item));
+                    try {
+                        out.append(py::options::parse_option_list(item));
+                    } catch (im::OptionsError& exc) {
+                        Py_DECREF(sequence);
+                        throw;
+                    }
                 } else if (item == Py_None) {
                     out.append(options_list::null);
                 } else if (PyBool_Check(item)) {
@@ -68,9 +79,15 @@ namespace py {
                         py::buffer::source data = py::buffer::source(*view, false);
                         out.append(std::string(data.str()));
                     }
+                } else if (NumpyImage_Check(item)) {
+                    Py_DECREF(sequence);
+                    imread_raise(OptionsError, "[ERROR]",
+                        FF("Illegal NumpyImage data found in item %i (of %i)",
+                            idx, len));
                 } else {
                     const char* c = py::options::get_cstring(item);
                     if (!c) {
+                        Py_DECREF(sequence);
                         imread_raise(OptionsError, "[ERROR]",
                             FF("Misparsed sequence item %i (of %i)",
                                 idx, len));
@@ -119,11 +136,15 @@ namespace py {
                         py::buffer::source data = py::buffer::source(*view, false);
                         out.set(k, std::string(data.str()));
                     }
+                } else if (NumpyImage_Check(value)) {
+                    imread_raise(OptionsError, "[ERROR]",
+                        FF("Illegal NumpyImage data found at key %s (index %i)",
+                            k.c_str(), pos));
                 } else {
                     const char* c = py::options::get_cstring(value);
                     if (!c) {
                         imread_raise(OptionsError, "[ERROR]",
-                            FF("Misparsed map value for key %s (at index %i)",
+                            FF("Misparsed map value at key %s (index %i)",
                                 k.c_str(), pos));
                     }
                     out.set(k, std::string(c));

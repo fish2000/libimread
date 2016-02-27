@@ -7,6 +7,7 @@
 #include <Python.h>
 #include <structmember.h>
 
+#include "check.hh"
 #include "gil.hh"
 #include "detail.hh"
 #include "options.hpp"
@@ -19,10 +20,6 @@
 #include <libimread/errors.hh>
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
-
-/// forward type declaration
-extern PyTypeObject NumpyImage_Type;
-#define NumpyImage_Check(op) (Py_TYPE(op) == &NumpyImage_Type)
 
 namespace py {
     
@@ -193,13 +190,12 @@ namespace py {
                 &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
                 &options))                  /// "options", read-options dict
             {
-                // PyErr_SetString(PyExc_ValueError, "Bad arguments to image_init");
                 return -1;
-            } else {
-                if (py_is_blob) {
-                    /// test is necessary, the next line chokes on NULL:
-                    is_blob = PyObject_IsTrue(py_is_blob);
-                }
+            }
+            
+            if (py_is_blob) {
+                /// test is necessary, the next line chokes on NULL:
+                is_blob = PyObject_IsTrue(py_is_blob);
             }
             
             try {
@@ -485,20 +481,25 @@ namespace py {
                 &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
                 &options))                  /// "options", read-options dict
             {
-                // PyErr_SetString(PyExc_ValueError, "Bad arguments to write");
                 return NULL;
-            } else {
-                if (py_as_blob) {
-                    /// test is necessary, the next line chokes on NULL:
-                    as_blob = PyObject_IsTrue(py_as_blob);
-                }
+            }
+            
+            if (py_as_blob) {
+                /// test is necessary, the next line chokes on NULL:
+                as_blob = PyObject_IsTrue(py_as_blob);
+            }
+            
+            if (options) {
+                PyDict_Update(pyim->writeoptDict, options);
             }
             
             try {
-                options_map opts = py::options::parse_options(options);
-                if (pyim->writeoptDict) {
-                    opts = opts.update(pyim->writeopts());
-                }
+                // options_map opts = py::options::parse_options(options);
+                // if (pyim->writeoptDict) {
+                //     opts = opts.update(pyim->writeopts());
+                // }
+                options_map opts = pyim->writeopts();
+                
                 if (as_blob) {
                     /// save as blob -- pass the buffer along
                     if (!opts.has("format")) {
@@ -681,6 +682,20 @@ namespace py {
             return 0;
         }
         
+        /// NumpyImage.read_opts formatter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    format_read_opts(PyObject* self, PyObject*) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            options_map opts = pyim->readopts();
+            char const* out;
+            {
+                py::gil::release nogil;
+                out = opts.format().c_str();
+            }
+            return Py_BuildValue("s", out);
+        }
+        
         /// NumpyImage.write_opts getter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
@@ -703,6 +718,20 @@ namespace py {
             Py_CLEAR(pyim->writeoptDict);
             pyim->writeoptDict = Py_BuildValue("O", value);
             return 0;
+        }
+        
+        /// NumpyImage.write_opts formatter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    format_write_opts(PyObject* self, PyObject*) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            options_map opts = pyim->writeopts();
+            char const* out;
+            {
+                py::gil::release nogil;
+                out = opts.format().c_str();
+            }
+            return Py_BuildValue("s", out);
         }
         
     } /* namespace image */
@@ -770,6 +799,16 @@ static PyMethodDef NumpyImage_methods[] = {
             (PyCFunction)py::image::write<HybridArray>,
             METH_VARARGS | METH_KEYWORDS,
             "Format and write image data to file or blob" },
+    {
+        "format_read_opts",
+            (PyCFunction)py::image::format_read_opts<HybridArray>,
+            METH_NOARGS,
+            "Get the read options as a formatted JSON string" },
+    {
+        "format_write_opts",
+            (PyCFunction)py::image::format_write_opts<HybridArray>,
+            METH_NOARGS,
+            "Get the write options as a formatted JSON string" },
     { NULL, NULL, 0, NULL }
 };
 
