@@ -580,7 +580,8 @@ void Json::Array::add(Node* v) {
 /** Inserts given Node* before index. */
 void Json::Array::ins(int index, Node* v) {
     assert(v != nullptr);
-    if (index < 0) { index += list.size(); }
+    // if (index < 0) { index += list.size(); }
+    if (index < 0) { index = 0; }
     if (index < 0 || index > (int)list.size()) {
         imread_raise_default(JSONOutOfRange);
     }

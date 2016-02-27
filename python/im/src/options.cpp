@@ -35,14 +35,14 @@ namespace py {
         options_list parse_option_list(PyObject* list) {
             options_list out;
             if (!list) { return out; }
-            if (!PySequence_Check(list)) { return out; }
+            //if (!PySequence_Check(list)) { return out; }
             PyObject* sequence = PySequence_Fast(list, "Sequence expected");
             int idx = 0, len = PySequence_Fast_GET_SIZE(sequence);
             for (; idx < len; idx++) {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                 if (PyDict_Check(item)) {
                     out.append(py::options::parse_options(item));
-                } else if (PyTuple_Check(item) || PyList_Check(item)) {
+                } else if (PyTuple_Check(item) || PyList_Check(item) || PyAnySet_Check(item)) {
                     out.append(py::options::parse_option_list(item));
                 } else if (item == Py_None) {
                     out.append(options_list::null);
@@ -93,7 +93,7 @@ namespace py {
                 std::string k = py::options::get_cstring(key);
                 if (PyDict_Check(value)) {
                     out.set(k, py::options::parse_options(value));
-                } else if (PyTuple_Check(value) || PyList_Check(value)) {
+                } else if (PyTuple_Check(value) || PyList_Check(value) || PyAnySet_Check(value)) {
                     out.set(k, py::options::parse_option_list(value));
                 } else if (value == Py_None) {
                     out.set(k, options_map::null);
