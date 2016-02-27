@@ -11,16 +11,18 @@
 Usage:
   sigbytes.py INFILE... [-o OUTFILE]
                         [-s SIZE]
+                        [-c | --clean]
                         [-V | --verbose]
   
   sigbytes.py -h | --help | -v | --version
     
 Options:
-  -o OUTFILE --output=OUTFILE       specify output file [default: stdout]
-  -s SIZE    --size=SIZE            specify size of bytes to read [default: 8]
-  -V --verbose                      print verbose output
-  -h --help                         show this text
-  -v --version                      print version
+  -o OUTFILE --output=OUTFILE       specify output file [default: stdout].
+  -s SIZE    --size=SIZE            specify size of bytes to read [default: 8].
+  -c --clean                        clean first, strip out the slash-x punctuation.
+  -V --verbose                      print verbose output.
+  -h --help                         show this text.
+  -v --version                      print version.
 """
 
 from __future__ import print_function
@@ -43,10 +45,14 @@ def cli(argv=None):
     ipths = (expanduser(pth) for pth in arguments.get('INFILE'))
     opth = expanduser(arguments.get('--output'))
     siz = int(arguments.get('-s', 8))
+    clean = bool(arguments.get('--clean'))
     verbose = bool(arguments.get('--verbose'))
     
     if not len(arguments.get('INFILE')) > 0:
         raise AttributeError("No input files")
+    
+    cleanr = lambda b: repr(b).replace(r'\x', ' ').upper()
+    process_bytes = clean and cleanr or repr
     
     for ipth in ipths:
         fp = None
@@ -60,9 +66,9 @@ def cli(argv=None):
             if opth == 'stdout':
                 if verbose:
                     print(">>> Header bytes (%s) for %s" % (siz, ipth))
-                    print(">>> %s" % repr(header_bytes))
+                    print(">>> %s" % process_bytes(header_bytes))
                 else:
-                    print(repr(header_bytes)[1:-1])
+                    print(process_bytes(header_bytes)[1:-1])
             else:
                 fp.write(header_bytes)
                 fp.write("\n")
