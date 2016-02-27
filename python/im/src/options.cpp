@@ -12,24 +12,24 @@ namespace py {
         const char* get_blob(PyObject* data,
                              std::size_t& len) noexcept {
             #if PY_MAJOR_VERSION < 3
-                if (!PyString_Check(data)) { return 0; }
+                if (!PyString_Check(data)) { return nullptr; }
                 len = PyString_Size(data);
-                return PyString_AsString(data);
-            #else
+                return PyString_AS_STRING(data);
+            #elif PY_MAJOR_VERSION >= 3
                 len = PyBytes_Size(data);
-                if (!PyBytes_Check(data)) { return 0; }
+                if (!PyBytes_Check(data)) { return nullptr; }
                 return PyBytes_AsString(data);
-            #endif
+            #endif /// PY_MAJOR_VERSION
         }
         
         const char* get_cstring(PyObject* stro) noexcept {
             #if PY_MAJOR_VERSION < 3
-                if (!PyString_Check(stro)) { return 0; }
-                return PyString_AsString(stro);
-            #else
-                if (!PyUnicode_Check(stro)) { return 0; }
+                if (!PyString_Check(stro)) { return nullptr; }
+                return PyString_AS_STRING(stro);
+            #elif PY_MAJOR_VERSION >= 3
+                if (!PyUnicode_Check(stro)) { return nullptr; }
                 return PyUnicode_AsUTF8(stro);
-            #endif
+            #endif /// PY_MAJOR_VERSION
         }
         
         options_list parse_option_list(PyObject* list) {
@@ -50,18 +50,17 @@ namespace py {
                     out.append(PyObject_IsTrue(item) == 1);
                 } else if (PyLong_Check(item)) {
                     out.append(PyLong_AsLong(item));
+                } else if (PyFloat_Check(item)) {
+                    out.append(PyFloat_AS_DOUBLE(item));
             #if PY_MAJOR_VERSION < 3
                 } else if (PyInt_Check(item)) {
                     out.append(static_cast<int>(PyInt_AS_LONG(item)));
-            #endif
-                } else if (PyFloat_Check(item)) {
-                    out.append(PyFloat_AS_DOUBLE(item));
-            #if PY_MAJOR_VERSION >= 3
+            #elif PY_MAJOR_VERSION >= 3
                 } else if (PyBytes_Check(item)) {
                     std::size_t len;
                     const char* blob = py::options::get_blob(item, len);
                     out.append(std::string(blob, len));
-            #endif
+            #endif /// PY_MAJOR_VERSION
                 } else if (PyMemoryView_Check(item)) {
                     Py_buffer* view = PyMemoryView_GET_BUFFER(item);
                     {
@@ -72,8 +71,9 @@ namespace py {
                 } else {
                     const char* c = py::options::get_cstring(item);
                     if (!c) {
-                        imread_raise(OptionsError,
-                            "Couldn't parse option value for list item:", idx);
+                        imread_raise(OptionsError, "[ERROR]",
+                            FF("Misparsed sequence item %i (of %i)",
+                                idx, len));
                     }
                     out.append(std::string(c));
                 }
@@ -101,18 +101,17 @@ namespace py {
                     out.set(k, PyObject_IsTrue(value) == 1);
                 } else if (PyLong_Check(value)) {
                     out.set(k, PyLong_AsLong(value));
+                } else if (PyFloat_Check(value)) {
+                    out.set(k, PyFloat_AS_DOUBLE(value));
             #if PY_MAJOR_VERSION < 3
                 } else if (PyInt_Check(value)) {
                     out.set(k, static_cast<int>(PyInt_AS_LONG(value)));
-            #endif
-                } else if (PyFloat_Check(value)) {
-                    out.set(k, PyFloat_AS_DOUBLE(value));
-            #if PY_MAJOR_VERSION >= 3
+            #elif PY_MAJOR_VERSION >= 3
                 } else if (PyBytes_Check(value)) {
                     std::size_t len;
                     const char* blob = py::options::get_blob(value, len);
                     out.set(k, std::string(blob, len));
-            #endif
+            #endif /// PY_MAJOR_VERSION
                 } else if (PyMemoryView_Check(value)) {
                     Py_buffer* view = PyMemoryView_GET_BUFFER(value);
                     {
@@ -123,8 +122,9 @@ namespace py {
                 } else {
                     const char* c = py::options::get_cstring(value);
                     if (!c) {
-                        imread_raise(OptionsError,
-                            "Couldn't parse option value for key:", k);
+                        imread_raise(OptionsError, "[ERROR]",
+                            FF("Misparsed map value for key %s (at index %i)",
+                                k.c_str(), pos));
                     }
                     out.set(k, std::string(c));
                 }

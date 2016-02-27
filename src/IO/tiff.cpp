@@ -15,7 +15,7 @@ namespace im {
     namespace {
         
         void show_tiff_warning(const char* module, const char* fmt, va_list ap) {
-            std::fprintf(stderr, "%s: ", module);
+            std::fprintf(stderr, "[TIFF/WARNING] %s: ", module);
             std::vfprintf(stderr, fmt, ap);
             std::fprintf(stderr, "\n");
         }
@@ -23,7 +23,9 @@ namespace im {
         void tiff_error(const char* module, const char* fmt, va_list ap) {
             char buffer[4096];
             vsnprintf(buffer, sizeof(buffer), fmt, ap);
-            imread_raise(CannotReadError, "TIFF library error:", buffer);
+            imread_raise(CannotReadError, "FATAL in TIFF I/O",
+                FF("[TIFF/ERROR***] %s: ", module),
+                FF("%s\n", buffer));
         }
         
         tsize_t tiff_read(thandle_t handle, void* data, tsize_t n) {
@@ -42,7 +44,7 @@ namespace im {
         
         tsize_t tiff_no_write(thandle_t, void*, tsize_t) {
             imread_raise(ProgrammingError,
-                "tiff_write called when reading");
+                "tiff_no_write() called during read");
         }
         
         template <typename Seekable>
@@ -364,13 +366,15 @@ namespace im {
         /// NB. Get this from Image object ImageWithMetadata ancestor -- or else
         /// why the fuck are we even using that shit?
         if (opts.cast<bool>("tiff:metadata", false)) {
-            const char* meta = opts.cast<std::string>("metadata",
-                                                      "<TIFF METADATA STRING>").c_str();
-            const char* ssig = opts.cast<std::string>("tiff:software-signature",
-                                                      "libimread (OST-MLOBJ/747)").c_str();
+            std::string meta = opts.cast<std::string>(
+                "metadata",
+                "<TIFF METADATA STRING>");
+            std::string ssig = opts.cast<std::string>(
+                "tiff:software-signature",
+                "libimread (OST-MLOBJ/747)");
             
-            TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta);
-            TIFFSetField(t.tif, TIFFTAG_SOFTWARE, ssig);
+            TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta.c_str());
+            TIFFSetField(t.tif, TIFFTAG_SOFTWARE, ssig.c_str());
             
             TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,
                 opts.cast<int>("tiff:x-resolution", 72));
