@@ -74,7 +74,8 @@ namespace py {
         }
         
         template <typename ImageType = HybridArray>
-        static const std::unique_ptr<ImageType> unique_null_t = { nullptr, nullptr };
+        static const std::unique_ptr<ImageType> unique_null_t = std::unique_ptr<ImageType>(nullptr);
+        #define UNIQUE_NULL(ImageType) std::unique_ptr<ImageType>(nullptr);
         
         /// Load an instance of the templated image type
         /// from a file source, with specified reading options
@@ -97,14 +98,14 @@ namespace py {
             } catch (im::FormatNotFound& exc) {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find I/O format for file: %s", source);
-                return unique_null_t<ImageType>;
+                return UNIQUE_NULL(ImageType);
             }
             
             if (!can_read) {
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
                     format->get_mimetype().c_str());
-                return unique_null_t<ImageType>;
+                return UNIQUE_NULL(ImageType);
             }
             
             {
@@ -117,7 +118,7 @@ namespace py {
             if (!exists) {
                 PyErr_Format(PyExc_ValueError,
                     "Can't find image file: %s", source);
-                return unique_null_t<ImageType>;
+                return UNIQUE_NULL(ImageType);
             }
             
             {
@@ -151,14 +152,14 @@ namespace py {
             } catch (im::FormatNotFound& exc) {
                 PyErr_SetString(PyExc_ValueError,
                     "Can't match blob data to a suitable I/O format");
-                return unique_null_t<ImageType>;
+                return UNIQUE_NULL(ImageType);
             }
             
             if (!can_read) {
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
                     format->get_mimetype().c_str());
-                return unique_null_t<ImageType>;
+                return UNIQUE_NULL(ImageType);
             }
             
             {
