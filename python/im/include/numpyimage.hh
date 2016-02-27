@@ -494,10 +494,6 @@ namespace py {
             }
             
             try {
-                // options_map opts = py::options::parse_options(options);
-                // if (pyim->writeoptDict) {
-                //     opts = opts.update(pyim->writeopts());
-                // }
                 options_map opts = pyim->writeopts();
                 
                 if (as_blob) {
@@ -737,8 +733,6 @@ namespace py {
     } /* namespace image */
         
 } /* namespace py */
-
-/// PYTHON TYPE DEFINITION
 
 using im::HybridArray;
 using im::ArrayFactory;
