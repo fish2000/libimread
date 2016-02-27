@@ -14,6 +14,8 @@ namespace im {
     struct options_map : public Json {
         public:
             using Json::set;
+            using Json::null;
+            using Json::undefined;
             
             options_map()
                 :Json()
@@ -39,6 +41,10 @@ namespace im {
     
     struct options_list : public Json {
         public:
+            using Json::set;
+            using Json::null;
+            using Json::undefined;
+            
             options_list()
                 :Json()
                 {

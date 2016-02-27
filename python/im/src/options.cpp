@@ -1,6 +1,8 @@
 
 #include <string>
 #include <libimread/errors.hh>
+#include "gil.hh"
+#include "pybuffer.hpp"
 #include "options.hpp"
 
 namespace py {
@@ -42,6 +44,8 @@ namespace py {
                     out.append(py::options::parse_options(item));
                 } else if (PyTuple_Check(item) || PyList_Check(item)) {
                     out.append(py::options::parse_option_list(item));
+                } else if (item == Py_None) {
+                    out.append(options_list::null);
                 } else if (PyBool_Check(item)) {
                     out.append(PyObject_IsTrue(item) == 1);
                 } else if (PyLong_Check(item)) {
@@ -58,6 +62,13 @@ namespace py {
                     const char* blob = py::options::get_blob(item, len);
                     out.append(std::string(blob, len));
             #endif
+                } else if (PyMemoryView_Check(item)) {
+                    Py_buffer* view = PyMemoryView_GET_BUFFER(item);
+                    {
+                        py::gil::release nogil;
+                        py::buffer::source data = py::buffer::source(*view, false);
+                        out.append(std::string(data.str()));
+                    }
                 } else {
                     const char* c = py::options::get_cstring(item);
                     if (!c) {
@@ -84,8 +95,10 @@ namespace py {
                     out.set(k, py::options::parse_options(value));
                 } else if (PyTuple_Check(value) || PyList_Check(value)) {
                     out.set(k, py::options::parse_option_list(value));
-                } else if (PyBool_Check(item)) {
-                    out.set(k, PyObject_IsTrue(item) == 1);
+                } else if (value == Py_None) {
+                    out.set(k, options_map::null);
+                } else if (PyBool_Check(value)) {
+                    out.set(k, PyObject_IsTrue(value) == 1);
                 } else if (PyLong_Check(value)) {
                     out.set(k, PyLong_AsLong(value));
             #if PY_MAJOR_VERSION < 3
@@ -100,6 +113,13 @@ namespace py {
                     const char* blob = py::options::get_blob(value, len);
                     out.set(k, std::string(blob, len));
             #endif
+                } else if (PyMemoryView_Check(value)) {
+                    Py_buffer* view = PyMemoryView_GET_BUFFER(value);
+                    {
+                        py::gil::release nogil;
+                        py::buffer::source data = py::buffer::source(*view, false);
+                        out.set(k, std::string(data.str()));
+                    }
                 } else {
                     const char* c = py::options::get_cstring(value);
                     if (!c) {
