@@ -102,7 +102,7 @@ namespace py {
             if (!can_read) {
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
-                    format->get_mimetype());
+                    format->get_mimetype().c_str());
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
@@ -156,7 +156,7 @@ namespace py {
             if (!can_read) {
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
-                    format->get_mimetype());
+                    format->get_mimetype().c_str());
                 return std::unique_ptr<ImageType>(nullptr);
             }
             
@@ -405,7 +405,7 @@ namespace py {
             if (!can_write) {
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented write() in I/O format %s",
-                    format->get_mimetype());
+                    format->get_mimetype().c_str());
                 return false;
             }
             
