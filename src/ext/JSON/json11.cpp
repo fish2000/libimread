@@ -97,12 +97,6 @@ namespace detail {
     
 }
 
-// Json::parse_error::parse_error(char const* msg, std::istream& in)
-//     :im::JSONParseError(msg)
-//     {
-//         line = detail::currpos(in, &col);
-//     }
-
 Json::parse_error::parse_error(std::string const& msg, std::istream& in)
     :im::JSONParseError(msg)
     {
@@ -424,11 +418,7 @@ Json Json::update(Json const& other) const {
 }
 
 bool Json::has(std::string const& key) const {
-    Object* obj = mkobject();
-    auto kp = keyset.find(key);
-    if (kp == keyset.end()) { return false; }
-    auto it = obj->map.find(&*kp);
-    return it != obj->map.end();
+    return mkobject()->get(key) != nullptr;
 }
 
 bool Json::remove(std::string const& key) {
@@ -488,9 +478,17 @@ Json Json::Property::target() const {
 
 std::vector<std::string> Json::keys() {
     Object* op = mkobject();
-    std::vector<std::string> ret;
-    for (auto it : op->map) { ret.push_back(*it.first); }
-    return ret;
+    std::vector<std::string> out;
+    for (auto it : op->map) { out.push_back(*it.first); }
+    return out;
+}
+
+Json Json::values() {
+    Json out{};
+    Array* ap = out.mkarray();
+    Object* op = mkobject();
+    for (auto it : op->map) { ap->add(it.second); }
+    return out;
 }
 
 bool Json::String::operator==(Node const& that) const {
@@ -579,7 +577,9 @@ void Json::Object::set(std::string const& k, Node* v) {
         Node* np = it->second;
         np->unref();
         it->second = v;
-    } else { map[&*kit] = v; }
+    } else {
+        map[&*kit] = v;
+    }
     v->refcnt++;
 }
 

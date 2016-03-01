@@ -338,7 +338,9 @@ class Json {
         Json  update(Json const& other) const;
         Json  pop(std::string const& key);
         Json  pop(std::string const& key, Json const& default_value);
+        
         std::vector<std::string> keys();
+        Json  values();     /// returned object is typed as an array
         
         /// traverse
         using JSONNode = Node;
