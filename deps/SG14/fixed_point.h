@@ -8,12 +8,49 @@
 #include <ostream>
 #include <istream>
 #include <iostream>
+#include <functional>
 
 // sg14::float_point only fully supports 64-bit types with the help of 128-bit ints.
 // Clang and GCC use (__int128_t) and (unsigned __int128_t) for 128-bit ints.
 
 #if defined(__clang__) || defined(__GNUG__)
 #define _SG14_FIXED_POINT_128
+
+namespace std {
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    // placeholder hashers for 128-bit integer types
+    
+    template <>
+    struct hash<__int128_t> {
+        
+        typedef __int128_t argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& bigint) const {
+            std::hash<int64_t> hasher;
+            return static_cast<result_type>(
+                hasher(static_cast<int64_t>(bigint)));
+        }
+        
+    };
+    
+    template <>
+    struct hash<__uint128_t> {
+        
+        typedef __uint128_t argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& biguint) const {
+            std::hash<uint64_t> hasher;
+            return static_cast<result_type>(
+                hasher(static_cast<uint64_t>(biguint)));
+        }
+        
+    };
+    
+} /* namespace std */
+
 #endif
 
 namespace sg14 {
@@ -171,7 +208,7 @@ namespace sg14 {
                   typename INPUT,
                   typename std::enable_if_t<EXPONENT >= 0 && sizeof(OUTPUT) <= sizeof(INPUT) &&
                            impl::is_unsigned_v<INPUT>, int> dummy = 0>
-            constexpr OUTPUT shift_left(INPUT i) noexcept
+        constexpr OUTPUT shift_left(INPUT i) noexcept
         {
             static_assert(impl::is_integral_v<INPUT>,
                           "INPUT must be integral type");
@@ -232,7 +269,7 @@ namespace sg14 {
                   typename INPUT,
                   typename std::enable_if_t<EXPONENT >= 0 && !(sizeof(OUTPUT) <= sizeof(INPUT)) &&
                            impl::is_signed_v<INPUT>, char> dummy = 0>
-            constexpr OUTPUT shift_left(INPUT i) noexcept
+        constexpr OUTPUT shift_left(INPUT i) noexcept
         {
             static_assert(impl::is_integral_v<INPUT>,
                           "INPUT must be integral type");
@@ -437,6 +474,50 @@ namespace sg14 {
                 : repr_value(impl::shift_right<(exponent - FROM_EXPONENT), repr_type>(rhs.data()))
                 {}
             
+            constexpr fixed_point(fixed_point const& rhs) noexcept
+                : repr_value(rhs.repr_value)
+                {}
+            
+            constexpr fixed_point(fixed_point&& rhs) noexcept
+                : repr_value(rhs.repr_value)
+                {}
+            
+            template <typename FROM_REPR_TYPE,
+                      int FROM_EXPONENT>
+            constexpr fixed_point& operator=(fixed_point<FROM_REPR_TYPE, FROM_EXPONENT>&& rhs) noexcept
+            {
+                repr_value = impl::shift_right<(exponent - FROM_EXPONENT), repr_type>(rhs.data());
+                return *this;
+            }
+            
+            template <typename S,
+                      typename std::enable_if_t<impl::is_integral_v<S>, int> dummy = 0>
+            constexpr fixed_point& operator=(S s) noexcept
+            {
+                repr_value = integral_to_repr(s);
+                return *this;
+            }
+            
+            template <typename S,
+                      typename std::enable_if_t<impl::is_floating_point_v<S>, int> dummy = 0>
+            constexpr fixed_point& operator=(S s) noexcept
+            {
+                repr_value = floating_point_to_repr(s);
+                return *this;
+            }
+            
+            constexpr fixed_point& operator=(fixed_point const& rhs) noexcept
+            {
+                repr_value = rhs.repr_value;
+                return *this;
+            }
+            
+            constexpr fixed_point& operator=(fixed_point&& rhs) noexcept
+            {
+                repr_value = rhs.repr_value;
+                return *this;
+            }
+            
             // returns value represented as a floating-point
             template <typename S,
                       typename std::enable_if_t<impl::is_integral_v<S>, int> dummy = 0>
@@ -559,7 +640,7 @@ namespace sg14 {
                       typename std::enable_if_t<impl::is_floating_point_v<S>, int> dummy = 0>
             static constexpr S one() noexcept
             {
-                return impl::pow2<S, - exponent>();
+                return impl::pow2<S, -exponent>();
             }
             
             template <typename S,
@@ -608,7 +689,27 @@ namespace sg14 {
                               "S must be floating-point type");
                 return S(r) * inverse_one<S>();
             }
+        
+        public:
+            void swap(fixed_point& rhs) noexcept
+            {
+                using std::swap;
+                swap(repr_value, rhs.repr_value);
+            }
             
+            friend void swap(fixed_point& lhs, fixed_point& rhs) noexcept
+            {
+                using std::swap;
+                swap(lhs.repr_value, rhs.repr_value);
+            }
+            
+            std::size_t hash() const noexcept
+            {
+                std::hash<repr_type> hasher;
+                return hasher(repr_value);
+            }
+        
+        private:
             ////////////////////////////////////////////////////////////////////////////////
             // variables
             
@@ -912,6 +1013,77 @@ namespace sg14 {
     #endif
     
 } /* namespace sg14 */
+
+namespace std {
+    
+    #define DECLARE_HASHER(type)                                                \
+    template <>                                                                 \
+    struct hash<sg14::type> {                                                   \
+        std::size_t operator()(sg14::type const& fixed_number) const {          \
+            return static_cast<std::size_t>(fixed_number.hash());               \
+        }                                                                       \
+    };
+    
+    DECLARE_HASHER(fixed0_7_t);
+    DECLARE_HASHER(fixed1_6_t);
+    DECLARE_HASHER(fixed3_4_t);
+    DECLARE_HASHER(fixed4_3_t);
+    DECLARE_HASHER(fixed7_0_t);
+    
+    DECLARE_HASHER(ufixed0_8_t);
+    DECLARE_HASHER(ufixed1_7_t);
+    DECLARE_HASHER(ufixed4_4_t);
+    DECLARE_HASHER(ufixed8_0_t);
+    
+    DECLARE_HASHER(fixed0_15_t);
+    DECLARE_HASHER(fixed1_14_t);
+    DECLARE_HASHER(fixed7_8_t);
+    DECLARE_HASHER(fixed8_7_t);
+    DECLARE_HASHER(fixed15_0_t);
+    
+    DECLARE_HASHER(ufixed0_16_t);
+    DECLARE_HASHER(ufixed1_15_t);
+    DECLARE_HASHER(ufixed8_8_t);
+    DECLARE_HASHER(ufixed16_0_t);
+    
+    DECLARE_HASHER(fixed0_31_t);
+    DECLARE_HASHER(fixed1_30_t);
+    DECLARE_HASHER(fixed15_16_t);
+    DECLARE_HASHER(fixed16_15_t);
+    DECLARE_HASHER(fixed31_0_t);
+    
+    DECLARE_HASHER(ufixed0_32_t);
+    DECLARE_HASHER(ufixed1_31_t);
+    DECLARE_HASHER(ufixed16_16_t);
+    DECLARE_HASHER(ufixed32_0_t);
+    
+    DECLARE_HASHER(fixed0_63_t);
+    DECLARE_HASHER(fixed1_62_t);
+    DECLARE_HASHER(fixed31_32_t);
+    DECLARE_HASHER(fixed32_31_t);
+    DECLARE_HASHER(fixed63_0_t);
+    
+    DECLARE_HASHER(ufixed0_64_t);
+    DECLARE_HASHER(ufixed1_63_t);
+    DECLARE_HASHER(ufixed32_32_t);
+    DECLARE_HASHER(ufixed64_0_t);
+    
+    #if defined(_SG14_FIXED_POINT_128)
+    DECLARE_HASHER(fixed0_127_t);
+    DECLARE_HASHER(fixed1_126_t);
+    DECLARE_HASHER(fixed63_64_t);
+    DECLARE_HASHER(fixed64_63_t);
+    DECLARE_HASHER(fixed127_0_t);
+    
+    DECLARE_HASHER(ufixed0_128_t);
+    DECLARE_HASHER(ufixed1_127_t);
+    DECLARE_HASHER(ufixed64_64_t);
+    DECLARE_HASHER(ufixed128_0_t);
+    #endif
+    
+    #undef DECLARE_HASHER
+    
+} /* namespace std */
 
 namespace {
     extern "C" {
