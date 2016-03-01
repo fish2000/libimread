@@ -79,16 +79,16 @@ class Json {
             virtual ~Node();
             virtual Type type() const { return Type::JSNULL; }
             virtual void print(std::ostream& out) const { out << "null"; }
-            virtual void traverse(void (*f)(const Node*)) const { f(this); }
-            virtual bool contains(const Node* that) const { return false; }
-            virtual bool operator==(const Node& that) const {
+            virtual void traverse(void (*f)(Node const*)) const { f(this); }
+            virtual bool contains(Node const* that) const { return false; }
+            virtual bool operator==(Node const& that) const {
                 return this == &that;
             }
             virtual bool is_schema() const { return false; }
             void unref();
             const char* typestr() const { return tc::typestr(this->type()); }
-            virtual void validate(const Schema& schema,
-                                  std::vector<const Node*>&) const;
+            virtual void validate(Schema const& schema,
+                                  std::vector<Node const*>&) const;
             static Node null, undefined;
         };
         
@@ -96,7 +96,7 @@ class Json {
             static constexpr Type typecode = Type::BOOLEAN;
             Bool(bool x) { refcnt = 1; }
             Type type() const override { return Type::BOOLEAN; }
-            void print(std::ostream &out) const override;
+            void print(std::ostream& out) const override;
             static Bool T;
             static Bool F;
         };
@@ -138,9 +138,9 @@ class Json {
             Number(std::istream&);
             Type type() const override { return Type::NUMBER; }
             void print(std::ostream& out) const override;
-            bool operator==(const Node& that) const override;
-            void validate(const Schema& schema,
-                          std::vector<const Node*>&) const override;
+            bool operator==(Node const& that) const override;
+            void validate(Schema const& schema,
+                          std::vector<Node const*>&) const override;
         };
         
         struct String : Node {
@@ -155,9 +155,9 @@ class Json {
             String(std::istream&);
             Type type() const override { return Type::STRING; }
             void print(std::ostream& out) const override;
-            bool operator==(const Node& that) const override;
-            void validate(const Schema& schema,
-                          std::vector<const Node*>&) const override;
+            bool operator==(Node const& that) const override;
+            void validate(Schema const& schema,
+                          std::vector<Node const*>&) const override;
         };
         
         struct Array : Node {
@@ -166,30 +166,32 @@ class Json {
             virtual ~Array();
             Type type() const override { return Type::ARRAY; }
             void print(std::ostream&) const override;
-            void traverse(void (*f)(const Node*)) const override;
+            void traverse(void (*f)(Node const*)) const override;
             void add(Node*);
             void ins(int, Node*);
             void del(int);
             void repl(int, Node*);
-            bool contains(const Node*) const override;
-            bool operator==(const Node& that) const override;
-            void validate(const Schema& schema,
-                          std::vector<const Node*>&) const override;
+            bool contains(Node const*) const override;
+            bool operator==(Node const& that) const override;
+            void validate(Schema const& schema,
+                          std::vector<Node const*>&) const override;
         };
         
         struct Object : Node {
             static constexpr Type typecode = Type::OBJECT;
-            std::map<const std::string*, Node*> map;
+            std::map<std::string const*, Node*> map;
             virtual ~Object();
             Type type() const override { return Type::OBJECT; }
             void print(std::ostream&) const override;
-            void traverse(void (*f)(const Node*)) const override;
-            Node* get(const std::string&) const;
-            void set(const std::string&, Node*);
-            bool contains(const Node*) const override;
-            bool operator==(const Node& that) const override;
-            void validate(const Schema& schema,
-                          std::vector<const Node*>&) const override;
+            void traverse(void (*f)(Node const*)) const override;
+            Node* get(std::string const&) const;
+            void  set(std::string const&, Node*);
+            bool  del(std::string const&);
+            Node* pop(std::string const&);
+            bool contains(Node const*) const override;
+            bool operator==(Node const& that) const override;
+            void validate(Schema const& schema,
+                          std::vector<Node const*>&) const override;
         };
         
         struct Schema : Node {
@@ -234,7 +236,7 @@ class Json {
             Json target() const;
             
             public:
-                Property(Node*, const std::string&);
+                Property(Node*, std::string const&);
                 Property(Node*, int);
                 explicit Property(Node* n, const char* c)
                     :Property(n, std::string(c))
@@ -248,18 +250,18 @@ class Json {
                 explicit operator long long()   { return static_cast<long long>(target()); }
                 explicit operator double()      { return static_cast<double>(target()); }
                 explicit operator long double() { return static_cast<long double>(target()); }
-                Property operator[](const std::string& k) { return target()[k]; }
+                Property operator[](std::string const& k) { return target()[k]; }
                 Property operator[](const char* k) { return (*this)[std::string(k)]; }
                 Property operator[](int i) { return target()[i]; }
-                Json operator=(const Json&);
-                Json operator=(const Property&);
-                bool operator==(const Json& js) const { return (Json)(*this) == js; }
-                bool operator!=(const Json& js) const { return !(*this == js); }
+                Json operator=(Json const&);
+                Json operator=(Property const&);
+                bool operator==(Json const& js) const { return (Json)(*this) == js; }
+                bool operator!=(Json const& js) const { return !(*this == js); }
                 std::vector<std::string> keys() { return target().keys(); }
-                bool has(const std::string& key) const { return target().has(key); }
-                bool has(const char* key) const { return target().has(std::string(key)); }
+                bool has(std::string const& key) const { return target().has(key); }
+                bool has(char const* key) const { return target().has(std::string(key)); }
             
-            friend std::ostream &operator<<(std::ostream& out, const Property& p) {
+            friend std::ostream& operator<<(std::ostream& out, Property const& p) {
                 return out << (Json)p;
             }
             
@@ -278,26 +280,26 @@ class Json {
     public:
         /// constructors
         Json() { (root = &Node::null)->refcnt++; }
-        Json(const Json& that);
+        Json(Json const& that);
         Json(Json&& that) noexcept;
         Json(std::istream&, bool full=true); // parse
         virtual ~Json();
         
         /// assignment
-        Json &operator=(const Json&);
+        Json &operator=(Json const&);
         Json &operator=(Json&&) noexcept;
         
         /// more constructors
         Json(int x)                 { (root = new Number(x))->refcnt++; }
         Json(float x)               { (root = new Number(x))->refcnt++; }
-        Json(const std::string& s)  { (root = new String(s))->refcnt++; }
+        Json(std::string const& s)  { (root = new String(s))->refcnt++; }
         Json(bool x)                { (root = (x ? &Bool::T : &Bool::F))->refcnt++; }
         Json(long x)                { (root = new Number(x))->refcnt++; }
         Json(long long x)           { (root = new Number(x))->refcnt++; }
         Json(double x)              { (root = new Number(x))->refcnt++; }
         Json(long double x)         { (root = new Number(x))->refcnt++; }
-        Json(const char* s)         { (root = new String(s))->refcnt++; }
-        Json(const Property& p)     { (root = p.target().root)->refcnt++; }
+        Json(char const* s)         { (root = new String(s))->refcnt++; }
+        Json(Property const& p)     { (root = p.target().root)->refcnt++; }
         Json(std::initializer_list<Json>);
         
         explicit Json(uint8_t x)    { (root = new Number(x))->refcnt++; }
@@ -307,7 +309,9 @@ class Json {
         
         /// dynamic type info
         Array* mkarray();
+        Array* mkarray() const;
         Object* mkobject();
+        Object* mkobject() const;
         Type type() const                   { return root->type(); }
         const char* typestr() const         { return root->typestr(); }
         std::string typestring() const      { return std::string(root->typestr()); }
@@ -327,13 +331,13 @@ class Json {
         explicit operator long double() const;
         
         /// dictionary operations (or "object properties" in JS-Ville)
-        Json& set(std::string key, const Json& val);
-        Json  get(const std::string& key) const;
-        bool  has(const std::string& key) const;
-        Json& set(const char* key, const Json& val) { return set(std::string(key), val); }
-        Json  get(const char* key) const            { return get(std::string(key)); }
-        bool  has(const char* key) const            { return has(std::string(key)); }
-        Json  update(const Json& other) const;
+        Json& set(std::string const& key, Json const& value);
+        Json  get(std::string const& key) const;
+        bool  has(std::string const& key) const;
+        bool  remove(std::string const& key);
+        Json  update(Json const& other) const;
+        Json  pop(std::string const& key);
+        Json  pop(std::string const& key, Json const& default_value);
         std::vector<std::string> keys();
         
         /// traverse
@@ -344,13 +348,13 @@ class Json {
         
         /// cast operations
         template <typename T> inline
-        decltype(auto) cast(const std::string& key) const {
+        decltype(auto) cast(std::string const& key) const {
             using rT = std::remove_reference_t<T>;
             return static_cast<rT>(get(key));
         }
         
         template <typename T> inline
-        decltype(auto) cast(const std::string& key,
+        decltype(auto) cast(std::string const& key,
                             T default_value) const {
             using rT = std::remove_reference_t<T>;
             if (!has(key)) { return static_cast<rT>(default_value); }
@@ -358,13 +362,13 @@ class Json {
         }
         
         template <Type t = Type::STRING> inline
-        decltype(auto) json_cast(const std::string& key) const {
+        decltype(auto) json_cast(std::string const& key) const {
             using rT = tc::idx::helper_t<t>;
             return static_cast<rT>(get(key));
         }
         
         template <Type t = Type::STRING> inline
-        decltype(auto) json_cast(const std::string& key,
+        decltype(auto) json_cast(std::string const& key,
                                  tc::idx::helper_t<t> default_value) const {
             if (!has(key)) { return default_value; }
             return json_cast<t>(key);
@@ -372,9 +376,9 @@ class Json {
         
         /// array operations
         Json& operator<<(const Json&);
-        Json&  insert(int index, const Json&);
+        Json&  insert(int index, Json const&);
         Json&   erase(int index);
-        Json& replace(int index, const Json&);
+        Json& replace(int index, Json const&);
         Json  extend(Json const&) const;
         Json& append(Json const&);
         int    index(Json const&) const;
@@ -382,7 +386,7 @@ class Json {
         
         /// subscripting
         std::size_t size() const;
-        Json::Property operator[](const std::string&);
+        Json::Property operator[](std::string const&);
         Json::Property operator[](const char* k) { return (*this)[std::string(k)]; }
         Json::Property operator[](int);
         
@@ -399,8 +403,8 @@ class Json {
         }
         
         /// boolean comparison
-        bool operator==(const Json&) const;
-        bool operator!=(const Json& that) const { return !(*this == that); }
+        bool operator==(Json const&) const;
+        bool operator!=(Json const& that) const { return !(*this == that); }
     
         /// schema hooks
         bool to_schema(std::string* reason);
@@ -408,8 +412,7 @@ class Json {
         
         /// input parsing
         static Json null, undefined;
-        static Json parse(const std::string&);
-        static Json parse(const char* json) { return parse(std::string(json)); }
+        static Json parse(std::string const&);
         
         static Json array() { return new Array(); }   // returns empty array
         static Json object() { return new Object(); } // returns empty object
@@ -417,15 +420,11 @@ class Json {
         
         struct parse_error : im::JSONParseError {
             unsigned line = 0, col = 0;
-            parse_error(const char* msg, std::istream& in);
-            parse_error(const std::string &msg, std::istream& in);
+            parse_error(std::string const& msg, std::istream& in);
         };
         
         struct use_error : im::JSONUseError {
-            use_error(const char* msg)
-                :im::JSONUseError(msg)
-                {}
-            use_error(const std::string& msg)
+            use_error(std::string const& msg)
                 :im::JSONUseError(msg)
                 {}
         };
@@ -436,15 +435,15 @@ class Json {
 // using Schema = Json::JSONSchema;
 
 template <> inline
-decltype(auto) Json::cast<filesystem::path>(const std::string& key) const {
+decltype(auto) Json::cast<filesystem::path>(std::string const& key) const {
     return filesystem::path(static_cast<std::string>(get(key)));
 }
 template <> inline
-decltype(auto) Json::cast<const char*>(const std::string& key) const {
+decltype(auto) Json::cast<const char*>(std::string const& key) const {
     return static_cast<std::string>(get(key)).c_str();
 }
 template <> inline
-decltype(auto) Json::cast<char*>(const std::string& key) const {
+decltype(auto) Json::cast<char*>(std::string const& key) const {
     return const_cast<char*>(static_cast<std::string>(get(key)).c_str());
 }
 
