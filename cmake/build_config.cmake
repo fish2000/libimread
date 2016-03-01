@@ -26,6 +26,7 @@ include(macro)
 # Include `check_include_file()` macro/function and friends
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
+include(CheckTypeSize)
 
 # Check required headers
 check_include_file(fcntl.h              HAVE_FCNTL_H)
@@ -48,3 +49,15 @@ if(APPLE)
     check_include_file(objc/runtime.h   HAVE_OBJC_RUNTIME_H)
     check_include_file(sys/mman.h       HAVE_SYS_MMAN_H)
 endif(APPLE)
+
+set(CMAKE_EXTRA_INCLUDE_FILES "stdint.h")
+check_type_size("__int128_t"  INT128_T)
+check_type_size("__uint128_t" UINT128_T)
+set(CMAKE_EXTRA_INCLUDE_FILES)
+
+if(NOT ${INT128_T})
+    message(WARNING "__int128_t not found")
+endif(NOT ${INT128_T})
+if(NOT ${UINT128_T})
+    message(WARNING "__uint128_t not found")
+endif(NOT ${UINT128_T})

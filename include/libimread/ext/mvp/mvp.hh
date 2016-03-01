@@ -89,7 +89,7 @@ class DataPointBase : Base<> {
             ,comparator(other.comparator)
             {}
         
-        DataPointBase(DataPointBase&& other)
+        DataPointBase(DataPointBase&& other) noexcept
             :name(std::move(other.name))
             ,paths(std::move(other.paths))
             ,comparator(std::move(other.comparator))
@@ -208,7 +208,7 @@ class Datum : public DataPointBase<Datum<DataType, PathType,
             ,datum(other.datum)
             {}
         
-        Datum(Datum&& other) : DPBase(other)
+        Datum(Datum&& other) noexcept : DPBase(other)
             ,datum(std::move(other.datum))
             {}
         
@@ -293,7 +293,7 @@ class Vector : public DataPointBase<Vector<DataType, PathType,
             ,datavec(other.datavec)
             {}
         
-        Vector(Vector&& other) : DPBase(other)
+        Vector(Vector&& other) noexcept : DPBase(other)
             ,datavec(std::move(other.datavec))
             {}
         
