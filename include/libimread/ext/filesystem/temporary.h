@@ -11,6 +11,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
 
 namespace filesystem {

@@ -4,19 +4,17 @@
 #ifndef LIBIMREAD_EXT_FILESYSTEM_OPAQUES_H_
 #define LIBIMREAD_EXT_FILESYSTEM_OPAQUES_H_
 
-#include <string>
-#include <memory>
-#include <mutex>
-#include <functional>
-
 #include <cctype>
 #include <cstdio>
-#include <cstring>
 #include <cstddef>
 #include <dirent.h>
 
+#include <string>
+#include <memory>
+#include <type_traits>
+
 #include <libimread/libimread.hpp>
-#include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/mode.h>
 
 namespace filesystem {
     
@@ -26,19 +24,35 @@ namespace filesystem {
     namespace detail {
         
         /// Deleter structures to close directory and file handles
-        template <typename D>
-        struct dircloser {
-            constexpr dircloser() noexcept = default;
-            template <typename U> dircloser(const dircloser<U>&) noexcept {};
-            void operator()(D* dirhandle) { ::closedir(dirhandle); }
+        template <typename T, typename U>
+        static constexpr bool is_same_v = std::is_same<T, U>::value;
+        
+        template <typename HandleType>
+        struct handle_helper;
+        
+        template <>
+        struct handle_helper<DIR>  { using type = std::add_pointer_t<DIR>; };
+        
+        template <>
+        struct handle_helper<FILE> { using type = std::add_pointer_t<FILE>; };
+        
+        template <typename HandleType>
+        using handle = typename handle_helper<HandleType>::type;
+        
+        template <typename T>
+        struct closer {
+            using handle_t = std::decay_t<T>;
+            constexpr closer() noexcept = default;
+            template <typename U> closer(closer<U> const&) noexcept {};
+            template <typename X = typename std::enable_if<is_same_v<T, DIR>>>
+            void operator()(handle<DIR>  handle)    { ::closedir(handle);  }
+            template <typename X = typename std::enable_if<is_same_v<T, FILE>>>
+            void operator()(handle<FILE> handle)    { std::fclose(handle); }
         };
-    
-        template <typename F>
-        struct filecloser {
-            constexpr filecloser() noexcept = default;
-            template <typename U> filecloser(const filecloser<U>&) noexcept {};
-            void operator()(F* filehandle) { std::fclose(filehandle); }
-        };
+        
+        template <typename T>
+        using handle_ptr = std::unique_ptr<typename closer<T>::handle_t,
+                                                    closer<T>>;
         
     }
     
@@ -48,8 +62,8 @@ namespace filesystem {
     /// the original opaques: FILE* and DIR*,
     /// herein wrapped neatly out of sight forever in unique_ptrs.
     /// ... YOURE WELCOME.
-    using directory = std::unique_ptr<typename std::decay<DIR>::type, detail::dircloser<DIR>>;
-    using file = std::unique_ptr<typename std::decay<FILE>::type, detail::filecloser<FILE>>;
+    using directory = detail::handle_ptr<DIR>;
+    using file      = detail::handle_ptr<FILE>;
     
     namespace detail {
         using dirent_t = struct dirent;
@@ -63,10 +77,10 @@ namespace filesystem {
         ///     ::some_posix_func_that_wants_a_dirhandle(dir.get());
         ///     
         /// ... see? see what I am getting at with all this? NO DIR!! haha. anyway.
-        filesystem::directory ddopen(const char* c);
-        filesystem::directory ddopen(const std::string& s);
-        filesystem::directory ddopen(const path& p);
-        filesystem::file ffopen(const std::string& s, mode m = mode::READ);
+        filesystem::directory ddopen(char const* c);
+        filesystem::directory ddopen(std::string const& s);
+        filesystem::directory ddopen(path const& p);
+        filesystem::file ffopen(std::string const& s, mode m = mode::READ);
     }
 
 } /* namespace filesystem */

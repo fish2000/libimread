@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/seekable.hh>
 

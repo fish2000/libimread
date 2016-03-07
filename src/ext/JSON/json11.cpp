@@ -8,15 +8,17 @@
 
 // Version 0.6.5, 2013-11-07
 
-#include <libimread/ext/JSON/json11.h>
-#include <libimread/errors.hh>
-#include <cassert>
 #include <cmath>
-#include <cfloat>
 #include <climits>
 #include <sstream>
 #include <iomanip>
+#include <exception>
+#include <stdexcept>
 #include <algorithm>
+
+#include <libimread/ext/JSON/json11.h>
+#include <libimread/errors.hh>
+#include <libimread/rehash.hh>
 
 Json::Node Json::Node::null(1);
 Json::Node Json::Node::undefined(1);
@@ -24,7 +26,7 @@ Json Json::null;
 Json Json::undefined(&Node::undefined);
 Json::Bool Json::Bool::T(true);
 Json::Bool Json::Bool::F(false);
-std::set<std::string> Json::keyset;
+detail::stringset_t Json::keyset;
 int Json::indent;
 int Json::level;
 
@@ -46,18 +48,23 @@ namespace tc {
 }
 
 namespace detail {
+    using chartraits = std::char_traits<char>;
     
     unsigned currpos(std::istream& in, unsigned* pos) {
         unsigned curr = in.tellg();
         if (pos != nullptr) { *pos = 0; }
         in.seekg(0); // rewind
         if (in.bad()) { return 0; }
-        unsigned count = 0, line = 1, col = 1;
+        unsigned count = 0,
+                  line = 1,
+                   col = 1;
         while (!in.eof() && !in.fail() && ++count < curr) {
             if (in.get() == '\n') {
                 ++line;
                 col = 1;
-            } else { ++col; }
+            } else {
+                ++col;
+            }
         }
         if (pos != nullptr) { *pos = col; }
         return line;
@@ -109,35 +116,38 @@ Json::Node::Node(unsigned init)
     {}
 
 Json::Node::~Node() {
-    assert(this == &null || this == &undefined || this == &Bool::T || this == &Bool::F || refcnt == 0);
+    imread_assert(this == &null || this == &undefined || this == &Bool::T || this == &Bool::F || refcnt == 0,
+                  "Non-static Node has non-zero refcount upon destruction");
 }
 
 void Json::Node::unref() {
     if (this == &null || this == &undefined || this == &Bool::T || this == &Bool::F) {
         return;
     }
-    assert(refcnt > 0);
+    imread_assert(refcnt > 0,
+                  "Trying to unref() a node whose refcount <= 0");
     if (--refcnt == 0) { delete this; }
 }
 
 bool Json::Array::operator==(Node const& that) const {
     if (this == &that) { return true; }
     if (that.type() != Type::ARRAY) { return false; }
-    std::vector<Node*>& that_list = ((Array*)&that)->list;
+    Json::nodevec_t& that_list = ((Array*)&that)->list;
     return std::equal(list.begin(), list.end(),
                  that_list.begin(),
                    [](Node* n1, Node* n2) { return *n1 == *n2; });
 }
 
 bool Json::Object::operator==(Node const& that) const {
-    using kv = std::pair<const std::string*, Node*>;
+    using kv_t = Json::nodepair_t;
     if (this == &that) { return true; }
     if (that.type() != Type::OBJECT) { return false; }
-    std::map<const std::string*, Node*>& that_map = ((Object*)&that)->map;
+    Json::nodemap_t& that_map = ((Object*)&that)->map;
     return std::equal(map.begin(), map.end(),
                  that_map.begin(),
-                   [](kv p, kv q) { return *p.first == *q.first &&
-                                           *p.second == *q.second; });
+                   [](kv_t const& p,
+                      kv_t const& q) { return *p.first == *q.first &&
+                                             *p.second == *q.second; });
 }
 
 bool Json::Number::operator==(Node const& that) const {
@@ -165,7 +175,9 @@ bool Json::Object::contains(Node const* that) const {
     if (that == nullptr) { return false; }
     if (this == that) { return true; }
     for (auto it : map) {
-        if (it.second->contains(that)) { return true; }
+        if (it.second->contains(that)) {
+            return true;
+        }
     }
     return false;
 }
@@ -476,14 +488,14 @@ Json Json::Property::target() const {
         "\tConverted Property object should be Type::OBJECT or Type::ARRAY");
 }
 
-std::vector<std::string> Json::keys() {
+detail::stringvec_t Json::keys() const {
     Object* op = mkobject();
-    std::vector<std::string> out;
+    detail::stringvec_t out;
     for (auto it : op->map) { out.push_back(*it.first); }
     return out;
 }
 
-Json Json::values() {
+Json Json::values() const {
     Json out{};
     Array* ap = out.mkarray();
     Object* op = mkobject();
@@ -510,14 +522,40 @@ void Json::String::print(std::ostream& out) const {
     detail::escape(out, value);
 }
 
-void Json::Object::traverse(void (*f)(JSONNode const*)) const {
-    //for (auto it : map) { f(it.second); }
-    for (auto it : map) { it.second->traverse(f); }
+void Json::Object::traverse(Json::traverser_t traverser) const {
+    for (auto it : map) { it.second->traverse(traverser); }
 }
 
-void Json::Array::traverse(void (*f)(JSONNode const*)) const {
-    //for (auto it : list) { f(it); }
-    for (auto it : list) { it->traverse(f); }
+void Json::Object::traverse(Json::named_traverser_t named_traverser,
+                            char const* name) const {
+    for (auto it : map) {
+        it.second->traverse(
+            named_traverser,
+            it.first->c_str());
+    }
+}
+
+void Json::Array::traverse(Json::traverser_t traverser) const {
+    for (auto it : list) { it->traverse(traverser); }
+}
+
+void Json::Array::traverse(Json::named_traverser_t named_traverser,
+                           char const* name) const {
+    std::size_t idx = 0;
+    for (auto it : list) {
+        it->traverse(
+            named_traverser,
+            std::to_string(idx).c_str());
+        ++idx;
+    }
+}
+
+void Json::traverse(Json::traverser_t traverser) const {
+    root->traverse(traverser);
+}
+
+void Json::traverse(Json::named_traverser_t named_traverser) const {
+    root->traverse(named_traverser, "root");
 }
 
 void Json::Object::print(std::ostream& out) const {
@@ -570,7 +608,8 @@ Json::Node* Json::Object::get(std::string const& key) const {
 }
 
 void Json::Object::set(std::string const& k, Node* v) {
-    assert(v != nullptr);
+    imread_assert(v != nullptr,
+                  "Json::Object::set(k, v) called with v == nullptr");
     auto kit = keyset.insert(keyset.begin(), k);
     auto it = map.find(&*kit);
     if (it != map.end()) {
@@ -616,14 +655,16 @@ Json::Array::~Array() {
 }
 
 void Json::Array::add(Node* v) {
-    assert(v != nullptr);
+    imread_assert(v != nullptr,
+                  "Json::Array::add(v) called with v == nullptr");
     list.push_back(v);
     v->refcnt++;
 }
 
 /** Inserts given Node* before index. */
 void Json::Array::ins(int index, Node* v) {
-    assert(v != nullptr);
+    imread_assert(v != nullptr,
+                  "Json::Array::ins(idx, v) called with v == nullptr");
     if (index < 0) { index = 0; }
     if (index < 0 || index > (int)list.size()) {
         imread_raise_default(JSONOutOfRange);
@@ -664,7 +705,7 @@ Json::String::String(std::istream& in) {
     int quote = in.get();
     while (!in.eof()) {
         int c = in.get();
-        if (c == std::char_traits<char>::eof()) {
+        if (c == detail::chartraits::eof()) {
             throw parse_error("unterminated std::string", in);
         }
         if (c == quote) { return; }
@@ -812,7 +853,7 @@ Json::Json(std::istream& in, bool full) {
     throw parse_error("json format error", in);
 out:
     if (full) {
-        if (in.peek() == std::char_traits<char>::eof()) { return; }
+        if (in.peek() == detail::chartraits::eof()) { return; }
         while (std::isspace(in.get()))
             /* skip */;
         if (in.eof()) { return; }
@@ -829,11 +870,16 @@ std::string Json::format() const {
 Json Json::parse(std::string const& str) {
     std::istringstream is(str);
     Json parsed(is);
-    if (is.peek() == std::char_traits<char>::eof()) { return parsed; }
+    if (is.peek() == detail::chartraits::eof()) { return parsed; }
     while (std::isspace(is.get()))
         /* skip */;
     if (is.eof()) { return parsed; }
     throw parse_error("JSON format error", is);
+}
+
+std::size_t Json::hash(std::size_t H) const {
+    hash::rehash<std::string>(H, format());
+    return H;
 }
 
 Json::operator std::string() const {

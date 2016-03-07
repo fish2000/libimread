@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/rehash.hh>
 

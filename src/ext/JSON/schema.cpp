@@ -22,7 +22,7 @@ namespace detail {
    
     /// * Returns number of utf-8 characters in std::string.
     /// * Possible encoding errors are ignored.
-    unsigned u8size(const std::string& s) {
+    unsigned u8size(std::string const& s) {
         unsigned off = 0, count = 0;
         unsigned len = s.length();
         while (off < len) {
@@ -346,7 +346,7 @@ Json::Schema::~Schema() {
     for (Schema* sp : anyof)    { delete sp; }
     for (Schema* sp : oneof)    { delete sp; }
     if (s_not != nullptr)       { delete s_not; }
-    if (pattern != nullptr)     { delete pattern; }
+    if (pattern != nullptr)     { delete static_cast<std::regex*>(pattern); }
     if (item != nullptr)        { delete item; }
     for (Schema* sp : items)    { delete sp; }
     if (add_items != nullptr)   { delete add_items; }
@@ -359,7 +359,7 @@ Json::Schema::~Schema() {
     /// TODO: the rest
 }
 
-void Json::Node::validate(const Schema& schema, std::vector<const Node*>& path) const {
+void Json::Node::validate(const Schema& schema, Json::nodecvec_t& path) const {
     if (schema.s_enum != nullptr) {
         bool found = false;
         for (const Node* n : schema.s_enum->list) {
@@ -391,7 +391,7 @@ void Json::Node::validate(const Schema& schema, std::vector<const Node*>& path) 
     /// TODO: oneof, not, definitions
 }
 
-void Json::Array::validate(const Schema& schema, std::vector<const Node*>& path) const {
+void Json::Array::validate(const Schema& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "array") { throw JSONInvalidSchema("type mismatch"); }
     if (list.size() < schema.min_len) { throw JSONInvalidSchema("array length below minItems"); }
@@ -415,7 +415,7 @@ void Json::Array::validate(const Schema& schema, std::vector<const Node*>& path)
     path.pop_back();
 }
 
-void Json::Object::validate(const Schema& schema, std::vector<const Node*>& path) const {
+void Json::Object::validate(const Schema& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "object") { throw JSONInvalidSchema("type mismatch"); }
     if (map.size() < schema.min_len) { throw JSONInvalidSchema("number of properties below minimum"); }
@@ -451,7 +451,7 @@ void Json::Object::validate(const Schema& schema, std::vector<const Node*>& path
     path.pop_back();
 }
 
-void Json::Number::validate(const Schema& schema, std::vector<const Node*>& path) const {
+void Json::Number::validate(const Schema& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "number") { throw JSONInvalidSchema("type mismatch"); }
     if (value < schema.min_num) { throw JSONInvalidSchema("number below minimum"); }
@@ -467,13 +467,13 @@ void Json::Number::validate(const Schema& schema, std::vector<const Node*>& path
     path.pop_back();
 }
 
-void Json::String::validate(const Schema& schema, std::vector<const Node*>& path) const {
+void Json::String::validate(const Schema& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "string") { throw JSONInvalidSchema("type mismatch"); }
     if (detail::u8size(value) < schema.min_len) { throw JSONInvalidSchema("string length below minLength"); }
     if (detail::u8size(value) > schema.max_len) { throw JSONInvalidSchema("string length above maxLength"); }
     if (schema.pattern != nullptr) {
-        if (!std::regex_match(im::stringify(value), *schema.pattern)) {
+        if (!std::regex_match(im::stringify(value), *static_cast<std::regex*>(schema.pattern))) {
             throw JSONInvalidSchema("pattern mismatch");
         }
     }
@@ -487,8 +487,10 @@ bool Json::to_schema(std::string* reason) {
         root->unref();
         (root = sp)->refcnt++;
         return true;
-    } catch (use_error& ex) {
-        if (reason != nullptr) { *reason = ex.what(); }
+    } catch (use_error& exc) {
+        if (reason != nullptr) { *reason = exc.what(); }
+    } catch (im::JSONUseError& exc) {
+        if (reason != nullptr) { *reason = exc.what(); }
     }
     return false;
 }
@@ -497,11 +499,11 @@ bool Json::valid(Json& schema, std::string* reason) {
     if (!schema.root->is_schema()) {
         if (!schema.to_schema(reason)) { return false; }
     }
-    std::vector<const Node*> path;
+    Json::nodecvec_t path;
     try {
         ((Node*)root)->validate(*(Schema*)schema.root, path);
         root->validate(*(Schema*)schema.root, path);
-    } catch (JSONInvalidSchema &ex) {
+    } catch (JSONInvalidSchema& exc) {
         std::string pref = "";
         for (unsigned i = 1; i < path.size(); i++) {
             const Node* super = path[i-1];
@@ -520,7 +522,7 @@ bool Json::valid(Json& schema, std::string* reason) {
                 }
             }
         }
-        if (reason != nullptr) { *reason = pref + ": " + ex.w; }
+        if (reason != nullptr) { *reason = pref + ": " + exc.w; }
         return false;
     }
     return true;

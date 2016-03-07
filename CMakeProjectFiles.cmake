@@ -103,6 +103,8 @@ set(hdrs
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
+    ${hdrs_dir}/ext/filesystem/directory.h
+    ${hdrs_dir}/ext/filesystem/mode.h
     ${hdrs_dir}/ext/filesystem/opaques.h
     ${hdrs_dir}/ext/filesystem/path.h
     ${hdrs_dir}/ext/filesystem/resolver.h

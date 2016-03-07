@@ -9,27 +9,27 @@
 /// it under the terms of the MIT license. See LICENSE for details.
 /// Version 0.6.5, 2013-11-07
 
-#include <iostream>
-#include <string>
+#include <cstdint>
+#include <cfloat>
 #include <vector>
-#include <memory>
 #include <map>
 #include <set>
-#include <regex>
-#include <cfloat>
-#include <cstdint>
-#include <utility>
-#include <exception>
-#include <stdexcept>
+#include <string>
+#include <iostream>
 #include <type_traits>
 #include <initializer_list>
+
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/rehash.hh>
 #include <libimread/ext/filesystem/path.h>
 
 using Base = std::integral_constant<uint8_t, 1>;
 using BaseType = Base::value_type;
+
+namespace detail {
+    using stringvec_t = std::vector<std::string>;
+    using stringset_t = std::set<std::string>;
+}
 
 /// FORWARD!!!
 class Json;
@@ -69,9 +69,25 @@ namespace tc {
 
 
 class Json {
+    
     private:
-        /// schema is forward-declared:
+        /// Schema is forward-declared:
         struct Schema;
+        
+        /// Node is forward-declared too,
+        /// for the function-pointer signatures that follow:
+        struct Node;
+        using nodevec_t = std::vector<Node*>;
+        using nodecvec_t = std::vector<Node const*>;
+        using nodemap_t = std::map<std::string const*, Node*>;
+        using nodepair_t = std::pair<std::string const*, Node*>;
+    
+    public:
+        /// Originally this was declared as: `void (*f)(Node const*)` ...
+        using traverser_t       = std::add_pointer_t<void(Node const*)>;
+        using named_traverser_t = std::add_pointer_t<void(Node const*, char const*)>;
+        
+    private:
         struct Node {
             static constexpr Type typecode = Type::JSNULL;
             unsigned refcnt;
@@ -79,16 +95,17 @@ class Json {
             virtual ~Node();
             virtual Type type() const { return Type::JSNULL; }
             virtual void print(std::ostream& out) const { out << "null"; }
-            virtual void traverse(void (*f)(Node const*)) const { f(this); }
+            virtual void traverse(traverser_t traverser) const      {       traverser(this);       }
+            virtual void traverse(named_traverser_t named_traverser,
+                                  char const* name = nullptr) const { named_traverser(this, name); }
             virtual bool contains(Node const* that) const { return false; }
             virtual bool operator==(Node const& that) const {
                 return this == &that;
             }
             virtual bool is_schema() const { return false; }
             void unref();
-            const char* typestr() const { return tc::typestr(this->type()); }
-            virtual void validate(Schema const& schema,
-                                  std::vector<Node const*>&) const;
+            char const* typestr() const { return tc::typestr(this->type()); }
+            virtual void validate(Schema const& schema, nodecvec_t&) const;
             static Node null, undefined;
         };
         
@@ -139,8 +156,7 @@ class Json {
             Type type() const override { return Type::NUMBER; }
             void print(std::ostream& out) const override;
             bool operator==(Node const& that) const override;
-            void validate(Schema const& schema,
-                          std::vector<Node const*>&) const override;
+            void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
         struct String : Node {
@@ -156,42 +172,43 @@ class Json {
             Type type() const override { return Type::STRING; }
             void print(std::ostream& out) const override;
             bool operator==(Node const& that) const override;
-            void validate(Schema const& schema,
-                          std::vector<Node const*>&) const override;
+            void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
         struct Array : Node {
             static constexpr Type typecode = Type::ARRAY;
-            std::vector<Node*> list;
+            nodevec_t list;
             virtual ~Array();
             Type type() const override { return Type::ARRAY; }
             void print(std::ostream&) const override;
-            void traverse(void (*f)(Node const*)) const override;
             void add(Node*);
             void ins(int, Node*);
             void del(int);
             void repl(int, Node*);
+            void traverse(traverser_t traverser) const override;
+            void traverse(named_traverser_t traverser,
+                          char const* name = nullptr) const override;
             bool contains(Node const*) const override;
             bool operator==(Node const& that) const override;
-            void validate(Schema const& schema,
-                          std::vector<Node const*>&) const override;
+            void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
         struct Object : Node {
             static constexpr Type typecode = Type::OBJECT;
-            std::map<std::string const*, Node*> map;
+            nodemap_t map;
             virtual ~Object();
             Type type() const override { return Type::OBJECT; }
             void print(std::ostream&) const override;
-            void traverse(void (*f)(Node const*)) const override;
             Node* get(std::string const&) const;
             void  set(std::string const&, Node*);
             bool  del(std::string const&);
             Node* pop(std::string const&);
+            void traverse(traverser_t traverser) const override;
+            void traverse(named_traverser_t traverser,
+                          char const* name = nullptr) const override;
             bool contains(Node const*) const override;
             bool operator==(Node const& that) const override;
-            void validate(Schema const& schema,
-                          std::vector<Node const*>&) const override;
+            void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
         struct Schema : Node {
@@ -211,7 +228,7 @@ class Json {
             bool max_exc = false, min_exc = false;
             unsigned long max_len = UINT32_MAX;
             unsigned long min_len = 0;
-            std::regex* pattern = nullptr; // regex
+            void* pattern = nullptr; /// std::regex
             Schema* item = nullptr;
             std::vector<Schema*> items;
             Schema* add_items = nullptr;
@@ -257,7 +274,7 @@ class Json {
                 Json operator=(Property const&);
                 bool operator==(Json const& js) const { return (Json)(*this) == js; }
                 bool operator!=(Json const& js) const { return !(*this == js); }
-                std::vector<std::string> keys() { return target().keys(); }
+                detail::stringvec_t keys() { return target().keys(); }
                 bool has(std::string const& key) const { return target().has(key); }
                 bool has(char const* key) const { return target().has(std::string(key)); }
             
@@ -268,7 +285,7 @@ class Json {
             friend Json;
         };
         
-        static std::set<std::string> keyset; /// all propery names
+        static detail::stringset_t keyset;   /// all propery names
         static int level;                    /// for pretty printing
         
         Json(Node* node) {
@@ -314,7 +331,7 @@ class Json {
         Object* mkobject() const;
         Type type() const                   { return root->type(); }
         const char* typestr() const         { return root->typestr(); }
-        std::string typestring() const      { return std::string(root->typestr()); }
+        std::string typestring() const      { return root->typestr(); }
         
         /// conversion operators
         operator int() const;
@@ -339,14 +356,13 @@ class Json {
         Json  pop(std::string const& key);
         Json  pop(std::string const& key, Json const& default_value);
         
-        std::vector<std::string> keys();
-        Json  values();     /// returned object is typed as an array
+        detail::stringvec_t keys() const;
+        Json  values() const;     /// returned object is typed as an array
         
-        /// traverse
-        using JSONNode = Node;
-        void traverse(void (*f)(const JSONNode*)) {
-            root->traverse(f);
-        }
+        /// traversal
+        using JSONNode = Node; /// legacy
+        void traverse(traverser_t) const;
+        void traverse(named_traverser_t) const;
         
         /// cast operations
         template <typename T> inline
@@ -399,10 +415,7 @@ class Json {
         friend std::istream &operator>>(std::istream&, Json&);
         
         /// hashing
-        std::size_t hash(std::size_t H = 0) const {
-            hash::rehash<std::string>(H, format());
-            return H;
-        }
+        std::size_t hash(std::size_t H = 0) const;
         
         /// boolean comparison
         bool operator==(Json const&) const;
@@ -431,10 +444,7 @@ class Json {
                 {}
         };
         
-        using JSONSchema = Schema;
 };
-
-// using Schema = Json::JSONSchema;
 
 template <> inline
 decltype(auto) Json::cast<filesystem::path>(std::string const& key) const {
