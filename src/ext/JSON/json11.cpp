@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #include <libimread/ext/JSON/json11.h>
+#include <libimread/ext/filesystem/path.h>
 #include <libimread/errors.hh>
 #include <libimread/rehash.hh>
 
@@ -953,3 +954,15 @@ bool Json::operator==(Json const& that) const {
     return *root == *that.root;
 }
 
+template <>
+filesystem::path Json::cast<filesystem::path>(std::string const& key) const {
+    return filesystem::path(static_cast<std::string>(get(key)));
+}
+template <>
+const char* Json::cast<const char*>(std::string const& key) const {
+    return static_cast<std::string>(get(key)).c_str();
+}
+template <>
+char* Json::cast<char*>(std::string const& key) const {
+    return const_cast<char*>(static_cast<std::string>(get(key)).c_str());
+}

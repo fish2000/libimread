@@ -21,10 +21,13 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/ext/filesystem/path.h>
 
 using Base = std::integral_constant<uint8_t, 1>;
 using BaseType = Base::value_type;
+
+namespace filesystem {
+    class path;
+}
 
 namespace detail {
     using stringvec_t = std::vector<std::string>;
@@ -366,13 +369,13 @@ class Json {
         
         /// cast operations
         template <typename T> inline
-        decltype(auto) cast(std::string const& key) const {
+        std::remove_reference_t<T> cast(std::string const& key) const {
             using rT = std::remove_reference_t<T>;
             return static_cast<rT>(get(key));
         }
         
         template <typename T> inline
-        decltype(auto) cast(std::string const& key,
+        std::remove_reference_t<T> cast(std::string const& key,
                             T default_value) const {
             using rT = std::remove_reference_t<T>;
             if (!has(key)) { return static_cast<rT>(default_value); }
@@ -446,18 +449,14 @@ class Json {
         
 };
 
-template <> inline
-decltype(auto) Json::cast<filesystem::path>(std::string const& key) const {
-    return filesystem::path(static_cast<std::string>(get(key)));
-}
-template <> inline
-decltype(auto) Json::cast<const char*>(std::string const& key) const {
-    return static_cast<std::string>(get(key)).c_str();
-}
-template <> inline
-decltype(auto) Json::cast<char*>(std::string const& key) const {
-    return const_cast<char*>(static_cast<std::string>(get(key)).c_str());
-}
+template <>
+filesystem::path Json::cast<filesystem::path>(std::string const& key) const;
+
+template <>
+const char* Json::cast<const char*>(std::string const& key) const;
+
+template <>
+char* Json::cast<char*>(std::string const& key) const;
 
 namespace std {
     
