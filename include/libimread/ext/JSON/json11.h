@@ -98,24 +98,22 @@ class Json {
             virtual ~Node();
             virtual Type type() const { return Type::JSNULL; }
             virtual void print(std::ostream& out) const { out << "null"; }
-            virtual void traverse(traverser_t traverser) const      {       traverser(this);       }
+            virtual void traverse(traverser_t traverser) const      { traverser(this); }
             virtual void traverse(named_traverser_t named_traverser,
                                   char const* name = nullptr) const { named_traverser(this, name); }
-            virtual bool contains(Node const* that) const { return false; }
-            virtual bool operator==(Node const& that) const {
-                return this == &that;
-            }
+            virtual bool contains(Node const* that) const   { return this == that; }
+            virtual bool operator==(Node const& that) const { return this == &that; }
+            virtual void validate(Schema const& schema, nodecvec_t&) const;
             virtual bool is_schema() const { return false; }
             void unref();
             char const* typestr() const { return tc::typestr(this->type()); }
-            virtual void validate(Schema const& schema, nodecvec_t&) const;
             static Node null, undefined;
         };
         
         struct Bool : Node {
             static constexpr Type typecode = Type::BOOLEAN;
-            Bool(bool x) { refcnt = 1; }
             Type type() const override { return Type::BOOLEAN; }
+            Bool(bool x) { refcnt = 1; }
             void print(std::ostream& out) const override;
             static Bool T;
             static Bool F;
@@ -123,6 +121,7 @@ class Json {
         
         struct Number : Node {
             static constexpr Type typecode = Type::NUMBER;
+            Type type() const override { return Type::NUMBER; }
             long double value;
             int prec = -1;
             Number(int x)
@@ -156,7 +155,6 @@ class Json {
                 :value(static_cast<int>(x))
                 {}
             Number(std::istream&);
-            Type type() const override { return Type::NUMBER; }
             void print(std::ostream& out) const override;
             bool operator==(Node const& that) const override;
             void validate(Schema const& schema, nodecvec_t&) const override;
@@ -164,6 +162,7 @@ class Json {
         
         struct String : Node {
             static constexpr Type typecode = Type::STRING;
+            Type type() const override { return Type::STRING; }
             std::string value;
             String(std::string const& s)
                 :value(s)
@@ -172,7 +171,6 @@ class Json {
                 :value(cs)
                 {}
             String(std::istream&);
-            Type type() const override { return Type::STRING; }
             void print(std::ostream& out) const override;
             bool operator==(Node const& that) const override;
             void validate(Schema const& schema, nodecvec_t&) const override;
@@ -180,11 +178,12 @@ class Json {
         
         struct Array : Node {
             static constexpr Type typecode = Type::ARRAY;
+            Type type() const override { return Type::ARRAY; }
             nodevec_t list;
             virtual ~Array();
-            Type type() const override { return Type::ARRAY; }
             void print(std::ostream&) const override;
             void add(Node*);
+            void pop();
             void ins(int, Node*);
             void del(int);
             void repl(int, Node*);
@@ -198,9 +197,9 @@ class Json {
         
         struct Object : Node {
             static constexpr Type typecode = Type::OBJECT;
+            Type type() const override { return Type::OBJECT; }
             nodemap_t map;
             virtual ~Object();
-            Type type() const override { return Type::OBJECT; }
             void print(std::ostream&) const override;
             Node* get(std::string const&) const;
             void  set(std::string const&, Node*);
@@ -216,6 +215,8 @@ class Json {
         
         struct Schema : Node {
             static constexpr Type typecode = Type::SCHEMA;
+            Type type() const override { return Type::SCHEMA; }
+            bool is_schema() const override { return true; }
             Schema(Node*);
             virtual ~Schema();
             std::string uri;
@@ -245,14 +246,12 @@ class Json {
             Object* deps = nullptr;
             Object* defs = nullptr;
             Node* deflt = nullptr;
-            Type type() const override { return Type::SCHEMA; }
-            bool is_schema() const override { return true; }
         };
         
         class Property {
             Node* host;
             std::string key;
-            int index;
+            int kidx;
             Json target() const;
             
             public:
@@ -290,6 +289,7 @@ class Json {
         
         static detail::stringset_t keyset;   /// all propery names
         static int level;                    /// for pretty printing
+        static int indent;                   /// for pretty printing
         
         Json(Node* node) {
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
@@ -397,9 +397,9 @@ class Json {
         
         /// array operations
         Json& operator<<(const Json&);
-        Json&  insert(int index, Json const&);
-        Json&   erase(int index);
-        Json& replace(int index, Json const&);
+        Json&  insert(int idx, Json const&);
+        Json&   erase(int idx);
+        Json& replace(int idx, Json const&);
         Json  extend(Json const&) const;
         Json& append(Json const&);
         int    index(Json const&) const;
@@ -434,7 +434,6 @@ class Json {
         
         static Json array() { return new Array(); }   // returns empty array
         static Json object() { return new Object(); } // returns empty object
-        static int indent;                            // for pretty printing
         
         struct parse_error : im::JSONParseError {
             unsigned line = 0, col = 0;

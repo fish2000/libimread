@@ -3,6 +3,7 @@ from __future__ import print_function
 from basecase import BaseCase
 
 import im
+import json
 # import numpy
 
 class NumpyImageReadWriteTests(BaseCase):
@@ -151,7 +152,12 @@ class NumpyImageReadWriteTests(BaseCase):
                                                        'yodogg:memoryview'          : memview,
                                                        'yodogg:str'                 : "SO WE PUT ALL SORTS OF SHIT IN HERE I DUNNO DOGG"
                                                      })
+            opts_json = image.format_write_opts()
             self.assertIsNotNone(data)
+            self.assertIsNotNone(opts_json)
+            # self.assertEqual(opts_json, image.format_write_opts())
+            print(">>>>>>>> opts_json = %s" % opts_json)
+            
             opts = image.write_opts
             
             for key in doggkeys:
@@ -185,6 +191,9 @@ class NumpyImageReadWriteTests(BaseCase):
             image2 = im.NumpyImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
+            
+            # opts_reconstituted = json.loads(opts_json)
+            # self.assertIsNotNone(opts_reconstituted)
     
     '''
     def test_load_image_jpg_check_dimensions(self):

@@ -48,9 +48,16 @@ namespace py {
                         Py_DECREF(sequence);
                         throw;
                     }
-                } else if (PyTuple_Check(item) || PyList_Check(item) || PyAnySet_Check(item)) {
+                } else if (PyTuple_Check(item) || PyList_Check(item)) {
                     try {
                         out.append(py::options::parse_option_list(item));
+                    } catch (im::OptionsError& exc) {
+                        Py_DECREF(sequence);
+                        throw;
+                    }
+                } else if (PyAnySet_Check(item)) {
+                    try {
+                        out.append(py::options::parse_option_set(item));
                     } catch (im::OptionsError& exc) {
                         Py_DECREF(sequence);
                         throw;
@@ -99,6 +106,97 @@ namespace py {
             return out;
         }
         
+        options_list parse_option_set(PyObject* set) {
+            options_list out;
+            if (!set) { return out; }
+            // if (!PyIter_Check(set)) { return out; }
+            if (!PyAnySet_Check(set)) { return out; }
+            
+            PyObject* iterator = PyObject_GetIter(set);
+            PyObject* item;
+            
+            if (iterator == NULL) {
+                imread_raise(OptionsError, "[ERROR]",
+                    "Set object not iterable");
+            }
+            
+            /// double-parens are to silence a warning
+            while ((item = PyIter_Next(iterator))) {
+                if (PyDict_Check(item)) {
+                    try {
+                        out.append(py::options::parse_options(item));
+                    } catch (im::OptionsError& exc) {
+                        Py_DECREF(item);
+                        Py_DECREF(iterator);
+                        throw;
+                    }
+                } else if (PyTuple_Check(item) || PyList_Check(item)) {
+                    try {
+                        out.append(py::options::parse_option_list(item));
+                    } catch (im::OptionsError& exc) {
+                        Py_DECREF(item);
+                        Py_DECREF(iterator);
+                        throw;
+                    }
+                } else if (PyAnySet_Check(item)) {
+                    try {
+                        out.append(py::options::parse_option_set(item));
+                    } catch (im::OptionsError& exc) {
+                        Py_DECREF(item);
+                        Py_DECREF(iterator);
+                        throw;
+                    }
+                } else if (item == Py_None) {
+                    out.append(options_list::null);
+                } else if (PyBool_Check(item)) {
+                    out.append(PyObject_IsTrue(item) == 1);
+                } else if (PyLong_Check(item)) {
+                    out.append(PyLong_AsLong(item));
+                } else if (PyFloat_Check(item)) {
+                    out.append(PyFloat_AS_DOUBLE(item));
+            #if PY_MAJOR_VERSION < 3
+                } else if (PyInt_Check(item)) {
+                    out.append(static_cast<int>(PyInt_AS_LONG(item)));
+            #elif PY_MAJOR_VERSION >= 3
+                } else if (PyBytes_Check(item)) {
+                    std::size_t len;
+                    const char* blob = py::options::get_blob(item, len);
+                    out.append(std::string(blob, len));
+            #endif /// PY_MAJOR_VERSION
+                } else if (PyMemoryView_Check(item)) {
+                    Py_buffer* view = PyMemoryView_GET_BUFFER(item);
+                    {
+                        py::gil::release nogil;
+                        py::buffer::source data = py::buffer::source(*view, false);
+                        out.append(std::string(data.str()));
+                    }
+                } else if (NumpyImage_Check(item)) {
+                    Py_DECREF(item);
+                    Py_DECREF(iterator);
+                    imread_raise(OptionsError, "[ERROR]",
+                        "Illegal NumpyImage data found in set");
+                } else {
+                    const char* c = py::options::get_cstring(item);
+                    if (!c) {
+                        Py_DECREF(item);
+                        Py_DECREF(iterator);
+                        imread_raise(OptionsError, "[ERROR]",
+                            "Misparsed sequence item in set");
+                    }
+                    out.append(std::string(c));
+                }
+                Py_DECREF(item);
+            }
+            
+            Py_DECREF(iterator);
+            if (PyErr_Occurred()) {
+                imread_raise(OptionsError, "[ERROR]",
+                    "Error occurred while iterating set");
+            }
+            
+            return out;
+        }
+        
         options_map parse_options(PyObject* dict) {
             options_map out;
             if (!dict) { return out; }
@@ -110,8 +208,10 @@ namespace py {
                 std::string k = py::options::get_cstring(key);
                 if (PyDict_Check(value)) {
                     out.set(k, py::options::parse_options(value));
-                } else if (PyTuple_Check(value) || PyList_Check(value) || PyAnySet_Check(value)) {
+                } else if (PyTuple_Check(value) || PyList_Check(value)) {
                     out.set(k, py::options::parse_option_list(value));
+                } else if (PyAnySet_Check(value)) {
+                    out.set(k, py::options::parse_option_set(value));
                 } else if (value == Py_None) {
                     out.set(k, options_map::null);
                 } else if (PyBool_Check(value)) {

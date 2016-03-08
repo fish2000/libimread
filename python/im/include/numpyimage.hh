@@ -489,8 +489,12 @@ namespace py {
                 as_blob = PyObject_IsTrue(py_as_blob);
             }
             
-            if (options) {
-                PyDict_Update(pyim->writeoptDict, options);
+            if (options == NULL) {
+                options = PyDict_New();
+            }
+            if (PyDict_Update(pyim->writeoptDict, options) == -1) {
+                /// exception was raised
+                return NULL;
             }
             
             try {
@@ -721,12 +725,18 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    format_write_opts(PyObject* self, PyObject*) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            if (pyim->writeoptDict == nullptr || pyim->writeoptDict == NULL) {
+                PyErr_SetString(PyExc_AttributeError,
+                    "pyim->writeoptDict is NULL");
+                return NULL;
+            }
             options_map opts = pyim->writeopts();
             char const* out;
             {
                 py::gil::release nogil;
                 out = opts.format().c_str();
             }
+            // out = opts.format().c_str();
             return Py_BuildValue("s", out);
         }
         

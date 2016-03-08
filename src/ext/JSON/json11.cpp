@@ -167,7 +167,9 @@ bool Json::Array::contains(Node const* that) const {
     if (that == nullptr) { return false; }
     if (this == that) { return true; }
     for (Node* it : list) {
-        if (it->contains(that)) { return true; }
+        if (it->contains(that)) {
+            return true;
+        }
     }
     return false;
 }
@@ -175,7 +177,7 @@ bool Json::Array::contains(Node const* that) const {
 bool Json::Object::contains(Node const* that) const {
     if (that == nullptr) { return false; }
     if (this == that) { return true; }
-    for (auto it : map) {
+    for (auto const& it : map) {
         if (it.second->contains(that)) {
             return true;
         }
@@ -190,7 +192,7 @@ Json::Json(Json const& that) {
 
 /** Move constructor. */
 Json::Json(Json&& that) noexcept {
-    root = that.root;
+    root = std::move(that.root);
     that.root = nullptr;
 }
 
@@ -209,7 +211,7 @@ Json& Json::operator=(Json const& that) {
 /** Move assignment */
 Json& Json::operator=(Json&& that) noexcept {
     root->unref();
-    root = that.root;
+    root = std::move(that.root);
     that.root = nullptr;
     return *this;
 }
@@ -278,25 +280,25 @@ Json& Json::operator<<(Json const& that) {
     return *this;
 }
 
-Json& Json::insert(int index, Json const& that) {
+Json& Json::insert(int idx, Json const& that) {
     if (that.root->contains(root)) {
         imread_raise(JSONUseError,
             "cyclic dependency"); }
-    mkarray()->ins(index, that.root);
+    mkarray()->ins(idx, that.root);
     return *this;
 }
 
-Json& Json::replace(int index, Json const& that) {
+Json& Json::replace(int idx, Json const& that) {
     if (that.root->contains(root)) {
         imread_raise(JSONUseError,
             "cyclic dependency");
     }
-    mkarray()->repl(index, that.root);
+    mkarray()->repl(idx, that.root);
     return *this;
 }
 
-Json& Json::erase(int index) {
-    mkarray()->del(index);
+Json& Json::erase(int idx) {
+    mkarray()->del(idx);
     return *this;
 }
 
@@ -333,12 +335,13 @@ Json& Json::append(Json const& other) {
     if (other.root->contains(root)) {
         imread_raise(JSONUseError,
             "cyclic dependency"); }
-    mkarray()->ins(-1, other.root);
+    mkarray()->add(other.root);
     return *this;
 }
 
 int Json::index(Json const& other) const {
-    auto const& arlist = mkarray()->list;
+    auto ap = mkarray();
+    auto const& arlist = ap->list;
     if (!root->contains(other.root)) { return -1; }
     int idx = 0;
     for (auto it = arlist.begin();
@@ -349,10 +352,11 @@ int Json::index(Json const& other) const {
 }
 
 Json Json::pop() {
-    auto const& arlist = mkarray()->list;
+    auto ap = mkarray();
+    auto const& arlist = ap->list;
     if (arlist.empty()) { return null; }
     Json out(arlist.back());
-    erase(-1);
+    ap->pop();
     return out;
 }
 
@@ -360,7 +364,7 @@ Json Json::Property::operator=(Json const& that) {
     if (host->type() == Type::OBJECT) {
         ((Object*)host)->set(key, that.root);
     } else if (host->type() == Type::ARRAY) {
-        ((Array*)host)->repl(index, that.root);
+        ((Array*)host)->repl(kidx, that.root);
     } else {
         imread_raise(JSONLogicError,
             "Property::operator=(Json) assignment logic error:",
@@ -374,8 +378,8 @@ Json Json::Property::operator=(Property const& that) {
     return (*this = that.target());
 }
 
-Json::Property Json::operator[](int index) {
-    return Property(mkarray(), index);
+Json::Property Json::operator[](int idx) {
+    return Property(mkarray(), idx);
 }
 
 Json::Property Json::operator[](std::string const& key) {
@@ -383,7 +387,7 @@ Json::Property Json::operator[](std::string const& key) {
 }
 
 std::size_t Json::size() const {
-    if (root->type() == Type::ARRAY) { return ((Array*)root)->list.size(); }
+    if (root->type() == Type::ARRAY)  { return ((Array*)root)->list.size(); }
     if (root->type() == Type::OBJECT) { return ((Object*)root)->map.size(); }
     if (root->type() == Type::STRING) { return ((String*)root)->value.size(); }
     imread_raise(JSONUseError,
@@ -446,7 +450,7 @@ Json Json::pop(std::string const& key) {
             "\t(root->pop(key)        == nullptr)");
     }
     Json out(node);                         /// constructor increments refcount (>= 2)
-    out.root->refcnt--;                    /// back to reality (>= 1)
+    out.root->refcnt--;                     /// back to reality (>= 1)
     return out;
 }
 
@@ -454,35 +458,35 @@ Json Json::pop(std::string const& key, Json const& default_value) {
     Node* node = mkobject()->pop(key);      /// refcount unaffected (>= 1)
     if (!node) { return default_value; }
     Json out(node);                         /// constructor increments refcount (>= 2)
-    out.root->refcnt--;                    /// back to reality (>= 1)
+    out.root->refcnt--;                     /// back to reality (>= 1)
     return out;
 }
 
-Json::Property::Property(Node* node, std::string const& key) : host(node) {
-    if (node->type() != Type::OBJECT) {
-        imread_raise(JSONUseError,
-            "Json::Property::Property(node, key) method not applicable",
-         FF("\tnode->type() == Type::%s", node->typestr()),
-            "\t(Requires Type::OBJECT)");
+Json::Property::Property(Node* node, std::string const& key)
+    :host(node), key(key), kidx(-1)
+    {
+        if (node->type() != Type::OBJECT) {
+            imread_raise(JSONUseError,
+                "Json::Property::Property(node, key) method not applicable",
+             FF("\tnode->type() == Type::%s", node->typestr()),
+                "\t(Requires Type::OBJECT)");
+        }
     }
-    this->key = key;
-    index = -1;
-}
 
-Json::Property::Property(Node* node, int index) : host(node) {
-    if (node->type() != Type::ARRAY) {
-        imread_raise(JSONUseError,
-            "Json::Property::Property(node, idx) method not applicable",
-         FF("\tnode->type() == Type::%s", node->typestr()),
-            "(Requires Type::ARRAY)");
+Json::Property::Property(Node* node, int idx)
+    :host(node), key(""), kidx(idx)
+    {
+        if (node->type() != Type::ARRAY) {
+            imread_raise(JSONUseError,
+                "Json::Property::Property(node, idx) method not applicable",
+             FF("\tnode->type() == Type::%s", node->typestr()),
+                "(Requires Type::ARRAY)");
+        }
     }
-    key = "";
-    this->index = index;
-}
 
 Json Json::Property::target() const {
     if (host->type() == Type::OBJECT) { return ((Object*)host)->get(key); }
-    if (host->type() == Type::ARRAY)  { return ((Array*)host)->list.at(index); }
+    if (host->type() == Type::ARRAY)  { return ((Array*)host)->list.at(kidx); }
     imread_raise(JSONLogicError,
         "Property::operator Json() conversion-operator logic error:",
      FF("\tConverstion attempt made on Property object of Type::%s", host->typestr()),
@@ -492,7 +496,9 @@ Json Json::Property::target() const {
 detail::stringvec_t Json::keys() const {
     Object* op = mkobject();
     detail::stringvec_t out;
-    for (auto it : op->map) { out.push_back(*it.first); }
+    for (auto const& it : op->map) {
+        out.push_back(*it.first);
+    }
     return out;
 }
 
@@ -500,7 +506,9 @@ Json Json::values() const {
     Json out{};
     Array* ap = out.mkarray();
     Object* op = mkobject();
-    for (auto it : op->map) { ap->add(it.second); }
+    for (auto const& it : op->map) {
+        ap->add(it.second);
+    }
     return out;
 }
 
@@ -529,7 +537,7 @@ void Json::Object::traverse(Json::traverser_t traverser) const {
 
 void Json::Object::traverse(Json::named_traverser_t named_traverser,
                             char const* name) const {
-    for (auto it : map) {
+    for (auto const& it : map) {
         it.second->traverse(
             named_traverser,
             it.first->c_str());
@@ -563,7 +571,7 @@ void Json::Object::print(std::ostream& out) const {
     out << '{';
     ++level;
     bool comma = false;
-    for (auto it : map) {
+    for (auto const& it : map) {
         if (comma)  { out << ','; }
         if (indent) { out << '\n'
                           << std::string(indent*level, ' '); }
@@ -581,7 +589,7 @@ void Json::Array::print(std::ostream& out) const {
     out << '[';
     ++level;
     bool comma = false;
-    for (const Node* it : list) {
+    for (Node const* it : list) {
         if (comma)  { out << ','; }
         if (indent) { out << '\n'
                           << std::string(indent*level, ' '); }
@@ -593,7 +601,7 @@ void Json::Array::print(std::ostream& out) const {
 }
 
 Json::Object::~Object() {
-    for (auto it : map) {
+    for (auto const& it : map) {
         Node* np = it.second;
         np->unref();
     }
@@ -662,30 +670,44 @@ void Json::Array::add(Node* v) {
     v->refcnt++;
 }
 
+void Json::Array::pop() {
+    Node* v = (Node*)list.back();
+    v->unref();
+    list.pop_back();
+}
+
 /** Inserts given Node* before index. */
-void Json::Array::ins(int index, Node* v) {
+void Json::Array::ins(int idx, Node* v) {
     imread_assert(v != nullptr,
                   "Json::Array::ins(idx, v) called with v == nullptr");
-    if (index < 0) { index = 0; }
-    if (index < 0 || index > (int)list.size()) {
+    if (idx < 0) { idx = list.size(); }
+    if (idx < 0 || idx >= (int)list.size()) {
         imread_raise_default(JSONOutOfRange);
     }
-    list.insert(list.begin() + index, v);
+    list.insert(list.begin() + idx, v);
     v->refcnt++;
 }
 
-void Json::Array::del(int index) {
-    if (index < 0) { index += list.size(); }
-    Node* v = list.at(index);
+void Json::Array::del(int idx) {
+    if (idx < 0) { idx = list.size(); }
+    if (idx < 0 || idx >= (int)list.size()) {
+        imread_raise_default(JSONOutOfRange);
+    }
+    Node* v = list.at(idx);
     v->unref();
-    list.erase(list.begin() + index);
+    list.erase(list.begin() + idx);
 }
 
-void Json::Array::repl(int index, Node* v) {
-    if (index < 0) { index += list.size(); }
-    Node* u = list.at(index);
+void Json::Array::repl(int idx, Node* v) {
+    imread_assert(v != nullptr,
+                  "Json::Array::ins(idx, v) called with v == nullptr");
+    if (idx < 0) { idx = list.size(); }
+    if (idx < 0 || idx >= (int)list.size()) {
+        imread_raise_default(JSONOutOfRange);
+    }
+    Node* u = list.at(idx);
     u->unref();
-    list[index] = v;
+    list[idx] = v;
     v->refcnt++;
 }
 
@@ -695,10 +717,12 @@ std::ostream& operator<<(std::ostream& out, Json const& json) {
 }
 
 std::istream& operator>>(std::istream& in, Json& json) {
-    json.root->unref();
-    Json temp(in);
-    json.root = temp.root;
-    temp.root = nullptr;
+    // json.root->unref();
+    // Json temp(in);
+    // json.root = temp.root;
+    // temp.root = nullptr;
+    Json t(in);
+    json = std::move(t);
     return in;
 }
 

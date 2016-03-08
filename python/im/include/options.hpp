@@ -16,6 +16,7 @@ namespace py {
         const char* get_blob(PyObject* data, std::size_t& len) noexcept;
         const char* get_cstring(PyObject* stro) noexcept;
         options_list parse_option_list(PyObject* list);
+        options_list parse_option_set(PyObject* set);
         options_map parse_options(PyObject* dict);
         
     }
