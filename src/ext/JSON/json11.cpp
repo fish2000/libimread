@@ -30,6 +30,7 @@ Json::Bool Json::Bool::F(false);
 detail::stringset_t Json::keyset;
 int Json::indent = 4;
 int Json::level;
+std::mutex Json::mute;
 
 namespace tc {
     
@@ -888,9 +889,12 @@ out:
 }
 
 std::string Json::format() const {
+    mute.lock();
     std::ostringstream out;
     out << *this;
-    return out.str();
+    std::string outstr(out.str());
+    mute.unlock();
+    return outstr;
 }
 
 Json Json::parse(std::string const& str) {
