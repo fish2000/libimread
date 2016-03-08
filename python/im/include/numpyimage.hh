@@ -104,9 +104,10 @@ namespace py {
             }
             
             if (!can_read) {
+                std::string mime = format->get_mimetype();
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
-                    format->get_mimetype().c_str());
+                    mime.c_str());
                 return UNIQUE_NULL(ImageType);
             }
             
@@ -158,9 +159,10 @@ namespace py {
             }
             
             if (!can_read) {
+                std::string mime = format->get_mimetype();
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented read() in I/O format %s",
-                    format->get_mimetype().c_str());
+                    mime.c_str());
                 return UNIQUE_NULL(ImageType);
             }
             
@@ -409,9 +411,10 @@ namespace py {
             }
             
             if (!can_write) {
+                std::string mime = format->get_mimetype();
                 PyErr_Format(PyExc_ValueError,
                     "Unimplemented write() in I/O format %s",
-                    format->get_mimetype().c_str());
+                    mime.c_str());
                 return false;
             }
             
@@ -689,12 +692,12 @@ namespace py {
         PyObject*    format_read_opts(PyObject* self, PyObject*) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             options_map opts = pyim->readopts();
-            char const* out;
+            std::string out;
             {
                 py::gil::release nogil;
-                out = opts.format().c_str();
+                out = opts.format();
             }
-            return Py_BuildValue("s", out);
+            return Py_BuildValue("s", out.c_str());
         }
         
         /// NumpyImage.write_opts getter
@@ -726,29 +729,13 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    format_write_opts(PyObject* self, PyObject*) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            if (pyim->writeoptDict == nullptr || pyim->writeoptDict == NULL) {
-                PyErr_SetString(PyExc_AttributeError,
-                    "pyim->writeoptDict is NULL");
-                return NULL;
-            }
             options_map opts = pyim->writeopts();
-            char const* out;
-            std::vector<std::string> keys;
+            std::string out;
             {
                 py::gil::release nogil;
-                out = opts.format().c_str();
-                keys = Json::allkeys();
+                out = opts.format();
             }
-            // out = opts.format().c_str();
-            bool comma = false;
-            std::cerr << "KEYS: ";
-            for (auto const& key : keys) {
-                if (comma) { std::cerr << ','; }
-                std::cerr << key;
-                comma = true;
-            }
-            std::cerr << std::endl;
-            return Py_BuildValue("s", out);
+            return Py_BuildValue("s", out.c_str());
         }
         
     } /* namespace image */
