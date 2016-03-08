@@ -596,6 +596,8 @@ void Json::Object::print(std::ostream& out) const {
         comma = true;
     }
     --level;
+    if (indent) { out << '\n'
+                      << std::string(indent*level, ' '); }
     out << '}';
 }
 
@@ -611,6 +613,8 @@ void Json::Array::print(std::ostream& out) const {
         comma = true;
     }
     --level;
+    if (indent) { out << '\n'
+                      << std::string(indent*level, ' '); }
     out << ']';
 }
 
