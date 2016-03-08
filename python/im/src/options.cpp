@@ -262,7 +262,7 @@ namespace py {
             bool tempfile = false;
             
             if (!PyArg_ParseTupleAndKeywords(
-                args, kwargs, "s|OO", const_cast<char**>(keywords),
+                args, kwargs, "|sOO", const_cast<char**>(keywords),
                 &destination,
                 &py_overwrite,
                 &py_tempfile))
@@ -270,6 +270,11 @@ namespace py {
             
             if (py_overwrite) { overwrite = PyObject_IsTrue(py_overwrite) == 1; }
             if (py_tempfile)  { tempfile  = PyObject_IsTrue(py_tempfile) == 1;  }
+            if (!py_tempfile && !destination) {
+                PyErr_SetString(PyExc_AttributeError,
+                    "Must specify either destination path or tempfile=True");
+                return NULL;
+            }
             
             try {
                 py::gil::release nogil;
