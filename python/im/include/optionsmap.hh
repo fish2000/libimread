@@ -36,11 +36,11 @@ namespace py {
         template <typename OptionsType>
         struct PythonOptionsBase {
             PyObject_HEAD
-            OptionsType data;
+            OptionsType* data;
             PyObject* source;
             
             void cleanup() {
-                data.reset();
+                data->reset();
                 Py_CLEAR(source);
             }
         };
@@ -54,7 +54,7 @@ namespace py {
         PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
             PythonOptionsType* self = reinterpret_cast<PythonOptionsType*>(type->tp_alloc(type, 0));
             if (self != NULL) {
-                self->data = OptionsType(OptionsType::null);
+                self->data = new OptionsType(OptionsType::null);
                 self->source = nullptr;
             }
             return reinterpret_cast<PyObject*>(self); /// all is well, return self
@@ -105,13 +105,14 @@ namespace py {
         PyObject* str(PyObject* self) {
             PythonOptionsType* pyopts = reinterpret_cast<PythonOptionsType*>(self);
             Py_ssize_t string_size;
+            std::string out;
             {
                 py::gil::release nogil;
-                // string_size = pyim->image->size();
+                out = pyopts->data->format();
+                string_size = out.size();
             }
-            // return PyString_FromStringAndSize(
-            //     pyim->image->template rowp_as<char const>(0),
-            //     string_size);
+            return PyString_FromStringAndSize(
+                out.c_str(), string_size);
         }
         
         /// __hash__ implementation
@@ -122,8 +123,7 @@ namespace py {
             long out;
             {
                 py::gil::release nogil;
-                // auto bithash = blockhash::blockhash_quick(*pyim->image);
-                // out = static_cast<long>(bithash.to_ulong());
+                out = static_cast<long>(pyopts->data->hash());
             }
             return out;
         }
@@ -134,9 +134,11 @@ namespace py {
         Py_ssize_t length(PyObject* self) {
             PythonOptionsType* pyopts = reinterpret_cast<PythonOptionsType*>(self);
             Py_ssize_t out;
-            {
+            try {
                 py::gil::release nogil;
-                // out = pyim->image->size();
+                out = static_cast<Py_ssize_t>(pyopts->data->size());
+            } except (im::JSONUseError& exc) {
+                out = 0;
             }
             return out;
         }
@@ -147,6 +149,7 @@ namespace py {
         void dealloc(PyObject* self) {
             PythonOptionsType* pyopts = reinterpret_cast<PythonOptionsType*>(self);
             pyopts->cleanup();
+            delete pyopts->data;
             self->ob_type->tp_free(self);
         }
         

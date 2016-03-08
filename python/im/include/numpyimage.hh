@@ -637,27 +637,90 @@ namespace py {
             return Py_BuildValue("");
         }
         
+        namespace closures {
+            static char const* READ  = "READ";
+            static char const* WRITE = "WRITE";
+            
+            enum params : std::size_t { dim, stride }
+        }
+        
+        template <typename ImageType = HybridArray>
+        using getter_t = int(ImageType::*)(int) const;
+        
+        template <typename ImageType = HybridArray,
+                  closures::params Param>
+        auto getter = std::mem_fn((getter_t<ImageType>)&ImageType::rowp);
+        
+        template <typename ImageType = HybridArray>
+        auto getter<closures::params::dim> = std::mem_fn(
+            (getter_t<ImageType>)&ImageType::dim);
+        template <typename ImageType = HybridArray>
+        auto getter<closures::params::stride> = std::mem_fn(
+            (getter_t<ImageType>)&ImageType::stride);
+        
+        /// NumpyImage.shape getter
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    dimensional_value(PyObject* self, void* closure) {
+            
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            auto getter<closure> = std::mem_fn((getter_t<ImageType>)closure);
+            auto image = pyim->image.get();
+            switch (image->ndims()) {
+                case 1:
+                    return Py_BuildValue("(i)",     getter(image, 0));
+                case 2:
+                    return Py_BuildValue("(ii)",    getter(image, 0),
+                                                    getter(image, 1));
+                case 3:
+                    return Py_BuildValue("(iii)",   getter(image, 0),
+                                                    getter(image, 1),
+                                                    getter(image, 2));
+                case 4:
+                    return Py_BuildValue("(iiii)",  getter(image, 0),
+                                                    getter(image, 1),
+                                                    getter(image, 2),
+                                                    getter(image, 3));
+                case 5:
+                    return Py_BuildValue("(iiiii)", getter(image, 0),
+                                                    getter(image, 1),
+                                                    getter(image, 2),
+                                                    getter(image, 3),
+                                                    getter(image, 4));
+                default:
+                    return Py_BuildValue("");
+            }
+            return Py_BuildValue("");
+        }
+        
         /// NumpyImage.read_opts getter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        PyObject*    get_read_opts(PyObject* self, void* closure) {
+        PyObject*    get_opts(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            return Py_BuildValue("O", pyim->readoptDict ? pyim->readoptDict : Py_None);
+            PyObject* target = (char const*)closure == closures::READ ? pyim->readoptDict : pyim->writeoptDict;
+            return Py_BuildValue("O", target ? target : Py_None);
         }
         
         /// NumpyImage.read_opts setter
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
-        int          set_read_opts(PyObject* self, PyObject* value, void* closure) {
+        int          set_opts(PyObject* self, PyObject* value, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             if (!value) { return 0; }
             if (!PyMapping_Check(value)) {
                 PyErr_SetString(PyExc_AttributeError,
-                    "read_opts must be dict-ish");
+                    "opts value must be dict-ish");
                 return -1;
             }
-            Py_CLEAR(pyim->readoptDict);
-            pyim->readoptDict = Py_BuildValue("O", value);
+            /// switch on closure tag (?)
+            if ((char const*)closure == closures::READ) {
+                Py_CLEAR(pyim->readoptDict);
+                pyim->readoptDict = Py_BuildValue("O", value);
+            } else {
+                Py_CLEAR(pyim->writeoptDict);
+                pyim->writeoptDict = Py_BuildValue("O", value);
+            }
             return 0;
         }
         
@@ -697,30 +760,6 @@ namespace py {
                 return NULL;
             }
             return py::options::dump(self, args, kwargs, opts);
-        }
-        
-        /// NumpyImage.write_opts getter
-        template <typename ImageType = HybridArray,
-                  typename PythonImageType = PythonImageBase<ImageType>>
-        PyObject*    get_write_opts(PyObject* self, void* closure) {
-            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            return Py_BuildValue("O", pyim->writeoptDict ? pyim->writeoptDict : Py_None);
-        }
-        
-        /// NumpyImage.write_opts setter
-        template <typename ImageType = HybridArray,
-                  typename PythonImageType = PythonImageBase<ImageType>>
-        int          set_write_opts(PyObject* self, PyObject* value, void* closure) {
-            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            if (!value) { return 0; }
-            if (!PyMapping_Check(value)) {
-                PyErr_SetString(PyExc_AttributeError,
-                    "write_opts must be dict-ish");
-                return -1;
-            }
-            Py_CLEAR(pyim->writeoptDict);
-            pyim->writeoptDict = Py_BuildValue("O", value);
-            return 0;
         }
         
         /// NumpyImage.write_opts formatter
@@ -794,27 +833,32 @@ static PyGetSetDef NumpyImage_getset[] = {
         (char*)"dtype",
             (getter)py::image::get_dtype<HybridArray>,
             NULL,
-            (char*)"NumpyImage dtype", NULL },
+            (char*)"NumpyImage dtype",
+            NULL },
     {
         (char*)"shape",
-            (getter)py::image::get_shape<HybridArray>,
+            (getter)py::image::dimensional_value<HybridArray>,
             NULL,
-            (char*)"NumpyImage shape tuple", NULL },
+            (char*)"NumpyImage shape tuple",
+            (void*)py::image::closures::params::dim },
     {
         (char*)"strides",
-            (getter)py::image::get_strides<HybridArray>,
+            (getter)py::image::dimensional_value<HybridArray>,
             NULL,
-            (char*)"NumpyImage strides tuple", NULL },
+            (char*)"NumpyImage strides tuple",
+            (void*)py::image::closures::params::stride },
     {
         (char*)"read_opts",
-            (getter)py::image::get_read_opts<HybridArray>,
-            (setter)py::image::set_read_opts<HybridArray>,
-            (char*)"Read options dict", NULL },
+            (getter)py::image::get_opts<HybridArray>,
+            (setter)py::image::set_opts<HybridArray>,
+            (char*)"Read options dict",
+            (void*)py::image::closures::READ },
     {
         (char*)"write_opts",
-            (getter)py::image::get_write_opts<HybridArray>,
-            (setter)py::image::set_write_opts<HybridArray>,
-            (char*)"Write options dict", NULL },
+            (getter)py::image::get_opts<HybridArray>,
+            (setter)py::image::set_opts<HybridArray>,
+            (char*)"Write options dict",
+            (void*)py::image::closures::WRITE },
     { NULL, NULL, NULL, NULL, NULL }
 };
 
