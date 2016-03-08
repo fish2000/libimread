@@ -925,7 +925,7 @@ Json& Json::dump(std::string const& dest, bool overwrite) {
     std::string destination(dest);
     
     try {
-        destination = path::absolute(dest).str();
+        destination = path::expand_user(dest).make_absolute().str();
     } catch (im::FileSystemError& exc) {
         throw;
     }

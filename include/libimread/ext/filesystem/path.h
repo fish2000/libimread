@@ -113,6 +113,10 @@ namespace filesystem {
             /// ... or whatever it is on your system, I don't know
             path expand_user() const;
             
+            /// static forwarder for path::expand_user<P>(p)
+            template <typename P> inline
+            static path expand_user(P&& p) { return path(std::forward<P>(p)).expand_user(); }
+            
             bool compare_debug(const path& other) const;        /// legacy, full of printf-debuggery
             bool compare_lexical(const path& other) const;      /// compare using std::strcmp(),
                                                                 /// fails for nonexistant paths
