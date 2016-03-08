@@ -438,6 +438,7 @@ class Json {
         
         /// file I/O: dump and load
         Json& dump(std::string const& dest, bool overwrite = false);
+        std::string dumptmp();
         static Json load(std::string const& source);
         
         struct parse_error : im::JSONParseError {

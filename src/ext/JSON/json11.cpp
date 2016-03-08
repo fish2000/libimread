@@ -933,6 +933,7 @@ Json& Json::dump(std::string const& dest, bool overwrite) {
     if (path::exists(destination) && !overwrite) {
         imread_raise(JSONIOError,
             "Json::dump(destination, overwrite=false) has existant destination",
+         FF("\tdest        == %s", dest.c_str()),
          FF("\tdestination == %s", destination.c_str()),
             "\t(Requires overwrite=true or a unique destination)");
     }
@@ -950,12 +951,22 @@ Json& Json::dump(std::string const& dest, bool overwrite) {
     if (!finalfile.is_file()) {
         imread_raise(JSONIOError,
             "Json::dump(destination, ...) failed writing to destination",
+         FF("\tdest        == %s", dest.c_str()),
          FF("\tdestination == %s", destination.c_str()),
          FF("\tfinalfile   == %s", finalfile.c_str()));
     }
     
     /// return-self by reference
     return *this;
+}
+
+std::string Json::dumptmp() {
+    using filesystem::NamedTemporaryFile;
+    NamedTemporaryFile tf(".json", FILESYSTEM_TEMP_FILENAME, false);
+    tf.open();
+    tf.stream << *this;
+    tf.close();
+    return tf.filepath.str();
 }
 
 Json Json::load(std::string const& source) {

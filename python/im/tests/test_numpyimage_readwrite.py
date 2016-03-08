@@ -156,6 +156,7 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
             self.assertIsNotNone(opts_json)
             self.assertEqual(opts_json, image.format_write_opts())
+            opts_tempfile = image.dump_write_opts(tempfile=True)
             # print(">>>>>>>> opts_json = %s" % opts_json)
             
             opts = image.write_opts
@@ -192,8 +193,9 @@ class NumpyImageReadWriteTests(BaseCase):
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
             
-            opts_reconstituted = json.loads(opts_json)
+            opts_reconstituted = json.load(opts_tempfile)
             self.assertIsNotNone(opts_reconstituted)
+            self.assertDictEqual(opts_reconstituted, opts_json)
     
     '''
     def test_load_image_jpg_check_dimensions(self):

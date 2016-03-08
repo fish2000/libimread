@@ -252,36 +252,41 @@ namespace py {
             return out;
         }
         
-        
         PyObject* dump(PyObject* self, PyObject* args, PyObject* kwargs,
                        options_map& opts) {
             PyObject* py_overwrite = NULL;
-            char const* keywords[] = { "destination", "overwrite", NULL };
+            PyObject* py_tempfile = NULL;
+            char const* keywords[] = { "destination", "overwrite", "tempfile", NULL };
             char const* destination = NULL;
             bool overwrite = false;
+            bool tempfile = false;
             
             if (!PyArg_ParseTupleAndKeywords(
-                args, kwargs, "s|O", const_cast<char**>(keywords),
+                args, kwargs, "s|OO", const_cast<char**>(keywords),
                 &destination,
-                &py_overwrite))
+                &py_overwrite,
+                &py_tempfile))
                     { return NULL; }
-            if (py_overwrite) {
-                overwrite = PyObject_IsTrue(py_overwrite);
-            }
+            
+            if (py_overwrite) { overwrite = PyObject_IsTrue(py_overwrite) == 1; }
+            if (py_tempfile)  { tempfile  = PyObject_IsTrue(py_tempfile) == 1;  }
             
             try {
                 py::gil::release nogil;
-                opts.dump(destination, overwrite);
+                if (tempfile) {
+                    std::string dest = opts.dumptmp();
+                    destination = dest.c_str();
+                } else {
+                    opts.dump(destination, overwrite);
+                }
             } catch (im::JSONIOError& exc) {
                 PyErr_SetString(PyExc_IOError, exc.what());
                 return NULL;
             }
             
-            return Py_BuildValue("O", Py_True);
+            return Py_BuildValue("s", destination);
         }
         
-        
-        
-    }
+    } /* namespace options */
     
-}
+} /* namespace py */

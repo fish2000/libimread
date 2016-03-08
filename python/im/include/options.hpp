@@ -21,6 +21,7 @@ namespace py {
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject *kwargs,
                        options_map& opts);
+        
     }
     
 }
