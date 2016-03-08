@@ -33,7 +33,7 @@ namespace py {
             #endif /// PY_MAJOR_VERSION
         }
         
-        options_list parse_option_list(PyObject* list) {
+        options_list parse_list(PyObject* list) {
             options_list out;
             if (!list) { return out; }
             if (!PySequence_Check(list)) { return out; }
@@ -43,21 +43,21 @@ namespace py {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                 if (PyDict_Check(item)) {
                     try {
-                        out.append(py::options::parse_options(item));
+                        out.append(py::options::parse(item));
                     } catch (im::OptionsError& exc) {
                         Py_DECREF(sequence);
                         throw;
                     }
                 } else if (PyTuple_Check(item) || PyList_Check(item)) {
                     try {
-                        out.append(py::options::parse_option_list(item));
+                        out.append(py::options::parse_list(item));
                     } catch (im::OptionsError& exc) {
                         Py_DECREF(sequence);
                         throw;
                     }
                 } else if (PyAnySet_Check(item)) {
                     try {
-                        out.append(py::options::parse_option_set(item));
+                        out.append(py::options::parse_set(item));
                     } catch (im::OptionsError& exc) {
                         Py_DECREF(sequence);
                         throw;
@@ -106,10 +106,9 @@ namespace py {
             return out;
         }
         
-        options_list parse_option_set(PyObject* set) {
+        options_list parse_set(PyObject* set) {
             options_list out;
             if (!set) { return out; }
-            // if (!PyIter_Check(set)) { return out; }
             if (!PyAnySet_Check(set)) { return out; }
             
             PyObject* iterator = PyObject_GetIter(set);
@@ -124,7 +123,7 @@ namespace py {
             while ((item = PyIter_Next(iterator))) {
                 if (PyDict_Check(item)) {
                     try {
-                        out.append(py::options::parse_options(item));
+                        out.append(py::options::parse(item));
                     } catch (im::OptionsError& exc) {
                         Py_DECREF(item);
                         Py_DECREF(iterator);
@@ -132,7 +131,7 @@ namespace py {
                     }
                 } else if (PyTuple_Check(item) || PyList_Check(item)) {
                     try {
-                        out.append(py::options::parse_option_list(item));
+                        out.append(py::options::parse_list(item));
                     } catch (im::OptionsError& exc) {
                         Py_DECREF(item);
                         Py_DECREF(iterator);
@@ -140,7 +139,7 @@ namespace py {
                     }
                 } else if (PyAnySet_Check(item)) {
                     try {
-                        out.append(py::options::parse_option_set(item));
+                        out.append(py::options::parse_set(item));
                     } catch (im::OptionsError& exc) {
                         Py_DECREF(item);
                         Py_DECREF(iterator);
@@ -197,7 +196,7 @@ namespace py {
             return out;
         }
         
-        options_map parse_options(PyObject* dict) {
+        options_map parse(PyObject* dict) {
             options_map out;
             if (!dict) { return out; }
             if (!PyDict_Check(dict)) { return out; }
@@ -207,11 +206,11 @@ namespace py {
             while (PyDict_Next(dict, &pos, &key, &value)) {
                 std::string k = py::options::get_cstring(key);
                 if (PyDict_Check(value)) {
-                    out.set(k, py::options::parse_options(value));
+                    out.set(k, py::options::parse(value));
                 } else if (PyTuple_Check(value) || PyList_Check(value)) {
-                    out.set(k, py::options::parse_option_list(value));
+                    out.set(k, py::options::parse_list(value));
                 } else if (PyAnySet_Check(value)) {
-                    out.set(k, py::options::parse_option_set(value));
+                    out.set(k, py::options::parse_set(value));
                 } else if (value == Py_None) {
                     out.set(k, options_map::null);
                 } else if (PyBool_Check(value)) {
@@ -252,6 +251,36 @@ namespace py {
             }
             return out;
         }
+        
+        
+        PyObject* dump(PyObject* self, PyObject* args, PyObject* kwargs,
+                       options_map const& opts) {
+            PyObject* py_overwrite = NULL;
+            char const* keywords[] = { "destination", "overwrite", NULL };
+            char const* destination = NULL;
+            bool overwrite = false;
+            
+            if (!PyArg_ParseTupleAndKeywords(
+                args, kwargs, "s|O", const_cast<char**>(keywords),
+                &destination,
+                &py_overwrite))
+                    { return NULL; }
+            if (py_overwrite) {
+                overwrite = PyObject_IsTrue(py_overwrite);
+            }
+            
+            try {
+                py::gil::release nogil;
+                opts.dump(destination, overwrite);
+            } catch (im::JSONIOError& exc) {
+                PyErr_SetString(PyExc_IOError, exc.what());
+                return NULL;
+            }
+            
+            return Py_BuildValue("O", Py_True);
+        }
+        
+        
         
     }
     

@@ -28,6 +28,7 @@ namespace filesystem {
         const char* userdir() noexcept;
         const char* syspaths() noexcept;
         std::string execpath() noexcept;
+        ssize_t copyfile(char const*, char const*);
         
         /// return type for path::list(), when called with a detail::list_separate_t tag
         using pathvec_t = std::vector<path>;
@@ -282,6 +283,18 @@ namespace filesystem {
             template <typename P, typename Q> inline
             static bool rename(P&& p, Q&& q) {
                 return path(std::forward<P>(p)).rename(std::forward<Q>(q));
+            }
+            
+            /// duplicate a file (using ::fcopyfile() or ::sendfile()),
+            /// specifying the new name with a new path instance
+            path duplicate(const path& newpath);
+            path duplicate(const char* newpath)        { return duplicate(path(newpath)); }
+            path duplicate(const std::string& newpath) { return duplicate(path(newpath)); }
+            
+            /// Static forwarder for path::rename<P, Q>(p, q)
+            template <typename P, typename Q> inline
+            static path duplicate(P&& p, Q&& q) {
+                return path(std::forward<P>(p)).duplicate(std::forward<Q>(q));
             }
             
             /// Attempt to return the string extention (WITHOUT THE LEADING ".")

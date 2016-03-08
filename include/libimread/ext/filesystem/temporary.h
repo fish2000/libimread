@@ -73,6 +73,7 @@ namespace filesystem {
             ,filepath(std::move(other.filepath))
             ,stream(std::move(other.stream))
             {
+                other.cleanup = false;
                 other.deallocate = false;
             }
         
@@ -139,6 +140,7 @@ namespace filesystem {
             ,tplpath(std::move(other.tplpath))
             ,dirpath(std::move(other.dirpath))
             {
+                other.cleanup = false;
                 other.deallocate = false;
             }
         

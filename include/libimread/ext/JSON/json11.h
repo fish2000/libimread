@@ -291,6 +291,7 @@ class Json {
         static detail::stringset_t keyset;   /// all propery names
         static int level;                    /// for pretty printing
         static int indent;                   /// for pretty printing
+        static bool locking;
         static std::mutex mute;
         
         Json(Node* node) {
@@ -379,7 +380,7 @@ class Json {
         
         template <typename T> inline
         std::remove_reference_t<T> cast(std::string const& key,
-                            T default_value) const {
+                                        T default_value) const {
             using rT = std::remove_reference_t<T>;
             if (!has(key)) { return static_cast<rT>(default_value); }
             return cast<T>(key);
@@ -435,8 +436,9 @@ class Json {
         static Json null, undefined;
         static Json parse(std::string const&);
         
-        static Json array() { return new Array(); }   // returns empty array
-        static Json object() { return new Object(); } // returns empty object
+        /// file I/O: dump and load
+        Json& dump(std::string const& dest, bool overwrite = false);
+        static Json load(std::string const& source);
         
         struct parse_error : im::JSONParseError {
             unsigned line = 0, col = 0;
@@ -452,13 +454,13 @@ class Json {
 };
 
 template <>
-filesystem::path Json::cast<filesystem::path>(std::string const& key) const;
+filesystem::path    Json::cast<filesystem::path>(std::string const& key) const;
 
 template <>
-const char* Json::cast<const char*>(std::string const& key) const;
+const char*         Json::cast<const char*>(std::string const& key) const;
 
 template <>
-char* Json::cast<char*>(std::string const& key) const;
+char*               Json::cast<char*>(std::string const& key) const;
 
 namespace std {
     

@@ -27,7 +27,7 @@ namespace filesystem {
             stream.clear();
             stream.open(filepath.str(), std::ios::out); /// TOUCH!
             stream.close();
-            stream.open(filepath.str());
+            stream.open(filepath.str(), this->mode(additionally));
         }
         return stream.good();
     }

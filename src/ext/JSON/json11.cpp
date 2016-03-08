@@ -18,6 +18,7 @@
 
 #include <libimread/ext/JSON/json11.h>
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/temporary.h>
 #include <libimread/errors.hh>
 #include <libimread/rehash.hh>
 
@@ -30,6 +31,7 @@ Json::Bool Json::Bool::F(false);
 detail::stringset_t Json::keyset;
 int Json::indent = 4;
 int Json::level;
+bool Json::locking = false;
 std::mutex Json::mute;
 
 namespace tc {
@@ -729,10 +731,6 @@ std::ostream& operator<<(std::ostream& out, Json const& json) {
 }
 
 std::istream& operator>>(std::istream& in, Json& json) {
-    // json.root->unref();
-    // Json temp(in);
-    // json.root = temp.root;
-    // temp.root = nullptr;
     Json t(in);
     json = std::move(t);
     return in;
@@ -899,11 +897,11 @@ out:
 }
 
 std::string Json::format() const {
-    mute.lock();
+    if (locking) { mute.lock(); }
     std::ostringstream out;
     out << *this;
     std::string outstr(out.str());
-    mute.unlock();
+    if (locking) { mute.unlock(); }
     return outstr;
 }
 
@@ -915,6 +913,70 @@ Json Json::parse(std::string const& str) {
         /* skip */;
     if (is.eof()) { return parsed; }
     throw parse_error("JSON format error", is);
+}
+
+Json& Json::dump(std::string const& dest, bool overwrite) {
+    using filesystem::path;
+    using filesystem::NamedTemporaryFile;
+    std::string destination(dest);
+    
+    try {
+        destination = path::absolute(dest).str();
+    } catch (im::FileSystemError& exc) {
+        throw;
+    }
+    
+    if (path::exists(destination) && !overwrite) {
+        imread_raise(JSONIOError,
+            "Json::dump(destination, overwrite=false) has existant destination",
+         FF("\tdestination == %s", destination.c_str()),
+            "\t(Requires overwrite=true or a unique destination)");
+    }
+    
+    NamedTemporaryFile tf(".json");
+    tf.open();
+    tf.stream << *this;
+    tf.close();
+    
+    if (path::exists(destination)) {
+        path::remove(destination);
+    }
+    
+    path finalfile = tf.filepath.duplicate(destination);
+    if (!finalfile.is_file()) {
+        imread_raise(JSONIOError,
+            "Json::dump(destination, ...) failed writing to destination",
+         FF("\tdestination == %s", destination.c_str()),
+         FF("\tfinalfile   == %s", finalfile.c_str()));
+    }
+    
+    /// return-self by reference
+    return *this;
+}
+
+Json Json::load(std::string const& source) {
+    using filesystem::path;
+    
+    if (!path::is_file_or_link(source)) {
+        imread_raise(JSONIOError,
+            "Json::load(source) has non-file-or-link source",
+         FF("\tsource == %s", source.c_str()));
+    }
+    
+    std::fstream stream;
+    stream.open(source, std::ios::in);
+    if (!stream.is_open()) {
+        imread_raise(JSONIOError,
+            "Json::load(source) couldn't open a stream to read source",
+         FF("\tsource == %s", source.c_str()));
+    }
+    
+    Json out{};
+    stream >> out;
+    stream.close();
+    
+    /// return by value
+    return out;
 }
 
 std::size_t Json::hash(std::size_t H) const {
@@ -994,14 +1056,19 @@ bool Json::operator==(Json const& that) const {
 }
 
 template <>
-filesystem::path Json::cast<filesystem::path>(std::string const& key) const {
-    return filesystem::path(static_cast<std::string>(get(key)));
+filesystem::path    Json::cast<filesystem::path>(std::string const& key) const {
+    std::string out = static_cast<std::string>(get(key));
+    return filesystem::path(out);
 }
+
 template <>
-const char* Json::cast<const char*>(std::string const& key) const {
-    return static_cast<std::string>(get(key)).c_str();
+const char*         Json::cast<const char*>(std::string const& key) const {
+    std::string out = static_cast<std::string>(get(key));
+    return out.c_str();
 }
+
 template <>
-char* Json::cast<char*>(std::string const& key) const {
-    return const_cast<char*>(static_cast<std::string>(get(key)).c_str());
+char*               Json::cast<char*>(std::string const& key) const {
+    std::string out = static_cast<std::string>(get(key));
+    return const_cast<char*>(out.c_str());
 }

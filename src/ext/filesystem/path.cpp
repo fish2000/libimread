@@ -11,6 +11,12 @@
 #include <mach-o/dyld.h>
 #endif
 
+#if defined(__APPLE__) || defined(__FreeBSD__)
+#include <copyfile.h>
+#else
+#include <sys/sendfile.h>
+#endif
+
 #include <cerrno>
 #include <cstdlib>
 #include <numeric>
@@ -69,6 +75,35 @@ namespace filesystem {
                 if (res == 0 || res == sizeof(pbuf)) { return "" }
             #endif
             return std::string(pbuf, res);
+        }
+        
+        ssize_t copyfile(char const* source, char const* destination) {
+            /// Copy a file from source to destination
+            /// Adapted from http://stackoverflow.com/a/2180157/298171
+            int input, output; /// file descriptors
+            
+            if ((input  = ::open(source,      O_RDONLY)) == -1) { return -1; }
+            if ((output = ::open(destination, O_RDWR | O_CREAT, 0644)) == -1) {
+                ::close(input);
+                return -1;
+            }
+            
+            #if defined(__APPLE__) || defined(__FreeBSD__)
+                /// fcopyfile() works on FreeBSD and OS X 10.5+ 
+                ssize_t result = ::fcopyfile(input, output, 0, COPYFILE_ALL);
+            #else
+                /// sendfile() will work with non-socket output
+                /// -- i.e. regular files -- on Linux 2.6.33+
+                off_t bytescopied = 0;
+                stat_t fileinfo = { 0 };
+                ::fstat(input, &fileinfo);
+                ssize_t result = ::sendfile(output, input, &bytescopied, fileinfo.st_size);
+            #endif
+            
+            ::close(input);
+            ::close(output);
+            
+            return result;
         }
         
     } /* namespace detail */
@@ -365,6 +400,14 @@ namespace filesystem {
         bool status = ::rename(c_str(), newpath.c_str()) != -1;
         if (status) { set(newpath.make_absolute().str()); }
         return status;
+    }
+    
+    path path::duplicate(const path& newpath) {
+        path out;
+        if (!exists() || newpath.exists()) { return out; }
+        bool status = detail::copyfile(c_str(), newpath.c_str()) != -1;
+        if (status) { out = path(newpath.make_absolute().str()); }
+        return out;
     }
     
     path path::getcwd() {

@@ -43,11 +43,11 @@ namespace py {
             PyObject* writeoptDict = nullptr;
             
             options_map readopts() {
-                return py::options::parse_options(readoptDict);
+                return py::options::parse(readoptDict);
             }
             
             options_map writeopts() {
-                return py::options::parse_options(writeoptDict);
+                return py::options::parse(writeoptDict);
             }
             
             void cleanup() {
@@ -202,7 +202,7 @@ namespace py {
             }
             
             try {
-                options_map opts = py::options::parse_options(options);
+                options_map opts = py::options::parse(options);
                 if (is_blob) {
                     /// load as blob -- pass the buffer along
                     pyim->image = py::image::loadblob<ImageType, FactoryType>(view, opts);
@@ -442,31 +442,6 @@ namespace py {
             return true;
         }
         
-        /// Save an instance of the templated image from a Py_buffer
-        /// describing an in-memory source, with specified reading options
-        // template <typename ImageType = HybridArray>
-        // std::unique_ptr<ImageType> saveblob(ImageType& input,
-        //                                     Py_buffer& view,
-        //                                     options_map const& opts) {
-        //     std::unique_ptr<im::ImageFormat> format;
-        //     std::unique_ptr<py::buffer::sink> output;
-        //     options_map default_opts;
-        //     try {
-        //         py::gil::release nogil;
-        //         output = std::unique_ptr<py::buffer::sink>(
-        //             new py::buffer::sink(view));
-        //         format = std::unique_ptr<im::ImageFormat>(
-        //             im::get_format(opts.cast<char const*>("format")));
-        //         default_opts = format->add_options(opts);
-        //         format->write(dynamic_cast<Image&>(input),
-        //                       output.get(), default_opts);
-        //         return true;
-        //     } catch (im::FormatNotFound& exc) {
-        //         PyErr_SetString(PyExc_ValueError, exc.what());
-        //         return false;
-        //     }
-        // }
-        
         template <typename ImageType = HybridArray,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -525,7 +500,7 @@ namespace py {
                     py::buffer::source dest(view);
                     dststr = std::string(dest.str());
                 }
-                did_save = py::image::save(*pyim->image.get(), dststr.c_str(), opts);
+                did_save = py::image::save<ImageType>(*pyim->image.get(), dststr.c_str(), opts);
             } catch (im::OptionsError& exc) {
                 /// there was something weird in the `options` dict
                 PyErr_SetString(PyExc_AttributeError, exc.what());
@@ -691,13 +666,37 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    format_read_opts(PyObject* self, PyObject*) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            options_map opts = pyim->readopts();
             std::string out;
+            options_map opts;
+            
+            try {
+                opts = pyim->readopts();
+            } catch (im::OptionsError& exc) {
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return NULL;
+            }
+            
             {
                 py::gil::release nogil;
                 out = opts.format();
             }
+            
             return Py_BuildValue("s", out.c_str());
+        }
+        
+        /// NumpyImage.read_opts file-dumper
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    dump_read_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            options_map opts;
+            try {
+                opts = pyim->readopts();
+            } catch (im::OptionsError& exc) {
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return NULL;
+            }
+            return py::options::dump(self, args, kwargs, opts);
         }
         
         /// NumpyImage.write_opts getter
@@ -729,14 +728,76 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    format_write_opts(PyObject* self, PyObject*) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            options_map opts = pyim->writeopts();
             std::string out;
+            options_map opts;
+            
+            try {
+                opts = pyim->writeopts();
+            } catch (im::OptionsError& exc) {
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return NULL;
+            }
+            
             {
                 py::gil::release nogil;
                 out = opts.format();
             }
+            
             return Py_BuildValue("s", out.c_str());
         }
+        
+        /// NumpyImage.read_opts file-dumper
+        template <typename ImageType = HybridArray,
+                  typename PythonImageType = PythonImageBase<ImageType>>
+        PyObject*    dump_write_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
+            PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            options_map opts;
+            try {
+                opts = pyim->writeopts();
+            } catch (im::OptionsError& exc) {
+                PyErr_SetString(PyExc_AttributeError, exc.what());
+                return NULL;
+            }
+            return py::options::dump(self, args, kwargs, opts);
+        }
+        
+        /// NumpyImage.write_opts file-dumper
+        // template <typename ImageType = HybridArray,
+        //           typename PythonImageType = PythonImageBase<ImageType>>
+        // PyObject*    dump_write_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
+        //     PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+        //     PyObject* py_overwrite = NULL;
+        //     char const* keywords[] = { "destination", "overwrite", NULL };
+        //     char const* destination = NULL;
+        //     bool overwrite = false;
+        //
+        //     if (!PyArg_ParseTupleAndKeywords(
+        //         args, kwargs, "s|O", const_cast<char**>(keywords),
+        //         &destination,
+        //         &py_overwrite))
+        //             { return NULL; }
+        //     if (py_overwrite) {
+        //         overwrite = PyObject_IsTrue(py_overwrite);
+        //     }
+        //
+        //     try {
+        //         options_map opts = pyim->writeopts();
+        //     } catch (im::OptionsError& exc) {
+        //         /// there was something weird in the `options` dict
+        //         PyErr_SetString(PyExc_AttributeError, exc.what());
+        //         return NULL;
+        //     }
+        //
+        //     try {
+        //         py::gil::release nogil;
+        //         opts.dump(destination, overwrite);
+        //     } catch (im::JSONIOError& exc) {
+        //         PyErr_SetString(PyExc_IOError, exc.what());
+        //         return NULL;
+        //     }
+        //
+        //     return Py_BuildValue("O", Py_True);
+        // }
         
     } /* namespace image */
         
@@ -811,6 +872,16 @@ static PyMethodDef NumpyImage_methods[] = {
             (PyCFunction)py::image::format_write_opts<HybridArray>,
             METH_NOARGS,
             "Get the write options as a formatted JSON string" },
+    {
+        "dump_read_opts",
+            (PyCFunction)py::image::dump_read_opts<HybridArray>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Dump the read options to a JSON file" },
+    {
+        "dump_write_opts",
+            (PyCFunction)py::image::dump_write_opts<HybridArray>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Dump the write options to a JSON file" },
     { NULL, NULL, 0, NULL }
 };
 

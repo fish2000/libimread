@@ -291,6 +291,7 @@ DECLARE_IMREAD_ERROR_TYPE(JSONUseError,             "JSON library internal error
 DECLARE_IMREAD_ERROR_TYPE(JSONInvalidSchema,        "JSON schema parsing error");
 DECLARE_IMREAD_ERROR_TYPE(JSONOutOfRange,           "JSON index value out of range");
 DECLARE_IMREAD_ERROR_TYPE(JSONBadCast,              "Error casting JSON value");
+DECLARE_IMREAD_ERROR_TYPE(JSONIOError,              "Error in JSON I/O");
 
 DECLARE_IMREAD_ERROR_TYPE(HDF5IOError,              "Error in HDF5 I/O");
 DECLARE_IMREAD_ERROR_TYPE(PNGIOError,               "Error in PNG libpng I/O");
