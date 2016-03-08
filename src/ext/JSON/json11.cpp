@@ -504,6 +504,14 @@ detail::stringvec_t Json::keys() const {
     return out;
 }
 
+detail::stringvec_t Json::allkeys() {
+    detail::stringvec_t out;
+    for (auto const& key : keyset) {
+        out.push_back(key);
+    }
+    return out;
+}
+
 Json Json::values() const {
     Json out{};
     Array* ap = out.mkarray();
@@ -525,7 +533,9 @@ void Json::Bool::print(std::ostream& out) const {
 }
 
 void Json::Number::print(std::ostream& out) const {
-    if (prec >= 0) { out << std::setprecision(prec); }
+    if (prec > -1) {
+        out << std::setprecision(prec);
+    }
     out << value;
 }
 

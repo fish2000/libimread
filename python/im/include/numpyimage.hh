@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
@@ -732,11 +733,21 @@ namespace py {
             }
             options_map opts = pyim->writeopts();
             char const* out;
+            std::vector<std::string> keys;
             {
                 py::gil::release nogil;
                 out = opts.format().c_str();
+                keys = Json::allkeys();
             }
             // out = opts.format().c_str();
+            bool comma = false;
+            std::cerr << "KEYS: "
+            for (auto const& key : keys) {
+                if (comma) { std::cerr << ','; }
+                std::cerr << key;
+                comma = true;
+            }
+            std::cerr << std::endl;
             return Py_BuildValue("s", out);
         }
         

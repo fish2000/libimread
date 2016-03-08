@@ -362,6 +362,7 @@ class Json {
         Json  pop(std::string const& key, Json const& default_value);
         
         detail::stringvec_t keys() const;
+        static detail::stringvec_t allkeys(); /// return a copy of the keyset
         Json  values() const;     /// returned object is typed as an array
         
         /// traversal
