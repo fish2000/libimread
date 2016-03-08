@@ -4,7 +4,7 @@
 
 #include <Python.h>
 
-/// forward type declaration
+/// forward type declarations
 extern PyTypeObject NumpyImage_Type;
 #define NumpyImage_Check(op) (Py_TYPE(op) == &NumpyImage_Type)
 
