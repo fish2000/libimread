@@ -33,6 +33,51 @@ namespace py {
             #endif /// PY_MAJOR_VERSION
         }
         
+        Json convert(PyObject* value) {
+            if (PyDict_Check(value)) {
+                return py::options::parse(value);
+            } else if (PyTuple_Check(value) || PyList_Check(value)) {
+                return py::options::parse_list(value);
+            } else if (PyAnySet_Check(value)) {
+                return py::options::parse_set(value);
+            } else if (value == Py_None) {
+                return options_map::null;
+            } else if (PyBool_Check(value)) {
+                return PyObject_IsTrue(value) == 1;
+            } else if (PyLong_Check(value)) {
+                return PyLong_AsLong(value);
+            } else if (PyFloat_Check(value)) {
+                return PyFloat_AS_DOUBLE(value);
+        #if PY_MAJOR_VERSION < 3
+            } else if (PyInt_Check(value)) {
+                return static_cast<int>(PyInt_AS_LONG(value));
+        #elif PY_MAJOR_VERSION >= 3
+            } else if (PyBytes_Check(value)) {
+                std::size_t len;
+                const char* blob = py::options::get_blob(value, len);
+                return std::string(blob, len);
+        #endif /// PY_MAJOR_VERSION
+            } else if (PyMemoryView_Check(value)) {
+                Py_buffer* view = PyMemoryView_GET_BUFFER(value);
+                {
+                    py::gil::release nogil;
+                    py::buffer::source data = py::buffer::source(*view, false);
+                    return std::string(data.str());
+                }
+            } else if (NumpyImage_Check(value)) {
+                imread_raise(OptionsError, "[ERROR]",
+                    "Illegal NumpyImage data found");
+            }
+            
+            /// "else":
+            const char* c = py::options::get_cstring(value);
+            if (!c) {
+                imread_raise(OptionsError, "[ERROR]",
+                    "Misparsed map value");
+            }
+            return std::string(c);
+        }
+        
         options_list parse_list(PyObject* list) {
             options_list out;
             if (!list) { return out; }
@@ -41,66 +86,14 @@ namespace py {
             int idx = 0, len = PySequence_Fast_GET_SIZE(sequence);
             for (; idx < len; idx++) {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
-                if (PyDict_Check(item)) {
-                    try {
-                        out.append(py::options::parse(item));
-                    } catch (im::OptionsError& exc) {
-                        Py_DECREF(sequence);
-                        throw;
-                    }
-                } else if (PyTuple_Check(item) || PyList_Check(item)) {
-                    try {
-                        out.append(py::options::parse_list(item));
-                    } catch (im::OptionsError& exc) {
-                        Py_DECREF(sequence);
-                        throw;
-                    }
-                } else if (PyAnySet_Check(item)) {
-                    try {
-                        out.append(py::options::parse_set(item));
-                    } catch (im::OptionsError& exc) {
-                        Py_DECREF(sequence);
-                        throw;
-                    }
-                } else if (item == Py_None) {
-                    out.append(options_list::null);
-                } else if (PyBool_Check(item)) {
-                    out.append(PyObject_IsTrue(item) == 1);
-                } else if (PyLong_Check(item)) {
-                    out.append(PyLong_AsLong(item));
-                } else if (PyFloat_Check(item)) {
-                    out.append(PyFloat_AS_DOUBLE(item));
-            #if PY_MAJOR_VERSION < 3
-                } else if (PyInt_Check(item)) {
-                    out.append(static_cast<int>(PyInt_AS_LONG(item)));
-            #elif PY_MAJOR_VERSION >= 3
-                } else if (PyBytes_Check(item)) {
-                    std::size_t len;
-                    const char* blob = py::options::get_blob(item, len);
-                    out.append(std::string(blob, len));
-            #endif /// PY_MAJOR_VERSION
-                } else if (PyMemoryView_Check(item)) {
-                    Py_buffer* view = PyMemoryView_GET_BUFFER(item);
-                    {
-                        py::gil::release nogil;
-                        py::buffer::source data = py::buffer::source(*view, false);
-                        out.append(std::string(data.str()));
-                    }
-                } else if (NumpyImage_Check(item)) {
-                    Py_DECREF(sequence);
-                    imread_raise(OptionsError, "[ERROR]",
-                        FF("Illegal NumpyImage data found in item %i (of %i)",
-                            idx, len));
-                } else {
-                    const char* c = py::options::get_cstring(item);
-                    if (!c) {
-                        Py_DECREF(sequence);
-                        imread_raise(OptionsError, "[ERROR]",
-                            FF("Misparsed sequence item %i (of %i)",
-                                idx, len));
-                    }
-                    out.append(std::string(c));
+                Json ison(Json::null);
+                try {
+                    ison = std::move(py::options::convert(item));
+                } catch (im::OptionsError& exc) {
+                    // Py_DECREF(sequence);
+                    WTF("OptionsError raised:", exc.what());
                 }
+                out.append(ison);
             }
             Py_DECREF(sequence);
             return out;
@@ -110,89 +103,30 @@ namespace py {
             options_list out;
             if (!set) { return out; }
             if (!PyAnySet_Check(set)) { return out; }
-            
             PyObject* iterator = PyObject_GetIter(set);
             PyObject* item;
-            
             if (iterator == NULL) {
                 imread_raise(OptionsError, "[ERROR]",
                     "Set object not iterable");
             }
-            
             /// double-parens are to silence a warning
             while ((item = PyIter_Next(iterator))) {
-                if (PyDict_Check(item)) {
-                    try {
-                        out.append(py::options::parse(item));
-                    } catch (im::OptionsError& exc) {
-                        Py_DECREF(item);
-                        Py_DECREF(iterator);
-                        throw;
-                    }
-                } else if (PyTuple_Check(item) || PyList_Check(item)) {
-                    try {
-                        out.append(py::options::parse_list(item));
-                    } catch (im::OptionsError& exc) {
-                        Py_DECREF(item);
-                        Py_DECREF(iterator);
-                        throw;
-                    }
-                } else if (PyAnySet_Check(item)) {
-                    try {
-                        out.append(py::options::parse_set(item));
-                    } catch (im::OptionsError& exc) {
-                        Py_DECREF(item);
-                        Py_DECREF(iterator);
-                        throw;
-                    }
-                } else if (item == Py_None) {
-                    out.append(options_list::null);
-                } else if (PyBool_Check(item)) {
-                    out.append(PyObject_IsTrue(item) == 1);
-                } else if (PyLong_Check(item)) {
-                    out.append(PyLong_AsLong(item));
-                } else if (PyFloat_Check(item)) {
-                    out.append(PyFloat_AS_DOUBLE(item));
-            #if PY_MAJOR_VERSION < 3
-                } else if (PyInt_Check(item)) {
-                    out.append(static_cast<int>(PyInt_AS_LONG(item)));
-            #elif PY_MAJOR_VERSION >= 3
-                } else if (PyBytes_Check(item)) {
-                    std::size_t len;
-                    const char* blob = py::options::get_blob(item, len);
-                    out.append(std::string(blob, len));
-            #endif /// PY_MAJOR_VERSION
-                } else if (PyMemoryView_Check(item)) {
-                    Py_buffer* view = PyMemoryView_GET_BUFFER(item);
-                    {
-                        py::gil::release nogil;
-                        py::buffer::source data = py::buffer::source(*view, false);
-                        out.append(std::string(data.str()));
-                    }
-                } else if (NumpyImage_Check(item)) {
-                    Py_DECREF(item);
-                    Py_DECREF(iterator);
-                    imread_raise(OptionsError, "[ERROR]",
-                        "Illegal NumpyImage data found in set");
-                } else {
-                    const char* c = py::options::get_cstring(item);
-                    if (!c) {
-                        Py_DECREF(item);
-                        Py_DECREF(iterator);
-                        imread_raise(OptionsError, "[ERROR]",
-                            "Misparsed sequence item in set");
-                    }
-                    out.append(std::string(c));
+                Json ison(Json::null);
+                try {
+                    ison = std::move(py::options::convert(item));
+                } catch (im::OptionsError& exc) {
+                    // Py_DECREF(item);
+                    // Py_DECREF(iterator);
+                    WTF("OptionsError raised:", exc.what());
                 }
+                out.append(ison);
                 Py_DECREF(item);
             }
-            
             Py_DECREF(iterator);
             if (PyErr_Occurred()) {
                 imread_raise(OptionsError, "[ERROR]",
                     "Error occurred while iterating set");
             }
-            
             return out;
         }
         
@@ -205,49 +139,13 @@ namespace py {
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value)) {
                 std::string k = py::options::get_cstring(key);
-                if (PyDict_Check(value)) {
-                    out.set(k, py::options::parse(value));
-                } else if (PyTuple_Check(value) || PyList_Check(value)) {
-                    out.set(k, py::options::parse_list(value));
-                } else if (PyAnySet_Check(value)) {
-                    out.set(k, py::options::parse_set(value));
-                } else if (value == Py_None) {
-                    out.set(k, options_map::null);
-                } else if (PyBool_Check(value)) {
-                    out.set(k, PyObject_IsTrue(value) == 1);
-                } else if (PyLong_Check(value)) {
-                    out.set(k, PyLong_AsLong(value));
-                } else if (PyFloat_Check(value)) {
-                    out.set(k, PyFloat_AS_DOUBLE(value));
-            #if PY_MAJOR_VERSION < 3
-                } else if (PyInt_Check(value)) {
-                    out.set(k, static_cast<int>(PyInt_AS_LONG(value)));
-            #elif PY_MAJOR_VERSION >= 3
-                } else if (PyBytes_Check(value)) {
-                    std::size_t len;
-                    const char* blob = py::options::get_blob(value, len);
-                    out.set(k, std::string(blob, len));
-            #endif /// PY_MAJOR_VERSION
-                } else if (PyMemoryView_Check(value)) {
-                    Py_buffer* view = PyMemoryView_GET_BUFFER(value);
-                    {
-                        py::gil::release nogil;
-                        py::buffer::source data = py::buffer::source(*view, false);
-                        out.set(k, std::string(data.str()));
-                    }
-                } else if (NumpyImage_Check(value)) {
-                    imread_raise(OptionsError, "[ERROR]",
-                        FF("Illegal NumpyImage data found at key %s (index %i)",
-                            k.c_str(), pos));
-                } else {
-                    const char* c = py::options::get_cstring(value);
-                    if (!c) {
-                        imread_raise(OptionsError, "[ERROR]",
-                            FF("Misparsed map value at key %s (index %i)",
-                                k.c_str(), pos));
-                    }
-                    out.set(k, std::string(c));
+                Json v(Json::null);
+                try {
+                    v = std::move(py::options::convert(value));
+                } catch (im::OptionsError& exc) {
+                    WTF("OptionsError raised:", exc.what());
                 }
+                out.set(k, v);
             }
             return out;
         }

@@ -224,6 +224,12 @@ Json::~Json() {
     if (root != nullptr) { root->unref(); }
 }
 
+Json& Json::reset() {
+    root->unref();
+    (root = &Node::null)->refcnt++;
+    return *this;
+}
+
 Json::Object* Json::mkobject() {
     if (root->type() == Type::JSNULL) {
         root = new Object();
@@ -657,7 +663,7 @@ bool Json::Object::del(std::string const& k) {
         Node* np = it->second;
         np->unref();
         map.erase(&*kit);
-        keyset.erase(kit);
+        // keyset.erase(kit);
         return true;
     }
     return false;
@@ -670,7 +676,7 @@ Json::Node* Json::Object::pop(std::string const& k) {
     if (it != map.end()) {
         Node* np = it->second;
         map.erase(&*kit);
-        keyset.erase(kit);
+        // keyset.erase(kit);
         return np;
     }
     return nullptr;

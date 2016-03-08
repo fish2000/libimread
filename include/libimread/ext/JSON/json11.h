@@ -305,12 +305,13 @@ class Json {
         Json() { (root = &Node::null)->refcnt++; }
         Json(Json const& that);
         Json(Json&& that) noexcept;
-        Json(std::istream&, bool full=true); // parse
+        Json(std::istream&, bool full=true); /// parse
         virtual ~Json();
         
         /// assignment
-        Json &operator=(Json const&);
-        Json &operator=(Json&&) noexcept;
+        Json& operator=(Json const&);
+        Json& operator=(Json&&) noexcept;
+        Json& reset(); /// reassigns `null` to root node
         
         /// more constructors
         Json(int x)                 { (root = new Number(x))->refcnt++; }
@@ -329,6 +330,16 @@ class Json {
         explicit Json(uint16_t x)   { (root = new Number(x))->refcnt++; }
         explicit Json(int8_t x)     { (root = new Number(x))->refcnt++; }
         explicit Json(int16_t x)    { (root = new Number(x))->refcnt++; }
+        
+        /// implict constructor template -- matches anything with
+        /// a `to_json()` member function, which it calls on construction.
+        /// ... I stole this one weird trick from the other json11: 
+        ///     https://github.com/dropbox/json11/blob/master/json11.hpp#L92-L94
+        template <typename ConvertibleType,
+                  typename = decltype(&ConvertibleType::to_json)>
+        Json(ConvertibleType const& convertible)
+            :Json(convertible.to_json())
+            {}
         
         /// dynamic type info
         Array* mkarray();
@@ -400,7 +411,7 @@ class Json {
         }
         
         /// array operations
-        Json& operator<<(const Json&);
+        Json& operator<<(Json const&);
         Json&  insert(int idx, Json const&);
         Json&   erase(int idx);
         Json& replace(int idx, Json const&);
@@ -418,7 +429,7 @@ class Json {
         /// stringification
         std::string stringify() const { return format(); }
         std::string format() const;
-        friend std::ostream &operator<<(std::ostream&, const Json&);
+        friend std::ostream &operator<<(std::ostream&, Json const&);
         friend std::istream &operator>>(std::istream&, Json&);
         
         /// hashing
@@ -435,6 +446,8 @@ class Json {
         /// input parsing
         static Json null, undefined;
         static Json parse(std::string const&);
+        static Json array() { return new Array(); }    // returns empty array
+        static Json object() { return new Object(); }  // returns empty object
         
         /// file I/O: dump and load
         Json& dump(std::string const& dest, bool overwrite = false);
