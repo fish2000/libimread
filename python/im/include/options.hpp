@@ -20,7 +20,7 @@ namespace py {
         options_map parse(PyObject* dict);
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject *kwargs,
-                       options_map const& opts);
+                       options_map& opts);
     }
     
 }

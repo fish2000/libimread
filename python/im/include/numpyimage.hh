@@ -761,44 +761,6 @@ namespace py {
             return py::options::dump(self, args, kwargs, opts);
         }
         
-        /// NumpyImage.write_opts file-dumper
-        // template <typename ImageType = HybridArray,
-        //           typename PythonImageType = PythonImageBase<ImageType>>
-        // PyObject*    dump_write_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
-        //     PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-        //     PyObject* py_overwrite = NULL;
-        //     char const* keywords[] = { "destination", "overwrite", NULL };
-        //     char const* destination = NULL;
-        //     bool overwrite = false;
-        //
-        //     if (!PyArg_ParseTupleAndKeywords(
-        //         args, kwargs, "s|O", const_cast<char**>(keywords),
-        //         &destination,
-        //         &py_overwrite))
-        //             { return NULL; }
-        //     if (py_overwrite) {
-        //         overwrite = PyObject_IsTrue(py_overwrite);
-        //     }
-        //
-        //     try {
-        //         options_map opts = pyim->writeopts();
-        //     } catch (im::OptionsError& exc) {
-        //         /// there was something weird in the `options` dict
-        //         PyErr_SetString(PyExc_AttributeError, exc.what());
-        //         return NULL;
-        //     }
-        //
-        //     try {
-        //         py::gil::release nogil;
-        //         opts.dump(destination, overwrite);
-        //     } catch (im::JSONIOError& exc) {
-        //         PyErr_SetString(PyExc_IOError, exc.what());
-        //         return NULL;
-        //     }
-        //
-        //     return Py_BuildValue("O", Py_True);
-        // }
-        
     } /* namespace image */
         
 } /* namespace py */
