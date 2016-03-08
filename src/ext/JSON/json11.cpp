@@ -28,7 +28,7 @@ Json Json::undefined(&Node::undefined);
 Json::Bool Json::Bool::T(true);
 Json::Bool Json::Bool::F(false);
 detail::stringset_t Json::keyset;
-int Json::indent;
+int Json::indent = 4;
 int Json::level;
 
 namespace tc {
