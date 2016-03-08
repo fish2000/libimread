@@ -98,6 +98,7 @@ namespace detail {
                     break;
                 default:
                     out << c;
+                    break;
             }
         }
         out << '"';
@@ -887,9 +888,9 @@ out:
 }
 
 std::string Json::format() const {
-    std::ostringstream is("");
-    is << *this;
-    return is.str();
+    std::ostringstream out;
+    out << *this;
+    return out.str();
 }
 
 Json Json::parse(std::string const& str) {
