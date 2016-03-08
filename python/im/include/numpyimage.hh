@@ -741,7 +741,7 @@ namespace py {
             }
             // out = opts.format().c_str();
             bool comma = false;
-            std::cerr << "KEYS: "
+            std::cerr << "KEYS: ";
             for (auto const& key : keys) {
                 if (comma) { std::cerr << ','; }
                 std::cerr << key;

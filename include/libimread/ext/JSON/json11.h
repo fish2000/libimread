@@ -16,7 +16,7 @@
 #include <map>
 #include <set>
 #include <string>
-#include <iostream>
+#include <ostream>
 #include <type_traits>
 #include <initializer_list>
 
