@@ -28,6 +28,8 @@ namespace py {
         
         using im::byte;
         using im::options_map;
+        using im::Image;
+        using im::ImageFormat;
         using im::HalideNumpyImage;
         using im::HybridFactory;
         

@@ -5,7 +5,7 @@ PyTypeObject HybridImage_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                  /* ob_size */
     "im.HybridImage",                                                   /* tp_name */
-    sizeof(HybridImage),                                                /* tp_basicsize */
+    sizeof(HybridImageModel),                                           /* tp_basicsize */
     0,                                                                  /* tp_itemsize */
     (destructor)py::image::dealloc<HalideNumpyImage>,                   /* tp_dealloc */
     0,                                                                  /* tp_print */
