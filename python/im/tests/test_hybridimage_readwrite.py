@@ -8,7 +8,7 @@ import json
 
 class HybridImageReadWriteTests(BaseCase):
     
-    def test_numpyimage_check(self):
+    def test_hybridimage_check(self):
         # ''' Re-using `test_load_image_jpg_write_blob_jpg` here '''
         for image_path in self.jpgs:
             image = im.HybridImage(image_path)

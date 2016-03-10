@@ -1,5 +1,5 @@
 # Author: Alexander Böhn
-# © 2011.10 -- GPL, Motherfuckers
+# © 2015.10 -- GPL, Motherfuckers
 # FindHalide.cmake
 #  -- shamelessly based on FindJeMalloc.cmake
 
