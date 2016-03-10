@@ -1,5 +1,5 @@
 
 from im import (
-    NumpyImage,
+    HybridImage,
     structcode_parse,
     numpyimage_check)

@@ -5,7 +5,7 @@
 #include <memory>
 #include <Python.h>
 
-namespace im {
+namespace py {
     
     namespace detail {
         

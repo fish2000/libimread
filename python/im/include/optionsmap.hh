@@ -100,7 +100,7 @@ namespace py {
         }
         
         /// __str__ implementaton
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* str(PyObject* self) {
             PythonOptionsType* pyopts = reinterpret_cast<PythonOptionsType*>(self);

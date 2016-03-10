@@ -64,9 +64,9 @@ namespace py {
                     py::buffer::source data = py::buffer::source(*view, false);
                     return std::string(data.str());
                 }
-            } else if (NumpyImage_Check(value)) {
+            } else if (HybridImage_Check(value)) {
                 imread_raise(OptionsError, "[ERROR]",
-                    "Illegal NumpyImage data found");
+                    "Illegal HybridImage data found");
             }
             
             /// "else":

@@ -2,7 +2,7 @@
 #define NO_IMPORT_ARRAY
 
 #include <cstring>
-#include "numpy.hh"
+#include "hybrid.hh"
 #include "structcode.hpp"
 #include "typecode.hpp"
 
@@ -106,124 +106,124 @@ namespace im {
         }
     }
     
-    HybridArray::HybridArray()
+    HalideNumpyImage::HalideNumpyImage()
         :HalBase(), PythonBufferImage(), MetaImage()
         ,dtype_(NPY_UINT8)
         {}
     
-    HybridArray::HybridArray(NPY_TYPES d, const buffer_t* b, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, const buffer_t* b, const std::string& name)
         :HalBase(detail::for_dtype(d), b, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HybridArray::HybridArray(NPY_TYPES d, int x, int y, int z, int w, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, const std::string& name)
         :HalBase(detail::for_dtype(d), x, y, z, w, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HybridArray::HybridArray(NPY_TYPES d, int x, int y, int z, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, const std::string& name)
         :HalBase(detail::for_dtype(d), x, y, z, 0, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HybridArray::HybridArray(NPY_TYPES d, int x, int y, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, const std::string& name)
         :HalBase(detail::for_dtype(d), x, y, 0, 0, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HybridArray::HybridArray(NPY_TYPES d, int x, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, const std::string& name)
         :HalBase(detail::for_dtype(d), x, 0, 0, 0, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HybridArray::~HybridArray() {}
+    HalideNumpyImage::~HalideNumpyImage() {}
     
-    PyObject* HybridArray::metadataPyObject() {
+    PyObject* HalideNumpyImage::metadataPyObject() {
         const std::string& s = MetaImage::get_meta();
         if (s != "") { return PyBytes_FromString(s.c_str()); }
         Py_RETURN_NONE;
     }
     
     /// This returns the same type of data as buffer_t.host
-    uint8_t* HybridArray::data(int s) const {
+    uint8_t* HalideNumpyImage::data(int s) const {
         return (uint8_t*)HalBase::buffer.host_ptr();
     }
     
-    Halide::Type HybridArray::type() const {
+    Halide::Type HalideNumpyImage::type() const {
         return HalBase::buffer.type();
     }
     
-    buffer_t* HybridArray::buffer_ptr() const {
+    buffer_t* HalideNumpyImage::buffer_ptr() const {
         return HalBase::raw_buffer();
     }
     
-    int HybridArray::nbits() const {
+    int HalideNumpyImage::nbits() const {
         return type().bits();
     }
     
-    int HybridArray::nbytes() const {
+    int HalideNumpyImage::nbytes() const {
         const int bits = nbits();
         return (bits / 8) + bool(bits % 8);
     }
     
-    int HybridArray::ndims() const {
+    int HalideNumpyImage::ndims() const {
         return HalBase::dimensions();
     }
     
-    int HybridArray::dim(int d) const {
+    int HalideNumpyImage::dim(int d) const {
         return HalBase::extent(d);
     }
     
-    int HybridArray::stride(int s) const {
+    int HalideNumpyImage::stride(int s) const {
         return HalBase::stride(s);
     }
     
-    off_t HybridArray::rowp_stride() const {
+    off_t HalideNumpyImage::rowp_stride() const {
         return HalBase::channels() == 1 ? 0 : off_t(HalBase::stride(1));
     }
     
-    void* HybridArray::rowp(int r) const {
+    void* HalideNumpyImage::rowp(int r) const {
         uint8_t* host = data();
         host += off_t(r * rowp_stride());
         return static_cast<void*>(host);
     }
     
     /// extent, stride, min
-    NPY_TYPES HybridArray::dtype()  { return dtype_; }
-    int32_t* HybridArray::dims()    { return HalBase::raw_buffer()->extent; }
-    int32_t* HybridArray::strides() { return HalBase::raw_buffer()->stride; }
-    int32_t* HybridArray::offsets() { return HalBase::raw_buffer()->min; }
+    NPY_TYPES HalideNumpyImage::dtype()  { return dtype_; }
+    int32_t* HalideNumpyImage::dims()    { return HalBase::raw_buffer()->extent; }
+    int32_t* HalideNumpyImage::strides() { return HalBase::raw_buffer()->stride; }
+    int32_t* HalideNumpyImage::offsets() { return HalBase::raw_buffer()->min; }
     
 #define xWIDTH d1
 #define xHEIGHT d0
 #define xDEPTH d2
     
-    ArrayFactory::ArrayFactory()
+    HybridFactory::HybridFactory()
         :nm("")
         {}
     
-    ArrayFactory::ArrayFactory(const std::string& n)
+    HybridFactory::HybridFactory(const std::string& n)
         :nm(n)
         {}
     
-    ArrayFactory::~ArrayFactory() {}
+    HybridFactory::~HybridFactory() {}
     
-    std::string& ArrayFactory::name() { return nm; }
-    void ArrayFactory::name(const std::string& n) { nm = n; }
+    std::string& HybridFactory::name() { return nm; }
+    void HybridFactory::name(const std::string& n) { nm = n; }
     
-    std::unique_ptr<Image> ArrayFactory::create(int nbits,
+    std::unique_ptr<Image> HybridFactory::create(int nbits,
                                                 int xHEIGHT, int xWIDTH, int xDEPTH,
                                                 int d3, int d4) {
         return std::unique_ptr<Image>(
-            new HybridArray(
+            new HalideNumpyImage(
                 detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
     }
     
-    std::shared_ptr<Image> ArrayFactory::shared(int nbits,
+    std::shared_ptr<Image> HybridFactory::shared(int nbits,
                                                 int xHEIGHT, int xWIDTH, int xDEPTH,
                                                 int d3, int d4) {
         return std::shared_ptr<Image>(
-            new HybridArray(
+            new HalideNumpyImage(
                 detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
     }
     

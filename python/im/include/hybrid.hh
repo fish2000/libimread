@@ -1,8 +1,8 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LIBIMREAD_PYTHON_NUMPY_HH_
-#define LIBIMREAD_PYTHON_NUMPY_HH_
+#ifndef LIBIMREAD_PYTHON_HYBRID_HH_
+#define LIBIMREAD_PYTHON_HYBRID_HH_
 
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
@@ -37,14 +37,14 @@ namespace im {
     using HalBase = Halide::ImageBase;
     using MetaImage = ImageWithMetadata;
     
-    class HybridArray : public HalBase, public PythonBufferImage, public MetaImage {
+    class HalideNumpyImage : public HalBase, public PythonBufferImage, public MetaImage {
         public:
-            HybridArray();
-            HybridArray(NPY_TYPES d, const buffer_t* b, const std::string& name="");
-            HybridArray(NPY_TYPES d, int x, int y, int z, int w, const std::string& name="");
-            HybridArray(NPY_TYPES d, int x, int y, int z, const std::string& name="");
-            HybridArray(NPY_TYPES d, int x, int y, const std::string& name="");
-            HybridArray(NPY_TYPES d, int x, const std::string& name="");
+            HalideNumpyImage();
+            HalideNumpyImage(NPY_TYPES d, const buffer_t* b, const std::string& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, const std::string& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, int y, int z, const std::string& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, int y, const std::string& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, const std::string& name="");
             
             using HalBase::dimensions;
             using HalBase::extent;
@@ -53,7 +53,7 @@ namespace im {
             using HalBase::buffer;
             using HalBase::raw_buffer;
             
-            virtual ~HybridArray();
+            virtual ~HalideNumpyImage();
             PyObject* metadataPyObject();
             
             /// This returns the same type of data as buffer_t.host
@@ -83,18 +83,18 @@ namespace im {
 #define xHEIGHT d0
 #define xDEPTH d2
     
-    class ArrayFactory : public ImageFactory {
+    class HybridFactory : public ImageFactory {
         
         private:
             std::string nm;
         
         public:
-            using image_t = HybridArray;
+            using image_t = HalideNumpyImage;
             
-            ArrayFactory();
-            ArrayFactory(const std::string& n);
+            HybridFactory();
+            HybridFactory(const std::string& n);
             
-            virtual ~ArrayFactory();
+            virtual ~HybridFactory();
             std::string& name();
             void name(const std::string& n);
         
@@ -114,4 +114,4 @@ namespace im {
 
 }
 
-#endif /// LIBIMREAD_PYTHON_NUMPY_HH_
+#endif /// LIBIMREAD_PYTHON_HYBRID_HH_

@@ -125,8 +125,8 @@ other_flags = ['-Qunused-arguments']
 extensions = {
     'im': [
         "im/src/detail.cpp",
-        "im/src/numpy.cpp",
-        "im/src/numpyimage.cpp",
+        "im/src/hybrid.cpp",
+        "im/src/hybridimage.cpp",
         "im/src/options.cpp",
         "im/src/pybuffer.cpp",
         "im/src/structcode.cpp",

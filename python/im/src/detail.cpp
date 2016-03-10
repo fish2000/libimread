@@ -5,7 +5,7 @@
 #include "structcode.hpp"
 #include "gil.hh"
 
-namespace im {
+namespace py {
     
     namespace detail {
         

@@ -5,7 +5,7 @@
 #include <Python.h>
 
 /// forward type declarations
-extern PyTypeObject NumpyImage_Type;
-#define NumpyImage_Check(op) (Py_TYPE(op) == &NumpyImage_Type)
+extern PyTypeObject HybridImage_Type;
+#define HybridImage_Check(op) (Py_TYPE(op) == &HybridImage_Type)
 
 #endif /// LIBIMREAD_PYTHON_IM_INCLUDE_CHECK_HH_

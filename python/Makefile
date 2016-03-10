@@ -1,7 +1,7 @@
 
 clean: clean-pyc clean-so
 
-distclean: clean-all-pyc clean-so clean-build-artifacts
+distclean: clean-all-pyc clean-pycache clean-so clean-build-artifacts
 
 ext: buildext test
 
@@ -14,6 +14,9 @@ clean-pyc:
 
 clean-all-pyc:
 	find . -name \*.pyc -print -delete
+
+clean-pycache:
+	find . -path \*__pycache__\* -print -delete
 
 clean-so:
 	rm -f im/*.so

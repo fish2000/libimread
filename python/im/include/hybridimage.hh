@@ -1,6 +1,6 @@
 
-#ifndef LIBIMREAD_PYTHON_IM_INCLUDE_NUMPYIMAGE_HH_
-#define LIBIMREAD_PYTHON_IM_INCLUDE_NUMPYIMAGE_HH_
+#ifndef LIBIMREAD_PYTHON_IM_INCLUDE_HYBRIDIMAGE_HH_
+#define LIBIMREAD_PYTHON_IM_INCLUDE_HYBRIDIMAGE_HH_
 
 #include <memory>
 #include <string>
@@ -13,7 +13,7 @@
 #include "detail.hh"
 #include "options.hpp"
 #include "pybuffer.hpp"
-#include "numpy.hh"
+#include "hybrid.hh"
 
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -28,8 +28,8 @@ namespace py {
         
         using im::byte;
         using im::options_map;
-        using im::HybridArray;
-        using im::ArrayFactory;
+        using im::HalideNumpyImage;
+        using im::HybridFactory;
         
         using filesystem::path;
         using filesystem::NamedTemporaryFile;
@@ -58,10 +58,11 @@ namespace py {
             }
         };
         
-        using NumpyImage = PythonImageBase<HybridArray>;
+        /// “Models” are python wrapper types
+        using HybridImageModel = PythonImageBase<HalideNumpyImage>;
         
         /// ALLOCATE / __new__ implementation
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
             PythonImageType* self = reinterpret_cast<PythonImageType*>(type->tp_alloc(type, 0));
@@ -75,20 +76,20 @@ namespace py {
             return reinterpret_cast<PyObject*>(self); /// all is well, return self
         }
         
-        template <typename ImageType = HybridArray>
+        template <typename ImageType = HalideNumpyImage>
         static const std::unique_ptr<ImageType> unique_null_t = std::unique_ptr<ImageType>(nullptr);
         #define UNIQUE_NULL(ImageType) std::unique_ptr<ImageType>(nullptr);
         
         /// Load an instance of the templated image type
         /// from a file source, with specified reading options
-        template <typename ImageType = HybridArray,
-                  typename FactoryType = ArrayFactory>
+        template <typename ImageType = HalideNumpyImage,
+                  typename FactoryType = HybridFactory>
         std::unique_ptr<ImageType> load(char const* source,
                                         options_map const& opts) {
             FactoryType factory;
-            std::unique_ptr<im::ImageFormat> format;
+            std::unique_ptr<ImageFormat> format;
             std::unique_ptr<im::FileSource> input;
-            std::unique_ptr<im::Image> output;
+            std::unique_ptr<Image> output;
             bool exists = false,
                  can_read = false;
             options_map default_opts;
@@ -128,21 +129,21 @@ namespace py {
                 py::gil::release nogil;
                 default_opts = format->add_options(opts);
                 output = format->read(input.get(), &factory, default_opts);
-                return im::detail::dynamic_cast_unique<ImageType>(
+                return py::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             }
         }
         
         /// Load an instance of the templated image type from a Py_buffer
         /// describing an in-memory source, with specified reading options
-        template <typename ImageType = HybridArray,
-                  typename FactoryType = ArrayFactory>
+        template <typename ImageType = HalideNumpyImage,
+                  typename FactoryType = HybridFactory>
         std::unique_ptr<ImageType> loadblob(Py_buffer const& view,
                                             options_map const& opts) {
             FactoryType factory;
-            std::unique_ptr<im::ImageFormat> format;
+            std::unique_ptr<ImageFormat> format;
             std::unique_ptr<py::buffer::source> input;
-            std::unique_ptr<im::Image> output;
+            std::unique_ptr<Image> output;
             options_map default_opts;
             bool can_read = false;
             
@@ -170,14 +171,14 @@ namespace py {
                 py::gil::release nogil;
                 default_opts = format->add_options(opts);
                 output = format->read(input.get(), &factory, default_opts);
-                return im::detail::dynamic_cast_unique<ImageType>(
+                return py::detail::dynamic_cast_unique<ImageType>(
                     std::move(output));
             }
         }
         
         /// __init__ implementation
-        template <typename ImageType = HybridArray,
-                  typename FactoryType = ArrayFactory,
+        template <typename ImageType = HalideNumpyImage,
+                  typename FactoryType = HybridFactory,
                   typename PythonImageType = PythonImageBase<ImageType>>
         int init(PyObject* self, PyObject* args, PyObject* kwargs) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -248,7 +249,7 @@ namespace py {
         }
         
         /// __repr__ implementation
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* repr(PyObject* self) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -263,7 +264,7 @@ namespace py {
         }
         
         /// __str__ implementaton -- return bytes of image
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* str(PyObject* self) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -278,7 +279,7 @@ namespace py {
         }
         
         /// __hash__ implementation
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         long hash(PyObject* self) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -292,7 +293,7 @@ namespace py {
         }
         
         /// __len__ implementation
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         Py_ssize_t length(PyObject* self) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -304,7 +305,7 @@ namespace py {
             return out;
         }
         
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* atindex(PyObject* self, Py_ssize_t idx) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -354,7 +355,7 @@ namespace py {
             return Py_BuildValue("I", op);
         }
         
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         int getbuffer(PyObject* self, Py_buffer* view, int flags) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -368,7 +369,7 @@ namespace py {
             return out;
         }
         
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         void releasebuffer(PyObject* self, Py_buffer* view) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -380,7 +381,7 @@ namespace py {
         }
         
         /// DEALLOCATE
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         void dealloc(PyObject* self) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -388,10 +389,10 @@ namespace py {
             self->ob_type->tp_free(self);
         }
         
-        template <typename ImageType = HybridArray>
+        template <typename ImageType = HalideNumpyImage>
         bool save(ImageType& input, char const* destination,
                                     options_map const& opts) {
-            std::unique_ptr<im::ImageFormat> format;
+            std::unique_ptr<ImageFormat> format;
             options_map default_opts;
             bool exists = false,
                  can_write = false,
@@ -439,7 +440,7 @@ namespace py {
             return true;
         }
         
-        template <typename ImageType = HybridArray,
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -555,16 +556,16 @@ namespace py {
             return PyString_FromString(dststr.c_str());
         }
         
-        /// NumpyImage.dtype getter
-        template <typename ImageType = HybridArray,
+        /// HybridImage.dtype getter
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_dtype(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             return Py_BuildValue("O", pyim->dtype);
         }
         
-        /// NumpyImage.shape getter
-        template <typename ImageType = HybridArray,
+        /// HybridImage.shape getter
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_shape(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -596,8 +597,8 @@ namespace py {
             return Py_BuildValue("");
         }
         
-        /// NumpyImage.strides getter
-        template <typename ImageType = HybridArray,
+        /// HybridImage.strides getter
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_strides(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -634,8 +635,8 @@ namespace py {
             static char const* WRITE = "WRITE";
         }
         
-        /// NumpyImage.read_opts getter
-        template <typename ImageType = HybridArray,
+        /// HybridImage.read_opts getter
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_opts(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -644,8 +645,8 @@ namespace py {
             return Py_BuildValue("O", target ? target : Py_None);
         }
         
-        /// NumpyImage.read_opts setter
-        template <typename ImageType = HybridArray,
+        /// HybridImage.read_opts setter
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         int          set_opts(PyObject* self, PyObject* value, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -666,8 +667,8 @@ namespace py {
             return 0;
         }
         
-        /// NumpyImage.read_opts formatter
-        template <typename ImageType = HybridArray,
+        /// HybridImage.read_opts formatter
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    format_read_opts(PyObject* self, PyObject*) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -689,8 +690,8 @@ namespace py {
             return Py_BuildValue("s", out.c_str());
         }
         
-        /// NumpyImage.read_opts file-dumper
-        template <typename ImageType = HybridArray,
+        /// HybridImage.read_opts file-dumper
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    dump_read_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -704,8 +705,8 @@ namespace py {
             return py::options::dump(self, args, kwargs, opts);
         }
         
-        /// NumpyImage.write_opts formatter
-        template <typename ImageType = HybridArray,
+        /// HybridImage.write_opts formatter
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    format_write_opts(PyObject* self, PyObject*) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -727,8 +728,8 @@ namespace py {
             return Py_BuildValue("s", out.c_str());
         }
         
-        /// NumpyImage.read_opts file-dumper
-        template <typename ImageType = HybridArray,
+        /// HybridImage.read_opts file-dumper
+        template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    dump_write_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
@@ -746,96 +747,96 @@ namespace py {
         
 } /* namespace py */
 
-using im::HybridArray;
-using im::ArrayFactory;
-using py::image::NumpyImage;
+using im::HalideNumpyImage;
+using im::HybridFactory;
+using py::image::HybridImageModel;
 
-static PyBufferProcs NumpyImage_Buffer3000Methods = {
+static PyBufferProcs HybridImage_Buffer3000Methods = {
     0, /* (readbufferproc) */
     0, /* (writebufferproc) */
     0, /* (segcountproc) */
     0, /* (charbufferproc) */
-    (getbufferproc)py::image::getbuffer<HybridArray>,
-    (releasebufferproc)py::image::releasebuffer<HybridArray>,
+    (getbufferproc)py::image::getbuffer<HalideNumpyImage>,
+    (releasebufferproc)py::image::releasebuffer<HalideNumpyImage>,
 };
 
-static PySequenceMethods NumpyImage_SequenceMethods = {
-    (lenfunc)py::image::length<HybridArray>,        /* sq_length */
-    0,                                              /* sq_concat */
-    0,                                              /* sq_repeat */
-    (ssizeargfunc)py::image::atindex<HybridArray>,  /* sq_item */
-    0,                                              /* sq_slice */
-    0,                                              /* sq_ass_item HAHAHAHA */
-    0,                                              /* sq_ass_slice HEHEHE ASS <snort> HA */
-    0                                               /* sq_contains */
+static PySequenceMethods HybridImage_SequenceMethods = {
+    (lenfunc)py::image::length<HalideNumpyImage>,       /* sq_length */
+    0,                                                  /* sq_concat */
+    0,                                                  /* sq_repeat */
+    (ssizeargfunc)py::image::atindex<HalideNumpyImage>, /* sq_item */
+    0,                                                  /* sq_slice */
+    0,                                                  /* sq_ass_item HAHAHAHA */
+    0,                                                  /* sq_ass_slice HEHEHE ASS <snort> HA */
+    0                                                   /* sq_contains */
 };
 
-static PyGetSetDef NumpyImage_getset[] = {
+static PyGetSetDef HybridImage_getset[] = {
     {
         (char*)"dtype",
-            (getter)py::image::get_dtype<HybridArray>,
+            (getter)py::image::get_dtype<HalideNumpyImage>,
             nullptr,
-            (char*)"NumpyImage dtype",
+            (char*)"HybridImage dtype",
             nullptr },
     {
         (char*)"shape",
-            (getter)py::image::get_shape<HybridArray>,
+            (getter)py::image::get_shape<HalideNumpyImage>,
             nullptr,
-            (char*)"NumpyImage shape tuple",
+            (char*)"HybridImage shape tuple",
             nullptr },
     {
         (char*)"strides",
-            (getter)py::image::get_strides<HybridArray>,
+            (getter)py::image::get_strides<HalideNumpyImage>,
             nullptr,
-            (char*)"NumpyImage strides tuple",
+            (char*)"HybridImage strides tuple",
             nullptr },
     {
         (char*)"read_opts",
-            (getter)py::image::get_opts<HybridArray>,
-            (setter)py::image::set_opts<HybridArray>,
+            (getter)py::image::get_opts<HalideNumpyImage>,
+            (setter)py::image::set_opts<HalideNumpyImage>,
             (char*)"Read options dict",
             (void*)py::image::closures::READ },
     {
         (char*)"write_opts",
-            (getter)py::image::get_opts<HybridArray>,
-            (setter)py::image::set_opts<HybridArray>,
+            (getter)py::image::get_opts<HalideNumpyImage>,
+            (setter)py::image::set_opts<HalideNumpyImage>,
             (char*)"Write options dict",
             (void*)py::image::closures::WRITE },
     { nullptr, nullptr, nullptr, nullptr, nullptr }
 };
 
-static PyMethodDef NumpyImage_methods[] = {
+static PyMethodDef HybridImage_methods[] = {
     {
         "write",
-            (PyCFunction)py::image::write<HybridArray>,
+            (PyCFunction)py::image::write<HalideNumpyImage>,
             METH_VARARGS | METH_KEYWORDS,
             "Format and write image data to file or blob" },
     {
         "format_read_opts",
-            (PyCFunction)py::image::format_read_opts<HybridArray>,
+            (PyCFunction)py::image::format_read_opts<HalideNumpyImage>,
             METH_NOARGS,
             "Get the read options as a formatted JSON string" },
     {
         "format_write_opts",
-            (PyCFunction)py::image::format_write_opts<HybridArray>,
+            (PyCFunction)py::image::format_write_opts<HalideNumpyImage>,
             METH_NOARGS,
             "Get the write options as a formatted JSON string" },
     {
         "dump_read_opts",
-            (PyCFunction)py::image::dump_read_opts<HybridArray>,
+            (PyCFunction)py::image::dump_read_opts<HalideNumpyImage>,
             METH_VARARGS | METH_KEYWORDS,
             "Dump the read options to a JSON file" },
     {
         "dump_write_opts",
-            (PyCFunction)py::image::dump_write_opts<HybridArray>,
+            (PyCFunction)py::image::dump_write_opts<HalideNumpyImage>,
             METH_VARARGS | METH_KEYWORDS,
             "Dump the write options to a JSON file" },
     { nullptr, nullptr, 0, nullptr }
 };
 
-static Py_ssize_t NumpyImage_TypeFlags = Py_TPFLAGS_DEFAULT         | 
-                                         Py_TPFLAGS_BASETYPE        | 
-                                         Py_TPFLAGS_HAVE_NEWBUFFER;
+static Py_ssize_t HybridImage_TypeFlags = Py_TPFLAGS_DEFAULT         | 
+                                          Py_TPFLAGS_BASETYPE        | 
+                                          Py_TPFLAGS_HAVE_NEWBUFFER;
 namespace py {
     
     namespace functions {
@@ -845,7 +846,7 @@ namespace py {
     }
 }
 
-static PyMethodDef NumpyImage_module_functions[] = {
+static PyMethodDef HybridImage_module_functions[] = {
     {
         "structcode_parse",
             (PyCFunction)py::functions::structcode_parse,
@@ -855,8 +856,8 @@ static PyMethodDef NumpyImage_module_functions[] = {
         "numpyimage_check",
             (PyCFunction)py::functions::numpyimage_check,
             METH_VARARGS,
-            "Boolean function to test for NumpyImage instances" },
+            "Boolean function to test for HybridImage instances" },
     { nullptr, nullptr, 0, nullptr }
 };
 
-#endif /// LIBIMREAD_PYTHON_IM_INCLUDE_NUMPYIMAGE_HH_
+#endif /// LIBIMREAD_PYTHON_IM_INCLUDE_HYBRIDIMAGE_HH_
