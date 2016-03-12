@@ -157,7 +157,8 @@ PyTypeObject ImageModel_Type = {
 PyTypeObject ImageBufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                      /* ob_size */
-    "im.Image.ImageBuffer",                                                 /* tp_name */
+    // "im.Image.ImageBuffer",                                              /* tp_name */
+    "im.ImageBuffer",                                                       /* tp_name */
     sizeof(ImageBufferModel),                                               /* tp_basicsize */
     0,                                                                      /* tp_itemsize */
     (destructor)py::ext::buffer::dealloc<buffer_t, ImageBufferModel>,       /* tp_dealloc */
@@ -274,11 +275,15 @@ PyMODINIT_FUNC initim(void) {
         (PyObject*)&BufferModel_Type);
     
     /// Add the ImageBufferModel type object to im.Image
+    // Py_INCREF(&ImageBufferModel_Type);
+    // PyObject_SetAttrString((PyObject*)&ImageModel_Type,
+    //     "ImageBuffer",
+    //     (PyObject*)&ImageBufferModel_Type);
+    // PyType_Modified((PyTypeObject*)&ImageModel_Type);
     Py_INCREF(&ImageBufferModel_Type);
-    PyObject_SetAttrString((PyObject*)&ImageModel_Type,
+    PyModule_AddObject(module,
         "ImageBuffer",
         (PyObject*)&ImageBufferModel_Type);
-    PyType_Modified((PyTypeObject*)&ImageModel_Type);
     
     /// Add the ImageModel type object to the module
     Py_INCREF(&ImageModel_Type);
