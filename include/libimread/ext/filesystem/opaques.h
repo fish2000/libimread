@@ -22,38 +22,36 @@ namespace filesystem {
     class path;
     
     namespace detail {
-        
         /// Deleter structures to close directory and file handles
-        template <typename T, typename U>
-        static constexpr bool is_same_v = std::is_same<T, U>::value;
-        
         template <typename HandleType>
         struct handle_helper;
         
         template <>
-        struct handle_helper<DIR>  { using type = std::add_pointer_t<DIR>; };
+        struct handle_helper<DIR>  {
+            using type = std::add_pointer_t<DIR>;
+            static void close(type handle) { ::closedir(handle); }
+        };
         
         template <>
-        struct handle_helper<FILE> { using type = std::add_pointer_t<FILE>; };
+        struct handle_helper<FILE> {
+            using type = std::add_pointer_t<FILE>;
+            static void close(type handle) { std::fclose(handle); }
+        };
         
         template <typename HandleType>
-        using handle = typename handle_helper<HandleType>::type;
+        using handle_t = typename handle_helper<HandleType>::type;
         
         template <typename T>
         struct closer {
-            using handle_t = std::decay_t<T>;
+            using opaque_t = std::decay_t<T>;
             constexpr closer() noexcept = default;
             template <typename U> closer(closer<U> const&) noexcept {};
-            template <typename X = typename std::enable_if<is_same_v<T, DIR>>>
-            void operator()(handle<DIR>  handle)    { ::closedir(handle);  }
-            template <typename X = typename std::enable_if<is_same_v<T, FILE>>>
-            void operator()(handle<FILE> handle)    { std::fclose(handle); }
+            void operator()(handle_t<T> handle) { handle_helper<T>::close(handle); }
         };
         
         template <typename T>
-        using handle_ptr = std::unique_ptr<typename closer<T>::handle_t,
+        using handle_ptr = std::unique_ptr<typename closer<T>::opaque_t,
                                                     closer<T>>;
-        
     }
     
     /// RAII-ified simplifications, for opening directory and file handles

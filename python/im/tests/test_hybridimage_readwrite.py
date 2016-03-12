@@ -13,10 +13,10 @@ class HybridImageReadWriteTests(BaseCase):
         for image_path in self.jpgs:
             image = im.HybridImage(image_path)
             self.assertIsNotNone(image)
-            self.assertTrue(im.numpyimage_check(image))
+            self.assertTrue(im.hybridimage_check(image))
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
-            self.assertFalse(im.numpyimage_check(data))
+            self.assertFalse(im.hybridimage_check(data))
     
     def test_load_image_jpg_write_blob_jpg(self):
         ''' Load JPG files, write JPG blobs '''

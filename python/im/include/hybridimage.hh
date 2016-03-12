@@ -8,6 +8,7 @@
 #include <Python.h>
 #include <structmember.h>
 
+#include "private/buffer_t.h"
 #include "check.hh"
 #include "gil.hh"
 #include "detail.hh"
@@ -836,30 +837,18 @@ static PyMethodDef HybridImage_methods[] = {
     { nullptr, nullptr, 0, nullptr }
 };
 
-static Py_ssize_t HybridImage_TypeFlags = Py_TPFLAGS_DEFAULT         | 
-                                          Py_TPFLAGS_BASETYPE        | 
-                                          Py_TPFLAGS_HAVE_NEWBUFFER;
+static Py_ssize_t HybridImageModel_TypeFlags = Py_TPFLAGS_DEFAULT         | 
+                                               Py_TPFLAGS_BASETYPE        | 
+                                               Py_TPFLAGS_HAVE_NEWBUFFER;
 namespace py {
     
     namespace functions {
         
         PyObject* structcode_parse(PyObject* self, PyObject* args);
-        PyObject* numpyimage_check(PyObject* self, PyObject* args);
+        PyObject* hybridimage_check(PyObject* self, PyObject* args);
+        
     }
+    
 }
-
-static PyMethodDef HybridImage_module_functions[] = {
-    {
-        "structcode_parse",
-            (PyCFunction)py::functions::structcode_parse,
-            METH_VARARGS,
-            "Parse struct code into list of dtype-string tuples" },
-    {
-        "numpyimage_check",
-            (PyCFunction)py::functions::numpyimage_check,
-            METH_VARARGS,
-            "Boolean function to test for HybridImage instances" },
-    { nullptr, nullptr, 0, nullptr }
-};
 
 #endif /// LIBIMREAD_PYTHON_IM_INCLUDE_HYBRIDIMAGE_HH_
