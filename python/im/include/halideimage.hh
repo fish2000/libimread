@@ -125,7 +125,7 @@ namespace py {
                 static PyTypeObject* type_ptr() { return &ImageBufferModel_Type; }
                 
                 void* operator new(std::size_t newsize) {
-                    PyTypeObject* type = type_ptr();
+                    PyTypeObject* type = ImageBufferModel::type_ptr();
                     ImageBufferModel* self = reinterpret_cast<ImageBufferModel*>(
                         type->tp_alloc(type, 0));
                     if (self != NULL) {
@@ -137,12 +137,14 @@ namespace py {
                 void operator delete(void* voidself) {
                     ImageBufferModel* self = reinterpret_cast<ImageBufferModel*>(voidself);
                     self->cleanup();
-                    type_ptr()->tp_free(reinterpret_cast<PyObject*>(self));
+                    ImageBufferModel::type_ptr()->tp_free(reinterpret_cast<PyObject*>(self));
                 }
                 
                 weak_image_t image;
                 
-                ImageBufferModel() = default;
+                ImageBufferModel()
+                    :base_t()
+                    {}
                 explicit ImageBufferModel(shared_image_t shared_image)
                     :base_t(shared_image->buffer_ptr())
                     ,image(shared_image)
@@ -217,7 +219,7 @@ namespace py {
             static PyTypeObject* type_ptr() noexcept { return &ImageModel_Type; }
             
             void* operator new(std::size_t newsize) {
-                PyTypeObject* type = type_ptr();
+                PyTypeObject* type = ImageModelBase::type_ptr();
                 ImageModelBase* self = reinterpret_cast<ImageModelBase*>(
                     type->tp_alloc(type, 0));
                 if (self != NULL) {
@@ -233,7 +235,7 @@ namespace py {
             void operator delete(void* voidself) {
                 ImageModelBase* self = reinterpret_cast<ImageModelBase*>(voidself);
                 self->cleanup();
-                type_ptr()->tp_free(reinterpret_cast<PyObject*>(self));
+                ImageModelBase::type_ptr()->tp_free(reinterpret_cast<PyObject*>(self));
             }
             
             PyObject_HEAD
@@ -244,7 +246,13 @@ namespace py {
             PyObject* writeoptDict = nullptr;
             bool clean = false;
             
-            ImageModelBase() = default;
+            ImageModelBase()
+                :image(std::make_shared<ImageType>())
+                ,dtype(nullptr)
+                ,imagebuffer(nullptr)
+                ,readoptDict(nullptr)
+                ,writeoptDict(nullptr)
+                {}
             ImageModelBase(ImageModelBase const& other)
                 :image(other.image)
                 ,dtype(other.dtype)

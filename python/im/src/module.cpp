@@ -187,7 +187,7 @@ PyTypeObject ImageBufferModel_Type = {
     ImageBuffer_methods,                                                    /* tp_methods */
     0,                                                                      /* tp_members */
     ImageBuffer_getset,                                                     /* tp_getset */
-    &BufferModel_Type,                                                      /* tp_base */
+    0,                                                                      /* tp_base */
     0,                                                                      /* tp_dict */
     0,                                                                      /* tp_descr_get */
     0,                                                                      /* tp_descr_set */
@@ -247,6 +247,7 @@ PyMODINIT_FUNC initim(void) {
     PyEval_InitThreads();
     
     /// Check readiness of our extension types (?)
+    ImageBufferModel_Type.tp_base = &BufferModel_Type;
     if (PyType_Ready(&HybridImageModel_Type) < 0) { return; }
     if (PyType_Ready(&BufferModel_Type) < 0)      { return; }
     if (PyType_Ready(&ImageModel_Type) < 0)       { return; }

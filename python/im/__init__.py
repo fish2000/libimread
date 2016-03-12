@@ -1,11 +1,7 @@
 
 from im import (
-    HybridImage,
-    Buffer,
-    ImageBuffer,
-    Image,
+    HybridImage, Image,
+    Buffer, ImageBuffer,
     structcode_parse,
-    hybridimage_check,
-    image_check,
-    buffer_check,
-    imagebuffer_check)
+    hybridimage_check, image_check,
+    buffer_check, imagebuffer_check)
