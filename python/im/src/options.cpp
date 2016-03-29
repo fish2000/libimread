@@ -88,7 +88,7 @@ namespace py {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                 Json ison(Json::null);
                 try {
-                    ison = std::move(py::options::convert(item));
+                    ison = py::options::convert(item);
                 } catch (im::OptionsError& exc) {
                     // Py_DECREF(sequence);
                     WTF("OptionsError raised:", exc.what());
@@ -113,7 +113,7 @@ namespace py {
             while ((item = PyIter_Next(iterator))) {
                 Json ison(Json::null);
                 try {
-                    ison = std::move(py::options::convert(item));
+                    ison = py::options::convert(item);
                 } catch (im::OptionsError& exc) {
                     // Py_DECREF(item);
                     // Py_DECREF(iterator);
@@ -141,7 +141,7 @@ namespace py {
                 std::string k = py::options::get_cstring(key);
                 Json v(Json::null);
                 try {
-                    v = std::move(py::options::convert(value));
+                    v = py::options::convert(value);
                 } catch (im::OptionsError& exc) {
                     WTF("OptionsError raised:", exc.what());
                 }
