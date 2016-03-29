@@ -10,22 +10,27 @@ namespace py {
     
     namespace options {
         
-        const char* get_blob(PyObject* data,
+        bool truth(PyObject* value) noexcept {
+            if (!value) { return false; }
+            return PyObject_IsTrue(value) == 1;
+        }
+        
+        char const* get_blob(PyObject* data,
                              std::size_t& len) noexcept {
             #if PY_MAJOR_VERSION < 3
-                if (!PyString_Check(data)) { return nullptr; }
+                if (!PyString_Check(data))  { return nullptr; }
                 len = PyString_Size(data);
                 return PyString_AS_STRING(data);
             #elif PY_MAJOR_VERSION >= 3
                 len = PyBytes_Size(data);
-                if (!PyBytes_Check(data)) { return nullptr; }
+                if (!PyBytes_Check(data))   { return nullptr; }
                 return PyBytes_AsString(data);
             #endif /// PY_MAJOR_VERSION
         }
         
-        const char* get_cstring(PyObject* stro) noexcept {
+        char const* get_cstring(PyObject* stro) noexcept {
             #if PY_MAJOR_VERSION < 3
-                if (!PyString_Check(stro)) { return nullptr; }
+                if (!PyString_Check(stro))  { return nullptr; }
                 return PyString_AS_STRING(stro);
             #elif PY_MAJOR_VERSION >= 3
                 if (!PyUnicode_Check(stro)) { return nullptr; }
@@ -43,7 +48,7 @@ namespace py {
             } else if (value == Py_None) {
                 return options_map::null;
             } else if (PyBool_Check(value)) {
-                return PyObject_IsTrue(value) == 1;
+                return py::options::truth(value);
             } else if (PyLong_Check(value)) {
                 return PyLong_AsLong(value);
             } else if (PyFloat_Check(value)) {
@@ -54,7 +59,7 @@ namespace py {
         #elif PY_MAJOR_VERSION >= 3
             } else if (PyBytes_Check(value)) {
                 std::size_t len;
-                const char* blob = py::options::get_blob(value, len);
+                char const* blob = py::options::get_blob(value, len);
                 return std::string(blob, len);
         #endif /// PY_MAJOR_VERSION
             } else if (PyMemoryView_Check(value)) {
@@ -62,7 +67,7 @@ namespace py {
                 {
                     py::gil::release nogil;
                     py::buffer::source data = py::buffer::source(*view, false);
-                    return std::string(data.str());
+                    return data.str();
                 }
             } else if (HybridImage_Check(value)) {
                 imread_raise(OptionsError, "[ERROR]",
@@ -70,12 +75,12 @@ namespace py {
             }
             
             /// "else":
-            const char* c = py::options::get_cstring(value);
+            char const* c = py::options::get_cstring(value);
             if (!c) {
                 imread_raise(OptionsError, "[ERROR]",
                     "Misparsed map value");
             }
-            return std::string(c);
+            return c;
         }
         
         options_list parse_list(PyObject* list) {
@@ -83,14 +88,14 @@ namespace py {
             if (!list) { return out; }
             if (!PySequence_Check(list)) { return out; }
             PyObject* sequence = PySequence_Fast(list, "Sequence expected");
-            int idx = 0, len = PySequence_Fast_GET_SIZE(sequence);
+            int idx = 0,
+                len = PySequence_Fast_GET_SIZE(sequence);
             for (; idx < len; idx++) {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                 Json ison(Json::null);
                 try {
                     ison = py::options::convert(item);
                 } catch (im::OptionsError& exc) {
-                    // Py_DECREF(sequence);
                     WTF("OptionsError raised:", exc.what());
                 }
                 out.append(ison);
@@ -104,19 +109,17 @@ namespace py {
             if (!set) { return out; }
             if (!PyAnySet_Check(set)) { return out; }
             PyObject* iterator = PyObject_GetIter(set);
-            PyObject* item;
             if (iterator == NULL) {
                 imread_raise(OptionsError, "[ERROR]",
                     "Set object not iterable");
             }
             /// double-parens are to silence a warning
+            PyObject* item;
             while ((item = PyIter_Next(iterator))) {
                 Json ison(Json::null);
                 try {
                     ison = py::options::convert(item);
                 } catch (im::OptionsError& exc) {
-                    // Py_DECREF(item);
-                    // Py_DECREF(iterator);
                     WTF("OptionsError raised:", exc.what());
                 }
                 out.append(ison);
@@ -166,13 +169,13 @@ namespace py {
                 &py_tempfile))
                     { return NULL; }
             
-            if (py_overwrite) { overwrite = PyObject_IsTrue(py_overwrite) == 1; }
-            if (py_tempfile)  { tempfile  = PyObject_IsTrue(py_tempfile) == 1;  }
             if (!py_tempfile && !destination) {
                 PyErr_SetString(PyExc_AttributeError,
                     "Must specify either destination path or tempfile=True");
                 return NULL;
             }
+            overwrite = py::options::truth(py_overwrite);
+            tempfile  = py::options::truth(py_tempfile);
             
             try {
                 py::gil::release nogil;

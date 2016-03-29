@@ -726,7 +726,7 @@ namespace py {
                 }
                 
                 /// test is necessary, the next line chokes on NULL:
-                if (py_is_blob) { is_blob = PyObject_IsTrue(py_is_blob); }
+                is_blob = py::options::truth(py_is_blob);
                 
                 try {
                     options_map opts = py::options::parse(options);
@@ -900,7 +900,7 @@ namespace py {
                 }
                 
                 /// tests are necessary, the next lines choke on NULL:
-                if (py_as_blob) { as_blob = PyObject_IsTrue(py_as_blob); }
+                as_blob = py::options::truth(py_as_blob);
                 if (options == NULL) { options = PyDict_New(); }
                 
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {

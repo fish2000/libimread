@@ -13,6 +13,7 @@ namespace py {
         using im::options_map;
         using im::options_list;
         
+        bool truth(PyObject* value) noexcept;
         const char* get_blob(PyObject* data, std::size_t& len) noexcept;
         const char* get_cstring(PyObject* stro) noexcept;
         Json convert(PyObject* value);
