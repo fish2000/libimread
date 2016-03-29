@@ -47,7 +47,6 @@ namespace py {
                 void operator()(std::add_pointer_t<B> ptr) { /*NOP*/ }
             };
             
-            //using unique_buffer_t = std::unique_ptr<BufferType, nop<BufferType>>;
             using unique_buffer_t = std::unique_ptr<BufferType>;
             
             static PyTypeObject* type_ptr() { return &BufferModel_Type; }

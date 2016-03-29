@@ -12,6 +12,7 @@
 *.bii
 *.pyc
 *.pyo
+*.xcuserstate
 .tm_properties
 .cache/
 .prof/

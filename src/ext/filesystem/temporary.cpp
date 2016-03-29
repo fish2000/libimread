@@ -3,9 +3,10 @@
 
 #include <cstdio>
 #include <cerrno>
-#include <cstddef>
+#include <cstdlib>
 #include <dirent.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <vector>
 #include <algorithm>
