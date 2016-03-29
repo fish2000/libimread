@@ -24,9 +24,9 @@ namespace filesystem {
     namespace detail {
         /// returns a C-style string containing the temporary directory,
         // using std::getenv() and some guesswork -- originally cribbed from boost
-        const char* tmpdir() noexcept;
-        const char* userdir() noexcept;
-        const char* syspaths() noexcept;
+        char const* tmpdir() noexcept;
+        char const* userdir() noexcept;
+        char const* syspaths() noexcept;
         std::string execpath() noexcept;
         ssize_t copyfile(char const*, char const*);
         
@@ -42,7 +42,7 @@ namespace filesystem {
         struct list_separate_t {};
         
         /// user-provided callback function signature for path::walk()
-        using walk_visitor_t = std::function<void(const path&,  /// root path
+        using walk_visitor_t = std::function<void(path const&,  /// root path
                                              stringvec_t&,      /// directories
                                              stringvec_t&)>;    /// files
         
@@ -74,7 +74,7 @@ namespace filesystem {
                 ,m_absolute(false)
                 {}
             
-            path(const path& p)
+            path(path const& p)
                 :m_type(native_path)
                 ,m_path(p.m_path)
                 ,m_absolute(p.m_absolute)
@@ -87,11 +87,11 @@ namespace filesystem {
                 {}
             
             path(char* st)              { set(st); }
-            path(const char* st)        { set(st); }
-            path(const std::string& st) { set(st); }
+            path(char const* st)        { set(st); }
+            path(std::string const& st) { set(st); }
             
             explicit path(int descriptor);
-            explicit path(const detail::stringvec_t& vec, bool absolute = false);
+            explicit path(detail::stringvec_t const& vec, bool absolute = false);
             explicit path(detail::stringlist_t list);
             
             inline std::size_t size() const { return static_cast<std::size_t>(m_path.size()); }
@@ -117,10 +117,10 @@ namespace filesystem {
             template <typename P> inline
             static path expand_user(P&& p) { return path(std::forward<P>(p)).expand_user(); }
             
-            bool compare_debug(const path& other) const;        /// legacy, full of printf-debuggery
-            bool compare_lexical(const path& other) const;      /// compare using std::strcmp(),
+            bool compare_debug(path const& other) const;        /// legacy, full of printf-debuggery
+            bool compare_lexical(path const& other) const;      /// compare using std::strcmp(),
                                                                 /// fails for nonexistant paths
-            bool compare(const path& other) const noexcept;     /// compare using fast-as-fuck path::hash()
+            bool compare(path const& other) const noexcept;     /// compare using fast-as-fuck path::hash()
             
             /// static forwarder for path::compare<P>(p)
             template <typename P, typename Q> inline
@@ -129,8 +129,8 @@ namespace filesystem {
             }
             
             /// equality-test operators use path::hash()
-            bool operator==(const path& other) const { return compare(other); }
-            bool operator!=(const path& other) const { return !compare(other); }
+            bool operator==(path const& other) const { return compare(other); }
+            bool operator!=(path const& other) const { return !compare(other); }
             
             /// self-explanatory interrogatives
             bool exists() const;
@@ -166,11 +166,11 @@ namespace filesystem {
             /// std::regex_search(), and std::regex_replace, using the stringified path.
             /// As one would expect, calls to the former two return booleans whereas
             /// both replace() overloads yield new path objects.
-            bool match(const std::regex& pattern,           bool case_sensitive=false) const;
-            bool search(const std::regex& pattern,          bool case_sensitive=false) const;
-            path replace(const std::regex& pattern,         const char* replacement,
+            bool match(std::regex const& pattern,           bool case_sensitive=false) const;
+            bool search(std::regex const& pattern,          bool case_sensitive=false) const;
+            path replace(std::regex const& pattern,         char const* replacement,
                                                             bool case_sensitive=false) const;
-            path replace(const std::regex& pattern,         const std::string& replacement,
+            path replace(std::regex const& pattern,         std::string const& replacement,
                                                             bool case_sensitive=false) const;
             
             /// static forwarder for path::match<P>(p)
@@ -204,16 +204,10 @@ namespace filesystem {
             /// ... in all cases, you can specify a trailing boolean to ensure the paths you get back are absolute.
             detail::pathvec_t     list(                             bool full_paths=false) const;
             detail::vector_pair_t list(detail::list_separate_t tag, bool full_paths=false) const;
-            detail::pathvec_t     list(const char* pattern,         bool full_paths=false) const;
-            detail::pathvec_t     list(const std::string& pattern,  bool full_paths=false) const;
-            detail::pathvec_t     list(const std::regex& pattern,
+            detail::pathvec_t     list(char const* pattern,         bool full_paths=false) const;
+            detail::pathvec_t     list(std::string const& pattern,  bool full_paths=false) const;
+            detail::pathvec_t     list(std::regex const& pattern,
                                        bool case_sensitive=false,   bool full_paths=false) const;
-            
-            /// Generic static forwarder for path::list<P>(p)
-            // template <typename P> inline
-            // static detail::pathvec_t list(P&& p, bool full_paths=false) {
-            //     return path(std::forward<P>(p)).list(full_paths);
-            // }
             
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
             template <typename P, typename G> inline
@@ -279,9 +273,9 @@ namespace filesystem {
             
             /// rename a file (using ::rename()),
             /// specifying the new name with a new path instance
-            bool rename(const path& newpath);
-            bool rename(const char* newpath)        { return rename(path(newpath)); }
-            bool rename(const std::string& newpath) { return rename(path(newpath)); }
+            bool rename(path const& newpath);
+            bool rename(char const* newpath)        { return rename(path(newpath)); }
+            bool rename(std::string const& newpath) { return rename(path(newpath)); }
             
             /// Static forwarder for path::rename<P, Q>(p, q)
             template <typename P, typename Q> inline
@@ -291,9 +285,9 @@ namespace filesystem {
             
             /// duplicate a file (using ::fcopyfile() or ::sendfile()),
             /// specifying the new name with a new path instance
-            path duplicate(const path& newpath);
-            path duplicate(const char* newpath)        { return duplicate(path(newpath)); }
-            path duplicate(const std::string& newpath) { return duplicate(path(newpath)); }
+            path duplicate(path const& newpath);
+            path duplicate(char const* newpath)        { return duplicate(path(newpath)); }
+            path duplicate(std::string const& newpath) { return duplicate(path(newpath)); }
             
             /// Static forwarder for path::rename<P, Q>(p, q)
             template <typename P, typename Q> inline
@@ -344,7 +338,7 @@ namespace filesystem {
             inline path dirname() const { return parent(); }
             
             /// join a path with a new trailing path fragment
-            path join(const path& other) const {
+            path join(path const& other) const {
                 if (other.m_absolute) {
                     imread_raise(FileSystemError,
                         "path::join() expects a relative-path RHS");
@@ -365,9 +359,9 @@ namespace filesystem {
             ///     path q = p / "i-heard";
             ///     path r = q / "you-like";
             ///     path s = r / "to-join-paths";
-            path operator/(const path& other) const        { return join(other); }
-            path operator/(const char* other) const        { return join(path(other)); }
-            path operator/(const std::string& other) const { return join(path(other)); }
+            path operator/(path const& other) const        { return join(other); }
+            path operator/(char const* other) const        { return join(path(other)); }
+            path operator/(std::string const& other) const { return join(path(other)); }
             
             /// Static forwarder for path::join<P, Q>(p, q) --
             /// sometimes you want to just join stuff mainually like:
@@ -379,7 +373,7 @@ namespace filesystem {
             }
             
             /// Simple string-append for the trailing path segment
-            path append(const std::string& appendix) const {
+            path append(std::string const& appendix) const {
                 path out(m_path, m_absolute);
                 out.m_path.back().append(appendix);
                 return out;
@@ -390,9 +384,9 @@ namespace filesystem {
             ///     path q = p + "_i_heard";
             ///     path r = q + "_you_dont_necessarily_like";
             ///     path s = r + "_segment_based_append_operations";
-            path operator+(const path& other) const        { return append(other.str()); }
-            path operator+(const char* other) const        { return append(other); }
-            path operator+(const std::string& other) const { return append(other); }
+            path operator+(path const& other) const        { return append(other.str()); }
+            path operator+(char const* other) const        { return append(other); }
+            path operator+(std::string const& other) const { return append(other); }
             
             /// Static forwarder for path::append<P, Q>(p, q) --
             /// you *get* this by now, rite? It's just like some shorthand for
@@ -416,7 +410,7 @@ namespace filesystem {
             }
             
             /// Convenience function to get a C-style string, a la std::string's API
-            inline const char* c_str() const { return str().c_str(); }
+            inline char const* c_str() const { return str().c_str(); }
             
             /// Static functions for getting both the current, system temp, and user/home directories
             static path getcwd();
@@ -434,19 +428,19 @@ namespace filesystem {
             /// Conversion operators -- in theory you can pass your paths to functions
             /// expecting either std::strings or const char*s with these...
             operator std::string()           { return str(); }
-            operator const char*()           { return c_str(); }
+            operator char const*()           { return c_str(); }
             
             /// Set and tokenize the path using a std::string (mainly used internally)
-            void set(const std::string& str) {
+            void set(std::string const& str) {
                 m_type = native_path;
                 m_path = tokenize(str, sep);
                 m_absolute = !str.empty() && str[0] == sep;
             }
             
             /// ... and here, we have the requisite assign operators
-            path &operator=(const std::string& str) { set(str); return *this; }
-            path &operator=(const char* str)        { set(str); return *this; }
-            path &operator=(const path& p) {
+            path &operator=(std::string const& str) { set(str); return *this; }
+            path &operator=(char const* str)        { set(str); return *this; }
+            path &operator=(path const& p) {
                 if (!compare(p, *this)) {
                     path(p).swap(*this);
                 }
@@ -462,7 +456,7 @@ namespace filesystem {
             }
             
             /// Stringify the path to an ostream
-            friend std::ostream &operator<<(std::ostream& os, const path& p) {
+            friend std::ostream &operator<<(std::ostream& os, path const& p) {
                 return os << p.str();
             }
             
@@ -482,8 +476,8 @@ namespace filesystem {
             detail::stringvec_t components() const;
             
         protected:
-            static detail::stringvec_t tokenize(const std::string& source,
-                                                const character_type delim) {
+            static detail::stringvec_t tokenize(std::string const& source,
+                                                character_type const delim) {
                 detail::stringvec_t tokens;
                 size_type lastPos = 0,
                           pos = source.find_first_of(delim, lastPos);

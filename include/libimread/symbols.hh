@@ -5,7 +5,6 @@
 #define IMREAD_SYMBOLS_HH
 
 #include <string>
-
 #include <libimread/libimread.hpp>
 #include <libimread/ext/iod.hh>
 #include <libimread/symbols.hpp>

@@ -17,8 +17,8 @@
 
 namespace im {
     
-    bool match_magic(byte_source*, const char*, const std::size_t);
-    bool match_magic(byte_source*, const std::string&);
+    bool match_magic(byte_source*, char const*, std::size_t const);
+    bool match_magic(byte_source*, std::string const&);
     
     #define DECLARE_OPTIONS(...)                                                    \
         static const options_t OPTS() {                                             \
@@ -47,15 +47,16 @@ namespace im {
             ));
             
             DECLARE_OPTIONS(
-                "xxxxxxxx",                 /// signature
-                "image",                    /// suffix
-                "application/octet-stream"  /// mimetype
+                "xxxxxxxx",                                     /// signature
+                "imread",                                       /// suffix
+                "application/octet-stream"                      /// mimetype
             );
             
             virtual std::string get_suffix() const;
             virtual std::string get_mimetype() const;
             
-            static options_map encode_options(options_t which_options = options);
+            /// SPOILER ALERT, static-const options_t member 'options' is declared by DECLARE_OPTIONS()
+            static  options_map encode_options(options_t const& opts = options);
             virtual options_map get_options() const;
             virtual options_map add_options(options_map const& opts) const;
             
@@ -63,19 +64,19 @@ namespace im {
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                const options_map &opts);
+                                                options_map const& opts);
             
             virtual ImageList read_multi(byte_source* src,
                                          ImageFactory* factory,
-                                         const options_map& opts);
+                                         options_map const& opts);
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               const options_map& opts);
+                               options_map const& opts);
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     const options_map& opts);
+                                     options_map const& opts);
             
             virtual bool format_can_read() const noexcept;
             virtual bool format_can_read_multi() const noexcept;
@@ -136,7 +137,6 @@ namespace im {
                                     std::remove_cv_t<OtherFormatType>>::value;
             }
             
-            /// DIFFERENT CLASS IS DIFFERENT
             template <typename OtherFormatType,
                       typename X = std::enable_if_t<
                                    std::is_base_of<ImageFormat, OtherFormatType>::value>> inline
@@ -144,6 +144,17 @@ namespace im {
                 return !std::is_same<std::remove_cv_t<FormatType>,
                                      std::remove_cv_t<OtherFormatType>>::value;
             }
+            
+            /// DIFFERENT CLASS IS DIFFERENT
+            // template <typename Whatever,
+            //           typename X = std::enable_if_t<
+            //                       !std::is_base_of<ImageFormat, Whatever>::value>> inline
+            // bool operator==(Whatever const& other) const noexcept { return false; }
+            //
+            // template <typename Whatever,
+            //           typename X = std::enable_if_t<
+            //                       !std::is_base_of<ImageFormat, Whatever>::value>> inline
+            // bool operator!=(Whatever const& other) const noexcept { return true; }
     
     };
 

@@ -111,27 +111,27 @@ namespace im {
         ,dtype_(NPY_UINT8)
         {}
     
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, const buffer_t* b, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
         :HalBase(detail::for_dtype(d), b, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
         :HalBase(detail::for_dtype(d), x, y, z, w, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, std::string const& name)
         :HalBase(detail::for_dtype(d), x, y, z, 0, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, std::string const& name)
         :HalBase(detail::for_dtype(d), x, y, 0, 0, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, const std::string& name)
+    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, std::string const& name)
         :HalBase(detail::for_dtype(d), x, 0, 0, 0, name), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
@@ -202,14 +202,14 @@ namespace im {
         :nm("")
         {}
     
-    HybridFactory::HybridFactory(const std::string& n)
+    HybridFactory::HybridFactory(std::string const& n)
         :nm(n)
         {}
     
     HybridFactory::~HybridFactory() {}
     
     std::string& HybridFactory::name() { return nm; }
-    void HybridFactory::name(const std::string& n) { nm = n; }
+    void HybridFactory::name(std::string const& n) { nm = n; }
     
     std::unique_ptr<Image> HybridFactory::create(int nbits,
                                                 int xHEIGHT, int xWIDTH, int xDEPTH,

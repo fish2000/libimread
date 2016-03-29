@@ -23,17 +23,17 @@ namespace blockhash {
     
     namespace orig {
         
-        int cmpint(const void *pa, const void *pb) noexcept;
-        int cmpfloat(const void *pa, const void *pb) noexcept;
-        float median(int *data, int n);
-        float medianf(float *data, int n);
-        char* bits_to_hexhash(int *bits, int nbits);
+        int cmpint(const void* pa, const void* pb) noexcept;
+        int cmpfloat(const void* pa, const void* pb) noexcept;
+        float median(int* data, int n);
+        float medianf(float* data, int n);
+        char* bits_to_hexhash(int* bits, int nbits);
         
-        void blockhash_quick(int bits, unsigned char *data,
-                             int width, int height, int **hash);
+        void blockhash_quick(int bits, unsigned char* data,
+                             int width, int height, int** hash);
         
-        void blockhash(int bits, unsigned char *data,
-                       int width, int height, int **hash);
+        void blockhash(int bits, unsigned char* data,
+                       int width, int height, int** hash);
     
     };
     
@@ -87,7 +87,7 @@ namespace blockhash {
     };
     
     template <std::size_t N = 8>
-    std::bitset<N*N> blockhash_quick(Image& image) {
+    std::bitset<N*N> blockhash_quick(Image const& image) {
         constexpr int           NN = N*N;
         constexpr int           NN2 = NN/2;
         constexpr int           NN4 = NN/4;
@@ -137,7 +137,7 @@ namespace blockhash {
     }
     
     template <std::size_t N = 8>
-    std::bitset<N*N> blockhash(Image& image) {
+    std::bitset<N*N> blockhash(Image const& image) {
         constexpr int               NN = N*N;
         constexpr int               NN2 = NN/2;
         constexpr int               NN4 = NN/4;
@@ -238,7 +238,7 @@ namespace std {
         typedef im::Image argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type& image) const {
+        result_type operator()(argument_type const& image) const {
             auto bithash = blockhash::blockhash(image);
             return static_cast<result_type>(bithash.to_ullong());
         }

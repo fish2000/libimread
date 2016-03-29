@@ -46,7 +46,12 @@ namespace im {
         DEFINE_TYPE_MAPPING(float,          Float(32));
         DEFINE_TYPE_MAPPING(double,         Float(64));
         DEFINE_TYPE_MAPPING(long double,    Float(64));
-        // DEFINE_TYPE_MAPPING(PixelType*,     Handle());
+        
+        template <typename PointerBase>
+        struct for_type<PointerBase*> {
+            using type = std::add_pointer_t<PointerBase>;
+            static Halide::Type get() { return Halide::Handle(); }
+        };
         
         template <typename PixelType> inline
         Halide::Type halide_t() { return for_type<std::remove_pointer_t<
@@ -74,29 +79,29 @@ namespace im {
                 :halide_image_t(), Image(), MetaImage()
                 {}
             
-            HybridImage(int x, int y, int z, int w, const std::string& name="")
+            HybridImage(int x, int y, int z, int w, std::string const& name="")
                 :halide_image_t(x, y, z, w, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(int x, int y, int z, const std::string& name="")
+            HybridImage(int x, int y, int z, std::string const& name="")
                 :halide_image_t(x, y, z, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(int x, int y, const std::string& name="")
+            HybridImage(int x, int y, std::string const& name="")
                 :halide_image_t(x, y, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(int x, const std::string& name="")
+            HybridImage(int x, std::string const& name="")
                 :halide_image_t(x, name), Image(), MetaImage(name)
                 {}
             
-            HybridImage(const Buffer& buf)
+            HybridImage(Buffer const& buf)
                 :halide_image_t(buf), Image(), MetaImage()
                 {}
-            HybridImage(const Realization& r)
+            HybridImage(Realization const& r)
                 :halide_image_t(r), Image(), MetaImage()
                 {}
-            HybridImage(const buffer_t* b, const std::string& name="")
+            HybridImage(buffer_t const* b, std::string const& name="")
                 :halide_image_t(b, name), Image(), MetaImage(name)
                 {}
             
@@ -178,7 +183,7 @@ namespace im {
             HalideFactory()
                 :nm("")
                 {}
-            HalideFactory(const std::string& n)
+            HalideFactory(std::string const& n)
                 :nm(n)
                 {}
             
@@ -189,7 +194,7 @@ namespace im {
             }
             
             std::string& name() { return nm; }
-            void name(std::string& nnm) { nm = nnm; }
+            void name(std::string const& nnm) { nm = nnm; }
             
         protected:
             virtual std::unique_ptr<Image> create(int nbits,
@@ -216,8 +221,8 @@ namespace im {
         static const options_map halide_default_opts;
         
         template <typename T = byte> inline
-        HybridImage<T> read(const std::string& filename,
-                            const options_map& opts = halide_default_opts) {
+        HybridImage<T> read(std::string const& filename,
+                            options_map const& opts = halide_default_opts) {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
@@ -229,16 +234,16 @@ namespace im {
         }
         
         template <typename T = byte> inline
-        void write(HybridImage<T>& input, const std::string& filename,
-                                          const options_map& opts = halide_default_opts) {
+        void write(HybridImage<T>& input, std::string const& filename,
+                                          options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             options_map default_opts = format->add_options(opts);
             format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
         }
         
-        inline void write_multi(ImageList& input, const std::string& filename,
-                                                  const options_map& opts = halide_default_opts) {
+        inline void write_multi(ImageList& input, std::string const& filename,
+                                                  options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             options_map default_opts = format->add_options(opts);
@@ -247,7 +252,7 @@ namespace im {
         
         template <typename Format, typename T = byte> inline
         std::string tmpwrite(HybridImage<T>& input,
-                             const options_map& opts = halide_default_opts) {
+                             options_map const& opts = halide_default_opts) {
             im::fs::NamedTemporaryFile tf("." + Format::suffix(),       /// suffix
                                           FILESYSTEM_TEMP_FILENAME,     /// prefix (filename template)
                                           false); tf.remove();          /// cleanup on scope exit

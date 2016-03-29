@@ -70,36 +70,10 @@ namespace filesystem {
         } else {
             tplpath = path::join(filesystem::path::gettmp(), filesystem::path(tpl));
         }
-        const char* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
+        char const* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
         if (dtemp == NULL) { return false; }
         dirpath = filesystem::path(dtemp);
         return true;
-    }
-    
-    bool TemporaryDirectory::cleand() {
-        /// scrub all files
-        /// N.B. this will not recurse -- keep yr structures FLAAAT
-        if (!dirpath.exists()) { return false; }
-        filesystem::path abspath = dirpath.make_absolute();
-        directory cleand = detail::ddopen(abspath.c_str());
-        bool out = true;
-        
-        if (!cleand.get()) {
-            imread_raise(FileSystemError, "[ERROR]",
-                "TemporaryDirectory::clean(): error in detail::ddopen() with path:",
-                abspath.str(), std::strerror(errno));
-        }
-        
-        detail::dirent_t* entry;
-        while ((entry = ::readdir(cleand.get())) != NULL) {
-            std::string dname(entry->d_name);
-            if (std::strncmp(dname.c_str(), ".", 1) == 0)   { continue; }
-            if (std::strncmp(dname.c_str(), "..", 2) == 0)  { continue; }
-            path epp = abspath/dname;
-            out &= epp.remove();
-        }
-        
-        return out;
     }
     
     bool TemporaryDirectory::clean() {
@@ -111,17 +85,17 @@ namespace filesystem {
         /// walk_visitor_t recursively removes files while saving directories
         /// as full paths in the `directorylist` vector
         detail::walk_visitor_t walk_visitor = [&out, &directorylist](
-                                    const filesystem::path& p,
+                                    filesystem::path const& p,
                                     detail::stringvec_t& directories,
                                     detail::stringvec_t& files) {
             if (!directories.empty()) {
                 std::for_each(directories.begin(), directories.end(),
-                    [&p, &directorylist](const std::string& directory) {
+                    [&p, &directorylist](std::string const& directory) {
                         directorylist.push_back(p/directory); });
             }
             if (!files.empty()) {
                 std::for_each(files.begin(), files.end(),
-                    [&p, &out](const std::string& file) {
+                    [&p, &out](std::string const& file) {
                         out &= (p/file).remove(); });
             }
         };
@@ -132,7 +106,7 @@ namespace filesystem {
         /// remove emptied directories per saved list
         if (!directorylist.empty()) {
             std::for_each(directorylist.begin(), directorylist.end(),
-                   [&out](const filesystem::path& p) { out &= p.remove(); });
+                   [&out](filesystem::path const& p) { out &= p.remove(); });
         }
         
         /// return as per logical sum of `remove()` call successes

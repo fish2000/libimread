@@ -27,24 +27,24 @@ namespace filesystem {
                 :m_paths{ path(std::forward<P>(p)) }
                 {}
             
-            explicit resolver(const detail::pathvec_t& paths)
+            explicit resolver(detail::pathvec_t const& paths)
                 :m_paths(paths)
                 {
                     m_paths.erase(
                         std::remove_if(m_paths.begin(), m_paths.end(),
-                                    [](const path& p) { return p == path(); }),
+                                    [](path const& p) { return p == path(); }),
                         m_paths.end());
                 }
             
-            explicit resolver(const detail::stringvec_t& strings)
+            explicit resolver(detail::stringvec_t const& strings)
                 :m_paths(strings.size())
                 {
                     std::transform(strings.begin(), strings.end(),
                                    std::back_inserter(m_paths),
-                                [](const std::string& s) { return path(s); });
+                                [](std::string const& s) { return path(s); });
                     m_paths.erase(
                         std::remove_if(m_paths.begin(), m_paths.end(),
-                                    [](const path& p) { return p == path(); }),
+                                    [](path const& p) { return p == path(); }),
                         m_paths.end());
                 }
             
@@ -53,7 +53,7 @@ namespace filesystem {
                 {
                     m_paths.erase(
                         std::remove_if(m_paths.begin(), m_paths.end(),
-                                    [](const path& p) { return p == path(); }),
+                                    [](path const& p) { return p == path(); }),
                         m_paths.end());
                 }
             
@@ -66,10 +66,10 @@ namespace filesystem {
             const_iterator end()   const    { return m_paths.end(); }
             
             void erase(iterator it)         { m_paths.erase(it); }
-            void prepend(const path& path)  { m_paths.insert(m_paths.begin(), path); }
-            void append(const path& path)   { m_paths.push_back(path); }
+            void prepend(path const& path)  { m_paths.insert(m_paths.begin(), path); }
+            void append(path const& path)   { m_paths.push_back(path); }
             
-            path resolve_impl(const path& value) const {
+            path resolve_impl(path const& value) const {
                 if (m_paths.empty()) { return path(); }
                 for (const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
                     path combined = *it / value;
@@ -88,12 +88,12 @@ namespace filesystem {
                 return resolve_impl(path(std::forward<P>(p))) != path();
             }
             
-            detail::pathvec_t resolve_all_impl(const path& value) const {
+            detail::pathvec_t resolve_all_impl(path const& value) const {
                 detail::pathvec_t out;
                 if (m_paths.empty()) { return out; }
                 std::copy_if(m_paths.begin(), m_paths.end(),
                              std::back_inserter(out),
-                             [&value](const path& p) { return (p/value).exists(); });
+                             [&value](path const& p) { return (p/value).exists(); });
                 return out;
             }
             
@@ -102,10 +102,10 @@ namespace filesystem {
                 return resolve_all_impl(path(std::forward<P>(p)));
             }
             
-            friend std::ostream& operator<<(std::ostream& out, const resolver& paths) {
+            friend std::ostream& operator<<(std::ostream& out, resolver const& paths) {
                 if (paths.m_paths.empty()) { return out; }
                 std::for_each(paths.begin(), paths.end(),
-                       [&out](const path& p) {
+                       [&out](path const& p) {
                     out << p.str() << ":";
                 });
                 return out;

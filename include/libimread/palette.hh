@@ -49,7 +49,7 @@ namespace im {
         std::set<Color> items;
         
         constexpr Palette() noexcept = default;
-        Palette(const Palette& other)
+        Palette(Palette const& other)
             :items(other.items)
             {}
         Palette(Palette&& other) noexcept {
@@ -58,13 +58,13 @@ namespace im {
         
         explicit constexpr Palette(composite_list_t initlist)     { add_impl(initlist); }
         explicit constexpr Palette(channel_listlist_t initlist)   { add_impl(initlist); }
-        Palette& operator=(const Palette& other)        { items = other.items;                      return *this; }
+        Palette& operator=(Palette const& other)        { items = other.items;                      return *this; }
         Palette& operator=(Palette&& other) noexcept    { items.clear(); items.swap(other.items);   return *this; }
         Palette& operator=(composite_list_t initlist)   { items.clear(); add_impl(initlist);        return *this; }
         Palette& operator=(channel_listlist_t initlist) { items.clear(); add_impl(initlist);        return *this; }
         
-        constexpr bool add(const nonvalue_t& nonvalue)            { return false; }
-        constexpr bool add(const Color& color)                    { return items.insert(color).second; }
+        constexpr bool add(nonvalue_t const& nonvalue)            { return false; }
+        constexpr bool add(Color const& color)                    { return items.insert(color).second; }
         constexpr bool add(composite_t composite)                 { return items.emplace(composite).second; }
         constexpr bool add(channel_list_t channel_list)           { return items.emplace(channel_list).second; }
         constexpr bool bulk_add(composite_list_t composite_list)  { return add_impl(composite_list); }
@@ -85,16 +85,16 @@ namespace im {
         constexpr std::size_t max_size() const noexcept { return N; }
         inline const std::size_t size() const { return items.size(); }
         
-        inline const bool contains(const nonvalue_t& nonvalue) const { return false; }
-        inline const bool contains(const Color& color) const {
+        inline const bool contains(nonvalue_t const& nonvalue) const { return false; }
+        inline const bool contains(Color const& color) const {
             return static_cast<bool>(items.count(color));
         }
         inline const bool contains(composite_t composite) const {
             return static_cast<bool>(items.count(Color(composite)));
         }
         
-        inline const bool remove(const nonvalue_t& nonvalue) { return false; }
-        inline const bool remove(const Color& color) { return static_cast<bool>(items.erase(color)); }
+        inline const bool remove(nonvalue_t const& nonvalue) { return false; }
+        inline const bool remove(Color const& color) { return static_cast<bool>(items.erase(color)); }
         inline const bool remove(composite_t color) { return static_cast<bool>(items.erase(Color(color))); }
         inline const bool remove(channel_list_t color) { return static_cast<bool>(items.erase(Color(color))); }
         
@@ -107,7 +107,7 @@ namespace im {
             }
             return nonvalue_t();
         }
-        Color operator[](const Color& color) const noexcept {
+        Color operator[](Color const& color) const noexcept {
             try {
                 return items.at(color);
             } catch (std::out_of_range& e) {
@@ -115,12 +115,12 @@ namespace im {
             }
         }
         
-        constexpr bool operator<(const Palette& rhs) const noexcept { return bool(items < rhs.items); }
-        constexpr bool operator>(const Palette& rhs) const noexcept { return bool(items > rhs.items); }
-        constexpr bool operator<=(const Palette& rhs) const noexcept { return bool(items <= rhs.items); }
-        constexpr bool operator>=(const Palette& rhs) const noexcept { return bool(items >= rhs.items); }
-        constexpr bool operator==(const Palette& rhs) const noexcept { return bool(items == rhs.items); }
-        constexpr bool operator!=(const Palette& rhs) const noexcept { return bool(items != rhs.items); }
+        constexpr bool operator<(Palette const& rhs) const noexcept { return bool(items < rhs.items); }
+        constexpr bool operator>(Palette const& rhs) const noexcept { return bool(items > rhs.items); }
+        constexpr bool operator<=(Palette const& rhs) const noexcept { return bool(items <= rhs.items); }
+        constexpr bool operator>=(Palette const& rhs) const noexcept { return bool(items >= rhs.items); }
+        constexpr bool operator==(Palette const& rhs) const noexcept { return bool(items == rhs.items); }
+        constexpr bool operator!=(Palette const& rhs) const noexcept { return bool(items != rhs.items); }
         
         const std::string to_string() const {
             static const std::string prefix("* ");

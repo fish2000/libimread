@@ -23,7 +23,7 @@ namespace hash {
     /// this value to the seed value, which it modifies in-place
     
     template <typename T> inline
-    void rehash(std::size_t& seed, const T& v) {
+    void rehash(std::size_t& seed, T const& v) {
         std::hash<T> hasher;
         REHASHER(seed, hasher, v);
     }

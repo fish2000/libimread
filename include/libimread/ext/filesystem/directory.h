@@ -68,9 +68,9 @@ namespace filesystem {
         
         private:
             switchdir(void);
-            switchdir(const switchdir&);
+            switchdir(switchdir const&);
             switchdir(switchdir&&);
-            switchdir &operator=(const switchdir&);
+            switchdir &operator=(switchdir const&);
             switchdir &operator=(switchdir&&);
             static std::mutex mute; /// declaration not definition
             mutable std::string olddir;
@@ -113,7 +113,7 @@ namespace filesystem {
             workingdir(void);
             workingdir(const workingdir&);
             workingdir(workingdir&&);
-            workingdir &operator=(const workingdir&);
+            workingdir &operator=(workingdir const&);
             workingdir &operator=(workingdir&&);
             static std::recursive_mutex mute; /// declaration not definition
             static std::stack<path> dstack;   /// declaration not definition

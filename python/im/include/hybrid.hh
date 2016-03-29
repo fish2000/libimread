@@ -40,11 +40,11 @@ namespace im {
     class HalideNumpyImage : public HalBase, public PythonBufferImage, public MetaImage {
         public:
             HalideNumpyImage();
-            HalideNumpyImage(NPY_TYPES d, const buffer_t* b, const std::string& name="");
-            HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, const std::string& name="");
-            HalideNumpyImage(NPY_TYPES d, int x, int y, int z, const std::string& name="");
-            HalideNumpyImage(NPY_TYPES d, int x, int y, const std::string& name="");
-            HalideNumpyImage(NPY_TYPES d, int x, const std::string& name="");
+            HalideNumpyImage(NPY_TYPES d, const buffer_t* b, std::string const& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, int y, int z, std::string const& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, int y, std::string const& name="");
+            HalideNumpyImage(NPY_TYPES d, int x, std::string const& name="");
             
             using HalBase::dimensions;
             using HalBase::extent;
@@ -92,11 +92,11 @@ namespace im {
             using image_t = HalideNumpyImage;
             
             HybridFactory();
-            HybridFactory(const std::string& n);
+            HybridFactory(std::string const& n);
             
             virtual ~HybridFactory();
             std::string& name();
-            void name(const std::string& n);
+            void name(std::string const& n);
         
         protected:
             virtual std::unique_ptr<Image> create(int nbits,

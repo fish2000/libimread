@@ -28,18 +28,18 @@ namespace filesystem {
         
         template <>
         struct handle_helper<DIR>  {
-            using type = std::add_pointer_t<DIR>;
-            static void close(type handle) { ::closedir(handle); }
+            using ptr_t = std::add_pointer_t<DIR>;
+            static void close(ptr_t handle) { ::closedir(handle); }
         };
         
         template <>
         struct handle_helper<FILE> {
-            using type = std::add_pointer_t<FILE>;
-            static void close(type handle) { std::fclose(handle); }
+            using ptr_t = std::add_pointer_t<FILE>;
+            static void close(ptr_t handle) { std::fclose(handle); }
         };
         
         template <typename HandleType>
-        using handle_t = typename handle_helper<HandleType>::type;
+        using handle_t = typename handle_helper<HandleType>::ptr_t;
         
         template <typename T>
         struct closer {

@@ -5,8 +5,8 @@
 #define IMREAD_OPTIONS_HH
 
 #include <string>
-
-#include <libimread/ext/iod.hh>
+#include <sstream>
+// #include <libimread/ext/iod.hh>
 #include <libimread/ext/JSON/json11.h>
 
 namespace im {
@@ -19,9 +19,7 @@ namespace im {
             
             options_map()
                 :Json()
-                {
-                    mkobject();
-                }
+                { mkobject(); }
             
             options_map(Json const& other)
                 :Json(other)
@@ -30,12 +28,12 @@ namespace im {
                 :Json(other)
                 {}
             
-            options_map(std::istream& is, bool full=true)
+            options_map(std::istream& is, bool full = true)
                 :Json(is, full)
                 {}
             
-            static options_map parse(const std::string&);
-            static options_map parse(const char* json) { return parse(std::string(json)); }
+            static options_map parse(std::string const&);
+            static options_map parse(char const* json) { return parse(std::string(json)); }
             
     };
     
@@ -47,18 +45,16 @@ namespace im {
             
             options_list()
                 :Json()
-                {
-                    mkarray();
-                }
+                { mkarray(); }
     };
     
-    std::string get_optional_string(const options_map& opts,  const std::string& key);
-    const char *get_optional_cstring(const options_map& opts, const std::string& key);
+    std::string get_optional_string(options_map const& opts,  std::string const& key);
+    const char* get_optional_cstring(options_map const& opts, std::string const& key);
     
-    int get_optional_int(const options_map& opts,   const std::string& key,
-                                                    const int default_value);
-    bool get_optional_bool(const options_map& opts, const std::string& key,
-                                                    const bool default_value);
+    int get_optional_int(options_map const& opts,
+                         std::string const& key,    int const default_value = 0);
+    bool get_optional_bool(options_map const& opts,
+                           std::string const& key, bool const default_value = false);
     
 }
 

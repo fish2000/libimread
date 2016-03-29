@@ -33,9 +33,9 @@ namespace filesystem {
         filesystem::path filepath;
         std::fstream stream;
         
-        explicit NamedTemporaryFile(const char* s = tfs, const char* p = tfp, bool c = true,
+        explicit NamedTemporaryFile(char const* s = tfs, char const* p = tfp, bool c = true,
                                     filesystem::mode m = filesystem::mode::WRITE,
-                                    const filesystem::path& td = filesystem::path::tmp())
+                                    filesystem::path const& td = filesystem::path::tmp())
                                         :cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s)), prefix(::strdup(p))
                                         ,filemode(m)
@@ -44,9 +44,9 @@ namespace filesystem {
                                         {
                                             create();
                                         }
-        explicit NamedTemporaryFile(const std::string& s, const std::string& p = tfp, bool c = true,
+        explicit NamedTemporaryFile(std::string const& s, std::string const& p = tfp, bool c = true,
                                     filesystem::mode m = filesystem::mode::WRITE,
-                                    const filesystem::path& td = filesystem::path::tmp())
+                                    filesystem::path const& td = filesystem::path::tmp())
                                         :cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
                                         ,filemode(m)
@@ -56,7 +56,7 @@ namespace filesystem {
                                             create();
                                         }
         
-        NamedTemporaryFile(const NamedTemporaryFile& other)
+        NamedTemporaryFile(NamedTemporaryFile const& other)
             :descriptor(other.descriptor)
             ,cleanup(other.cleanup), deallocate(true)
             ,suffix(::strdup(other.suffix)), prefix(::strdup(other.prefix))
@@ -78,9 +78,9 @@ namespace filesystem {
             }
         
         inline std::string   str() const noexcept  { return filepath.str(); }
-        inline const char* c_str() const noexcept  { return filepath.c_str(); }
+        inline char const* c_str() const noexcept  { return filepath.c_str(); }
         operator std::string() const noexcept      { return str(); }
-        operator const char*() const noexcept      { return c_str(); }
+        operator char const*() const noexcept      { return c_str(); }
         
         inline openmode mode() const noexcept {
             return filemode == filesystem::mode::WRITE ? std::ios::out : std::ios::in;
@@ -98,7 +98,8 @@ namespace filesystem {
         
         ~NamedTemporaryFile() {
             if (cleanup) { close(); remove(); }
-            if (deallocate) { free(suffix); free(prefix); }
+            if (deallocate) { std::free(suffix);
+                              std::free(prefix); }
         }
     
     };
@@ -115,19 +116,19 @@ namespace filesystem {
         filesystem::path tplpath;
         filesystem::path dirpath;
         
-        explicit TemporaryDirectory(const char* t = tdp, bool c = true)
+        explicit TemporaryDirectory(char const* t = tdp, bool c = true)
             :tpl(::strdup(t)), cleanup(c), deallocate(true)
             {
                 create();
             }
         
-        explicit TemporaryDirectory(const std::string& t, bool c = true)
+        explicit TemporaryDirectory(std::string const& t, bool c = true)
             :tpl(::strdup(t.c_str())), cleanup(c), deallocate(true)
             {
                 create();
             }
         
-        TemporaryDirectory(const TemporaryDirectory& other)
+        TemporaryDirectory(TemporaryDirectory const& other)
             :tpl(::strdup(other.tpl))
             ,cleanup(other.cleanup), deallocate(true)
             ,tplpath(other.tplpath)
@@ -145,24 +146,23 @@ namespace filesystem {
             }
         
         inline std::string   str() const noexcept   { return dirpath.str(); }
-        inline const char* c_str() const noexcept   { return dirpath.c_str(); }
+        inline char const* c_str() const noexcept   { return dirpath.c_str(); }
         operator std::string() const noexcept       { return str(); }
-        operator const char*() const noexcept       { return c_str(); }
+        operator char const*() const noexcept       { return c_str(); }
         
-        NamedTemporaryFile get(const std::string& suffix = tfs,
-                               const std::string& prefix = tfp,
+        NamedTemporaryFile get(std::string const& suffix = tfs,
+                               std::string const& prefix = tfp,
                                mode m = mode::WRITE) { return NamedTemporaryFile(
                                                           suffix, prefix,
                                                           cleanup, m, dirpath); }
         
         bool create();
-        bool cleand();
         bool clean();
         bool remove();
         
         ~TemporaryDirectory() {
-            if (cleanup) { clean(); remove(); }
-            if (deallocate) { free(tpl); }
+            if (cleanup)    { clean(); remove(); }
+            if (deallocate) { std::free(tpl); }
         }
     
     };

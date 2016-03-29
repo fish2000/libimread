@@ -87,7 +87,6 @@ namespace im {
             template <typename ...Args>
             std::size_t writef(const char* fmt, Args... args) {
                 char buffer[1024];
-                // std::size_t buffer_size = std::snprintf(buffer, 1024, fmt, args...);
                 std::snprintf(buffer, 1024, fmt, args...);
                 return this->write(buffer, std::strlen(static_cast<const char*>(buffer)));
             }

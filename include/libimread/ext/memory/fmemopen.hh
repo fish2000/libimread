@@ -46,16 +46,16 @@
 
 namespace memory {
     
-    FILE* fmemopen(void* buf, std::size_t size, const char* mode = "r");
+    FILE* fmemopen(void* buf, std::size_t size, char const* mode = "r");
     
     template <typename F>
     struct fcloser {
         constexpr fcloser() noexcept = default;
-        template <typename U> fcloser(const fcloser<U>&) noexcept {};
-        void operator()(F* filehandle) { if (filehandle) std::fclose(filehandle); }
+        template <typename U> fcloser(fcloser<U> const&) noexcept {};
+        void operator()(std::add_pointer_t<F> filehandle) { std::fclose(filehandle); }
     };
     
-    using buffer = std::unique_ptr<typename std::decay<FILE>::type, fcloser<FILE>>;
+    using buffer = std::unique_ptr<typename std::decay_t<FILE>, fcloser<FILE>>;
     
     buffer source(void* buf, std::size_t size);
     buffer sink(void* buf, std::size_t size);

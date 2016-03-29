@@ -126,7 +126,7 @@ namespace filesystem {
         }
     }
     
-    path::path(const detail::stringvec_t& vec, bool absolute)
+    path::path(detail::stringvec_t const& vec, bool absolute)
         :m_absolute(absolute), m_type(native_path)
         ,m_path(vec)
         {}
@@ -138,18 +138,18 @@ namespace filesystem {
     
     #define REGEX_FLAGS case_sensitive ? regex_flags_icase : regex_flags
     
-    bool path::match(const std::regex& pattern, bool case_sensitive) const {
+    bool path::match(std::regex const& pattern, bool case_sensitive) const {
         return std::regex_match(str(), pattern);
     }
     
-    bool path::search(const std::regex& pattern, bool case_sensitive) const {
+    bool path::search(std::regex const& pattern, bool case_sensitive) const {
         return std::regex_search(str(), pattern);
     }
     
-    path path::replace(const std::regex& pattern, const char* replacement, bool case_sensitive) const {
+    path path::replace(std::regex const& pattern, char const* replacement, bool case_sensitive) const {
         return path(std::regex_replace(str(), pattern, replacement));
     }
-    path path::replace(const std::regex& pattern, const std::string& replacement, bool case_sensitive) const {
+    path path::replace(std::regex const& pattern, std::string const& replacement, bool case_sensitive) const {
         return path(std::regex_replace(str(), pattern, replacement));
     }
     
@@ -175,7 +175,7 @@ namespace filesystem {
         return replace(re, detail::userdir());
     }
     
-    bool path::compare_debug(const path& other) const {
+    bool path::compare_debug(path const& other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(), raw_self)  == NULL) {
@@ -199,7 +199,7 @@ namespace filesystem {
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
-    bool path::compare_lexical(const path& other) const {
+    bool path::compare_lexical(path const& other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(),       raw_self)  == NULL) { return false; }
@@ -207,7 +207,7 @@ namespace filesystem {
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
-    bool path::compare(const path& other) const noexcept {
+    bool path::compare(path const& other) const noexcept {
         return bool(hash() == other.hash());
     }
     
@@ -280,7 +280,7 @@ namespace filesystem {
     
     static const int glob_pattern_flags = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
     
-    detail::pathvec_t path::list(const char* pattern, bool full_paths) const {
+    detail::pathvec_t path::list(char const* pattern, bool full_paths) const {
         /// list files with glob
         if (!pattern) {
             imread_raise(FileSystemError,
@@ -304,18 +304,18 @@ namespace filesystem {
         return out;
     }
     
-    detail::pathvec_t path::list(const std::string& pattern, bool full_paths) const {
+    detail::pathvec_t path::list(std::string const& pattern, bool full_paths) const {
         return list(pattern.c_str(), full_paths);
     }
     
-    detail::pathvec_t path::list(const std::regex& pattern, bool case_sensitive, bool full_paths) const {
+    detail::pathvec_t path::list(std::regex const& pattern, bool case_sensitive, bool full_paths) const {
         /// list files with regex object
         detail::pathvec_t unfiltered = list(full_paths);
         detail::pathvec_t out;
         if (unfiltered.size() == 0) { return out; }
         std::copy_if(unfiltered.begin(), unfiltered.end(),
                      std::back_inserter(out),
-                     [&](const path& p) {
+                     [&](path const& p) {
             /// keep those paths that match the pattern
             return p.search(pattern, case_sensitive);
         });
@@ -347,7 +347,7 @@ namespace filesystem {
         /// recursively walk into subdirs
         if (directories.empty()) { return; }
         std::for_each(directories.begin(), directories.end(),
-                      [&](const std::string& subdir) {
+                      [&](std::string const& subdir) {
             abspath.join(subdir).walk(
                 std::forward<detail::walk_visitor_t>(walk_visitor));
         });
@@ -395,14 +395,14 @@ namespace filesystem {
         return bool(::mkdir(c_str(), mkdir_flags) != -1);
     }
     
-    bool path::rename(const path& newpath) {
+    bool path::rename(path const& newpath) {
         if (!exists() || newpath.exists()) { return false; }
         bool status = ::rename(c_str(), newpath.c_str()) != -1;
         if (status) { set(newpath.make_absolute().str()); }
         return status;
     }
     
-    path path::duplicate(const path& newpath) {
+    path path::duplicate(path const& newpath) {
         path out;
         if (!exists() || newpath.exists()) { return out; }
         bool status = detail::copyfile(c_str(), newpath.c_str()) != -1;
