@@ -641,13 +641,13 @@ static PyBufferProcs Buffer_Buffer3000Methods = {
 
 static PySequenceMethods Buffer_SequenceMethods = {
     (lenfunc)py::ext::buffer::length<buffer_t>,         /* sq_length */
-    0,                                                     /* sq_concat */
-    0,                                                     /* sq_repeat */
+    0,                                                  /* sq_concat */
+    0,                                                  /* sq_repeat */
     (ssizeargfunc)py::ext::buffer::atindex<buffer_t>,   /* sq_item */
-    0,                                                     /* sq_slice */
-    0,                                                     /* sq_ass_item HAHAHAHA */
-    0,                                                     /* sq_ass_slice HEHEHE ASS <snort> HA */
-    0                                                      /* sq_contains */
+    0,                                                  /* sq_slice */
+    0,                                                  /* sq_ass_item HAHAHAHA */
+    0,                                                  /* sq_ass_slice HEHEHE ASS <snort> HA */
+    0                                                   /* sq_contains */
 };
 
 static PyGetSetDef Buffer_getset[] = {
@@ -671,14 +671,14 @@ static PyBufferProcs ImageBuffer_Buffer3000Methods = {
 };
 
 static PySequenceMethods ImageBuffer_SequenceMethods = {
-    (lenfunc)py::ext::buffer::length<buffer_t, ImageBufferModel>,        /* sq_length */
-    0,                                                                      /* sq_concat */
-    0,                                                                      /* sq_repeat */
-    (ssizeargfunc)py::ext::buffer::atindex<buffer_t, ImageBufferModel>,  /* sq_item */
-    0,                                                                      /* sq_slice */
-    0,                                                                      /* sq_ass_item HAHAHAHA */
-    0,                                                                      /* sq_ass_slice HEHEHE ASS <snort> HA */
-    0                                                                       /* sq_contains */
+    (lenfunc)py::ext::buffer::length<buffer_t, ImageBufferModel>,       /* sq_length */
+    0,                                                                  /* sq_concat */
+    0,                                                                  /* sq_repeat */
+    (ssizeargfunc)py::ext::buffer::atindex<buffer_t, ImageBufferModel>, /* sq_item */
+    0,                                                                  /* sq_slice */
+    0,                                                                  /* sq_ass_item HAHAHAHA */
+    0,                                                                  /* sq_ass_slice HEHEHE ASS <snort> HA */
+    0                                                                   /* sq_contains */
 };
 
 static PyGetSetDef ImageBuffer_getset[] = {
@@ -708,6 +708,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int init(PyObject* self, PyObject* args, PyObject* kwargs) {
+                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* py_is_blob = NULL;
                 PyObject* options = NULL;
@@ -764,8 +765,7 @@ namespace py {
                 
                 /// allocate a new image buffer
                 Py_CLEAR(pyim->imagebuffer);
-                pyim->imagebuffer = reinterpret_cast<PyObject*>(
-                    new typename PythonImageType::ImageBufferModel(pyim->image));
+                pyim->imagebuffer = reinterpret_cast<PyObject*>(new imagebuffer_t(pyim->image));
                 Py_INCREF(pyim->imagebuffer);
                 
                 /// store the read options dict
@@ -828,17 +828,20 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             Py_ssize_t length(PyObject* self) {
+                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return reinterpret_cast<typename PythonImageType::ImageBufferModel*>(pyim->imagebuffer)->__len__();
+                imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
+                return imbuf->__len__();
             }
             
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* atindex(PyObject* self, Py_ssize_t idx) {
+                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return reinterpret_cast<typename PythonImageType::ImageBufferModel*>(pyim->imagebuffer)->__index__(
-                    idx, static_cast<int>(pyim->dtype->type_num));
+                imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
+                return imbuf->__index__(idx, static_cast<int>(pyim->dtype->type_num));
             }
             
             template <typename ImageType = HalideNumpyImage,

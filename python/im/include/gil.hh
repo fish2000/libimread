@@ -9,8 +9,8 @@ namespace py {
     namespace gil {
         
         struct release {
-            PyThreadState* state;
-            bool active;
+            PyThreadState*  state;
+            bool            active;
             
             release()
                 :state(PyEval_SaveThread()), active(true)
@@ -27,8 +27,8 @@ namespace py {
         };
         
         struct ensure {
-            PyGILState_STATE state;
-            bool active;
+            PyGILState_STATE    state;
+            bool                active;
             
             ensure()
                 :state(PyGILState_Ensure()), active(true)
