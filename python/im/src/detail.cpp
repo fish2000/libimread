@@ -1,9 +1,9 @@
 
 #include <string>
 #include <tuple>
-#include "detail.hh"
+#include "detail.hpp"
 #include "structcode.hpp"
-#include "gil.hh"
+#include "gil.hpp"
 
 namespace py {
     

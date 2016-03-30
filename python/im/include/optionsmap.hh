@@ -9,8 +9,8 @@
 #include <structmember.h>
 
 #include "check.hh"
-#include "gil.hh"
-#include "detail.hh"
+#include "gil.hpp"
+#include "detail.hpp"
 #include "options.hpp"
 #include "pybuffer.hpp"
 

@@ -2,7 +2,7 @@
 #include <string>
 #include <libimread/errors.hh>
 #include "check.hh"
-#include "gil.hh"
+#include "gil.hpp"
 #include "pybuffer.hpp"
 #include "options.hpp"
 
