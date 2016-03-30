@@ -11,7 +11,6 @@ source "${PRAXONS}/urlcache.sh"
 # N.B. do not use "master.zip" URLs as they all hash to the same fucking thing
 deps="${PROJECT}/deps"
 iod_dst="${deps}/iod"
-# iod_url="https://github.com/matt-42/iod/archive/c1580a5a017e357cd1d947118c22de2c650a2873.zip"
 iod_url="https://github.com/matt-42/iod/archive/f6c3f863a05e7938adf97d510886e1afe512facb.zip"
 
 pushd $deps
