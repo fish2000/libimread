@@ -69,9 +69,12 @@ namespace py {
                     py::buffer::source data = py::buffer::source(*view, false);
                     return data.str();
                 }
-            } else if (HybridImage_Check(value)) {
+            } else if (HybridImage_Check(value)         ||
+                       BufferModel_Check(value)         ||
+                       ImageModel_Check(value)          ||
+                       ImageBufferModel_Check(value)) {
                 imread_raise(OptionsError, "[ERROR]",
-                    "Illegal HybridImage data found");
+                    "Illegal data found");
             }
             
             /// "else":
@@ -113,9 +116,9 @@ namespace py {
                 imread_raise(OptionsError, "[ERROR]",
                     "Set object not iterable");
             }
-            /// double-parens are to silence a warning
             PyObject* item;
             while ((item = PyIter_Next(iterator))) {
+                /// double-parens silence a warning
                 Json ison(Json::null);
                 try {
                     ison = py::options::convert(item);

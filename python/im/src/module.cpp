@@ -240,14 +240,24 @@ static PyMethodDef module_functions[] = {
 #endif
 
 PyMODINIT_FUNC initim(void) {
-    /// Allocate a pointer to the module object
+    /// Declare a pointer to the new module object
     PyObject* module;
     
     /// Initialize Python threads and GIL state
     PyEval_InitThreads();
     
-    /// Check readiness of our extension types (?)
+    /// Bring in NumPy's C-API
+    import_array();
+    
+    /// Manually amend our declared types, as needed:
+    /// -- Prepare im.Image.__dict__ for our customizations
+    ImageModel_Type.tp_dict = PyDict_New();
+    
+    /// -- Specify that im.ImageBuffer subclasses im.Buffer
     ImageBufferModel_Type.tp_base = &BufferModel_Type;
+    
+    /// Check readiness of our extension type declarations (?)
+    if (!ImageModel_Type.tp_dict)                 { return; }
     if (PyType_Ready(&HybridImageModel_Type) < 0) { return; }
     if (PyType_Ready(&BufferModel_Type) < 0)      { return; }
     if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
@@ -258,10 +268,7 @@ PyMODINIT_FUNC initim(void) {
     module = Py_InitModule3(
         "im.im", module_functions,
         "libimread python bindings");
-    if (module == NULL) { return; }
-    
-    /// Bring in NumPy's C-API
-    import_array();
+    if (module == NULL)                           { return; }
     
     /// Add the HybridImageModel type object to the module
     Py_INCREF(&HybridImageModel_Type);
@@ -275,14 +282,14 @@ PyMODINIT_FUNC initim(void) {
         "Buffer",
         (PyObject*)&BufferModel_Type);
     
-    /// Add the ImageBufferModel type object to im.Image
-    // Py_INCREF(&ImageBufferModel_Type);
-    // PyObject_SetAttrString((PyObject*)&ImageModel_Type,
-    //     "ImageBuffer",
-    //     (PyObject*)&ImageBufferModel_Type);
-    // PyType_Modified((PyTypeObject*)&ImageModel_Type);
+    /// Add the ImageBufferModel type object directly to im.Image.__dict__,
+    /// such that ImageBuffer presents as an inner class of im.Image, e.g.
+    /// 
+    ///     im.Image.ImageBuffer
+    /// 
+    /// ... thanks SO! http://stackoverflow.com/q/35954016/298171
     Py_INCREF(&ImageBufferModel_Type);
-    PyModule_AddObject(module,
+    PyDict_SetItemString(ImageModel_Type.tp_dict,
         "ImageBuffer",
         (PyObject*)&ImageBufferModel_Type);
     

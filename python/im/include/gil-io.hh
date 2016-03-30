@@ -38,6 +38,7 @@ namespace py {
             }
             
             void init() {
+                Py_INCREF(source);
                 file = PyFile_AsFile(reinterpret_cast<PyObject*>(source));
                 PyFile_IncUseCount(source);
                 state = PyEval_SaveThread();
@@ -46,6 +47,7 @@ namespace py {
             void restore() {
                 PyEval_RestoreThread(state);
                 PyFile_DecUseCount(source);
+                Py_DECREF(source);
                 file = nullptr;
                 active = false;
             }
