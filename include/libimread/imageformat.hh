@@ -23,24 +23,24 @@ namespace im {
     
     /// use `DECLARE_OPTIONS("value", "another-value", ...);` in format.hh:
     
-    #define DECLARE_OPTIONS(...)                                                                    \
-        static ImageFormat::unique_t create();                                                      \
-        static const options_t OPTS() {                                                             \
-            const options_t O(__VA_ARGS__);                                                         \
-            return O;                                                                               \
-        }                                                                                           \
+    #define DECLARE_OPTIONS(...)                                                            \
+        static ImageFormat::unique_t create();                                              \
+        static const options_t OPTS() {                                                     \
+            const options_t O(__VA_ARGS__);                                                 \
+            return O;                                                                       \
+        }                                                                                   \
         static const options_t options;
     
     /// ... then use `DECLARE_FORMAT_OPTIONS(FormatClassName);` in format.cpp:
     
-    #define DECLARE_FORMAT_OPTIONS(format)                                                          \
-        namespace {                                                                                 \
-            ImageFormat::Registrar<format> registrar("" # format);                                  \
-        };                                                                                          \
-        ImageFormat::unique_t format::create() {                                                    \
-            return std::make_unique<format>();                                                      \
-        }                                                                                           \
-        const ImageFormat::options_t format::options = format::OPTS();
+    #define DECLARE_FORMAT_OPTIONS(format)                                                  \
+        ImageFormat::unique_t format::create() {                                            \
+            return std::make_unique<format>();                                              \
+        }                                                                                   \
+        const ImageFormat::options_t format::options = format::OPTS();                      \
+        namespace {                                                                         \
+            ImageFormat::Registrar<format> registrar(format::options.suffix);               \
+        };
     
     /// ... those macros also set your format up to register its class (see below).
     
