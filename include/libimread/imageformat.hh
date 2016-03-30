@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <string>
 #include <memory>
+#include <unordered_map>
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
@@ -20,15 +21,28 @@ namespace im {
     bool match_magic(byte_source*, char const*, std::size_t const);
     bool match_magic(byte_source*, std::string const&);
     
-    #define DECLARE_OPTIONS(...)                                                    \
-        static const options_t OPTS() {                                             \
-            const options_t O(__VA_ARGS__);                                         \
-            return O;                                                               \
-        }                                                                           \
+    /// use `DECLARE_OPTIONS("value", "another-value", ...);` in format.hh:
+    
+    #define DECLARE_OPTIONS(...)                                                                    \
+        static ImageFormat::unique_t create();                                                      \
+        static const options_t OPTS() {                                                             \
+            const options_t O(__VA_ARGS__);                                                         \
+            return O;                                                                               \
+        }                                                                                           \
         static const options_t options;
     
-    #define DECLARE_FORMAT_OPTIONS(format)                                          \
+    /// ... then use `DECLARE_FORMAT_OPTIONS(FormatClassName);` in format.cpp:
+    
+    #define DECLARE_FORMAT_OPTIONS(format)                                                          \
+        namespace {                                                                                 \
+            ImageFormat::Registrar<format> registrar("" # format);                                  \
+        };                                                                                          \
+        ImageFormat::unique_t format::create() {                                                    \
+            return std::make_unique<format>();                                                      \
+        }                                                                                           \
         const ImageFormat::options_t format::options = format::OPTS();
+    
+    /// ... those macros also set your format up to register its class (see below).
     
     class ImageFormat {
         
@@ -40,7 +54,13 @@ namespace im {
             using can_write_multi       = std::false_type;
             using can_write_metadata    = std::false_type;
             
-            using options_t             = decltype(D(
+            using format_t      = ImageFormat;
+            using unique_t      = std::unique_ptr<format_t>;
+            using create_f      = unique_t();
+            using create_t      = std::add_pointer_t<create_f>;
+            using registry_t    = std::unordered_map<std::string, create_t>;
+            
+            using options_t     = decltype(D(
                 _signature(_optional, _json_key = _signature)  = std::string(),
                 _suffix(_optional,    _json_key = _suffix)     = std::string(),
                 _mimetype(_optional,  _json_key = _mimetype)   = std::string()
@@ -52,10 +72,32 @@ namespace im {
                 "application/octet-stream"                      /// mimetype
             );
             
+            /// These static methods, and the ImageFormat::Registrar<Derived> template,
+            /// implement the API to the format registry. Just use the static method:
+            /// 
+            ///     auto format_ptr = ImageFormat::named("JPEGFormat");
+            /// 
+            /// ... and you get a std::unique_ptr<ImageFormat> wrapping a pointer
+            /// to a new heap-allocated instance of the named ImageFormat subclass.
+            
+            static void registrate(std::string const& name, create_t fp);
+            static unique_t named(std::string const& name);
+            
+            /// Format registry derived from: http://stackoverflow.com/a/11176265/298171
+            
+            template <typename D>
+            struct Registrar {
+                explicit Registrar(std::string const& name) {
+                    ImageFormat::registrate(name, &D::create);
+                }
+            };
+            
             virtual std::string get_suffix() const;
             virtual std::string get_mimetype() const;
             
-            /// SPOILER ALERT, static-const options_t member 'options' is declared by DECLARE_OPTIONS()
+            /// SPOILER ALERT:
+            /// static-const options_t member 'options' declared by DECLARE_OPTIONS()
+            
             static  options_map encode_options(options_t const& opts = options);
             virtual options_map get_options() const;
             virtual options_map add_options(options_map const& opts) const;
@@ -84,6 +126,9 @@ namespace im {
             virtual bool format_can_write() const noexcept;
             virtual bool format_can_write_multi() const noexcept;
             virtual bool format_can_write_metadata() const noexcept;
+        
+        private:
+            static registry_t& registry();
     
     };
     
@@ -144,17 +189,6 @@ namespace im {
                 return !std::is_same<std::remove_cv_t<FormatType>,
                                      std::remove_cv_t<OtherFormatType>>::value;
             }
-            
-            /// DIFFERENT CLASS IS DIFFERENT
-            // template <typename Whatever,
-            //           typename X = std::enable_if_t<
-            //                       !std::is_base_of<ImageFormat, Whatever>::value>> inline
-            // bool operator==(Whatever const& other) const noexcept { return false; }
-            //
-            // template <typename Whatever,
-            //           typename X = std::enable_if_t<
-            //                       !std::is_base_of<ImageFormat, Whatever>::value>> inline
-            // bool operator!=(Whatever const& other) const noexcept { return true; }
     
     };
 

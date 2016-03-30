@@ -30,6 +30,15 @@ namespace im {
     std::string ImageFormat::get_suffix() const   { return ImageFormat::options.suffix; }
     std::string ImageFormat::get_mimetype() const { return ImageFormat::options.mimetype; }
     
+    void ImageFormat::registrate(std::string const& name, ImageFormat::create_t fp) {
+        registry()[name] = fp;
+    }
+    
+    ImageFormat::unique_t ImageFormat::named(std::string const& name) {
+        auto it = registry().find(name);
+        return it == registry().end() ? nullptr : (it->second)();
+    }
+    
     /// including <iod/json.hh> along with Halide.h will cause a conflict --
     /// -- some macro called `user_error` I believe -- that won't compile.
     /// So this next method must be defined out-of-line, in a TU set up to safely call
@@ -79,4 +88,8 @@ namespace im {
     bool ImageFormat::format_can_write_multi() const noexcept    { return false; }
     bool ImageFormat::format_can_write_metadata() const noexcept { return false; }
     
+    ImageFormat::registry_t& ImageFormat::registry() {
+        static ImageFormat::registry_t registry_impl;
+        return registry_impl;
+    }
 }

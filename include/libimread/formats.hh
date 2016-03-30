@@ -13,16 +13,16 @@
 
 namespace im {
     
-    std::unique_ptr<ImageFormat> get_format(char const*);
+    ImageFormat::unique_t get_format(char const*);
     
     template <typename S> inline
-    std::unique_ptr<ImageFormat> for_filename(S&& s) {
+    ImageFormat::unique_t for_filename(S&& s) {
         return get_format(
             filesystem::path::extension<S>(std::forward<S>(s)).c_str());
     }
     
     char const* magic_format(byte_source*);
-    std::unique_ptr<ImageFormat> for_source(byte_source*);
+    ImageFormat::unique_t for_source(byte_source*);
     
 } /* namespace im */
 

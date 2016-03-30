@@ -29,8 +29,8 @@ namespace im {
         
     } /* namespace detail */
     
-    std::unique_ptr<ImageFormat> get_format(char const* format) {
-        using format_ptr = std::unique_ptr<ImageFormat>;
+    ImageFormat::unique_t get_format(char const* format) {
+        using format_ptr = ImageFormat::unique_t;
         
         if (detail::ext(format, "png"))         { return format_ptr(new format::PNG);  }
         if (detail::ext(format, "jpg")  ||
@@ -80,7 +80,7 @@ namespace im {
             "\tFile suffix not found for byte source");
     }
     
-    std::unique_ptr<ImageFormat> for_source(byte_source* source) {
+    ImageFormat::unique_t for_source(byte_source* source) {
         return get_format(magic_format(source));
     }
     
