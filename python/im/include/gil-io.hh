@@ -1,6 +1,6 @@
 
-#ifndef LIBIMREAD_PYTHON_IM_INCLUDE_GIL_HH_
-#define LIBIMREAD_PYTHON_IM_INCLUDE_GIL_HH_
+#ifndef LIBIMREAD_PYTHON_IM_INCLUDE_GIL_IO_HH_
+#define LIBIMREAD_PYTHON_IM_INCLUDE_GIL_IO_HH_
 
 #include <Python.h>
 
@@ -55,4 +55,4 @@ namespace py {
     
 } /* namespace py */
 
-#endif /// LIBIMREAD_PYTHON_IM_INCLUDE_GIL_HH_
+#endif /// LIBIMREAD_PYTHON_IM_INCLUDE_GIL_IO_HH_
