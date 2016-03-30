@@ -30,8 +30,9 @@ namespace py {
         PyObject* structcode_to_dtype(char const* code);
         
         using stringvec_t = std::vector<std::string>;
-        stringvec_t& formats_as_vector();
-        PyObject* formats_as_pytuple(int idx = 0);
+        stringvec_t& formats_as_vector();                   /// this one is GIL-optional (how european!)
+        PyObject* formats_as_pytuple(int idx = 0);          /// whereas here, no GIL no shoes no funcall
+        
     }
     
 }

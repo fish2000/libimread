@@ -254,18 +254,18 @@ PyMODINIT_FUNC initim(void) {
     import_array();
     
     /// Manually amend our declared types, as needed:
-    /// -- Prepare im.Image.__dict__ for our customizations
-    ImageModel_Type.tp_dict = PyDict_New();
-    
     /// -- Specify that im.ImageBuffer subclasses im.Buffer
     ImageBufferModel_Type.tp_base = &BufferModel_Type;
     
-    /// Check readiness of our extension type declarations (?)
+    /// -- Prepare im.Image.__dict__ for our customizations
+    ImageModel_Type.tp_dict = PyDict_New();
     if (!ImageModel_Type.tp_dict)                 { return; }
+    
+    /// Check readiness of our extension type declarations (?)
     if (PyType_Ready(&HybridImageModel_Type) < 0) { return; }
     if (PyType_Ready(&BufferModel_Type) < 0)      { return; }
-    if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
     if (PyType_Ready(&ImageBufferModel_Type) < 0) { return; }
+    if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
     
     /// Actually initialize the module object,
     /// setting up the module's external C-function table
