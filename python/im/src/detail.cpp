@@ -1,9 +1,13 @@
 
 #include <string>
 #include <tuple>
+#include <algorithm>
 #include "detail.hpp"
 #include "structcode.hpp"
 #include "gil.hpp"
+
+#include <libimread/libimread.hpp>
+#include <libimread/imageformat.hh>
 
 namespace py {
     
@@ -40,6 +44,23 @@ namespace py {
             }
             
             return tuple;
+        }
+        
+        using im::ImageFormat;
+        
+        stringvec_t& list_formats() {
+            static auto DMV = ImageFormat::registry();
+            static stringvec_t out(DMV.size());
+            static bool listed = false;
+            if (!listed) {
+                std::transform(DMV.begin(), DMV.end(),
+                               std::back_inserter(out),
+                            [](auto const& registrant) {
+                    return std::string(registrant.first);
+                });
+                listed = true;
+            }
+            return out;
         }
         
     }

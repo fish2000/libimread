@@ -126,8 +126,7 @@ namespace im {
             virtual bool format_can_write() const noexcept;
             virtual bool format_can_write_multi() const noexcept;
             virtual bool format_can_write_metadata() const noexcept;
-        
-        private:
+            
             static registry_t& registry();
     
     };

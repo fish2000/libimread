@@ -3,6 +3,8 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_DETAIL_HPP_
 
 #include <memory>
+#include <vector>
+#include <string>
 #include <Python.h>
 
 namespace py {
@@ -27,6 +29,8 @@ namespace py {
         
         PyObject* structcode_to_dtype(char const* code);
         
+        using stringvec_t = std::vector<std::string>;
+        stringvec_t& list_formats();
     }
     
 }
