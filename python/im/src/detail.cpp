@@ -1,5 +1,4 @@
 
-#include <string>
 #include <tuple>
 #include <algorithm>
 #include "detail.hpp"
@@ -48,7 +47,7 @@ namespace py {
         
         using im::ImageFormat;
         
-        stringvec_t& list_formats() {
+        stringvec_t& formats_as_vector() {
             static auto DMV = ImageFormat::registry();
             static stringvec_t out(DMV.size());
             static bool listed = false;
@@ -63,6 +62,20 @@ namespace py {
             return out;
         }
         
+        PyObject* formats_as_pytuple(int idx) {
+            stringvec_t& formats = py::detail::formats_as_vector();
+            const int max = formats.size();
+            PyObject* tuple = PyTuple_New(max);
+            for (auto it = formats.begin();
+                 it != formats.end() && idx < max;
+                 ++it) { std::string const& format = *it;
+                         if (format.size() > 0) {
+                             PyTuple_SET_ITEM(tuple, idx,
+                                 PyString_FromString(format.c_str()));
+                         }
+                         ++idx; }
+            return tuple;
+        }
     }
     
 }

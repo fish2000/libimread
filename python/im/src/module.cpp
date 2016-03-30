@@ -240,8 +240,12 @@ static PyMethodDef module_functions[] = {
 #endif
 
 PyMODINIT_FUNC initim(void) {
-    /// Declare a pointer to the new module object
+    /// Declare some object pointers:
+    /// ... one, to the new module object;
     PyObject* module;
+    
+    /// ... another to the tuple of image-format suffix strings …
+    PyObject* format_tuple;
     
     /// Initialize Python threads and GIL state
     PyEval_InitThreads();
@@ -298,5 +302,15 @@ PyMODINIT_FUNC initim(void) {
     PyModule_AddObject(module,
         "Image",
         (PyObject*)&ImageModel_Type);
+    
+    /// Get the master list of image format suffixes,
+    /// newly formatted as a Python tuple of strings,
+    /// and add this to the module as a static-ish constant
+    format_tuple = py::detail::formats_as_pytuple();
+    if (format_tuple == NULL)                     { return; }
+    Py_INCREF(format_tuple);
+    PyModule_AddObject(module,
+        "formats",
+        format_tuple);
     
 }

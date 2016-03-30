@@ -31,7 +31,9 @@ namespace im {
     std::string ImageFormat::get_mimetype() const { return ImageFormat::options.mimetype; }
     
     void ImageFormat::registrate(std::string const& name, ImageFormat::create_t fp) {
-        registry()[name] = fp;
+        if (name.size() > 0) {
+            registry()[name] = fp;
+        }
     }
     
     ImageFormat::unique_t ImageFormat::named(std::string const& name) {

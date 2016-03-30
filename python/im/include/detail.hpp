@@ -30,7 +30,8 @@ namespace py {
         PyObject* structcode_to_dtype(char const* code);
         
         using stringvec_t = std::vector<std::string>;
-        stringvec_t& list_formats();
+        stringvec_t& formats_as_vector();
+        PyObject* formats_as_pytuple(int idx = 0);
     }
     
 }
