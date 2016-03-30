@@ -81,12 +81,17 @@ class Json {
         /// Node is forward-declared too,
         /// for the function-pointer signatures that follow:
         struct Node;
-        using nodevec_t = std::vector<Node*>;
+        using nodevec_t  = std::vector<Node*>;
         using nodecvec_t = std::vector<Node const*>;
-        using nodemap_t = std::map<std::string const*, Node*>;
+        using nodemap_t  = std::map<std::string const*, Node*>;
         using nodepair_t = std::pair<std::string const*, Node*>;
     
     public:
+        using jsonlist_t = std::initializer_list<Json>;
+        using jsonvec_t  = std::vector<Json>;
+        using jsonmap_t  = std::map<std::string, Json>;
+        using jsonpair_t = std::pair<std::string, Json>;
+        
         /// Originally this was declared as: `void (*f)(Node const*)` ...
         using traverser_t       = std::add_pointer_t<void(Node const*)>;
         using named_traverser_t = std::add_pointer_t<void(Node const*, char const*)>;
@@ -324,21 +329,46 @@ class Json {
         Json(long double x)         { (root = new Number(x))->refcnt++; }
         Json(char const* s)         { (root = new String(s))->refcnt++; }
         Json(Property const& p)     { (root = p.target().root)->refcnt++; }
-        Json(std::initializer_list<Json>);
         
         explicit Json(uint8_t x)    { (root = new Number(x))->refcnt++; }
         explicit Json(uint16_t x)   { (root = new Number(x))->refcnt++; }
         explicit Json(int8_t x)     { (root = new Number(x))->refcnt++; }
         explicit Json(int16_t x)    { (root = new Number(x))->refcnt++; }
         
+                 Json(jsonlist_t);
+        explicit Json(jsonvec_t const&);
+        explicit Json(jsonmap_t const&);
+        
         /// implict constructor template -- matches anything with
         /// a `to_json()` member function, which it calls on construction.
         /// ... I stole this one weird trick from the other json11: 
         ///     https://github.com/dropbox/json11/blob/master/json11.hpp#L92-L94
+        
         template <typename ConvertibleType,
                   typename = decltype(&ConvertibleType::to_json)>
         Json(ConvertibleType const& convertible)
             :Json(convertible.to_json())
+            {}
+        
+        /// These next two crafty vector- and mapping-converter constructor
+        /// templates are also stolen from the other json11 (as above).
+        /// ... after all I steal from the best like always dogg you know it
+        
+        template <typename Vector,
+                  typename std::enable_if_t<
+                           std::is_constructible<Json,        typename Vector::value_type>::value,
+                      int> = 0>
+        explicit Json(Vector const& vector)
+            :Json(jsonvec_t(vector.begin(), vector.end()))
+            {}
+        
+        template <typename Mapping,
+                  typename std::enable_if_t<
+                           std::is_constructible<std::string, typename Mapping::key_type>::value &&
+                           std::is_constructible<Json,        typename Mapping::mapped_type>::value,
+                      int> = 0>
+        explicit Json(Mapping const& mapping)
+            :Json(jsonmap_t(mapping.begin(), mapping.end()))
             {}
         
         /// dynamic type info

@@ -200,9 +200,25 @@ Json::Json(Json&& that) noexcept {
     that.root = nullptr;
 }
 
-Json::Json(std::initializer_list<Json> args) {
+Json::Json(Json::jsonlist_t arglist) {
     (root = new Array())->refcnt++;
-    for (auto arg : args) { *this << arg; }
+    for (auto const& arg : arglist) {
+        *this << arg;
+    }
+}
+
+Json::Json(Json::jsonvec_t const& argvec) {
+    (root = new Array())->refcnt++;
+    for (auto const& arg : argvec) {
+        *this << arg;
+    }
+}
+
+Json::Json(Json::jsonmap_t const& propmap) {
+    (root = new Object())->refcnt++;
+    for (auto const& prop : propmap) {
+        set(prop.first, prop.second);
+    }
 }
 
 /** Copy assignment */

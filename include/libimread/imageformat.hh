@@ -75,7 +75,7 @@ namespace im {
             /// These static methods, and the ImageFormat::Registrar<Derived> template,
             /// implement the API to the format registry. Just use the static method:
             /// 
-            ///     auto format_ptr = ImageFormat::named("JPEGFormat");
+            ///     auto format_ptr = ImageFormat::named("jpg");
             /// 
             /// ... and you get a std::unique_ptr<ImageFormat> wrapping a pointer
             /// to a new heap-allocated instance of the named ImageFormat subclass.

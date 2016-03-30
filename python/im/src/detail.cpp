@@ -49,7 +49,7 @@ namespace py {
         
         stringvec_t& formats_as_vector() {
             static auto DMV = ImageFormat::registry();
-            static stringvec_t out(DMV.size());
+            static stringvec_t out;
             static bool listed = false;
             if (!listed) {
                 std::transform(DMV.begin(), DMV.end(),
