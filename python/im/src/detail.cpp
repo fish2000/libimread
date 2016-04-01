@@ -28,7 +28,7 @@ namespace py {
                 imax = static_cast<Py_ssize_t>(pairvec.size());
             }
             
-            if (!bool(imax)) {
+            if (imax < 1) {
                 PyErr_Format(PyExc_ValueError,
                     "Structcode %.200s parsed to zero-length", code);
                 return NULL;
@@ -37,9 +37,12 @@ namespace py {
             /// Make python list of tuples
             PyObject* tuple = PyTuple_New(imax);
             for (Py_ssize_t idx = 0; idx < imax; idx++) {
+                std::string endianized(endianness + pairvec[idx].second);
                 PyTuple_SET_ITEM(tuple, idx, PyTuple_Pack(2,
-                    PyString_FromString(pairvec[idx].first.c_str()),
-                    PyString_FromString((endianness + pairvec[idx].second).c_str())));
+                    PyString_FromStringAndSize(pairvec[idx].first.c_str(),
+                                               pairvec[idx].first.size()),
+                    PyString_FromStringAndSize(endianized.c_str(),
+                                               endianized.size())));
             }
             
             return tuple;
@@ -91,8 +94,9 @@ namespace py {
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
                              PyList_Append(list,
-                                 PyString_FromString(
-                                     format.c_str()));
+                                 PyString_FromStringAndSize(
+                                     format.c_str(),
+                                     format.size()));
                          } ++idx; }
             return PyList_AsTuple(list);
         }

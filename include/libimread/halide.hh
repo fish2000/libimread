@@ -27,11 +27,11 @@ namespace im {
         template <typename PixelType>
         struct for_type;
         
-        #define DEFINE_TYPE_MAPPING(PixelType, StructType)                  \
-        template <>                                                         \
-        struct for_type<PixelType> {                                        \
-            using type = PixelType;                                         \
-            static Halide::Type get() { return Halide::StructType; }        \
+        #define DEFINE_TYPE_MAPPING(PixelType, StructType)                              \
+        template <>                                                                     \
+        struct for_type<PixelType> {                                                    \
+            using type = PixelType;                                                     \
+            static Halide::Type get() { return Halide::StructType; }                    \
         };
         
         DEFINE_TYPE_MAPPING(bool,           Bool());
@@ -47,6 +47,13 @@ namespace im {
         DEFINE_TYPE_MAPPING(double,         Float(64));
         DEFINE_TYPE_MAPPING(long double,    Float(64));
         
+        // #ifdef __OBJC__
+        // DEFINE_TYPE_MAPPING(BOOL,           Bool());
+        // DEFINE_TYPE_MAPPING(NSInteger,      Int(sizeof(NSInteger) * 8));
+        // DEFINE_TYPE_MAPPING(NSUInteger,     UInt(sizeof(NSUInteger) * 8));
+        // DEFINE_TYPE_MAPPING(CGFloat,        Float(sizeof(CGFloat) * 8));
+        // #endif /// __OBJC__
+        
         template <typename PointerBase>
         struct for_type<PointerBase*> {
             using type = std::add_pointer_t<PointerBase>;
@@ -54,13 +61,13 @@ namespace im {
         };
         
         template <typename PixelType> inline
-        Halide::Type halide_t() { return for_type<std::remove_pointer_t<
+        Halide::Type halide_t() { return for_type<std::remove_cv_t<
                                                   std::decay_t<PixelType>>>::get(); }
         
     } /* namespace detail */
     
     template <typename T>
-    using HalImage = Halide::Image<typename std::decay<T>::type>;
+    using HalImage = Halide::Image<std::decay_t<T>>;
     using MetaImage = ImageWithMetadata;
     
     using Halide::Expr;
@@ -173,44 +180,106 @@ namespace im {
     
     template <typename T>
     class HalideFactory : public ImageFactory {
+    
+        public:
+            using pixel_t  = T;
+            using image_t  = HybridImage<pixel_t>;
+            using unique_t = std::unique_ptr<Image>;
+            using shared_t = std::shared_ptr<Image>;
+        
         private:
-            std::string nm;
+            std::string factory_name;
+            Halide::Type factory_type;
         
         public:
-            using pixel_t = T;
-            using image_t = HybridImage<T>;
             
             HalideFactory()
-                :nm("")
+                :factory_name("")
+                ,factory_type(detail::halide_t<pixel_t>())
                 {}
             HalideFactory(std::string const& n)
-                :nm(n)
+                :factory_name(n)
+                ,factory_type(detail::halide_t<pixel_t>())
                 {}
             
             virtual ~HalideFactory() {}
             
-            Halide::Type type() {
-                return detail::halide_t<T>();
-            }
-            
-            std::string& name() { return nm; }
-            void name(std::string const& nnm) { nm = nnm; }
+            Halide::Type type()                                 { return factory_type; }
+            std::string const& name()                           { return factory_name; }
+            std::string const& name(std::string const& nm)      { factory_name = nm; return name(); }
             
         protected:
-            virtual std::unique_ptr<Image> create(int nbits,
-                                                  int xHEIGHT, int xWIDTH, int xDEPTH,
-                                                  int d3, int d4) override {
-                return std::unique_ptr<Image>(
-                    new image_t(xWIDTH, xHEIGHT, xDEPTH));
+            virtual unique_t create(int nbits,
+                                    int xHEIGHT, int xWIDTH, int xDEPTH,
+                                    int d3, int d4) override {
+                return unique_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
             }
             
-            virtual std::shared_ptr<Image> shared(int nbits,
-                                                  int xHEIGHT, int xWIDTH, int xDEPTH,
-                                                  int d3, int d4) override {
-                return std::shared_ptr<Image>(
-                    new image_t(xWIDTH, xHEIGHT, xDEPTH));
+            virtual shared_t shared(int nbits,
+                                    int xHEIGHT, int xWIDTH, int xDEPTH,
+                                    int d3, int d4) override {
+                return shared_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
             }
     };
+    
+    // class HalideRuntimeFactory : public ImageFactory {
+    //
+    //     public:
+    //         using pixel_t  = uint8_t;
+    //         using image_t  = HybridImage<uint8_t>;
+    //         // detail::halide_t<pixel_t>()
+    //         using unique_t  = std::unique_ptr<Image>;
+    //         using shared_t  = std::shared_ptr<Image>;
+    //         using haltype_t = Halide::Type;
+    //
+    //     private:
+    //         std::string factory_name;
+    //         haltype_t factory_type;
+    //
+    //     public:
+    //
+    //         HalideFactory()
+    //             :factory_name("")
+    //             ,factory_type(Halide::Handle())
+    //             {}
+    //         HalideFactory(std::string const& n)
+    //             :factory_name(n)
+    //             ,factory_type(Halide::Handle())
+    //             {}
+    //         HalideFactory(haltype_t const& haltype)
+    //             :factory_name("")
+    //             ,factory_type(haltype)
+    //             {}
+    //         HalideFactory(haltype_t const& haltype, std::string const& n)
+    //             :factory_name(n)
+    //             ,factory_type(haltype)
+    //             {}
+    //         /// and why not
+    //         HalideFactory(std::string const& n, haltype_t const& haltype)
+    //             :factory_name(n)
+    //             ,factory_type(haltype)
+    //             {}
+    //
+    //         virtual ~HalideFactory() {}
+    //
+    //         Halide::Type type()                                 { return factory_type; }
+    //         std::string const& name()                           { return factory_name; }
+    //         std::string const& name(std::string const& nm)      { factory_name = nm; return name(); }
+    //
+    //     protected:
+    //         virtual unique_t create(int nbits,
+    //                                 int xHEIGHT, int xWIDTH, int xDEPTH,
+    //                                 int d3, int d4) override {
+    //             return unique_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
+    //         }
+    //
+    //         virtual shared_t shared(int nbits,
+    //                                 int xHEIGHT, int xWIDTH, int xDEPTH,
+    //                                 int d3, int d4) override {
+    //             return shared_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
+    //         }
+    // };
+    
     
 #undef xWIDTH
 #undef xHEIGHT

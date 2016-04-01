@@ -40,13 +40,6 @@ namespace py {
         template <typename BufferType = buffer_t>
         struct BufferModelBase {
             
-            template <typename B>
-            struct nop {
-                constexpr nop() noexcept = default;
-                template <typename U> nop(nop<U> const&) noexcept {}
-                void operator()(std::add_pointer_t<B> ptr) { /*NOP*/ }
-            };
-            
             using unique_buffer_t = std::unique_ptr<BufferType>;
             
             static PyTypeObject* type_ptr() { return &BufferModel_Type; }
@@ -56,6 +49,7 @@ namespace py {
                 BufferModelBase* self = reinterpret_cast<BufferModelBase*>(
                     type->tp_alloc(type, 0));
                 if (self != NULL) {
+                    self->weakrefs = NULL;
                     self->internal = unique_buffer_t(nullptr);
                 }
                 return reinterpret_cast<void*>(self);
@@ -63,20 +57,23 @@ namespace py {
             
             void operator delete(void* voidself) {
                 BufferModelBase* self = reinterpret_cast<BufferModelBase*>(voidself);
+                PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
+                if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
                 self->cleanup();
-                type_ptr()->tp_free(reinterpret_cast<PyObject*>(self));
+                type_ptr()->tp_free(pyself);
             }
             
             PyObject_HEAD
-            unique_buffer_t internal;
+            PyObject* weakrefs = nullptr;
             bool clean = false;
+            unique_buffer_t internal;
             
             BufferModelBase()
                 :internal(std::make_unique<BufferType>())
                 {}
             explicit BufferModelBase(BufferType* buffer)
-                :internal(unique_buffer_t(buffer))
-                ,clean(true)
+                :clean(true)
+                ,internal(unique_buffer_t(buffer))
                 {}
             
             Py_ssize_t __len__() {
@@ -90,9 +87,57 @@ namespace py {
                 return Py_BuildValue("I", internal->host[idx]);
             }
             
-            static Py_ssize_t typeflags() {
+            int getbuffer(Py_buffer* view, int flags) {
+                {
+                    py::gil::release nogil;
+                    BufferType* internal_ptr = internal.get();
+                    
+                    view->buf = internal_ptr->host;
+                    view->ndim = 0;
+                    view->ndim += internal_ptr->extent[0] ? 1 : 0;
+                    view->ndim += internal_ptr->extent[1] ? 1 : 0;
+                    view->ndim += internal_ptr->extent[2] ? 1 : 0;
+                    view->ndim += internal_ptr->extent[3] ? 1 : 0;
+                    
+                    view->format = ::strdup(im::detail::structcode(NPY_UINT8));
+                    view->shape = new Py_ssize_t[view->ndim];
+                    view->strides = new Py_ssize_t[view->ndim];
+                    view->itemsize = static_cast<Py_ssize_t>(internal_ptr->elem_size);
+                    view->suboffsets = NULL;
+                    
+                    int len = 1;
+                    for (int idx = 0; idx < view->ndim; idx++) {
+                        len *= internal_ptr->extent[idx] ? internal_ptr->extent[idx] : 1;
+                        view->shape[idx] = internal_ptr->extent[idx] ? internal_ptr->extent[idx] : 1;
+                        view->strides[idx] = internal_ptr->stride[idx] ? internal_ptr->stride[idx] : 1;
+                    }
+                    
+                    view->len = len * view->itemsize;
+                    view->readonly = 1; /// true
+                    view->internal = (void*)"I HEARD YOU LIKE BUFFERS";
+                    view->obj = NULL;
+                }
+                return 0;
+            }
+            
+            void releasebuffer(Py_buffer* view) {
+                {
+                    py::gil::release nogil;
+                    if (std::string((const char*)view->internal) == "I HEARD YOU LIKE BUFFERS") {
+                        if (view->format)   { std::free(view->format);  view->format  = nullptr; }
+                        if (view->shape)    { delete[] view->shape;     view->shape   = nullptr; }
+                        if (view->strides)  { delete[] view->strides;   view->strides = nullptr; }
+                        view->internal = nullptr;
+                    }
+                }
+                PyBuffer_Release(view);
+            }
+            
+            static constexpr Py_ssize_t typeflags() {
                 return Py_TPFLAGS_DEFAULT         |
                        Py_TPFLAGS_BASETYPE        |
+                       Py_TPFLAGS_HAVE_GC         |
+                       Py_TPFLAGS_HAVE_WEAKREFS   |
                        Py_TPFLAGS_HAVE_NEWBUFFER;
             }
             
@@ -100,14 +145,16 @@ namespace py {
                 return "Python buffer model object";
             }
             
-            void cleanup() {
-                if (clean) {
+            void cleanup(bool force = false) {
+                if (clean && !force) {
                     internal.release();
                 } else {
                     internal.reset(nullptr);
-                    clean = true;
+                    clean = !force;
                 }
             }
+            
+            int vacay(visitproc visit, void* arg) { return 0; }
         };
         
         template <typename ImageType,
@@ -128,6 +175,7 @@ namespace py {
                     ImageBufferModel* self = reinterpret_cast<ImageBufferModel*>(
                         type->tp_alloc(type, 0));
                     if (self != NULL) {
+                        self->weakrefs = NULL;
                         self->internal = typename base_t::unique_buffer_t(nullptr);
                     }
                     return reinterpret_cast<void*>(self);
@@ -135,8 +183,10 @@ namespace py {
                 
                 void operator delete(void* voidself) {
                     ImageBufferModel* self = reinterpret_cast<ImageBufferModel*>(voidself);
+                    PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
+                    if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
                     self->cleanup();
-                    ImageBufferModel::type_ptr()->tp_free(reinterpret_cast<PyObject*>(self));
+                    ImageBufferModel::type_ptr()->tp_free(pyself);
                 }
                 
                 weak_image_t image;
@@ -233,8 +283,9 @@ namespace py {
             
             void operator delete(void* voidself) {
                 ImageModelBase* self = reinterpret_cast<ImageModelBase*>(voidself);
+                PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
                 self->cleanup();
-                ImageModelBase::type_ptr()->tp_free(reinterpret_cast<PyObject*>(self));
+                ImageModelBase::type_ptr()->tp_free(pyself);
             }
             
             PyObject_HEAD
@@ -470,9 +521,10 @@ namespace py {
                 return true;
             }
             
-            static Py_ssize_t typeflags() {
+            static constexpr Py_ssize_t typeflags() {
                 return Py_TPFLAGS_DEFAULT         |
                        Py_TPFLAGS_BASETYPE        |
+                       Py_TPFLAGS_HAVE_GC         |
                        Py_TPFLAGS_HAVE_NEWBUFFER;
             }
             
@@ -482,22 +534,30 @@ namespace py {
             
             void swap(ImageModelBase& other) noexcept {
                 using std::swap;
-                swap(image, other.image);
-                swap(dtype, other.dtype);
-                swap(imagebuffer, other.imagebuffer);
-                swap(readoptDict, other.readoptDict);
-                swap(writeoptDict, other.writeoptDict);
+                swap(image,         other.image);
+                swap(dtype,         other.dtype);
+                swap(imagebuffer,   other.imagebuffer);
+                swap(readoptDict,   other.readoptDict);
+                swap(writeoptDict,  other.writeoptDict);
             }
             
-            void cleanup() {
-                if (!clean) {
+            void cleanup(bool force = false) {
+                if (!clean || force) {
                     image.reset();
                     Py_CLEAR(dtype);
                     Py_CLEAR(imagebuffer);
                     Py_CLEAR(readoptDict);
                     Py_CLEAR(writeoptDict);
-                    clean = true;
+                    clean = !force;
                 }
+            }
+            
+            /// Arguments to ImageModel::vacay() are as required
+            /// by the Py_VISIT(), w/r/t both types and names
+            int vacay(visitproc visit, void* arg) {
+                Py_VISIT(dtype);
+                Py_VISIT(readoptDict);
+                Py_VISIT(writeoptDict);
             }
             
         }; /* ImageModelBase */
@@ -548,7 +608,6 @@ namespace py {
                     string_size);
             }
             
-            
             /// __len__ implementaton
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
@@ -568,50 +627,14 @@ namespace py {
                       typename PythonBufferType = BufferModelBase<BufferType>>
             int getbuffer(PyObject* self, Py_buffer* view, int flags) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                {
-                    py::gil::release nogil;
-                    view->buf = pybuf->internal->host;
-                    
-                    view->ndim = 0;
-                    view->ndim += pybuf->internal->extent[0] ? 1 : 0;
-                    view->ndim += pybuf->internal->extent[1] ? 1 : 0;
-                    view->ndim += pybuf->internal->extent[2] ? 1 : 0;
-                    view->ndim += pybuf->internal->extent[3] ? 1 : 0;
-                    
-                    view->format = ::strdup(im::detail::structcode(NPY_UINT8));
-                    view->shape = new Py_ssize_t[view->ndim];
-                    view->strides = new Py_ssize_t[view->ndim];
-                    view->itemsize = (Py_ssize_t)pybuf->internal->elem_size;
-                    view->suboffsets = NULL;
-                    
-                    int len = 1;
-                    for (int idx = 0; idx < view->ndim; idx++) {
-                        len *= pybuf->internal->extent[idx] ? pybuf->internal->extent[idx] : 1;
-                        view->shape[idx] = pybuf->internal->extent[idx] ? pybuf->internal->extent[idx] : 1;
-                        view->strides[idx] = pybuf->internal->stride[idx] ? pybuf->internal->stride[idx] : 1;
-                    }
-                    
-                    view->len = len * view->itemsize;
-                    view->readonly = 1; /// true
-                    view->internal = (void*)"I HEARD YOU LIKE BUFFERS";
-                    view->obj = NULL;
-                }
-                return 0;
+                return pybuf->getbuffer(view, flags);
             }
             
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             void releasebuffer(PyObject* self, Py_buffer* view) {
-                {
-                    py::gil::release nogil;
-                    if (std::string((const char*)view->internal) == "I HEARD YOU LIKE BUFFERS") {
-                        if (view->format)   { std::free(view->format);  view->format  = nullptr; }
-                        if (view->shape)    { delete[] view->shape;     view->shape   = nullptr; }
-                        if (view->strides)  { delete[] view->strides;   view->strides = nullptr; }
-                        view->internal = nullptr;
-                    }
-                }
-                PyBuffer_Release(view);
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                pybuf->releasebuffer(view);
             }
             
             /// DEALLOCATE
@@ -620,6 +643,32 @@ namespace py {
             void dealloc(PyObject* self) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
                 delete pybuf;
+            }
+            
+            /// CLEAR
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            int clear(PyObject* self) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                pybuf->cleanup(true);
+                return 0;
+            }
+            
+            /// TRAVERSE
+            // template <typename BufferType = buffer_t,
+            //           typename PythonBufferType = BufferModelBase<BufferType>,
+            //           typename ...Args>
+            // int traverse(PyObject* self, Args&& ...args) {
+            //     PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+            //     pybuf->vacay(std::forward<Args>(args)...);
+            //     return 0;
+            // }
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            int traverse(PyObject* self, visitproc visit, void* arg) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                pybuf->vacay(visit, arg);
+                return 0;
             }
             
         }; /* namespace buffer */
@@ -880,6 +929,26 @@ namespace py {
                 delete pyim;
             }
             
+            /// CLEAR
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            int clear(PyObject* self) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                pyim->cleanup(true);
+                return 0;
+            }
+            
+            /// TRAVERSE
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            int traverse(PyObject* self, visitproc visit, void* arg) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                pyim->vacay(visit, arg);
+                return 0;
+            }
+            
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
@@ -985,8 +1054,7 @@ namespace py {
                         return NULL;
                     }
                     out = PyString_FromStringAndSize(
-                        (char const*)&data[0],
-                        data.size());
+                        (char const*)&data[0], data.size());
                     if (out == NULL) {
                         PyErr_SetString(PyExc_ValueError,
                             "Failed converting output to Python string");
@@ -994,8 +1062,8 @@ namespace py {
                     return out;
                 }
                 /// "else":
-                return PyString_FromStringAndSize(dststr.c_str(),
-                                                  dststr.size());
+                return PyString_FromStringAndSize(
+                    dststr.c_str(), dststr.size());
             }
             
             /// HybridImage.dtype getter
@@ -1005,6 +1073,15 @@ namespace py {
             PyObject*    get_dtype(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 return Py_BuildValue("O", pyim->dtype);
+            }
+            
+            /// HybridImage.imagebuffer getter
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    get_imagebuffer(PyObject* self, void* closure) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return Py_BuildValue("O", pyim->imagebuffer);
             }
             
             /// HybridImage.shape getter
@@ -1230,6 +1307,12 @@ static PyGetSetDef Image_getset[] = {
             (getter)py::ext::image::get_dtype<HalideNumpyImage, buffer_t>,
             nullptr,
             (char*)"Image dtype",
+            nullptr },
+    {
+        (char*)"buffer",
+            (getter)py::ext::image::get_imagebuffer<HalideNumpyImage, buffer_t>,
+            nullptr,
+            (char*)"Underlying data buffer accessor object",
             nullptr },
     {
         (char*)"shape",

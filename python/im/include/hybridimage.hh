@@ -547,8 +547,7 @@ namespace py {
                     return NULL;
                 }
                 out = PyString_FromStringAndSize(
-                    (char const*)&data[0],
-                    data.size());
+                    (char const*)&data[0], data.size());
                 if (out == NULL) {
                     PyErr_SetString(PyExc_ValueError,
                         "Failed converting output to Python string");
@@ -556,7 +555,8 @@ namespace py {
                 return out;
             }
             /// "else":
-            return PyString_FromString(dststr.c_str());
+            return PyString_FromStringAndSize(
+                dststr.c_str(), dststr.size());
         }
         
         /// HybridImage.dtype getter

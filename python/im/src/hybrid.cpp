@@ -73,25 +73,28 @@ namespace im {
     int PythonBufferImage::populate_buffer(Py_buffer* view,
                                            NPY_TYPES dtype,
                                            int flags) {
-        view->buf = rowp(0);
-        view->ndim = ndims();
-        view->format = ::strdup(detail::structcode(dtype));
-        view->shape = new Py_ssize_t[ndims()];
-        view->strides = new Py_ssize_t[ndims()];
-        view->itemsize = (Py_ssize_t)nbytes();
-        view->suboffsets = NULL;
+        int dimensions          = ndims();
+        int bytes               = nbytes();
+        view->buf               = rowp(0);
+        view->ndim              = dimensions;
+        view->format            = ::strdup(detail::structcode(dtype));
+        view->shape             = new Py_ssize_t[dimensions];
+        view->strides           = new Py_ssize_t[dimensions];
+        view->itemsize          = static_cast<Py_ssize_t>(bytes);
+        view->suboffsets        = NULL;
         
         int len = 1;
-        for (int idx = 0; idx < view->ndim; idx++) {
-            len *= dim_or(idx, 1);
-            view->shape[idx] = dim_or(idx, 1);
-            view->strides[idx] = stride_or(idx, 1);
+        for (int idx = 0; idx < dimensions; idx++) {
+            int dim_or_one      = dim_or(idx, 1);
+            len *= dim_or_one;
+            view->shape[idx]    = dim_or_one;
+            view->strides[idx]  = stride_or(idx, 1);
         }
         
-        view->len = len * nbytes();
-        view->readonly = 1; /// true
-        view->internal = (void*)"YO DOGG";
-        view->obj = NULL;
+        view->len               = len * bytes;
+        view->readonly          = 1; /// true
+        view->internal          = (void*)"YO DOGG";
+        view->obj               = NULL;
         
         /// per the Python API:
         return 0;
@@ -139,8 +142,9 @@ namespace im {
     HalideNumpyImage::~HalideNumpyImage() {}
     
     PyObject* HalideNumpyImage::metadataPyObject() {
-        const std::string& s = MetaImage::get_meta();
-        if (s != "") { return PyBytes_FromString(s.c_str()); }
+        std::string const& s = MetaImage::get_meta();
+        if (s != "") { return PyBytes_FromStringAndSize(s.c_str(),
+                                                        s.size()); }
         Py_RETURN_NONE;
     }
     

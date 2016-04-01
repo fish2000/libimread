@@ -102,28 +102,27 @@ namespace im {
         
         public:
             using image_t = Image;
+            using unique_t = std::unique_ptr<image_t>;
+            using shared_t = std::shared_ptr<image_t>;
             
-            virtual ~ImageFactory() { }
+            virtual ~ImageFactory() {}
             
-            virtual std::unique_ptr<image_t>
-                create(int nbits,
+            virtual unique_t create(int nbits,
                     int d0, int d1, int d2,
                     int d3=-1, int d4=-1) = 0;
             
-            virtual std::shared_ptr<image_t>
-                shared(int nbits,
+            virtual shared_t shared(int nbits,
                     int d0, int d1, int d2,
                     int d3=-1, int d4=-1) = 0;
             
         protected:
             template <typename T>
-            std::shared_ptr<T>
-                specialized(int nbits,
-                    int d0, int d1, int d2,
-                    int d3=-1, int d4=-1) {
-                        return std::dynamic_pointer_cast<T>(
-                            shared(nbits, d0, d1, d2, d3, d4));
-                    };
+            std::shared_ptr<T> specialized(int nbits,
+                           int d0, int d1, int d2,
+                           int d3=-1, int d4=-1) {
+                return std::dynamic_pointer_cast<T>(
+                    shared(nbits, d0, d1, d2, d3, d4));
+            };
     };
     
     class ImageWithMetadata {

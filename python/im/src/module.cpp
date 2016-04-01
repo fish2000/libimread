@@ -1,4 +1,5 @@
 
+#include <cstddef>
 #include "module.hpp"
 
 PyTypeObject HybridImageModel_Type = {
@@ -75,10 +76,10 @@ PyTypeObject BufferModel_Type = {
     &Buffer_Buffer3000Methods,                                          /* tp_as_buffer */
     py::ext::BufferModel::typeflags(),                                  /* tp_flags */
     py::ext::BufferModel::typedoc(),                                    /* tp_doc */
-    0,                                                                  /* tp_traverse */
-    0,                                                                  /* tp_clear */
+    (traverseproc)py::ext::buffer::traverse<buffer_t>,                  /* tp_traverse */
+    (inquiry)py::ext::buffer::clear<buffer_t>,                          /* tp_clear */
     0,                                                                  /* tp_richcompare */
-    0,                                                                  /* tp_weaklistoffset */
+    py::detail::offset(&BufferModel::weakrefs),                         /* tp_weaklistoffset */
     0,                                                                  /* tp_iter */
     0,                                                                  /* tp_iternext */
     Buffer_methods,                                                     /* tp_methods */
@@ -126,8 +127,8 @@ PyTypeObject ImageModel_Type = {
     &Image_Buffer3000Methods,                                           /* tp_as_buffer */
     py::ext::ImageModel::typeflags(),                                   /* tp_flags */
     py::ext::ImageModel::typedoc(),                                     /* tp_doc */
-    0,                                                                  /* tp_traverse */
-    0,                                                                  /* tp_clear */
+    (traverseproc)py::ext::image::traverse<HalideNumpyImage, buffer_t>, /* tp_traverse */
+    (inquiry)py::ext::image::clear<HalideNumpyImage, buffer_t>,         /* tp_clear */
     0,                                                                  /* tp_richcompare */
     0,                                                                  /* tp_weaklistoffset */
     0,                                                                  /* tp_iter */
@@ -154,11 +155,13 @@ PyTypeObject ImageModel_Type = {
     0,                                                                  /* tp_version_tag */
 };
 
+// static_assert(std::is_standard_layout<ImageBufferModel>::value,
+//               "ImageBufferModel isn't standard-layout -- offsetof(ImageBufferModel) is UB!");
+
 PyTypeObject ImageBufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                      /* ob_size */
-    // "im.Image.ImageBuffer",                                              /* tp_name */
-    "im.ImageBuffer",                                                       /* tp_name */
+    "im.Image.Buffer",                                                      /* tp_name */
     sizeof(ImageBufferModel),                                               /* tp_basicsize */
     0,                                                                      /* tp_itemsize */
     (destructor)py::ext::buffer::dealloc<buffer_t, ImageBufferModel>,       /* tp_dealloc */
@@ -178,10 +181,10 @@ PyTypeObject ImageBufferModel_Type = {
     &ImageBuffer_Buffer3000Methods,                                         /* tp_as_buffer */
     py::ext::ImageModel::ImageBufferModel::typeflags(),                     /* tp_flags */
     py::ext::ImageModel::ImageBufferModel::typedoc(),                       /* tp_doc */
-    0,                                                                      /* tp_traverse */
-    0,                                                                      /* tp_clear */
+    (traverseproc)py::ext::buffer::traverse<buffer_t, ImageBufferModel>,    /* tp_traverse */
+    (inquiry)py::ext::buffer::clear<buffer_t, ImageBufferModel>,            /* tp_clear */
     0,                                                                      /* tp_richcompare */
-    0,                                                                      /* tp_weaklistoffset */
+    py::detail::offset(&ImageBufferModel::weakrefs),                        /* tp_weaklistoffset */
     0,                                                                      /* tp_iter */
     0,                                                                      /* tp_iternext */
     ImageBuffer_methods,                                                    /* tp_methods */
@@ -294,7 +297,7 @@ PyMODINIT_FUNC initim(void) {
     /// ... thanks SO! http://stackoverflow.com/q/35954016/298171
     Py_INCREF(&ImageBufferModel_Type);
     PyDict_SetItemString(ImageModel_Type.tp_dict,
-        "ImageBuffer",
+        "Buffer",
         (PyObject*)&ImageBufferModel_Type);
     
     /// Add the ImageModel type object to the module
