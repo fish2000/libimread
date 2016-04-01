@@ -79,7 +79,9 @@ namespace im {
             const pdiff_t stride0, stride1, stride2;
             
             /// default constexpr constructor
-            constexpr accessor() = default;
+            constexpr accessor()
+                :data_pointer(nullptr), stride0(0), stride1(0), stride2(0)
+                {}
             
             /// One-way constructor
             explicit accessor(pdata_t* __restrict__ dp,
