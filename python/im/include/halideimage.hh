@@ -655,14 +655,6 @@ namespace py {
             }
             
             /// TRAVERSE
-            // template <typename BufferType = buffer_t,
-            //           typename PythonBufferType = BufferModelBase<BufferType>,
-            //           typename ...Args>
-            // int traverse(PyObject* self, Args&& ...args) {
-            //     PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-            //     pybuf->vacay(std::forward<Args>(args)...);
-            //     return 0;
-            // }
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             int traverse(PyObject* self, visitproc visit, void* arg) {

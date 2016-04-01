@@ -47,13 +47,6 @@ namespace im {
         DEFINE_TYPE_MAPPING(double,         Float(64));
         DEFINE_TYPE_MAPPING(long double,    Float(64));
         
-        // #ifdef __OBJC__
-        // DEFINE_TYPE_MAPPING(BOOL,           Bool());
-        // DEFINE_TYPE_MAPPING(NSInteger,      Int(sizeof(NSInteger) * 8));
-        // DEFINE_TYPE_MAPPING(NSUInteger,     UInt(sizeof(NSUInteger) * 8));
-        // DEFINE_TYPE_MAPPING(CGFloat,        Float(sizeof(CGFloat) * 8));
-        // #endif /// __OBJC__
-        
         template <typename PointerBase>
         struct for_type<PointerBase*> {
             using type = std::add_pointer_t<PointerBase>;
