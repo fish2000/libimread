@@ -22,6 +22,7 @@
 #include <libimread/errors.hh>
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
+#include <libimread/pixels.hh>
 
 namespace py {
     
@@ -41,6 +42,7 @@ namespace py {
         struct BufferModelBase {
             
             using unique_buffer_t = std::unique_ptr<BufferType>;
+            using accessor_t = im::pix::accessor<byte>;
             
             static PyTypeObject* type_ptr() { return &BufferModel_Type; }
             
@@ -67,13 +69,18 @@ namespace py {
             PyObject* weakrefs = nullptr;
             bool clean = false;
             unique_buffer_t internal;
+            accessor_t accessor;
             
             BufferModelBase()
                 :internal(std::make_unique<BufferType>())
+                ,accessor{}
                 {}
             explicit BufferModelBase(BufferType* buffer)
                 :clean(true)
                 ,internal(unique_buffer_t(buffer))
+                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
+                                          internal->extent[1] ? internal->stride[1] : 0,
+                                          internal->extent[2] ? internal->stride[2] : 0)
                 {}
             
             Py_ssize_t __len__() {
@@ -272,6 +279,7 @@ namespace py {
                 ImageModelBase* self = reinterpret_cast<ImageModelBase*>(
                     type->tp_alloc(type, 0));
                 if (self != NULL) {
+                    self->weakrefs = NULL;
                     self->image = shared_image_t(nullptr);
                     self->dtype = nullptr;
                     self->imagebuffer = nullptr;
@@ -284,11 +292,13 @@ namespace py {
             void operator delete(void* voidself) {
                 ImageModelBase* self = reinterpret_cast<ImageModelBase*>(voidself);
                 PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
+                if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
                 self->cleanup();
                 ImageModelBase::type_ptr()->tp_free(pyself);
             }
             
             PyObject_HEAD
+            PyObject* weakrefs = nullptr;
             shared_image_t image;
             PyArray_Descr* dtype = nullptr;
             PyObject* imagebuffer = nullptr;
@@ -297,31 +307,36 @@ namespace py {
             bool clean = false;
             
             ImageModelBase()
-                :image(std::make_shared<ImageType>())
+                :weakrefs(nullptr)
+                ,image(std::make_shared<ImageType>())
                 ,dtype(nullptr)
                 ,imagebuffer(nullptr)
                 ,readoptDict(nullptr)
                 ,writeoptDict(nullptr)
                 {}
             ImageModelBase(ImageModelBase const& other)
-                :image(other.image)
+                :weakrefs(other.weakrefs)
+                ,image(other.image)
                 ,dtype(other.dtype)
                 ,imagebuffer(other.imagebuffer)
                 ,readoptDict(other.readoptDict)
                 ,writeoptDict(other.writeoptDict)
                 {
+                    Py_INCREF(weakrefs);
                     Py_INCREF(dtype);
                     Py_INCREF(imagebuffer);
                     Py_INCREF(readoptDict);
                     Py_INCREF(writeoptDict);
                 }
             ImageModelBase(ImageModelBase&& other) noexcept
-                :image(std::move(other.image))
+                :weakrefs(other.weakrefs)
+                ,image(std::move(other.image))
                 ,dtype(other.dtype)
                 ,imagebuffer(other.imagebuffer)
                 ,readoptDict(other.readoptDict)
                 ,writeoptDict(other.writeoptDict)
                 {
+                    other.weakrefs = nullptr;
                     other.image.reset(nullptr);
                     other.dtype = nullptr;
                     other.imagebuffer = nullptr;
@@ -343,11 +358,13 @@ namespace py {
             }
             ImageModelBase& operator=(ImageModelBase&& other) noexcept {
                 if (&other != this) {
+                    weakrefs = other.weakrefs;
                     image = std::move(other.image);
                     dtype = other.dtype;
                     imagebuffer = other.imagebuffer;
                     readoptDict = other.readoptDict;
                     writeoptDict = other.writeoptDict;
+                    other.weakrefs = nullptr;
                     other.image.reset(nullptr);
                     other.dtype = nullptr;
                     other.imagebuffer = nullptr;
@@ -525,6 +542,7 @@ namespace py {
                 return Py_TPFLAGS_DEFAULT         |
                        Py_TPFLAGS_BASETYPE        |
                        Py_TPFLAGS_HAVE_GC         |
+                       Py_TPFLAGS_HAVE_WEAKREFS   |
                        Py_TPFLAGS_HAVE_NEWBUFFER;
             }
             
@@ -534,6 +552,7 @@ namespace py {
             
             void swap(ImageModelBase& other) noexcept {
                 using std::swap;
+                swap(weakrefs,      other.weakrefs);
                 swap(image,         other.image);
                 swap(dtype,         other.dtype);
                 swap(imagebuffer,   other.imagebuffer);
@@ -558,6 +577,7 @@ namespace py {
                 Py_VISIT(dtype);
                 Py_VISIT(readoptDict);
                 Py_VISIT(writeoptDict);
+                return 0;
             }
             
         }; /* ImageModelBase */
@@ -889,27 +909,20 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int getbuffer(PyObject* self, Py_buffer* view, int flags) {
+                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                int out;
-                {
-                    py::gil::release nogil;
-                    out = pyim->image->populate_buffer(view,
-                                                       (NPY_TYPES)pyim->dtype->type_num,
-                                                       flags);
-                }
-                return out;
+                imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
+                return imbuf->getbuffer(view, flags);
             }
             
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             void releasebuffer(PyObject* self, Py_buffer* view) {
+                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                {
-                    py::gil::release nogil;
-                    pyim->image->release_buffer(view);
-                }
-                PyBuffer_Release(view);
+                imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
+                imbuf->releasebuffer(view);
             }
             
             /// DEALLOCATE

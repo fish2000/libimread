@@ -130,7 +130,7 @@ PyTypeObject ImageModel_Type = {
     (traverseproc)py::ext::image::traverse<HalideNumpyImage, buffer_t>, /* tp_traverse */
     (inquiry)py::ext::image::clear<HalideNumpyImage, buffer_t>,         /* tp_clear */
     0,                                                                  /* tp_richcompare */
-    0,                                                                  /* tp_weaklistoffset */
+    py::detail::offset(&ImageModel::weakrefs),                          /* tp_weaklistoffset */
     0,                                                                  /* tp_iter */
     0,                                                                  /* tp_iternext */
     Image_methods,                                                      /* tp_methods */
@@ -154,9 +154,6 @@ PyTypeObject ImageModel_Type = {
     0,                                                                  /* tp_del */
     0,                                                                  /* tp_version_tag */
 };
-
-// static_assert(std::is_standard_layout<ImageBufferModel>::value,
-//               "ImageBufferModel isn't standard-layout -- offsetof(ImageBufferModel) is UB!");
 
 PyTypeObject ImageBufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
