@@ -98,27 +98,39 @@ namespace py {
         };
         
         template <typename Pointer,
-                  typename Context,
-                  typename Destructor = std::conditional_t<py::detail::null_or_void<Context>,
-                                                           single_destructor_t,
-                                                           double_destructor_t>>
+                  typename Destructor = single_destructor_t>
         PyObject* objectify(Pointer* pointer,
-                            Context* context,
-                            Destructor destructor = py::detail::null_or_void<Context> ?
-                                                    default_single<Pointer, Context>  :
-                                                    default_double<Pointer, Context>) {
+                            Destructor destructor = default_single<Pointer, std::nullptr_t>) {
             PyObject* cob = nullptr;
             if (!pointer) {
                 PyErr_SetString(PyExc_ValueError,
                     "Can't objectify(nullptr)");
-            } else if (!context) {
+            } else {
                 cob = PyCObject_FromVoidPtr((void*)pointer, destructor);
+            }
+            if (!cob) {
+                PyErr_SetString(PyExc_ValueError,
+                    "Failure creating PyCObject");
+            }
+            return cob;
+        }
+        
+        template <typename Pointer,
+                  typename Context,
+                  typename Destructor = double_destructor_t>
+        PyObject* objectify(Pointer* pointer,
+                            Context* context,
+                            Destructor destructor = default_double<Pointer, Context>) {
+            PyObject* cob = nullptr;
+            if (!pointer) {
+                PyErr_SetString(PyExc_ValueError,
+                    "Can't objectify(nullptr, ...)");
             } else {
                 cob = PyCObject_FromVoidPtrAndDesc((void*)pointer, (void*)context, destructor);
             }
             if (!cob) {
                 PyErr_SetString(PyExc_ValueError,
-                    "Failure creating PyCObject");
+                    "Failure creating PyCObject with context");
             }
             return cob;
         }

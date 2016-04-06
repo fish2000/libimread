@@ -289,23 +289,6 @@ namespace py {
                 }
                 
                 PyObject* __array_interface__() const {
-                    
-                    /// {
-                    ///     'shape'     : (1024, 768, 3),
-                    ///     'typestr'   : im::detail::encoding_for<byte>(),
-                    ///     'descr'     : py::detail::structcode_to_dtype(
-                    ///                   im::detail::structcode(typecode)),
-                    ///     'data'      : ( PTR-AS-INT/LONG, ReadOnlyPyBoolean),
-                    ///     'strides'   : (4800, 240, WHATEVER-in-bytes),
-                    ///     'mask'      : None,
-                    ///     'offset'    : None,         # can use an int if 'data' is a 'buffer object' 
-                    ///     'version'   : 3             # always
-                    /// }
-                    // vtmpl = std::string("(") + std::string(ndims, "i") + std::string(")");
-                    // PyDict_SetItemString(map, "shape", Py_BuildValue(vtmpl.c_str(), ));
-                    // std::string vtmpl;
-                    // PyArrayInterface* newstruct = strong_image->array_struct();
-                    
                     shared_image_t strong_image;
                     std::string encoding;
                     NPY_TYPES typecode;
@@ -347,8 +330,8 @@ namespace py {
                         newstruct = py::detail::array_struct(*strong_image.get());
                     }
                     
-                    /// std::remove_pointer_t<decltype(newstruct)>
-                    return py::cob::objectify(newstruct, nullptr,
+                    return py::cob::objectify<PyArrayInterface, py::cob::single_destructor_t>(
+                                              newstruct,
                                               array_destructor<PyArrayInterface>());
                 }
                 
