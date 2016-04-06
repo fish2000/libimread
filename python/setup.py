@@ -131,6 +131,7 @@ extensions = {
         "im/src/hybridimage.cpp",
         "im/src/options.cpp",
         "im/src/pybuffer.cpp",
+        "im/src/pycapsule.cpp",
         "im/src/structcode.cpp",
         "im/src/typecode.cpp",
         "im/src/module.cpp"

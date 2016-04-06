@@ -1,6 +1,7 @@
 
 #include <tuple>
 #include <algorithm>
+#define NO_IMPORT_ARRAY
 #include "detail.hpp"
 #include "structcode.hpp"
 #include "gil.hpp"

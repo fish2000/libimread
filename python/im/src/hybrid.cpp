@@ -193,10 +193,10 @@ namespace im {
     }
     
     /// extent, stride, min
-    NPY_TYPES HalideNumpyImage::dtype()  { return dtype_; }
-    int32_t* HalideNumpyImage::dims()    { return HalBase::raw_buffer()->extent; }
-    int32_t* HalideNumpyImage::strides() { return HalBase::raw_buffer()->stride; }
-    int32_t* HalideNumpyImage::offsets() { return HalBase::raw_buffer()->min; }
+    NPY_TYPES HalideNumpyImage::dtype() const  { return dtype_; }
+    int32_t* HalideNumpyImage::dims()          { return HalBase::raw_buffer()->extent; }
+    int32_t* HalideNumpyImage::strides()       { return HalBase::raw_buffer()->stride; }
+    int32_t* HalideNumpyImage::offsets()       { return HalBase::raw_buffer()->min; }
     
 #define xWIDTH d1
 #define xHEIGHT d0

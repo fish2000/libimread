@@ -6,7 +6,6 @@
 
 #include <string>
 #include <sstream>
-// #include <libimread/ext/iod.hh>
 #include <libimread/ext/JSON/json11.h>
 
 namespace im {

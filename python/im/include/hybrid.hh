@@ -20,7 +20,81 @@ namespace im {
         Halide::Type for_dtype(NPY_TYPES dtype);
         NPY_TYPES for_nbits(int nbits, bool signed_type = false);
         
-    }
+        enum class Endian : char
+        {
+            Unspecified = '|',
+            Little      = '<',
+            Big         = '>'
+        };
+        
+        template <typename PixelType>
+        struct encode_type;
+        
+        #define DEFINE_TYPE_ENCODING(PixelType, character)                              \
+        template <>                                                                     \
+        struct encode_type<PixelType> {                                                 \
+            using type = PixelType;                                                     \
+            static constexpr std::size_t typesize() { return sizeof(type); }            \
+            static constexpr char typekind() { return character; }                      \
+            static std::string typestr(Endian endian = Endian::Unspecified) {           \
+                char endianness = static_cast<char>(endian);                            \
+                int buffer_size = std::snprintf(nullptr, 0,                             \
+                                                "%c%c%lu",                              \
+                                                endianness, typekind(), typesize());    \
+                char out_buffer[buffer_size];                                           \
+                int buffer_used = std::snprintf(out_buffer, buffer_size,                \
+                                                "%c%c%lu",                              \
+                                                endianness, typekind(), typesize());    \
+                return std::string(out_buffer, buffer_used);                            \
+            }                                                                           \
+        };
+        
+        DEFINE_TYPE_ENCODING(bool,           'b');
+        DEFINE_TYPE_ENCODING(uint8_t,        'u');
+        DEFINE_TYPE_ENCODING(uint16_t,       'u');
+        DEFINE_TYPE_ENCODING(uint32_t,       'u');
+        DEFINE_TYPE_ENCODING(uint64_t,       'u');
+        DEFINE_TYPE_ENCODING(int8_t,         'i');
+        DEFINE_TYPE_ENCODING(int16_t,        'i');
+        DEFINE_TYPE_ENCODING(int32_t,        'i');
+        DEFINE_TYPE_ENCODING(int64_t,        'i');
+        DEFINE_TYPE_ENCODING(float,          'f');
+        DEFINE_TYPE_ENCODING(double,         'f');
+        DEFINE_TYPE_ENCODING(long double,    'f');
+        DEFINE_TYPE_ENCODING(PyObject*,      'O');
+        DEFINE_TYPE_ENCODING(char*,          'S');
+        DEFINE_TYPE_ENCODING(char const*,    'S');
+        DEFINE_TYPE_ENCODING(wchar_t*,       'U');
+        
+        template <typename PointerBase>
+        struct encode_type<PointerBase*> {
+            using type = std::add_pointer_t<PointerBase>;
+            static constexpr std::size_t typesize() { return sizeof(type); }
+            static constexpr char typekind() { return 'V'; }
+            static std::string typestr(Endian e = Endian::Unspecified) {
+                char endianness = static_cast<char>(e);
+                int buffer_size = std::snprintf(nullptr, 0,
+                                                "%cV%i", endianness, typesize());
+                char out_buffer[buffer_size];
+                int buffer_used = std::snprintf(out_buffer, buffer_size,
+                                                "%cV%i", endianness, typesize());
+                return std::string(out_buffer, buffer_used);
+            }
+        };
+        
+        template <typename PixelType> inline
+        std::string encoding_for(Endian e = Endian::Unspecified) {
+            return encode_type<std::remove_cv_t<
+                               std::decay_t<PixelType>>>::typestr(e);
+        }
+        
+        template <typename PixelType> inline
+        const char character_for() {
+            return encode_type<std::remove_cv_t<
+                               std::decay_t<PixelType>>>::typekind();
+        }
+        
+    };
     
     class PythonBufferImage : public Image {
         
@@ -70,7 +144,7 @@ namespace im {
             virtual void* rowp(int r) const override;
             
             /// extent, stride, min
-            virtual NPY_TYPES dtype();
+            virtual NPY_TYPES dtype() const;
             virtual int32_t* dims();
             virtual int32_t* strides();
             virtual int32_t* offsets();

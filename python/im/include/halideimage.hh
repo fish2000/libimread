@@ -14,6 +14,8 @@
 #include "detail.hpp"
 #include "options.hpp"
 #include "pybuffer.hpp"
+#include "pycapsule.hpp"
+#include "typecode.hpp"
 #include "hybrid.hh"
 
 #include <libimread/ext/errors/demangle.hh>
@@ -41,8 +43,9 @@ namespace py {
         template <typename BufferType = buffer_t>
         struct BufferModelBase {
             
+            using pixel_t = byte;
             using unique_buffer_t = std::unique_ptr<BufferType>;
-            using accessor_t = im::pix::accessor<byte>;
+            using accessor_t = im::pix::accessor<pixel_t>;
             
             static PyTypeObject* type_ptr() { return &BufferModel_Type; }
             
@@ -82,6 +85,17 @@ namespace py {
                                           internal->extent[1] ? internal->stride[1] : 0,
                                           internal->extent[2] ? internal->stride[2] : 0)
                 {}
+            
+            void cleanup(bool force = false) {
+                if (clean && !force) {
+                    internal.release();
+                } else {
+                    internal.reset(nullptr);
+                    clean = !force;
+                }
+            }
+            
+            int vacay(visitproc visit, void* arg) { return 0; }
             
             Py_ssize_t __len__() {
                 return (internal->extent[0] ? internal->extent[0] : 1) *
@@ -151,17 +165,6 @@ namespace py {
             static char const* typedoc() {
                 return "Python buffer model object";
             }
-            
-            void cleanup(bool force = false) {
-                if (clean && !force) {
-                    internal.release();
-                } else {
-                    internal.reset(nullptr);
-                    clean = !force;
-                }
-            }
-            
-            int vacay(visitproc visit, void* arg) { return 0; }
         };
         
         template <typename ImageType,
@@ -268,6 +271,85 @@ namespace py {
                     }
                     uint32_t op = strong_image->template rowp_as<uint32_t>(0)[nidx];
                     return Py_BuildValue("I", op);
+                }
+                
+                template <typename Pointer = PyArrayInterface,
+                          typename = std::nullptr_t>
+                py::cob::single_destructor_t array_destructor() const {
+                    py::cob::single_destructor_t array_destruct = [](void* voidptr) {
+                        Pointer* pointer = (Pointer*)voidptr;
+                        if (pointer) {
+                            delete pointer->shape;
+                            delete pointer->strides;
+                            Py_XDECREF(pointer->descr);
+                            delete pointer;
+                        }
+                    };
+                    return array_destruct;
+                }
+                
+                PyObject* __array_interface__() const {
+                    
+                    /// {
+                    ///     'shape'     : (1024, 768, 3),
+                    ///     'typestr'   : im::detail::encoding_for<byte>(),
+                    ///     'descr'     : py::detail::structcode_to_dtype(
+                    ///                   im::detail::structcode(typecode)),
+                    ///     'data'      : ( PTR-AS-INT/LONG, ReadOnlyPyBoolean),
+                    ///     'strides'   : (4800, 240, WHATEVER-in-bytes),
+                    ///     'mask'      : None,
+                    ///     'offset'    : None,         # can use an int if 'data' is a 'buffer object' 
+                    ///     'version'   : 3             # always
+                    /// }
+                    // vtmpl = std::string("(") + std::string(ndims, "i") + std::string(")");
+                    // PyDict_SetItemString(map, "shape", Py_BuildValue(vtmpl.c_str(), ));
+                    // std::string vtmpl;
+                    // PyArrayInterface* newstruct = strong_image->array_struct();
+                    
+                    shared_image_t strong_image;
+                    std::string encoding;
+                    NPY_TYPES typecode;
+                    char const* structcode;
+                    long literal_pointer;
+                    int ndims;
+                    
+                    {
+                        py::gil::release nogil;
+                        strong_image = image.lock();
+                        ndims = strong_image->ndims();
+                        typecode = strong_image->dtype();
+                        structcode = im::detail::structcode(typecode);
+                        encoding = im::detail::encoding_for<uint8_t>();
+                        literal_pointer = (long)strong_image->template rowp_as<uint8_t>(0);
+                    }
+                    
+                    PyObject* map = PyDict_New();
+                    typename shared_image_t::element_type const& imageref = *strong_image.get();
+                    PyDict_SetItemString(map, "version",    PyInt_FromSize_t(3));
+                    PyDict_SetItemString(map, "shape",      py::detail::image_shape(imageref));
+                    PyDict_SetItemString(map, "strides",    py::detail::image_strides(imageref));
+                    PyDict_SetItemString(map, "descr",      py::detail::structcode_to_dtype(structcode));
+                    PyDict_SetItemString(map, "mask",       Py_BuildValue("O", Py_None));
+                    PyDict_SetItemString(map, "offset",     Py_BuildValue("O", Py_None));
+                    PyDict_SetItemString(map, "data",       PyTuple_Pack(2,
+                                                                PyLong_FromLong(literal_pointer),
+                                                                Py_BuildValue("O", Py_True)));
+                    PyDict_SetItemString(map, "typestr",    PyString_FromStringAndSize(
+                                                                encoding.c_str(), encoding.size()));
+                    return map;
+                }
+                
+                PyObject* __array_struct__() const {
+                    PyArrayInterface* newstruct;
+                    {
+                        py::gil::release nogil;
+                        shared_image_t strong_image = image.lock();
+                        newstruct = py::detail::array_struct(*strong_image.get());
+                    }
+                    
+                    /// std::remove_pointer_t<decltype(newstruct)>
+                    return py::cob::objectify(newstruct, nullptr,
+                                              array_destructor<PyArrayInterface>());
                 }
                 
             }; /* ImageBufferModel */
@@ -381,6 +463,46 @@ namespace py {
                 return *this;
             }
             
+            void swap(ImageModelBase& other) noexcept {
+                using std::swap;
+                swap(weakrefs,      other.weakrefs);
+                swap(image,         other.image);
+                swap(dtype,         other.dtype);
+                swap(imagebuffer,   other.imagebuffer);
+                swap(readoptDict,   other.readoptDict);
+                swap(writeoptDict,  other.writeoptDict);
+            }
+            
+            void cleanup(bool force = false) {
+                if (!clean || force) {
+                    image.reset();
+                    Py_CLEAR(dtype);
+                    Py_CLEAR(imagebuffer);
+                    Py_CLEAR(readoptDict);
+                    Py_CLEAR(writeoptDict);
+                    clean = !force;
+                }
+            }
+            
+            /// Arguments to ImageModel::vacay() are as required
+            /// by the Py_VISIT(), w/r/t both types and names
+            int vacay(visitproc visit, void* arg) {
+                Py_VISIT(dtype);
+                Py_VISIT(readoptDict);
+                Py_VISIT(writeoptDict);
+                return 0;
+            }
+            
+            long __hash__() {
+                long out;
+                {
+                    py::gil::release nogil;
+                    auto bithash = blockhash::blockhash_quick(*image);
+                    out = static_cast<long>(bithash.to_ulong());
+                }
+                return out;
+            }
+            
             options_map readopts() {
                 return py::options::parse(readoptDict);
             }
@@ -477,16 +599,6 @@ namespace py {
                 return true;
             }
             
-            long __hash__() {
-                long out;
-                {
-                    py::gil::release nogil;
-                    auto bithash = blockhash::blockhash_quick(*image);
-                    out = static_cast<long>(bithash.to_ulong());
-                }
-                return out;
-            }
-            
             bool save(char const* destination, options_map const& opts) {
                 std::unique_ptr<ImageFormat> format;
                 options_map default_opts;
@@ -548,36 +660,6 @@ namespace py {
             
             static char const* typedoc() {
                 return "Python image model object";
-            }
-            
-            void swap(ImageModelBase& other) noexcept {
-                using std::swap;
-                swap(weakrefs,      other.weakrefs);
-                swap(image,         other.image);
-                swap(dtype,         other.dtype);
-                swap(imagebuffer,   other.imagebuffer);
-                swap(readoptDict,   other.readoptDict);
-                swap(writeoptDict,  other.writeoptDict);
-            }
-            
-            void cleanup(bool force = false) {
-                if (!clean || force) {
-                    image.reset();
-                    Py_CLEAR(dtype);
-                    Py_CLEAR(imagebuffer);
-                    Py_CLEAR(readoptDict);
-                    Py_CLEAR(writeoptDict);
-                    clean = !force;
-                }
-            }
-            
-            /// Arguments to ImageModel::vacay() are as required
-            /// by the Py_VISIT(), w/r/t both types and names
-            int vacay(visitproc visit, void* arg) {
-                Py_VISIT(dtype);
-                Py_VISIT(readoptDict);
-                Py_VISIT(writeoptDict);
-                return 0;
             }
             
         }; /* ImageModelBase */
@@ -655,6 +737,20 @@ namespace py {
             void releasebuffer(PyObject* self, Py_buffer* view) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
                 pybuf->releasebuffer(view);
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_array_interface(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return Py_BuildValue("O", pybuf->__array_interface__());
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_array_struct(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return Py_BuildValue("O", pybuf->__array_struct__());
             }
             
             /// DEALLOCATE
@@ -743,6 +839,18 @@ static PySequenceMethods ImageBuffer_SequenceMethods = {
 };
 
 static PyGetSetDef ImageBuffer_getset[] = {
+    {
+        (char*)"__array_interface__",
+            (getter)py::ext::buffer::get_array_interface<buffer_t, ImageBufferModel>,
+            nullptr,
+            (char*)"NumPy array interface (Python API)",
+            nullptr },
+    {
+        (char*)"__array_struct__",
+            (getter)py::ext::buffer::get_array_struct<buffer_t, ImageBufferModel>,
+            nullptr,
+            (char*)"NumPy array interface (C-level API)",
+            nullptr },
     { nullptr, nullptr, nullptr, nullptr, nullptr }
 };
 
@@ -1095,32 +1203,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_shape(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                auto image = pyim->image.get();
-                switch (image->ndims()) {
-                    case 1:
-                        return Py_BuildValue("(i)",     image->dim(0));
-                    case 2:
-                        return Py_BuildValue("(ii)",    image->dim(0),
-                                                        image->dim(1));
-                    case 3:
-                        return Py_BuildValue("(iii)",   image->dim(0),
-                                                        image->dim(1),
-                                                        image->dim(2));
-                    case 4:
-                        return Py_BuildValue("(iiii)",  image->dim(0),
-                                                        image->dim(1),
-                                                        image->dim(2),
-                                                        image->dim(3));
-                    case 5:
-                        return Py_BuildValue("(iiiii)", image->dim(0),
-                                                        image->dim(1),
-                                                        image->dim(2),
-                                                        image->dim(3),
-                                                        image->dim(4));
-                    default:
-                        return Py_BuildValue("");
-                }
-                return Py_BuildValue("");
+                return py::detail::image_shape(*pyim->image.get());
             }
             
             /// HybridImage.strides getter
@@ -1129,32 +1212,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_strides(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                auto image = pyim->image.get();
-                switch (image->ndims()) {
-                    case 1:
-                        return Py_BuildValue("(i)",     image->stride(0));
-                    case 2:
-                        return Py_BuildValue("(ii)",    image->stride(0),
-                                                        image->stride(1));
-                    case 3:
-                        return Py_BuildValue("(iii)",   image->stride(0),
-                                                        image->stride(1),
-                                                        image->stride(2));
-                    case 4:
-                        return Py_BuildValue("(iiii)",  image->stride(0),
-                                                        image->stride(1),
-                                                        image->stride(2),
-                                                        image->stride(3));
-                    case 5:
-                        return Py_BuildValue("(iiiii)", image->stride(0),
-                                                        image->stride(1),
-                                                        image->stride(2),
-                                                        image->stride(3),
-                                                        image->stride(4));
-                    default:
-                        return Py_BuildValue("");
-                }
-                return Py_BuildValue("");
+                return py::detail::image_strides(*pyim->image.get());
             }
             
             namespace closures {
@@ -1194,6 +1252,26 @@ namespace py {
                     pyim->writeoptDict = Py_BuildValue("O", value);
                 }
                 return 0;
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    get_array_interface(PyObject* self, void* closure) {
+                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
+                return Py_BuildValue("O", imbuf->__array_interface__());
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    get_array_struct(PyObject* self, void* closure) {
+                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
+                return Py_BuildValue("O", imbuf->__array_struct__());
             }
             
             /// HybridImage.read_opts formatter
@@ -1307,6 +1385,18 @@ static PySequenceMethods Image_SequenceMethods = {
 };
 
 static PyGetSetDef Image_getset[] = {
+    {
+        (char*)"__array_interface__",
+            (getter)py::ext::image::get_array_interface<HalideNumpyImage, buffer_t>,
+            nullptr,
+            (char*)"NumPy array interface (Python API)",
+            nullptr },
+    {
+        (char*)"__array_struct__",
+            (getter)py::ext::image::get_array_struct<HalideNumpyImage, buffer_t>,
+            nullptr,
+            (char*)"NumPy array interface (C-level API)",
+            nullptr },
     {
         (char*)"dtype",
             (getter)py::ext::image::get_dtype<HalideNumpyImage, buffer_t>,

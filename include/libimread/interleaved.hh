@@ -34,12 +34,12 @@ namespace im {
     template <std::size_t Dimensions = 3>
     struct Index {
         static constexpr std::size_t D = Dimensions;
-        using idx_t = std::ptrdiff_t;
-        using idxlist_t = std::initializer_list<idx_t>;
-        using array_t = std::array<idx_t, D>;
-        using sequence_t = std::make_index_sequence<D>;
-        using iterator = typename array_t::iterator;
-        using const_iterator = typename array_t::const_iterator;
+        using idx_t             = std::ptrdiff_t;
+        using idxlist_t         = std::initializer_list<idx_t>;
+        using array_t           = std::array<idx_t, D>;
+        using sequence_t        = std::make_index_sequence<D>;
+        using iterator          = typename array_t::iterator;
+        using const_iterator    = typename array_t::const_iterator;
         
         array_t indices;
         
@@ -47,7 +47,7 @@ namespace im {
             :indices{ 0 }
             {}
         
-        Index(const idx_t* indexes, std::size_t nd = 0)
+        explicit Index(const idx_t* indexes, std::size_t nd = 0)
             :indices{ 0 }
             {
                 if (nd == 0) { nd = D; }
@@ -56,7 +56,7 @@ namespace im {
                 assign_impl(indexes, sequence_t());
             }
         
-        Index(const array_t& indexes)
+        explicit Index(const array_t& indexes)
             :indices{ 0 }
             {
                 imread_assert(indexes.size() == D,
@@ -64,7 +64,7 @@ namespace im {
                 assign_impl(indexes.data(), sequence_t());
             }
         
-        Index(idxlist_t initlist)
+        explicit Index(idxlist_t initlist)
             :indices{ 0 }
             {
                 std::size_t idx = 0;
@@ -74,7 +74,7 @@ namespace im {
                              ++idx; }
             }
         
-        Index(const Index& other)
+        Index(Index const& other)
             :Index(other.indices)
             {}
         
@@ -82,7 +82,7 @@ namespace im {
             :Index(std::move(other.indices))
             {}
         
-        Index& operator=(const Index& other) {
+        Index& operator=(Index const& other) {
             Index(other).swap(*this);
             return *this;
         }
@@ -114,16 +114,16 @@ namespace im {
             lhs.swap(rhs);
         }
         
-        friend std::ostream& operator<<(std::ostream& out, const Index& idx) {
+        friend std::ostream& operator<<(std::ostream& out, Index const& idx) {
             return out << idx.string_impl(sequence_t());
         }
         
-        bool operator<(const Index& rhs) const { return binary_op<std::less<idx_t>>(rhs.indices); }
-        bool operator>(const Index& rhs) const { return binary_op<std::greater<idx_t>>(rhs.indices); }
-        bool operator<=(const Index& rhs) const { return binary_op<std::less_equal<idx_t>>(rhs.indices); }
-        bool operator>=(const Index& rhs) const { return binary_op<std::greater_equal<idx_t>>(rhs.indices); }
-        bool operator==(const Index& rhs) const { return binary_op<std::equal_to<idx_t>>(rhs.indices); }
-        bool operator!=(const Index& rhs) const { return binary_op<std::not_equal_to<idx_t>>(rhs.indices); }
+        bool operator<(Index const& rhs) const  { return binary_op<std::less<idx_t>>(rhs.indices); }
+        bool operator>(Index const& rhs) const  { return binary_op<std::greater<idx_t>>(rhs.indices); }
+        bool operator<=(Index const& rhs) const { return binary_op<std::less_equal<idx_t>>(rhs.indices); }
+        bool operator>=(Index const& rhs) const { return binary_op<std::greater_equal<idx_t>>(rhs.indices); }
+        bool operator==(Index const& rhs) const { return binary_op<std::equal_to<idx_t>>(rhs.indices); }
+        bool operator!=(Index const& rhs) const { return binary_op<std::not_equal_to<idx_t>>(rhs.indices); }
         
         std::ptrdiff_t flatten_with(array_t const& dimensions) {
             std::ptrdiff_t out = 0,
@@ -237,11 +237,10 @@ namespace im {
         static constexpr std::size_t S = sizeof(typename Color::channel_t);
         static constexpr std::size_t D = Dimensions;
         friend struct Index<D>;
-        // static const Index<D> ZERO = { 0 };
-        using index_t = Index<D>;
-        using idx_t = typename index_t::idx_t;
-        using array_t = std::array<std::size_t, D>;
-        using sequence_t = std::make_index_sequence<D>;
+        using index_t       = Index<D>;
+        using idx_t         = typename index_t::idx_t;
+        using array_t       = std::array<std::size_t, D>;
+        using sequence_t    = std::make_index_sequence<D>;
         
         array_t extents;
         array_t strides;
@@ -295,42 +294,42 @@ namespace im {
     class InterleavedImage : public Image, public MetaImage {
         
         public:
-            static constexpr std::size_t C = Color::Meta::channel_count;
-            static constexpr std::size_t D = Dimensions;
-            static constexpr std::size_t P = 40; /// padding (I still don't quite get this)
-            using color_t = Color;
-            using nonvalue_t = typename Color::NonValue;
-            using component_t = typename Color::component_t; /// == channel_t[N]
-            using composite_t = typename Color::composite_t; /// integer-packed components
-            using channel_t = typename Color::channel_t; /// single component value
-            using array_t = std::array<std::size_t, D>;
-            using sequence_t = std::make_index_sequence<D>;
+            static constexpr std::size_t C      = Color::Meta::channel_count;
+            static constexpr std::size_t D      = Dimensions;
+            static constexpr std::size_t P      = 40; /// padding (I still don't quite get this)
+            using color_t                       = Color;
+            using nonvalue_t                    = typename Color::NonValue;
+            using component_t                   = typename Color::component_t; /// == channel_t[N]
+            using composite_t                   = typename Color::composite_t; /// integer-packed components
+            using channel_t                     = typename Color::channel_t; /// single component value
+            using array_t                       = std::array<std::size_t, D>;
+            using sequence_t                    = std::make_index_sequence<D>;
             
-            using contents_t = std::shared_ptr<channel_t>;
-            using weak_t = std::weak_ptr<channel_t>; /// WEAK TEA see what I did there
-            using deleter_t = std::default_delete<channel_t[]>;
-            using meta_t = Meta<Color, Dimensions>;
-            using Contents = contents_t;
-            using ContentsRef = weak_t;
-            using Meta = meta_t;
-            using MetaRef = std::add_rvalue_reference_t<meta_t>;
+            using contents_t                    = std::shared_ptr<channel_t>;
+            using weak_t                        = std::weak_ptr<channel_t>; /// WEAK TEA see what I did there
+            using deleter_t                     = std::default_delete<channel_t[]>;
+            using meta_t                        = Meta<Color, Dimensions>;
+            using Contents                      = contents_t; /// I CHANGED MY MIND CamelCase READS BETTER DOGG
+            using ContentsRef                   = weak_t;
+            using Meta                          = meta_t;
+            using MetaRef                       = std::add_rvalue_reference_t<meta_t>;
             
-            using channel_list_t = typename Color::channel_list_t;
-            using channel_listlist_t = std::initializer_list<channel_list_t>;
-            using composite_list_t = std::initializer_list<composite_t>;
-            using composite_listlist_t = std::initializer_list<composite_list_t>;
+            using channel_list_t                = typename Color::channel_list_t;
+            using channel_listlist_t            = std::initializer_list<channel_list_t>;
+            using composite_list_t              = std::initializer_list<composite_t>;
+            using composite_listlist_t          = std::initializer_list<composite_list_t>;
             
             template <typename Channel>
-            using forward_iterator_t = std::iterator<std::forward_iterator_tag, Channel>;
+            using forward_iterator_t            = std::iterator<std::forward_iterator_tag, Channel>;
             
             template <std::size_t HyperDimensions = 3>
             struct Plinth : public forward_iterator_t<channel_t> {
                 
                 static constexpr std::size_t HD = HyperDimensions;
-                static constexpr std::size_t S = sizeof(channel_t);
-                using index_t = Index<HD>;
-                using array_t = std::array<std::size_t, HD>;
-                static const index_t ZERO = { 0 };
+                static constexpr std::size_t S  = sizeof(channel_t);
+                using index_t                   = Index<HD>;
+                using array_t                   = std::array<std::size_t, HD>;
+                static const index_t ZERO       = { 0 };
                 
                 /// OK, see - the subsequent `index_t position` doesn't *actually*
                 /// store the motherfucking position. It stores the quote-unquote
@@ -695,59 +694,54 @@ namespace im {
     class InterleavedFactory : public ImageFactory {
         
         private:
-            std::string nm;
+            std::string factory_name;
         
         public:
-            using image_t = InterleavedImage<color::RGBA>;
+            using rgb_image_t  = InterleavedImage<color::RGB>;
+            using rgba_image_t = InterleavedImage<color::RGBA>;
+            using mono_image_t = InterleavedImage<color::Monochrome>;
+            
+            using unique_t = std::unique_ptr<Image>;
+            using shared_t = std::shared_ptr<Image>;
             
             InterleavedFactory()
-                :nm(std::string(""))
+                :factory_name("")
                 {}
-            InterleavedFactory(const std::string &n)
-                :nm(std::string(n))
+            InterleavedFactory(std::string const& n)
+                :factory_name(n)
                 {}
             
             virtual ~InterleavedFactory() {}
             
-            std::string &name() { return nm; }
-            void name(std::string& nnm) { nm = nnm; }
+            std::string const& name(void)                 { return factory_name; }
+            std::string const& name(std::string const& n) { factory_name = n; return name(); }
             
         protected:
-            virtual std::unique_ptr<Image> create(int nbits,
-                                                  int xHEIGHT, int xWIDTH,
-                                                  int xDEPTH,
-                                                  int d3 = 0, int d4 = 0) override {
+            virtual unique_t create(int nbits,
+                                    int xHEIGHT, int xWIDTH, int xDEPTH,
+                                    int d3 = 0, int d4 = 0) override {
                 if (xDEPTH == 1) {
-                    return std::unique_ptr<Image>(
-                        new InterleavedImage<color::Monochrome>(xWIDTH, xHEIGHT));
+                    return unique_t(new mono_image_t(xWIDTH, xHEIGHT));
                 } else if (xDEPTH == 3) {
-                    return std::unique_ptr<Image>(
-                        new InterleavedImage<color::RGB>(xWIDTH, xHEIGHT));
+                    return unique_t(new  rgb_image_t(xWIDTH, xHEIGHT));
                 } else if (xDEPTH == 4) {
-                    return std::unique_ptr<Image>(
-                        new InterleavedImage<color::RGBA>(xWIDTH, xHEIGHT));
+                    return unique_t(new rgba_image_t(xWIDTH, xHEIGHT));
                 } else {
-                    return std::unique_ptr<Image>(
-                        new InterleavedImage<color::RGBA>(xWIDTH, xHEIGHT));
+                    return unique_t(new rgba_image_t(xWIDTH, xHEIGHT));
                 }
             }
             
-            virtual std::shared_ptr<Image> shared(int nbits,
-                                                  int xHEIGHT, int xWIDTH,
-                                                  int xDEPTH,
-                                                  int d3 = 0, int d4 = 0) override {
+            virtual shared_t shared(int nbits,
+                                    int xHEIGHT, int xWIDTH, int xDEPTH,
+                                    int d3 = 0, int d4 = 0) override {
                 if (xDEPTH == 1) {
-                    return std::shared_ptr<Image>(
-                        new InterleavedImage<color::Monochrome>(xWIDTH, xHEIGHT));
+                    return shared_t(new mono_image_t(xWIDTH, xHEIGHT));
                 } else if (xDEPTH == 3) {
-                    return std::shared_ptr<Image>(
-                        new InterleavedImage<color::RGB>(xWIDTH, xHEIGHT));
+                    return shared_t(new  rgb_image_t(xWIDTH, xHEIGHT));
                 } else if (xDEPTH == 4) {
-                    return std::shared_ptr<Image>(
-                        new InterleavedImage<color::RGBA>(xWIDTH, xHEIGHT));
+                    return shared_t(new rgba_image_t(xWIDTH, xHEIGHT));
                 } else {
-                    return std::shared_ptr<Image>(
-                        new InterleavedImage<color::RGBA>(xWIDTH, xHEIGHT));
+                    return shared_t(new rgba_image_t(xWIDTH, xHEIGHT));
                 }
             }
     };
