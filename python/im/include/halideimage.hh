@@ -336,7 +336,7 @@ namespace py {
                         strong = image.lock();
                         structcode = strong->structcode();
                         dsig = strong->dsignature();
-                        literal_pointer = (long)strong->template rowp_as<uint8_t>(0);
+                        literal_pointer = (long)strong->data();
                     }
                     
                     PyObject* map = PyDict_New();

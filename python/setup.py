@@ -266,7 +266,7 @@ for key, sources in extensions.iteritems():
         sources=sources,
         extra_compile_args=[
             '-O3', '-mtune=native',
-            '-std=c++14',
+            '-std=c++1z',
             '-stdlib=libc++'
         ] + other_flags))
 

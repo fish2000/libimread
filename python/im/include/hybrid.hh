@@ -4,10 +4,20 @@
 #ifndef LIBIMREAD_PYTHON_HYBRID_HH_
 #define LIBIMREAD_PYTHON_HYBRID_HH_
 
-#include <Python.h>
-#include <numpy/ndarrayobject.h>
 #include <vector>
 #include <memory>
+#include <string>
+
+#ifdef __CPP1z__
+#include <string_view>
+#else
+namespace std {
+    using string_view = std::string; /// WTF HAX
+}
+#endif
+
+#include <Python.h>
+#include <numpy/ndarrayobject.h>
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/halide.hh>
@@ -132,10 +142,12 @@ namespace im {
             using HalBase::raw_buffer;
             
             virtual ~HalideNumpyImage();
-            PyObject* metadataPyObject();
+            // PyObject* metadataPyObject();
             
             /// This returns the same type of data as buffer_t.host
-            virtual uint8_t* data(int s = 0) const;
+            virtual uint8_t* data() const;
+            virtual uint8_t* data(int s) const;
+            virtual std::string_view view() const;
             
             Halide::Type type() const;
             buffer_t* buffer_ptr() const;

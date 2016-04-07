@@ -35,14 +35,6 @@ namespace im {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
     }
     
-    // using ImageList::vector_t;
-    // using ImageList::pointer_t;
-    // using ImageList::pointerlist_t;
-    // using ImageList::unique_t;
-    // using ImageList::vector_size_t;
-    // using ImageList::iterator;
-    // using ImageList::const_iterator;
-    
     ImageList::ImageList(ImageList::pointerlist_t pointerlist)
         :content(pointerlist)
         {
