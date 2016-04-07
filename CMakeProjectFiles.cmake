@@ -17,7 +17,7 @@ SET(C_OPTIONS
     -x c)
 
 SET(CXX_OPTIONS
-    -std=c++14 -stdlib=libc++
+    -std=c++1z -stdlib=libc++
     -x c++)
 
 SET(OBJC_OPTIONS
@@ -34,14 +34,14 @@ SET(OBJCXX_OPTIONS
     -fno-objc-arc
     -fobjc-legacy-dispatch
     -fobjc-call-cxx-cdtors
-    -std=c++14 -stdlib=libc++
+    -std=c++1z -stdlib=libc++
     -x objective-c++)
 
 SET(OBJCXX_OPTIONS_ARC
     -fobjc-abi-version=3
     -fobjc-arc -fobjc-call-cxx-cdtors
     -fno-objc-arc-exceptions
-    -std=c++14 -stdlib=libc++
+    -std=c++1z -stdlib=libc++
     -x objective-c++)
 
 # Extra options for Image IO code
