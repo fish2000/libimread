@@ -11,21 +11,13 @@ namespace im {
             buffer_t* out = new buffer_t{
                 buffer->dev,
                 buffer->host,
-                { 0, 0, 0, 0 },
-                { 0, 0, 0, 0 },
-                { 0, 0, 0, 0 },
+                { buffer->extent[0], buffer->extent[1], buffer->extent[2], buffer->extent[3] },
+                { buffer->stride[0], buffer->stride[1], buffer->stride[2], buffer->stride[3] },
+                { buffer->min[0],    buffer->min[1],    buffer->min[2],    buffer->min[3]    },
                 buffer->elem_size,
                 buffer->host_dirty,
                 buffer->dev_dirty
             };
-            // out->extent = new int32_t[4];
-            // out->stride = new int32_t[4];
-            // out->min = new int32_t[4];
-            for (int idx = 0; idx < 4; ++idx) {
-                out->extent[idx] = buffer->extent[idx];
-                out->stride[idx] = buffer->stride[idx];
-                out->min[idx]    = buffer->min[idx];
-            }
             return out;
         }
         

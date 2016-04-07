@@ -121,9 +121,9 @@ namespace py {
             }
             
             PyObject* transpose() {
-                static constexpr std::size_t N = 4;
+                const std::size_t N = im::buffer::ndims(*internal.get());
                 
-                Py_intptr_t permutation[N] = { 0, 0, 0, 0 };
+                Py_intptr_t permutation[N];
                 for (int idx = 0; idx < N; ++idx) {
                     permutation[idx] = N - 1 - idx;
                 }
@@ -436,6 +436,25 @@ namespace py {
             /// reinterpret, depointerize, copy-construct
             explicit ImageModelBase(PyObject* other)
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(other))
+                {}
+            
+            /// bmoi = Buffer Model Object Instance
+            explicit ImageModelBase(BufferModelBase<BufferType> const& bmoi)
+                :weakrefs(nullptr)
+                ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi.internal.get()))
+                ,dtype(PyArray_DescrFromType(image->dtype()))
+                ,imagebuffer(reinterpret_cast<PyObject*>(new typename ImageModelBase::ImageBufferModel(image)))
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
+                ,clean(false)
+                {
+                    Py_INCREF(dtype);
+                    Py_INCREF(imagebuffer);
+                    Py_INCREF(readoptDict);
+                    Py_INCREF(writeoptDict);
+                }
+            explicit ImageModelBase(PyObject* buffer, bool buffer_construct_flag = false)
+                :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
                 {}
             
             ImageModelBase& operator=(ImageModelBase const& other) {
@@ -761,6 +780,20 @@ namespace py {
             
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_shape(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return im::buffer::shape<BufferType>(*pybuf->internal.get());
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_strides(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return im::buffer::strides<BufferType>(*pybuf->internal.get());
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject*    get_array_interface(PyObject* self, void* closure) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
                 return py::object(pybuf->__array_interface__());
@@ -845,6 +878,18 @@ static PyGetSetDef Buffer_getset[] = {
             nullptr,
             (char*)"Buffer with transposed axes",
             nullptr },
+    {
+        (char*)"shape",
+            (getter)py::ext::buffer::get_shape<buffer_t>,
+            nullptr,
+            (char*)"Buffer shape tuple",
+            nullptr },
+    {
+        (char*)"strides",
+            (getter)py::ext::buffer::get_strides<buffer_t>,
+            nullptr,
+            (char*)"Buffer strides tuple",
+            nullptr },
     { nullptr, nullptr, nullptr, nullptr, nullptr }
 };
 
@@ -913,15 +958,35 @@ static PyMethodDef ImageBuffer_methods[] = {
 namespace py {
     
     namespace ext {
-    
-        namespace image {
         
+        namespace image {
+            
             /// ALLOCATE / __new__ implementation
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
                 return reinterpret_cast<PyObject*>(new PythonImageType());
+            }
+            
+            /// ALLOCATE / frombuffer(bufferInstance) implementation
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* newfrombuffer(PyTypeObject* type, PyObject* buffer) {
+                if (!buffer) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "missing im.Buffer argument");
+                    return NULL;
+                }
+                if (!BufferModel_Check(buffer) &&
+                    !ImageBufferModel_Check(buffer)) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "invalid im.Buffer instance");
+                    return NULL;
+                }
+                return reinterpret_cast<PyObject*>(
+                    new PythonImageType(buffer, true));
             }
             
             /// __init__ implementation
@@ -1488,6 +1553,11 @@ static PyGetSetDef Image_getset[] = {
 };
 
 static PyMethodDef Image_methods[] = {
+    {
+        "frombuffer",
+            (PyCFunction)py::ext::image::newfrombuffer<HalideNumpyImage, buffer_t>,
+            METH_O | METH_CLASS,
+            "Return a new im.Image based on an im.Buffer instance" },
     {
         "write",
             (PyCFunction)py::ext::image::write<HalideNumpyImage, buffer_t>,
