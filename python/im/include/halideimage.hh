@@ -46,8 +46,6 @@ namespace py {
         struct BufferModelBase {
             
             using pixel_t = byte;
-            // using unique_buffer_t = std::unique_ptr<BufferType,
-            //                     im::buffer::deleter<BufferType>>;
             using unique_buffer_t = std::unique_ptr<BufferType>;
             using accessor_t = im::pix::accessor<pixel_t>;
             
@@ -82,6 +80,7 @@ namespace py {
                 :internal(std::make_unique<BufferType>())
                 ,accessor{}
                 {}
+            
             explicit BufferModelBase(BufferType* buffer)
                 :clean(true)
                 ,internal(unique_buffer_t(buffer))
@@ -89,12 +88,15 @@ namespace py {
                                           internal->extent[1] ? internal->stride[1] : 0,
                                           internal->extent[2] ? internal->stride[2] : 0)
                 {}
+            
             BufferModelBase(BufferModelBase const& other)
                 :internal(im::buffer::heapcopy(other.internal.get()))
                 ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
                                           internal->extent[1] ? internal->stride[1] : 0,
                                           internal->extent[2] ? internal->stride[2] : 0)
                 {}
+            
+            /// reinterpret, depointerize, copy-construct
             explicit BufferModelBase(PyObject* other)
                 :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other))
                 {}
@@ -235,14 +237,18 @@ namespace py {
                 ImageBufferModel()
                     :base_t()
                     {}
+                
                 explicit ImageBufferModel(shared_image_t shared_image)
                     :base_t(shared_image->buffer_ptr())
                     ,image(shared_image)
                     {}
+                
                 ImageBufferModel(ImageBufferModel const& other)
                     :base_t(other.internal.get())
                     ,image(other.image)
                     {}
+                
+                /// reinterpret, depointerize, copy-construct
                 explicit ImageBufferModel(PyObject* other)
                     :ImageBufferModel(*reinterpret_cast<ImageBufferModel*>(other))
                     {}
@@ -403,6 +409,7 @@ namespace py {
                 ,readoptDict(nullptr)
                 ,writeoptDict(nullptr)
                 {}
+            
             ImageModelBase(ImageModelBase const& other)
                 :weakrefs(other.weakrefs)
                 ,image(other.image)
@@ -411,12 +418,13 @@ namespace py {
                 ,readoptDict(other.readoptDict)
                 ,writeoptDict(other.writeoptDict)
                 {
-                    Py_INCREF(weakrefs);
+                    // Py_INCREF(weakrefs);
                     Py_INCREF(dtype);
                     Py_INCREF(imagebuffer);
                     Py_INCREF(readoptDict);
                     Py_INCREF(writeoptDict);
                 }
+            
             ImageModelBase(ImageModelBase&& other) noexcept
                 :weakrefs(other.weakrefs)
                 ,image(std::move(other.image))
@@ -444,7 +452,8 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi.internal.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(reinterpret_cast<PyObject*>(new typename ImageModelBase::ImageBufferModel(image)))
+                ,imagebuffer(reinterpret_cast<PyObject*>(
+                             new typename ImageModelBase::ImageBufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 ,clean(false)
@@ -454,6 +463,8 @@ namespace py {
                     Py_INCREF(readoptDict);
                     Py_INCREF(writeoptDict);
                 }
+            
+            /// tag dipatch, reinterpret, depointerize, explicit-init-style construct
             explicit ImageModelBase(PyObject* buffer, bool buffer_construct_flag = false)
                 :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
                 {}
@@ -967,14 +978,15 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
-                return reinterpret_cast<PyObject*>(new PythonImageType());
+                return reinterpret_cast<PyObject*>(
+                    new PythonImageType());
             }
             
             /// ALLOCATE / frombuffer(bufferInstance) implementation
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject* newfrombuffer(PyTypeObject* type, PyObject* buffer) {
+            PyObject* newfrombuffer(PyObject* _nothing_, PyObject* buffer) {
                 if (!buffer) {
                     PyErr_SetString(PyExc_ValueError,
                         "missing im.Buffer argument");
@@ -1612,7 +1624,7 @@ static PyMethodDef Image_methods[] = {
     {
         "frombuffer",
             (PyCFunction)py::ext::image::newfrombuffer<HalideNumpyImage, buffer_t>,
-            METH_O | METH_CLASS,
+            METH_O | METH_STATIC,
             "Return a new im.Image based on an im.Buffer instance" },
     {
         "write",
