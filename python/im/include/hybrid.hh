@@ -8,6 +8,12 @@
 #include <memory>
 #include <string>
 
+#include <Python.h>
+#include <numpy/ndarrayobject.h>
+#include <libimread/libimread.hpp>
+#include <libimread/base.hh>
+#include <libimread/halide.hh>
+
 #ifdef __CPP1z__
 #include <string_view>
 #else
@@ -15,12 +21,6 @@ namespace std {
     using string_view = std::string; /// WTF HAX
 }
 #endif
-
-#include <Python.h>
-#include <numpy/ndarrayobject.h>
-#include <libimread/libimread.hpp>
-#include <libimread/base.hh>
-#include <libimread/halide.hh>
 
 namespace im {
     
