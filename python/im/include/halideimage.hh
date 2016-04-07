@@ -14,6 +14,7 @@
 #include "gil.hpp"
 #include "detail.hpp"
 #include "options.hpp"
+#include "preview.hpp"
 #include "pybuffer.hpp"
 #include "pycapsule.hpp"
 #include "typecode.hpp"
@@ -1295,6 +1296,61 @@ namespace py {
                 return py::string(dststr);
             }
             
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* preview(PyObject* self, PyObject* args, PyObject* kwargs) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                PyObject* options = NULL;
+                options_map opts;
+                char const* keywords[] = { "options", NULL };
+                std::string dststr;
+                bool did_save = false;
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    args, kwargs, "|O", const_cast<char**>(keywords),
+                    &options))                  /// "options", read-options dict
+                {
+                    return py::False();
+                }
+                if (options == NULL) { options = PyDict_New(); }
+                if (PyDict_Update(pyim->writeoptDict, options) == -1) {
+                    return py::False();
+                }
+                
+                try {
+                    opts = pyim->writeopts();
+                    if (!opts.has("format")) {
+                        PyErr_SetString(PyExc_AttributeError,
+                            "Output format unspecified in options dict");
+                        return py::False();
+                    }
+                } catch (im::OptionsError& exc) {
+                    PyErr_SetString(PyExc_AttributeError, exc.what());
+                    return py::False();
+                }
+                
+                try {
+                    py::gil::release nogil;
+                    NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
+                                        FILESYSTEM_TEMP_FILENAME,                  /// prefix (filename template)
+                                        false);                                    /// cleanup on scope exit
+                    path dst = tf.filepath.make_absolute();
+                    dststr = std::string(dst.str());
+                    did_save = pyim->save(dststr.c_str(), opts);
+                    if (!did_save) { return NULL; }
+                    py::image::preview(dst);
+                    tf.close();
+                    tf.remove();
+                } catch (im::NotImplementedError& exc) {
+                    /// this shouldn't happen
+                    PyErr_SetString(PyExc_AttributeError, exc.what());
+                    return py::False();
+                }
+                
+                return py::True();
+            }
+            
             /// HybridImage.dtype getter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
@@ -1563,6 +1619,11 @@ static PyMethodDef Image_methods[] = {
             (PyCFunction)py::ext::image::write<HalideNumpyImage, buffer_t>,
             METH_VARARGS | METH_KEYWORDS,
             "Format and write image data to file or blob" },
+    {
+        "preview",
+            (PyCFunction)py::ext::image::preview<HalideNumpyImage, buffer_t>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Preview image in external viewer" },
     {
         "format_read_opts",
             (PyCFunction)py::ext::image::format_read_opts<HalideNumpyImage, buffer_t>,

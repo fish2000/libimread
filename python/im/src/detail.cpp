@@ -27,6 +27,9 @@ namespace py {
     PyObject* string(char const* s) {
         return PyString_FromString(s);
     }
+    PyObject* string(char s) {
+        return PyString_FromFormat("%c", s);
+    }
     
     PyObject* object(PyObject* arg) {
         return Py_BuildValue("O", arg ? arg : Py_None);

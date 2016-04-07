@@ -122,6 +122,11 @@ other_flags = ['-Qunused-arguments']
 #     if os.path.isdir(pth):
 #         library_dirs.append(pth)
 
+preview_source = (sys.platform == 'yarwin') and 'im/src/plat/preview_mac.mm' or \
+                  (sys.platform == 'linux') and 'im/src/plat/preview_linux.cpp' or \
+                  (sys.platform == 'win32') and 'im/src/plat/preview_windows.cpp' or \
+                                                'im/src/plat/preview.cpp'
+
 extensions = {
     'im': [
         "im/src/buffer.cpp",
@@ -131,6 +136,7 @@ extensions = {
         "im/src/hybrid.cpp",
         "im/src/hybridimage.cpp",
         "im/src/options.cpp",
+        preview_source,
         "im/src/pybuffer.cpp",
         "im/src/pycapsule.cpp",
         "im/src/structcode.cpp",
@@ -244,6 +250,8 @@ print('')
 
 # from distutils.extension import Extension
 # from distutils.core import setup
+# language="c++",
+# '-x', 'c++',
 
 ext_modules = []
 for key, sources in extensions.iteritems():
@@ -256,9 +264,8 @@ for key, sources in extensions.iteritems():
         undef_macros=undef_macros,
         define_macros=define_macros,
         sources=sources,
-        language="c++",
         extra_compile_args=[
-            '-x', 'c++',
+            '-O3',
             '-std=c++14',
             '-stdlib=libc++'
         ] + other_flags))
@@ -267,9 +274,7 @@ packages = find_packages()
 package_dir = {
     'im': 'im',
 }
-#package_data = { 'im/tools': ['im/tools/*.*'] }
 package_data = dict()
-
 classifiers = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',

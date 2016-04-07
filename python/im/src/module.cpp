@@ -247,6 +247,10 @@ PyMODINIT_FUNC initim(void) {
     /// ... another to the tuple of image-format suffix strings …
     PyObject* format_tuple;
     
+    /// ... two more for endianness …
+    PyObject* _byteorder;
+    PyObject* _byteordermark;
+    
     /// Initialize Python threads and GIL state
     PyEval_InitThreads();
     
@@ -313,4 +317,19 @@ PyMODINIT_FUNC initim(void) {
         "formats",
         format_tuple);
     
+    /// Store the byte order of the system in im._byteorder and im._byteordermark
+    /// ... note that the byte-order-determining function (in hybrid.cpp) uses
+    /// the exact same logic used in the python `sys` module's implementation
+    _byteorder = py::string(im::byteorder == im::Endian::Big ? "big" : "little");
+    _byteordermark = py::string((char)im::byteorder);
+    if (_byteorder == NULL)                       { return; }
+    if (_byteordermark == NULL)                   { return; }
+    Py_INCREF(_byteorder);
+    Py_INCREF(_byteordermark);
+    PyModule_AddObject(module,
+        "_byteorder",
+        _byteorder);
+    PyModule_AddObject(module,
+        "_byteordermark",
+        _byteordermark);
 }

@@ -21,6 +21,8 @@ namespace im {
         Big         = '>'
     };
     
+    extern const Endian byteorder;
+    
     namespace detail {
         
         char const* structcode(NPY_TYPES dtype);
@@ -96,7 +98,7 @@ namespace im {
                                std::decay_t<PixelType>>>::typekind();
         }
         
-    };
+    }; /* namespace detail */
     
     class PythonBufferImage : public Image {
         

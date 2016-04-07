@@ -8,6 +8,22 @@
 
 namespace im {
     
+    inline Endian endianness() {
+        unsigned long number = 1;
+        char* s;
+        Endian value = Endian::Unspecified;
+        s = (char*)&number;
+        if (s[0] == 0) {
+            value = Endian::Big;
+        } else {
+            value = Endian::Little;
+        }
+        return value;
+    }
+    
+    /// determine system byte order
+    const Endian byteorder = im::endianness();
+    
     namespace detail {
         
         char const* structcode(NPY_TYPES dtype) {

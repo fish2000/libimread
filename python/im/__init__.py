@@ -1,8 +1,16 @@
 
 from im import (
-    HybridImage,
-    Buffer, Image,
+    _byteorder,
+    _byteordermark,
+    
     formats,
     structcode_parse,
-    hybridimage_check, image_check,
-    buffer_check, imagebuffer_check)
+    
+    HybridImage,
+    Buffer,
+    Image,
+    
+    hybridimage_check,
+    image_check,
+    buffer_check,
+    imagebuffer_check)
