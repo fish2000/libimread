@@ -265,7 +265,7 @@ for key, sources in extensions.iteritems():
         define_macros=define_macros,
         sources=sources,
         extra_compile_args=[
-            '-O3',
+            '-O3', '-mtune=native',
             '-std=c++14',
             '-stdlib=libc++'
         ] + other_flags))
