@@ -16,6 +16,7 @@ namespace structcode {
         static stringmap_t init_byteorder() {
             stringmap_t _byteorder_map = {
                 {"@", "="},
+                {"|", "|"},
                 {"=", "="},
                 {"<", "<"},
                 {">", ">"},

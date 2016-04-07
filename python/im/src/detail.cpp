@@ -1,7 +1,9 @@
 
 #include <tuple>
 #include <algorithm>
+
 #define NO_IMPORT_ARRAY
+
 #include "detail.hpp"
 #include "structcode.hpp"
 #include "gil.hpp"
@@ -10,6 +12,22 @@
 #include <libimread/imageformat.hh>
 
 namespace py {
+    
+    PyObject* None()  { return Py_BuildValue("O", Py_None); }
+    PyObject* True()  { return Py_BuildValue("O", Py_True); }
+    PyObject* False() { return Py_BuildValue("O", Py_False); }
+    
+    PyObject* boolean(bool truth) {
+         return Py_BuildValue("O", truth ? Py_True : Py_False);
+    }
+    
+    PyObject* string(std::string const& s) {
+        return PyString_FromStringAndSize(s.c_str(), s.size());
+    }
+    
+    PyObject* string(char const* s) {
+        return PyString_FromString(s);
+    }
     
     namespace detail {
         
@@ -39,11 +57,9 @@ namespace py {
             PyObject* tuple = PyTuple_New(imax);
             for (Py_ssize_t idx = 0; idx < imax; idx++) {
                 std::string endianized(endianness + pairvec[idx].second);
-                PyTuple_SET_ITEM(tuple, idx, PyTuple_Pack(2,
-                    PyString_FromStringAndSize(pairvec[idx].first.c_str(),
-                                               pairvec[idx].first.size()),
-                    PyString_FromStringAndSize(endianized.c_str(),
-                                               endianized.size())));
+                PyTuple_SET_ITEM(tuple, idx, py::tuple(
+                    py::string(pairvec[idx].first),
+                    py::string(endianized)));
             }
             
             return tuple;
@@ -94,10 +110,7 @@ namespace py {
                  it != formats.end() && idx < max;
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
-                             PyList_Append(list,
-                                 PyString_FromStringAndSize(
-                                     format.c_str(),
-                                     format.size()));
+                             PyList_Append(list, py::string(format));
                          } ++idx; }
             return PyList_AsTuple(list);
         }

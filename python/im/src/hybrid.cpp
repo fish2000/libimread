@@ -162,11 +162,11 @@ namespace im {
     }
     
     int HalideNumpyImage::nbits() const {
-        return type().bits();
+        return HalBase::buffer.type().bits();
     }
     
     int HalideNumpyImage::nbytes() const {
-        const int bits = nbits();
+        const int bits = HalBase::buffer.type().bits();
         return (bits / 8) + bool(bits % 8);
     }
     
@@ -192,11 +192,29 @@ namespace im {
         return static_cast<void*>(host);
     }
     
+    /// type encoding
+    NPY_TYPES   HalideNumpyImage::dtype() const         { return dtype_; }
+    char        HalideNumpyImage::dtypechar() const     { return static_cast<char>(typecode::typechar(dtype_)); }
+    std::string HalideNumpyImage::dtypename() const     { return typecode::name(dtype_); }
+    char const* HalideNumpyImage::structcode() const    { return im::detail::structcode(dtype_); }
+    
+    std::string HalideNumpyImage::dsignature(Endian e) const {
+        char endianness = static_cast<char>(e);
+        char typechar = static_cast<char>(typecode::typechar(dtype_));
+        int bytes = nbytes();
+        int buffer_size = std::snprintf(nullptr, 0, "%c%c%i",
+                                        endianness, typechar, bytes) + 1;
+        char out_buffer[buffer_size];
+        __attribute__((unused))
+        int buffer_used = std::snprintf(out_buffer, buffer_size, "%c%c%i",
+                                        endianness, typechar, bytes);
+        return std::string(out_buffer);
+    }
+    
     /// extent, stride, min
-    NPY_TYPES HalideNumpyImage::dtype() const  { return dtype_; }
-    int32_t* HalideNumpyImage::dims()          { return HalBase::raw_buffer()->extent; }
-    int32_t* HalideNumpyImage::strides()       { return HalBase::raw_buffer()->stride; }
-    int32_t* HalideNumpyImage::offsets()       { return HalBase::raw_buffer()->min; }
+    int32_t*    HalideNumpyImage::dims()                { return HalBase::raw_buffer()->extent; }
+    int32_t*    HalideNumpyImage::strides()             { return HalBase::raw_buffer()->stride; }
+    int32_t*    HalideNumpyImage::offsets()             { return HalBase::raw_buffer()->min; }
     
 #define xWIDTH d1
 #define xHEIGHT d0
@@ -216,16 +234,16 @@ namespace im {
     void HybridFactory::name(std::string const& n) { nm = n; }
     
     std::unique_ptr<Image> HybridFactory::create(int nbits,
-                                                int xHEIGHT, int xWIDTH, int xDEPTH,
-                                                int d3, int d4) {
+                                                 int xHEIGHT, int xWIDTH, int xDEPTH,
+                                                 int d3, int d4) {
         return std::unique_ptr<Image>(
             new HalideNumpyImage(
                 detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
     }
     
     std::shared_ptr<Image> HybridFactory::shared(int nbits,
-                                                int xHEIGHT, int xWIDTH, int xDEPTH,
-                                                int d3, int d4) {
+                                                 int xHEIGHT, int xWIDTH, int xDEPTH,
+                                                 int d3, int d4) {
         return std::shared_ptr<Image>(
             new HalideNumpyImage(
                 detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));

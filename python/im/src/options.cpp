@@ -2,6 +2,8 @@
 #include <string>
 #include <libimread/errors.hh>
 #include "check.hh"
+#define NO_IMPORT_ARRAY
+#include "detail.hpp"
 #include "gil.hpp"
 #include "pybuffer.hpp"
 #include "options.hpp"
@@ -193,7 +195,7 @@ namespace py {
                 return NULL;
             }
             
-            return Py_BuildValue("s", destination);
+            return py::string(destination);
         }
         
     } /* namespace options */

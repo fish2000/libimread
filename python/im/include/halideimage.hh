@@ -220,18 +220,18 @@ namespace py {
                     Py_ssize_t out;
                     {
                         py::gil::release nogil;
-                        shared_image_t strong_image = image.lock();
-                        out = strong_image->size();
+                        shared_image_t strong = image.lock();
+                        out = strong->size();
                     }
                     return out;
                 }
                 PyObject*   __index__(Py_ssize_t idx, int tc = NPY_UINT) {
                     Py_ssize_t siz;
-                    shared_image_t strong_image;
+                    shared_image_t strong;
                     {
                         py::gil::release nogil;
-                        strong_image = image.lock();
-                        siz = strong_image->size();
+                        strong = image.lock();
+                        siz = strong->size();
                     }
                     if (siz <= idx || idx < 0) {
                         PyErr_SetString(PyExc_IndexError,
@@ -241,42 +241,42 @@ namespace py {
                     std::size_t nidx = static_cast<std::size_t>(idx);
                     switch (tc) {
                         case NPY_FLOAT: {
-                            float op = strong_image->template rowp_as<float>(0)[nidx];
+                            float op = strong->template rowp_as<float>(0)[nidx];
                             return Py_BuildValue("f", op);
                         }
                         break;
                         case NPY_DOUBLE:
                         case NPY_LONGDOUBLE: {
-                            double op = strong_image->template rowp_as<double>(0)[nidx];
+                            double op = strong->template rowp_as<double>(0)[nidx];
                             return Py_BuildValue("d", op);
                         }
                         break;
                         case NPY_USHORT:
                         case NPY_UBYTE: {
-                            byte op = strong_image->template rowp_as<byte>(0)[nidx];
+                            byte op = strong->template rowp_as<byte>(0)[nidx];
                             return Py_BuildValue("B", op);
                         }
                         break;
                         case NPY_UINT: {
-                            uint32_t op = strong_image->template rowp_as<uint32_t>(0)[nidx];
+                            uint32_t op = strong->template rowp_as<uint32_t>(0)[nidx];
                             return Py_BuildValue("I", op);
                         }
                         break;
                         case NPY_ULONG:
                         case NPY_ULONGLONG: {
-                            uint64_t op = strong_image->template rowp_as<uint64_t>(0)[nidx];
+                            uint64_t op = strong->template rowp_as<uint64_t>(0)[nidx];
                             return Py_BuildValue("Q", op);
                         }
                         break;
                     }
-                    uint32_t op = strong_image->template rowp_as<uint32_t>(0)[nidx];
+                    uint32_t op = strong->template rowp_as<uint32_t>(0)[nidx];
                     return Py_BuildValue("I", op);
                 }
                 
                 template <typename Pointer = PyArrayInterface,
                           typename = std::nullptr_t>
                 py::cob::single_destructor_t array_destructor() const {
-                    py::cob::single_destructor_t array_destruct = [](void* voidptr) {
+                    return [](void* voidptr) {
                         Pointer* pointer = (Pointer*)voidptr;
                         if (pointer) {
                             delete pointer->shape;
@@ -285,40 +285,33 @@ namespace py {
                             delete pointer;
                         }
                     };
-                    return array_destruct;
                 }
                 
                 PyObject* __array_interface__() const {
-                    shared_image_t strong_image;
-                    std::string encoding;
-                    NPY_TYPES typecode;
+                    using imageref_t = typename shared_image_t::element_type const&;
+                    shared_image_t strong;
                     char const* structcode;
+                    std::string dsig;
                     long literal_pointer;
-                    int ndims;
                     
                     {
                         py::gil::release nogil;
-                        strong_image = image.lock();
-                        ndims = strong_image->ndims();
-                        typecode = strong_image->dtype();
-                        structcode = im::detail::structcode(typecode);
-                        encoding = im::detail::encoding_for<uint8_t>();
-                        literal_pointer = (long)strong_image->template rowp_as<uint8_t>(0);
+                        strong = image.lock();
+                        structcode = strong->structcode();
+                        dsig = strong->dsignature();
+                        literal_pointer = (long)strong->template rowp_as<uint8_t>(0);
                     }
                     
                     PyObject* map = PyDict_New();
-                    typename shared_image_t::element_type const& imageref = *strong_image.get();
+                    imageref_t imageref = *strong.get();
                     PyDict_SetItemString(map, "version",    PyInt_FromSize_t(3));
                     PyDict_SetItemString(map, "shape",      py::detail::image_shape(imageref));
                     PyDict_SetItemString(map, "strides",    py::detail::image_strides(imageref));
                     PyDict_SetItemString(map, "descr",      py::detail::structcode_to_dtype(structcode));
-                    PyDict_SetItemString(map, "mask",       Py_BuildValue("O", Py_None));
-                    PyDict_SetItemString(map, "offset",     Py_BuildValue("O", Py_None));
-                    PyDict_SetItemString(map, "data",       PyTuple_Pack(2,
-                                                                PyLong_FromLong(literal_pointer),
-                                                                Py_BuildValue("O", Py_True)));
-                    PyDict_SetItemString(map, "typestr",    PyString_FromStringAndSize(
-                                                                encoding.c_str(), encoding.size()));
+                    PyDict_SetItemString(map, "mask",       py::None());
+                    PyDict_SetItemString(map, "offset",     py::None());
+                    PyDict_SetItemString(map, "data",       py::tuple(PyLong_FromLong(literal_pointer), py::True()));
+                    PyDict_SetItemString(map, "typestr",    py::string(dsig));
                     return map;
                 }
                 
@@ -326,8 +319,8 @@ namespace py {
                     PyArrayInterface* newstruct;
                     {
                         py::gil::release nogil;
-                        shared_image_t strong_image = image.lock();
-                        newstruct = py::detail::array_struct(*strong_image.get());
+                        shared_image_t strong = image.lock();
+                        newstruct = py::detail::array_struct(*strong.get());
                     }
                     
                     return py::cob::objectify<PyArrayInterface, py::cob::single_destructor_t>(
@@ -736,6 +729,17 @@ namespace py {
                 return Py_BuildValue("O", pybuf->__array_struct__());
             }
             
+            /// tostring() -- like __str__ implementation (above), return bytes from buffer
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject* tostring(PyObject* self, PyObject*) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                Py_ssize_t string_size = pybuf->__len__();
+                return PyString_FromStringAndSize(
+                    (char const*)pybuf->internal->host,
+                    string_size);
+            }
+            
             /// DEALLOCATE
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
@@ -795,6 +799,11 @@ static PyGetSetDef Buffer_getset[] = {
 };
 
 static PyMethodDef Buffer_methods[] = {
+    {
+        "tostring",
+            (PyCFunction)py::ext::buffer::tostring<buffer_t>,
+            METH_NOARGS,
+            "Get bytes from buffer as a string" },
     { nullptr, nullptr, 0, nullptr }
 };
 
@@ -838,6 +847,11 @@ static PyGetSetDef ImageBuffer_getset[] = {
 };
 
 static PyMethodDef ImageBuffer_methods[] = {
+    {
+        "tostring",
+            (PyCFunction)py::ext::buffer::tostring<buffer_t, ImageBufferModel>,
+            METH_NOARGS,
+            "Get bytes from image buffer as a string" },
     { nullptr, nullptr, 0, nullptr }
 };
 
@@ -1158,8 +1172,7 @@ namespace py {
                     return out;
                 }
                 /// "else":
-                return PyString_FromStringAndSize(
-                    dststr.c_str(), dststr.size());
+                return py::string(dststr);
             }
             
             /// HybridImage.dtype getter
@@ -1278,7 +1291,7 @@ namespace py {
                     out = opts.format();
                 }
                 
-                return Py_BuildValue("s", out.c_str());
+                return py::string(out);
             }
             
             /// HybridImage.read_opts file-dumper
@@ -1318,7 +1331,7 @@ namespace py {
                     out = opts.format();
                 }
                 
-                return Py_BuildValue("s", out.c_str());
+                return py::string(out);
             }
             
             /// HybridImage.write_opts file-dumper

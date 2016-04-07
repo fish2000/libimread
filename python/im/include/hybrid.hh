@@ -14,39 +14,40 @@
 
 namespace im {
     
+    enum class Endian : char
+    {
+        Unspecified = '|',
+        Little      = '<',
+        Big         = '>'
+    };
+    
     namespace detail {
         
         char const* structcode(NPY_TYPES dtype);
         Halide::Type for_dtype(NPY_TYPES dtype);
         NPY_TYPES for_nbits(int nbits, bool signed_type = false);
         
-        enum class Endian : char
-        {
-            Unspecified = '|',
-            Little      = '<',
-            Big         = '>'
-        };
-        
         template <typename PixelType>
         struct encode_type;
         
-        #define DEFINE_TYPE_ENCODING(PixelType, character)                              \
-        template <>                                                                     \
-        struct encode_type<PixelType> {                                                 \
-            using type = PixelType;                                                     \
-            static constexpr std::size_t typesize() { return sizeof(type); }            \
-            static constexpr char typekind() { return character; }                      \
-            static std::string typestr(Endian endian = Endian::Unspecified) {           \
-                char endianness = static_cast<char>(endian);                            \
-                int buffer_size = std::snprintf(nullptr, 0,                             \
-                                                "%c%c%lu",                              \
-                                                endianness, typekind(), typesize());    \
-                char out_buffer[buffer_size];                                           \
-                int buffer_used = std::snprintf(out_buffer, buffer_size,                \
-                                                "%c%c%lu",                              \
-                                                endianness, typekind(), typesize());    \
-                return std::string(out_buffer, buffer_used);                            \
-            }                                                                           \
+        #define DEFINE_TYPE_ENCODING(PixelType, character)                                      \
+        template <>                                                                             \
+        struct encode_type<PixelType> {                                                         \
+            using type = PixelType;                                                             \
+            static constexpr int typesize() { return sizeof(type); }                            \
+            static constexpr char typekind() { return character; }                              \
+            static std::string typestr(Endian endian = Endian::Unspecified) {                   \
+                char endianness = static_cast<char>(endian);                                    \
+                int buffer_size = std::snprintf(nullptr, 0,                                     \
+                                                "%c%c%lu",                                      \
+                                                endianness, typekind(), sizeof(type)) + 1;      \
+                char out_buffer[buffer_size];                                                   \
+                __attribute__((unused))                                                         \
+                int buffer_used = std::snprintf(out_buffer, buffer_size,                        \
+                                                "%c%c%lu",                                      \
+                                                endianness, typekind(), sizeof(type));          \
+                return std::string(out_buffer);                                                 \
+            }                                                                                   \
         };
         
         DEFINE_TYPE_ENCODING(bool,           'b');
@@ -69,16 +70,17 @@ namespace im {
         template <typename PointerBase>
         struct encode_type<PointerBase*> {
             using type = std::add_pointer_t<PointerBase>;
-            static constexpr std::size_t typesize() { return sizeof(type); }
+            static constexpr int typesize() { return sizeof(type); }
             static constexpr char typekind() { return 'V'; }
             static std::string typestr(Endian e = Endian::Unspecified) {
                 char endianness = static_cast<char>(e);
                 int buffer_size = std::snprintf(nullptr, 0,
-                                                "%cV%i", endianness, typesize());
+                                                "%cV%i", endianness, typesize()) + 1;
                 char out_buffer[buffer_size];
+                __attribute__((unused))
                 int buffer_used = std::snprintf(out_buffer, buffer_size,
                                                 "%cV%i", endianness, typesize());
-                return std::string(out_buffer, buffer_used);
+                return std::string(out_buffer);
             }
         };
         
@@ -143,8 +145,14 @@ namespace im {
             inline off_t rowp_stride() const;
             virtual void* rowp(int r) const override;
             
-            /// extent, stride, min
+            /// type encoding
             virtual NPY_TYPES dtype() const;
+            virtual char dtypechar() const;
+            virtual std::string dtypename() const;
+            virtual char const* structcode() const;
+            virtual std::string dsignature(Endian e = Endian::Unspecified) const;
+            
+            /// extent, stride, min
             virtual int32_t* dims();
             virtual int32_t* strides();
             virtual int32_t* offsets();

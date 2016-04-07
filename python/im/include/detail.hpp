@@ -5,13 +5,35 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <utility>
+
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
+
 #include "hybrid.hh"
 #include "gil.hpp"
 #include "typecode.hpp"
 
 namespace py {
+    
+    PyObject* None();
+    PyObject* True();
+    PyObject* False();
+    
+    PyObject* boolean(bool truth = false);
+    PyObject* string(std::string const&);
+    PyObject* string(char const*);
+    
+    template <typename ...Args> inline
+    PyObject* tuple(Args&& ...args) {
+        static_assert(
+            sizeof...(Args) > 0,
+            "Can't pack zero-length argument list to PyTuple");
+        
+        return PyTuple_Pack(
+            sizeof...(Args),
+            std::forward<Args>(args)...);
+    }
     
     namespace detail {
         
