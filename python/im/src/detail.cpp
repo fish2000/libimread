@@ -24,9 +24,15 @@ namespace py {
     PyObject* string(std::string const& s) {
         return PyString_FromStringAndSize(s.c_str(), s.size());
     }
-    
     PyObject* string(char const* s) {
         return PyString_FromString(s);
+    }
+    
+    PyObject* object(PyObject* arg) {
+        return Py_BuildValue("O", arg ? arg : Py_None);
+    }
+    PyObject* object(PyArray_Descr* arg) {
+        return py::object((PyObject*)arg);
     }
     
     namespace detail {

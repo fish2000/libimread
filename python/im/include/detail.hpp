@@ -23,6 +23,8 @@ namespace py {
     PyObject* boolean(bool truth = false);
     PyObject* string(std::string const&);
     PyObject* string(char const*);
+    PyObject* object(PyObject* arg = nullptr);
+    PyObject* object(PyArray_Descr* arg = nullptr);
     
     template <typename ...Args> inline
     PyObject* tuple(Args&& ...args) {

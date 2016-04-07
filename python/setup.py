@@ -124,6 +124,7 @@ other_flags = ['-Qunused-arguments']
 
 extensions = {
     'im': [
+        "im/src/buffer.cpp",
         "im/src/detail.cpp",
         "im/src/gil.cpp",
         "im/src/halideimage.cpp",

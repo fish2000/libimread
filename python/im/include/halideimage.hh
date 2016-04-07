@@ -9,6 +9,7 @@
 #include <structmember.h>
 
 #include "private/buffer_t.h"
+#include "buffer.hpp"
 #include "check.hh"
 #include "gil.hpp"
 #include "detail.hpp"
@@ -44,6 +45,8 @@ namespace py {
         struct BufferModelBase {
             
             using pixel_t = byte;
+            // using unique_buffer_t = std::unique_ptr<BufferType,
+            //                     im::buffer::deleter<BufferType>>;
             using unique_buffer_t = std::unique_ptr<BufferType>;
             using accessor_t = im::pix::accessor<pixel_t>;
             
@@ -85,6 +88,15 @@ namespace py {
                                           internal->extent[1] ? internal->stride[1] : 0,
                                           internal->extent[2] ? internal->stride[2] : 0)
                 {}
+            BufferModelBase(BufferModelBase const& other)
+                :internal(im::buffer::heapcopy(other.internal.get()))
+                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
+                                          internal->extent[1] ? internal->stride[1] : 0,
+                                          internal->extent[2] ? internal->stride[2] : 0)
+                {}
+            explicit BufferModelBase(PyObject* other)
+                :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other))
+                {}
             
             void cleanup(bool force = false) {
                 if (clean && !force) {
@@ -106,6 +118,24 @@ namespace py {
             
             PyObject* __index__(Py_ssize_t idx, int tc = NPY_UINT) {
                 return Py_BuildValue("I", internal->host[idx]);
+            }
+            
+            PyObject* transpose() {
+                static constexpr std::size_t N = 4;
+                
+                Py_intptr_t permutation[N] = { 0, 0, 0, 0 };
+                for (int idx = 0; idx < N; ++idx) {
+                    permutation[idx] = N - 1 - idx;
+                }
+                
+                BufferModelBase* transposed = new BufferModelBase(*this);
+                for (int idx = 0; idx < N; ++idx) {
+                    transposed->internal->extent[idx] = internal->extent[permutation[idx]];
+                    transposed->internal->stride[idx] = internal->stride[permutation[idx]];
+                    transposed->internal->min[idx]    = internal->min[permutation[idx]];
+                }
+                
+                return reinterpret_cast<PyObject*>(transposed);
             }
             
             int getbuffer(Py_buffer* view, int flags) {
@@ -717,16 +747,30 @@ namespace py {
             
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    transpose(PyObject* self, PyObject*) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return pybuf->transpose();
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_transpose(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return py::object(pybuf->transpose());
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject*    get_array_interface(PyObject* self, void* closure) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                return Py_BuildValue("O", pybuf->__array_interface__());
+                return py::object(pybuf->__array_interface__());
             }
             
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject*    get_array_struct(PyObject* self, void* closure) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                return Py_BuildValue("O", pybuf->__array_struct__());
+                return py::object(pybuf->__array_struct__());
             }
             
             /// tostring() -- like __str__ implementation (above), return bytes from buffer
@@ -795,6 +839,12 @@ static PySequenceMethods Buffer_SequenceMethods = {
 };
 
 static PyGetSetDef Buffer_getset[] = {
+    {
+        (char*)"T",
+            (getter)py::ext::buffer::get_transpose<buffer_t>,
+            nullptr,
+            (char*)"Buffer with transposed axes",
+            nullptr },
     { nullptr, nullptr, nullptr, nullptr, nullptr }
 };
 
@@ -804,6 +854,11 @@ static PyMethodDef Buffer_methods[] = {
             (PyCFunction)py::ext::buffer::tostring<buffer_t>,
             METH_NOARGS,
             "Get bytes from buffer as a string" },
+    {
+        "transpose",
+            (PyCFunction)py::ext::buffer::transpose<buffer_t>,
+            METH_NOARGS,
+            "Get copy of buffer with transposed axes" },
     { nullptr, nullptr, 0, nullptr }
 };
 
@@ -1181,7 +1236,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_dtype(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return Py_BuildValue("O", pyim->dtype);
+                return py::object(pyim->dtype);
             }
             
             /// HybridImage.imagebuffer getter
@@ -1190,7 +1245,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_imagebuffer(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return Py_BuildValue("O", pyim->imagebuffer);
+                return py::object(pyim->imagebuffer);
             }
             
             /// HybridImage.shape getter
@@ -1224,7 +1279,7 @@ namespace py {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* target = (char const*)closure == closures::READ ? pyim->readoptDict :
                                                                             pyim->writeoptDict;
-                return Py_BuildValue("O", target ? target : Py_None);
+                return py::object(target);
             }
             
             /// HybridImage.{read,write}_opts setter
@@ -1242,10 +1297,10 @@ namespace py {
                 /// switch on closure tag (?)
                 if ((char const*)closure == closures::READ) {
                     Py_CLEAR(pyim->readoptDict);
-                    pyim->readoptDict = Py_BuildValue("O", value);
+                    pyim->readoptDict = py::object(value);
                 } else {
                     Py_CLEAR(pyim->writeoptDict);
-                    pyim->writeoptDict = Py_BuildValue("O", value);
+                    pyim->writeoptDict = py::object(value);
                 }
                 return 0;
             }
@@ -1257,7 +1312,7 @@ namespace py {
                 using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                return Py_BuildValue("O", imbuf->__array_interface__());
+                return py::object(imbuf->__array_interface__());
             }
             
             template <typename ImageType = HalideNumpyImage,
@@ -1267,7 +1322,7 @@ namespace py {
                 using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                return Py_BuildValue("O", imbuf->__array_struct__());
+                return py::object(imbuf->__array_struct__());
             }
             
             /// HybridImage.read_opts formatter
