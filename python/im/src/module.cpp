@@ -1,5 +1,6 @@
 
 #include <cstddef>
+#include <iostream>
 #include "module.hpp"
 
 PyTypeObject HybridImageModel_Type = {
@@ -256,6 +257,11 @@ PyMODINIT_FUNC initim(void) {
     
     /// Bring in NumPy's C-API
     import_array();
+    
+    /// Nix the obsequeously scrupulous global I/O buffer behavior
+    /// ... doctor's orders, q.v. http://ubm.io/1VCwhdy
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(0);
     
     /// Manually amend our declared types, as needed:
     /// -- Specify that im.ImageBuffer subclasses im.Buffer
