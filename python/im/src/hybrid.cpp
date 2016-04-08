@@ -158,13 +158,6 @@ namespace im {
     
     HalideNumpyImage::~HalideNumpyImage() {}
     
-    // PyObject* HalideNumpyImage::metadataPyObject() {
-    //     std::string const& s = MetaImage::get_meta();
-    //     if (s != "") { return PyBytes_FromStringAndSize(s.c_str(),
-    //                                                     s.size()); }
-    //     Py_RETURN_NONE;
-    // }
-    
     /// This returns the same type of data as buffer_t.host
     uint8_t* HalideNumpyImage::data() const {
         return (uint8_t*)HalBase::buffer.host_ptr();

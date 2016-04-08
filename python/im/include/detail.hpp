@@ -27,6 +27,58 @@ namespace py {
     PyObject* object(PyObject* arg = nullptr);
     PyObject* object(PyArray_Descr* arg = nullptr);
     
+    template <typename ValueType> inline
+    PyObject* convert(ValueType&& value);
+    
+    #define DECLARE_CONVERTER_FOR_TYPE(TypeName, ConverterFunction)                             \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName>(std::remove_cv_t(TypeName)&& value) {                           \
+        return ConverterFunction(std::forward<TypeName>(value)); }                              \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName const>(std::remove_cv_t(TypeName)&& value) {                     \
+        return ConverterFunction(std::forward<TypeName>(value)); }                              \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName volatile>(std::remove_cv_t(TypeName)&& value) {                  \
+        return ConverterFunction(std::forward<TypeName>(value)); }                              \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName const volatile>(std::remove_cv_t(TypeName)&& value) {            \
+        return ConverterFunction(std::forward<TypeName>(value)); }
+        
+    #define DECLARE_CONVERTER_FOR_EXPR(TypeName, ConverterFunction, Expression)                 \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName>(std::remove_cv_t(TypeName)&& value) {                           \
+        return ConverterFunction(##Expression##); }                                             \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName const>(std::remove_cv_t(TypeName)&& value) {                     \
+        return ConverterFunction(##Expression##); }                                             \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName volatile>(std::remove_cv_t(TypeName)&& value) {                  \
+        return ConverterFunction(##Expression##); }                                             \
+    template <> inline                                                                          \
+    PyObject* convert<TypeName const volatile>(std::remove_cv_t(TypeName)&& value) {            \
+        return ConverterFunction(##Expression##); }
+    
+    
+    DECLARE_CONVERTER_FOR_TYPE(std::size_t,     PyInt_FromSize_t);
+    DECLARE_CONVERTER_FOR_TYPE(Py_size_t,       PyInt_FromSize_t);
+    DECLARE_CONVERTER_FOR_TYPE(Py_ssize_t,      PyInt_FromSsize_t);
+    DECLARE_CONVERTER_FOR_TYPE(int8_t,          PyInt_FromLong);
+    DECLARE_CONVERTER_FOR_TYPE(int16_t,         PyInt_FromLong);
+    DECLARE_CONVERTER_FOR_TYPE(int32_t,         PyInt_FromLong);
+    DECLARE_CONVERTER_FOR_TYPE(int64_t,         PyLong_FromLongLong);
+    DECLARE_CONVERTER_FOR_TYPE(uint8_t,         PyInt_FromLong);
+    DECLARE_CONVERTER_FOR_TYPE(uint16_t,        PyInt_FromLong);
+    DECLARE_CONVERTER_FOR_TYPE(uint32_t,        PyInt_FromLong);
+    DECLARE_CONVERTER_FOR_TYPE(uint64_t,        PyLong_FromUnsignedLongLong);
+    DECLARE_CONVERTER_FOR_TYPE(float,           PyFloat_FromDouble);
+    DECLARE_CONVERTER_FOR_TYPE(double,          PyFloat_FromDouble);
+    DECLARE_CONVERTER_FOR_TYPE(long double,     PyFloat_FromDouble);
+    DECLARE_CONVERTER_FOR_TYPE(char*,           PyString_FromString);
+    DECLARE_CONVERTER_FOR_EXPR(std::string,     PyString_FromStringAndSize,
+                              "std::forward<std::string>(value).c_str(), std::forward<std::string>(value).size()" );
+    
+    
+    
     template <typename ...Args> inline
     PyObject* tuple(Args&& ...args) {
         static_assert(
