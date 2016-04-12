@@ -1422,6 +1422,7 @@ namespace py {
                 PyObject* options = NULL;
                 options_map opts;
                 char const* keywords[] = { "options", NULL };
+                path dst;
                 std::string dststr;
                 bool did_save = false;
                 
@@ -1453,18 +1454,21 @@ namespace py {
                     NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
                                         FILESYSTEM_TEMP_FILENAME,                  /// prefix (filename template)
                                         false);                                    /// cleanup on scope exit
-                    path dst = tf.filepath.make_absolute();
+                    dst = tf.filepath.make_absolute();
                     dststr = std::string(dst.str());
-                    did_save = pyim->save(dststr.c_str(), opts);
-                    if (!did_save) { return NULL; }
-                    im::image::preview(dst);
-                    tf.close();
-                    tf.remove();
                 } catch (im::NotImplementedError& exc) {
                     /// this shouldn't happen
                     PyErr_SetString(PyExc_AttributeError, exc.what());
                     return py::False();
                 }
+                
+                did_save = pyim->save(dststr.c_str(), opts);
+                if (!did_save) {
+                    return py::False();
+                }
+                
+                im::image::preview(dst);
+                path::remove(dst);
                 
                 return py::True();
             }
