@@ -104,25 +104,7 @@ namespace im {
         return true;
     }
     
-    FILE* handle_source_sink::open(char* cpath,
-                                 filesystem::mode fmode) {
-        // if (fmode == filesystem::mode::WRITE) {
-        //     handle = std::fopen(cpath, "r+");
-        //     if (!handle) {
-        //         imread_raise(CannotWriteError, "filehandle open-to-write failure:",
-        //             FF("\tstd::fopen(\"%s\", \"r+\")", cpath),
-        //                "\treturned nullptr value",
-        //                "\tERROR MESSAGE IS: ", std::strerror(errno));
-        //     }
-        // } else {
-        //     handle = std::fopen(cpath, "r+");
-        //     if (!handle) {
-        //         imread_raise(CannotReadError, "filehandle open-to-read failure:",
-        //             FF("\tstd::fopen(\"%s\", \"r+\")", cpath),
-        //                "\treturned nullptr value",
-        //                "\tERROR MESSAGE IS: ", std::strerror(errno));
-        //     }
-        // }
+    FILE* handle_source_sink::open(char* cpath, filesystem::mode fmode) {
         handle = std::fopen(cpath, "r+");
         if (!handle) {
             imread_raise(CannotReadError, "filehandle open failure:",

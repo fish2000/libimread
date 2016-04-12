@@ -74,7 +74,7 @@ namespace py {
             active = false;
         }
         
-        with::source_t with::source() const {
+        with::source_t with::source() {
             if (!active) {
                 imread_raise(CannotReadError,
                     "py::gil::with::source():",
@@ -88,7 +88,7 @@ namespace py {
             return out;
         }
         
-        with::sink_t with::sink() const {
+        with::sink_t with::sink() {
             if (!active) {
                 imread_raise(CannotWriteError,
                     "py::gil::with::sink():",

@@ -63,8 +63,8 @@ namespace py {
             using sink_t = std::unique_ptr<py::handle::sink,
                                  fileclose<py::handle::sink>>;
             
-            source_t source() const;
-            sink_t sink() const;
+            source_t source();
+            sink_t sink();
         };
         
     } /* namespace gil */
