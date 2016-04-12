@@ -1,6 +1,7 @@
 
 #define NO_IMPORT_ARRAY
 #include "halideimage.hh"
+#include "detail.hpp"
 
 namespace py {
     
@@ -9,19 +10,19 @@ namespace py {
         PyObject* image_check(PyObject* self, PyObject* args) {
             PyObject* evaluee;
             if (!PyArg_ParseTuple(args, "O", &evaluee)) { return NULL; }
-            return Py_BuildValue("O", ImageModel_Check(evaluee) ? Py_True : Py_False);
+            return py::boolean(ImageModel_Check(evaluee));
         }
         
         PyObject* buffer_check(PyObject* self, PyObject* args) {
             PyObject* evaluee;
             if (!PyArg_ParseTuple(args, "O", &evaluee)) { return NULL; }
-            return Py_BuildValue("O", BufferModel_Check(evaluee) ? Py_True : Py_False);
+            return py::boolean(BufferModel_Check(evaluee));
         }
         
         PyObject* imagebuffer_check(PyObject* self, PyObject* args) {
             PyObject* evaluee;
             if (!PyArg_ParseTuple(args, "O", &evaluee)) { return NULL; }
-            return Py_BuildValue("O", ImageBufferModel_Check(evaluee) ? Py_True : Py_False);
+            return py::boolean(ImageBufferModel_Check(evaluee));
         }
         
     }

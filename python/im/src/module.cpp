@@ -240,6 +240,8 @@ static PyMethodDef module_functions[] = {
 #define PyMODINIT_FUNC void
 #endif
 
+using filesystem::path;
+
 PyMODINIT_FUNC initim(void) {
     /// Declare some object pointers:
     /// ... one, to the new module object;
@@ -277,12 +279,20 @@ PyMODINIT_FUNC initim(void) {
     if (PyType_Ready(&ImageBufferModel_Type) < 0) { return; }
     if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
     
+    /// Get the path of the extension module
+    path modulefile(initim);
+    
     /// Actually initialize the module object,
     /// setting up the module's external C-function table
     module = Py_InitModule3(
         "im.im", module_functions,
         "libimread python bindings");
     if (module == NULL)                           { return; }
+    
+    /// Set the module object's __file__ attribute
+    PyObject_SetAttrString(module,
+        "__file__",
+        py::string(modulefile.str()));
     
     /// Add the HybridImageModel type object to the module
     Py_INCREF(&HybridImageModel_Type);

@@ -33,12 +33,12 @@ namespace py {
             int flags               = include_descriptor ? NPY_ARR_HAS_DESCR : 0;
             NPY_TYPES typecode      = image.dtype();
             NPY_TYPECHAR typechar   = typecode::typechar(typecode);
+            char const* structcode  = im::detail::structcode(typecode);
             PyObject* descriptor    = nullptr;
             
             if (include_descriptor) {
                 py::gil::ensure yesgil;
-                descriptor = py::detail::structcode_to_dtype(
-                             im::detail::structcode(typecode));
+                descriptor = py::detail::structcode_to_dtype(structcode);
             }
             
             out = new PyArrayInterface {

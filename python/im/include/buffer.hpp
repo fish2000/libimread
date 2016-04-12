@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <Python.h>
 #include "private/buffer_t.h"
+#include "detail.hpp"
 #include <libimread/libimread.hpp>
 
 namespace im {
@@ -40,69 +41,69 @@ namespace im {
         PyObject* shape(BufferType const& buffer) {
             switch (im::buffer::ndims(buffer)) {
                 case 1:
-                    return Py_BuildValue("(i)",     buffer.extent[0]);
+                    return py::tuplize(buffer.extent[0]);
                 case 2:
-                    return Py_BuildValue("(ii)",    buffer.extent[0],
-                                                    buffer.extent[1]);
+                    return py::tuplize(buffer.extent[0],
+                                       buffer.extent[1]);
                 case 3:
-                    return Py_BuildValue("(iii)",   buffer.extent[0],
-                                                    buffer.extent[1],
-                                                    buffer.extent[2]);
+                    return py::tuplize(buffer.extent[0],
+                                       buffer.extent[1],
+                                       buffer.extent[2]);
                 case 4:
-                    return Py_BuildValue("(iiii)",  buffer.extent[0],
-                                                    buffer.extent[1],
-                                                    buffer.extent[2],
-                                                    buffer.extent[3]);
+                    return py::tuplize(buffer.extent[0],
+                                       buffer.extent[1],
+                                       buffer.extent[2],
+                                       buffer.extent[3]);
                 default:
-                    return Py_BuildValue("");
+                    return py::tuplize();
             }
-            return Py_BuildValue("");
+            return py::tuplize();
         }
         
         template <typename BufferType> inline
         PyObject* strides(BufferType const& buffer) {
             switch (im::buffer::ndims(buffer)) {
                 case 1:
-                    return Py_BuildValue("(i)",     buffer.stride[0]);
+                    return py::tuplize(buffer.stride[0]);
                 case 2:
-                    return Py_BuildValue("(ii)",    buffer.stride[0],
-                                                    buffer.stride[1]);
+                    return py::tuplize(buffer.stride[0],
+                                       buffer.stride[1]);
                 case 3:
-                    return Py_BuildValue("(iii)",   buffer.stride[0],
-                                                    buffer.stride[1],
-                                                    buffer.stride[2]);
+                    return py::tuplize(buffer.stride[0],
+                                       buffer.stride[1],
+                                       buffer.stride[2]);
                 case 4:
-                    return Py_BuildValue("(iiii)",  buffer.stride[0],
-                                                    buffer.stride[1],
-                                                    buffer.stride[2],
-                                                    buffer.stride[3]);
+                    return py::tuplize(buffer.stride[0],
+                                       buffer.stride[1],
+                                       buffer.stride[2],
+                                       buffer.stride[3]);
                 default:
-                    return Py_BuildValue("");
+                    return py::tuplize();
             }
-            return Py_BuildValue("");
+            return py::tuplize();
         }
         
         template <typename BufferType> inline
         PyObject* min(BufferType const& buffer) {
             switch (im::buffer::ndims(buffer)) {
                 case 1:
-                    return Py_BuildValue("(i)",     buffer.min[0]);
+                    return py::tuplize(buffer.min[0]);
                 case 2:
-                    return Py_BuildValue("(ii)",    buffer.min[0],
-                                                    buffer.min[1]);
+                    return py::tuplize(buffer.min[0],
+                                       buffer.min[1]);
                 case 3:
-                    return Py_BuildValue("(iii)",   buffer.min[0],
-                                                    buffer.min[1],
-                                                    buffer.min[2]);
+                    return py::tuplize(buffer.min[0],
+                                       buffer.min[1],
+                                       buffer.min[2]);
                 case 4:
-                    return Py_BuildValue("(iiii)",  buffer.min[0],
-                                                    buffer.min[1],
-                                                    buffer.min[2],
-                                                    buffer.min[3]);
+                    return py::tuplize(buffer.min[0],
+                                       buffer.min[1],
+                                       buffer.min[2],
+                                       buffer.min[3]);
                 default:
-                    return Py_BuildValue("");
+                    return py::tuplize();
             }
-            return Py_BuildValue("");
+            return py::tuplize();
         }
         
         

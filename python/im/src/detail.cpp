@@ -81,11 +81,13 @@ namespace py {
     PyObject* convert(int8_t operand)               { return PyInt_FromSsize_t(static_cast<Py_ssize_t>(operand)); }
     PyObject* convert(int16_t operand)              { return PyInt_FromSsize_t(static_cast<Py_ssize_t>(operand)); }
     PyObject* convert(int32_t operand)              { return PyInt_FromSsize_t(static_cast<Py_ssize_t>(operand)); }
-    PyObject* convert(int64_t operand)              { return PyLong_FromLongLong(operand); }
+    PyObject* convert(int64_t operand)              { return PyLong_FromLong(operand); }
+    // PyObject* convert(int128_t operand)             { return PyLong_FromLongLong(operand); }
     PyObject* convert(uint8_t operand)              { return PyInt_FromSize_t(static_cast<std::size_t>(operand)); }
     PyObject* convert(uint16_t operand)             { return PyInt_FromSize_t(static_cast<std::size_t>(operand)); }
     PyObject* convert(uint32_t operand)             { return PyInt_FromSize_t(static_cast<std::size_t>(operand)); }
-    PyObject* convert(uint64_t operand)             { return PyLong_FromUnsignedLongLong(operand); }
+    PyObject* convert(uint64_t operand)             { return PyLong_FromUnsignedLong(operand); }
+    // PyObject* convert(uint128_t operand)            { return PyLong_FromUnsignedLongLong(operand); }
     PyObject* convert(float operand)                { return PyFloat_FromDouble(static_cast<double>(operand)); }
     PyObject* convert(double operand)               { return PyFloat_FromDouble(operand); }
     PyObject* convert(long double operand)          { return PyFloat_FromDouble(static_cast<double>(operand)); }
@@ -165,7 +167,6 @@ namespace py {
         }
         
         PyObject* formats_as_pytuple(int idx) {
-            PyObject* list = PyList_New(0);
             stringvec_t formats;
             int max = 0;
             {
@@ -188,12 +189,16 @@ namespace py {
             /// which did you know that's even less frequent?) -- so dogg I am actually
             /// totally cool with it
             
+            PyObject* list = PyList_New(max);
+            
             for (auto it = formats.begin();
                  it != formats.end() && idx < max;
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
-                             PyList_Append(list, py::string(format));
+                             PyList_SET_ITEM(list, idx,
+                                             py::string(format));
                          } ++idx; }
+            
             PyObject* out = PyList_AsTuple(list);
             Py_DECREF(list);
             return out;

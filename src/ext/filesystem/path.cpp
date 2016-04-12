@@ -6,6 +6,7 @@
 #include <pwd.h>
 #include <glob.h>
 #include <fcntl.h>
+#include <dlfcn.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -35,6 +36,7 @@ namespace filesystem {
         using stat_t = struct stat;
         using passwd_t = struct passwd;
         using rehasher_t = hash::rehasher<std::string>;
+        using dlinfo_t = Dl_info;
         
         const char* tmpdir() noexcept {
             /// cribbed/tweaked from boost
@@ -123,6 +125,17 @@ namespace filesystem {
             imread_raise(FileSystemError,
                 "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath)",
                 "where fdpath = ", fdpath, std::strerror(errno));
+        }
+    }
+    
+    path::path(const void* address) {
+        detail::dlinfo_t dlinfo;
+        if (::dladdr(address, &dlinfo)) {
+            set(dlinfo.dli_fname);
+        } else {
+            imread_raise(FileSystemError,
+                "Internal error in ::dlfcn(address, &dlinfo)",
+                "where address = ", (long)address, std::strerror(errno));
         }
     }
     

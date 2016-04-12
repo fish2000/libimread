@@ -91,6 +91,7 @@ namespace filesystem {
             path(std::string const& st) { set(st); }
             
             explicit path(int descriptor);
+            explicit path(const void* address);
             explicit path(detail::stringvec_t const& vec, bool absolute = false);
             explicit path(detail::stringlist_t list);
             

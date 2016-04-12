@@ -121,7 +121,7 @@ namespace py {
             }
             
             PyObject* __index__(Py_ssize_t idx, int tc = NPY_UINT) {
-                return Py_BuildValue("I", internal->host[idx]);
+                return py::convert(internal->host[idx]);
             }
             
             PyObject* transpose() {
@@ -280,35 +280,52 @@ namespace py {
                     switch (tc) {
                         case NPY_FLOAT: {
                             float op = strong->template rowp_as<float>(0)[nidx];
-                            return Py_BuildValue("f", op);
+                            return py::convert(op);
                         }
                         break;
                         case NPY_DOUBLE:
                         case NPY_LONGDOUBLE: {
                             double op = strong->template rowp_as<double>(0)[nidx];
-                            return Py_BuildValue("d", op);
+                            return py::convert(op);
+                        }
+                        break;
+                        case NPY_SHORT:
+                        case NPY_BYTE: {
+                            byte op = strong->template rowp_as<byte>(0)[nidx];
+                            return py::convert(op);
                         }
                         break;
                         case NPY_USHORT:
                         case NPY_UBYTE: {
-                            byte op = strong->template rowp_as<byte>(0)[nidx];
-                            return Py_BuildValue("B", op);
+                            unsigned char op = strong->template rowp_as<unsigned char>(0)[nidx];
+                            return py::convert(op);
+                        }
+                        break;
+                        case NPY_INT: {
+                            int32_t op = strong->template rowp_as<int32_t>(0)[nidx];
+                            return py::convert(op);
                         }
                         break;
                         case NPY_UINT: {
                             uint32_t op = strong->template rowp_as<uint32_t>(0)[nidx];
-                            return Py_BuildValue("I", op);
+                            return py::convert(op);
+                        }
+                        break;
+                        case NPY_LONG:
+                        case NPY_LONGLONG: {
+                            int64_t op = strong->template rowp_as<int64_t>(0)[nidx];
+                            return py::convert(op);
                         }
                         break;
                         case NPY_ULONG:
                         case NPY_ULONGLONG: {
                             uint64_t op = strong->template rowp_as<uint64_t>(0)[nidx];
-                            return Py_BuildValue("Q", op);
+                            return py::convert(op);
                         }
                         break;
                     }
                     uint32_t op = strong->template rowp_as<uint32_t>(0)[nidx];
-                    return Py_BuildValue("I", op);
+                    return py::convert(op);
                 }
                 
                 template <typename Pointer = PyArrayInterface,
@@ -791,7 +808,7 @@ namespace py {
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject*    get_transpose(PyObject* self, void* closure) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                return py::object(pybuf->transpose());
+                return pybuf->transpose();
             }
             
             template <typename BufferType = buffer_t,
@@ -812,14 +829,14 @@ namespace py {
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject*    get_array_interface(PyObject* self, void* closure) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                return py::object(pybuf->__array_interface__());
+                return pybuf->__array_interface__();
             }
             
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject*    get_array_struct(PyObject* self, void* closure) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                return py::object(pybuf->__array_struct__());
+                return pybuf->__array_struct__();
             }
             
             /// tostring() -- like __str__ implementation (above), return bytes from buffer
@@ -1448,7 +1465,7 @@ namespace py {
                 using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                return py::object(imbuf->__array_interface__());
+                return imbuf->__array_interface__();
             }
             
             template <typename ImageType = HalideNumpyImage,
@@ -1458,7 +1475,7 @@ namespace py {
                 using imagebuffer_t = typename PythonImageType::ImageBufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                return py::object(imbuf->__array_struct__());
+                return imbuf->__array_struct__();
             }
             
             /// HybridImage.read_opts formatter
