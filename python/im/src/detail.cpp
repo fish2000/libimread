@@ -111,6 +111,7 @@ namespace py {
     #endif
     
     PyObject* tuplize()                             { return PyTuple_New(0); }
+    PyObject* listify()                             { return PyList_New(0);  }
     
     namespace detail {
         

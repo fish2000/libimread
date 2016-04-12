@@ -236,13 +236,13 @@ static PyMethodDef module_functions[] = {
     { nullptr, nullptr, 0, nullptr }
 };
 
-#ifndef PyMODINIT_FUNC
-#define PyMODINIT_FUNC void
-#endif
-
-using filesystem::path;
+PyDoc_STRVAR(module__doc__,
+"Python bindings for libimread");
 
 PyMODINIT_FUNC initim(void) {
+    /// Bring in filesystem::path
+    using filesystem::path;
+    
     /// Declare some object pointers:
     /// ... one, to the new module object;
     PyObject* module;
@@ -279,20 +279,26 @@ PyMODINIT_FUNC initim(void) {
     if (PyType_Ready(&ImageBufferModel_Type) < 0) { return; }
     if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
     
-    /// Get the path of the extension module
+    /// Get the path of the extension module --
+    /// via dladdr() on the module init function's address
     path modulefile((const void*)initim);
     
     /// Actually initialize the module object,
     /// setting up the module's external C-function table
-    module = Py_InitModule3(
-        "im.im", module_functions,
-        "Python bindings for libimread");
+    module = Py_InitModule3("im.im",
+        module_functions,
+        module__doc__);
     if (module == NULL)                           { return; }
     
     /// Set the module object's __file__ attribute
     PyObject_SetAttrString(module,
         "__file__",
-        py::string(modulefile.str()));
+        py::string(modulefile.make_absolute().str()));
+    
+    /// Set the module object's __path__ single-element list
+    PyObject_SetAttrString(module,
+        "__path__",
+        py::listify(modulefile.make_absolute().parent().str()));
     
     /// Add the HybridImageModel type object to the module
     Py_INCREF(&HybridImageModel_Type);

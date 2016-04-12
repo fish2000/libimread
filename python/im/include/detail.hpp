@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <initializer_list>
 #include <Python.h>
+#include <libimread/libimread.hpp>
 
 /// forward-declare PyArray_Descr from numpy
 struct _PyArray_Descr;
@@ -27,6 +28,17 @@ namespace py {
     PyObject* string(char);
     PyObject* object(PyObject* arg = nullptr);
     PyObject* object(PyArray_Descr* arg = nullptr);
+    
+    template <typename ...Args> inline
+    PyObject* tuple(Args&& ...args) {
+        static_assert(
+            sizeof...(Args) > 0,
+            "Can't pack a zero-length arglist as a PyTuple");
+        
+        return PyTuple_Pack(
+            sizeof...(Args),
+            std::forward<Args>(args)...);
+    }
     
     PyObject* convert(PyObject*);
     PyObject* convert(std::nullptr_t);
@@ -130,15 +142,66 @@ namespace py {
             py::convert(std::forward<Args>(arg)));
     }
     
-    template <typename ...Args> inline
-    PyObject* tuple(Args&& ...args) {
+    template <typename ...Args>
+    PyObject* tuplize(Args&& ...args) {
         static_assert(
-            sizeof...(Args) > 0,
-            "Can't pack a zero-length arglist as a PyTuple");
+            sizeof...(Args) > 1,
+            "Can't tuplize a zero-length arglist");
         
         return PyTuple_Pack(
             sizeof...(Args),
-            std::forward<Args>(args)...);
+            py::convert(std::forward<Args>(args))...);
+    }
+    
+    PyObject* listify();
+    
+    template <typename ListType,
+              typename std::enable_if_t<
+                        py::convertible<ListType>::value,
+              int> = 0>
+    PyObject* listify(std::initializer_list<ListType> list) {
+        Py_ssize_t idx = 0,
+                   max = list.size();
+        PyObject* pylist = PyList_New(max);
+        for (ListType const& item : list) {
+            PyList_SET_ITEM(pylist, idx, py::convert(item));
+            idx++;
+        }
+        return pylist;
+    }
+    
+    template <typename Args,
+              typename std::enable_if_t<
+                        py::convertible<Args>::value,
+              int> = 0>
+    PyObject* listify(Args arg) {
+        PyObject* pylist = PyList_New(1);
+        PyList_SET_ITEM(pylist, 0,
+            py::convert(std::forward<Args>(arg)));
+        return pylist;
+    }
+    
+    template <typename Tuple, std::size_t ...I>
+    PyObject* listify(Tuple&& t, std::index_sequence<I...>) {
+        PyObject* pylist = PyList_New(
+            std::tuple_size<Tuple>::value);
+        unpack {
+            PyList_SET_ITEM(pylist, I,
+                py::convert(std::get<I>(std::forward<Tuple>(t))))...
+        };
+        return pylist;
+    }
+    
+    template <typename ...Args>
+    PyObject* listify(Args&& ...args) {
+        using Indices = std::make_index_sequence<sizeof...(Args)>;
+        static_assert(
+            sizeof...(Args) > 1,
+            "Can't tuplize a zero-length arglist");
+        
+        return py::listify(
+            std::forward_as_tuple(args...),
+            Indices());
     }
     
     namespace impl {
@@ -156,22 +219,11 @@ namespace py {
         
     }
     
-    template <typename ...Args>
-    PyObject* tuplize(Args&& ...args) {
-        static_assert(
-            sizeof...(Args) > 1,
-            "Can't tuplize a zero-length arglist");
-        
-        return PyTuple_Pack(
-            sizeof...(Args),
-            py::convert(std::forward<Args>(args))...);
-    }
-    
     template <typename ...Args> inline
     PyObject* convert(std::tuple<Args&&...> argtuple) {
         using Tuple = std::tuple<Args&&...>;
         static_assert(
-            sizeof...(Args) > 0,
+            std::tuple_size<Tuple>::value > 0,
             "Can't convert a zero-length std::tuple to a PyTuple");
         
         return py::impl::apply(py::tuplize<Args...>,
