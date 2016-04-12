@@ -408,6 +408,11 @@ namespace filesystem {
         return bool(::mkdir(c_str(), mkdir_flags) != -1);
     }
     
+    std::string path::basename() const {
+        if (empty()) { return ""; }
+        return m_path.back();
+    }
+    
     bool path::rename(path const& newpath) {
         if (!exists() || newpath.exists()) { return false; }
         bool status = ::rename(c_str(), newpath.c_str()) != -1;
@@ -419,7 +424,70 @@ namespace filesystem {
         path out;
         if (!exists() || newpath.exists()) { return out; }
         bool status = detail::copyfile(c_str(), newpath.c_str()) != -1;
-        if (status) { out = path(newpath.make_absolute().str()); }
+        if (status) { out = path::absolute(newpath); }
+        return out;
+    }
+    
+    std::string path::extension() const {
+        if (empty()) { return ""; }
+        const std::string& last = m_path.back();
+        size_type pos = last.find_last_of(extsep);
+        if (pos == std::string::npos) { return ""; }
+        return last.substr(pos+1);
+    }
+    
+    path path::parent() const {
+        path result;
+        result.m_absolute = m_absolute;
+        
+        if (m_path.empty()) {
+            if (!m_absolute) {
+                result.m_path.push_back("..");
+            } else {
+                imread_raise(FileSystemError,
+                    "path::parent() can't get the parent of an empty absolute path");
+            }
+        } else {
+            size_type idx = 0,
+                      until = m_path.size() - 1;
+            for (; idx < until; ++idx) {
+                result.m_path.push_back(m_path[idx]);
+            }
+        }
+        return result;
+    }
+    
+    path path::join(path const& other) const {
+        if (other.m_absolute) {
+            imread_raise(FileSystemError,
+                "path::join() expects a relative-path RHS");
+        }
+        
+        path result(m_path, m_absolute);
+        size_type idx = 0,
+                  max = other.m_path.size();
+        
+        for (; idx < max; ++idx) {
+            result.m_path.push_back(other.m_path[idx]);
+        }
+        return result;
+    }
+    
+    path path::append(std::string const& appendix) const {
+        path out(m_path, m_absolute);
+        out.m_path.back().append(appendix);
+        return out;
+    }
+    
+    std::string path::str() const {
+        std::string out = "";
+        if (m_absolute) { out += sep; }
+        size_type idx = 0,
+                  siz = m_path.size();
+        for (; idx < siz; ++idx) {
+            out += m_path[idx];
+            if (idx + 1 < siz) { out += sep; }
+        }
         return out;
     }
     

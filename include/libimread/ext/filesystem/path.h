@@ -261,10 +261,7 @@ namespace filesystem {
             
             /// get the basename -- i.e. for path /yo/dogg/iheardyoulike/basenames.jpg
             /// ... the basename returned is "basenames.jpg"
-            std::string basename() const {
-                if (empty()) { return ""; }
-                return m_path.back();
-            }
+            std::string basename() const;
             
             /// Static forwarder for path::basename<P>(p)
             template <typename P> inline
@@ -299,13 +296,7 @@ namespace filesystem {
             /// Attempt to return the string extention (WITHOUT THE LEADING ".")
             /// ... I never know when to include the fucking leading "." and so
             /// at any given time, half my functions support it and half don't. BLEAH.
-            std::string extension() const {
-                if (empty()) { return ""; }
-                const std::string& last = m_path.back();
-                size_type pos = last.find_last_of(extsep);
-                if (pos == std::string::npos) { return ""; }
-                return last.substr(pos+1);
-            }
+            std::string extension() const;
             
             /// Static forwarder for path::extension<P>(p)
             template <typename P> inline
@@ -315,45 +306,11 @@ namespace filesystem {
             
             /// Get back the parent path (also known as the 'dirname' if you are
             /// a fan of the Python os.path module, which meh I could take or leave)
-            path parent() const {
-                path result;
-                result.m_absolute = m_absolute;
-                
-                if (m_path.empty()) {
-                    if (!m_absolute) {
-                        result.m_path.push_back("..");
-                    } else {
-                        imread_raise(FileSystemError,
-                            "path::parent() can't get the parent of an empty absolute path");
-                    }
-                } else {
-                    size_type idx = 0,
-                              until = m_path.size() - 1;
-                    for (; idx < until; ++idx) {
-                        result.m_path.push_back(m_path[idx]);
-                    }
-                }
-                return result;
-            }
-            
+            path parent() const;
             inline path dirname() const { return parent(); }
             
             /// join a path with a new trailing path fragment
-            path join(path const& other) const {
-                if (other.m_absolute) {
-                    imread_raise(FileSystemError,
-                        "path::join() expects a relative-path RHS");
-                }
-                
-                path result(m_path, m_absolute);
-                size_type idx = 0,
-                          max = other.m_path.size();
-                
-                for (; idx < max; ++idx) {
-                    result.m_path.push_back(other.m_path[idx]);
-                }
-                return result;
-            }
+            path join(path const& other) const;
             
             /// operator overloads to join paths with slashes -- you can be like this:
             ///     path p = "/yo/dogg";
@@ -374,11 +331,7 @@ namespace filesystem {
             }
             
             /// Simple string-append for the trailing path segment
-            path append(std::string const& appendix) const {
-                path out(m_path, m_absolute);
-                out.m_path.back().append(appendix);
-                return out;
-            }
+            path append(std::string const& appendix) const;
             
             /// operator overloads for bog-standard string-appending -- like so:
             ///     path p = "/yo/dogg";
@@ -398,17 +351,7 @@ namespace filesystem {
             }
             
             /// Stringify the path (pared down for UNIX-only specifics)
-            std::string str() const {
-                std::string out = "";
-                if (m_absolute) { out += sep; }
-                size_type idx = 0,
-                          siz = m_path.size();
-                for (; idx < siz; ++idx) {
-                    out += m_path[idx];
-                    if (idx + 1 < siz) { out += sep; }
-                }
-                return out;
-            }
+            std::string str() const;
             
             /// Convenience function to get a C-style string, a la std::string's API
             inline char const* c_str() const { return str().c_str(); }

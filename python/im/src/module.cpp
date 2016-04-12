@@ -280,13 +280,13 @@ PyMODINIT_FUNC initim(void) {
     if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
     
     /// Get the path of the extension module
-    path modulefile(initim);
+    path modulefile((const void*)initim);
     
     /// Actually initialize the module object,
     /// setting up the module's external C-function table
     module = Py_InitModule3(
         "im.im", module_functions,
-        "libimread python bindings");
+        "Python bindings for libimread");
     if (module == NULL)                           { return; }
     
     /// Set the module object's __file__ attribute
@@ -328,7 +328,6 @@ PyMODINIT_FUNC initim(void) {
     /// and add this to the module as a static-ish constant
     format_tuple = py::detail::formats_as_pytuple();
     if (format_tuple == NULL)                     { return; }
-    Py_INCREF(format_tuple);
     PyModule_AddObject(module,
         "formats",
         format_tuple);
@@ -340,8 +339,6 @@ PyMODINIT_FUNC initim(void) {
     _byteordermark = py::string((char)im::byteorder);
     if (_byteorder == NULL)                       { return; }
     if (_byteordermark == NULL)                   { return; }
-    Py_INCREF(_byteorder);
-    Py_INCREF(_byteordermark);
     PyModule_AddObject(module,
         "_byteorder",
         _byteorder);
