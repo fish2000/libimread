@@ -12,6 +12,7 @@
 #include "buffer.hpp"
 #include "check.hh"
 #include "gil.hpp"
+#include "gil-io.hpp"
 #include "detail.hpp"
 #include "numpy.hpp"
 #include "options.hpp"
@@ -652,6 +653,43 @@ namespace py {
                 return true;
             }
             
+            bool loadfilelike(PyObject* file, options_map const& opts) {
+                HybridFactory factory;
+                std::unique_ptr<ImageFormat> format;
+                typename py::gil::with::source_t input;
+                std::unique_ptr<Image> output;
+                options_map default_opts;
+                bool can_read = false;
+                
+                try {
+                    py::gil::with iohandle(file);
+                    input = iohandle.source();
+                    format = im::for_source(input.get());
+                    can_read = format->format_can_read();
+                } catch (im::FormatNotFound& exc) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Can't match blob data to a suitable I/O format");
+                    return false;
+                }
+                
+                if (!can_read) {
+                    std::string mime = format->get_mimetype();
+                    PyErr_Format(PyExc_ValueError,
+                        "Unimplemented read() in I/O format %s",
+                        mime.c_str());
+                    return false;
+                }
+                
+                {
+                    py::gil::release nogil;
+                    default_opts = format->add_options(opts);
+                    output = format->read(input.get(), &factory, default_opts);
+                    image.reset(dynamic_cast<ImageType*>(output.release()));
+                }
+                
+                return true;
+            }
+            
             bool loadblob(Py_buffer const& view, options_map const& opts) {
                 HybridFactory factory;
                 std::unique_ptr<ImageFormat> format;
@@ -1118,14 +1156,16 @@ namespace py {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* py_is_blob = NULL;
                 PyObject* options = NULL;
+                PyObject* file = NULL;
                 Py_buffer view;
-                char const* keywords[] = { "source", "is_blob", "options", NULL };
+                char const* keywords[] = { "source", "file", "is_blob", "options", NULL };
                 bool is_blob = false;
                 bool did_load = false;
                 
                 if (!PyArg_ParseTupleAndKeywords(
-                    args, kwargs, "s*|OO", const_cast<char**>(keywords),
+                    args, kwargs, "|s*OOO", const_cast<char**>(keywords),
                     &view,                      /// "view", buffer with file path or image data
+                    &file,                      /// "file", possible file-like object
                     &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
                     &options))                  /// "options", read-options dict
                 {
@@ -1137,7 +1177,10 @@ namespace py {
                 
                 try {
                     options_map opts = py::options::parse(options);
-                    if (is_blob) {
+                    if (file) {
+                        /// load as file-like Python object
+                        did_load = pyim->loadfilelike(file, opts);
+                    } else if (is_blob) {
                         /// load as blob -- pass the buffer along
                         did_load = pyim->loadblob(view, opts);
                     } else {

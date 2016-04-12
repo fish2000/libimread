@@ -7,21 +7,21 @@ namespace py {
     namespace gil {
         
         with::with(PyObject* fileobject)
-            :state(nullptr), source(reinterpret_cast<PyFileObject*>(fileobject))
+            :state(nullptr), object(reinterpret_cast<PyFileObject*>(fileobject))
             ,file(nullptr),  active(PyFile_Check(fileobject))
             {
                 if (active) { init(); }
             }
         
         with::with(PyFileObject* fileobject)
-            :state(nullptr), source(fileobject)
+            :state(nullptr), object(fileobject)
             ,file(nullptr),  active(PyFile_Check(fileobject))
             {
                 if (active) { init(); }
             }
         
         with::with(std::nullptr_t no)
-            :state(nullptr), source(nullptr)
+            :state(nullptr), object(nullptr)
             ,file(nullptr),  active(false)
             {}
         
@@ -30,36 +30,38 @@ namespace py {
         }
         
         void with::init() {
-            Py_INCREF(source);
-            file = PyFile_AsFile(reinterpret_cast<PyObject*>(source));
-            PyFile_IncUseCount(source);
+            Py_INCREF(object);
+            file = PyFile_AsFile(reinterpret_cast<PyObject*>(object));
+            PyFile_IncUseCount(object);
             state = PyEval_SaveThread();
         }
         
         void with::restore() {
             PyEval_RestoreThread(state);
-            PyFile_DecUseCount(source);
-            Py_DECREF(source);
+            PyFile_DecUseCount(object);
+            Py_DECREF(object);
             file = nullptr;
             active = false;
         }
         
-        std::unique_ptr<im::handle::source> source() const {
+        with::source_t with::source() const {
             if (!active) {
                 imread_raise(CannotReadError,
                     "py::gil::with::source():",
                     "\tGIL guard not active");
             }
-            return std::make_unique<im::handle::source>(file);
+            return with::source_t(new py::handle::source(file,
+                                  reinterpret_cast<PyObject*>(object)));
         }
         
-        std::unique_ptr<im::handle::sink> sink() const {
+        with::sink_t with::sink() const {
             if (!active) {
                 imread_raise(CannotWriteError,
                     "py::gil::with::sink():",
                     "\tGIL guard not active");
             }
-            return std::make_unique<im::handle::sink>(file);
+            return with::sink_t(new py::handle::sink(file,
+                                reinterpret_cast<PyObject*>(object)));
         }
         
         

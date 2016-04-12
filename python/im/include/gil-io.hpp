@@ -10,13 +10,62 @@
 
 namespace py {
     
+    namespace handle {
+        
+        class source : public im::handle::source {
+            public:
+                PyObject* object = nullptr;
+            
+            public:
+                source(FILE* fh)
+                    :im::handle::source(fh)
+                    {}
+                source(FILE* fh, PyObject* pyfh)
+                    :im::handle::source(fh)
+                    ,object(pyfh)
+                    {
+                        Py_INCREF(object);
+                        PyFile_IncUseCount((PyFileObject*)object);
+                    }
+        };
+        
+        class sink : public im::handle::sink {
+            public:
+                PyObject* object = nullptr;
+            
+            public:
+                sink(FILE* fh)
+                    :im::handle::sink(fh)
+                    {}
+                sink(FILE* fh, PyObject* pyfh)
+                    :im::handle::sink(fh)
+                    ,object(pyfh)
+                    {
+                        Py_INCREF(object);
+                        PyFile_IncUseCount((PyFileObject*)object);
+                    }
+        };
+        
+    }
+    
     namespace gil {
         
         struct with {
             PyThreadState*  state;
-            PyFileObject*   source;
+            PyFileObject*   object;
             FILE*           file;
             bool            active;
+            
+            template <typename F>
+            struct fileclose {
+                constexpr fileclose() noexcept = default;
+                template <typename U> fileclose(fileclose<U> const&) noexcept {};
+                void operator()(std::add_pointer_t<F> handle) {
+                    PyFile_DecUseCount((PyFileObject*)handle->object);
+                    Py_DECREF(handle->object);
+                    delete handle;
+                }
+            };
             
             with(PyObject* fileobject);
             with(PyFileObject* fileobject);
@@ -26,8 +75,11 @@ namespace py {
             void init();
             void restore();
             
-            std::unique_ptr<im::handle::source> source() const;
-            std::unique_ptr<im::handle::sink> sink() const;
+            using source_t = std::unique_ptr<py::handle::source, fileclose<py::handle::source>>;
+            using sink_t = std::unique_ptr<py::handle::sink, fileclose<py::handle::sink>>;
+            
+            source_t source() const;
+            sink_t sink() const;
         };
         
     } /* namespace gil */
