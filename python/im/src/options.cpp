@@ -4,6 +4,7 @@
 #include "options.hpp"
 #include "check.hh"
 #include "gil.hpp"
+#include "gil-io.hpp"
 #include "pybuffer.hpp"
 
 #define NO_IMPORT_ARRAY
@@ -73,12 +74,26 @@ namespace py {
                     py::buffer::source data = py::buffer::source(*view, false);
                     return data.str();
                 }
+            } else if (PyFile_Check(value)) {
+                {
+                    py::gil::with iohandle(value);
+                    auto fulldata = iohandle.source()->full_data();
+                    return std::string((const char*)&fulldata[0], fulldata.size());
+                }
             } else if (HybridImage_Check(value)         ||
                        BufferModel_Check(value)         ||
                        ImageModel_Check(value)          ||
                        ImageBufferModel_Check(value)) {
                 imread_raise(OptionsError, "[ERROR]",
                     "Illegal data found");
+            } else if (PyObject_CheckBuffer(value)) {
+                Py_buffer view;
+                PyObject_GetBuffer(value, &view, PyBUF_SIMPLE);
+                {
+                    py::gil::release nogil;
+                    py::buffer::source data = py::buffer::source(view);
+                    return data.str();
+                }
             }
             
             /// "else":

@@ -1107,6 +1107,12 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
                 // using tag_t = typename PythonImageType::Tag::FromImage;
+                
+                options_map argsaver;
+                argsaver.set("args",   py::options::parse_list(args));
+                argsaver.set("kwargs", py::options::parse(kwargs));
+                std::string dest = argsaver.dumptmp();
+                
                 return reinterpret_cast<PyObject*>(
                     new PythonImageType());
             }

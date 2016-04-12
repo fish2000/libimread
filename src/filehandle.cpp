@@ -66,14 +66,14 @@ namespace im {
         /// start as you mean to go on
         std::fseek(handle, 0, SEEK_SET);
         
-        /// unbuffered read directly from descriptor:
+        /// unbuffered read directly from file handle:
         if (std::fread(&res[0], 1, res.size(), handle) == -1) {
             imread_raise(CannotReadError,
                 "error in full_data(): read() returned -1",
                 std::strerror(errno));
         }
         
-        /// reset descriptor position before returning
+        /// reseek to the streams' original position
         std::fseek(handle, orig, SEEK_SET);
         return res;
     }
@@ -106,22 +106,29 @@ namespace im {
     
     FILE* handle_source_sink::open(char* cpath,
                                  filesystem::mode fmode) {
-        if (fmode == filesystem::mode::WRITE) {
-            handle = std::fopen(cpath, "r+");
-            if (!handle) {
-                imread_raise(CannotWriteError, "filehandle open-to-write failure:",
-                    FF("\tstd::fopen(\"%s\", \"r+\")", cpath),
-                       "\treturned nullptr value",
-                       "\tERROR MESSAGE IS: ", std::strerror(errno));
-            }
-        } else {
-            handle = std::fopen(cpath, "r+");
-            if (!handle) {
-                imread_raise(CannotReadError, "filehandle open-to-read failure:",
-                    FF("\tstd::fopen(\"%s\", \"r+\")", cpath),
-                       "\treturned nullptr value",
-                       "\tERROR MESSAGE IS: ", std::strerror(errno));
-            }
+        // if (fmode == filesystem::mode::WRITE) {
+        //     handle = std::fopen(cpath, "r+");
+        //     if (!handle) {
+        //         imread_raise(CannotWriteError, "filehandle open-to-write failure:",
+        //             FF("\tstd::fopen(\"%s\", \"r+\")", cpath),
+        //                "\treturned nullptr value",
+        //                "\tERROR MESSAGE IS: ", std::strerror(errno));
+        //     }
+        // } else {
+        //     handle = std::fopen(cpath, "r+");
+        //     if (!handle) {
+        //         imread_raise(CannotReadError, "filehandle open-to-read failure:",
+        //             FF("\tstd::fopen(\"%s\", \"r+\")", cpath),
+        //                "\treturned nullptr value",
+        //                "\tERROR MESSAGE IS: ", std::strerror(errno));
+        //     }
+        // }
+        handle = std::fopen(cpath, "r+");
+        if (!handle) {
+            imread_raise(CannotReadError, "filehandle open failure:",
+                FF("\tstd::fopen(\"%s\", \"r+\")", cpath),
+                    "\treturned nullptr value",
+                    "\tERROR MESSAGE IS: ", std::strerror(errno));
         }
         return handle;
     }
@@ -139,7 +146,6 @@ namespace im {
         }
         return out;
     }
-    
     
     filehandle_source_sink::filehandle_source_sink(FILE* fh, filesystem::mode fmode)
         :handle_source_sink(fh), pth(::fileno(fh)), md(fmode)

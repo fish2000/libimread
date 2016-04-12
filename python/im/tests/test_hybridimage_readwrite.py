@@ -2,6 +2,7 @@
 from __future__ import print_function
 from basecase import BaseCase
 
+import os
 import im
 import json
 
@@ -212,4 +213,6 @@ class HybridImageReadWriteTests(BaseCase):
                 opts_reconstituted = json.load(fh)
             self.assertIsNotNone(opts_reconstituted)
             self.assertDictEqual(opts_reconstituted, json.loads(opts_json))
+            
+            os.remove(opts_tempfile)
     

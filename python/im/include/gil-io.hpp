@@ -15,35 +15,15 @@ namespace py {
         class source : public im::handle::source {
             public:
                 PyObject* object = nullptr;
-            
-            public:
-                source(FILE* fh)
-                    :im::handle::source(fh)
-                    {}
-                source(FILE* fh, PyObject* pyfh)
-                    :im::handle::source(fh)
-                    ,object(pyfh)
-                    {
-                        Py_INCREF(object);
-                        PyFile_IncUseCount((PyFileObject*)object);
-                    }
+                source(FILE* fh);
+                source(FILE* fh, PyObject* pyfh);
         };
         
         class sink : public im::handle::sink {
             public:
                 PyObject* object = nullptr;
-            
-            public:
-                sink(FILE* fh)
-                    :im::handle::sink(fh)
-                    {}
-                sink(FILE* fh, PyObject* pyfh)
-                    :im::handle::sink(fh)
-                    ,object(pyfh)
-                    {
-                        Py_INCREF(object);
-                        PyFile_IncUseCount((PyFileObject*)object);
-                    }
+                sink(FILE* fh);
+                sink(FILE* fh, PyObject* pyfh);
         };
         
     }
@@ -60,10 +40,12 @@ namespace py {
             struct fileclose {
                 constexpr fileclose() noexcept = default;
                 template <typename U> fileclose(fileclose<U> const&) noexcept {};
-                void operator()(std::add_pointer_t<F> handle) {
-                    PyFile_DecUseCount((PyFileObject*)handle->object);
-                    Py_DECREF(handle->object);
-                    delete handle;
+                void operator()(std::add_pointer_t<F> source_sink) {
+                    if (source_sink != nullptr) {
+                        PyFile_DecUseCount((PyFileObject*)source_sink->object);
+                        Py_DECREF(source_sink->object);
+                        delete source_sink;
+                    }
                 }
             };
             
@@ -75,8 +57,11 @@ namespace py {
             void init();
             void restore();
             
-            using source_t = std::unique_ptr<py::handle::source, fileclose<py::handle::source>>;
-            using sink_t = std::unique_ptr<py::handle::sink, fileclose<py::handle::sink>>;
+            using source_t = std::unique_ptr<py::handle::source,
+                                   fileclose<py::handle::source>>;
+            
+            using sink_t = std::unique_ptr<py::handle::sink,
+                                 fileclose<py::handle::sink>>;
             
             source_t source() const;
             sink_t sink() const;

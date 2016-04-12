@@ -2,6 +2,7 @@
 from __future__ import print_function
 from basecase import BaseCase
 
+import os
 import im
 import json
 
@@ -156,8 +157,6 @@ class ImageReadWriteTests(BaseCase):
             self.assertIsNotNone(opts_json)
             self.assertEqual(opts_json, image.format_write_opts())
             opts_tempfile = image.dump_write_opts(tempfile=True)
-            # print(">>>>>>>> opts_json = %s" % opts_json)
-            
             opts = image.write_opts
             
             for key in doggkeys:
@@ -196,4 +195,6 @@ class ImageReadWriteTests(BaseCase):
                 opts_reconstituted = json.load(fh)
             self.assertIsNotNone(opts_reconstituted)
             self.assertDictEqual(opts_reconstituted, json.loads(opts_json))
+            
+            os.remove(opts_tempfile)
     

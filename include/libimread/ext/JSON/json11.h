@@ -39,7 +39,7 @@ namespace detail {
 class Json;
 class Schema;
 
-enum Type : BaseType { JSNULL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT, SCHEMA };
+enum Type : BaseType { JSNULL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT, POINTER, SCHEMA };
 
 namespace tc {
     
@@ -63,6 +63,7 @@ namespace tc {
         template <> struct helper<Type::STRING>  { using value_type = std::string; };
         template <> struct helper<Type::ARRAY>   { using value_type = Json; };
         template <> struct helper<Type::OBJECT>  { using value_type = Json; };
+        template <> struct helper<Type::POINTER> { using value_type = void*; };
         template <> struct helper<Type::SCHEMA>  { using value_type = Schema; };
         
         template <Type t>
@@ -178,6 +179,48 @@ class Json {
                 {}
             String(std::istream&);
             void print(std::ostream& out) const override;
+            bool operator==(Node const& that) const override;
+            void validate(Schema const& schema, nodecvec_t&) const override;
+        };
+        
+        struct Pointer : Node {
+            static constexpr Type typecode = Type::POINTER;
+            Type type() const override { return Type::POINTER; }
+            void* value = nullptr;
+            bool destroy = false;
+            explicit Pointer(void* voidptr)
+                :value(voidptr)
+                {}
+            explicit Pointer(void* voidptr, bool d)
+                :value(voidptr)
+                ,destroy(d)
+                {}
+            template <typename Whatever>
+            explicit Pointer(Whatever* whatevs)
+                :value(reinterpret_cast<void*>(whatevs))
+                {}
+            template <typename Whatever>
+            explicit Pointer(Whatever* whatevs, bool d)
+                :value(reinterpret_cast<void*>(whatevs))
+                ,destroy(d)
+                {}
+            Pointer(std::istream&);
+            virtual ~Pointer();
+            void print(std::ostream& out) const override;
+            bool  has() { return value != nullptr; }
+            void* get() { return value; }
+            void  set(void* v) { value = v; }
+            template <typename T>
+            std::remove_reference_t<T> cast() {
+                using rT = std::remove_reference_t<T>;
+                return reinterpret_cast<rT*>(value);
+            }
+            template <typename T>
+            std::remove_reference_t<T> cast(T* default_value) {
+                using rT = std::remove_reference_t<T>;
+                return value ? reinterpret_cast<rT*>(value) :
+                               reinterpret_cast<rT*>(default_value);
+            }
             bool operator==(Node const& that) const override;
             void validate(Schema const& schema, nodecvec_t&) const override;
         };
@@ -393,6 +436,7 @@ class Json {
         explicit operator long long() const;
         explicit operator double() const;
         explicit operator long double() const;
+        explicit operator void*() const;
         
         /// dictionary operations (or "object properties" in JS-Ville)
         Json& set(std::string const& key, Json const& value);

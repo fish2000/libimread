@@ -44,6 +44,7 @@ namespace tc {
             case Type::STRING:  return "STRING";
             case Type::ARRAY:   return "ARRAY";
             case Type::OBJECT:  return "OBJECT";
+            case Type::POINTER: return "POINTER";
             case Type::SCHEMA:  return "SCHEMA";
         }
         imread_raise_default(JSONOutOfRange);
@@ -552,6 +553,12 @@ bool Json::String::operator==(Node const& that) const {
             value == ((String*)&that)->value);
 }
 
+bool Json::Pointer::operator==(Node const& that) const {
+    return this == &that || (
+            that.type() == Type::POINTER &&
+            &value == &((Pointer*)&that)->value);
+}
+
 void Json::Bool::print(std::ostream& out) const {
     out << (this == &Bool::T ? "true" : "false");
 }
@@ -565,6 +572,10 @@ void Json::Number::print(std::ostream& out) const {
 
 void Json::String::print(std::ostream& out) const {
     detail::escape(out, value);
+}
+
+void Json::Pointer::print(std::ostream& out) const {
+    out << "#" << (unsigned long)value << "";
 }
 
 void Json::Object::traverse(Json::traverser_t traverser) const {
@@ -601,6 +612,13 @@ void Json::traverse(Json::traverser_t traverser) const {
 
 void Json::traverse(Json::named_traverser_t named_traverser) const {
     root->traverse(named_traverser, "root");
+}
+
+Json::Pointer::~Pointer() {
+    if (destroy) {
+        std::free(value);
+    }
+    value = nullptr;
 }
 
 void Json::Object::print(std::ostream& out) const {
@@ -806,6 +824,34 @@ Json::String::String(std::istream& in) {
         }
         value.push_back(c);
     }
+}
+
+Json::Pointer::Pointer(std::istream& in) {
+    char buf[128];
+    const char* end = buf+126;
+    char* p = buf;
+    char c;
+    bool leading = true;
+    while ((std::isdigit(c = in.get()) || (leading && c == '#')) && p < end) {
+        *p++ = c;
+        leading = false;
+    }
+    if ((c == 'x' || c == '0') && p < end) {
+        *p++ = c;
+        leading = true;
+        while ((std::isdigit(c = in.get()) || (leading && (c == '#' || c == '*'))) && p < end) {
+            *p++ = c;
+            leading = false;
+        }
+    }
+    *p = 0;
+    in.putback(c);
+    char* eptr = nullptr;
+    long double num = std::strtold(buf, &eptr);
+    if (eptr != p) {
+        throw parse_error("illegal number format", in);
+    }
+    // value = num;
 }
 
 Json::Number::Number(std::istream& in) {
@@ -1073,6 +1119,16 @@ Json::operator int8_t() const {
 
 Json::operator int16_t() const {
     if (root->type() == Type::NUMBER) { return int16_t(((Number*)root)->value); }
+    imread_raise_default(JSONBadCast);
+}
+
+// Json::operator int16_t() const {
+//     if (root->type() == Type::NUMBER) { return int16_t(((Number*)root)->value); }
+//     imread_raise_default(JSONBadCast);
+// }
+
+Json::operator void*() const {
+    if (root->type() == Type::POINTER) { return ((Pointer*)root)->value; }
     imread_raise_default(JSONBadCast);
 }
 

@@ -204,6 +204,8 @@ Json::Schema::Schema(Node* node) {
                 throw use_error(std::string("pattern: ") + ex.what());
             }
         }
+    } else if (s_type == "pointer") {
+        /// check string type properties
     } else if (s_type == "array") {
         /// check array (list) type properties
         nptr = obj->get("items");
@@ -479,6 +481,15 @@ void Json::String::validate(const Schema& schema, Json::nodecvec_t& path) const 
     }
     path.pop_back();
 }
+
+
+void Json::Pointer::validate(const Schema& schema, Json::nodecvec_t& path) const {
+    path.push_back(this);
+    if (schema.s_type != "pointer") { throw JSONInvalidSchema("type mismatch"); }
+    /// INSERT STUFF HERE
+    path.pop_back();
+}
+
 
 bool Json::to_schema(std::string* reason) {
     try {
