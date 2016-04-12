@@ -6,12 +6,10 @@
 
 #include <string>
 #include <vector>
-#include <Python.h>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
-// #include "hybrid.hh"
 
-namespace py {
+namespace im {
     
     namespace image {
         

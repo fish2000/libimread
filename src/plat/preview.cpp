@@ -1,11 +1,12 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#include "preview.hpp"
+#include <libimread/libimread.hpp>
+#include <libimread/preview.hh>
 #include <chrono>
 #include <thread>
 
-namespace py {
+namespace im {
     
     namespace image {
         
@@ -15,7 +16,7 @@ namespace py {
             /// HERE
             std::this_thread::sleep_for(
                 std::chrono::milliseconds(
-                    py::image::sleeptime));
+                    im::image::sleeptime));
             
         }
         

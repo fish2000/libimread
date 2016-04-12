@@ -15,7 +15,6 @@
 #include "detail.hpp"
 #include "numpy.hpp"
 #include "options.hpp"
-#include "preview.hpp"
 #include "pybuffer.hpp"
 #include "pycapsule.hpp"
 #include "typecode.hpp"
@@ -28,6 +27,7 @@
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
 #include <libimread/pixels.hh>
+#include <libimread/preview.hh>
 
 namespace py {
     
@@ -1457,7 +1457,7 @@ namespace py {
                     dststr = std::string(dst.str());
                     did_save = pyim->save(dststr.c_str(), opts);
                     if (!did_save) { return NULL; }
-                    py::image::preview(dst);
+                    im::image::preview(dst);
                     tf.close();
                     tf.remove();
                 } catch (im::NotImplementedError& exc) {
