@@ -13,6 +13,7 @@
 #include "check.hh"
 #include "gil.hpp"
 #include "detail.hpp"
+#include "numpy.hpp"
 #include "options.hpp"
 #include "preview.hpp"
 #include "pybuffer.hpp"
@@ -341,7 +342,7 @@ namespace py {
                     
                     PyObject* map = PyDict_New();
                     imageref_t imageref = *strong.get();
-                    PyDict_SetItemString(map, "version",    PyInt_FromSize_t(3));
+                    PyDict_SetItemString(map, "version",    py::convert(3));
                     PyDict_SetItemString(map, "shape",      py::detail::image_shape(imageref));
                     PyDict_SetItemString(map, "strides",    py::detail::image_strides(imageref));
                     PyDict_SetItemString(map, "descr",      py::detail::structcode_to_dtype(structcode));
@@ -357,7 +358,7 @@ namespace py {
                     {
                         py::gil::release nogil;
                         shared_image_t strong = image.lock();
-                        newstruct = py::detail::array_struct(*strong.get());
+                        newstruct = py::numpy::array_struct(*strong.get());
                     }
                     
                     return py::cob::objectify<PyArrayInterface, py::cob::single_destructor_t>(
@@ -391,6 +392,11 @@ namespace py {
                 self->cleanup();
                 ImageModelBase::type_ptr()->tp_free(pyself);
             }
+            
+            struct Tag {
+                struct FromImage    {};
+                struct FromBuffer   {};
+            };
             
             PyObject_HEAD
             PyObject* weakrefs = nullptr;
@@ -443,7 +449,7 @@ namespace py {
                 }
             
             /// reinterpret, depointerize, copy-construct
-            explicit ImageModelBase(PyObject* other)
+            explicit ImageModelBase(PyObject* other, typename Tag::FromImage tag = typename Tag::FromImage{})
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(other))
                 {}
             
@@ -465,7 +471,7 @@ namespace py {
                 }
             
             /// tag dipatch, reinterpret, depointerize, explicit-init-style construct
-            explicit ImageModelBase(PyObject* buffer, bool buffer_construct_flag = false)
+            explicit ImageModelBase(PyObject* buffer, typename Tag::FromBuffer)
                 :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
                 {}
             
@@ -741,10 +747,8 @@ namespace py {
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject* str(PyObject* self) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                Py_ssize_t string_size = pybuf->__len__();
-                return PyString_FromStringAndSize(
-                    (char const*)pybuf->internal->host,
-                    string_size);
+                std::size_t string_size = static_cast<std::size_t>(pybuf->__len__());
+                return py::string((char const*)pybuf->internal->host, string_size);
             }
             
             /// __len__ implementaton
@@ -823,10 +827,8 @@ namespace py {
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject* tostring(PyObject* self, PyObject*) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                Py_ssize_t string_size = pybuf->__len__();
-                return PyString_FromStringAndSize(
-                    (char const*)pybuf->internal->host,
-                    string_size);
+                std::size_t string_size = static_cast<std::size_t>(pybuf->__len__());
+                return py::string((char const*)pybuf->internal->host, string_size);
             }
             
             /// DEALLOCATE
@@ -978,6 +980,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
+                // using tag_t = typename PythonImageType::Tag::FromImage;
                 return reinterpret_cast<PyObject*>(
                     new PythonImageType());
             }
@@ -987,6 +990,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* newfrombuffer(PyObject* _nothing_, PyObject* buffer) {
+                using tag_t = typename PythonImageType::Tag::FromBuffer;
                 if (!buffer) {
                     PyErr_SetString(PyExc_ValueError,
                         "missing im.Buffer argument");
@@ -999,7 +1003,7 @@ namespace py {
                     return NULL;
                 }
                 return reinterpret_cast<PyObject*>(
-                    new PythonImageType(buffer, true));
+                    new PythonImageType(buffer, tag_t{}));
             }
             
             /// __init__ implementation
@@ -1103,14 +1107,14 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* str(PyObject* self) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                char const* string_ptr;
                 Py_ssize_t string_size;
                 {
                     py::gil::release nogil;
+                    string_ptr = pyim->image->template rowp_as<char const>(0);
                     string_size = pyim->image->size();
                 }
-                return PyString_FromStringAndSize(
-                    pyim->image->template rowp_as<char const>(0),
-                    string_size);
+                return py::string(string_ptr, string_size);
             }
             
             /// __hash__ implementation
@@ -1296,8 +1300,7 @@ namespace py {
                             dststr.c_str());
                         return NULL;
                     }
-                    out = PyString_FromStringAndSize(
-                        (char const*)&data[0], data.size());
+                    out = py::string((char const*)&data[0], data.size());
                     if (out == NULL) {
                         PyErr_SetString(PyExc_ValueError,
                             "Failed converting output to Python string");

@@ -14,8 +14,8 @@ namespace py {
         using im::options_list;
         
         bool truth(PyObject* value) noexcept;
-        const char* get_blob(PyObject* data, std::size_t& len) noexcept;
-        const char* get_cstring(PyObject* stro) noexcept;
+        char const* get_blob(PyObject* data, std::size_t& len) noexcept;
+        char const* get_cstring(PyObject* stro) noexcept;
         Json convert(PyObject* value);
         
         options_list parse_list(PyObject* list);

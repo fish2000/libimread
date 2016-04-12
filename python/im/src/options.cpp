@@ -1,12 +1,14 @@
 
 #include <string>
-#include <libimread/errors.hh>
+
+#include "options.hpp"
 #include "check.hh"
-#define NO_IMPORT_ARRAY
-#include "detail.hpp"
 #include "gil.hpp"
 #include "pybuffer.hpp"
-#include "options.hpp"
+
+#define NO_IMPORT_ARRAY
+#include "detail.hpp"
+#include <libimread/errors.hh>
 
 namespace py {
     

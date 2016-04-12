@@ -16,6 +16,7 @@
 #include "pybuffer.hpp"
 #include "hybrid.hh"
 
+#include <libimread/libimread.hpp>
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
@@ -271,14 +272,14 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* str(PyObject* self) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+            char const* string_ptr;
             Py_ssize_t string_size;
             {
                 py::gil::release nogil;
+                string_ptr = pyim->image->template rowp_as<char const>(0);
                 string_size = pyim->image->size();
             }
-            return PyString_FromStringAndSize(
-                pyim->image->template rowp_as<char const>(0),
-                string_size);
+            return py::string(string_ptr, string_size);
         }
         
         /// __hash__ implementation
@@ -546,8 +547,7 @@ namespace py {
                         dststr.c_str());
                     return NULL;
                 }
-                out = PyString_FromStringAndSize(
-                    (char const*)&data[0], data.size());
+                out = py::string((char const*)&data[0], data.size());
                 if (out == NULL) {
                     PyErr_SetString(PyExc_ValueError,
                         "Failed converting output to Python string");
@@ -555,8 +555,7 @@ namespace py {
                 return out;
             }
             /// "else":
-            return PyString_FromStringAndSize(
-                dststr.c_str(), dststr.size());
+            return py::string(dststr);
         }
         
         /// HybridImage.dtype getter
@@ -564,7 +563,7 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject*    get_dtype(PyObject* self, void* closure) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            return Py_BuildValue("O", pyim->dtype);
+            return py::object(pyim->dtype);
         }
         
         /// HybridImage.shape getter
@@ -575,29 +574,29 @@ namespace py {
             auto image = pyim->image.get();
             switch (image->ndims()) {
                 case 1:
-                    return Py_BuildValue("(i)",     image->dim(0));
+                    return py::tuplize(image->dim(0));
                 case 2:
-                    return Py_BuildValue("(ii)",    image->dim(0),
-                                                    image->dim(1));
+                    return py::tuplize(image->dim(0),
+                                       image->dim(1));
                 case 3:
-                    return Py_BuildValue("(iii)",   image->dim(0),
-                                                    image->dim(1),
-                                                    image->dim(2));
+                    return py::tuplize(image->dim(0),
+                                       image->dim(1),
+                                       image->dim(2));
                 case 4:
-                    return Py_BuildValue("(iiii)",  image->dim(0),
-                                                    image->dim(1),
-                                                    image->dim(2),
-                                                    image->dim(3));
+                    return py::tuplize(image->dim(0),
+                                       image->dim(1),
+                                       image->dim(2),
+                                       image->dim(3));
                 case 5:
-                    return Py_BuildValue("(iiiii)", image->dim(0),
-                                                    image->dim(1),
-                                                    image->dim(2),
-                                                    image->dim(3),
-                                                    image->dim(4));
+                    return py::tuplize(image->dim(0),
+                                       image->dim(1),
+                                       image->dim(2),
+                                       image->dim(3),
+                                       image->dim(4));
                 default:
-                    return Py_BuildValue("");
+                    return py::tuplize();
             }
-            return Py_BuildValue("");
+            return py::tuplize();
         }
         
         /// HybridImage.strides getter
@@ -608,29 +607,29 @@ namespace py {
             auto image = pyim->image.get();
             switch (image->ndims()) {
                 case 1:
-                    return Py_BuildValue("(i)",     image->stride(0));
+                    return py::tuplize(image->stride(0));
                 case 2:
-                    return Py_BuildValue("(ii)",    image->stride(0),
-                                                    image->stride(1));
+                    return py::tuplize(image->stride(0),
+                                       image->stride(1));
                 case 3:
-                    return Py_BuildValue("(iii)",   image->stride(0),
-                                                    image->stride(1),
-                                                    image->stride(2));
+                    return py::tuplize(image->stride(0),
+                                       image->stride(1),
+                                       image->stride(2));
                 case 4:
-                    return Py_BuildValue("(iiii)",  image->stride(0),
-                                                    image->stride(1),
-                                                    image->stride(2),
-                                                    image->stride(3));
+                    return py::tuplize(image->stride(0),
+                                       image->stride(1),
+                                       image->stride(2),
+                                       image->stride(3));
                 case 5:
-                    return Py_BuildValue("(iiiii)", image->stride(0),
-                                                    image->stride(1),
-                                                    image->stride(2),
-                                                    image->stride(3),
-                                                    image->stride(4));
+                    return py::tuplize(image->stride(0),
+                                       image->stride(1),
+                                       image->stride(2),
+                                       image->stride(3),
+                                       image->stride(4));
                 default:
-                    return Py_BuildValue("");
+                    return py::tuplize();
             }
-            return Py_BuildValue("");
+            return py::tuplize();
         }
         
         namespace closures {
@@ -645,7 +644,7 @@ namespace py {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
             PyObject* target = (char const*)closure == closures::READ ? pyim->readoptDict :
                                                                         pyim->writeoptDict;
-            return Py_BuildValue("O", target ? target : Py_None);
+            return py::object(target);
         }
         
         /// HybridImage.read_opts setter
@@ -662,10 +661,10 @@ namespace py {
             /// switch on closure tag (?)
             if ((char const*)closure == closures::READ) {
                 Py_CLEAR(pyim->readoptDict);
-                pyim->readoptDict = Py_BuildValue("O", value);
+                pyim->readoptDict = py::object(value);
             } else {
                 Py_CLEAR(pyim->writeoptDict);
-                pyim->writeoptDict = Py_BuildValue("O", value);
+                pyim->writeoptDict = py::object(value);
             }
             return 0;
         }
@@ -690,7 +689,7 @@ namespace py {
                 out = opts.format();
             }
             
-            return Py_BuildValue("s", out.c_str());
+            return py::string(out);
         }
         
         /// HybridImage.read_opts file-dumper
@@ -728,7 +727,7 @@ namespace py {
                 out = opts.format();
             }
             
-            return Py_BuildValue("s", out.c_str());
+            return py::string(out);
         }
         
         /// HybridImage.read_opts file-dumper

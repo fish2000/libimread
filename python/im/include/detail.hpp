@@ -2,17 +2,17 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_DETAIL_HPP_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_DETAIL_HPP_
 
+#include <tuple>
 #include <memory>
-#include <vector>
 #include <string>
 #include <utility>
-
+#include <type_traits>
+#include <initializer_list>
 #include <Python.h>
-#include <numpy/ndarrayobject.h>
 
-#include "hybrid.hh"
-#include "gil.hpp"
-#include "typecode.hpp"
+/// forward-declare PyArray_Descr from numpy
+struct _PyArray_Descr;
+typedef _PyArray_Descr PyArray_Descr;
 
 namespace py {
     
@@ -23,71 +23,159 @@ namespace py {
     PyObject* boolean(bool truth = false);
     PyObject* string(std::string const&);
     PyObject* string(char const*);
+    PyObject* string(char const*, std::size_t);
     PyObject* string(char);
     PyObject* object(PyObject* arg = nullptr);
     PyObject* object(PyArray_Descr* arg = nullptr);
     
-    template <typename ValueType> inline
-    PyObject* convert(ValueType&& value);
+    PyObject* convert(PyObject*);
+    PyObject* convert(std::nullptr_t);
+    PyObject* convert(bool);
+    PyObject* convert(void*);
+    PyObject* convert(std::size_t);
+    PyObject* convert(Py_ssize_t);
+    PyObject* convert(int8_t);
+    PyObject* convert(int16_t);
+    PyObject* convert(int32_t);
+    PyObject* convert(int64_t);
+    PyObject* convert(uint8_t);
+    PyObject* convert(uint16_t);
+    PyObject* convert(uint32_t);
+    PyObject* convert(uint64_t);
+    PyObject* convert(float);
+    PyObject* convert(double);
+    PyObject* convert(long double);
+    PyObject* convert(char*);
+    PyObject* convert(char const*);
+    PyObject* convert(std::string const&);
+    PyObject* convert(char*, std::size_t);
+    PyObject* convert(char const*, std::size_t);
     
-    #define DECLARE_CONVERTER_FOR_TYPE(TypeName, ConverterFunction)                             \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName>(std::remove_cv_t(TypeName)&& value) {                           \
-        return ConverterFunction(std::forward<TypeName>(value)); }                              \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName const>(std::remove_cv_t(TypeName)&& value) {                     \
-        return ConverterFunction(std::forward<TypeName>(value)); }                              \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName volatile>(std::remove_cv_t(TypeName)&& value) {                  \
-        return ConverterFunction(std::forward<TypeName>(value)); }                              \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName const volatile>(std::remove_cv_t(TypeName)&& value) {            \
-        return ConverterFunction(std::forward<TypeName>(value)); }
-        
-    #define DECLARE_CONVERTER_FOR_EXPR(TypeName, ConverterFunction, Expression)                 \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName>(std::remove_cv_t(TypeName)&& value) {                           \
-        return ConverterFunction(##Expression##); }                                             \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName const>(std::remove_cv_t(TypeName)&& value) {                     \
-        return ConverterFunction(##Expression##); }                                             \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName volatile>(std::remove_cv_t(TypeName)&& value) {                  \
-        return ConverterFunction(##Expression##); }                                             \
-    template <> inline                                                                          \
-    PyObject* convert<TypeName const volatile>(std::remove_cv_t(TypeName)&& value) {            \
-        return ConverterFunction(##Expression##); }
+    template <typename Cast,
+              typename Original,
+              typename std::enable_if_t<std::is_arithmetic<Cast>::value &&
+                                        std::is_arithmetic<Original>::value,
+              int> = 0> inline
+    PyObject* convert(Original orig) {
+        return py::convert(static_cast<Cast>(orig));
+    }
     
+    template <typename Cast,
+              typename Original,
+              typename std::enable_if_t<!std::is_arithmetic<Cast>::value &&
+                                        !std::is_arithmetic<Original>::value,
+              int> = 0> inline
+    PyObject* convert(Original orig) {
+        return py::convert(reinterpret_cast<Cast>(orig));
+    }
     
-    DECLARE_CONVERTER_FOR_TYPE(std::size_t,     PyInt_FromSize_t);
-    DECLARE_CONVERTER_FOR_TYPE(Py_size_t,       PyInt_FromSize_t);
-    DECLARE_CONVERTER_FOR_TYPE(Py_ssize_t,      PyInt_FromSsize_t);
-    DECLARE_CONVERTER_FOR_TYPE(int8_t,          PyInt_FromLong);
-    DECLARE_CONVERTER_FOR_TYPE(int16_t,         PyInt_FromLong);
-    DECLARE_CONVERTER_FOR_TYPE(int32_t,         PyInt_FromLong);
-    DECLARE_CONVERTER_FOR_TYPE(int64_t,         PyLong_FromLongLong);
-    DECLARE_CONVERTER_FOR_TYPE(uint8_t,         PyInt_FromLong);
-    DECLARE_CONVERTER_FOR_TYPE(uint16_t,        PyInt_FromLong);
-    DECLARE_CONVERTER_FOR_TYPE(uint32_t,        PyInt_FromLong);
-    DECLARE_CONVERTER_FOR_TYPE(uint64_t,        PyLong_FromUnsignedLongLong);
-    DECLARE_CONVERTER_FOR_TYPE(float,           PyFloat_FromDouble);
-    DECLARE_CONVERTER_FOR_TYPE(double,          PyFloat_FromDouble);
-    DECLARE_CONVERTER_FOR_TYPE(long double,     PyFloat_FromDouble);
-    DECLARE_CONVERTER_FOR_TYPE(char*,           PyString_FromString);
-    DECLARE_CONVERTER_FOR_EXPR(std::string,     PyString_FromStringAndSize,
-                              "std::forward<std::string>(value).c_str(), std::forward<std::string>(value).size()" );
+    template <typename Mapping,
+              typename Value = typename Mapping::mapped_type,
+              typename std::enable_if_t<
+                       std::is_constructible<std::string,
+                                             typename Mapping::key_type>::value,
+              int> = 0> inline
+    PyObject* convert(Mapping const& mapping) {
+        PyObject* dict = PyDict_New();
+        for (auto const& item : mapping) {
+            std::string key(item.first);
+            PyDict_SetItemString(dict, key.c_str(), py::convert(item.second));
+        }
+        return dict;
+    }
     
+    template <typename Vector,
+              typename Value = typename Vector::value_type> inline
+    PyObject* convert(Vector const& vector) {
+        Py_ssize_t idx = 0,
+                   max = vector.size();
+        PyObject* tuple = PyTuple_New(max);
+        for (Value const& item : vector) {
+            PyTuple_SET_ITEM(tuple, idx, py::convert(item));
+            idx++;
+        }
+        return tuple;
+    }
     
+    template <typename ...Args>
+    using convertible = std::is_same<std::add_pointer_t<PyObject>,
+                                     decltype(py::convert(Args{}...))>;
+    
+    template <typename ...Args>
+    bool convertible_v = py::convertible<Args...>::value;
+    
+    PyObject* tuplize();
+    
+    template <typename ListType,
+              typename std::enable_if_t<
+                        py::convertible<ListType>::value,
+              int> = 0>
+    PyObject* tuplize(std::initializer_list<ListType> list) {
+        Py_ssize_t idx = 0,
+                   max = list.size();
+        PyObject* tuple = PyTuple_New(max);
+        for (ListType const& item : list) {
+            PyTuple_SET_ITEM(tuple, idx, py::convert(item));
+            idx++;
+        }
+        return tuple;
+    }
+    
+    template <typename Args,
+              typename std::enable_if_t<
+                        py::convertible<Args>::value,
+              int> = 0>
+    PyObject* tuplize(Args arg) {
+        return PyTuple_Pack(1,
+            py::convert(std::forward<Args>(arg)));
+    }
     
     template <typename ...Args> inline
     PyObject* tuple(Args&& ...args) {
         static_assert(
             sizeof...(Args) > 0,
-            "Can't pack zero-length argument list to PyTuple");
+            "Can't pack a zero-length arglist as a PyTuple");
         
         return PyTuple_Pack(
             sizeof...(Args),
             std::forward<Args>(args)...);
+    }
+    
+    namespace impl {
+        
+        template <typename F, typename Tuple, std::size_t ...I> inline
+        auto apply_impl(F&& f, Tuple&& t, std::index_sequence<I...>) {
+            return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
+        }
+        
+        template <typename F, typename Tuple> inline
+        auto apply(F&& f, Tuple&& t) {
+            using Indices = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>;
+            return apply_impl(std::forward<F>(f), std::forward<Tuple>(t), Indices());
+        }
+        
+    }
+    
+    template <typename ...Args>
+    PyObject* tuplize(Args&& ...args) {
+        static_assert(
+            sizeof...(Args) > 1,
+            "Can't tuplize a zero-length arglist");
+        
+        return PyTuple_Pack(
+            sizeof...(Args),
+            py::convert(std::forward<Args>(args))...);
+    }
+    
+    template <typename ...Args> inline
+    PyObject* convert(std::tuple<Args&&...> argtuple) {
+        using Tuple = std::tuple<Args&&...>;
+        static_assert(
+            sizeof...(Args) > 0,
+            "Can't convert a zero-length std::tuple to a PyTuple");
+        
+        return py::impl::apply(py::tuplize<Args...>,
+                               std::forward<Tuple>(argtuple));
     }
     
     namespace detail {
@@ -156,58 +244,58 @@ namespace py {
         PyObject* image_shape(ImageType const& image) {
             switch (image.ndims()) {
                 case 1:
-                    return Py_BuildValue("(i)",     image.dim(0));
+                    return py::tuplize(image.dim(0));
                 case 2:
-                    return Py_BuildValue("(ii)",    image.dim(0),
-                                                    image.dim(1));
+                    return py::tuplize(image.dim(0),
+                                       image.dim(1));
                 case 3:
-                    return Py_BuildValue("(iii)",   image.dim(0),
-                                                    image.dim(1),
-                                                    image.dim(2));
+                    return py::tuplize(image.dim(0),
+                                       image.dim(1),
+                                       image.dim(2));
                 case 4:
-                    return Py_BuildValue("(iiii)",  image.dim(0),
-                                                    image.dim(1),
-                                                    image.dim(2),
-                                                    image.dim(3));
+                    return py::tuplize(image.dim(0),
+                                       image.dim(1),
+                                       image.dim(2),
+                                       image.dim(3));
                 case 5:
-                    return Py_BuildValue("(iiiii)", image.dim(0),
-                                                    image.dim(1),
-                                                    image.dim(2),
-                                                    image.dim(3),
-                                                    image.dim(4));
+                    return py::tuplize(image.dim(0),
+                                       image.dim(1),
+                                       image.dim(2),
+                                       image.dim(3),
+                                       image.dim(4));
                 default:
-                    return Py_BuildValue("");
+                    return py::tuplize();
             }
-            return Py_BuildValue("");
+            return py::tuplize();
         }
         
         template <typename ImageType> inline
         PyObject* image_strides(ImageType const& image) {
             switch (image.ndims()) {
                 case 1:
-                    return Py_BuildValue("(i)",     image.stride(0));
+                    return py::tuplize(image.stride(0));
                 case 2:
-                    return Py_BuildValue("(ii)",    image.stride(0),
-                                                    image.stride(1));
+                    return py::tuplize(image.stride(0),
+                                       image.stride(1));
                 case 3:
-                    return Py_BuildValue("(iii)",   image.stride(0),
-                                                    image.stride(1),
-                                                    image.stride(2));
+                    return py::tuplize(image.stride(0),
+                                       image.stride(1),
+                                       image.stride(2));
                 case 4:
-                    return Py_BuildValue("(iiii)",  image.stride(0),
-                                                    image.stride(1),
-                                                    image.stride(2),
-                                                    image.stride(3));
+                    return py::tuplize(image.stride(0),
+                                       image.stride(1),
+                                       image.stride(2),
+                                       image.stride(3));
                 case 5:
-                    return Py_BuildValue("(iiiii)", image.stride(0),
-                                                    image.stride(1),
-                                                    image.stride(2),
-                                                    image.stride(3),
-                                                    image.stride(4));
+                    return py::tuplize(image.stride(0),
+                                       image.stride(1),
+                                       image.stride(2),
+                                       image.stride(3),
+                                       image.stride(4));
                 default:
-                    return Py_BuildValue("");
+                    return py::tuplize();
             }
-            return Py_BuildValue("");
+            return py::tuplize();
         }
         
         /// A misnomer -- actually returns a dtype-compatible tuple full
@@ -215,61 +303,13 @@ namespace py {
         /// of the parsed typecode you pass it
         PyObject* structcode_to_dtype(char const* code);
         
-        // tuple((),()...)  py::detail::structcode_to_dtype(char)
-        //   "NPY_UINT32"   typecode::name(NPY_TYPES)
-        //            "b"   typecode::typechar(NPY_TYPES)
-        //            "b"   im::detail::character_for<PixelType>()
-        //            "B"   im::detail::structcode(NPY_TYPES)
-        //        HalType   im::detail::for_dtype(NPY_TYPES)
-        //        HalType   im::detail::for_type<uint32_t>()
-        //          "|b8"   im::detail::encoding_for<PixelType>(e)
-        //      NPY_TYPES   im::detail::for_nbits(nbits, is_signed=false)
-        // py::detail::structcode_to_dtype(typecode) || nullptr
-        
-        template <typename ImageType> inline
-        PyArrayInterface* array_struct(ImageType const& image,
-                                       bool include_descriptor = true) {
-            PyArrayInterface* out   = nullptr;
-            void* data              = image.rowp(0);
-            int ndims               = image.ndims();
-            int flags               = include_descriptor ? NPY_ARR_HAS_DESCR : 0;
-            NPY_TYPES typecode      = image.dtype();
-            NPY_TYPECHAR typechar   = typecode::typechar(typecode);
-            PyObject* descriptor    = nullptr;
-            
-            if (include_descriptor) {
-                py::gil::ensure yesgil;
-                descriptor = py::detail::structcode_to_dtype(
-                             im::detail::structcode(typecode));
-            }
-            
-            out = new PyArrayInterface {
-                2,                          /// brought to you by
-                ndims,
-                (char)typechar,
-                sizeof(uint8_t),            /// need to not hardcode this
-                flags,
-                new Py_intptr_t[ndims],     /// shape
-                new Py_intptr_t[ndims],     /// strides
-                data,                       /// void* data
-                descriptor                  /// PyObject*
-            };
-            
-            for (int idx = 0; idx < ndims; idx++) {
-                out->shape[idx]   = image.dim(idx);
-                out->strides[idx] = image.stride(idx);
-            }
-            
-            return out;
-        }
-        
         /// One-and-done functions for dumping a tuple of python strings
         /// filled with valid (as in registered) format suffixes; currently
         /// we just call this the once in the extensions' init func and stash
         /// the return value in the `im` module PyObject, just in there like
         /// alongside the types and other junk
-        using stringvec_t = std::vector<std::string>;
-        stringvec_t& formats_as_vector();                   /// this one is GIL-optional (how european!)
+        // using stringvec_t = std::vector<std::string>;
+        // stringvec_t& formats_as_vector();                   /// this one is GIL-optional (how european!)
         PyObject* formats_as_pytuple(int idx = 0);          /// whereas here, no GIL no shoes no funcall
         
     }

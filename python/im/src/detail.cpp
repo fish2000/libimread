@@ -1,17 +1,33 @@
 
-#include <tuple>
+#include <vector>
 #include <algorithm>
 
-#define NO_IMPORT_ARRAY
-
 #include "detail.hpp"
-#include "structcode.hpp"
 #include "gil.hpp"
+#include "pycapsule.hpp"
+#include "structcode.hpp"
+
+#define NO_IMPORT_ARRAY
+#include <numpy/ndarrayobject.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/imageformat.hh>
 
 namespace py {
+    
+    namespace capsule {
+        
+        template <>
+        destructor_t decapsulator<void, void> = [](PyObject* capsule) {
+            if (!PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+                PyErr_SetString(PyExc_ValueError,
+                    "Invalid PyCapsule");
+            }
+            char const* name = PyCapsule_GetName(capsule);
+            if (name) { std::free((void*)name); name = nullptr;    }
+        };
+        
+    }
     
     PyObject* None()  { return Py_BuildValue("O", Py_None); }
     PyObject* True()  { return Py_BuildValue("O", Py_True); }
@@ -21,15 +37,33 @@ namespace py {
          return Py_BuildValue("O", truth ? Py_True : Py_False);
     }
     
+    #if PY_MAJOR_VERSION < 3
     PyObject* string(std::string const& s) {
         return PyString_FromStringAndSize(s.c_str(), s.size());
     }
     PyObject* string(char const* s) {
         return PyString_FromString(s);
     }
+    PyObject* string(char const* s, std::size_t length) {
+        return PyString_FromStringAndSize(s, length);
+    }
     PyObject* string(char s) {
         return PyString_FromFormat("%c", s);
     }
+    #elif PY_MAJOR_VERSION >= 3
+    PyObject* string(std::string const& s) {
+        return PyBytes_FromStringAndSize(s.c_str(), s.size());
+    }
+    PyObject* string(char const* s) {
+        return PyBytes_FromString(s);
+    }
+    PyObject* string(char const* s, std::size_t length) {
+        return PyBytes_FromStringAndSize(s, length);
+    }
+    PyObject* string(char s) {
+        return PyBytes_FromFormat("%c", s);
+    }
+    #endif
     
     PyObject* object(PyObject* arg) {
         return Py_BuildValue("O", arg ? arg : Py_None);
@@ -38,10 +72,49 @@ namespace py {
         return py::object((PyObject*)arg);
     }
     
+    PyObject* convert(PyObject* operand)            { return py::object(operand); }
+    PyObject* convert(std::nullptr_t operand)       { return Py_BuildValue("O", Py_None); }
+    PyObject* convert(bool operand)                 { return Py_BuildValue("O", operand ? Py_True : Py_False); }
+    PyObject* convert(void* operand)                { return py::capsule::encapsulate(operand); }
+    PyObject* convert(std::size_t operand)          { return PyInt_FromSize_t(operand); }
+    PyObject* convert(Py_ssize_t operand)           { return PyInt_FromSsize_t(operand); }
+    PyObject* convert(int8_t operand)               { return PyInt_FromSsize_t(static_cast<Py_ssize_t>(operand)); }
+    PyObject* convert(int16_t operand)              { return PyInt_FromSsize_t(static_cast<Py_ssize_t>(operand)); }
+    PyObject* convert(int32_t operand)              { return PyInt_FromSsize_t(static_cast<Py_ssize_t>(operand)); }
+    PyObject* convert(int64_t operand)              { return PyLong_FromLongLong(operand); }
+    PyObject* convert(uint8_t operand)              { return PyInt_FromSize_t(static_cast<std::size_t>(operand)); }
+    PyObject* convert(uint16_t operand)             { return PyInt_FromSize_t(static_cast<std::size_t>(operand)); }
+    PyObject* convert(uint32_t operand)             { return PyInt_FromSize_t(static_cast<std::size_t>(operand)); }
+    PyObject* convert(uint64_t operand)             { return PyLong_FromUnsignedLongLong(operand); }
+    PyObject* convert(float operand)                { return PyFloat_FromDouble(static_cast<double>(operand)); }
+    PyObject* convert(double operand)               { return PyFloat_FromDouble(operand); }
+    PyObject* convert(long double operand)          { return PyFloat_FromDouble(static_cast<double>(operand)); }
+    
+    #if PY_MAJOR_VERSION < 3
+    PyObject* convert(char* operand)                { return PyString_FromString(operand); }
+    PyObject* convert(char const* operand)          { return PyString_FromString(operand); }
+    PyObject* convert(std::string const& operand)   { return PyString_FromStringAndSize(operand.c_str(), operand.size()); }
+    PyObject* convert(char* operand,
+                      std::size_t length)           { return PyString_FromStringAndSize(operand, length); }
+    PyObject* convert(char const* operand,
+                      std::size_t length)           { return PyString_FromStringAndSize(operand, length); }
+    #elif PY_MAJOR_VERSION >= 3
+    PyObject* convert(char* operand)                { return PyBytes_FromString(operand); }
+    PyObject* convert(char const* operand)          { return PyBytes_FromString(operand); }
+    PyObject* convert(std::string const& operand)   { return PyBytes_FromStringAndSize(operand.c_str(), operand.size()); }
+    PyObject* convert(char* operand,
+                      std::size_t length)           { return PyBytes_FromStringAndSize(operand, length); }
+    PyObject* convert(char const* operand,
+                      std::size_t length)           { return PyBytes_FromStringAndSize(operand, length); }
+    #endif
+    
+    PyObject* tuplize()                             { return PyTuple_New(0); }
+    
     namespace detail {
         
+        using structcode::stringvec_t;
+        
         PyObject* structcode_to_dtype(char const* code) {
-            using structcode::stringvec_t;
             using structcode::structcode_t;
             using structcode::parse_result_t;
             
@@ -121,7 +194,9 @@ namespace py {
                          if (format.size() > 0) {
                              PyList_Append(list, py::string(format));
                          } ++idx; }
-            return PyList_AsTuple(list);
+            PyObject* out = PyList_AsTuple(list);
+            Py_DECREF(list);
+            return out;
         }
     }
     

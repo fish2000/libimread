@@ -6,11 +6,7 @@
 
 #include <type_traits>
 #include <cstdlib>
-
-#include "private/buffer_t.h"
 #include <Python.h>
-#include <numpy/ndarrayobject.h>
-#include <libimread/libimread.hpp>
 
 namespace py {
     
@@ -32,7 +28,7 @@ namespace py {
             /// PyCapsule_Get* calls are guaranteed for valid capsules ...
             if (!PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
                 PyErr_SetString(PyExc_ValueError,
-                    "Invalid capsule");
+                    "Invalid PyCapsule");
             }
             /// ... otherwise everything returns nullptr anyway:
             char const* name = PyCapsule_GetName(capsule);
@@ -58,11 +54,11 @@ namespace py {
                                               destructor);
             if (!capsule) {
                 PyErr_SetString(PyExc_ValueError,
-                    "Failure creating capsule");
+                    "Failure creating PyCapsule");
             } else if (PyCapsule_SetContext(capsule, (void*)context) != 0) {
                 /// context can be nullptr w/o invalidating capsule
                 PyErr_SetString(PyExc_ValueError,
-                    "Failure while assigning capsule context");
+                    "Failure assigning PyCapsule context");
                 // PyObject_Del(capsule);
                 // capsule = nullptr;
             } 
