@@ -3,7 +3,10 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_GIL_IO_HH_
 
 #include <cstddef>
+#include <memory>
 #include <Python.h>
+#include <libimread/libimread.hpp>
+#include <libimread/filehandle.hh>
 
 namespace py {
     
@@ -22,6 +25,9 @@ namespace py {
             
             void init();
             void restore();
+            
+            std::unique_ptr<im::handle::source> source() const;
+            std::unique_ptr<im::handle::sink> sink() const;
         };
         
     } /* namespace gil */

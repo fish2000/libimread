@@ -28,7 +28,7 @@ namespace im {
             static const unsigned DONT_RELEASE =  H5LT_FILE_IMAGE_DONT_RELEASE;
         
         public:
-            H5MemoryBuffer(void *buffer, std::size_t size, unsigned flags)
+            H5MemoryBuffer(void* buffer, std::size_t size, unsigned flags)
                 :H5File()
                 {
                     hid_t idx = H5LTopen_file_image(buffer, size, flags);
@@ -56,7 +56,7 @@ namespace im {
         std::string name = opts.cast<std::string>("hdf5:name",
                                      std::string("imread-data"));
         
-        std::unique_ptr<Image> output;
+        /// HDF5 error status
         herr_t status;
         
         /// Open a data buffer as an HDF5 store (née "file image") for fast reading:
@@ -86,9 +86,9 @@ namespace im {
         H5Sget_simple_extent_dims(space_id, dims, NULL);
         
         /// Allocate a new unique-pointer-wrapped image instance:
-        output = factory->create(8,  dims[0],
-                                     dims[1],
-                                     dims[2]);
+        std::unique_ptr<Image> output = factory->create(8,  dims[0],
+                                                            dims[1],
+                                                            dims[2]);
         
         /// read typed data into the internal data buffer
         /// of the new image, from the HDF5 dataset in question:

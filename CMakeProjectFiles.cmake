@@ -162,6 +162,7 @@ set(hdrs
     ${hdrs_dir}/coregraphics.hh
     ${hdrs_dir}/errors.hh
     ${hdrs_dir}/file.hh
+    ${hdrs_dir}/filehandle.hh
     ${hdrs_dir}/formats.hh
     ${hdrs_dir}/fs.hh
     ${hdrs_dir}/halide.hh
@@ -253,6 +254,7 @@ set(srcs
     ${srcs_dir}/coregraphics.mm
     ${srcs_dir}/errors.cpp
     ${srcs_dir}/file.cpp
+    ${srcs_dir}/filehandle.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/fs.cpp
     ${srcs_dir}/halide.cpp

@@ -5,11 +5,7 @@
 #define LIBIMREAD_FILE_HH_
 
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <vector>
-
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
@@ -28,12 +24,8 @@ namespace im {
             static constexpr int WRITE_FLAGS = O_WRONLY | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
             static constexpr int WRITE_CREATE_MASK = 0644;
             
-            inline int open_read(char* p) const {
-                return ::open(p, READ_FLAGS);
-            }
-            inline int open_write(char* p, int mask = WRITE_CREATE_MASK) const {
-                return ::open(p, WRITE_FLAGS, mask);
-            }
+            int open_read(char* p) const;
+            int open_write(char* p, int mask = WRITE_CREATE_MASK) const;
         
         public:
             fd_source_sink() {}
@@ -44,9 +36,9 @@ namespace im {
             virtual ~fd_source_sink() { close(); }
             
             virtual bool can_seek() const noexcept { return true; }
-            virtual std::size_t seek_absolute(std::size_t pos) { return ::lseek(descriptor, pos, SEEK_SET); }
-            virtual std::size_t seek_relative(int delta) { return ::lseek(descriptor, delta, SEEK_CUR); }
-            virtual std::size_t seek_end(int delta) { return ::lseek(descriptor, delta, SEEK_END); }
+            virtual std::size_t seek_absolute(std::size_t pos);
+            virtual std::size_t seek_relative(int delta);
+            virtual std::size_t seek_end(int delta);
             
             virtual std::size_t read(byte* buffer, std::size_t n);
             virtual std::vector<byte> full_data();
@@ -104,7 +96,7 @@ namespace im {
             
             virtual ~file_source_sink() { fd_source_sink::close(); }
             
-            const filesystem::path& path() const { return pth; }
+            filesystem::path const& path() const { return pth; }
             virtual bool exists() const noexcept override;
             
             void mode(filesystem::mode m) { md = m; }

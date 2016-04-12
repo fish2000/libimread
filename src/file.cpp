@@ -1,6 +1,10 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <cerrno>
 #include <cstring>
 #include <string>
@@ -15,6 +19,18 @@ namespace im {
     constexpr int fd_source_sink::READ_FLAGS;
     constexpr int fd_source_sink::WRITE_FLAGS;
     constexpr int fd_source_sink::WRITE_CREATE_MASK;
+    
+    int fd_source_sink::open_read(char* p) const {
+        return ::open(p, READ_FLAGS);
+    }
+    
+    int fd_source_sink::open_write(char* p, int mask) const {
+        return ::open(p, WRITE_FLAGS, mask);
+    }
+    
+    std::size_t fd_source_sink::seek_absolute(std::size_t pos) { return ::lseek(descriptor, pos, SEEK_SET); }
+    std::size_t fd_source_sink::seek_relative(int delta) { return ::lseek(descriptor, delta, SEEK_CUR); }
+    std::size_t fd_source_sink::seek_end(int delta) { return ::lseek(descriptor, delta, SEEK_END); }
     
     std::size_t fd_source_sink::read(byte* buffer, std::size_t n) {
         int out = ::read(descriptor, buffer, n);

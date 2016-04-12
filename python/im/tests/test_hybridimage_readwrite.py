@@ -17,6 +17,7 @@ class HybridImageReadWriteTests(BaseCase):
             self.assertIsNotNone(data)
             self.assertFalse(im.hybridimage_check(data))
     
+    """
     def test_load_image_jpg_write_blob_jpg(self):
         ''' Load JPG files, write JPG blobs '''
         for image_path in self.jpgs:
@@ -24,6 +25,7 @@ class HybridImageReadWriteTests(BaseCase):
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
+    """
     
     """
     def test_load_image_png_write_blob_jpg(self):
@@ -89,6 +91,7 @@ class HybridImageReadWriteTests(BaseCase):
             self.assertEqual(image.shape[:2], image2.shape[:2])
     """
     
+    """
     def test_load_image_jpg_write_blob_jpg_readback(self):
         ''' Load JPG files, write PNG blobs with readback '''
         for image_path in self.jpgs:
@@ -99,6 +102,7 @@ class HybridImageReadWriteTests(BaseCase):
             image2 = im.HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             self.assertEqual(image.shape, image2.shape)
+    """
     
     """
     def test_load_image_png_write_blob_jpg_readback(self):

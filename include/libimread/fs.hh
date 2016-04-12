@@ -10,6 +10,7 @@
 #include <libimread/ext/filesystem/resolver.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
+#include <libimread/filehandle.hh>
 
 namespace im {
     

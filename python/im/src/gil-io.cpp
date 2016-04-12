@@ -1,5 +1,6 @@
 
 #include "gil-io.hpp"
+#include <libimread/errors.hh>
 
 namespace py {
     
@@ -42,6 +43,25 @@ namespace py {
             file = nullptr;
             active = false;
         }
+        
+        std::unique_ptr<im::handle::source> source() const {
+            if (!active) {
+                imread_raise(CannotReadError,
+                    "py::gil::with::source():",
+                    "\tGIL guard not active");
+            }
+            return std::make_unique<im::handle::source>(file);
+        }
+        
+        std::unique_ptr<im::handle::sink> sink() const {
+            if (!active) {
+                imread_raise(CannotWriteError,
+                    "py::gil::with::sink():",
+                    "\tGIL guard not active");
+            }
+            return std::make_unique<im::handle::sink>(file);
+        }
+        
         
     } /* namespace gil */
     
