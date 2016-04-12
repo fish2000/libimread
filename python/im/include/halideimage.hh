@@ -118,12 +118,12 @@ namespace py {
                 Py_buffer view{ 0 };
                 if (PyObject_GetBuffer(bufferhost, &view, PyBUF_ND | PyBUF_STRIDES) != -1) {
                     internal = unique_buffer_t(im::buffer::heapcopy(&view));
-                    accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
+                    accessor = accessor_t(internal->host, internal->extent[0] ? internal->stride[0] : 0,
                                                           internal->extent[1] ? internal->stride[1] : 0,
                                                           internal->extent[2] ? internal->stride[2] : 0);
                 } else {
                     internal = std::make_unique<BufferType>();
-                    accessor(accessor_t{});
+                    accessor = accessor_t{};
                 }
                 PyBuffer_Release(&view);
             }
