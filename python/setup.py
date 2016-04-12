@@ -127,6 +127,7 @@ extensions = {
         "im/src/buffer.cpp",
         "im/src/detail.cpp",
         "im/src/gil.cpp",
+        "im/src/gil-io.cpp",
         "im/src/halideimage.cpp",
         "im/src/hybrid.cpp",
         "im/src/hybridimage.cpp",
