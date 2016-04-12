@@ -653,6 +653,11 @@ namespace py {
                 return true;
             }
             
+            bool load(Py_buffer const& view, options_map const& opts) {
+                py::buffer::source source(view);
+                return load(source.str().c_str(), opts);
+            }
+            
             bool loadfilelike(PyObject* file, options_map const& opts) {
                 HybridFactory factory;
                 std::unique_ptr<ImageFormat> format;
@@ -1158,6 +1163,7 @@ namespace py {
                 PyObject* options = NULL;
                 PyObject* file = NULL;
                 Py_buffer view;
+                options_map opts;
                 char const* keywords[] = { "source", "file", "is_blob", "options", NULL };
                 bool is_blob = false;
                 bool did_load = false;
@@ -1174,32 +1180,19 @@ namespace py {
                 
                 /// test is necessary, the next line chokes on NULL:
                 is_blob = py::options::truth(py_is_blob);
+                opts = py::options::parse(options);
                 
-                try {
-                    options_map opts = py::options::parse(options);
-                    if (file) {
-                        /// load as file-like Python object
-                        did_load = pyim->loadfilelike(file, opts);
-                    } else if (is_blob) {
-                        /// load as blob -- pass the buffer along
-                        did_load = pyim->loadblob(view, opts);
-                    } else {
-                        /// load as file -- extract the filename from the buffer
-                        /// into a temporary c-string for passing
-                        py::buffer::source source(view);
-                        std::string srcstr = source.str();
-                        char const* srccstr = srcstr.c_str();
-                        did_load = pyim->load(srccstr, opts);
-                    }
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return -1;
-                } catch (im::NotImplementedError& exc) {
-                    /// this shouldn't happen -- a generic ImageFormat pointer
-                    /// was returned when determining the blob image type
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return -1;
+                if (file) {
+                    /// load as file-like Python object
+                    did_load = pyim->loadfilelike(file, opts);
+                } else if (is_blob) {
+                    /// load as blob -- pass the buffer along
+                    did_load = pyim->loadblob(view, opts);
+                } else {
+                    /// load as file -- pass the buffer along
+                    did_load = pyim->load(view, opts);
                 }
+                
                 if (!did_load) {
                     /// If this is true, PyErr has already been set
                     /// ... presumably by problems loading an ImageFormat
