@@ -21,6 +21,26 @@ namespace im {
             return out;
         }
         
+        buffer_t* heapcopy(Py_buffer* pybuffer) {
+            buffer_t* out = new buffer_t{
+                0,
+                reinterpret_cast<uint8_t*>(pybuffer->buf),
+                { static_cast<int32_t>(pybuffer->shape[0]),
+                  static_cast<int32_t>(pybuffer->shape[1]),
+                  static_cast<int32_t>(pybuffer->shape[2]),
+                  0 },
+                { static_cast<int32_t>(pybuffer->strides[0]),
+                  static_cast<int32_t>(pybuffer->strides[1]),
+                  static_cast<int32_t>(pybuffer->strides[2]),
+                  0 },
+                { 0, 0, 0, 0 },
+                static_cast<int32_t>(pybuffer->itemsize),
+                false,
+                false
+            };
+            return out;
+        }
+        
         void heapdestroy(buffer_t* buffer) {
             // delete buffer->extent;
             // delete buffer->stride;

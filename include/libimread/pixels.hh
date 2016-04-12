@@ -76,7 +76,7 @@ namespace im {
             pdata_t* __restrict__ data_pointer;
             
             /// Stride values
-            const pdiff_t stride0, stride1, stride2;
+            pdiff_t stride0, stride1, stride2;
             
             /// default constexpr constructor
             constexpr accessor()

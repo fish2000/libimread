@@ -71,6 +71,11 @@ namespace py {
                 type_ptr()->tp_free(pyself);
             }
             
+            struct Tag {
+                struct FromBuffer {};
+                struct FromPyBuffer {};
+            };
+            
             PyObject_HEAD
             PyObject* weakrefs = nullptr;
             bool clean = false;
@@ -97,10 +102,31 @@ namespace py {
                                           internal->extent[2] ? internal->stride[2] : 0)
                 {}
             
-            /// reinterpret, depointerize, copy-construct
-            explicit BufferModelBase(PyObject* other)
+            explicit BufferModelBase(Py_buffer* view)
+                :internal(im::buffer::heapcopy(view))
+                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
+                                          internal->extent[1] ? internal->stride[1] : 0,
+                                          internal->extent[2] ? internal->stride[2] : 0)
+                {}
+            
+            /// tag dispatch, reinterpret, depointerize, copy-construct
+            explicit BufferModelBase(PyObject* other, typename Tag::FromBuffer tag = typename Tag::FromBuffer{})
                 :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other))
                 {}
+            
+            explicit BufferModelBase(PyObject* bufferhost, typename Tag::FromPyBuffer) {
+                Py_buffer view{ 0 };
+                if (PyObject_GetBuffer(bufferhost, &view, PyBUF_ND | PyBUF_STRIDES) != -1) {
+                    internal = unique_buffer_t(im::buffer::heapcopy(&view));
+                    accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
+                                                          internal->extent[1] ? internal->stride[1] : 0,
+                                                          internal->extent[2] ? internal->stride[2] : 0);
+                } else {
+                    internal = std::make_unique<BufferType>();
+                    accessor(accessor_t{});
+                }
+                PyBuffer_Release(&view);
+            }
             
             void cleanup(bool force = false) {
                 if (clean && !force) {
@@ -199,7 +225,8 @@ namespace py {
             static char const* typedoc() {
                 return "Python buffer model object";
             }
-        };
+            
+        }; /* BufferModelBase */
         
         template <typename ImageType,
                   typename BufferType = buffer_t>
@@ -263,20 +290,22 @@ namespace py {
                     }
                     return out;
                 }
+                
                 PyObject*   __index__(Py_ssize_t idx, int tc = NPY_UINT) {
                     Py_ssize_t siz;
+                    std::size_t nidx;
                     shared_image_t strong;
                     {
                         py::gil::release nogil;
                         strong = image.lock();
                         siz = strong->size();
+                        nidx = static_cast<std::size_t>(idx);
                     }
                     if (siz <= idx || idx < 0) {
                         PyErr_SetString(PyExc_IndexError,
                             "index out of range");
                         return NULL;
                     }
-                    std::size_t nidx = static_cast<std::size_t>(idx);
                     switch (tc) {
                         case NPY_FLOAT: {
                             float op = strong->template rowp_as<float>(0)[nidx];
@@ -434,18 +463,20 @@ namespace py {
                 {}
             
             ImageModelBase(ImageModelBase const& other)
-                :weakrefs(other.weakrefs)
+                :weakrefs(nullptr)
                 ,image(other.image)
-                ,dtype(other.dtype)
-                ,imagebuffer(other.imagebuffer)
-                ,readoptDict(other.readoptDict)
-                ,writeoptDict(other.writeoptDict)
+                ,dtype(PyArray_DescrFromType(image->dtype()))
+                ,imagebuffer(reinterpret_cast<PyObject*>(
+                             new typename ImageModelBase::ImageBufferModel(image)))
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
                 {
-                    // Py_INCREF(weakrefs);
                     Py_INCREF(dtype);
                     Py_INCREF(imagebuffer);
                     Py_INCREF(readoptDict);
                     Py_INCREF(writeoptDict);
+                    PyDict_Update(readoptDict,  other.readoptDict);
+                    PyDict_Update(writeoptDict, other.writeoptDict);
                 }
             
             ImageModelBase(ImageModelBase&& other) noexcept
@@ -734,7 +765,27 @@ namespace py {
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
-                return reinterpret_cast<PyObject*>(new PythonBufferType());
+                return reinterpret_cast<PyObject*>(
+                    new PythonBufferType());
+            }
+            
+            /// ALLOCATE / frompybuffer(pybuffer_host) implementation
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject* newfrompybuffer(PyObject* _nothing_, PyObject* bufferhost) {
+                using tag_t = typename PythonBufferType::Tag::FromPyBuffer;
+                if (!bufferhost) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "missing Py_buffer host argument");
+                    return NULL;
+                }
+                if (!PyObject_CheckBuffer(bufferhost)) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "invalid Py_buffer host");
+                    return NULL;
+                }
+                return reinterpret_cast<PyObject*>(
+                    new PythonBufferType(bufferhost, tag_t{}));
             }
             
             template <typename BufferType = buffer_t,
@@ -926,6 +977,16 @@ static PyGetSetDef Buffer_getset[] = {
 
 static PyMethodDef Buffer_methods[] = {
     {
+        "frompybuffer",
+            (PyCFunction)py::ext::buffer::newfrompybuffer<buffer_t>,
+            METH_O | METH_STATIC,
+            "Return a new im.Buffer based on a Py_buffer host object" },
+    {
+        "tobytes",
+            (PyCFunction)py::ext::buffer::tostring<buffer_t>,
+            METH_NOARGS,
+            "Get bytes from buffer as a string" },
+    {
         "tostring",
             (PyCFunction)py::ext::buffer::tostring<buffer_t>,
             METH_NOARGS,
@@ -979,6 +1040,11 @@ static PyGetSetDef ImageBuffer_getset[] = {
 
 static PyMethodDef ImageBuffer_methods[] = {
     {
+        "tobytes",
+            (PyCFunction)py::ext::buffer::tostring<buffer_t, ImageBufferModel>,
+            METH_NOARGS,
+            "Get bytes from image buffer as a string" },
+    {
         "tostring",
             (PyCFunction)py::ext::buffer::tostring<buffer_t, ImageBufferModel>,
             METH_NOARGS,
@@ -1021,6 +1087,26 @@ namespace py {
                 }
                 return reinterpret_cast<PyObject*>(
                     new PythonImageType(buffer, tag_t{}));
+            }
+            
+            /// ALLOCATE / fromimage(imageInstance) implementation
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* newfromimage(PyObject* _nothing_, PyObject* other) {
+                using tag_t = typename PythonImageType::Tag::FromImage;
+                if (!other) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "missing im.Image argument");
+                    return NULL;
+                }
+                if (!ImageModel_Check(other)) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "invalid im.Image instance");
+                    return NULL;
+                }
+                return reinterpret_cast<PyObject*>(
+                    new PythonImageType(other, tag_t{}));
             }
             
             /// __init__ implementation
@@ -1646,6 +1732,11 @@ static PyMethodDef Image_methods[] = {
             (PyCFunction)py::ext::image::newfrombuffer<HalideNumpyImage, buffer_t>,
             METH_O | METH_STATIC,
             "Return a new im.Image based on an im.Buffer instance" },
+    {
+        "fromimage",
+            (PyCFunction)py::ext::image::newfromimage<HalideNumpyImage, buffer_t>,
+            METH_O | METH_STATIC,
+            "Return a new im.Image based on an im.Image instance" },
     {
         "write",
             (PyCFunction)py::ext::image::write<HalideNumpyImage, buffer_t>,

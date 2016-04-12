@@ -16,6 +16,7 @@ namespace im {
     namespace buffer {
         
         buffer_t* heapcopy(buffer_t* buffer);
+        buffer_t* heapcopy(Py_buffer* pybuffer);
         void heapdestroy(buffer_t* buffer);
         
         template <typename BufferType>
