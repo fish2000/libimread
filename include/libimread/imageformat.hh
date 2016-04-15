@@ -40,7 +40,7 @@ namespace im {
         }                                                                                   \
         const ImageFormat::options_t format::options = format::OPTS();                      \
         namespace {                                                                         \
-            ImageFormat::Registrar<format> registrar(format::options.suffix);               \
+            ImageFormat::Registrar<format> format##_registrar(format::options.suffix);      \
         };
     
     /// ... those macros also set your format up to register its class (see below).
@@ -63,12 +63,13 @@ namespace im {
             
             using options_t     = decltype(D(
                 _signature(_optional, _json_key = _signature)  = std::string(),
+                _siglength(_optional, _json_key = _siglength)  = int(),
                 _suffix(_optional,    _json_key = _suffix)     = std::string(),
                 _mimetype(_optional,  _json_key = _mimetype)   = std::string()
             ));
             
             DECLARE_OPTIONS(
-                base64::encode("xxxxxxxx", 8),                  /// signature
+                base64::encode("xxxxxxxx", 8), 8,               /// signature
                 "imread",                                       /// suffix
                 "application/octet-stream"                      /// mimetype
             );
@@ -138,7 +139,8 @@ namespace im {
         public:
             static bool match_format(byte_source* src) {
                 return match_magic(src,
-                    base64::decode(FormatType::options.signature).get());
+                    base64::decode(FormatType::options.signature).get(),
+                    FormatType::options.siglength);
             }
             
             static std::string suffix() {

@@ -99,8 +99,8 @@ namespace im {
         descriptor = fd;
     }
     
-    FILE* fd_source_sink::fh() const noexcept {
-        return ::fdopen(descriptor, "r+");
+    filesystem::file fd_source_sink::fh() const noexcept {
+        return filesystem::file(::fdopen(descriptor, "r+"));
     }
     
     void fd_source_sink::fh(FILE* fh) noexcept {

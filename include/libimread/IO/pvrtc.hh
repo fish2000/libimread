@@ -14,7 +14,7 @@ namespace im {
             using can_read = std::true_type;
             
             DECLARE_OPTIONS(
-                base64::encode("4\x00\x00\x00", 4), /// PVRTC "magic" tag is internal
+                base64::encode("4\x00\x00\x00", 4), 4, /// PVRTC "magic" tag is internal
                 "pvr",
                 "image/x-pvr");
             

@@ -17,8 +17,8 @@ namespace im {
         template <typename G>
         struct gifdisposer {
             constexpr gifdisposer() noexcept = default;
-            template <typename U> gifdisposer(const gifdisposer<U>&) noexcept {};
-            void operator()(G* gp) { if (gp) { gif::dispose(gp); gp = NULL; }}
+            template <typename U> gifdisposer(gifdisposer<U> const&) noexcept {};
+            void operator()(G* gp) { gif::dispose(gp); gp = NULL; }
         };
         
         using gifholder = std::shared_ptr<gif::GIF>;
@@ -31,7 +31,7 @@ namespace im {
             using can_write_multi = std::true_type;
             
             DECLARE_OPTIONS(
-                base64::encode("\x47\x49\x46\x38", 4), /// [0]
+                base64::encode("\x47\x49\x46\x38", 4), 4, /// [0]
                 "gif",
                 "image/gif");
             

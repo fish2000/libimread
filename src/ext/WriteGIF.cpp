@@ -1,6 +1,11 @@
 // Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 // License: MIT (see COPYING.MIT file)
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
+
 #include <libimread/libimread.hpp>
 #include <libimread/ext/WriteGIF.hh>
 #include <libimread/ext/memory/fmemopen.hh>
@@ -129,7 +134,7 @@ namespace {
         int byteCount;
         int curBitMask;
         int totalBytesWritten;
-    
+        
         BlockWriter(FILE* f)
             :f(f)
             ,curBits(0), byteCount(0)
@@ -139,13 +144,13 @@ namespace {
         void finish() {
             if (curBitMask > 1) { writeByte(); }
             if (byteCount > 0) { writeBlock(); }
-            fputc(0, f); /// block terminator
+            std::fputc(0, f); /// block terminator
         }
         
         void writeBlock() {
             if (f) {
-                fputc(byteCount, f);
-                fwrite(bytes, byteCount, 1, f);
+                std::fputc(byteCount, f);
+                std::fwrite(bytes, byteCount, 1, f);
             }
             byteCount = 0;
         }
@@ -297,7 +302,9 @@ namespace gif {
     
     static const int TranspColorIndex = 255; /// arbitrary, [0..255]
     
-    bool isAnimated(GIF* gif) { return (gif->frames && gif->frames->next); }
+    bool isAnimated(GIF* gif) {
+        return (gif->frames && gif->frames->next);
+    }
     
     GIF* newGIF(int delay) {
         GIF* gif = new GIF;
@@ -324,8 +331,8 @@ namespace gif {
         MAYBE("Caculating palette by median cut");
         unsigned char* uniqueColorArray = NULL;
         int uniqueColorCount = 0, idx = 0;
-        
         static char colorBitSet[256*256*256/8];
+        
         {
             idx = 0;
             std::memset(colorBitSet, 0, 256*256*256/8);
@@ -339,15 +346,18 @@ namespace gif {
                     }
                 }
             }
-            std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
-            std::memset(asterisks.get(), '*', idx);
-            MAYBE(
-                FF("Calculating unique color count [%s]", asterisks.get()),
-                FF("Unique color count: %d", uniqueColorCount)
-            );
+            #if (IM_VERBOSE > 0)
+                std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
+                std::memset(asterisks.get(), '*', idx);
+                MAYBE(
+                    FF("Calculating unique color count [%s]", asterisks.get()),
+                    FF("Unique color count: %d", uniqueColorCount)
+                );
+            #endif
         }
         
         uniqueColorArray = new unsigned char[uniqueColorCount * 3];
+        
         {
             idx = 0;
             std::memset(colorBitSet, 0, 256*256*256/8);
@@ -366,12 +376,13 @@ namespace gif {
                     }
                 }
             }
-            std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
-            std::memset(asterisks.get(), '*', idx);
-            MAYBE(
-                FF("Filling unique color array [%s]", asterisks.get())
-            );
-            
+            #if (IM_VERBOSE > 0)
+                std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
+                std::memset(asterisks.get(), '*', idx);
+                MAYBE(
+                    FF("Filling unique color array [%s]", asterisks.get())
+                );
+            #endif
         }
         
         struct ColorBox {
@@ -463,13 +474,15 @@ namespace gif {
                 }
             }
             
-            std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
-            std::memset(asterisks.get(), '*', 1+idx/10);
-            MAYBE(
-                FF("Creating color boxes [%s]", asterisks.get()),
-                FF("Total box count: %d", colorBoxCount),
-                FF(" Leaf box count: %d", leafBoxCount)
-            );
+            #if (IM_VERBOSE > 0)
+                std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
+                std::memset(asterisks.get(), '*', 1+idx/10);
+                MAYBE(
+                    FF("Creating color boxes [%s]", asterisks.get()),
+                    FF("Total box count: %d", colorBoxCount),
+                    FF(" Leaf box count: %d", leafBoxCount)
+                );
+            #endif
             
             {
                 MAYBE("Calculating palette from boxes");
@@ -491,12 +504,13 @@ namespace gif {
                         frame->rgbImage, frame->indexImage,
                         gif->palette, gif->paletteSize);
                 }
-                std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
-                std::memset(asterisks.get(), '*', idx);
-                MAYBE(
-                    FF("Indexizing frames [%s]", asterisks.get())
-                );
-                
+                #if (IM_VERBOSE > 0)
+                    std::unique_ptr<char[]> asterisks = std::make_unique<char[]>(idx+1);
+                    std::memset(asterisks.get(), '*', idx);
+                    MAYBE(
+                        FF("Indexizing frames [%s]", asterisks.get())
+                    );
+                #endif
             }
         }
         delete[] uniqueColorArray;
@@ -508,12 +522,14 @@ namespace gif {
         f->indexImage = NULL;
         f->rgbImage = new unsigned char[W*H*3];
         std::memcpy(f->rgbImage, rgbImage, W*H*3);
+        
         f->next = NULL;
         if (gif->lastFrame) {
             gif->lastFrame->next = f;
         } else {
             gif->frames = f;
         }
+        
         gif->lastFrame = f;
         if (gif->width && gif->height) {
             if (gif->width != W || gif->height != H) {
@@ -528,9 +544,10 @@ namespace gif {
     
     /// this used to write to a filehandle -- now it does so internally
     /// and captures the results using memory::sink for return
-    std::vector<byte> write(GIF* gif) {
+    bytevec_t write(GIF* gif) {
         if (!gif->frames) {
-            imread_raise(CannotWriteError, "Incomplete GIF passed to gif::write()");
+            imread_raise(CannotWriteError,
+                "Incomplete GIF passed to gif::write()");
         }
         
         {
@@ -546,7 +563,7 @@ namespace gif {
         
         /// allocate way-too-large buffer vector (which we resize before returning)
         int membufsize = gif->width * gif->height * 3 * framecount;
-        std::vector<byte> overflow(membufsize);
+        bytevec_t overflow(membufsize);
         std::unique_ptr<byte[]> membufstore = std::make_unique<byte[]>(membufsize);
         memory::buffer membuf = memory::sink(membufstore.get(), membufsize);
         FILE* f = membuf.get();
@@ -558,7 +575,7 @@ namespace gif {
         const int Trailer = 0x3b;
         
         {
-            fputs("GIF89a", f); /// header
+            std::fputs("GIF89a", f); /// header
         }
         
         {
@@ -576,30 +593,32 @@ namespace gif {
             const char BitsPerColor = 8;
             packed |= ((BitsPerColor-1) << 4) & ColorResolutionMask;
             packed |= (BitsPerColor-1) & GlobalColorTableSizeMask;
-            fwrite(&width, 2, 1, f);
-            fwrite(&height, 2, 1, f);
-            fputc(packed, f);
-            fputc(bgColorIndex, f);
-            fputc(pixelAspectRatio, f);
+            std::fwrite(&width, 2, 1, f);
+            std::fwrite(&height, 2, 1, f);
+            std::fputc(packed, f);
+            std::fputc(bgColorIndex, f);
+            std::fputc(pixelAspectRatio, f);
         }
         
         {
             /// global color table
             const int ColorCount = 256;
-            if (gif->palette) { fwrite(gif->palette, ColorCount*3, 1, f); }
+            if (gif->palette) {
+                std::fwrite(gif->palette, ColorCount*3, 1, f);
+            }
         }
         
         if (isAnimated(gif)) {
             /// application extension
-            fputc(ExtensionIntroducer, f);
-            fputc(ApplicationExtensionLabel, f);
-            fputc(11, f); /// block size
-            fputs("NETSCAPE2.0", f);
-            fputc(3, f); /// data block size
-            fputc(1, f);
+            std::fputc(ExtensionIntroducer, f);
+            std::fputc(ApplicationExtensionLabel, f);
+            std::fputc(11, f); /// block size
+            std::fputs("NETSCAPE2.0", f);
+            std::fputc(3, f); /// data block size
+            std::fputc(1, f);
             short repeatCount = 0; /// 0 = loop forever
-            fwrite(&repeatCount, 2, 1, f);
-            fputc(0, f); /// block terminator
+            std::fwrite(&repeatCount, 2, 1, f);
+            std::fputc(0, f); /// block terminator
         }
         
         int frameNumber = 0;
@@ -609,11 +628,11 @@ namespace gif {
             MAYBE(FF("frame %d", frameNumber));
             {
                 /// graphic control extension
-                fputc(ExtensionIntroducer, f);
-                fputc(GraphicControlLabel, f);
-                fputc(4, f); /// block size
-                
+                std::fputc(ExtensionIntroducer, f);
+                std::fputc(GraphicControlLabel, f);
+                std::fputc(4, f); /// block size
                 char packed = 0;
+                
                 enum {
                     DisposalNotSpecified = 0,
                     DoNotDispose = 1,
@@ -630,11 +649,11 @@ namespace gif {
                 }
                 
                 /// no transparent color index
-                fputc(packed, f);
+                std::fputc(packed, f);
                 short delay = frame->delay ? frame->delay : gif->frameDelay;
-                fwrite(&delay, 2, 1, f);
-                fputc(TranspColorIndex, f); /// transparent color index (if flag is set)
-                fputc(0, f); /// block terminator
+                std::fwrite(&delay, 2, 1, f);
+                std::fputc(TranspColorIndex, f); /// transparent color index (if flag is set)
+                std::fputc(0, f); /// block terminator
             }
             
             {
@@ -689,17 +708,17 @@ namespace gif {
                 {
                     /// image descriptor
                     char packed = 0;
-                    fputc(0x2c, f); /// separator
-                    fwrite(&fLeft, 2, 1, f);
-                    fwrite(&fTop, 2, 1, f);
-                    fwrite(&fWidth, 2, 1, f);
-                    fwrite(&fHeight, 2, 1, f);
-                    fputc(packed, f);
+                    std::fputc(0x2c, f); /// separator
+                    std::fwrite(&fLeft, 2, 1, f);
+                    std::fwrite(&fTop, 2, 1, f);
+                    std::fwrite(&fWidth, 2, 1, f);
+                    std::fwrite(&fHeight, 2, 1, f);
+                    std::fputc(packed, f);
                 }
                 
                 if (1) {
                     const int CodeSize = 8, MaxCodeSize = 12;
-                    fputc(CodeSize, f);
+                    std::fputc(CodeSize, f);
                     BlockWriter blockWriter(f);
                     encode(blockWriter, image, fWidth*fHeight, CodeSize, MaxCodeSize);
                     blockWriter.finish();
@@ -709,11 +728,13 @@ namespace gif {
                     int codeSize = 8;
                     int clearCode = 1 << codeSize;
                     int endOfInfo = clearCode + 1;
-                    fputc(codeSize, f);
+                    std::fputc(codeSize, f);
                     BlockWriter blockWriter(f);
                     for (int y = 0; y < gif->height; y++) {
                         for (int x = 0; x < gif->width; x++) {
-                            if (x % 100 == 0) { blockWriter.writeBitArray(clearCode, codeSize+1); }
+                            if (x % 100 == 0) {
+                                blockWriter.writeBitArray(clearCode, codeSize+1);
+                            }
                             /// TODO: a cleverer way to calculate the table reset time...?
                             int c = frame->indexImage[y*gif->width+x];
                             blockWriter.writeBitArray(c, codeSize+1);
@@ -722,23 +743,25 @@ namespace gif {
                     blockWriter.writeBitArray(endOfInfo, codeSize+1);
                     blockWriter.finish();
                 }
-                if (image != frame->indexImage) { delete[] image; }
+                if (image != frame->indexImage) {
+                    delete[] image;
+                }
             }
         }
         
         {
             /// comment extension
-            fputc(ExtensionIntroducer, f);
-            fputc(CommentLabel, f);
+            std::fputc(ExtensionIntroducer, f);
+            std::fputc(CommentLabel, f);
             const char* CommentText = "(c) Objects In Space And Time LLC";
-            const int blockSize = strlen(CommentText);
+            const int blockSize = std::strlen(CommentText);
             if (blockSize <= 255) {
-                fputc(blockSize, f);
-                fputs(CommentText, f);
+                std::fputc(blockSize, f);
+                std::fputs(CommentText, f);
             }
-            fputc(0, f); /// block terminator
+            std::fputc(0, f); /// block terminator
         }
-        fputc(Trailer, f);
+        std::fputc(Trailer, f);
         
         /// get current position
         std::fflush(f);
@@ -748,7 +771,8 @@ namespace gif {
         
         MAYBE("Done.",
             "About to call overflow.shrink_to_fit()",
-         FF("Current byte vector size: %d", overflow.size()));
+         FF("Current byte vector size: %d",
+             overflow.size()));
         
         overflow.shrink_to_fit();
         return overflow;

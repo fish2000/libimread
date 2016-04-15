@@ -18,7 +18,7 @@ namespace im {
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
-                base64::encode("\xff\xd8\xff", 3),
+                base64::encode("\xff\xd8\xff", 3), 3,
                 "jpg",
                 "image/jpeg");
             

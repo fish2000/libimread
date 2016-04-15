@@ -14,7 +14,7 @@ namespace im {
             using can_read = std::true_type;
             
             DECLARE_OPTIONS(
-                base64::encode("\x42\x4d", 2),
+                base64::encode("\x42\x4d", 2), 2,
                 "bmp",
                 "image/x-bmp");
             

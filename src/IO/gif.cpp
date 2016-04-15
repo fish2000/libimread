@@ -12,12 +12,15 @@ namespace im {
     
     namespace detail {
         
-        inline void __attribute__((unused)) setPixel(unsigned char* rgb, int r, int g, int b) {
+        __attribute__((unused))
+        inline void setPixel(unsigned char* rgb, int r, int g, int b) {
             rgb[0] = r; rgb[1] = g; rgb[2] = b;
         }
         
         gifholder gifsink(int delay=3) {
-            return gifholder(gif::newGIF(delay), gifdisposer<gif::GIF>());
+            return gifholder(
+                gif::newGIF(delay),
+                gifdisposer<gif::GIF>());
         }
         
         struct gifbuffer {
@@ -30,16 +33,16 @@ namespace im {
                     ,width(w), height(h)
                     {}
                 
-                virtual ~gifbuffer() { data_ptr.release(); }
+                virtual ~gifbuffer() { data_ptr.reset(nullptr); }
                 
                 byte* data() const { return data_ptr.get(); }
                 operator unsigned char*() const { return data(); }
                 
             private:
                 std::unique_ptr<byte[]> data_ptr;
-                gifbuffer(const gifbuffer&);
+                gifbuffer(gifbuffer const&);
                 gifbuffer(gifbuffer&&);
-                gifbuffer &operator=(const gifbuffer&);
+                gifbuffer &operator=(gifbuffer const&);
                 gifbuffer &operator=(gifbuffer&&);
         };
     }

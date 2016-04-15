@@ -23,6 +23,11 @@ namespace im {
             using can_read_metadata = std::true_type;
             using can_write = std::true_type;
             
+            DECLARE_OPTIONS(
+                base64::encode("\x4d\x4d\x00", 3), 3,
+                "tif",
+                "image/tiff");
+            
             static bool match_format(byte_source* src) {
                 return match_magic(src, "\x4d\x4d\x00\x2a", 4) ||
                        match_magic(src, "\x4d\x4d\x00\x2b", 4) ||
@@ -56,6 +61,11 @@ namespace im {
     class STKFormat : public ImageFormatBase<STKFormat> {
         public:
             using can_read_multi = std::true_type;
+            
+            DECLARE_OPTIONS(
+                base64::encode("\x49\x49\x2a\x00", 4), 4,
+                "stk",
+                "image/stk");
             
             virtual ImageList read_multi(byte_source* s,
                                          ImageFactory* f,

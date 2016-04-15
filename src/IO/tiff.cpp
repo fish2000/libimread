@@ -12,6 +12,8 @@ extern "C" {
 
 namespace im {
     
+    DECLARE_FORMAT_OPTIONS(TIFFFormat);
+    
     namespace {
         
         void show_tiff_warning(const char* module, const char* fmt, va_list ap) {
@@ -200,6 +202,8 @@ namespace im {
         };
         
     } /// namespace
+    
+    DECLARE_FORMAT_OPTIONS(STKFormat);
     
     ImageList STKFormat::read_multi(byte_source* src,
                                     ImageFactory* factory,

@@ -9,6 +9,7 @@
 #include <vector>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
+#include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/seekable.hh>
 
@@ -50,7 +51,7 @@ namespace im {
             
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
-            virtual FILE* fh() const noexcept;
+            virtual filesystem::file fh() const noexcept;
             virtual void fh(FILE* fh) noexcept;
             
             virtual bool exists() const noexcept;
