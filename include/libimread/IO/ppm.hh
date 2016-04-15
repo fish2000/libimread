@@ -15,7 +15,7 @@ namespace im {
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
-                "P6",
+                base64::encode("P6", 2),
                 "ppm",
                 "image/x-portable-pixmap");
             

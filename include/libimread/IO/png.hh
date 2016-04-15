@@ -26,7 +26,7 @@ namespace im {
             /// ... due to complaints of a 'control character in std::string'
             
             DECLARE_OPTIONS(
-                "\x89\x50\x4E\x47",
+                base64::encode("\x89\x50\x4E\x47", 4),
                 "png",
                 "image/png");
             

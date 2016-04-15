@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/base64.hh>
 #include <libimread/seekable.hh>
 #include <libimread/image.hh>
 #include <libimread/symbols.hh>
@@ -67,7 +68,7 @@ namespace im {
             ));
             
             DECLARE_OPTIONS(
-                "xxxxxxxx",                                     /// signature
+                base64::encode("xxxxxxxx", 8),                  /// signature
                 "imread",                                       /// suffix
                 "application/octet-stream"                      /// mimetype
             );
@@ -136,7 +137,8 @@ namespace im {
         
         public:
             static bool match_format(byte_source* src) {
-                return match_magic(src, FormatType::options.signature);
+                return match_magic(src,
+                    base64::decode(FormatType::options.signature).get());
             }
             
             static std::string suffix() {

@@ -31,7 +31,7 @@ namespace im {
             using can_write_multi = std::true_type;
             
             DECLARE_OPTIONS(
-                "\x47\x49\x46\x38", /// [0]
+                base64::encode("\x47\x49\x46\x38", 4), /// [0]
                 "gif",
                 "image/gif");
             

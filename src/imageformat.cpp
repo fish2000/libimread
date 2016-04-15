@@ -11,9 +11,8 @@
 namespace im {
     
     bool match_magic(byte_source* src, char const* magic, std::size_t const n) {
-        if (!src->can_seek()) { return false; }
-        std::vector<byte> buf;
-        buf.resize(n);
+        // if (!src->can_seek()) { return false; }
+        std::vector<byte> buf(n);
         const int n_read = static_cast<int>(src->read(&buf.front(), n));
         src->seek_relative(-n_read);
         return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);

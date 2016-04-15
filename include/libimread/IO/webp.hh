@@ -14,7 +14,7 @@ namespace im {
             using can_read = std::true_type;
             
             DECLARE_OPTIONS(
-                "RIFF", /// see https://en.wikipedia.org/wiki/WebP
+                base64::encode("RIFF", 4), /// see https://en.wikipedia.org/wiki/WebP
                 "webp",
                 "image/webp");
             

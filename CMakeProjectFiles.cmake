@@ -113,6 +113,7 @@ set(hdrs
     ${hdrs_dir}/ext/memory/open_memstream.hh
     ${hdrs_dir}/ext/memory/refcount.hh
     ${hdrs_dir}/ext/JSON/json11.h
+    ${hdrs_dir}/ext/base64.hh
     ${hdrs_dir}/ext/butteraugli.hh
     ${hdrs_dir}/ext/exif.hh
     ${hdrs_dir}/ext/iod.hh
@@ -217,6 +218,7 @@ set(srcs
     ${srcs_dir}/ext/memory/refcount.cpp
     ${srcs_dir}/ext/JSON/json11.cpp
     ${srcs_dir}/ext/JSON/schema.cpp
+    ${srcs_dir}/ext/base64.cpp
     ${srcs_dir}/ext/butteraugli.cpp
     ${srcs_dir}/ext/exif.cpp
     ${srcs_dir}/ext/pvr.cpp
