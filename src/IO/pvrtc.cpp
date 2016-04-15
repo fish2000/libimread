@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <iod/json.hh>
 #include <libimread/IO/pvrtc.hh>
 #include <libimread/errors.hh>
 #include <libimread/ext/pvr.hh>

@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 
+#include <iod/json.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>

@@ -1,8 +1,8 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_PVRTC_H_INCLUDE_GUARD_
-#define LPC_PVRTC_H_INCLUDE_GUARD_
+#ifndef LIBIMREAD_IO_PVRTC_HH_
+#define LIBIMREAD_IO_PVRTC_HH_
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
@@ -35,4 +35,4 @@ namespace im {
 }
 
 
-#endif // LPC_PVRTC_H_INCLUDE_GUARD_
+#endif /// LIBIMREAD_IO_PVRTC_HH_

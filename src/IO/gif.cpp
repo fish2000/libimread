@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <iod/json.hh>
 #include <libimread/IO/gif.hh>
 #include <libimread/pixels.hh>
 

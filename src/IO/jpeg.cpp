@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <algorithm>
+#include <iod/json.hh>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/pixels.hh>
 
@@ -249,8 +250,8 @@ namespace im {
                 jerr.error_message);
         }
         
-        if (opts.has("jpeg:quality")) {
-            auto quality = opts.cast<uint8_t>("jpeg:quality");
+        if (opts.has("jpg:quality")) {
+            auto quality = opts.cast<uint8_t>("jpg:quality");
             if (quality > 100) { quality = 100; }
             if (quality < 0) { quality = 0; }
             jpeg_set_quality(&compressor.info, quality, FALSE);

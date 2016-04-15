@@ -13,10 +13,10 @@ class ImageReadWriteTests(BaseCase):
         for image_path in self.jpgs:
             image = im.Image(image_path)
             self.assertIsNotNone(image)
-            self.assertTrue(im.image_check(image))
+            self.assertTrue(im.Image.check(image))
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
-            self.assertFalse(im.image_check(data))
+            self.assertFalse(im.Image.check(data))
     
     def test_load_image_jpg_write_blob_jpg(self):
         ''' Load JPG files, write JPG blobs '''

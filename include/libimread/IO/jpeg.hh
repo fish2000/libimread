@@ -21,7 +21,10 @@ namespace im {
                 _signature = base64::encode("\xff\xd8\xff", 3),
                 _siglength = 3,
                 _suffix = "jpg",
-                _mimetype = "image/jpeg"
+                _mimetype = "image/jpeg",
+                _writeopts = D(
+                    _quality = 0.75
+                )
             );
             
             virtual std::unique_ptr<Image> read(byte_source* src,

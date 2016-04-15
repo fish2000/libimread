@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <iostream>
+#include <iod/json.hh>
 #include <libimread/IO/png.hh>
 #include <libimread/pixels.hh>
 

@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstring>
 
+#include <iod/json.hh>
 #include <libimread/IO/ppm.hh>
 #include <libimread/ext/memory/fmemopen.hh>
 #include <libimread/errors.hh>

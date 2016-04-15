@@ -44,14 +44,6 @@ namespace im {
     /// -- some macro called `user_error` I believe -- that won't compile.
     /// So this next method must be defined out-of-line, in a TU set up to safely call
     /// `iod::json_encode()` (as the aforementioned conflicty include file declares it)
-    options_map ImageFormat::encode_options(options_t const& opts) {
-        return options_map::parse(iod::json_encode(opts));
-    }
-    
-    options_map ImageFormat::get_options() const {
-        return options_map::parse(iod::json_encode(ImageFormat::options));
-    }
-    
     options_map ImageFormat::add_options(options_map const& opts) const {
         return ImageFormat::get_options().update(opts);
     }

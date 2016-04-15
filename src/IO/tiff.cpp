@@ -4,6 +4,7 @@
 #define NO_IMPORT_ARRAY
 
 #include <type_traits>
+#include <iod/json.hh>
 #include <libimread/IO/tiff.hh>
 
 extern "C" {

@@ -39,6 +39,7 @@
 =========================================================================
 */
 
+#include <iod/json.hh>
 #include <libimread/IO/lsm.hh>
 
 namespace {

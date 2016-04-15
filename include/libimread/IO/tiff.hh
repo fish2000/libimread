@@ -27,7 +27,18 @@ namespace im {
                 _signature = base64::encode("\x4d\x4d\x00", 3),
                 _siglength = 3,
                 _suffix = "tif",
-                _mimetype = "image/tiff"
+                _mimetype = "image/tiff",
+                _metadata = "<TIFF METADATA STRING>",
+                _writeopts = D(
+                    _compress = true,
+                    _horizontal_predictor = false,
+                    _metadata = false,
+                    _software_signature = "libimread (OST-MLOBJ/747)",
+                    _x_resolution = 72,
+                    _y_resolution = 72,
+                    _resolution_unit = 1,   /// RESUNIT_INCH
+                    _orientation = 1        /// ORIENTATION_TOPLEFT
+                )
             );
             
             static bool match_format(byte_source* src) {

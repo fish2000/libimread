@@ -1,8 +1,7 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#define NO_IMPORT_ARRAY
-
+#include <iod/json.hh>
 #include <libimread/IO/bmp.hh>
 
 namespace im {
