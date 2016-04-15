@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_FILEHANDLE_HH_
 #define LIBIMREAD_FILEHANDLE_HH_
 
+#include <cstdio>
 #include <vector>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
@@ -40,6 +41,7 @@ namespace im {
             virtual std::size_t write(const void* buffer, std::size_t n);
             virtual std::size_t write(std::vector<byte> const& bv);
             virtual detail::stat_t stat() const;
+            virtual void flush();
             
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;

@@ -12,7 +12,6 @@ using im::byte_sink;
 using im::NSDataSource;
 using im::NSDataSink;
 
-
 @implementation NSData (AXDataAdditions)
 
 + (instancetype) dataWithByteVector:(std::vector<byte> const&)byteVector {
@@ -63,14 +62,18 @@ using im::NSDataSink;
 }
 
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink {
-    return static_cast<NSUInteger>(byteSink->write((byte*)self.bytes,
-                                                   (std::size_t)self.length));
+    std::size_t out = byteSink->write((byte*)self.bytes,
+                    static_cast<std::size_t>(self.length));
+    byteSink->flush();
+    return static_cast<NSUInteger>(out);
 }
 
 - (NSUInteger) writeUsingByteSink:(byte_sink*)byteSink
                            length:(NSUInteger)bytes {
-    return static_cast<NSUInteger>(byteSink->write((byte*)self.bytes,
-                                                   (std::size_t)bytes));
+    std::size_t out = byteSink->write((byte*)self.bytes,
+                         static_cast<std::size_t>(bytes));
+    byteSink->flush();
+    return static_cast<NSUInteger>(out);
 }
 
 - (std::unique_ptr<NSDataSource>) dataSource {

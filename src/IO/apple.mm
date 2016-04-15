@@ -1,6 +1,7 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
 #include <libimread/libimread.hpp>
@@ -11,6 +12,42 @@
 #include <libimread/ext/categories/NSURL+IM.hh>
 
 namespace im {
+    
+    namespace detail {
+        
+        NSDictionary* translate_options(options_map const& opts) {
+            NSMutableDictionary* out = [NSMutableDictionary dictionaryWithDictionary:@{
+                NSImageColorSyncProfileData     : [NSNull null],    /// NSData containing ICC profile data
+                NSImageEXIFData                 : @{},              /// JPEG EXIF NSDictionary
+                NSImageProgressive              : @1,               /// JPEG progressive-format boolean
+                NSImageCompressionFactor        : @0.75,            /// JPEG compression
+                NSImageCompressionMethod        : @5,               /// TIFF compression (5 = LZW)
+                NSImageRGBColorTable            : [NSNull null],    /// NSData containing GIF packed-RGB color table
+                NSImageDitherTransparency       : @0,               /// GIF dither boolean (0 = off, 1 = on)
+                NSImageInterlaced               : @1,               /// PNG interlacing boolean
+                NSImageGamma                    : @1.0,             /// PNG “gamma” value
+                NSImageFallbackBackgroundColor  : [NSNull null],    /// NSColor transparency value for non-alpha formats
+                NSImageFrameCount               : @0,               /// Animated GIF frame count
+                NSImageCurrentFrame             : @0,               /// Animated GIF current frame
+                NSImageCurrentFrameDuration     : @0,               /// Animated GIF current frame duration in seconds
+                NSImageLoopCount                : @0,               /// Animated GIF loop count
+            }];
+            
+            [out setObject:[NSNumber numberWithInt:opts.cast<bool>("jpeg:progressive", true) ? 1 : 0]
+                    forKey:NSImageProgressive];
+            [out setObject:[NSNumber numberWithFloat:opts.cast<float>("jpeg:quality", 0.75)]
+                    forKey:NSImageCompressionFactor];
+            [out setObject:[NSNumber numberWithInt:opts.cast<bool>("gif:dither", false) ? 1 : 0]
+                    forKey:NSImageDitherTransparency];
+            [out setObject:[NSNumber numberWithInt:opts.cast<bool>("png:interlace", true) ? 1 : 0]
+                    forKey:NSImageInterlaced];
+            [out setObject:[NSNumber numberWithFloat:opts.cast<float>("png:gamma", 1.0)]
+                    forKey:NSImageGamma];
+            
+            return [NSDictionary dictionaryWithDictionary:out];
+        }
+        
+    }
     
     std::unique_ptr<Image> NSImageFormat::read(byte_source* src,
                                                ImageFactory* factory,
@@ -31,8 +68,9 @@ namespace im {
         
         @autoreleasepool {
             NSBitmapImageRep* rep = [[NSBitmapImageRep alloc] initWithImage:input];
+            NSDictionary* props = detail::translate_options(opts);
             NSData* datum = [rep representationUsingType:static_cast<NSBitmapImageFileType>(filetype)
-                                              properties:@{}];
+                                              properties:props];
             [datum writeUsingByteSink:output];
         }
     }

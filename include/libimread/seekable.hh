@@ -47,13 +47,13 @@ namespace im {
             }
             
             virtual std::vector<byte> full_data() {
-                std::vector<byte> res;
+                std::vector<byte> result;
                 std::size_t n;
                 byte buffer[4096];
                 while ((n = this->read(buffer, sizeof(buffer)))) {
-                    res.insert(res.end(), buffer, buffer + n);
+                    result.insert(result.end(), buffer, buffer + n);
                 }
-                return res;
+                return result;
             }
             
     };

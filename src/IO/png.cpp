@@ -290,10 +290,10 @@ namespace im {
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                      PNG_FILTER_TYPE_BASE);
         
-        if (opts.has("png:compression_level")) {
-            auto compression_level = opts.cast<int>("png:compression_level");
-            if (compression_level && compression_level != -1) {
-                png_set_compression_level(p.png_ptr, compression_level);
+        if (opts.has("png:compression")) {
+            int compression = opts.cast<int>("png:compression");
+            if (compression && compression != -1) {
+                png_set_compression_level(p.png_ptr, compression);
             }
         }
         

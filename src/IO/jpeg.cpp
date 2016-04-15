@@ -58,7 +58,7 @@ namespace im {
         
         boolean empty_output_buffer(j_compress_ptr cinfo) {
             jpeg_dst_adaptor* adaptor = reinterpret_cast<jpeg_dst_adaptor*>(cinfo->dest);
-            adaptor->s->write_check(
+            adaptor->s->write(
                 adaptor->buf,
                 buffer_size);
             adaptor->mgr.next_output_byte = adaptor->buf;
@@ -68,9 +68,10 @@ namespace im {
         
         void flush_output_buffer(j_compress_ptr cinfo) {
             jpeg_dst_adaptor* adaptor = reinterpret_cast<jpeg_dst_adaptor*>(cinfo->dest);
-            adaptor->s->write_check(
+            adaptor->s->write(
                 adaptor->buf,
                 adaptor->mgr.next_output_byte - adaptor->buf);
+            adaptor->s->flush();
         }
         
         jpeg_source_adaptor::jpeg_source_adaptor(byte_source* s)
@@ -154,7 +155,9 @@ namespace im {
         decompressor.info.src = &adaptor.mgr;
         
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError, "libjpeg internal error:", jerr.error_message);
+            imread_raise(CannotReadError,
+                "libjpeg internal error:",
+                jerr.error_message);
         }
         
         // now read the header & image data
@@ -193,7 +196,9 @@ namespace im {
         }
         
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError, "libjpeg internal error:", jerr.error_message);
+            imread_raise(CannotReadError,
+                "libjpeg internal error:",
+                jerr.error_message);
         }
         
         jpeg_finish_decompress(&decompressor.info);
@@ -205,7 +210,8 @@ namespace im {
                            const options_map& opts) {
         if (input.nbits() != 8) {
             imread_raise(CannotReadError,
-                FF("Image must be 8 bits for JPEG saving (got %i)", input.nbits()));
+                FF("Image must be 8 bits for JPEG saving (got %i)",
+                    input.nbits()));
         }
         
         jpeg_dst_adaptor adaptor(output);
@@ -219,7 +225,9 @@ namespace im {
         compressor.info.dest = &adaptor.mgr;
         
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError, "libjpeg internal error:", jerr.error_message);
+            imread_raise(CannotReadError,
+                "libjpeg internal error:",
+                jerr.error_message);
         }
         
         const int w = input.dim(0);
@@ -236,7 +244,9 @@ namespace im {
         jpeg_set_defaults(&compressor.info);
         
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError, "libjpeg internal error:", jerr.error_message);
+            imread_raise(CannotReadError,
+                "libjpeg internal error:",
+                jerr.error_message);
         }
         
         if (opts.has("jpeg:quality")) {
@@ -249,7 +259,9 @@ namespace im {
         jpeg_start_compress(&compressor.info, TRUE);
         
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError, "libjpeg internal error:", jerr.error_message);
+            imread_raise(CannotReadError,
+                "libjpeg internal error:",
+                jerr.error_message);
         }
         
         JSAMPLE* rowbuf = new JSAMPLE[w * d]; /// width * channels
@@ -268,7 +280,9 @@ namespace im {
         }
         
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError, "libjpeg internal error:", jerr.error_message);
+            imread_raise(CannotReadError,
+                "libjpeg internal error:",
+                jerr.error_message);
         }
         
         delete[] rowbuf;

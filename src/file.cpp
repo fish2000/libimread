@@ -36,7 +36,7 @@ namespace im {
         int out = ::read(descriptor, buffer, n);
         if (out == -1) {
             imread_raise(CannotReadError,
-                "read() returned -1",
+                "::read() returned -1",
                 std::strerror(errno));
         }
         return static_cast<std::size_t>(out);
@@ -46,7 +46,7 @@ namespace im {
         int out = ::write(descriptor, buffer, n);
         if (out == -1) {
             imread_raise(CannotWriteError,
-                "write() returned -1",
+                "::write() returned -1",
                 std::strerror(errno));
         }
         return static_cast<std::size_t>(out);
@@ -60,11 +60,13 @@ namespace im {
         detail::stat_t info;
         if (::fstat(descriptor, &info) == -1) {
             imread_raise(CannotReadError,
-                "fstat() returned -1",
+                "::fstat() returned -1",
                 std::strerror(errno));
         }
         return info;
     }
+    
+    void fd_source_sink::flush() { ::fsync(descriptor); }
     
     std::vector<byte> fd_source_sink::full_data() {
         /// grab stat struct and store initial seek position
@@ -72,21 +74,21 @@ namespace im {
         std::size_t orig = ::lseek(descriptor, 0, SEEK_CUR);
         
         /// allocate output vector per size of file
-        std::vector<byte> res(info.st_size * sizeof(byte));
+        std::vector<byte> result(info.st_size * sizeof(byte));
         
         /// start as you mean to go on
         ::lseek(descriptor, 0, SEEK_SET);
         
         /// unbuffered read directly from descriptor:
-        if (::read(descriptor, &res[0], res.size()) == -1) {
+        if (::read(descriptor, &result[0], result.size()) == -1) {
             imread_raise(CannotReadError,
-                "error in full_data(): read() returned -1",
+                "fd_source_sink::full_data(): read() returned -1",
                 std::strerror(errno));
         }
         
         /// reset descriptor position before returning
         ::lseek(descriptor, orig, SEEK_SET);
-        return res;
+        return result;
     }
     
     int fd_source_sink::fd() const noexcept {
@@ -97,10 +99,18 @@ namespace im {
         descriptor = fd;
     }
     
+    FILE* fd_source_sink::fh() const noexcept {
+        return ::fdopen(descriptor, "r+");
+    }
+    
+    void fd_source_sink::fh(FILE* fh) noexcept {
+        descriptor = ::fileno(fh);
+    }
+    
     bool fd_source_sink::exists() const noexcept {
         try {
             this->stat();
-        } catch (const CannotReadError& e) {
+        } catch (CannotReadError const& e) {
             return false;
         }
         return true;
@@ -111,7 +121,7 @@ namespace im {
         if (fmode == filesystem::mode::WRITE) {
             descriptor = open_write(cpath);
             if (descriptor < 0) {
-                imread_raise(CannotWriteError, "file open-to-write failure:",
+                imread_raise(CannotWriteError, "descriptor open-to-write failure:",
                     FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC)", cpath),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
@@ -119,7 +129,7 @@ namespace im {
         } else {
             descriptor = open_read(cpath);
             if (descriptor < 0) {
-                imread_raise(CannotReadError, "file open-to-read failure:",
+                imread_raise(CannotReadError, "descriptor open-to-read failure:",
                     FF("\t::open(\"%s\", O_RDONLY | O_FSYNC)", cpath),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
@@ -134,7 +144,7 @@ namespace im {
         if (descriptor > 0) {
             if (::close(descriptor) == -1) {
                 imread_raise(FileSystemError,
-                    "error while closing file descriptor:",
+                    "error closing file descriptor:",
                     std::strerror(errno));
             }
             swap(out, descriptor);

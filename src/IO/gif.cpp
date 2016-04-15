@@ -99,6 +99,7 @@ namespace im {
         
         std::vector<byte> out = gif::write(g.get());
         output->write(&out[0], out.size());
+        output->flush();
         
         imread_assert(out.size() > 0,
             "gif::write() returned a size-zero byte vector!");
@@ -117,6 +118,7 @@ namespace im {
         
         std::vector<byte> out = gif::write(g.get());
         output->write(&out[0], out.size());
+        output->flush();
         
         imread_assert(out.size() > 0,
             "gif::write() returned a size-zero byte vector!");

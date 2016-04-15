@@ -28,7 +28,7 @@ namespace im {
                     #endif
                 }
             NSDataSource(NSMutableData* d)
-                :data((NSData*)d), pos(0)
+                :data([NSData dataWithData:d]), pos(0)
                 {
                     #if !__has_feature(objc_arc)
                         [data retain];
@@ -43,7 +43,7 @@ namespace im {
             
             virtual std::size_t read(byte* buffer, std::size_t n) {
                 if (pos + n > data.length) { n = data.length-pos; }
-                std::memmove(buffer, (byte *)data.bytes + pos, n);
+                std::memmove(buffer, (byte*)data.bytes + pos, n);
                 pos += n;
                 return n;
             }
@@ -52,6 +52,12 @@ namespace im {
             virtual std::size_t seek_absolute(std::size_t p) { return pos = p; }
             virtual std::size_t seek_relative(int delta) { return pos += delta; }
             virtual std::size_t seek_end(int delta) { return pos = (data.length-delta-1); }
+            
+            virtual std::vector<byte> full_data() {
+                std::vector<byte> out(data.length);
+                std::memcpy(&out[0], (byte*)data.bytes, out.size());
+                return out;
+            }
         
         private:
             NSData* data;
@@ -60,6 +66,13 @@ namespace im {
     
     class NSDataSink : public byte_sink {
         public:
+            NSDataSink(NSData* d)
+                :data([NSMutableData dataWithData:d]), pos(0)
+                {
+                    #if !__has_feature(objc_arc)
+                        [data retain];
+                    #endif
+                }
             NSDataSink(NSMutableData* d)
                 :data(d), pos(0)
                 {
@@ -80,8 +93,9 @@ namespace im {
             virtual std::size_t seek_end(int delta) { return pos = (data.length-delta-1); }
             
             virtual std::size_t write(const void* buffer, std::size_t n) {
-                seek_end(0);
-                [data appendBytes:buffer length:n];
+                if (pos + n > data.length) { n = data.length-pos; }
+                std::memmove((byte*)data.mutableBytes + pos, (byte*)buffer, n);
+                pos += n;
                 return n;
             }
             

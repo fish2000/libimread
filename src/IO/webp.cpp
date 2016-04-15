@@ -16,7 +16,8 @@ namespace im {
         int ok = WebPGetInfo(&data[0], data.size(), &w, &h);
         
         if (!ok) {
-            imread_raise(CannotReadError, "File does not validate as WebP");
+            imread_raise(CannotReadError,
+                "File does not validate as WebP");
         }
         
         std::unique_ptr<Image> output(factory->create(8, h, w, 4));

@@ -5,7 +5,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <cstdio>
 #include <cerrno>
 #include <cstring>
 #include <string>
@@ -22,20 +21,20 @@ namespace im {
     std::size_t handle_source_sink::seek_end(int delta) { return std::fseek(handle, delta, SEEK_END); }
     
     std::size_t handle_source_sink::read(byte* buffer, std::size_t n) {
-        std::size_t out = std::fread(buffer, 1, n, handle);
+        std::size_t out = std::fread(buffer, sizeof(byte), n, handle);
         if (out == -1) {
             imread_raise(CannotReadError,
-                "read() returned -1",
+                "std::fread() returned -1",
                 std::strerror(errno));
         }
         return out;
     }
     
     std::size_t handle_source_sink::write(const void* buffer, std::size_t n) {
-        std::size_t out = std::fwrite(buffer, 1, n, handle);
+        std::size_t out = std::fwrite(buffer, sizeof(byte), n, handle);
         if (out == -1) {
             imread_raise(CannotWriteError,
-                "write() returned -1",
+                "std::fwrite() returned -1",
                 std::strerror(errno));
         }
         return out;
@@ -49,11 +48,13 @@ namespace im {
         detail::stat_t info;
         if (::fstat(::fileno(handle), &info) == -1) {
             imread_raise(CannotReadError,
-                "fstat() returned -1",
+                "::fstat(::fileno()) returned -1",
                 std::strerror(errno));
         }
         return info;
     }
+    
+    void handle_source_sink::flush() { std::fflush(handle); }
     
     std::vector<byte> handle_source_sink::full_data() {
         /// grab stat struct and store initial seek position
@@ -61,29 +62,30 @@ namespace im {
         std::size_t orig = std::fseek(handle, 0, SEEK_CUR);
         
         /// allocate output vector per size of file
-        std::vector<byte> res(info.st_size * sizeof(byte));
+        std::vector<byte> result(info.st_size * sizeof(byte));
         
         /// start as you mean to go on
         std::fseek(handle, 0, SEEK_SET);
         
-        /// unbuffered read directly from file handle:
-        if (std::fread(&res[0], 1, res.size(), handle) == -1) {
+        /// read directly from filehandle:
+        if (std::fread(&result[0], sizeof(byte), result.size(), handle) == -1) {
             imread_raise(CannotReadError,
-                "error in full_data(): read() returned -1",
+                "handle_source_sink::full_data(): std::fread() returned -1",
                 std::strerror(errno));
         }
         
         /// reseek to the streams' original position
         std::fseek(handle, orig, SEEK_SET);
-        return res;
+        return result;
     }
     
     int handle_source_sink::fd() const noexcept {
         return ::fileno(handle);
     }
     
-    void handle_source_sink::fd(int fd) noexcept {
-        handle = ::fdopen(fd, "r+");
+    void handle_source_sink::fd(int descriptor) noexcept {
+        FILE* fh = ::fdopen(descriptor, "r+");
+        if (fh != nullptr) { handle = fh; }
     }
     
     FILE* handle_source_sink::fh() const noexcept {
@@ -91,14 +93,16 @@ namespace im {
     }
     
     void handle_source_sink::fh(FILE* fh) noexcept {
-        handle = fh;
-        external = true;
+        if (fh != nullptr) {
+            handle = fh;
+            external = true;
+        }
     }
     
     bool handle_source_sink::exists() const noexcept {
         try {
             this->stat();
-        } catch (const CannotReadError& e) {
+        } catch (CannotReadError const& e) {
             return false;
         }
         return true;
@@ -121,7 +125,7 @@ namespace im {
         if (handle) {
             if (std::fclose(handle) == -1) {
                 imread_raise(FileSystemError,
-                    "error while closing file hanlde:",
+                    "error closing filehandle:",
                     std::strerror(errno));
             }
             swap(out, handle);

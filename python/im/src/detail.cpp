@@ -100,6 +100,8 @@ namespace py {
                       std::size_t length)           { return PyString_FromStringAndSize(operand, length); }
     PyObject* convert(char const* operand,
                       std::size_t length)           { return PyString_FromStringAndSize(operand, length); }
+    PyObject* convert(std::string const& operand,
+                      std::size_t length)           { return PyString_FromStringAndSize(operand.c_str(), length); }
     #elif PY_MAJOR_VERSION >= 3
     PyObject* convert(char* operand)                { return PyBytes_FromString(operand); }
     PyObject* convert(char const* operand)          { return PyBytes_FromString(operand); }
@@ -108,6 +110,8 @@ namespace py {
                       std::size_t length)           { return PyBytes_FromStringAndSize(operand, length); }
     PyObject* convert(char const* operand,
                       std::size_t length)           { return PyBytes_FromStringAndSize(operand, length); }
+    PyObject* convert(std::string const& operand,
+                      std::size_t length)           { return PyBytes_FromStringAndSize(operand.c_str(), length); }
     #endif
     
     PyObject* tuplize()                             { return PyTuple_New(0); }

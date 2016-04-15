@@ -1,43 +1,14 @@
-// Copyright 2015 Alexander Bohn <fish2000@gmail.com>
-// License: MIT (see COPYING.MIT file)
+/// Copyright 2015 Alexander Bohn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
-#ifndef LPC_APPLE_HH_INCLUDE_GUARD_
-#define LPC_APPLE_HH_INCLUDE_GUARD_
-
-#ifdef __OBJC__
-#import <Foundation/Foundation.h>
-#import <CoreFoundation/CoreFoundation.h>
-#endif /// __OBJC__
+#ifndef LIBIMREAD_IO_APPLE_HH_
+#define LIBIMREAD_IO_APPLE_HH_
 
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
 
-#ifndef __OBJC__
-
-/// forward-declare CFTypeRef type
-struct CFTypeRef;
-
-/// forward-declare CFRelease()
-void CFRelease(CFTypeRef ref);
-
-#endif
-
 namespace im {
-    
-    namespace cf {
-        
-        template <typename C = CFTypeRef>
-        struct unref {
-            constexpr unref() noexcept = default;
-            template <typename U> unref(const unref<U>&) noexcept {};
-            void operator()(C ref) { if (ref) { CFRelease(ref); } }
-        };
-        
-        template <typename Ref>
-        using REF = std::unique_ptr<typename std::decay<Ref>::type, unref<Ref>>;
-        
-    }
     
     class NSImageFormat : public ImageFormatBase<NSImageFormat> {
         
@@ -61,4 +32,4 @@ namespace im {
 
 }
 
-#endif // LPC_APPLE_HH_INCLUDE_GUARD_
+#endif /// LIBIMREAD_IO_APPLE_HH_

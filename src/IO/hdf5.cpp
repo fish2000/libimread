@@ -246,7 +246,7 @@ namespace im {
         /// and write it out to the output byte sink
         std::unique_ptr<FileSource> readback(new FileSource(tf.filepath));
         std::vector<byte> data = readback->full_data();
-        output->write((const void *)&data[0], data.size());
+        output->write((const void*)&data[0], data.size());
         output->flush();
         
         /// clean up file resources

@@ -5,6 +5,37 @@
 #include <libimread/coregraphics.hh>
 
 namespace im {
+    
+    /*
+#ifndef __OBJC__
+
+/// forward-declare CFTypeRef type
+struct CFTypeRef;
+
+/// forward-declare CFRelease()
+void CFRelease(CFTypeRef ref);
+
+#endif
+
+#ifdef __OBJC__
+#import <CoreFoundation/CoreFoundation.h>
+#endif /// __OBJC__
+    
+    namespace cf {
+        
+        template <typename C = CFTypeRef>
+        struct unref {
+            constexpr unref() noexcept = default;
+            template <typename U> unref(const unref<U>&) noexcept {};
+            void operator()(C ref) { if (ref) { CFRelease(ref); } }
+        };
+        
+        template <typename Ref>
+        using REF = std::unique_ptr<typename std::decay<Ref>::type, unref<Ref>>;
+        
+    }
+    */
+    
         
         
         // using Releaser = std::function<void(CFTypeRef)>;

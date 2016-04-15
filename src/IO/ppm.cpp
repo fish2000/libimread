@@ -36,16 +36,16 @@ namespace im {
         int width, height, maxval;
         char header[256];
         
-        imread_assert(fscanf(membuf.get(), "%255s", header) == 1,
+        imread_assert(std::fscanf(membuf.get(), "%255s", header) == 1,
                       "Could not read PPM header\n");
         
-        imread_assert(fscanf(membuf.get(), "%d %d\n", &width, &height) == 2,
+        imread_assert(std::fscanf(membuf.get(), "%d %d\n", &width, &height) == 2,
                       "Could not read PPM width and height\n");
         
-        imread_assert(fscanf(membuf.get(), "%d", &maxval) == 1,
+        imread_assert(std::fscanf(membuf.get(), "%d", &maxval) == 1,
                       "Could not read PPM max value\n");
         
-        imread_assert(fgetc(membuf.get()) != EOF,
+        imread_assert(std::fgetc(membuf.get()) != EOF,
                       "Could not read char from PPM\n");
         
         int bit_depth = 0;
@@ -53,7 +53,7 @@ namespace im {
         else if (maxval == 65535) { bit_depth = 16; }
         else { imread_assert(false, "Invalid max bit-depth value in PPM\n"); }
         
-        imread_assert(strcmp(header, "P6") == 0 || strcmp(header, "p6") == 0,
+        imread_assert(std::strcmp(header, "P6") == 0 || std::strcmp(header, "p6") == 0,
                       "Input is not binary PPM\n");
         
         const int channels = 3;
@@ -63,7 +63,7 @@ namespace im {
         /// convert the data to T
         if (bit_depth == 8) {
             uint8_t* __restrict__ data = new uint8_t[full_size];
-            imread_assert(fread(static_cast<void*>(data),
+            imread_assert(std::fread(static_cast<void*>(data),
                           sizeof(uint8_t), full_size, membuf.get()) == static_cast<std::size_t>(full_size),
                     "Could not read PPM 8-bit data\n");
             
@@ -79,7 +79,7 @@ namespace im {
             delete[] data;
         } else if (bit_depth == 16) {
             uint16_t* __restrict__ data = new uint16_t[full_size];
-            imread_assert(fread(static_cast<void*>(data),
+            imread_assert(std::fread(static_cast<void*>(data),
                           sizeof(uint16_t), full_size, membuf.get()) == static_cast<std::size_t>(full_size),
                 "Could not read PPM 16-bit data\n");
             

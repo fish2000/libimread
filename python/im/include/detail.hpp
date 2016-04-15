@@ -62,6 +62,7 @@ namespace py {
     PyObject* convert(std::string const&);
     PyObject* convert(char*, std::size_t);
     PyObject* convert(char const*, std::size_t);
+    PyObject* convert(std::string const&, std::size_t);
     
     template <typename Cast,
               typename Original,
@@ -217,6 +218,17 @@ namespace py {
             return apply_impl(std::forward<F>(f), std::forward<Tuple>(t), Indices());
         }
         
+    }
+    
+    template <typename ...Args> inline
+    PyObject* convert(std::tuple<Args...> argtuple) {
+        using Tuple = std::tuple<Args...>;
+        static_assert(
+            std::tuple_size<Tuple>::value > 0,
+            "Can't convert a zero-length std::tuple to a PyTuple");
+        
+        return py::impl::apply(py::tuplize<Args...>,
+                               std::forward<Tuple>(argtuple));
     }
     
     template <typename ...Args> inline

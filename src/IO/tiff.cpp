@@ -22,7 +22,7 @@ namespace im {
         
         void tiff_error(const char* module, const char* fmt, va_list ap) {
             char buffer[4096];
-            vsnprintf(buffer, sizeof(buffer), fmt, ap);
+            std::vsnprintf(buffer, sizeof(buffer), fmt, ap);
             imread_raise(CannotReadError, "FATAL in TIFF I/O",
                 FF("[TIFF/ERROR***] %s: ", module),
                 FF("%s\n", buffer));

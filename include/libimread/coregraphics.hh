@@ -4,12 +4,6 @@
 #ifndef LIBIMREAD_COREGRAPHICS_HH_
 #define LIBIMREAD_COREGRAPHICS_HH_
 
-#ifdef __OBJC__
-#import <Cocoa/Cocoa.h>
-#import <Foundation/Foundation.h>
-#import <CoreFoundation/CoreFoundation.h>
-#endif
-
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/halide.hh>
@@ -21,29 +15,29 @@ namespace im {
     namespace apple {
         
         using filesystem::path;
-        // static const options_map apple_default_opts;
         
         template <typename T>
-        using ImageType = HybridImage<typename std::decay_t<T>>;
+        using ImageType = HybridImage<std::decay_t<T>>;
+        
         template <typename T>
         using image_ptr = std::unique_ptr<ImageType<T>>;
         
         template <typename T = byte> inline
-        ImageType<T> read(const std::string &filename,
-                          const options_map &opts = options_map()) {
+        ImageType<T> read(std::string const& filename,
+                          options_map const& opts = options_map()) {
             HalideFactory<T> factory(filename);
-            std::unique_ptr<ImageFormat> format(get_format("objc"));
+            std::unique_ptr<ImageFormat> format(new format::Apple());
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            options_map default_opts = format->add_options(opts);
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, default_opts);
+            options_map readopts(format->add_options(opts));
+            std::unique_ptr<Image> output = format->read(input.get(), &factory, readopts);
             ImageType<T> image(dynamic_cast<ImageType<T>&>(*output));
             return image;
         }
         
         template <typename T = byte> inline
-        void write(HybridImage<T>& input, const std::string& filename,
-                                          const options_map& opts = options_map()) {
-            std::unique_ptr<ImageFormat> format(get_format("objc"));
+        void write(HybridImage<T>& input, std::string const& filename,
+                                          options_map const& opts = options_map()) {
+            std::unique_ptr<ImageFormat> format(new format::Apple());
             std::unique_ptr<FileSink> output(new FileSink(filename));
             options_map writeopts(format->add_options(opts));
             writeopts.set("filename", filename);
@@ -52,9 +46,9 @@ namespace im {
         }
         
         template <typename Color = color::RGBA> inline
-        void write(InterleavedImage<Color>& input, const std::string& filename,
-                                                   const options_map& opts = options_map()) {
-            std::unique_ptr<ImageFormat> format(get_format("objc"));
+        void write(InterleavedImage<Color>& input, std::string const& filename,
+                                                   options_map const& opts = options_map()) {
+            std::unique_ptr<ImageFormat> format(new format::Apple());
             std::unique_ptr<FileSink> output(new FileSink(filename));
             options_map writeopts(format->add_options(opts));
             writeopts.set("filename", filename);
