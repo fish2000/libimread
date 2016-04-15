@@ -6,6 +6,9 @@ namespace im {
     
     namespace base64 {
         
+        /// implementation thanks to elegant dice of SO:
+        /// http://stackoverflow.com/a/35328409/298171
+        
         static const byte from_base64[128] = {
             /// 8 rows of 16 = 128
             /// note: only require 123 entries, as we only lookup for <= z , which z=122
