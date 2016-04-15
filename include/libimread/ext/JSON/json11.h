@@ -162,6 +162,7 @@ class Json {
                 :value(static_cast<int>(x))
                 {}
             Number(std::istream&);
+            bool is_integer() const;
             void print(std::ostream& out) const override;
             bool operator==(Node const& that) const override;
             void validate(Schema const& schema, nodecvec_t&) const override;
@@ -422,6 +423,7 @@ class Json {
         Type type() const                   { return root->type(); }
         const char* typestr() const         { return root->typestr(); }
         std::string typestring() const      { return root->typestr(); }
+        bool is_integer() const;
         
         /// conversion operators
         operator int() const;

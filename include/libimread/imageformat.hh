@@ -161,8 +161,7 @@ namespace im {
             }
             
             virtual options_map add_options(options_map const& opts) const override {
-                options_map result = get_options();
-                return result.update(opts);
+                return get_options().update(opts);
             }
             
             virtual bool format_can_read() const noexcept override           { return FormatType::can_read::value; }

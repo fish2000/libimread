@@ -208,6 +208,27 @@ namespace py {
             Py_DECREF(list);
             return out;
         }
+        
+        PyObject* format_info_dict(int idx) {
+            stringvec_t formats;
+            int max = 0;
+            
+            {
+                py::gil::release nogil;
+                formats = py::detail::formats_as_vector();
+                max = formats.size();
+            }
+            
+            PyObject* infodict = PyDict_New();
+            
+            for (auto it = formats.begin();
+                 it != formats.end() && idx < max;
+                 ++it) { std::string const& format = *it;
+                         if (format.size() > 0) {
+                             PyDict_SetItemString(infodict, format.c_str(), );
+                         } ++idx; }
+            
+        }
     }
     
 }

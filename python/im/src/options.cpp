@@ -3,12 +3,10 @@
 
 #include "options.hpp"
 #include "check.hh"
+#include "detail.hpp"
 #include "gil.hpp"
 #include "gil-io.hpp"
 #include "pybuffer.hpp"
-
-#define NO_IMPORT_ARRAY
-#include "detail.hpp"
 #include <libimread/errors.hh>
 
 namespace py {
@@ -173,6 +171,51 @@ namespace py {
                 out.set(k, v);
             }
             return out;
+        }
+        
+        PyObject* revert(Json const& value) {
+            Type jtype = value.type();
+            switch (jtype) {
+                case Type::JSNULL:
+                    return py::None();
+                case Type::BOOLEAN:
+                    return py::boolean(static_cast<bool>(value));
+                case Type::NUMBER:
+                    return py::convert(value.is_integer() ?
+                                       static_cast<long>(value) :
+                                       static_cast<long double>(value));
+                case Type::STRING:
+                    return py::string(static_cast<std::string>(value));
+                case Type::ARRAY: {
+                    int max = value.size();
+                    PyObject* list = PyList_New(max);
+                    for (int idx = 0; idx < max; ++idx) {
+                        PyList_SET_ITEM(list, idx,
+                            py::options::revert(value[idx]));
+                    }
+                    return list;
+                }
+                case Type::OBJECT: {
+                    auto const& keys = value.keys();
+                    PyObject* dict = PyDict_New();
+                    int idx = 0,
+                        max = keys.size();
+                    for (auto it = keys.begin();
+                         it != keys.end() && idx < max;
+                         ++it) { std::string const& key = *it;
+                                 if (key.size() > 0) {
+                                     PyDict_SetItemString(dict, key.c_str(),
+                                         py::options::revert(value[key]));
+                                 } ++idx; }
+                    return dict;
+                }
+                case Type::POINTER:
+                    return py::string("<POINTER>");
+                case Type::SCHEMA:
+                    return py::string("<SCHEMA>");
+                default:
+                    return py::string("<unknown>");
+            }
         }
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject* kwargs,

@@ -168,6 +168,20 @@ bool Json::Number::operator==(Node const& that) const {
     return delta < std::pow(10, -digs);
 }
 
+bool Json::Number::is_integer() const {
+    return prec == -1;
+}
+
+bool Json::is_integer() const {
+    if (root->type() != Type::NUMBER) {
+        imread_raise(JSONUseError,
+            "Json::is_integer() method not applicable",
+         FF("\troot->type() == Type::%s", root->typestr()),
+            "\t(Requires Type::NUMBER)");
+    }
+    return ((Number*)root)->is_integer();
+}
+
 bool Json::Array::contains(Node const* that) const {
     if (that == nullptr) { return false; }
     if (this == that) { return true; }
