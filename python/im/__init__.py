@@ -4,6 +4,7 @@ from im import (
     _byteordermark,
     
     formats,
+    format_info,
     structcode_parse,
     
     HybridImage,

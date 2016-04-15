@@ -250,6 +250,9 @@ PyMODINIT_FUNC initim(void) {
     /// ... another to the tuple of image-format suffix strings …
     PyObject* format_tuple;
     
+    /// ... another to the root dict of image-format info dicts …
+    PyObject* format_infodict;
+    
     /// ... two more for endianness …
     PyObject* _byteorder;
     PyObject* _byteordermark;
@@ -337,6 +340,12 @@ PyMODINIT_FUNC initim(void) {
     PyModule_AddObject(module,
         "formats",
         format_tuple);
+    
+    format_infodict = py::detail::formats_as_infodict();
+    if (format_infodict == NULL)                     { return; }
+    PyModule_AddObject(module,
+        "format_info",
+        format_infodict);
     
     /// Store the byte order of the system in im._byteorder and im._byteordermark
     /// ... note that the byte-order-determining function (in hybrid.cpp) uses

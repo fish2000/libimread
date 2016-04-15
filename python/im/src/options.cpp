@@ -173,7 +173,7 @@ namespace py {
             return out;
         }
         
-        PyObject* revert(Json const& value) {
+        PyObject* revert(Json& value) {
             Type jtype = value.type();
             switch (jtype) {
                 case Type::JSNULL:
@@ -190,8 +190,9 @@ namespace py {
                     int max = value.size();
                     PyObject* list = PyList_New(max);
                     for (int idx = 0; idx < max; ++idx) {
+                        Json subvalue = (Json)value[idx];
                         PyList_SET_ITEM(list, idx,
-                            py::options::revert(value[idx]));
+                            py::options::revert(subvalue));
                     }
                     return list;
                 }
@@ -204,8 +205,9 @@ namespace py {
                          it != keys.end() && idx < max;
                          ++it) { std::string const& key = *it;
                                  if (key.size() > 0) {
+                                     Json subvalue = (Json)value[key];
                                      PyDict_SetItemString(dict, key.c_str(),
-                                         py::options::revert(value[key]));
+                                         py::options::revert(subvalue));
                                  } ++idx; }
                     return dict;
                 }

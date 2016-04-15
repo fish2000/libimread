@@ -4,6 +4,7 @@
 
 #include "detail.hpp"
 #include "gil.hpp"
+#include "options.hpp"
 #include "pycapsule.hpp"
 #include "structcode.hpp"
 
@@ -155,6 +156,7 @@ namespace py {
         }
         
         using im::ImageFormat;
+        using im::options_map;
         
         stringvec_t& formats_as_vector() {
             static auto DMV = ImageFormat::registry();
@@ -209,7 +211,7 @@ namespace py {
             return out;
         }
         
-        PyObject* format_info_dict(int idx) {
+        PyObject* formats_as_infodict(int idx) {
             stringvec_t formats;
             int max = 0;
             
@@ -225,9 +227,19 @@ namespace py {
                  it != formats.end() && idx < max;
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
-                             PyDict_SetItemString(infodict, format.c_str(), );
+                             options_map opts;
+                             {
+                                 py::gil::release nogil;
+                                 auto format_ptr = ImageFormat::named(format);
+                                 opts = format_ptr->get_options();
+                             }
+                             PyDict_SetItemString(
+                                 infodict,
+                                 format.c_str(),
+                                 py::options::revert(opts));
                          } ++idx; }
             
+            return infodict;
         }
     }
     

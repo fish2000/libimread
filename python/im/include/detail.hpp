@@ -375,7 +375,7 @@ namespace py {
         // using stringvec_t = std::vector<std::string>;
         // stringvec_t& formats_as_vector();                   /// this one is GIL-optional (how european!)
         PyObject* formats_as_pytuple(int idx = 0);          /// whereas here, no GIL no shoes no funcall
-        
+        PyObject* formats_as_infodict(int idx = 0);
     }
     
 }
