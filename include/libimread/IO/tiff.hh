@@ -23,10 +23,17 @@ namespace im {
             using can_read_metadata = std::true_type;
             using can_write = std::true_type;
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("\x4d\x4d\x00", 3), 3,
+            //     "tif",
+            //     "image/tiff");
+            
             DECLARE_OPTIONS(
-                base64::encode("\x4d\x4d\x00", 3), 3,
-                "tif",
-                "image/tiff");
+                _signature = base64::encode("\x4d\x4d\x00", 3),
+                _siglength = 3,
+                _suffix = "tif",
+                _mimetype = "image/tiff"
+            );
             
             static bool match_format(byte_source* src) {
                 return match_magic(src, "\x4d\x4d\x00\x2a", 4) ||
@@ -62,10 +69,17 @@ namespace im {
         public:
             using can_read_multi = std::true_type;
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("\x49\x49\x2a\x00", 4), 4,
+            //     "stk",
+            //     "image/stk");
+            
             DECLARE_OPTIONS(
-                base64::encode("\x49\x49\x2a\x00", 4), 4,
-                "stk",
-                "image/stk");
+                _signature = base64::encode("\x49\x49\x2a\x00", 4),
+                _siglength = 4,
+                _suffix = "stk",
+                _mimetype = "image/stk"
+            );
             
             virtual ImageList read_multi(byte_source* s,
                                          ImageFactory* f,

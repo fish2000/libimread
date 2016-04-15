@@ -30,10 +30,17 @@ namespace im {
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("\x47\x49\x46\x38", 4), 4, /// [0]
+            //     "gif",
+            //     "image/gif");
+            
             DECLARE_OPTIONS(
-                base64::encode("\x47\x49\x46\x38", 4), 4, /// [0]
-                "gif",
-                "image/gif");
+                _signature = base64::encode("\x47\x49\x46\x38", 4),
+                _siglength = 4,
+                _suffix = "gif",
+                _mimetype = "image/gif"
+            );
             
             virtual void write(Image& input,
                                byte_sink* output,

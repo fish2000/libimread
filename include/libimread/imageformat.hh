@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/iod.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/seekable.hh>
 #include <libimread/image.hh>
@@ -25,9 +26,10 @@ namespace im {
     /// use `DECLARE_OPTIONS("value", "another-value", ...);` in format.hh:
     
     #define DECLARE_OPTIONS(...)                                                            \
+        using options_t = decltype(D(__VA_ARGS__));                                         \
         static ImageFormat::unique_t create();                                              \
         static const options_t OPTS() {                                                     \
-            const options_t O(__VA_ARGS__);                                                 \
+            const options_t O = D(__VA_ARGS__);                                             \
             return O;                                                                       \
         }                                                                                   \
         static const options_t options;
@@ -38,7 +40,7 @@ namespace im {
         ImageFormat::unique_t format::create() {                                            \
             return std::make_unique<format>();                                              \
         }                                                                                   \
-        const ImageFormat::options_t format::options = format::OPTS();                      \
+        const format::options_t format::options = format::OPTS();                           \
         namespace {                                                                         \
             ImageFormat::Registrar<format> format##_registrar(format::options.suffix);      \
         };
@@ -61,17 +63,24 @@ namespace im {
             using create_t      = std::add_pointer_t<create_f>;
             using registry_t    = std::unordered_map<std::string, create_t>;
             
-            using options_t     = decltype(D(
-                _signature(_optional, _json_key = _signature)  = std::string(),
-                _siglength(_optional, _json_key = _siglength)  = int(),
-                _suffix(_optional,    _json_key = _suffix)     = std::string(),
-                _mimetype(_optional,  _json_key = _mimetype)   = std::string()
-            ));
+            // using options_t     = decltype(D(
+            //     _signature(_optional, _json_key = _signature)  = std::string(),
+            //     _siglength(_optional, _json_key = _siglength)  = int(),
+            //     _suffix(_optional,    _json_key = _suffix)     = std::string(),
+            //     _mimetype(_optional,  _json_key = _mimetype)   = std::string()
+            // ));
+            
+            // DECLARE_OPTIONS(
+            //     base64::encode("xxxxxxxx", 8), 8,               /// signature
+            //     "imread",                                       /// suffix
+            //     "application/octet-stream"                      /// mimetype
+            // );
             
             DECLARE_OPTIONS(
-                base64::encode("xxxxxxxx", 8), 8,               /// signature
-                "imread",                                       /// suffix
-                "application/octet-stream"                      /// mimetype
+                _signature = base64::encode("xxxxxxxx", 8),
+                _siglength = 8,
+                _suffix = "imread",
+                _mimetype = "application/octet-stream"
             );
             
             /// These static methods, and the ImageFormat::Registrar<Derived> template,

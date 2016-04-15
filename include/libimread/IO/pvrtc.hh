@@ -13,10 +13,17 @@ namespace im {
         public:
             using can_read = std::true_type;
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("4\x00\x00\x00", 4), 4, /// PVRTC "magic" tag is internal
+            //     "pvr",
+            //     "image/x-pvr");
+            
             DECLARE_OPTIONS(
-                base64::encode("4\x00\x00\x00", 4), 4, /// PVRTC "magic" tag is internal
-                "pvr",
-                "image/x-pvr");
+                _signature = base64::encode("4\x00\x00\x00", 4),
+                _siglength = 4,
+                _suffix = "pvr",
+                _mimetype = "image/x-pvr"
+            );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,

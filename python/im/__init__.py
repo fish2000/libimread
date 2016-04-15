@@ -8,9 +8,4 @@ from im import (
     
     HybridImage,
     Buffer,
-    Image,
-    
-    hybridimage_check,
-    image_check,
-    buffer_check,
-    imagebuffer_check)
+    Image)

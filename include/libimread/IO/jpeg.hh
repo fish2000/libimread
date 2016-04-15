@@ -17,10 +17,17 @@ namespace im {
             using can_read = std::true_type;
             using can_write = std::true_type;
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("\xff\xd8\xff", 3), 3,
+            //     "jpg",
+            //     "image/jpeg");
+            
             DECLARE_OPTIONS(
-                base64::encode("\xff\xd8\xff", 3), 3,
-                "jpg",
-                "image/jpeg");
+                _signature = base64::encode("\xff\xd8\xff", 3),
+                _siglength = 3,
+                _suffix = "jpg",
+                _mimetype = "image/jpeg"
+            );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,

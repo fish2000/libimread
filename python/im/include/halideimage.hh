@@ -803,6 +803,14 @@ namespace py {
         using ImageModel = ImageModelBase<HalideNumpyImage, buffer_t>;
         using ImageBufferModel = ImageModel::ImageBufferModel;
         
+        namespace {
+            
+            PyObject* check(PyTypeObject* type, PyObject* evaluee) {
+                return py::boolean(type == Py_TYPE(evaluee));
+            }
+            
+        }
+        
         namespace buffer {
             
             template <typename BufferType = buffer_t,
@@ -1020,6 +1028,11 @@ static PyGetSetDef Buffer_getset[] = {
 
 static PyMethodDef Buffer_methods[] = {
     {
+        "check",
+            (PyCFunction)py::ext::check,
+            METH_O | METH_CLASS,
+            "Check the type of an instance against im.Buffer" },
+    {
         "frompybuffer",
             (PyCFunction)py::ext::buffer::newfrompybuffer<buffer_t>,
             METH_O | METH_STATIC,
@@ -1082,6 +1095,11 @@ static PyGetSetDef ImageBuffer_getset[] = {
 };
 
 static PyMethodDef ImageBuffer_methods[] = {
+    {
+        "check",
+            (PyCFunction)py::ext::check,
+            METH_O | METH_CLASS,
+            "Check the type of an instance against im.Image.Buffer" },
     {
         "tobytes",
             (PyCFunction)py::ext::buffer::tostring<buffer_t, ImageBufferModel>,
@@ -1773,6 +1791,11 @@ static PyGetSetDef Image_getset[] = {
 };
 
 static PyMethodDef Image_methods[] = {
+    {
+        "check",
+            (PyCFunction)py::ext::check,
+            METH_O | METH_CLASS,
+            "Check the type of an instance against im.Image" },
     {
         "frombuffer",
             (PyCFunction)py::ext::image::newfrombuffer<HalideNumpyImage, buffer_t>,

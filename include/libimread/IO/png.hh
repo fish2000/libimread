@@ -25,10 +25,17 @@ namespace im {
             ///         \x0D\x0A\x1A\x0A
             /// ... due to complaints of a 'control character in std::string'
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("\x89\x50\x4E\x47", 4), 4,
+            //     "png",
+            //     "image/png");
+            
             DECLARE_OPTIONS(
-                base64::encode("\x89\x50\x4E\x47", 4), 4,
-                "png",
-                "image/png");
+                _signature = base64::encode("\x89\x50\x4E\x47", 4),
+                _siglength = 4,
+                _suffix = "png",
+                _mimetype = "image/png"
+            );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,

@@ -14,10 +14,17 @@ namespace im {
             using can_read = std::true_type;
             using can_write = std::true_type;
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("P6", 2), 2,
+            //     "ppm",
+            //     "image/x-portable-pixmap");
+            
             DECLARE_OPTIONS(
-                base64::encode("P6", 2), 2,
-                "ppm",
-                "image/x-portable-pixmap");
+                _signature = base64::encode("P6", 2),
+                _siglength = 2,
+                _suffix = "ppm",
+                _mimetype = "image/x-portable-pixmap"
+            );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,

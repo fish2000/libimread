@@ -13,10 +13,17 @@ namespace im {
         public:
             using can_read = std::true_type;
             
+            // DECLARE_OPTIONS(
+            //     base64::encode("RIFF", 4), 4, /// see https://en.wikipedia.org/wiki/WebP
+            //     "webp",
+            //     "image/webp");
+            
             DECLARE_OPTIONS(
-                base64::encode("RIFF", 4), 4, /// see https://en.wikipedia.org/wiki/WebP
-                "webp",
-                "image/webp");
+                _signature = base64::encode("RIFF", 4),
+                _siglength = 4,
+                _suffix = "webp",
+                _mimetype = "image/webp"
+            );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,

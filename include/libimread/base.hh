@@ -9,9 +9,6 @@
 #include <vector>
 #include <string>
 #include <cstring>
-#include <cstdio>
-#include <cstdarg>
-#include <unistd.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
