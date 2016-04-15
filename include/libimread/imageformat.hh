@@ -97,8 +97,9 @@ namespace im {
                 }
             };
             
-            virtual std::string get_suffix() const;
             virtual std::string get_mimetype() const;
+            virtual std::string get_suffix() const;
+            virtual std::string get_suffix(bool with_period) const;
             
             /// SPOILER ALERT:
             /// static-const options_t member 'options' declared by DECLARE_OPTIONS()
@@ -154,6 +155,11 @@ namespace im {
             
             virtual std::string get_suffix() const override {
                 return FormatType::options.suffix;
+            }
+            
+            virtual std::string get_suffix(bool with_period) const override {
+                return with_period ? ("." + ImageFormat::options.suffix) :
+                                            ImageFormat::options.suffix;
             }
             
             virtual std::string get_mimetype() const override {

@@ -23,6 +23,7 @@ namespace py {
     
     PyObject* boolean(bool truth = false);
     PyObject* string(std::string const&);
+    PyObject* string(std::wstring const&);
     PyObject* string(char const*);
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);
@@ -63,6 +64,9 @@ namespace py {
     PyObject* convert(char*, std::size_t);
     PyObject* convert(char const*, std::size_t);
     PyObject* convert(std::string const&, std::size_t);
+    PyObject* convert(std::wstring const&);
+    PyObject* convert(std::wstring const&, std::size_t);
+    PyObject* convert(Py_buffer*);
     
     template <typename Cast,
               typename Original,
@@ -195,7 +199,7 @@ namespace py {
     
     template <typename ...Args>
     PyObject* listify(Args&& ...args) {
-        using Indices = std::make_index_sequence<sizeof...(Args)>;
+        using Indices = std::index_sequence_for<Args...>;
         static_assert(
             sizeof...(Args) > 1,
             "Can't tuplize a zero-length arglist");

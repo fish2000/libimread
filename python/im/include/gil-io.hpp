@@ -51,8 +51,9 @@ namespace py {
             
             with(PyObject* fileobject);
             with(PyFileObject* fileobject);
+            with(char const* filepth);
             with(std::nullptr_t no = nullptr);
-            ~with();
+            virtual ~with();
             
             void init();
             void restore();

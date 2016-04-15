@@ -342,7 +342,7 @@ PyMODINIT_FUNC initim(void) {
         format_tuple);
     
     format_infodict = py::detail::formats_as_infodict();
-    if (format_infodict == NULL)                     { return; }
+    if (format_infodict == NULL)                  { return; }
     PyModule_AddObject(module,
         "format_info",
         format_infodict);

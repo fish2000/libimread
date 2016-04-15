@@ -36,19 +36,23 @@ namespace py {
     
     namespace gil {
         
-        with::with(PyObject* fileobject)
-            :state(nullptr), object(reinterpret_cast<PyFileObject*>(fileobject))
-            ,file(nullptr),  active(PyFile_Check(fileobject))
-            {
-                if (active) { init(); }
-            }
-        
         with::with(PyFileObject* fileobject)
             :state(nullptr), object(fileobject)
             ,file(nullptr),  active(PyFile_Check(fileobject))
             {
                 if (active) { init(); }
             }
+        
+        with::with(PyObject* fileobject)
+            :with(reinterpret_cast<PyFileObject*>(
+                fileobject))
+            {}
+        
+        with::with(char const* filepth)
+            :with(reinterpret_cast<PyFileObject*>(
+                PyFile_FromString(const_cast<char*>(filepth),
+                                  const_cast<char*>("r+"))))
+            {}
         
         with::with(std::nullptr_t no)
             :state(nullptr), object(nullptr)

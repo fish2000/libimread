@@ -174,8 +174,7 @@ namespace py {
         }
         
         PyObject* revert(Json& value) {
-            Type jtype = value.type();
-            switch (jtype) {
+            switch (value.type()) {
                 case Type::JSNULL:
                     return py::None();
                 case Type::BOOLEAN:

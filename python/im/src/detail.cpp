@@ -42,6 +42,9 @@ namespace py {
     PyObject* string(std::string const& s) {
         return PyString_FromStringAndSize(s.c_str(), s.size());
     }
+    PyObject* string(std::wstring const& w) {
+        return PyUnicode_FromWideChar(w.data(), w.size());
+    }
     PyObject* string(char const* s) {
         return PyString_FromString(s);
     }
@@ -114,6 +117,11 @@ namespace py {
     PyObject* convert(std::string const& operand,
                       std::size_t length)           { return PyBytes_FromStringAndSize(operand.c_str(), length); }
     #endif
+    
+    PyObject* convert(std::wstring const& operand)  { return PyUnicode_FromWideChar(operand.data(), operand.size()); }
+    PyObject* convert(std::wstring const& operand,
+                      std::size_t length)           { return PyUnicode_FromWideChar(operand.data(), length); }
+    PyObject* convert(Py_buffer* operand)           { return PyMemoryView_FromBuffer(operand); }
     
     PyObject* tuplize()                             { return PyTuple_New(0); }
     PyObject* listify()                             { return PyList_New(0);  }

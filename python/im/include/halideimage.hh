@@ -784,6 +784,110 @@ namespace py {
                 return true;
             }
             
+            bool savefilelike(PyObject* file, options_map const& opts) {
+                std::unique_ptr<ImageFormat> format;
+                typename py::gil::with::sink_t output;
+                options_map default_opts;
+                bool can_write = false;
+                
+                if (!opts.has("format")) {
+                    PyErr_SetString(PyExc_AttributeError,
+                        "Output format unspecified in options dict");
+                    return false;
+                }
+                
+                try {
+                    py::gil::with iohandle(file);
+                    output = iohandle.sink();
+                    format = im::get_format(
+                        opts.cast<char const*>("format"));
+                    can_write = format->format_can_write();
+                } catch (im::FormatNotFound& exc) {
+                    PyErr_Format(PyExc_ValueError,
+                        "Can't find I/O format: %s",
+                        opts.cast<char const*>("format"));
+                    return false;
+                }
+                
+                if (!can_write) {
+                    std::string mime = format->get_mimetype();
+                    PyErr_Format(PyExc_ValueError,
+                        "Unimplemented write() in I/O format %s",
+                        mime.c_str());
+                    return false;
+                }
+                
+                {
+                    py::gil::release nogil;
+                    default_opts = format->add_options(opts);
+                    format->write(dynamic_cast<Image&>(*image.get()),
+                                                       output.get(), default_opts);
+                }
+                
+                return true;
+            }
+            
+            PyObject* saveblob(options_map const& opts) {
+                std::unique_ptr<ImageFormat> format;
+                typename py::gil::with::sink_t output;
+                options_map default_opts;
+                bool can_write = false,
+                     removed = false;
+                
+                if (!opts.has("format")) {
+                    PyErr_SetString(PyExc_AttributeError,
+                        "Output format unspecified in options dict");
+                    return nullptr;
+                }
+                
+                try {
+                    py::gil::release nogil;
+                    format = im::get_format(
+                        opts.cast<char const*>("format"));
+                    can_write = format->format_can_write();
+                } catch (im::FormatNotFound& exc) {
+                    PyErr_Format(PyExc_ValueError,
+                        "Can't find I/O format: %s",
+                        opts.cast<char const*>("format"));
+                    return nullptr;
+                }
+                
+                if (!can_write) {
+                    std::string mime = format->get_mimetype();
+                    PyErr_Format(PyExc_ValueError,
+                        "Unimplemented write() in I/O format %s",
+                        mime.c_str());
+                    return nullptr;
+                }
+                
+                std::vector<byte> data;
+                
+                {
+                    NamedTemporaryFile tf(format->get_suffix(true));
+                    {
+                        py::gil::with iohandle(tf.filepath.c_str());
+                        output = iohandle.sink();
+                        default_opts = format->add_options(opts);
+                        format->write(dynamic_cast<Image&>(*image.get()),
+                                                           output.get(), default_opts);
+                    }
+                    py::gil::release nogil;
+                    std::unique_ptr<im::FileSource> readback(
+                        new im::FileSource(tf.filepath.c_str()));
+                    data = readback->full_data();
+                    readback->close();
+                    readback.reset(nullptr);
+                    tf.close();
+                    removed = tf.remove();
+                }
+                if (!removed) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Failed to remove temporary file");
+                    return nullptr;
+                }
+                return py::string((char const*)&data[0], data.size());
+            }
+            
             static constexpr Py_ssize_t typeflags() {
                 return Py_TPFLAGS_DEFAULT         |
                        Py_TPFLAGS_BASETYPE        |
@@ -1362,7 +1466,7 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
+            PyObject* write_orig(PyObject* self, PyObject* args, PyObject* kwargs) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* py_as_blob = NULL;
                 PyObject* options = NULL;
@@ -1472,6 +1576,81 @@ namespace py {
                 }
                 /// "else":
                 return py::string(dststr);
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                PyObject* py_as_blob = NULL;
+                PyObject* options = NULL;
+                PyObject* blob = NULL;
+                PyObject* file = NULL;
+                Py_buffer view;
+                options_map opts;
+                char const* keywords[] = { "destination", "file", "as_blob", "options", NULL };
+                std::string dststr;
+                bool as_blob = false;
+                bool did_save = false;
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    args, kwargs, "|s*OO", const_cast<char**>(keywords),
+                    &view,                      /// "destination", buffer with file path
+                    &file,                      /// "file", possible file-like object
+                    &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
+                    &options))                  /// "options", read-options dict
+                {
+                    return NULL;
+                }
+                
+                /// Options! Options! Options!
+                as_blob = py::options::truth(py_as_blob);
+                if (options == NULL) { options = PyDict_New(); }
+                if (PyDict_Update(pyim->writeoptDict, options) == -1) {
+                    /// some exception was raised somewhere
+                    return NULL;
+                }
+                
+                try {
+                    opts = pyim->writeopts();
+                } catch (im::OptionsError& exc) {
+                    PyErr_SetString(PyExc_AttributeError, exc.what());
+                    return NULL;
+                }
+                
+                if (file) {
+                    /// save through PyFile interface
+                    did_save = pyim->savefilelike(file, opts);
+                } else if (as_blob) {
+                    /// save as blob -- write into PyObject string
+                    blob = pyim->saveblob(opts);
+                    did_save = blob != nullptr;
+                } else {
+                    /// save as file -- extract the filename from the buffer
+                    /// into a temporary string for passing
+                    {
+                        py::gil::release nogil;
+                        py::buffer::source dest(view);
+                        dststr = std::string(dest.str());
+                    }
+                    did_save = pyim->save(dststr.c_str(), opts);
+                }
+                
+                if (!did_save) {
+                    /// If this is false, PyErr has already been set
+                    /// ... presumably by problems loading an ImageFormat
+                    /// or opening the file at the specified image path
+                    return NULL;
+                }
+                
+                if (as_blob) {
+                    return blob;
+                } else if (file) {
+                    return file;
+                } else {
+                    return py::string(dststr);
+                }
             }
             
             template <typename ImageType = HalideNumpyImage,

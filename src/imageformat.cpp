@@ -26,8 +26,12 @@ namespace im {
     DECLARE_FORMAT_OPTIONS(ImageFormat);
     
     /// ... containing data used by format-specific functions e.g. these:
-    std::string ImageFormat::get_suffix() const   { return ImageFormat::options.suffix; }
     std::string ImageFormat::get_mimetype() const { return ImageFormat::options.mimetype; }
+    std::string ImageFormat::get_suffix() const   { return ImageFormat::options.suffix; }
+    std::string ImageFormat::get_suffix(bool with_period) const   {
+        return with_period ? ("." + ImageFormat::options.suffix) :
+                                    ImageFormat::options.suffix;
+    }
     
     void ImageFormat::registrate(std::string const& name, ImageFormat::create_t fp) {
         if (name.size() > 0) {
