@@ -14,11 +14,6 @@ namespace im {
             using can_read = std::true_type;
             using can_write = std::true_type;
             
-            // DECLARE_OPTIONS(
-            //     base64::encode("P6", 2), 2,
-            //     "ppm",
-            //     "image/x-portable-pixmap");
-            
             DECLARE_OPTIONS(
                 _signature = base64::encode("P6", 2),
                 _siglength = 2,

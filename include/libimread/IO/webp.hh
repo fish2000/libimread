@@ -13,11 +13,7 @@ namespace im {
         public:
             using can_read = std::true_type;
             
-            // DECLARE_OPTIONS(
-            //     base64::encode("RIFF", 4), 4, /// see https://en.wikipedia.org/wiki/WebP
-            //     "webp",
-            //     "image/webp");
-            
+            /// see https://en.wikipedia.org/wiki/WebP
             DECLARE_OPTIONS(
                 _signature = base64::encode("RIFF", 4),
                 _siglength = 4,

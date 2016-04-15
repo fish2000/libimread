@@ -25,14 +25,9 @@ namespace im {
             ///         \x0D\x0A\x1A\x0A
             /// ... due to complaints of a 'control character in std::string'
             
-            // DECLARE_OPTIONS(
-            //     base64::encode("\x89\x50\x4E\x47", 4), 4,
-            //     "png",
-            //     "image/png");
-            
             DECLARE_OPTIONS(
-                _signature = base64::encode("\x89\x50\x4E\x47", 4),
-                _siglength = 4,
+                _signature = base64::encode("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8),
+                _siglength = 8,
                 _suffix = "png",
                 _mimetype = "image/png"
             );

@@ -13,11 +13,6 @@ namespace im {
         public:
             using can_read = std::true_type;
             
-            // DECLARE_OPTIONS(
-            //     base64::encode("\x42\x4d", 2), 2,
-            //     "bmp",
-            //     "image/x-bmp");
-            
             DECLARE_OPTIONS(
                 _signature = base64::encode("\x42\x4d", 2),
                 _siglength = 2,

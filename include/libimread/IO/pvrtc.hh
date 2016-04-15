@@ -13,11 +13,7 @@ namespace im {
         public:
             using can_read = std::true_type;
             
-            // DECLARE_OPTIONS(
-            //     base64::encode("4\x00\x00\x00", 4), 4, /// PVRTC "magic" tag is internal
-            //     "pvr",
-            //     "image/x-pvr");
-            
+            /// PVRTC "magic" tag is internal
             DECLARE_OPTIONS(
                 _signature = base64::encode("4\x00\x00\x00", 4),
                 _siglength = 4,

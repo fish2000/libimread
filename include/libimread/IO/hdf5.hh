@@ -78,11 +78,6 @@ namespace im {
             
             /// \x0d\x0a\x1a\x0a
             
-            // DECLARE_OPTIONS(
-            //     base64::encode("\x89\x48\x44\x46", 4), 4, /// [0]
-            //     "hdf5",
-            //     "image/hdf5");
-            
             DECLARE_OPTIONS(
                 _signature = base64::encode("\x89\x48\x44\x46", 4),
                 _siglength = 4,
