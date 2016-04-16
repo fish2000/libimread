@@ -45,6 +45,9 @@ namespace py {
     PyObject* string(std::wstring const& w) {
         return PyUnicode_FromWideChar(w.data(), w.size());
     }
+    PyObject* string(bytevec_t const& bv) {
+        return PyString_FromStringAndSize((char const*)&bv[0], bv.size());
+    }
     PyObject* string(char const* s) {
         return PyString_FromString(s);
     }
@@ -57,6 +60,12 @@ namespace py {
     #elif PY_MAJOR_VERSION >= 3
     PyObject* string(std::string const& s) {
         return PyBytes_FromStringAndSize(s.c_str(), s.size());
+    }
+    PyObject* string(std::wstring const& w) {
+        return PyUnicode_FromWideChar(w.data(), w.size());
+    }
+    PyObject* string(bytevec_t const& bv) {
+        return PyBytes_FromStringAndSize((char const*)&bv[0], bv.size());
     }
     PyObject* string(char const* s) {
         return PyBytes_FromString(s);

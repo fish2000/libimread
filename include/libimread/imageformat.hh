@@ -17,6 +17,7 @@
 #include <libimread/image.hh>
 #include <libimread/symbols.hh>
 #include <libimread/options.hh>
+#include <libimread/traits.hh>
 
 namespace im {
     
@@ -30,7 +31,8 @@ namespace im {
             const options_t O = D(__VA_ARGS__);                                             \
             return O;                                                                       \
         }                                                                                   \
-        static const options_t options;
+        static const options_t options;                                                     \
+        static const capacity_t capacity;
     
     /// use `DECLARE_OPTIONS("value", "another-value", ...);` in format.hh:
     
@@ -45,8 +47,12 @@ namespace im {
             return std::make_unique<format>();                                              \
         }                                                                                   \
         const format::options_t format::options = format::OPTS();                           \
+        const format::capacity_t format::capacity = format::CAPACITY();                     \
         options_map format::get_options() const {                                           \
-            return options_map::parse(iod::json_encode(format::options));                   \
+            auto opts = options_map::parse(iod::json_encode(format::options));              \
+            opts.set("capacity",                                                            \
+                        options_map::parse(iod::json_encode(format::capacity)));            \
+            return opts;                                                                    \
         }                                                                                   \
         namespace {                                                                         \
             ImageFormat::Registrar<format> format##Registrar(format::options.suffix);       \
@@ -69,6 +75,23 @@ namespace im {
             using create_f      = unique_t();
             using create_t      = std::add_pointer_t<create_f>;
             using registry_t    = std::unordered_map<std::string, create_t>;
+            
+            using capacity_t    = decltype(D(
+                _can_read = false,
+                _can_read_multi = false,
+                _can_read_metadata = false,
+                _can_write = false,
+                _can_write_multi = false,
+                _can_write_metadata = false
+            ));
+                
+            static const capacity_t CAPACITY() {
+                const capacity_t C(
+                    false, false, false,
+                    false, false, false
+                );
+                return C;
+            }
             
             DECLARE_BASE_OPTIONS(
                 _signature = base64::encode("xxxxxxxx", 8),
@@ -137,8 +160,19 @@ namespace im {
     
     template <typename FormatType>
     class ImageFormatBase : public ImageFormat {
-        
         public:
+            static const capacity_t CAPACITY() {
+                const capacity_t C(
+                    (traits::has_read<FormatType>()         ),
+                    (traits::has_read_multi<FormatType>()   ),
+                    (traits::has_read_metadata<FormatType>()),
+                    (traits::has_write<FormatType>()        ),
+                    (traits::has_write_multi<FormatType>()  ),
+                    (traits::has_write_metadata<FormatType>())
+                );
+                return C;
+            }
+            
             static bool match_format(byte_source* src) {
                 return match_magic(src,
                     base64::decode(FormatType::options.signature).get(),
@@ -158,8 +192,8 @@ namespace im {
             }
             
             virtual std::string get_suffix(bool with_period) const override {
-                return with_period ? ("." + ImageFormat::options.suffix) :
-                                            ImageFormat::options.suffix;
+                return with_period ? ("." + FormatType::options.suffix) :
+                                            FormatType::options.suffix;
             }
             
             virtual std::string get_mimetype() const override {

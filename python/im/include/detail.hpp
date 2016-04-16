@@ -5,6 +5,7 @@
 #include <tuple>
 #include <memory>
 #include <string>
+#include <vector>
 #include <utility>
 #include <type_traits>
 #include <initializer_list>
@@ -17,6 +18,9 @@ typedef _PyArray_Descr PyArray_Descr;
 
 namespace py {
     
+    using im::byte;
+    using bytevec_t = std::vector<byte>;
+    
     PyObject* None();
     PyObject* True();
     PyObject* False();
@@ -24,6 +28,7 @@ namespace py {
     PyObject* boolean(bool truth = false);
     PyObject* string(std::string const&);
     PyObject* string(std::wstring const&);
+    PyObject* string(bytevec_t const&);
     PyObject* string(char const*);
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);

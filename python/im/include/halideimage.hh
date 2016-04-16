@@ -829,7 +829,8 @@ namespace py {
             
             PyObject* saveblob(options_map const& opts) {
                 std::unique_ptr<ImageFormat> format;
-                typename py::gil::with::sink_t output;
+                std::unique_ptr<im::FileSink> output;
+                std::unique_ptr<im::FileSource> readback;
                 options_map default_opts;
                 bool can_write = false,
                      removed = false;
@@ -863,17 +864,28 @@ namespace py {
                 std::vector<byte> data;
                 
                 {
-                    NamedTemporaryFile tf(format->get_suffix(true));
-                    {
-                        py::gil::with iohandle(tf.filepath.c_str());
-                        output = iohandle.sink();
-                        default_opts = format->add_options(opts);
-                        format->write(dynamic_cast<Image&>(*image.get()),
-                                                           output.get(), default_opts);
-                    }
                     py::gil::release nogil;
-                    std::unique_ptr<im::FileSource> readback(
-                        new im::FileSource(tf.filepath.c_str()));
+                    NamedTemporaryFile tf(format->get_suffix(true),
+                                          FILESYSTEM_TEMP_FILENAME,
+                                          false);
+                    
+                    std::string pth = tf.filepath.make_absolute().str();
+                    output = std::unique_ptr<im::FileSink>(
+                        new im::FileSink(pth.c_str()));
+                    default_opts = format->add_options(opts);
+                    format->write(dynamic_cast<Image&>(*image.get()),
+                                                       output.get(), default_opts);
+                    output->flush();
+                    
+                    if (!path::exists(pth)) {
+                        PyErr_SetString(PyExc_ValueError,
+                            "Temporary file is AWOL");
+                        return nullptr;
+                    }
+                    
+                    readback = std::unique_ptr<im::FileSource>(
+                        new im::FileSource(pth.c_str()));
+                    
                     data = readback->full_data();
                     readback->close();
                     readback.reset(nullptr);
@@ -885,7 +897,7 @@ namespace py {
                         "Failed to remove temporary file");
                     return nullptr;
                 }
-                return py::string((char const*)&data[0], data.size());
+                return py::string(data);
             }
             
             static constexpr Py_ssize_t typeflags() {
@@ -1466,19 +1478,23 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject* write_orig(PyObject* self, PyObject* args, PyObject* kwargs) {
+            PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
+                using iosource_t = typename py::gil::with::source_t;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* py_as_blob = NULL;
                 PyObject* options = NULL;
+                PyObject* file = NULL;
                 Py_buffer view;
-                char const* keywords[] = { "destination", "as_blob", "options", NULL };
+                char const* keywords[] = { "destination", "file", "as_blob", "options", NULL };
                 std::string dststr;
                 bool as_blob = false;
+                bool use_file = false;
                 bool did_save = false;
                 
                 if (!PyArg_ParseTupleAndKeywords(
-                    args, kwargs, "|s*OO", const_cast<char**>(keywords),
+                    args, kwargs, "|s*OOO", const_cast<char**>(keywords),
                     &view,                      /// "destination", buffer with file path
+                    &file,
                     &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
                     &options))                  /// "options", read-options dict
                 {
@@ -1487,6 +1503,7 @@ namespace py {
                 
                 /// tests are necessary, the next lines choke on NULL:
                 as_blob = py::options::truth(py_as_blob);
+                if (file) { use_file = PyFile_Check(file); }
                 if (options == NULL) { options = PyDict_New(); }
                 
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
@@ -1497,20 +1514,20 @@ namespace py {
                 try {
                     options_map opts = pyim->writeopts();
                     
-                    if (as_blob) {
-                        /// save as blob -- pass the buffer along
+                    if (as_blob || use_file) {
                         if (!opts.has("format")) {
                             PyErr_SetString(PyExc_AttributeError,
                                 "Output format unspecified in options dict");
                             return NULL;
                         }
-                        {
-                            py::gil::release nogil;
-                            NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
-                                                  FILESYSTEM_TEMP_FILENAME,                /// prefix (filename template)
-                                                  false);                                  /// cleanup on scope exit
-                            dststr = std::string(tf.filepath.make_absolute().str());
-                        }
+                    }
+                    
+                    if (as_blob) {
+                        py::gil::release nogil;
+                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
+                                              FILESYSTEM_TEMP_FILENAME,                /// prefix (filename template)
+                                              false);                                  /// cleanup on scope exit
+                        dststr = std::string(tf.filepath.make_absolute().str());
                     } else {
                         /// save as file -- extract the filename from the buffer
                         /// into a temporary string for passing
@@ -1518,7 +1535,13 @@ namespace py {
                         py::buffer::source dest(view);
                         dststr = std::string(dest.str());
                     }
-                    did_save = pyim->save(dststr.c_str(), opts);
+                    
+                    if (use_file) {
+                        did_save = pyim->savefilelike(file, opts);
+                    } else {
+                        did_save = pyim->save(dststr.c_str(), opts);
+                    }
+                    
                 } catch (im::OptionsError& exc) {
                     PyErr_SetString(PyExc_AttributeError, exc.what());
                     return NULL;
@@ -1536,7 +1559,7 @@ namespace py {
                     return NULL;
                 }
                 
-                if (!dststr.size()) {
+                if (!dststr.size() && !use_file) {
                     if (as_blob) {
                         PyErr_SetString(PyExc_ValueError,
                             "Blob output unexpectedly returned zero-length bytestring");
@@ -1552,36 +1575,46 @@ namespace py {
                     std::vector<byte> data;
                     PyObject* out = NULL;
                     bool removed = false;
-                    {
-                        py::gil::release nogil;
-                        std::unique_ptr<im::FileSource> readback(
-                            new im::FileSource(dststr.c_str()));
+                    if (use_file) {
+                        py::gil::with iohandle(file);
+                        iosource_t readback = iohandle.source();
                         data = readback->full_data();
-                        readback->close();
-                        readback.reset(nullptr);
-                        removed = path::remove(dststr);
+                    } else {
+                        {
+                            py::gil::release nogil;
+                            std::unique_ptr<im::FileSource> readback(
+                                new im::FileSource(dststr.c_str()));
+                            data = readback->full_data();
+                            readback->close();
+                            readback.reset(nullptr);
+                            removed = path::remove(dststr);
+                        }
+                        if (!removed) {
+                            PyErr_Format(PyExc_ValueError,
+                                "Failed to remove temporary file %s",
+                                dststr.c_str());
+                            return NULL;
+                        }
                     }
-                    if (!removed) {
-                        PyErr_Format(PyExc_ValueError,
-                            "Failed to remove temporary file %s",
-                            dststr.c_str());
-                        return NULL;
-                    }
-                    out = py::string((char const*)&data[0], data.size());
+                    out = py::string(data);
                     if (out == NULL) {
                         PyErr_SetString(PyExc_ValueError,
                             "Failed converting output to Python string");
                     }
                     return out;
                 }
+                
                 /// "else":
+                if (use_file) {
+                    return py::True();
+                }
                 return py::string(dststr);
             }
             
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
+            PyObject* write_nextgen(PyObject* self, PyObject* args, PyObject* kwargs) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* py_as_blob = NULL;
                 PyObject* options = NULL;
@@ -1595,7 +1628,7 @@ namespace py {
                 bool did_save = false;
                 
                 if (!PyArg_ParseTupleAndKeywords(
-                    args, kwargs, "|s*OO", const_cast<char**>(keywords),
+                    args, kwargs, "|s*OOO", const_cast<char**>(keywords),
                     &view,                      /// "destination", buffer with file path
                     &file,                      /// "file", possible file-like object
                     &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness

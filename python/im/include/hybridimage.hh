@@ -547,7 +547,7 @@ namespace py {
                         dststr.c_str());
                     return NULL;
                 }
-                out = py::string((char const*)&data[0], data.size());
+                out = py::string(data);
                 if (out == NULL) {
                     PyErr_SetString(PyExc_ValueError,
                         "Failed converting output to Python string");
