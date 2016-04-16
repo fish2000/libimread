@@ -49,9 +49,8 @@ namespace im {
         const format::options_t format::options = format::OPTS();                           \
         const format::capacity_t format::capacity = format::CAPACITY();                     \
         options_map format::get_options() const {                                           \
-            auto opts = options_map::parse(iod::json_encode(format::options));              \
-            opts.set("capacity",                                                            \
-                        options_map::parse(iod::json_encode(format::capacity)));            \
+            auto opts = options_map::parse(iod::json_encode(iod::cat(format::options,       \
+                                                       D(_capacity = format::capacity))));  \
             return opts;                                                                    \
         }                                                                                   \
         namespace {                                                                         \

@@ -178,13 +178,13 @@ namespace py {
                 case Type::JSNULL:
                     return py::None();
                 case Type::BOOLEAN:
-                    return py::boolean(static_cast<bool>(value));
+                    return py::boolean((int)value);
                 case Type::NUMBER:
                     return py::convert(value.is_integer() ?
-                                       static_cast<long>(value) :
-                                       static_cast<long double>(value));
+                                       std::stoi(value.format()) :
+                                       std::stof(value.format()));
                 case Type::STRING:
-                    return py::string(static_cast<std::string>(value));
+                    return py::string(std::string(value));
                 case Type::ARRAY: {
                     int max = value.size();
                     PyObject* list = PyList_New(max);
