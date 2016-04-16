@@ -76,12 +76,12 @@ namespace im {
             using registry_t    = std::unordered_map<std::string, create_t>;
             
             using capacity_t    = decltype(D(
-                _can_read = false,
-                _can_read_multi = false,
-                _can_read_metadata = false,
-                _can_write = false,
-                _can_write_multi = false,
-                _can_write_metadata = false
+                _can_read(_optional,            _json_key = _can_read)           = bool(),
+                _can_read_multi(_optional,      _json_key = _can_read_multi)     = bool(),
+                _can_read_metadata(_optional,   _json_key = _can_read_metadata)  = bool(),
+                _can_write(_optional,           _json_key = _can_write)          = bool(),
+                _can_write_multi(_optional,     _json_key = _can_write_multi)    = bool(),
+                _can_write_metadata(_optional,  _json_key = _can_write_metadata) = bool()
             ));
                 
             static const capacity_t CAPACITY() {

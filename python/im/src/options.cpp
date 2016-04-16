@@ -180,9 +180,10 @@ namespace py {
                 case Type::BOOLEAN:
                     return py::boolean((int)value);
                 case Type::NUMBER:
-                    return py::convert(value.is_integer() ?
-                                       std::stoi(value.format()) :
-                                       std::stof(value.format()));
+                    // return py::convert(value.is_integer() ?
+                    //                    std::stoi(value.format()) :
+                    //                    std::stof(value.format()));
+                    return py::convert((int)value);
                 case Type::STRING:
                     return py::string(std::string(value));
                 case Type::ARRAY: {
