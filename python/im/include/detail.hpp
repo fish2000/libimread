@@ -103,7 +103,9 @@ namespace py {
         PyObject* dict = PyDict_New();
         for (auto const& item : mapping) {
             std::string key(item.first);
-            PyDict_SetItemString(dict, key.c_str(), py::convert(item.second));
+            PyObject* pytem = py::convert(item.second);
+            PyDict_SetItemString(dict, key.c_str(), pytem);
+            Py_DECREF(pytem);
         }
         return dict;
     }
@@ -377,6 +379,10 @@ namespace py {
             }
             return py::tuplize();
         }
+        
+        /// Version of PyDict_SetItemString that STEALS REFERENCES:
+        int setitemstring(PyObject* dict, char const* key, PyObject* value);
+        int setitemstring(PyObject* dict, std::string const& key, PyObject* value);
         
         /// A misnomer -- actually returns a dtype-compatible tuple full
         /// of label/format subtuples germane to the description

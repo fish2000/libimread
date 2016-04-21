@@ -145,6 +145,18 @@ namespace py {
         
         using structcode::stringvec_t;
         
+        int setitemstring(PyObject* dict, char const* key, PyObject* value) {
+            int out = PyDict_SetItemString(dict, key, value);
+            Py_DECREF(value);
+            return out;
+        }
+        
+        int setitemstring(PyObject* dict, std::string const& key, PyObject* value) {
+            int out = PyDict_SetItemString(dict, key.c_str(), value);
+            Py_DECREF(value);
+            return out;
+        }
+        
         PyObject* structcode_to_dtype(char const* code) {
             using structcode::structcode_t;
             using structcode::parse_result_t;
@@ -251,16 +263,14 @@ namespace py {
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
                              PyObject* options;
+                             options_map opts;
                              {
                                  py::gil::release nogil;
                                  auto format_ptr = ImageFormat::named(format);
-                                 options_map opts(format_ptr->get_options());
+                                 opts = format_ptr->get_options();
                              }
                              options = py::options::revert(opts);
-                             PyDict_SetItemString(
-                                 infodict,
-                                 format.c_str(),
-                                 options);
+                             py::detail::setitemstring(infodict, format, options);
                          } ++idx; }
             
             return infodict;

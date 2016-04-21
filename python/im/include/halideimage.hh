@@ -389,14 +389,14 @@ namespace py {
                     
                     PyObject* map = PyDict_New();
                     imageref_t imageref = *strong.get();
-                    PyDict_SetItemString(map, "version",    py::convert(3));
-                    PyDict_SetItemString(map, "shape",      py::detail::image_shape(imageref));
-                    PyDict_SetItemString(map, "strides",    py::detail::image_strides(imageref));
-                    PyDict_SetItemString(map, "descr",      py::detail::structcode_to_dtype(structcode));
-                    PyDict_SetItemString(map, "mask",       py::None());
-                    PyDict_SetItemString(map, "offset",     py::None());
-                    PyDict_SetItemString(map, "data",       py::tuple(PyLong_FromLong(literal_pointer), py::True()));
-                    PyDict_SetItemString(map, "typestr",    py::string(dsig));
+                    py::detail::setitemstring(map, "version",    py::convert(3));
+                    py::detail::setitemstring(map, "shape",      py::detail::image_shape(imageref));
+                    py::detail::setitemstring(map, "strides",    py::detail::image_strides(imageref));
+                    py::detail::setitemstring(map, "descr",      py::detail::structcode_to_dtype(structcode));
+                    py::detail::setitemstring(map, "mask",       py::None());
+                    py::detail::setitemstring(map, "offset",     py::None());
+                    py::detail::setitemstring(map, "data",       py::tuple(PyLong_FromLong(literal_pointer), py::True()));
+                    py::detail::setitemstring(map, "typestr",    py::string(dsig));
                     return map;
                 }
                 
@@ -878,6 +878,7 @@ namespace py {
                     output->flush();
                     
                     if (!path::exists(pth)) {
+                        py::gil::ensure yesgil;
                         PyErr_SetString(PyExc_ValueError,
                             "Temporary file is AWOL");
                         return nullptr;
@@ -892,11 +893,13 @@ namespace py {
                     tf.close();
                     removed = tf.remove();
                 }
+                
                 if (!removed) {
                     PyErr_SetString(PyExc_ValueError,
                         "Failed to remove temporary file");
                     return nullptr;
                 }
+                
                 return py::string(data);
             }
             

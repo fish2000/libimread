@@ -204,7 +204,7 @@ namespace py {
                          ++it) { std::string const& key{*it};
                                  if (key.size() > 0) {
                                      Json subvalue(value[key]);
-                                     PyDict_SetItemString(dict, key.c_str(),
+                                     py::detail::setitemstring(dict, key,
                                          py::options::revert(subvalue));
                                  } ++idx; }
                     return dict;

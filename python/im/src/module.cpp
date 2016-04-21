@@ -345,7 +345,7 @@ PyMODINIT_FUNC initim(void) {
     if (format_infodict == NULL)                  { return; }
     PyModule_AddObject(module,
         "format_info",
-        format_infodict);
+        PyDictProxy_New(format_infodict));
     
     /// Store the byte order of the system in im._byteorder and im._byteordermark
     /// ... note that the byte-order-determining function (in hybrid.cpp) uses
