@@ -48,6 +48,9 @@ namespace py {
     PyObject* string(bytevec_t const& bv) {
         return PyString_FromStringAndSize((char const*)&bv[0], bv.size());
     }
+    PyObject* string(charvec_t const& cv) {
+        return PyString_FromStringAndSize((char const*)&cv[0], cv.size());
+    }
     PyObject* string(char const* s) {
         return PyString_FromString(s);
     }
@@ -66,6 +69,9 @@ namespace py {
     }
     PyObject* string(bytevec_t const& bv) {
         return PyBytes_FromStringAndSize((char const*)&bv[0], bv.size());
+    }
+    PyObject* string(charvec_t const& cv) {
+        return PyBytes_FromStringAndSize((char const*)&cv[0], cv.size());
     }
     PyObject* string(char const* s) {
         return PyBytes_FromString(s);
@@ -244,16 +250,17 @@ namespace py {
                  it != formats.end() && idx < max;
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
-                             options_map opts;
+                             PyObject* options;
                              {
                                  py::gil::release nogil;
                                  auto format_ptr = ImageFormat::named(format);
-                                 opts = format_ptr->get_options();
+                                 options_map opts(format_ptr->get_options());
                              }
+                             options = py::options::revert(opts);
                              PyDict_SetItemString(
                                  infodict,
                                  format.c_str(),
-                                 py::options::revert(opts));
+                                 options);
                          } ++idx; }
             
             return infodict;

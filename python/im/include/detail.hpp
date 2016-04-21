@@ -20,6 +20,7 @@ namespace py {
     
     using im::byte;
     using bytevec_t = std::vector<byte>;
+    using charvec_t = std::vector<char>;
     
     PyObject* None();
     PyObject* True();
@@ -29,6 +30,7 @@ namespace py {
     PyObject* string(std::string const&);
     PyObject* string(std::wstring const&);
     PyObject* string(bytevec_t const&);
+    PyObject* string(charvec_t const&);
     PyObject* string(char const*);
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);
@@ -216,6 +218,9 @@ namespace py {
     
     namespace impl {
         
+        template <typename Tuple>
+        std::size_t tuple_size_v = std::tuple_size<Tuple>::value;
+        
         template <typename F, typename Tuple, std::size_t ...I> inline
         auto apply_impl(F&& f, Tuple&& t, std::index_sequence<I...>) {
             return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
@@ -223,7 +228,7 @@ namespace py {
         
         template <typename F, typename Tuple> inline
         auto apply(F&& f, Tuple&& t) {
-            using Indices = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>;
+            using Indices = std::make_index_sequence<tuple_size_v<std::decay_t<Tuple>>>;
             return apply_impl(std::forward<F>(f), std::forward<Tuple>(t), Indices());
         }
         
@@ -232,23 +237,25 @@ namespace py {
     template <typename ...Args> inline
     PyObject* convert(std::tuple<Args...> argtuple) {
         using Tuple = std::tuple<Args...>;
-        static_assert(
-            std::tuple_size<Tuple>::value > 0,
-            "Can't convert a zero-length std::tuple to a PyTuple");
-        
-        return py::impl::apply(py::tuplize<Args...>,
-                               std::forward<Tuple>(argtuple));
+        using Indices = std::index_sequence_for<Args...>;
+        if (py::impl::tuple_size_v<Tuple> == 0) {
+            return py::tuplize();
+        }
+        return py::impl::apply_impl(py::tuplize<Args...>,
+                                    std::forward<Tuple>(argtuple),
+                                    Indices());
     }
     
     template <typename ...Args> inline
     PyObject* convert(std::tuple<Args&&...> argtuple) {
         using Tuple = std::tuple<Args&&...>;
-        static_assert(
-            std::tuple_size<Tuple>::value > 0,
-            "Can't convert a zero-length std::tuple to a PyTuple");
-        
-        return py::impl::apply(py::tuplize<Args...>,
-                               std::forward<Tuple>(argtuple));
+        using Indices = std::index_sequence_for<Args...>;
+        if (py::impl::tuple_size_v<Tuple> == 0) {
+            return py::tuplize();
+        }
+        return py::impl::apply_impl(py::tuplize<Args...>,
+                                    std::forward<Tuple>(argtuple),
+                                    Indices());
     }
     
     namespace detail {

@@ -501,6 +501,9 @@ class Json {
         Json::Property operator[](std::string const&);
         Json::Property operator[](const char* k) { return (*this)[std::string(k)]; }
         Json::Property operator[](int);
+        Json::Property operator[](std::string const&) const;
+        Json::Property operator[](const char* k) const { return (*this)[std::string(k)]; }
+        Json::Property operator[](int) const;
         
         /// stringification
         std::string stringify() const { return format(); }

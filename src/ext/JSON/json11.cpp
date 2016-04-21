@@ -169,7 +169,7 @@ bool Json::Number::operator==(Node const& that) const {
 }
 
 bool Json::Number::is_integer() const {
-    return prec == -1;
+    return std::fabs(value - std::floor(value)) <= LDBL_EPSILON;
 }
 
 bool Json::is_integer() const {
@@ -424,6 +424,14 @@ Json::Property Json::operator[](int idx) {
 }
 
 Json::Property Json::operator[](std::string const& key) {
+    return Property(mkobject(), key);
+}
+
+Json::Property Json::operator[](int idx) const {
+    return Property(mkarray(), idx);
+}
+
+Json::Property Json::operator[](std::string const& key) const {
     return Property(mkobject(), key);
 }
 

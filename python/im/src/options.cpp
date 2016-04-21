@@ -173,24 +173,22 @@ namespace py {
             return out;
         }
         
-        PyObject* revert(Json& value) {
+        PyObject* revert(Json const& value) {
             switch (value.type()) {
                 case Type::JSNULL:
                     return py::None();
                 case Type::BOOLEAN:
-                    return py::boolean((int)value);
+                    return py::boolean((bool)value);
                 case Type::NUMBER:
-                    // return py::convert(value.is_integer() ?
-                    //                    std::stoi(value.format()) :
-                    //                    std::stof(value.format()));
-                    return py::convert((int)value);
+                    return value.is_integer() ? py::convert((long)value) :
+                                                py::convert((long double)value);
                 case Type::STRING:
-                    return py::string(std::string(value));
+                    return py::string((std::string)value);
                 case Type::ARRAY: {
                     int max = value.size();
                     PyObject* list = PyList_New(max);
                     for (int idx = 0; idx < max; ++idx) {
-                        Json subvalue = (Json)value[idx];
+                        Json subvalue(value[idx]);
                         PyList_SET_ITEM(list, idx,
                             py::options::revert(subvalue));
                     }
@@ -203,9 +201,9 @@ namespace py {
                         max = keys.size();
                     for (auto it = keys.begin();
                          it != keys.end() && idx < max;
-                         ++it) { std::string const& key = *it;
+                         ++it) { std::string const& key{*it};
                                  if (key.size() > 0) {
-                                     Json subvalue = (Json)value[key];
+                                     Json subvalue(value[key]);
                                      PyDict_SetItemString(dict, key.c_str(),
                                          py::options::revert(subvalue));
                                  } ++idx; }

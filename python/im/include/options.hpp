@@ -22,7 +22,7 @@ namespace py {
         options_list parse_set(PyObject* set);
         options_map parse(PyObject* dict);
         
-        PyObject* revert(Json& value);
+        PyObject* revert(Json const& value);
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject *kwargs,
                        options_map& opts);
