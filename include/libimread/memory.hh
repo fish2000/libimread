@@ -4,10 +4,7 @@
 #ifndef LIBIMREAD_MEMORY_HH_
 #define LIBIMREAD_MEMORY_HH_
 
-#include <cstdio>
 #include <vector>
-#include <memory>
-
 #include <libimread/libimread.hpp>
 #include <libimread/ext/memory/fmemopen.hh>
 #include <libimread/seekable.hh>
@@ -16,61 +13,42 @@ namespace im {
     
     class memory_source : public byte_source {
         public:
-            memory_source(const byte* c, const int l)
-                :data(c), len(l), pos(0)
-                { }
-            
-            virtual ~memory_source() { }
-            
-            virtual std::size_t read(byte* buffer, std::size_t n) {
-                if (pos + n > len) { n = len-pos; }
-                /// FYI, std::memmove() actually copies bytes, rather
-                /// than 'moving' them (whatever that might mean)
-                std::memmove(buffer, data + pos, n);
-                pos += n;
-                return n;
-            }
-            
-            virtual bool can_seek() const noexcept { return true; }
-            virtual std::size_t seek_absolute(std::size_t p) { return pos = p; }
-            virtual std::size_t seek_relative(int delta) { return pos += delta; }
-            virtual std::size_t seek_end(int delta) { return pos = (len-delta-1); }
+            memory_source(const byte* c, const int len);
+            virtual ~memory_source();
+            virtual std::size_t read(byte* buffer, std::size_t n);
+            virtual bool can_seek() const noexcept;
+            virtual std::size_t seek_absolute(std::size_t p);
+            virtual std::size_t seek_relative(int delta);
+            virtual std::size_t seek_end(int delta);
         
         private:
             const byte* data;
-            const std::size_t len;
+            const std::size_t length;
             std::size_t pos;
     };
     
     class memory_sink : public byte_sink {
         public:
-            memory_sink(byte* c, std::size_t l)
-                :data(c), membuf(memory::sink(data, l)), len(l)
-                {}
+            memory_sink(byte* c, std::size_t len);
+            memory_sink(std::size_t len);
+            virtual ~memory_sink();
             
-            virtual ~memory_sink() {}
+            virtual bool can_seek() const noexcept;
+            virtual std::size_t seek_absolute(std::size_t pos);
+            virtual std::size_t seek_relative(int delta);
+            virtual std::size_t seek_end(int delta);
             
-            virtual bool can_seek() const noexcept { return true; }
-            virtual std::size_t seek_absolute(std::size_t pos) { return std::fseek(membuf.get(), pos, SEEK_SET); }
-            virtual std::size_t seek_relative(int delta) { return std::fseek(membuf.get(), delta, SEEK_CUR); }
-            virtual std::size_t seek_end(int delta) { return std::fseek(membuf.get(), delta, SEEK_END); }
+            virtual std::size_t write(const void* buffer, std::size_t n);
+            virtual std::size_t write(std::vector<byte> const& bv);
+            virtual void flush();
             
-            virtual std::size_t write(const void* buffer, std::size_t n) {
-                return std::fwrite(buffer, sizeof(byte), n, membuf.get());
-            }
-            
-            virtual void flush() { std::fflush(membuf.get()); }
-            
-            virtual std::vector<byte> contents() {
-                std::vector<byte> out(len);
-                std::memcpy(&out[0], data, out.size());
-                return out;
-            }
+            virtual std::vector<byte> contents();
             
         private:
             byte* data;
             memory::buffer membuf;
-            const std::size_t len;
+            const std::size_t length;
+            const bool allocated;
     };
 
 }

@@ -39,9 +39,11 @@ namespace im {
         }
         return out;
     }
+    
     std::size_t handle_source_sink::write(std::vector<byte> const& bv) {
-        return this->write(static_cast<const void*>(&bv[0]),
-                           bv.size());
+        return this->write(
+            static_cast<const void*>(&bv[0]),
+            bv.size());
     }
     
     detail::stat_t handle_source_sink::stat() const {
@@ -59,19 +61,20 @@ namespace im {
     std::vector<byte> handle_source_sink::full_data() {
         /// grab stat struct and store initial seek position
         detail::stat_t info = this->stat();
+        std::size_t fsize = info.st_size * sizeof(byte);
         std::size_t orig = std::fseek(handle, 0, SEEK_CUR);
         
         /// allocate output vector per size of file
-        std::vector<byte> result(info.st_size * sizeof(byte));
+        std::vector<byte> result(fsize);
         
         /// start as you mean to go on
         std::fseek(handle, 0, SEEK_SET);
         
         /// read directly from filehandle:
-        if (std::fread(&result[0], sizeof(byte), result.size(), handle) == -1) {
+        if (std::fread(&result[0], sizeof(byte), fsize, handle) == -1) {
             imread_raise(CannotReadError,
-                "handle_source_sink::full_data(): std::fread() returned -1",
-                std::strerror(errno));
+                "handle_source_sink::full_data():",
+                "std::fread() returned -1", std::strerror(errno));
         }
         
         /// reseek to the streams' original position

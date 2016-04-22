@@ -51,9 +51,11 @@ namespace im {
         }
         return static_cast<std::size_t>(out);
     }
+    
     std::size_t fd_source_sink::write(std::vector<byte> const& bv) {
-        return this->write(static_cast<const void*>(&bv[0]),
-                           bv.size());
+        return this->write(
+            static_cast<const void*>(&bv[0]),
+            bv.size());
     }
     
     detail::stat_t fd_source_sink::stat() const {
@@ -71,19 +73,20 @@ namespace im {
     std::vector<byte> fd_source_sink::full_data() {
         /// grab stat struct and store initial seek position
         detail::stat_t info = this->stat();
+        std::size_t fsize = info.st_size * sizeof(byte);
         std::size_t orig = ::lseek(descriptor, 0, SEEK_CUR);
         
         /// allocate output vector per size of file
-        std::vector<byte> result(info.st_size * sizeof(byte));
+        std::vector<byte> result(fsize);
         
         /// start as you mean to go on
         ::lseek(descriptor, 0, SEEK_SET);
         
         /// unbuffered read directly from descriptor:
-        if (::read(descriptor, &result[0], result.size()) == -1) {
+        if (::read(descriptor, &result[0], fsize) == -1) {
             imread_raise(CannotReadError,
-                "fd_source_sink::full_data(): read() returned -1",
-                std::strerror(errno));
+                "fd_source_sink::full_data():",
+                "read() returned -1", std::strerror(errno));
         }
         
         /// reset descriptor position before returning

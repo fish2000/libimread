@@ -130,7 +130,7 @@ namespace im {
         if (bitsppixel <= 8) {
             const uint32_t table_size = (n_colours == 0 ? pow2(bitsppixel) : n_colours);
             color_table.resize(table_size * 4);
-            src->read_check(&color_table[0], table_size * 4);
+            int what = src->read(&color_table[0], table_size * 4);
         }
         
         src->seek_absolute(offset);
@@ -141,7 +141,7 @@ namespace im {
         
         for (unsigned int r = 0; r != height; ++r) {
             byte* rowp = output->rowp_as<byte>(height - r - 1);
-            src->read_check(rowp, bytes_per_row);
+            int what = src->read(rowp, bytes_per_row);
             
             if (bitsppixel == 24) {
                 flippixels(rowp, width);
