@@ -15,9 +15,10 @@ namespace im {
             
             /// PVRTC "magic" tag is internal
             DECLARE_OPTIONS(
-                _signature = base64::encode("4\x00\x00\x00", 4),
-                _siglength = 4,
-                _suffix = "pvr",
+                _signatures = {
+                    SIGNATURE("4\x00\x00\x00", 4)
+                },
+                _suffixes = { "pvr", "pvrtc" },
                 _mimetype = "image/x-pvr"
             );
             

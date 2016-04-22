@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <iod/json.hh>
+#include <libimread/ext/base64.hh>
 #include <libimread/IO/png.hh>
 #include <libimread/pixels.hh>
 
@@ -362,7 +363,8 @@ namespace im {
     void PNGFormat::write_ios(Image& input, byte_sink* output, const options_map& opts) {
         /// immediately write the header, 
         /// before initializing the holder
-        output->write(options.signature.c_str(), 8);
+        output->write(base64::decode(options.signatures[0].bytes).get(),
+                                     options.signatures[0].length);
         
         png_holder p(png_holder::write_mode);
         p.create_info();

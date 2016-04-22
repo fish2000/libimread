@@ -15,9 +15,10 @@ namespace im {
             
             /// see https://en.wikipedia.org/wiki/WebP
             DECLARE_OPTIONS(
-                _signature = base64::encode("RIFF", 4),
-                _siglength = 4,
-                _suffix = "webp",
+                _signatures = {
+                    SIGNATURE("RIFF", 4)
+                },
+                _suffixes = { "webp", "wbp" },
                 _mimetype = "image/webp"
             );
             

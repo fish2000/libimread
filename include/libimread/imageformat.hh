@@ -40,6 +40,10 @@ namespace im {
         DECLARE_BASE_OPTIONS(__VA_ARGS__);                                                  \
         virtual options_map get_options() const override;
     
+    #define SIGNATURE(bytes, length)                                                        \
+        D(_bytes    = base64::encode(bytes, length),                                        \
+          _length   = length)
+    
     /// ... then use `DECLARE_FORMAT_OPTIONS(FormatClassName);` in format.cpp:
     
     #define DECLARE_FORMAT_OPTIONS(format)                                                  \
@@ -54,7 +58,7 @@ namespace im {
             return opts;                                                                    \
         }                                                                                   \
         namespace {                                                                         \
-            ImageFormat::Registrar<format> format##Registrar(format::options.suffix);       \
+            ImageFormat::Registrar<format> format##Registrar(format::options.suffixes[0]);  \
         };
     
     /// ... those macros also set your format up to register its class (see below).
@@ -93,9 +97,8 @@ namespace im {
             }
             
             DECLARE_BASE_OPTIONS(
-                _signature = base64::encode("xxxxxxxx", 8),
-                _siglength = 8,
-                _suffix = "imr",
+                _signatures = { SIGNATURE("xxxxxxxx", 8) },
+                _suffixes = { "imr" },
                 _mimetype = "application/octet-stream"
             );
             
@@ -174,12 +177,12 @@ namespace im {
             
             static bool match_format(byte_source* src) {
                 return match_magic(src,
-                    base64::decode(FormatType::options.signature).get(),
-                    FormatType::options.siglength);
+                    base64::decode(FormatType::options.signatures[0].bytes).get(),
+                                   FormatType::options.signatures[0].length);
             }
             
             static std::string suffix() {
-                return FormatType::options.suffix;
+                return FormatType::options.suffixes[0];
             }
             
             static std::string mimetype() {
@@ -187,12 +190,12 @@ namespace im {
             }
             
             virtual std::string get_suffix() const override {
-                return FormatType::options.suffix;
+                return FormatType::options.suffixes[0];
             }
             
             virtual std::string get_suffix(bool with_period) const override {
-                return with_period ? ("." + FormatType::options.suffix) :
-                                            FormatType::options.suffix;
+                return with_period ? ("." + FormatType::options.suffixes[0]) :
+                                            FormatType::options.suffixes[0];
             }
             
             virtual std::string get_mimetype() const override {

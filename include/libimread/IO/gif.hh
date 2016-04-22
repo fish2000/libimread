@@ -31,9 +31,10 @@ namespace im {
             using can_write_multi = std::true_type;
             
             DECLARE_OPTIONS(
-                _signature = base64::encode("\x47\x49\x46\x38", 4),
-                _siglength = 4,
-                _suffix = "gif",
+                _signatures = {
+                    SIGNATURE("\x47\x49\x46\x38", 4)
+                },
+                _suffixes = { "gif" },
                 _mimetype = "image/gif"
             );
             

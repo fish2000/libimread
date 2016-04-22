@@ -15,9 +15,10 @@ namespace im {
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
-                _signature = base64::encode("P6", 2),
-                _siglength = 2,
-                _suffix = "ppm",
+                _signatures = {
+                    SIGNATURE("P6", 2)
+                },
+                _suffixes = { "ppm" },
                 _mimetype = "image/x-portable-pixmap"
             );
             

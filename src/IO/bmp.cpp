@@ -8,7 +8,7 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(BMPFormat);
     
-    namespace {
+    namespace detail {
         
         void flippixels(byte* row, const int n) {
             for (int i = 0; i != n; row += 3, ++i) {
@@ -73,46 +73,50 @@ namespace im {
         char magic[2];
         
         if (src->read(reinterpret_cast<byte*>(magic), 2) != 2) {
-            imread_raise(CannotReadError, "File is empty");
+            imread_raise(CannotReadError,
+                "File is empty");
         }
         
         if (magic[0] != 'B' || magic[1] != 'M') {
             imread_raise(CannotReadError,
-                "Magic number not matched", "(this might not be a BMP file)");
+                "Magic number not matched",
+                "(this might not be a BMP file)");
         }
         
-        const uint32_t size = read32_le(*src);
+        const uint32_t size = detail::read32_le(*src);
         (void)size;
-        (void)read16_le(*src);
-        (void)read16_le(*src);
+        (void)detail::read16_le(*src);
+        (void)detail::read16_le(*src);
         
-        const uint32_t offset = read32_le(*src);
-        const uint32_t header_size = read32_le(*src);
+        const uint32_t offset = detail::read32_le(*src);
+        const uint32_t header_size = detail::read32_le(*src);
         (void)header_size;
         
-        const uint32_t width = read32_le(*src);
-        const uint32_t height = read32_le(*src);
-        const uint16_t planes = read16_le(*src);
+        const uint32_t width = detail::read32_le(*src);
+        const uint32_t height = detail::read32_le(*src);
+        const uint16_t planes = detail::read16_le(*src);
         
         if (planes != 1) {
-            imread_raise(NotImplementedError, "planes should be 1");
+            imread_raise(NotImplementedError,
+                "planes should be 1");
         }
         
-        const uint16_t bitsppixel = read16_le(*src);
-        const uint32_t compression = read32_le(*src);
+        const uint16_t bitsppixel = detail::read16_le(*src);
+        const uint32_t compression = detail::read32_le(*src);
         
         if (compression != 0) {
-            imread_raise(NotImplementedError, "Only uncompressed bitmaps are supported");
+            imread_raise(NotImplementedError,
+                "Only uncompressed bitmaps are supported");
         }
         
-        const uint32_t imsize = read32_le(*src);
+        const uint32_t imsize = detail::read32_le(*src);
         (void)imsize;
-        const uint32_t hres = read32_le(*src);
+        const uint32_t hres = detail::read32_le(*src);
         (void)hres;
-        const uint32_t vres = read32_le(*src);
+        const uint32_t vres = detail::read32_le(*src);
         (void)vres;
-        const uint32_t n_colours = read32_le(*src);
-        const uint32_t importantcolours = read32_le(*src);
+        const uint32_t n_colours = detail::read32_le(*src);
+        const uint32_t importantcolours = detail::read32_le(*src);
         (void)importantcolours;
         
         if (bitsppixel != 8 && bitsppixel != 16 && bitsppixel != 24) {
@@ -128,7 +132,7 @@ namespace im {
         
         std::vector<byte> color_table;
         if (bitsppixel <= 8) {
-            const uint32_t table_size = (n_colours == 0 ? pow2(bitsppixel) : n_colours);
+            const uint32_t table_size = (n_colours == 0 ? detail::pow2(bitsppixel) : n_colours);
             color_table.resize(table_size * 4);
             int what = src->read(&color_table[0], table_size * 4);
         }
@@ -144,13 +148,14 @@ namespace im {
             int what = src->read(rowp, bytes_per_row);
             
             if (bitsppixel == 24) {
-                flippixels(rowp, width);
+                detail::flippixels(rowp, width);
             } else if (!color_table.empty()) {
-                color_expand(color_table, rowp, width);
+                detail::color_expand(color_table, rowp, width);
             }
             
             if (src->read(buf, padding) != unsigned(padding) && r != (height - 1)) {
-                imread_raise(CannotReadError, "File ended prematurely while reading");
+                imread_raise(CannotReadError,
+                    "File ended prematurely while reading");
             }
         }
         

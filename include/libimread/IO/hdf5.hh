@@ -79,9 +79,10 @@ namespace im {
             /// \x0d\x0a\x1a\x0a
             
             DECLARE_OPTIONS(
-                _signature = base64::encode("\x89\x48\x44\x46", 4),
-                _siglength = 4,
-                _suffix = "hdf5",
+                _signatures = {
+                    SIGNATURE("\x89\x48\x44\x46", 4)
+                },
+                _suffixes = { "hdf5", "h5", "hdf" },
                 _mimetype = "image/hdf5"
             );
             

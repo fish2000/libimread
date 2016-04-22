@@ -14,9 +14,10 @@ namespace im {
             using can_read = std::true_type;
             
             DECLARE_OPTIONS(
-                _signature = base64::encode("\x42\x4d", 2),
-                _siglength = 2,
-                _suffix = "bmp",
+                _signatures = {
+                    SIGNATURE("\x42\x4d", 2)
+                },
+                _suffixes = { "bmp" },
                 _mimetype = "image/x-bmp"
             );
             

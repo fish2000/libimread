@@ -24,9 +24,13 @@ namespace im {
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
-                _signature = base64::encode("\x4d\x4d\x00", 3),
-                _siglength = 3,
-                _suffix = "tif",
+                _signatures = {
+                    SIGNATURE("\x4d\x4d\x00", 3),
+                    SIGNATURE("\x4d\x4d\x00\x2a", 4),
+                    SIGNATURE("\x4d\x4d\x00\x2b", 4),
+                    SIGNATURE("\x49\x49\x2a\x00", 4)
+                },
+                _suffixes = { "tif", "tiff" },
                 _mimetype = "image/tiff",
                 _metadata = "<TIFF METADATA STRING>",
                 _writeopts = D(
@@ -76,9 +80,11 @@ namespace im {
             using can_read_multi = std::true_type;
             
             DECLARE_OPTIONS(
-                _signature = base64::encode("\x49\x49\x2a\x00", 4),
-                _siglength = 4,
-                _suffix = "stk",
+                _signatures = {
+                    D(_bytes    = base64::encode("\x49\x49\x2a\x00", 4),
+                      _length   = 4)
+                },
+                _suffixes = { "stk" },
                 _mimetype = "image/stk"
             );
             

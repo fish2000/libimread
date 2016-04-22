@@ -18,9 +18,10 @@ namespace im {
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
-                _signature = base64::encode("\xff\xd8\xff", 3),
-                _siglength = 3,
-                _suffix = "jpg",
+                _signatures = {
+                    SIGNATURE("\xff\xd8\xff", 3)
+                },
+                _suffixes = { "jpg", "jpeg", "jpe" },
                 _mimetype = "image/jpeg",
                 _writeopts = D(
                     _quality = 0.75
