@@ -25,5 +25,17 @@ namespace py {
             return py::boolean(ImageBufferModel_Check(evaluee));
         }
         
+        PyObject* array_check(PyObject* self, PyObject* args) {
+            PyObject* evaluee;
+            if (!PyArg_ParseTuple(args, "O", &evaluee)) { return NULL; }
+            return py::boolean(ArrayModel_Check(evaluee));
+        }
+        
+        PyObject* arraybuffer_check(PyObject* self, PyObject* args) {
+            PyObject* evaluee;
+            if (!PyArg_ParseTuple(args, "O", &evaluee)) { return NULL; }
+            return py::boolean(ArrayBufferModel_Check(evaluee));
+        }
+        
     }
 }

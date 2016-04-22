@@ -7,7 +7,7 @@ namespace im {
     
     namespace buffer {
         
-        buffer_t* heapcopy(buffer_t* buffer) {
+        buffer_t* heapcopy(buffer_t const* buffer) {
             buffer_t* out = new buffer_t{
                 buffer->dev,
                 buffer->host,
@@ -21,7 +21,7 @@ namespace im {
             return out;
         }
         
-        buffer_t* heapcopy(Py_buffer* pybuffer) {
+        buffer_t* heapcopy(Py_buffer const* pybuffer) {
             buffer_t* out = new buffer_t{
                 0,
                 reinterpret_cast<uint8_t*>(pybuffer->buf),

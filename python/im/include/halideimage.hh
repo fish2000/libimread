@@ -39,7 +39,9 @@ namespace py {
         using im::Image;
         using im::ImageFormat;
         using im::HalideNumpyImage;
+        using im::ArrayImage;
         using im::HybridFactory;
+        using im::ArrayFactory;
         
         using filesystem::path;
         using filesystem::NamedTemporaryFile;
@@ -55,13 +57,7 @@ namespace py {
             
             void* operator new(std::size_t newsize) {
                 PyTypeObject* type = type_ptr();
-                BufferModelBase* self = reinterpret_cast<BufferModelBase*>(
-                    type->tp_alloc(type, 0));
-                if (self != NULL) {
-                    self->weakrefs = NULL;
-                    self->internal = unique_buffer_t(nullptr);
-                }
-                return reinterpret_cast<void*>(self);
+                return reinterpret_cast<void*>(type->tp_alloc(type, 0));
             }
             
             void operator delete(void* voidself) {
@@ -152,20 +148,26 @@ namespace py {
             }
             
             PyObject* transpose() {
-                const std::size_t N = im::buffer::ndims(*internal.get());
-                
+                std::size_t N, idx;
+                {
+                    py::gil::release nogil;
+                    N = im::buffer::ndims(*internal.get());
+                }
                 Py_intptr_t permutation[N];
-                for (int idx = 0; idx < N; ++idx) {
-                    permutation[idx] = N - 1 - idx;
-                }
-                
                 BufferModelBase* transposed = new BufferModelBase(*this);
-                for (int idx = 0; idx < N; ++idx) {
-                    transposed->internal->extent[idx] = internal->extent[permutation[idx]];
-                    transposed->internal->stride[idx] = internal->stride[permutation[idx]];
-                    transposed->internal->min[idx]    = internal->min[permutation[idx]];
+                {
+                    py::gil::release nogil;
+                    for (idx = 0; idx < N; ++idx) {
+                        /// can substitute custom permutation mapping, via
+                        /// a tuple argument; q.v. numpy array.transpose()
+                        permutation[idx] = N - 1 - idx;
+                    }
+                    for (idx = 0; idx < N; ++idx) {
+                        transposed->internal->extent[idx] = internal->extent[permutation[idx]];
+                        transposed->internal->stride[idx] = internal->stride[permutation[idx]];
+                        transposed->internal->min[idx]    = internal->min[permutation[idx]];
+                    }
                 }
-                
                 return reinterpret_cast<PyObject*>(transposed);
             }
             
@@ -230,56 +232,56 @@ namespace py {
         }; /* BufferModelBase */
         
         template <typename ImageType,
-                  typename BufferType = buffer_t>
+                  typename BufferType = buffer_t,
+                  typename FactoryType = typename ImageType::factory_t>
         struct ImageModelBase {
             
             using shared_image_t = std::shared_ptr<ImageType>;
             using weak_image_t = std::weak_ptr<ImageType>;
             
-            struct ImageBufferModel : public BufferModelBase<BufferType> {
+            struct BufferModel : public BufferModelBase<BufferType> {
                 
                 using base_t = BufferModelBase<BufferType>;
                 
-                static PyTypeObject* type_ptr() { return &ImageBufferModel_Type; }
-                
                 void* operator new(std::size_t newsize) {
-                    PyTypeObject* type = ImageBufferModel::type_ptr();
-                    ImageBufferModel* self = reinterpret_cast<ImageBufferModel*>(
-                        type->tp_alloc(type, 0));
-                    if (self != NULL) {
-                        self->weakrefs = NULL;
-                        self->internal = typename base_t::unique_buffer_t(nullptr);
-                    }
-                    return reinterpret_cast<void*>(self);
+                    PyTypeObject* type = FactoryType::buffer_type();
+                    return reinterpret_cast<void*>(type->tp_alloc(type, 0));
                 }
                 
                 void operator delete(void* voidself) {
-                    ImageBufferModel* self = reinterpret_cast<ImageBufferModel*>(voidself);
+                    BufferModel* self = reinterpret_cast<BufferModel*>(voidself);
                     PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
                     if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
                     self->cleanup();
-                    ImageBufferModel::type_ptr()->tp_free(pyself);
+                    FactoryType::buffer_type()->tp_free(pyself);
                 }
                 
                 weak_image_t image;
                 
-                ImageBufferModel()
+                BufferModel()
                     :base_t()
                     {}
                 
-                explicit ImageBufferModel(shared_image_t shared_image)
+                explicit BufferModel(shared_image_t shared_image)
                     :base_t(shared_image->buffer_ptr())
                     ,image(shared_image)
                     {}
                 
-                ImageBufferModel(ImageBufferModel const& other)
+                BufferModel(BufferModel const& other)
                     :base_t(other.internal.get())
                     ,image(other.image)
                     {}
                 
                 /// reinterpret, depointerize, copy-construct
-                explicit ImageBufferModel(PyObject* other)
-                    :ImageBufferModel(*reinterpret_cast<ImageBufferModel*>(other))
+                // explicit BufferModel(PyObject* other)
+                //     :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other))
+                //     :BufferModel(*reinterpret_cast<BufferModel*>(other))
+                //     {}
+                
+                /// tag dispatch, reinterpret, depointerize, copy-construct
+                /// , typename Tag::FromBuffer tag = typename Tag::FromBuffer{}
+                explicit BufferModel(PyObject* other)
+                    :BufferModel(*reinterpret_cast<BufferModel*>(other))
                     {}
                 
                 Py_ssize_t  __len__() {
@@ -413,23 +415,11 @@ namespace py {
                                               array_destructor<PyArrayInterface>());
                 }
                 
-            }; /* ImageBufferModel */
-            
-            static PyTypeObject* type_ptr() noexcept { return &ImageModel_Type; }
+            }; /* BufferModel */
             
             void* operator new(std::size_t newsize) {
-                PyTypeObject* type = ImageModelBase::type_ptr();
-                ImageModelBase* self = reinterpret_cast<ImageModelBase*>(
-                    type->tp_alloc(type, 0));
-                if (self != NULL) {
-                    self->weakrefs = NULL;
-                    self->image = shared_image_t(nullptr);
-                    self->dtype = nullptr;
-                    self->imagebuffer = nullptr;
-                    self->readoptDict = nullptr;
-                    self->writeoptDict = nullptr;
-                }
-                return reinterpret_cast<void*>(self);
+                PyTypeObject* type = FactoryType::image_type();
+                return reinterpret_cast<void*>(type->tp_alloc(type, 0));
             }
             
             void operator delete(void* voidself) {
@@ -437,12 +427,14 @@ namespace py {
                 PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
                 if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
                 self->cleanup();
-                ImageModelBase::type_ptr()->tp_free(pyself);
+                FactoryType::image_type()->tp_free(pyself);
             }
             
             struct Tag {
-                struct FromImage    {};
-                struct FromBuffer   {};
+                struct FromImage            {};
+                struct FromBuffer           {};
+                struct FromImageBuffer      {};
+                struct FromOtherImageBuffer {};
             };
             
             PyObject_HEAD
@@ -468,7 +460,7 @@ namespace py {
                 ,image(other.image)
                 ,dtype(PyArray_DescrFromType(image->dtype()))
                 ,imagebuffer(reinterpret_cast<PyObject*>(
-                             new typename ImageModelBase::ImageBufferModel(image)))
+                             new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
@@ -508,7 +500,7 @@ namespace py {
                 ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi.internal.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
                 ,imagebuffer(reinterpret_cast<PyObject*>(
-                             new typename ImageModelBase::ImageBufferModel(image)))
+                             new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 ,clean(false)
@@ -604,7 +596,7 @@ namespace py {
             }
             
             bool load(char const* source, options_map const& opts) {
-                HybridFactory factory;
+                FactoryType factory;
                 std::unique_ptr<ImageFormat> format;
                 std::unique_ptr<im::FileSource> input;
                 std::unique_ptr<Image> output;
@@ -659,7 +651,7 @@ namespace py {
             }
             
             bool loadfilelike(PyObject* file, options_map const& opts) {
-                HybridFactory factory;
+                FactoryType factory;
                 std::unique_ptr<ImageFormat> format;
                 typename py::gil::with::source_t input;
                 std::unique_ptr<Image> output;
@@ -696,7 +688,7 @@ namespace py {
             }
             
             bool loadblob(Py_buffer const& view, options_map const& opts) {
-                HybridFactory factory;
+                FactoryType factory;
                 std::unique_ptr<ImageFormat> format;
                 std::unique_ptr<py::buffer::source> input;
                 std::unique_ptr<Image> output;
@@ -918,9 +910,11 @@ namespace py {
         }; /* ImageModelBase */
         
         /// “Models” are python wrapper types
-        using BufferModel = BufferModelBase<buffer_t>;
         using ImageModel = ImageModelBase<HalideNumpyImage, buffer_t>;
-        using ImageBufferModel = ImageModel::ImageBufferModel;
+        using ImageBufferModel = ImageModel::BufferModel;
+        
+        using ArrayModel = ImageModelBase<ArrayImage, buffer_t>;
+        using ArrayBufferModel = ArrayModel::BufferModel;
         
         namespace {
             
@@ -1101,13 +1095,8 @@ namespace py {
 
 }; /* namespace py */
 
-using py::ext::BufferModel;
-
 static PyBufferProcs Buffer_Buffer3000Methods = {
-    0, /* (readbufferproc) */
-    0, /* (writebufferproc) */
-    0, /* (segcountproc) */
-    0, /* (charbufferproc) */
+    0, 0, 0, 0,
     (getbufferproc)py::ext::buffer::getbuffer<buffer_t>,
     (releasebufferproc)py::ext::buffer::releasebuffer<buffer_t>,
 };
@@ -1174,14 +1163,10 @@ static PyMethodDef Buffer_methods[] = {
     { nullptr, nullptr, 0, nullptr }
 };
 
-using py::ext::BufferModel;
 using py::ext::ImageBufferModel;
 
 static PyBufferProcs ImageBuffer_Buffer3000Methods = {
-    0, /* (readbufferproc) */
-    0, /* (writebufferproc) */
-    0, /* (segcountproc) */
-    0, /* (charbufferproc) */
+    0, 0, 0, 0,
     (getbufferproc)py::ext::buffer::getbuffer<buffer_t, ImageBufferModel>,
     (releasebufferproc)py::ext::buffer::releasebuffer<buffer_t, ImageBufferModel>,
 };
@@ -1232,6 +1217,60 @@ static PyMethodDef ImageBuffer_methods[] = {
     { nullptr, nullptr, 0, nullptr }
 };
 
+using py::ext::ArrayBufferModel;
+
+static PyBufferProcs ArrayBuffer_Buffer3000Methods = {
+    0, 0, 0, 0,
+    (getbufferproc)py::ext::buffer::getbuffer<buffer_t, ArrayBufferModel>,
+    (releasebufferproc)py::ext::buffer::releasebuffer<buffer_t, ArrayBufferModel>,
+};
+
+static PySequenceMethods ArrayBuffer_SequenceMethods = {
+    (lenfunc)py::ext::buffer::length<buffer_t, ArrayBufferModel>,       /* sq_length */
+    0,                                                                  /* sq_concat */
+    0,                                                                  /* sq_repeat */
+    (ssizeargfunc)py::ext::buffer::atindex<buffer_t, ArrayBufferModel>, /* sq_item */
+    0,                                                                  /* sq_slice */
+    0,                                                                  /* sq_ass_item HAHAHAHA */
+    0,                                                                  /* sq_ass_slice HEHEHE ASS <snort> HA */
+    0                                                                   /* sq_contains */
+};
+
+static PyGetSetDef ArrayBuffer_getset[] = {
+    {
+        (char*)"__array_interface__",
+            (getter)py::ext::buffer::get_array_interface<buffer_t, ArrayBufferModel>,
+            nullptr,
+            (char*)"NumPy array interface (Python API)",
+            nullptr },
+    {
+        (char*)"__array_struct__",
+            (getter)py::ext::buffer::get_array_struct<buffer_t, ArrayBufferModel>,
+            nullptr,
+            (char*)"NumPy array interface (C-level API)",
+            nullptr },
+    { nullptr, nullptr, nullptr, nullptr, nullptr }
+};
+
+static PyMethodDef ArrayBuffer_methods[] = {
+    {
+        "check",
+            (PyCFunction)py::ext::check,
+            METH_O | METH_CLASS,
+            "Check the type of an instance against im.Array.Buffer" },
+    {
+        "tobytes",
+            (PyCFunction)py::ext::buffer::tostring<buffer_t, ArrayBufferModel>,
+            METH_NOARGS,
+            "Get bytes from array buffer as a string" },
+    {
+        "tostring",
+            (PyCFunction)py::ext::buffer::tostring<buffer_t, ArrayBufferModel>,
+            METH_NOARGS,
+            "Get bytes from array buffer as a string" },
+    { nullptr, nullptr, 0, nullptr }
+};
+
 namespace py {
     
     namespace ext {
@@ -1244,12 +1283,6 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
                 // using tag_t = typename PythonImageType::Tag::FromImage;
-                
-                // options_map argsaver;
-                // argsaver.set("args",   py::options::parse_list(args));
-                // argsaver.set("kwargs", py::options::parse(kwargs));
-                // std::string dest = argsaver.dumptmp();
-                
                 return reinterpret_cast<PyObject*>(
                     new PythonImageType());
             }
@@ -1266,7 +1299,8 @@ namespace py {
                     return NULL;
                 }
                 if (!BufferModel_Check(buffer) &&
-                    !ImageBufferModel_Check(buffer)) {
+                    !ImageBufferModel_Check(buffer) &&
+                    !ArrayBufferModel_Check(buffer)) {
                     PyErr_SetString(PyExc_ValueError,
                         "invalid im.Buffer instance");
                     return NULL;
@@ -1286,7 +1320,8 @@ namespace py {
                         "missing im.Image argument");
                     return NULL;
                 }
-                if (!ImageModel_Check(other)) {
+                if (!ImageModel_Check(other) &&
+                    !ArrayModel_Check(other)) {
                     PyErr_SetString(PyExc_ValueError,
                         "invalid im.Image instance");
                     return NULL;
@@ -1300,7 +1335,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int init(PyObject* self, PyObject* args, PyObject* kwargs) {
-                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* py_is_blob = NULL;
                 PyObject* options = NULL;
@@ -1338,8 +1373,6 @@ namespace py {
                 
                 if (!did_load) {
                     /// If this is true, PyErr has already been set
-                    /// ... presumably by problems loading an ImageFormat
-                    /// or opening the file at the specified image path
                     return -1;
                 }
                 
@@ -1413,7 +1446,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             Py_ssize_t length(PyObject* self) {
-                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
                 return imbuf->__len__();
@@ -1423,7 +1456,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* atindex(PyObject* self, Py_ssize_t idx) {
-                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
                 return imbuf->__index__(idx, static_cast<int>(pyim->dtype->type_num));
@@ -1433,7 +1466,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int getbuffer(PyObject* self, Py_buffer* view, int flags) {
-                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
                 return imbuf->getbuffer(view, flags);
@@ -1443,7 +1476,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             void releasebuffer(PyObject* self, Py_buffer* view) {
-                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
                 imbuf->releasebuffer(view);
@@ -1533,7 +1566,6 @@ namespace py {
                         dststr = std::string(tf.filepath.make_absolute().str());
                     } else {
                         /// save as file -- extract the filename from the buffer
-                        /// into a temporary string for passing
                         py::gil::release nogil;
                         py::buffer::source dest(view);
                         dststr = std::string(dest.str());
@@ -1546,11 +1578,6 @@ namespace py {
                     }
                     
                 } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return NULL;
-                } catch (im::NotImplementedError& exc) {
-                    /// this shouldn't happen -- a generic ImageFormat pointer
-                    /// was returned when determining the blob image type
                     PyErr_SetString(PyExc_AttributeError, exc.what());
                     return NULL;
                 }
@@ -1724,27 +1751,19 @@ namespace py {
                     return py::False();
                 }
                 
-                try {
+                {
                     py::gil::release nogil;
                     NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
                                         FILESYSTEM_TEMP_FILENAME,                  /// prefix (filename template)
                                         false);                                    /// cleanup on scope exit
                     dst = tf.filepath.make_absolute();
                     dststr = std::string(dst.str());
-                } catch (im::NotImplementedError& exc) {
-                    /// this shouldn't happen
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return py::False();
                 }
                 
                 did_save = pyim->save(dststr.c_str(), opts);
-                if (!did_save) {
-                    return py::False();
-                }
-                
+                if (!did_save) { return py::False(); }
                 im::image::preview(dst);
                 path::remove(dst);
-                
                 return py::True();
             }
             
@@ -1827,7 +1846,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_array_interface(PyObject* self, void* closure) {
-                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
                 return imbuf->__array_interface__();
@@ -1837,7 +1856,7 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_array_struct(PyObject* self, void* closure) {
-                using imagebuffer_t = typename PythonImageType::ImageBufferModel;
+                using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
                 return imbuf->__array_struct__();
@@ -1863,7 +1882,6 @@ namespace py {
                     py::gil::release nogil;
                     out = opts.format();
                 }
-                
                 return py::string(out);
             }
             
@@ -1903,7 +1921,6 @@ namespace py {
                     py::gil::release nogil;
                     out = opts.format();
                 }
-                
                 return py::string(out);
             }
             
@@ -1930,14 +1947,14 @@ namespace py {
 } /* namespace py */
 
 using im::HalideNumpyImage;
+using im::ArrayImage;
 using im::HybridFactory;
+using im::ArrayFactory;
 using py::ext::ImageModel;
+using py::ext::ArrayModel;
 
 static PyBufferProcs Image_Buffer3000Methods = {
-    0, /* (readbufferproc) */
-    0, /* (writebufferproc) */
-    0, /* (segcountproc) */
-    0, /* (charbufferproc) */
+    0, 0, 0, 0,
     (getbufferproc)py::ext::image::getbuffer<HalideNumpyImage, buffer_t>,
     (releasebufferproc)py::ext::image::releasebuffer<HalideNumpyImage, buffer_t>,
 };
@@ -2054,6 +2071,124 @@ static PyMethodDef Image_methods[] = {
     { nullptr, nullptr, 0, nullptr }
 };
 
+static PyBufferProcs Array_Buffer3000Methods = {
+    0, 0, 0, 0,
+    (getbufferproc)py::ext::image::getbuffer<ArrayImage, buffer_t>,
+    (releasebufferproc)py::ext::image::releasebuffer<ArrayImage, buffer_t>,
+};
+
+static PySequenceMethods Array_SequenceMethods = {
+    (lenfunc)py::ext::image::length<ArrayImage, buffer_t>,                  /* sq_length */
+    0,                                                                      /* sq_concat */
+    0,                                                                      /* sq_repeat */
+    (ssizeargfunc)py::ext::image::atindex<ArrayImage, buffer_t>,            /* sq_item */
+    0,                                                                      /* sq_slice */
+    0,                                                                      /* sq_ass_item HAHAHAHA */
+    0,                                                                      /* sq_ass_slice HEHEHE ASS <snort> HA */
+    0                                                                       /* sq_contains */
+};
+
+static PyGetSetDef Array_getset[] = {
+    {
+        (char*)"__array_interface__",
+            (getter)py::ext::image::get_array_interface<ArrayImage, buffer_t>,
+            nullptr,
+            (char*)"NumPy array interface (Python API)",
+            nullptr },
+    {
+        (char*)"__array_struct__",
+            (getter)py::ext::image::get_array_struct<ArrayImage, buffer_t>,
+            nullptr,
+            (char*)"NumPy array interface (C-level API)",
+            nullptr },
+    {
+        (char*)"dtype",
+            (getter)py::ext::image::get_dtype<ArrayImage, buffer_t>,
+            nullptr,
+            (char*)"Array dtype",
+            nullptr },
+    {
+        (char*)"buffer",
+            (getter)py::ext::image::get_imagebuffer<ArrayImage, buffer_t>,
+            nullptr,
+            (char*)"Underlying data buffer accessor object",
+            nullptr },
+    {
+        (char*)"shape",
+            (getter)py::ext::image::get_shape<ArrayImage, buffer_t>,
+            nullptr,
+            (char*)"Array shape tuple",
+            nullptr },
+    {
+        (char*)"strides",
+            (getter)py::ext::image::get_strides<ArrayImage, buffer_t>,
+            nullptr,
+            (char*)"Array strides tuple",
+            nullptr },
+    {
+        (char*)"read_opts",
+            (getter)py::ext::image::get_opts<ArrayImage, buffer_t>,
+            (setter)py::ext::image::set_opts<ArrayImage, buffer_t>,
+            (char*)"Read options dict",
+            (void*)py::ext::image::closures::READ },
+    {
+        (char*)"write_opts",
+            (getter)py::ext::image::get_opts<ArrayImage, buffer_t>,
+            (setter)py::ext::image::set_opts<ArrayImage, buffer_t>,
+            (char*)"Write options dict",
+            (void*)py::ext::image::closures::WRITE },
+    { nullptr, nullptr, nullptr, nullptr, nullptr }
+};
+
+static PyMethodDef Array_methods[] = {
+    {
+        "check",
+            (PyCFunction)py::ext::check,
+            METH_O | METH_CLASS,
+            "Check the type of an instance against im.Image" },
+    {
+        "frombuffer",
+            (PyCFunction)py::ext::image::newfrombuffer<ArrayImage, buffer_t>,
+            METH_O | METH_STATIC,
+            "Return a new im.Image based on an im.Buffer instance" },
+    {
+        "fromimage",
+            (PyCFunction)py::ext::image::newfromimage<ArrayImage, buffer_t>,
+            METH_O | METH_STATIC,
+            "Return a new im.Image based on an im.Image instance" },
+    {
+        "write",
+            (PyCFunction)py::ext::image::write<ArrayImage, buffer_t>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Format and write image data to file or blob" },
+    {
+        "preview",
+            (PyCFunction)py::ext::image::preview<ArrayImage, buffer_t>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Preview image in external viewer" },
+    {
+        "format_read_opts",
+            (PyCFunction)py::ext::image::format_read_opts<ArrayImage, buffer_t>,
+            METH_NOARGS,
+            "Get the read options as a formatted JSON string" },
+    {
+        "format_write_opts",
+            (PyCFunction)py::ext::image::format_write_opts<ArrayImage, buffer_t>,
+            METH_NOARGS,
+            "Get the write options as a formatted JSON string" },
+    {
+        "dump_read_opts",
+            (PyCFunction)py::ext::image::dump_read_opts<ArrayImage, buffer_t>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Dump the read options to a JSON file" },
+    {
+        "dump_write_opts",
+            (PyCFunction)py::ext::image::dump_write_opts<ArrayImage, buffer_t>,
+            METH_VARARGS | METH_KEYWORDS,
+            "Dump the write options to a JSON file" },
+    { nullptr, nullptr, 0, nullptr }
+};
+
 namespace py {
     
     namespace functions {
@@ -2061,6 +2196,8 @@ namespace py {
         PyObject* image_check(PyObject* self, PyObject* args);
         PyObject* buffer_check(PyObject* self, PyObject* args);
         PyObject* imagebuffer_check(PyObject* self, PyObject* args);
+        PyObject* array_check(PyObject* self, PyObject* args);
+        PyObject* arraybuffer_check(PyObject* self, PyObject* args);
         
     }
     

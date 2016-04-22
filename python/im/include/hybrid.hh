@@ -9,10 +9,13 @@
 #include <string>
 
 #include <Python.h>
-#include <numpy/ndarrayobject.h>
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
+
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/halide.hh>
+#include "check.hh"
 
 #ifdef __CPP1z__
 #include <string_view>
@@ -125,9 +128,14 @@ namespace im {
     using HalBase = Halide::ImageBase;
     using MetaImage = ImageWithMetadata;
     
+    /// forward-declare factory class
+    class HybridFactory;
+    
     class HalideNumpyImage : public HalBase, public PythonBufferImage, public MetaImage {
         
         public:
+            using factory_t = HybridFactory;
+            
             using HalBase::dimensions;
             using HalBase::extent;
             using HalBase::stride;
@@ -193,6 +201,97 @@ namespace im {
             virtual ~HybridFactory();
             std::string& name();
             void name(std::string const& n);
+            
+            static PyTypeObject* image_type() { return &ImageModel_Type; }
+            static PyTypeObject* buffer_type() { return &ImageBufferModel_Type; }
+        
+        protected:
+            virtual std::unique_ptr<Image> create(int nbits,
+                                          int xHEIGHT, int xWIDTH, int xDEPTH,
+                                          int d3, int d4) override;
+            
+            virtual std::shared_ptr<Image> shared(int nbits,
+                                          int xHEIGHT, int xWIDTH, int xDEPTH,
+                                          int d3, int d4) override;
+    };
+
+#undef xWIDTH
+#undef xHEIGHT
+#undef xDEPTH
+    
+    /// forward-declare factory class
+    class ArrayFactory;
+    
+    class ArrayImage : public PythonBufferImage, public MetaImage {
+        
+        public:
+            using factory_t = ArrayFactory;
+            
+            ArrayImage();
+            ArrayImage(NPY_TYPES d, const buffer_t* b,            std::string const& name="");
+            ArrayImage(NPY_TYPES d, int x, int y, int z, int w,   std::string const& name="");
+            ArrayImage(NPY_TYPES d, int x, int y, int z,          std::string const& name="");
+            ArrayImage(NPY_TYPES d, int x, int y,                 std::string const& name="");
+            ArrayImage(NPY_TYPES d, int x,                        std::string const& name="");
+            
+            ArrayImage(ArrayImage const& other);
+            ArrayImage(ArrayImage&& other) noexcept;
+            
+            virtual ~ArrayImage();
+            
+            /// This returns the same type of data as buffer_t.host
+            virtual uint8_t* data() const;
+            virtual uint8_t* data(int s) const;
+            virtual std::string_view view() const;
+            
+            Halide::Type type() const;
+            buffer_t* buffer_ptr() const;
+            virtual int nbits() const override;
+            virtual int nbytes() const override;
+            virtual int ndims() const override;
+            virtual int dim(int d) const override;
+            virtual int stride(int s) const override;
+            virtual void* rowp(int r) const override;
+            
+            /// type encoding
+            virtual NPY_TYPES dtype() const;
+            virtual char dtypechar() const;
+            virtual std::string dtypename() const;
+            virtual char const* structcode() const;
+            virtual std::string dsignature(Endian e = Endian::Unspecified) const;
+            
+            /// extent, stride, min
+            virtual int32_t* dims();
+            virtual int32_t* strides();
+            virtual int32_t* offsets();
+            
+        private:
+            PyArrayObject* array;
+            buffer_t* buffer;
+            bool deallocate = false;
+    };
+    
+#define xWIDTH d1
+#define xHEIGHT d0
+#define xDEPTH d2
+    
+    class ArrayFactory : public ImageFactory {
+        
+        private:
+            std::string nm;
+        
+        public:
+            using image_t = ArrayImage;
+            
+            ArrayFactory();
+            ArrayFactory(std::string const& n);
+            
+            virtual ~ArrayFactory();
+            std::string& name();
+            void name(std::string const& n);
+            
+            static PyTypeObject* image_type() { return &ArrayModel_Type; }
+            static PyTypeObject* buffer_type() { return &ArrayBufferModel_Type; }
         
         protected:
             virtual std::unique_ptr<Image> create(int nbits,

@@ -1,6 +1,8 @@
 
 #include <cstddef>
 #include <iostream>
+#include <Python.h>
+#include <numpy/arrayobject.h>
 #include "module.hpp"
 
 PyTypeObject HybridImageModel_Type = {
@@ -58,7 +60,7 @@ PyTypeObject BufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                  /* ob_size */
     "im.Buffer",                                                        /* tp_name */
-    sizeof(BufferModel),                                                /* tp_basicsize */
+    sizeof(py::ext::BufferModelBase<buffer_t>),                         /* tp_basicsize */
     0,                                                                  /* tp_itemsize */
     (destructor)py::ext::buffer::dealloc<buffer_t>,                     /* tp_dealloc */
     0,                                                                  /* tp_print */
@@ -75,12 +77,12 @@ PyTypeObject BufferModel_Type = {
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
     &Buffer_Buffer3000Methods,                                          /* tp_as_buffer */
-    py::ext::BufferModel::typeflags(),                                  /* tp_flags */
-    py::ext::BufferModel::typedoc(),                                    /* tp_doc */
+    py::ext::BufferModelBase<buffer_t>::typeflags(),                    /* tp_flags */
+    py::ext::BufferModelBase<buffer_t>::typedoc(),                      /* tp_doc */
     (traverseproc)py::ext::buffer::traverse<buffer_t>,                  /* tp_traverse */
     (inquiry)py::ext::buffer::clear<buffer_t>,                          /* tp_clear */
     0,                                                                  /* tp_richcompare */
-    py::detail::offset(&BufferModel::weakrefs),                         /* tp_weaklistoffset */
+    py::detail::offset(&py::ext::BufferModelBase<buffer_t>::weakrefs),  /* tp_weaklistoffset */
     0,                                                                  /* tp_iter */
     0,                                                                  /* tp_iternext */
     Buffer_methods,                                                     /* tp_methods */
@@ -177,8 +179,8 @@ PyTypeObject ImageBufferModel_Type = {
     (getattrofunc)PyObject_GenericGetAttr,                                  /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                                  /* tp_setattro */
     &ImageBuffer_Buffer3000Methods,                                         /* tp_as_buffer */
-    py::ext::ImageModel::ImageBufferModel::typeflags(),                     /* tp_flags */
-    py::ext::ImageModel::ImageBufferModel::typedoc(),                       /* tp_doc */
+    py::ext::ImageModel::BufferModel::typeflags(),                          /* tp_flags */
+    py::ext::ImageModel::BufferModel::typedoc(),                            /* tp_doc */
     (traverseproc)py::ext::buffer::traverse<buffer_t, ImageBufferModel>,    /* tp_traverse */
     (inquiry)py::ext::buffer::clear<buffer_t, ImageBufferModel>,            /* tp_clear */
     0,                                                                      /* tp_richcompare */
@@ -196,6 +198,108 @@ PyTypeObject ImageBufferModel_Type = {
     (initproc)py::ext::buffer::init<buffer_t, ImageBufferModel>,            /* tp_init */
     0,                                                                      /* tp_alloc */
     py::ext::buffer::createnew<buffer_t, ImageBufferModel>,                 /* tp_new */
+    0,                                                                      /* tp_free */
+    0,                                                                      /* tp_is_gc */
+    0,                                                                      /* tp_bases */
+    0,                                                                      /* tp_mro */
+    0,                                                                      /* tp_cache */
+    0,                                                                      /* tp_subclasses */
+    0,                                                                      /* tp_weaklist */
+    0,                                                                      /* tp_del */
+    0,                                                                      /* tp_version_tag */
+};
+
+PyTypeObject ArrayModel_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                                                                  /* ob_size */
+    "im.Array",                                                         /* tp_name */
+    sizeof(ArrayModel),                                                 /* tp_basicsize */
+    0,                                                                  /* tp_itemsize */
+    (destructor)py::ext::image::dealloc<ArrayImage, buffer_t>,          /* tp_dealloc */
+    0,                                                                  /* tp_print */
+    0,                                                                  /* tp_getattr */
+    0,                                                                  /* tp_setattr */
+    0,                                                                  /* tp_compare */
+    (reprfunc)py::ext::image::repr<ArrayImage, buffer_t>,               /* tp_repr */
+    0,                                                                  /* tp_as_number */
+    &Array_SequenceMethods,                                             /* tp_as_sequence */
+    0,                                                                  /* tp_as_mapping */
+    (hashfunc)py::ext::image::hash<ArrayImage, buffer_t>,               /* tp_hash */
+    0,                                                                  /* tp_call */
+    (reprfunc)py::ext::image::str<ArrayImage, buffer_t>,                /* tp_str */
+    (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
+    (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
+    &Array_Buffer3000Methods,                                           /* tp_as_buffer */
+    py::ext::ArrayModel::typeflags(),                                   /* tp_flags */
+    py::ext::ArrayModel::typedoc(),                                     /* tp_doc */
+    (traverseproc)py::ext::image::traverse<ArrayImage, buffer_t>,       /* tp_traverse */
+    (inquiry)py::ext::image::clear<ArrayImage, buffer_t>,               /* tp_clear */
+    0,                                                                  /* tp_richcompare */
+    py::detail::offset(&ArrayModel::weakrefs),                          /* tp_weaklistoffset */
+    0,                                                                  /* tp_iter */
+    0,                                                                  /* tp_iternext */
+    Array_methods,                                                      /* tp_methods */
+    0,                                                                  /* tp_members */
+    Array_getset,                                                       /* tp_getset */
+    0,                                                                  /* tp_base */
+    0,                                                                  /* tp_dict */
+    0,                                                                  /* tp_descr_get */
+    0,                                                                  /* tp_descr_set */
+    0,                                                                  /* tp_dictoffset */
+    (initproc)py::ext::image::init<ArrayImage, buffer_t>,               /* tp_init */
+    0,                                                                  /* tp_alloc */
+    py::ext::image::createnew<ArrayImage, buffer_t>,                    /* tp_new */
+    0,                                                                  /* tp_free */
+    0,                                                                  /* tp_is_gc */
+    0,                                                                  /* tp_bases */
+    0,                                                                  /* tp_mro */
+    0,                                                                  /* tp_cache */
+    0,                                                                  /* tp_subclasses */
+    0,                                                                  /* tp_weaklist */
+    0,                                                                  /* tp_del */
+    0,                                                                  /* tp_version_tag */
+};
+
+PyTypeObject ArrayBufferModel_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                                                                      /* ob_size */
+    "im.Array.Buffer",                                                      /* tp_name */
+    sizeof(ArrayBufferModel),                                               /* tp_basicsize */
+    0,                                                                      /* tp_itemsize */
+    (destructor)py::ext::buffer::dealloc<buffer_t, ArrayBufferModel>,       /* tp_dealloc */
+    0,                                                                      /* tp_print */
+    0,                                                                      /* tp_getattr */
+    0,                                                                      /* tp_setattr */
+    0,                                                                      /* tp_compare */
+    (reprfunc)py::ext::buffer::repr<buffer_t, ArrayBufferModel>,            /* tp_repr */
+    0,                                                                      /* tp_as_number */
+    &ArrayBuffer_SequenceMethods,                                           /* tp_as_sequence */
+    0,                                                                      /* tp_as_mapping */
+    0,                                                                      /* tp_hash */
+    0,                                                                      /* tp_call */
+    (reprfunc)py::ext::buffer::str<buffer_t, ArrayBufferModel>,             /* tp_str */
+    (getattrofunc)PyObject_GenericGetAttr,                                  /* tp_getattro */
+    (setattrofunc)PyObject_GenericSetAttr,                                  /* tp_setattro */
+    &ArrayBuffer_Buffer3000Methods,                                         /* tp_as_buffer */
+    py::ext::ArrayModel::BufferModel::typeflags(),                          /* tp_flags */
+    py::ext::ArrayModel::BufferModel::typedoc(),                            /* tp_doc */
+    (traverseproc)py::ext::buffer::traverse<buffer_t, ArrayBufferModel>,    /* tp_traverse */
+    (inquiry)py::ext::buffer::clear<buffer_t, ArrayBufferModel>,            /* tp_clear */
+    0,                                                                      /* tp_richcompare */
+    py::detail::offset(&ArrayBufferModel::weakrefs),                        /* tp_weaklistoffset */
+    0,                                                                      /* tp_iter */
+    0,                                                                      /* tp_iternext */
+    ArrayBuffer_methods,                                                    /* tp_methods */
+    0,                                                                      /* tp_members */
+    ArrayBuffer_getset,                                                     /* tp_getset */
+    0,                                                                      /* tp_base */
+    0,                                                                      /* tp_dict */
+    0,                                                                      /* tp_descr_get */
+    0,                                                                      /* tp_descr_set */
+    0,                                                                      /* tp_dictoffset */
+    (initproc)py::ext::buffer::init<buffer_t, ArrayBufferModel>,            /* tp_init */
+    0,                                                                      /* tp_alloc */
+    py::ext::buffer::createnew<buffer_t, ArrayBufferModel>,                 /* tp_new */
     0,                                                                      /* tp_free */
     0,                                                                      /* tp_is_gc */
     0,                                                                      /* tp_bases */
@@ -232,7 +336,17 @@ static PyMethodDef module_functions[] = {
         "imagebuffer_check",
             (PyCFunction)py::functions::imagebuffer_check,
             METH_VARARGS,
-            "Boolean function to test for im.Image.ImageBuffer instances" },
+            "Boolean function to test for im.Image.Buffer instances" },
+    {
+        "array_check",
+            (PyCFunction)py::functions::array_check,
+            METH_VARARGS,
+            "Boolean function to test for im.Array instances" },
+    {
+        "arraybuffer_check",
+            (PyCFunction)py::functions::arraybuffer_check,
+            METH_VARARGS,
+            "Boolean function to test for im.Array.Buffer instances" },
     { nullptr, nullptr, 0, nullptr }
 };
 
@@ -271,16 +385,21 @@ PyMODINIT_FUNC initim(void) {
     /// Manually amend our declared types, as needed:
     /// -- Specify that im.ImageBuffer subclasses im.Buffer
     ImageBufferModel_Type.tp_base = &BufferModel_Type;
+    ArrayBufferModel_Type.tp_base = &BufferModel_Type;
     
     /// -- Prepare im.Image.__dict__ for our customizations
     ImageModel_Type.tp_dict = PyDict_New();
     if (!ImageModel_Type.tp_dict)                 { return; }
+    ArrayModel_Type.tp_dict = PyDict_New();
+    if (!ArrayModel_Type.tp_dict)                 { return; }
     
     /// Check readiness of our extension type declarations (?)
     if (PyType_Ready(&HybridImageModel_Type) < 0) { return; }
     if (PyType_Ready(&BufferModel_Type) < 0)      { return; }
-    if (PyType_Ready(&ImageBufferModel_Type) < 0) { return; }
     if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
+    if (PyType_Ready(&ImageBufferModel_Type) < 0) { return; }
+    if (PyType_Ready(&ArrayModel_Type) < 0)       { return; }
+    if (PyType_Ready(&ArrayBufferModel_Type) < 0) { return; }
     
     /// Get the path of the extension module --
     /// via dladdr() on the module init function's address
@@ -331,6 +450,17 @@ PyMODINIT_FUNC initim(void) {
     PyModule_AddObject(module,
         "Image",
         (PyObject*)&ImageModel_Type);
+    
+    Py_INCREF(&ArrayBufferModel_Type);
+    PyDict_SetItemString(ArrayModel_Type.tp_dict,
+        "Buffer",
+        (PyObject*)&ArrayBufferModel_Type);
+    
+    /// Add the ImageModel type object to the module
+    Py_INCREF(&ArrayModel_Type);
+    PyModule_AddObject(module,
+        "Array",
+        (PyObject*)&ArrayModel_Type);
     
     /// Get the master list of image format suffixes,
     /// newly formatted as a Python tuple of strings,

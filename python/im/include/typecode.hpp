@@ -14,6 +14,7 @@
 #endif
 
 #include <Python.h>
+#define NO_IMPORT_ARRAY
 #include <numpy/ndarraytypes.h>
 
 namespace std {

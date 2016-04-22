@@ -2,7 +2,8 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_NUMPY_HPP_
 
 #include <Python.h>
-#include <numpy/ndarrayobject.h>
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 
 #include "hybrid.hh"
 #include "detail.hpp"

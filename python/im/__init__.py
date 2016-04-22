@@ -10,5 +10,6 @@ from im import (
     HybridImage,
     Buffer,
     Image,
+    Array,
     
     hybridimage_check)

@@ -64,6 +64,8 @@ define_macros.append(
 define_macros.append(
     ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'))
 define_macros.append(
+    ('PY_ARRAY_UNIQUE_SYMBOL', 'YO_DOGG'))
+define_macros.append(
     ('IM_COLOR_TRACE', '1'))
 define_macros.append(
     ('IM_VERBOSE', '1'))
