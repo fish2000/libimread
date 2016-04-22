@@ -27,7 +27,7 @@
 #cmakedefine IM_HAVE_STRINGVIEW_HH      1
 #cmakedefine IM_HAVE_SYS_SENDFILE_H     1
 
-#define FILESYSTEM_TEMP_SUFFIX          ".imdata"
+#define FILESYSTEM_TEMP_SUFFIX          ".imr"
 #define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"
 #define FILESYSTEM_TEMP_DIRECTORYNAME   "libimread-XXXXXXX"
 
