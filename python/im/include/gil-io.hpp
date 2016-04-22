@@ -8,6 +8,16 @@
 #include <libimread/libimread.hpp>
 #include <libimread/filehandle.hh>
 
+#if PY_MAJOR_VERSION >= 3
+#include <unistd.h>
+#define PyFile_Check(object)        true
+#define PyFile_IncUseCount(object)  Py_INCREF(object)
+#define PyFile_DecUseCount(object)  Py_DECREF(object)
+#define PyFile_AsFile(object)       ::fdopen(PyObject_AsFileDescriptor(object), "r+")
+#define PyFile_OPEN(fn)             ::open(fn, O_RDWR | O_CREAT | O_EXCL)
+#define PyFile_FromString(fn, m)    PyFile_FromFd(PyFile_OPEN(fn), fn, m, -1, NULL, NULL, 0)
+#endif
+
 namespace py {
     
     namespace handle {

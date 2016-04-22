@@ -44,14 +44,12 @@ namespace py {
             }
         
         with::with(PyObject* fileobject)
-            :with(reinterpret_cast<PyFileObject*>(
-                fileobject))
+            :with(reinterpret_cast<PyFileObject*>(fileobject))
             {}
         
         with::with(char const* filepth)
-            :with(reinterpret_cast<PyFileObject*>(
-                PyFile_FromString(const_cast<char*>(filepth),
-                                  const_cast<char*>("r+"))))
+            :with(PyFile_FromString(const_cast<char*>(filepth),
+                                    const_cast<char*>("r+")))
             {}
         
         with::with(std::nullptr_t no)
