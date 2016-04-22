@@ -8,5 +8,5 @@ install(DIRECTORY iod DESTINATION include
 install(DIRECTORY iod DESTINATION include
   FILES_MATCHING PATTERN "*.hpp")
 
-add_subdirectory(tools)
+# add_subdirectory(tools)
 add_subdirectory(tests)
