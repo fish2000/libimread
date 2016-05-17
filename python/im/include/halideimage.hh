@@ -1939,7 +1939,147 @@ namespace py {
                 }
                 return py::options::dump(self, args, kwargs, opts);
             }
-        
+            
+            namespace methods {
+                
+                /// " + terminator::nameof<ImageType>() + "
+                
+                template <typename ImageType,
+                          typename BufferType = buffer_t>
+                PyBufferProcs buffer() {
+                    return {
+                        0, 0, 0, 0,
+                        (getbufferproc)py::ext::image::getbuffer<ImageType, BufferType>,
+                        (releasebufferproc)py::ext::image::releasebuffer<ImageType, BufferType>,
+                    };
+                }
+                
+                template <typename ImageType,
+                          typename BufferType = buffer_t>
+                PySequenceMethods sequence() {
+                    return {
+                        (lenfunc)py::ext::image::length<ImageType, BufferType>,         /* sq_length */
+                        0,                                                              /* sq_concat */
+                        0,                                                              /* sq_repeat */
+                        (ssizeargfunc)py::ext::image::atindex<ImageType, BufferType>,   /* sq_item */
+                        0,                                                              /* sq_slice */
+                        0,                                                              /* sq_ass_item HAHAHAHA */
+                        0,                                                              /* sq_ass_slice HEHEHE ASS <snort> HA */
+                        0                                                               /* sq_contains */
+                    };
+                }
+                
+                template <typename ImageType,
+                          typename BufferType = buffer_t>
+                PyGetSetDef[] getset() {
+                    return {
+                        {
+                            (char*)"__array_interface__",
+                                (getter)py::ext::image::get_array_interface<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"NumPy array interface (Python API)",
+                                nullptr },
+                        {
+                            (char*)"__array_struct__",
+                                (getter)py::ext::image::get_array_struct<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"NumPy array interface (C-level API)",
+                                nullptr },
+                        {
+                            (char*)"dtype",
+                                (getter)py::ext::image::get_dtype<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image dtype",
+                                nullptr },
+                        {
+                            (char*)"buffer",
+                                (getter)py::ext::image::get_imagebuffer<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Underlying data buffer accessor object",
+                                nullptr },
+                        {
+                            (char*)"shape",
+                                (getter)py::ext::image::get_shape<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image shape tuple",
+                                nullptr },
+                        {
+                            (char*)"strides",
+                                (getter)py::ext::image::get_strides<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image strides tuple",
+                                nullptr },
+                        {
+                            (char*)"read_opts",
+                                (getter)py::ext::image::get_opts<ImageType, BufferType>,
+                                (setter)py::ext::image::set_opts<ImageType, BufferType>,
+                                (char*)"Read options dict",
+                                (void*)py::ext::image::closures::READ },
+                        {
+                            (char*)"write_opts",
+                                (getter)py::ext::image::get_opts<ImageType, BufferType>,
+                                (setter)py::ext::image::set_opts<ImageType, BufferType>,
+                                (char*)"Write options dict",
+                                (void*)py::ext::image::closures::WRITE },
+                        { nullptr, nullptr, nullptr, nullptr, nullptr }
+                    };
+                }
+                
+                template <typename ImageType,
+                          typename BufferType = buffer_t>
+                PyMethodDef[] basic() {
+                    return {
+                        {
+                            "check",
+                                (PyCFunction)py::ext::check,
+                                METH_O | METH_CLASS,
+                                "Check that an instance is of this type" },
+                        {
+                            "frombuffer",
+                                (PyCFunction)py::ext::image::newfrombuffer<ImageType, BufferType>,
+                                METH_O | METH_STATIC,
+                                "Return a new image based on an im.Buffer instance" },
+                        {
+                            "fromimage",
+                                (PyCFunction)py::ext::image::newfromimage<ImageType, BufferType>,
+                                METH_O | METH_STATIC,
+                                "Return a new image based on an existing image instance" },
+                        {
+                            "write",
+                                (PyCFunction)py::ext::image::write<ImageType, BufferType>,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "Format and write image data to file or blob" },
+                        {
+                            "preview",
+                                (PyCFunction)py::ext::image::preview<ImageType, BufferType>,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "Preview image in external viewer" },
+                        {
+                            "format_read_opts",
+                                (PyCFunction)py::ext::image::format_read_opts<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "Get the read options as a formatted JSON string" },
+                        {
+                            "format_write_opts",
+                                (PyCFunction)py::ext::image::format_write_opts<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "Get the write options as a formatted JSON string" },
+                        {
+                            "dump_read_opts",
+                                (PyCFunction)py::ext::image::dump_read_opts<ImageType, BufferType>,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "Dump the read options to a JSON file" },
+                        {
+                            "dump_write_opts",
+                                (PyCFunction)py::ext::image::dump_write_opts<ImageType, BufferType>,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "Dump the write options to a JSON file" },
+                        { nullptr, nullptr, 0, nullptr }
+                    };
+                }
+                
+            } /* namespace methods */
+            
         } /* namespace image */
         
     } /* namespace ext */
@@ -1953,241 +2093,15 @@ using im::ArrayFactory;
 using py::ext::ImageModel;
 using py::ext::ArrayModel;
 
-static PyBufferProcs Image_Buffer3000Methods = {
-    0, 0, 0, 0,
-    (getbufferproc)py::ext::image::getbuffer<HalideNumpyImage, buffer_t>,
-    (releasebufferproc)py::ext::image::releasebuffer<HalideNumpyImage, buffer_t>,
-};
+static PyBufferProcs Image_Buffer3000Methods = py::ext::image::methods::buffer<HalideNumpyImage>();
+static PySequenceMethods Image_SequenceMethods = py::ext::image::methods::sequence<HalideNumpyImage>();
+static PyGetSetDef Image_getset[] = py::ext::image::methods::getset<HalideNumpyImage>();
+static PyMethodDef Image_methods[] = py::ext::image::methods::basic<HalideNumpyImage>();
 
-static PySequenceMethods Image_SequenceMethods = {
-    (lenfunc)py::ext::image::length<HalideNumpyImage, buffer_t>,         /* sq_length */
-    0,                                                                      /* sq_concat */
-    0,                                                                      /* sq_repeat */
-    (ssizeargfunc)py::ext::image::atindex<HalideNumpyImage, buffer_t>,   /* sq_item */
-    0,                                                                      /* sq_slice */
-    0,                                                                      /* sq_ass_item HAHAHAHA */
-    0,                                                                      /* sq_ass_slice HEHEHE ASS <snort> HA */
-    0                                                                       /* sq_contains */
-};
-
-static PyGetSetDef Image_getset[] = {
-    {
-        (char*)"__array_interface__",
-            (getter)py::ext::image::get_array_interface<HalideNumpyImage, buffer_t>,
-            nullptr,
-            (char*)"NumPy array interface (Python API)",
-            nullptr },
-    {
-        (char*)"__array_struct__",
-            (getter)py::ext::image::get_array_struct<HalideNumpyImage, buffer_t>,
-            nullptr,
-            (char*)"NumPy array interface (C-level API)",
-            nullptr },
-    {
-        (char*)"dtype",
-            (getter)py::ext::image::get_dtype<HalideNumpyImage, buffer_t>,
-            nullptr,
-            (char*)"Image dtype",
-            nullptr },
-    {
-        (char*)"buffer",
-            (getter)py::ext::image::get_imagebuffer<HalideNumpyImage, buffer_t>,
-            nullptr,
-            (char*)"Underlying data buffer accessor object",
-            nullptr },
-    {
-        (char*)"shape",
-            (getter)py::ext::image::get_shape<HalideNumpyImage, buffer_t>,
-            nullptr,
-            (char*)"Image shape tuple",
-            nullptr },
-    {
-        (char*)"strides",
-            (getter)py::ext::image::get_strides<HalideNumpyImage, buffer_t>,
-            nullptr,
-            (char*)"Image strides tuple",
-            nullptr },
-    {
-        (char*)"read_opts",
-            (getter)py::ext::image::get_opts<HalideNumpyImage, buffer_t>,
-            (setter)py::ext::image::set_opts<HalideNumpyImage, buffer_t>,
-            (char*)"Read options dict",
-            (void*)py::ext::image::closures::READ },
-    {
-        (char*)"write_opts",
-            (getter)py::ext::image::get_opts<HalideNumpyImage, buffer_t>,
-            (setter)py::ext::image::set_opts<HalideNumpyImage, buffer_t>,
-            (char*)"Write options dict",
-            (void*)py::ext::image::closures::WRITE },
-    { nullptr, nullptr, nullptr, nullptr, nullptr }
-};
-
-static PyMethodDef Image_methods[] = {
-    {
-        "check",
-            (PyCFunction)py::ext::check,
-            METH_O | METH_CLASS,
-            "Check the type of an instance against im.Image" },
-    {
-        "frombuffer",
-            (PyCFunction)py::ext::image::newfrombuffer<HalideNumpyImage, buffer_t>,
-            METH_O | METH_STATIC,
-            "Return a new im.Image based on an im.Buffer instance" },
-    {
-        "fromimage",
-            (PyCFunction)py::ext::image::newfromimage<HalideNumpyImage, buffer_t>,
-            METH_O | METH_STATIC,
-            "Return a new im.Image based on an im.Image instance" },
-    {
-        "write",
-            (PyCFunction)py::ext::image::write<HalideNumpyImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Format and write image data to file or blob" },
-    {
-        "preview",
-            (PyCFunction)py::ext::image::preview<HalideNumpyImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Preview image in external viewer" },
-    {
-        "format_read_opts",
-            (PyCFunction)py::ext::image::format_read_opts<HalideNumpyImage, buffer_t>,
-            METH_NOARGS,
-            "Get the read options as a formatted JSON string" },
-    {
-        "format_write_opts",
-            (PyCFunction)py::ext::image::format_write_opts<HalideNumpyImage, buffer_t>,
-            METH_NOARGS,
-            "Get the write options as a formatted JSON string" },
-    {
-        "dump_read_opts",
-            (PyCFunction)py::ext::image::dump_read_opts<HalideNumpyImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Dump the read options to a JSON file" },
-    {
-        "dump_write_opts",
-            (PyCFunction)py::ext::image::dump_write_opts<HalideNumpyImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Dump the write options to a JSON file" },
-    { nullptr, nullptr, 0, nullptr }
-};
-
-static PyBufferProcs Array_Buffer3000Methods = {
-    0, 0, 0, 0,
-    (getbufferproc)py::ext::image::getbuffer<ArrayImage, buffer_t>,
-    (releasebufferproc)py::ext::image::releasebuffer<ArrayImage, buffer_t>,
-};
-
-static PySequenceMethods Array_SequenceMethods = {
-    (lenfunc)py::ext::image::length<ArrayImage, buffer_t>,                  /* sq_length */
-    0,                                                                      /* sq_concat */
-    0,                                                                      /* sq_repeat */
-    (ssizeargfunc)py::ext::image::atindex<ArrayImage, buffer_t>,            /* sq_item */
-    0,                                                                      /* sq_slice */
-    0,                                                                      /* sq_ass_item HAHAHAHA */
-    0,                                                                      /* sq_ass_slice HEHEHE ASS <snort> HA */
-    0                                                                       /* sq_contains */
-};
-
-static PyGetSetDef Array_getset[] = {
-    {
-        (char*)"__array_interface__",
-            (getter)py::ext::image::get_array_interface<ArrayImage, buffer_t>,
-            nullptr,
-            (char*)"NumPy array interface (Python API)",
-            nullptr },
-    {
-        (char*)"__array_struct__",
-            (getter)py::ext::image::get_array_struct<ArrayImage, buffer_t>,
-            nullptr,
-            (char*)"NumPy array interface (C-level API)",
-            nullptr },
-    {
-        (char*)"dtype",
-            (getter)py::ext::image::get_dtype<ArrayImage, buffer_t>,
-            nullptr,
-            (char*)"Array dtype",
-            nullptr },
-    {
-        (char*)"buffer",
-            (getter)py::ext::image::get_imagebuffer<ArrayImage, buffer_t>,
-            nullptr,
-            (char*)"Underlying data buffer accessor object",
-            nullptr },
-    {
-        (char*)"shape",
-            (getter)py::ext::image::get_shape<ArrayImage, buffer_t>,
-            nullptr,
-            (char*)"Array shape tuple",
-            nullptr },
-    {
-        (char*)"strides",
-            (getter)py::ext::image::get_strides<ArrayImage, buffer_t>,
-            nullptr,
-            (char*)"Array strides tuple",
-            nullptr },
-    {
-        (char*)"read_opts",
-            (getter)py::ext::image::get_opts<ArrayImage, buffer_t>,
-            (setter)py::ext::image::set_opts<ArrayImage, buffer_t>,
-            (char*)"Read options dict",
-            (void*)py::ext::image::closures::READ },
-    {
-        (char*)"write_opts",
-            (getter)py::ext::image::get_opts<ArrayImage, buffer_t>,
-            (setter)py::ext::image::set_opts<ArrayImage, buffer_t>,
-            (char*)"Write options dict",
-            (void*)py::ext::image::closures::WRITE },
-    { nullptr, nullptr, nullptr, nullptr, nullptr }
-};
-
-static PyMethodDef Array_methods[] = {
-    {
-        "check",
-            (PyCFunction)py::ext::check,
-            METH_O | METH_CLASS,
-            "Check the type of an instance against im.Image" },
-    {
-        "frombuffer",
-            (PyCFunction)py::ext::image::newfrombuffer<ArrayImage, buffer_t>,
-            METH_O | METH_STATIC,
-            "Return a new im.Image based on an im.Buffer instance" },
-    {
-        "fromimage",
-            (PyCFunction)py::ext::image::newfromimage<ArrayImage, buffer_t>,
-            METH_O | METH_STATIC,
-            "Return a new im.Image based on an im.Image instance" },
-    {
-        "write",
-            (PyCFunction)py::ext::image::write<ArrayImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Format and write image data to file or blob" },
-    {
-        "preview",
-            (PyCFunction)py::ext::image::preview<ArrayImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Preview image in external viewer" },
-    {
-        "format_read_opts",
-            (PyCFunction)py::ext::image::format_read_opts<ArrayImage, buffer_t>,
-            METH_NOARGS,
-            "Get the read options as a formatted JSON string" },
-    {
-        "format_write_opts",
-            (PyCFunction)py::ext::image::format_write_opts<ArrayImage, buffer_t>,
-            METH_NOARGS,
-            "Get the write options as a formatted JSON string" },
-    {
-        "dump_read_opts",
-            (PyCFunction)py::ext::image::dump_read_opts<ArrayImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Dump the read options to a JSON file" },
-    {
-        "dump_write_opts",
-            (PyCFunction)py::ext::image::dump_write_opts<ArrayImage, buffer_t>,
-            METH_VARARGS | METH_KEYWORDS,
-            "Dump the write options to a JSON file" },
-    { nullptr, nullptr, 0, nullptr }
-};
+static PyBufferProcs Array_Buffer3000Methods = py::ext::image::methods::buffer<ArrayImage>();
+static PySequenceMethods Array_SequenceMethods = py::ext::image::methods::sequence<ArrayImage>();
+static PyGetSetDef Array_getset[] = py::ext::image::methods::getset<ArrayImage>();
+static PyMethodDef Array_methods[] = py::ext::image::methods::basic<ArrayImage>();
 
 namespace py {
     

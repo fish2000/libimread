@@ -30,19 +30,21 @@ namespace {
         path basedir(im::test::basedir);
         path absdir(basedir.make_absolute());
         path tmpdir(path::tmp());
+        
         /// preflight: ensure that `absdir` (which is `basedir` in a suit)
         ///            and `tmpdir` (which guess) are actually existant and valid
         REQUIRE(absdir.is_directory());
         REQUIRE(tmpdir.is_directory());
+        
         /// preflight: store the current WD using path::cwd(),
         ///            manually call chdir() to start out in `basedir`
         const char* current = path::cwd().c_str();
         ::chdir(absdir);
-    
+        
         /// confirm the new WD using path::cwd() and operator==() with `absdir`
         bool check_one = bool(path::cwd() == absdir);
         REQUIRE(check_one);
-    
+        
         {
             /// switch working directory to tmpdir
             switchdir s(tmpdir);
@@ -60,11 +62,11 @@ namespace {
             REQUIRE(check_two_and_two_thirds);
             /// ... aaaand the working directory flips back to `basedir` at scope exit
         }
-    
+        
         /// confirm we are back in `basedir`
         bool check_three = bool(path::cwd() == absdir);
         REQUIRE(check_three);
-    
+        
         /// post-hoc: manually chdir() back to point of origin,
         ///           so as to hopefully return back into the test runner without having
         ///           problematically fucked with its state (like at least as minimally
@@ -79,16 +81,20 @@ namespace {
         path absdir(basedir.make_absolute());
         path tmpdir("/private/tmp");
         std::hash<path> hasher;
+        
         /// the test data header-generator will write 'basedir' out as absolute
         REQUIRE(basedir == absdir);
         REQUIRE(basedir != tmpdir);
+        
         /// path::operator==() uses path::hash()
         REQUIRE(basedir.hash() == absdir.hash());
         REQUIRE(basedir.hash() != tmpdir.hash());
+        
         /// std::hash<path> also uses path::hash()
         REQUIRE(hasher(basedir) == basedir.hash());
         REQUIRE(hasher(basedir) != tmpdir.hash());
         REQUIRE(hasher(basedir) == hasher(absdir));
+        
         /// path::hash<P>(p) forwards to path::hash()
         REQUIRE(path::hash(basedir) == path::hash(absdir));
         REQUIRE(path::hash(basedir) != path::hash(tmpdir));
@@ -211,11 +217,6 @@ namespace {
               "[fs-system-path-resolver]") {
         resolver syspaths = resolver::system();
         
-        // std::ostringstream os;
-        // os << syspaths;
-        // WTF("System path value", filesystem::detail::syspaths());
-        // WTF("System path resolver", os.str(), FF("Resolver size: %i", syspaths.size()));
-        
         REQUIRE(syspaths.resolve("ls") != path());
         REQUIRE(syspaths.resolve("clang") != path());
         REQUIRE(syspaths.resolve("YoDogg") == path());
@@ -225,14 +226,10 @@ namespace {
         REQUIRE(!syspaths.contains("YoDogg"));
     }
     
-    TEST_CASE("[filesystem] Test the default resolver",
-              "[fs-default-resolver]") {
+    TEST_CASE("[filesystem] Test the default resolver with path::executable()",
+              "[fs-default-resolver-with-path-executable]") {
         path executable = path::executable();
         resolver dres(executable.parent());
-        
-        // WTF("Current working dir:", path::getcwd().str());
-        // WTF("Executable basename:", executable.basename());
-        
         REQUIRE(dres.contains(executable.basename()));
     }
     
@@ -242,19 +239,6 @@ namespace {
         TemporaryDirectory td("test-td");
         (td.dirpath/"test-td-subdir0").makedir();
         (td.dirpath/"test-td-subdir1").makedir();
-        
-        // td.dirpath.walk([](const path& p,
-        //                    std::vector<std::string>& directories,
-        //                    std::vector<std::string>& files) {
-        //     std::for_each(directories.begin(), directories.end(), [&](const std::string& d) {
-        //         std::cout << "Directory: " << p/d << std::endl;
-        //         REQUIRE((p/d).is_directory());
-        //     });
-        //     std::for_each(files.begin(), files.end(), [&](const std::string& f) {
-        //         std::cout << "File: " << p/f << std::endl;
-        //         REQUIRE((p/f).is_file());
-        //     });
-        // });
     }
     
     

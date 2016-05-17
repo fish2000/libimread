@@ -13,11 +13,15 @@ namespace terminator {
     
     namespace {
         
-        /// define the (already-declared) static mutex,
+        /// define one singular, private, static std::mutex,
         /// to keep the demangler from reentering itself
-        /// ... which that does sound dirty, actually
+        /// ... which wow that does sound really dirty, actually
         static std::mutex mangle_barrier;
         
+        /// define a corresponding private and static std::unique_ptr,
+        /// using a delete-expression to reclaim the memory malloc()'ed by
+        /// abi::__cxa_demangle() upon its return.
+        /// … we use clang pragmas to add flags locally for this to work:
         #pragma clang diagnostic push
         #pragma clang diagnostic ignored "-Wglobal-constructors"
         #pragma clang diagnostic ignored "-Wexit-time-destructors"
