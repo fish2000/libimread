@@ -309,55 +309,7 @@ namespace py {
                             "index out of range");
                         return NULL;
                     }
-                    switch (tc) {
-                        case NPY_FLOAT: {
-                            float op = strong->template rowp_as<float>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                        case NPY_DOUBLE:
-                        case NPY_LONGDOUBLE: {
-                            double op = strong->template rowp_as<double>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                        case NPY_SHORT:
-                        case NPY_BYTE: {
-                            byte op = strong->template rowp_as<byte>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                        case NPY_USHORT:
-                        case NPY_UBYTE: {
-                            unsigned char op = strong->template rowp_as<unsigned char>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                        case NPY_INT: {
-                            int32_t op = strong->template rowp_as<int32_t>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                        case NPY_UINT: {
-                            uint32_t op = strong->template rowp_as<uint32_t>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                        case NPY_LONG:
-                        case NPY_LONGLONG: {
-                            int64_t op = strong->template rowp_as<int64_t>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                        case NPY_ULONG:
-                        case NPY_ULONGLONG: {
-                            uint64_t op = strong->template rowp_as<uint64_t>(0)[nidx];
-                            return py::convert(op);
-                        }
-                        break;
-                    }
-                    uint32_t op = strong->template rowp_as<uint32_t>(0)[nidx];
-                    return py::convert(op);
+                    return py::detail::image_typed_idx(strong, tc, nidx);
                 }
                 
                 template <typename Pointer = PyArrayInterface,
@@ -928,13 +880,8 @@ namespace py {
         using ArrayModel = ImageModelBase<ArrayImage, buffer_t>;
         using ArrayBufferModel = ArrayModel::BufferModel;
         
-        namespace {
-            
-            PyObject* check(PyTypeObject* type, PyObject* evaluee) {
-                return py::boolean(type == Py_TYPE(evaluee));
-            }
-            
-        }
+        /// check() has a forward declaration!
+        PyObject* check(PyTypeObject* type, PyObject* evaluee);
         
         namespace buffer {
             
@@ -1101,6 +1048,78 @@ namespace py {
                 return 0;
             }
             
+            namespace methods {
+                
+                template <typename BufferType = buffer_t,
+                          typename PythonBufferType = BufferModelBase<BufferType>>
+                PyBufferProcs* buffer() {
+                    static PyBufferProcs buffermethods = {
+                        0, 0, 0, 0,
+                        (getbufferproc)py::ext::buffer::getbuffer<BufferType, PythonBufferType>,
+                        (releasebufferproc)py::ext::buffer::releasebuffer<BufferType, PythonBufferType>,
+                    };
+                    return &buffermethods;
+                }
+                
+                template <typename BufferType = buffer_t,
+                          typename PythonBufferType = BufferModelBase<BufferType>>
+                PySequenceMethods* sequence() {
+                    static PySequenceMethods sequencemethods = {
+                        (lenfunc)py::ext::buffer::length<BufferType, PythonBufferType>,
+                        0, 0,
+                        (ssizeargfunc)py::ext::buffer::atindex<BufferType, PythonBufferType>,
+                        0, 0, 0, 0
+                    };
+                    return &sequencemethods;
+                }
+                
+                template <typename BufferType = buffer_t,
+                          typename PythonBufferType = BufferModelBase<BufferType>>
+                PyGetSetDef* getset() {
+                    static PyGetSetDef getsets[] = {
+                        {
+                            (char*)"__array_interface__",
+                                (getter)py::ext::buffer::get_array_interface<BufferType, PythonBufferType>,
+                                nullptr,
+                                (char*)"NumPy array interface (Python API)",
+                                nullptr },
+                        {
+                            (char*)"__array_struct__",
+                                (getter)py::ext::buffer::get_array_struct<BufferType, PythonBufferType>,
+                                nullptr,
+                                (char*)"NumPy array interface (C-level API)",
+                                nullptr },
+                        { nullptr, nullptr, nullptr, nullptr, nullptr }
+                    };
+                    return getsets;
+                }
+                
+                template <typename BufferType = buffer_t,
+                          typename PythonBufferType = BufferModelBase<BufferType>>
+                PyMethodDef* basic() {
+                    static PyMethodDef basics[] = {
+                        {
+                            "check",
+                                (PyCFunction)py::ext::check,
+                                METH_O | METH_CLASS,
+                                "Check the type of an instance against im.Image.Buffer" },
+                        {
+                            "tobytes",
+                                (PyCFunction)py::ext::buffer::tostring<BufferType, PythonBufferType>,
+                                METH_NOARGS,
+                                "Get bytes from image buffer as a string" },
+                        {
+                            "tostring",
+                                (PyCFunction)py::ext::buffer::tostring<BufferType, PythonBufferType>,
+                                METH_NOARGS,
+                                "Get bytes from image buffer as a string" },
+                        { nullptr, nullptr, 0, nullptr }
+                    };
+                    return basics;
+                }
+                
+            }; /* namespace methods */
+            
         }; /* namespace buffer */
     
     }; /* namespace ext */
@@ -1172,114 +1191,6 @@ static PyMethodDef Buffer_methods[] = {
             (PyCFunction)py::ext::buffer::transpose<buffer_t>,
             METH_NOARGS,
             "Get copy of buffer with transposed axes" },
-    { nullptr, nullptr, 0, nullptr }
-};
-
-using py::ext::ImageBufferModel;
-
-static PyBufferProcs ImageBuffer_Buffer3000Methods = {
-    0, 0, 0, 0,
-    (getbufferproc)py::ext::buffer::getbuffer<buffer_t, ImageBufferModel>,
-    (releasebufferproc)py::ext::buffer::releasebuffer<buffer_t, ImageBufferModel>,
-};
-
-static PySequenceMethods ImageBuffer_SequenceMethods = {
-    (lenfunc)py::ext::buffer::length<buffer_t, ImageBufferModel>,       /* sq_length */
-    0,                                                                  /* sq_concat */
-    0,                                                                  /* sq_repeat */
-    (ssizeargfunc)py::ext::buffer::atindex<buffer_t, ImageBufferModel>, /* sq_item */
-    0,                                                                  /* sq_slice */
-    0,                                                                  /* sq_ass_item HAHAHAHA */
-    0,                                                                  /* sq_ass_slice HEHEHE ASS <snort> HA */
-    0                                                                   /* sq_contains */
-};
-
-static PyGetSetDef ImageBuffer_getset[] = {
-    {
-        (char*)"__array_interface__",
-            (getter)py::ext::buffer::get_array_interface<buffer_t, ImageBufferModel>,
-            nullptr,
-            (char*)"NumPy array interface (Python API)",
-            nullptr },
-    {
-        (char*)"__array_struct__",
-            (getter)py::ext::buffer::get_array_struct<buffer_t, ImageBufferModel>,
-            nullptr,
-            (char*)"NumPy array interface (C-level API)",
-            nullptr },
-    { nullptr, nullptr, nullptr, nullptr, nullptr }
-};
-
-static PyMethodDef ImageBuffer_methods[] = {
-    {
-        "check",
-            (PyCFunction)py::ext::check,
-            METH_O | METH_CLASS,
-            "Check the type of an instance against im.Image.Buffer" },
-    {
-        "tobytes",
-            (PyCFunction)py::ext::buffer::tostring<buffer_t, ImageBufferModel>,
-            METH_NOARGS,
-            "Get bytes from image buffer as a string" },
-    {
-        "tostring",
-            (PyCFunction)py::ext::buffer::tostring<buffer_t, ImageBufferModel>,
-            METH_NOARGS,
-            "Get bytes from image buffer as a string" },
-    { nullptr, nullptr, 0, nullptr }
-};
-
-using py::ext::ArrayBufferModel;
-
-static PyBufferProcs ArrayBuffer_Buffer3000Methods = {
-    0, 0, 0, 0,
-    (getbufferproc)py::ext::buffer::getbuffer<buffer_t, ArrayBufferModel>,
-    (releasebufferproc)py::ext::buffer::releasebuffer<buffer_t, ArrayBufferModel>,
-};
-
-static PySequenceMethods ArrayBuffer_SequenceMethods = {
-    (lenfunc)py::ext::buffer::length<buffer_t, ArrayBufferModel>,       /* sq_length */
-    0,                                                                  /* sq_concat */
-    0,                                                                  /* sq_repeat */
-    (ssizeargfunc)py::ext::buffer::atindex<buffer_t, ArrayBufferModel>, /* sq_item */
-    0,                                                                  /* sq_slice */
-    0,                                                                  /* sq_ass_item HAHAHAHA */
-    0,                                                                  /* sq_ass_slice HEHEHE ASS <snort> HA */
-    0                                                                   /* sq_contains */
-};
-
-static PyGetSetDef ArrayBuffer_getset[] = {
-    {
-        (char*)"__array_interface__",
-            (getter)py::ext::buffer::get_array_interface<buffer_t, ArrayBufferModel>,
-            nullptr,
-            (char*)"NumPy array interface (Python API)",
-            nullptr },
-    {
-        (char*)"__array_struct__",
-            (getter)py::ext::buffer::get_array_struct<buffer_t, ArrayBufferModel>,
-            nullptr,
-            (char*)"NumPy array interface (C-level API)",
-            nullptr },
-    { nullptr, nullptr, nullptr, nullptr, nullptr }
-};
-
-static PyMethodDef ArrayBuffer_methods[] = {
-    {
-        "check",
-            (PyCFunction)py::ext::check,
-            METH_O | METH_CLASS,
-            "Check the type of an instance against im.Array.Buffer" },
-    {
-        "tobytes",
-            (PyCFunction)py::ext::buffer::tostring<buffer_t, ArrayBufferModel>,
-            METH_NOARGS,
-            "Get bytes from array buffer as a string" },
-    {
-        "tostring",
-            (PyCFunction)py::ext::buffer::tostring<buffer_t, ArrayBufferModel>,
-            METH_NOARGS,
-            "Get bytes from array buffer as a string" },
     { nullptr, nullptr, 0, nullptr }
 };
 
@@ -2106,6 +2017,8 @@ using im::HybridFactory;
 using im::ArrayFactory;
 using py::ext::ImageModel;
 using py::ext::ArrayModel;
+using py::ext::ImageBufferModel;
+using py::ext::ArrayBufferModel;
 
 static PyBufferProcs Image_Buffer3000Methods = py::ext::image::methods::buffer<HalideNumpyImage>();
 static PySequenceMethods Image_SequenceMethods = py::ext::image::methods::sequence<HalideNumpyImage>();

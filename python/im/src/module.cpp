@@ -171,14 +171,14 @@ PyTypeObject ImageBufferModel_Type = {
     0,                                                                      /* tp_compare */
     (reprfunc)py::ext::buffer::repr<buffer_t, ImageBufferModel>,            /* tp_repr */
     0,                                                                      /* tp_as_number */
-    &ImageBuffer_SequenceMethods,                                           /* tp_as_sequence */
+    py::ext::buffer::methods::sequence<buffer_t, ImageBufferModel>(),       /* tp_as_sequence */
     0,                                                                      /* tp_as_mapping */
     0,                                                                      /* tp_hash */
     0,                                                                      /* tp_call */
     (reprfunc)py::ext::buffer::str<buffer_t, ImageBufferModel>,             /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                                  /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                                  /* tp_setattro */
-    &ImageBuffer_Buffer3000Methods,                                         /* tp_as_buffer */
+    py::ext::buffer::methods::buffer<buffer_t, ImageBufferModel>(),         /* tp_as_buffer */
     py::ext::ImageModel::BufferModel::typeflags(),                          /* tp_flags */
     py::ext::ImageModel::BufferModel::typedoc(),                            /* tp_doc */
     (traverseproc)py::ext::buffer::traverse<buffer_t, ImageBufferModel>,    /* tp_traverse */
@@ -187,9 +187,9 @@ PyTypeObject ImageBufferModel_Type = {
     py::detail::offset(&ImageBufferModel::weakrefs),                        /* tp_weaklistoffset */
     0,                                                                      /* tp_iter */
     0,                                                                      /* tp_iternext */
-    ImageBuffer_methods,                                                    /* tp_methods */
+    py::ext::buffer::methods::basic<buffer_t, ImageBufferModel>(),          /* tp_methods */
     0,                                                                      /* tp_members */
-    ImageBuffer_getset,                                                     /* tp_getset */
+    py::ext::buffer::methods::getset<buffer_t, ImageBufferModel>(),         /* tp_getset */
     0,                                                                      /* tp_base */
     0,                                                                      /* tp_dict */
     0,                                                                      /* tp_descr_get */
@@ -273,14 +273,14 @@ PyTypeObject ArrayBufferModel_Type = {
     0,                                                                      /* tp_compare */
     (reprfunc)py::ext::buffer::repr<buffer_t, ArrayBufferModel>,            /* tp_repr */
     0,                                                                      /* tp_as_number */
-    &ArrayBuffer_SequenceMethods,                                           /* tp_as_sequence */
+    py::ext::buffer::methods::sequence<buffer_t, ArrayBufferModel>(),       /* tp_as_sequence */
     0,                                                                      /* tp_as_mapping */
     0,                                                                      /* tp_hash */
     0,                                                                      /* tp_call */
     (reprfunc)py::ext::buffer::str<buffer_t, ArrayBufferModel>,             /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                                  /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                                  /* tp_setattro */
-    &ArrayBuffer_Buffer3000Methods,                                         /* tp_as_buffer */
+    py::ext::buffer::methods::buffer<buffer_t, ArrayBufferModel>(),         /* tp_as_buffer */
     py::ext::ArrayModel::BufferModel::typeflags(),                          /* tp_flags */
     py::ext::ArrayModel::BufferModel::typedoc(),                            /* tp_doc */
     (traverseproc)py::ext::buffer::traverse<buffer_t, ArrayBufferModel>,    /* tp_traverse */
@@ -289,9 +289,9 @@ PyTypeObject ArrayBufferModel_Type = {
     py::detail::offset(&ArrayBufferModel::weakrefs),                        /* tp_weaklistoffset */
     0,                                                                      /* tp_iter */
     0,                                                                      /* tp_iternext */
-    ArrayBuffer_methods,                                                    /* tp_methods */
+    py::ext::buffer::methods::basic<buffer_t, ArrayBufferModel>(),          /* tp_methods */
     0,                                                                      /* tp_members */
-    ArrayBuffer_getset,                                                     /* tp_getset */
+    py::ext::buffer::methods::getset<buffer_t, ArrayBufferModel>(),         /* tp_getset */
     0,                                                                      /* tp_base */
     0,                                                                      /* tp_dict */
     0,                                                                      /* tp_descr_get */

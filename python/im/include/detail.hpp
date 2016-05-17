@@ -10,11 +10,13 @@
 #include <type_traits>
 #include <initializer_list>
 #include <Python.h>
+#define NO_IMPORT_ARRAY
+#include <numpy/ndarraytypes.h>
 #include <libimread/libimread.hpp>
 
 /// forward-declare PyArray_Descr from numpy
-struct _PyArray_Descr;
-typedef _PyArray_Descr PyArray_Descr;
+// struct _PyArray_Descr;
+// typedef _PyArray_Descr PyArray_Descr;
 
 namespace py {
     
@@ -379,6 +381,63 @@ namespace py {
             }
             return py::tuplize();
         }
+        
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wswitch"
+        template <typename ImageType> inline
+        PyObject* image_typed_idx(ImageType const& image,
+                                  int tc = NPY_UINT, std::size_t nidx = 0) {
+            switch (tc) {
+                case NPY_FLOAT: {
+                    float op = image->template rowp_as<float>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_DOUBLE:
+                case NPY_LONGDOUBLE: {
+                    double op = image->template rowp_as<double>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_SHORT:
+                case NPY_BYTE: {
+                    byte op = image->template rowp_as<byte>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_USHORT:
+                case NPY_UBYTE: {
+                    unsigned char op = image->template rowp_as<unsigned char>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_INT: {
+                    int32_t op = image->template rowp_as<int32_t>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_UINT: {
+                    uint32_t op = image->template rowp_as<uint32_t>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_LONG:
+                case NPY_LONGLONG: {
+                    int64_t op = image->template rowp_as<int64_t>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_ULONG:
+                case NPY_ULONGLONG: {
+                    uint64_t op = image->template rowp_as<uint64_t>(0)[nidx];
+                    return py::convert(op);
+                }
+                break;
+            }
+            uint32_t op = image->template rowp_as<uint32_t>(0)[nidx];
+            return py::convert(op);
+        }
+        #pragma clang diagnostic pop
         
         /// Version of PyDict_SetItemString that STEALS REFERENCES:
         int setitemstring(PyObject* dict, char const* key, PyObject* value);
