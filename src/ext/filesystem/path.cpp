@@ -273,11 +273,11 @@ namespace filesystem {
             }
             detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != NULL) {
-                if (std::strncmp(entp->d_name, ".", 1) == 0)   { continue; }
-                if (std::strncmp(entp->d_name, "..", 2) == 0)  { continue; }
                 /// ... it's either a directory, a regular file, or a symbolic link
                 switch (entp->d_type) {
                     case DT_DIR:
+                        if (std::strcmp(entp->d_name, ".") == 0)   { continue; }
+                        if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
                     case DT_REG:
                     case DT_LNK:
                         out.push_back(full_paths ? abspath/entp->d_name : path(entp->d_name));
@@ -301,17 +301,16 @@ namespace filesystem {
             }
             detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != NULL) {
-                if (std::strncmp(entp->d_name, ".", 1) == 0)   { continue; }
-                if (std::strncmp(entp->d_name, "..", 2) == 0)  { continue; }
                 /// ... it's either a directory, a regular file, or a symbolic link
-                std::string t(entp->d_name);
                 switch (entp->d_type) {
                     case DT_DIR:
-                        directories.push_back(std::move(t));
+                        if (std::strcmp(entp->d_name, ".") == 0)   { continue; }
+                        if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
+                        directories.push_back(std::string(entp->d_name));
                         continue;
                     case DT_REG:
                     case DT_LNK:
-                        files.push_back(std::move(t));
+                        files.push_back(std::string(entp->d_name));
                         continue;
                     default:
                         continue;
@@ -336,7 +335,7 @@ namespace filesystem {
                 "Bad call to path::list() from a non-directory:", str());
         }
         path abspath = make_absolute();
-        glob_t g = {0};
+        glob_t g = { 0 };
         {
             filesystem::switchdir s(abspath);
             ::glob(pattern, glob_pattern_flags, NULL, &g);
