@@ -32,8 +32,8 @@ namespace {
             U8Image halim = im::halide::read(fullpath.str());
             im::halide::write(halim, newpath.str());
             CHECK(newpath.is_file());
-            path copy = newpath.duplicate("/tmp/output-" + std::to_string(idx) + ".gif");
-            CHECK(copy.is_file());
+            // path copy = newpath.duplicate("/tmp/output-" + std::to_string(idx) + ".gif");
+            // CHECK(copy.is_file());
             idx++;
         });
     }
@@ -41,12 +41,13 @@ namespace {
     TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file",
               "[gif-write-multi-animated]")
     {
-        NamedTemporaryFile composite(".gif", FILESYSTEM_TEMP_FILENAME, false);
+        // NamedTemporaryFile composite(".gif", FILESYSTEM_TEMP_FILENAME, false);
+        NamedTemporaryFile composite(".gif");
         path basedir(im::test::basedir);
         std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
         im::ImageList outlist;
         
-        CHECK(composite.filepath.remove());
+        CHECK(composite.remove());
         std::for_each(sequence.begin(), sequence.end(),
                   [&](path const& p) {
             U8Image* halim = new U8Image(im::halide::read((basedir/p).str()));
@@ -54,13 +55,13 @@ namespace {
         });
         im::halide::write_multi(outlist, composite.str());
         CHECK(composite.filepath.is_file());
-        WTF("COMPOSITE FILEPATH, DOGG:",
-            composite.filepath.str(),
-            composite.filepath.inode(),
-            composite.filepath.filesize());
-        path dupe(composite.filepath.duplicate("/private/tmp/output-animated.gif"));
-        WTF("DUPE FILEPATH, DOGG:", dupe.str(), dupe.inode(), dupe.filesize());
-        CHECK(dupe.is_file());
+        // WTF("COMPOSITE FILEPATH, DOGG:",
+        //     composite.filepath.str(),
+        //     composite.filepath.inode(),
+        //     composite.filepath.filesize());
+        // path dupe(composite.filepath.duplicate("/private/tmp/output-animated.gif"));
+        // WTF("DUPE FILEPATH, DOGG:", dupe.str(), dupe.inode(), dupe.filesize());
+        // CHECK(dupe.is_file());
     }
     
 }
