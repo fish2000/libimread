@@ -115,10 +115,8 @@ namespace im {
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(3);
-        ImageList::vector_t imagevec = input.release();
-        std::for_each(imagevec.begin(), imagevec.end(), [&](Image* image) {
-            write_impl(*image, g);
-        });
+        std::for_each(input.begin(), input.end(),
+                  [&](Image* image) { write_impl(*image, g); });
         
         std::vector<byte> out = gif::write(g.get());
         output->write(&out[0], out.size());

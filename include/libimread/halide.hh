@@ -307,7 +307,8 @@ namespace im {
         inline void write_multi(ImageList& input, std::string const& filename,
                                                   options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
-            std::unique_ptr<FileSink> output(new FileSink(filename));
+            // std::unique_ptr<FileSink> output(new FileSink(filename));
+            std::unique_ptr<handle::sink> output(new handle::sink(filename));
             options_map default_opts = format->add_options(opts);
             format->write_multi(input, output.get(), default_opts);
         }
