@@ -2,6 +2,7 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_HALIDEIMAGE_HH_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_HALIDEIMAGE_HH_
 
+#include <array>
 #include <memory>
 #include <string>
 #include <iostream>
@@ -1971,8 +1972,8 @@ namespace py {
                 
                 template <typename ImageType,
                           typename BufferType = buffer_t>
-                PyGetSetDef[] getset() {
-                    return {
+                PyGetSetDef* getset() {
+                    static PyGetSetDef getsets[] = {
                         {
                             (char*)"__array_interface__",
                                 (getter)py::ext::image::get_array_interface<ImageType, BufferType>,
@@ -2023,12 +2024,13 @@ namespace py {
                                 (void*)py::ext::image::closures::WRITE },
                         { nullptr, nullptr, nullptr, nullptr, nullptr }
                     };
+                    return getsets;
                 }
                 
                 template <typename ImageType,
                           typename BufferType = buffer_t>
-                PyMethodDef[] basic() {
-                    return {
+                PyMethodDef* basic() {
+                    static PyMethodDef basics[] = {
                         {
                             "check",
                                 (PyCFunction)py::ext::check,
@@ -2076,6 +2078,7 @@ namespace py {
                                 "Dump the write options to a JSON file" },
                         { nullptr, nullptr, 0, nullptr }
                     };
+                    return basics;
                 }
                 
             } /* namespace methods */
@@ -2095,13 +2098,13 @@ using py::ext::ArrayModel;
 
 static PyBufferProcs Image_Buffer3000Methods = py::ext::image::methods::buffer<HalideNumpyImage>();
 static PySequenceMethods Image_SequenceMethods = py::ext::image::methods::sequence<HalideNumpyImage>();
-static PyGetSetDef Image_getset[] = py::ext::image::methods::getset<HalideNumpyImage>();
-static PyMethodDef Image_methods[] = py::ext::image::methods::basic<HalideNumpyImage>();
+static PyGetSetDef* Image_getset = py::ext::image::methods::getset<HalideNumpyImage>();
+static PyMethodDef* Image_methods = py::ext::image::methods::basic<HalideNumpyImage>();
 
 static PyBufferProcs Array_Buffer3000Methods = py::ext::image::methods::buffer<ArrayImage>();
 static PySequenceMethods Array_SequenceMethods = py::ext::image::methods::sequence<ArrayImage>();
-static PyGetSetDef Array_getset[] = py::ext::image::methods::getset<ArrayImage>();
-static PyMethodDef Array_methods[] = py::ext::image::methods::basic<ArrayImage>();
+static PyGetSetDef* Array_getset = py::ext::image::methods::getset<ArrayImage>();
+static PyMethodDef* Array_methods = py::ext::image::methods::basic<ArrayImage>();
 
 namespace py {
     
