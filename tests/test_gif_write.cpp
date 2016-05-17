@@ -9,9 +9,6 @@
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
-#define D(pth) "/Users/fish/Dropbox/libimread/tests/data/" pth
-#define T(pth) "/tmp/" pth
-
 namespace {
     
     using namespace Halide;
