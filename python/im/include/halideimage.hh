@@ -1869,18 +1869,19 @@ namespace py {
                 
                 template <typename ImageType,
                           typename BufferType = buffer_t>
-                PyBufferProcs buffer() {
-                    return {
+                PyBufferProcs* buffer() {
+                    static PyBufferProcs buffermethods = {
                         0, 0, 0, 0,
                         (getbufferproc)py::ext::image::getbuffer<ImageType, BufferType>,
                         (releasebufferproc)py::ext::image::releasebuffer<ImageType, BufferType>,
                     };
+                    return &buffermethods;
                 }
                 
                 template <typename ImageType,
                           typename BufferType = buffer_t>
-                PySequenceMethods sequence() {
-                    return {
+                PySequenceMethods* sequence() {
+                    static PySequenceMethods sequencemethods = {
                         (lenfunc)py::ext::image::length<ImageType, BufferType>,         /* sq_length */
                         0,                                                              /* sq_concat */
                         0,                                                              /* sq_repeat */
@@ -1890,6 +1891,7 @@ namespace py {
                         0,                                                              /* sq_ass_slice HEHEHE ASS <snort> HA */
                         0                                                               /* sq_contains */
                     };
+                    return &sequencemethods;
                 }
                 
                 template <typename ImageType,
@@ -2008,29 +2010,6 @@ namespace py {
         } /* namespace image */
         
     } /* namespace ext */
-        
-} /* namespace py */
-
-using im::HalideNumpyImage;
-using im::ArrayImage;
-using im::HybridFactory;
-using im::ArrayFactory;
-using py::ext::ImageModel;
-using py::ext::ArrayModel;
-using py::ext::ImageBufferModel;
-using py::ext::ArrayBufferModel;
-
-static PyBufferProcs Image_Buffer3000Methods = py::ext::image::methods::buffer<HalideNumpyImage>();
-static PySequenceMethods Image_SequenceMethods = py::ext::image::methods::sequence<HalideNumpyImage>();
-static PyGetSetDef* Image_getset = py::ext::image::methods::getset<HalideNumpyImage>();
-static PyMethodDef* Image_methods = py::ext::image::methods::basic<HalideNumpyImage>();
-
-static PyBufferProcs Array_Buffer3000Methods = py::ext::image::methods::buffer<ArrayImage>();
-static PySequenceMethods Array_SequenceMethods = py::ext::image::methods::sequence<ArrayImage>();
-static PyGetSetDef* Array_getset = py::ext::image::methods::getset<ArrayImage>();
-static PyMethodDef* Array_methods = py::ext::image::methods::basic<ArrayImage>();
-
-namespace py {
     
     namespace functions {
         

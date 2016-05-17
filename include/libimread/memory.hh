@@ -15,6 +15,7 @@ namespace im {
         public:
             memory_source(const byte* c, const int len);
             virtual ~memory_source();
+            
             virtual std::size_t read(byte* buffer, std::size_t n);
             virtual bool can_seek() const noexcept;
             virtual std::size_t seek_absolute(std::size_t p);

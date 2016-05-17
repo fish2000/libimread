@@ -30,6 +30,8 @@
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/rehash.hh>
 
+using im::byte;
+
 namespace filesystem {
     
     namespace detail {
@@ -180,6 +182,12 @@ namespace filesystem {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return detail::null_inode_v; }
         return static_cast<detail::inode_t>(sb.st_ino);
+    }
+    
+    std::size_t path::filesize() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return 0; }
+        return sb.st_size * sizeof(byte);
     }
     
     #define REGEX_FLAGS case_sensitive ? regex_flags_icase : regex_flags
@@ -510,7 +518,7 @@ namespace filesystem {
     }
     
     path path::append(std::string const& appendix) const {
-        path out(m_path, m_absolute);
+        path out(m_path.empty() ? detail::stringvec_t{ "" } : m_path, m_absolute);
         out.m_path.back().append(appendix);
         return out;
     }
@@ -560,7 +568,8 @@ namespace filesystem {
     
     /// calculate the hash value for the path
     std::size_t path::hash() const noexcept {
-        std::size_t seed = static_cast<std::size_t>(m_absolute);
+        std::size_t seed = static_cast<std::size_t>(m_absolute) +
+                           static_cast<std::size_t>(inode());
         return std::accumulate(m_path.begin(), m_path.end(),
                                seed, detail::rehasher_t());
     }

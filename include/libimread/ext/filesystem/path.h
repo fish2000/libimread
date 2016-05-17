@@ -90,6 +90,7 @@ namespace filesystem {
             bool is_absolute() const;
             bool empty() const;
             detail::inode_t inode() const;
+            std::size_t filesize() const;
             
             /// return a new and fully-absolute path wrapper,
             /// based on the path in question

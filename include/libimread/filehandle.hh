@@ -26,9 +26,7 @@ namespace im {
                 {}
             
             virtual ~handle_source_sink() {
-                if (!external) {
-                    close();
-                }
+                if (!external) { close(); }
             }
             
             virtual bool can_seek() const noexcept { return true; }

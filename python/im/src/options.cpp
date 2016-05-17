@@ -82,8 +82,9 @@ namespace py {
                        BufferModel_Check(value)         ||
                        ImageModel_Check(value)          ||
                        ImageBufferModel_Check(value)) {
-                imread_raise(OptionsError, "[ERROR]",
+                PyErr_SetString(PyExc_ValueError,
                     "Illegal data found");
+                return options_map::undefined;
             } else if (PyObject_CheckBuffer(value)) {
                 Py_buffer view;
                 PyObject_GetBuffer(value, &view, PyBUF_SIMPLE);
@@ -93,12 +94,12 @@ namespace py {
                     return data.str();
                 }
             }
-            
             /// "else":
             char const* c = py::options::get_cstring(value);
             if (!c) {
-                imread_raise(OptionsError, "[ERROR]",
+                PyErr_SetString(PyExc_KeyError,
                     "Misparsed map value");
+                return options_map::undefined;
             }
             return c;
         }
@@ -113,11 +114,7 @@ namespace py {
             for (; idx < len; idx++) {
                 PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                 Json ison(Json::null);
-                try {
-                    ison = py::options::convert(item);
-                } catch (im::OptionsError& exc) {
-                    WTF("OptionsError raised:", exc.what());
-                }
+                ison = py::options::convert(item); /// might PyErr here
                 out.append(ison);
             }
             Py_DECREF(sequence);
@@ -130,25 +127,23 @@ namespace py {
             if (!PyAnySet_Check(set)) { return out; }
             PyObject* iterator = PyObject_GetIter(set);
             if (iterator == NULL) {
-                imread_raise(OptionsError, "[ERROR]",
+                PyErr_SetString(PyExc_ValueError,
                     "Set object not iterable");
+                return options_list::undefined;
             }
             PyObject* item;
             while ((item = PyIter_Next(iterator))) {
                 /// double-parens silence a warning
                 Json ison(Json::null);
-                try {
-                    ison = py::options::convert(item);
-                } catch (im::OptionsError& exc) {
-                    WTF("OptionsError raised:", exc.what());
-                }
+                ison = py::options::convert(item); /// might PyErr here
                 out.append(ison);
                 Py_DECREF(item);
             }
             Py_DECREF(iterator);
             if (PyErr_Occurred()) {
-                imread_raise(OptionsError, "[ERROR]",
+                PyErr_SetString(PyExc_IOError,
                     "Error occurred while iterating set");
+                return options_list::undefined;
             }
             return out;
         }
@@ -163,11 +158,7 @@ namespace py {
             while (PyDict_Next(dict, &pos, &key, &value)) {
                 std::string k = py::options::get_cstring(key);
                 Json v(Json::null);
-                try {
-                    v = py::options::convert(value);
-                } catch (im::OptionsError& exc) {
-                    WTF("OptionsError raised:", exc.what());
-                }
+                v = py::options::convert(value); /// might PyErr here
                 out.set(k, v);
             }
             return out;

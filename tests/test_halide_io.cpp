@@ -4,6 +4,7 @@
 #include <libimread/halide.hh>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/IO/png.hh>
+#include <libimread/IO/tiff.hh>
 
 #include "include/catch.hpp"
 
@@ -83,8 +84,40 @@ namespace {
         CHECK(path::remove(tf));
     }
     
+    TEST_CASE("[halide-io] Read a JPEG and rewrite it as a TIFF using tmpwrite()",
+              "[halide-read-jpeg-write-tiff-tmpwrite]")
+    {
+        using im::format::TIFF;
+        
+        U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
+        auto tf = im::halide::tmpwrite<TIFF>(halim);
+        CHECK(path::remove(tf));
+        
+        U8Image halim2 = im::halide::read(D("IMG_4332.jpg"));
+        auto tf2 = im::halide::tmpwrite<TIFF>(halim2);
+        CHECK(path::remove(tf2));
+        
+        U8Image halim3 = im::halide::read(D("IMG_7333.jpeg"));
+        auto tf3 = im::halide::tmpwrite<TIFF>(halim3);
+        CHECK(path::remove(tf3));
+        
+        U8Image halim4 = im::halide::read(D("10954288_342637995941364_1354507656_n.jpg"));
+        auto tf4 = im::halide::tmpwrite<TIFF>(halim4);
+        CHECK(path::remove(tf4));
+    }
+    
+    TEST_CASE("[halide-io] Read a TIFF, rewrite it as another TIFF using tmpwrite()",
+              "[halide-read-tiff-write-tiff-tmpwrite]")
+    {
+        using im::format::TIFF;
+        
+        U8Image halim = im::halide::read(D("ptlobos.tif"));
+        auto tf = im::halide::tmpwrite<TIFF>(halim);
+        CHECK(path::remove(tf));
+    }
+    
     TEST_CASE("[halide-io] Write multiple formats as PPM",
-              "[halide-read-tiff-write-ppm]")
+              "[halide-read-multiple-write-ppm]")
     {
         im::fs::TemporaryDirectory td("test-halide-io");
         
@@ -97,6 +130,22 @@ namespace {
         im::halide::write(halim3, td.dirpath/"PPM_OH_DOGGGGG.ppm");
         U8Image halim4 = im::halide::read(td.dirpath/"PPM_OH_DOGGGGG.ppm");
         im::halide::write(halim4, td.dirpath/"PPM_IMG_DOGGGGGGGGG.png");
+    }
+    
+    TEST_CASE("[halide-io] Write multiple formats as TIFF",
+              "[halide-read-multiple-write-tiff]")
+    {
+        im::fs::TemporaryDirectory td("test-halide-io");
+        
+        U8Image halim = im::halide::read(D("ptlobos.tif"));
+        im::halide::write(halim, td.dirpath/"TIFF_DUG986.tiff");
+        U8Image halim2 = im::halide::read(td.dirpath/"TIFF_DUG986.tiff");
+        im::halide::write(halim2, td.dirpath/"TIFF_YO_DOGG222.tif");
+        
+        U8Image halim3 = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
+        im::halide::write(halim3, td.dirpath/"TIFF_OH_DOGGGGG.tiff");
+        U8Image halim4 = im::halide::read(td.dirpath/"TIFF_OH_DOGGGGG.tiff");
+        im::halide::write(halim4, td.dirpath/"TIFF_IMG_DOGGGGGGGGG.tif");
     }
     
     TEST_CASE("[halide-io] Check the dimensions of an image",

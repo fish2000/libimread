@@ -56,6 +56,15 @@ PyTypeObject HybridImageModel_Type = {
     0,                                                                  /* tp_version_tag */
 };
 
+using im::HalideNumpyImage;
+using im::ArrayImage;
+using im::HybridFactory;
+using im::ArrayFactory;
+using py::ext::ImageModel;
+using py::ext::ArrayModel;
+using py::ext::ImageBufferModel;
+using py::ext::ArrayBufferModel;
+
 PyTypeObject BufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                  /* ob_size */
@@ -120,14 +129,14 @@ PyTypeObject ImageModel_Type = {
     0,                                                                  /* tp_compare */
     (reprfunc)py::ext::image::repr<HalideNumpyImage, buffer_t>,         /* tp_repr */
     0,                                                                  /* tp_as_number */
-    &Image_SequenceMethods,                                             /* tp_as_sequence */
+    py::ext::image::methods::sequence<HalideNumpyImage>(),              /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
     (hashfunc)py::ext::image::hash<HalideNumpyImage, buffer_t>,         /* tp_hash */
     0,                                                                  /* tp_call */
     (reprfunc)py::ext::image::str<HalideNumpyImage, buffer_t>,          /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
-    &Image_Buffer3000Methods,                                           /* tp_as_buffer */
+    py::ext::image::methods::buffer<HalideNumpyImage>(),                /* tp_as_buffer */
     py::ext::ImageModel::typeflags(),                                   /* tp_flags */
     py::ext::ImageModel::typedoc(),                                     /* tp_doc */
     (traverseproc)py::ext::image::traverse<HalideNumpyImage, buffer_t>, /* tp_traverse */
@@ -222,14 +231,14 @@ PyTypeObject ArrayModel_Type = {
     0,                                                                  /* tp_compare */
     (reprfunc)py::ext::image::repr<ArrayImage, buffer_t>,               /* tp_repr */
     0,                                                                  /* tp_as_number */
-    &Array_SequenceMethods,                                             /* tp_as_sequence */
+    py::ext::image::methods::sequence<ArrayImage>(),                    /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
     (hashfunc)py::ext::image::hash<ArrayImage, buffer_t>,               /* tp_hash */
     0,                                                                  /* tp_call */
     (reprfunc)py::ext::image::str<ArrayImage, buffer_t>,                /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
     (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
-    &Array_Buffer3000Methods,                                           /* tp_as_buffer */
+    py::ext::image::methods::buffer<ArrayImage>(),                      /* tp_as_buffer */
     py::ext::ArrayModel::typeflags(),                                   /* tp_flags */
     py::ext::ArrayModel::typedoc(),                                     /* tp_doc */
     (traverseproc)py::ext::image::traverse<ArrayImage, buffer_t>,       /* tp_traverse */

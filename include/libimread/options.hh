@@ -45,6 +45,13 @@ namespace im {
             options_list()
                 :Json()
                 { mkarray(); }
+            
+            options_list(Json const& other)
+                :Json(other)
+                {}
+            options_list(Json&& other) noexcept
+                :Json(other)
+                {}
     };
     
     std::string get_optional_string(options_map const& opts,  std::string const& key);
