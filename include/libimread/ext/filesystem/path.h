@@ -36,6 +36,7 @@ namespace filesystem {
         using stringvec_t = std::vector<std::string>;
         using stringlist_t = std::initializer_list<std::string>;
         using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
+        using inode_t = uint64_t;
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
         /// instead of plain ol' pathvec_t
@@ -53,6 +54,9 @@ namespace filesystem {
         static constexpr char posix_extension_separator   = '.';
         static constexpr char posix_path_separator        = '/';
         static constexpr char posix_pathvar_separator     = ':';
+        
+        /// constant for null (nonexistent) inode
+        static constexpr inode_t null_inode_v             = 0;
     }
     
     /// The actual class for representing a path on the filesystem
@@ -69,35 +73,23 @@ namespace filesystem {
                 native_path = posix_path
             };
             
-            path()
-                :m_type(native_path)
-                ,m_absolute(false)
-                {}
+            path();
+            path(path const& p);
+            path(path&& p) noexcept;
             
-            path(path const& p)
-                :m_type(native_path)
-                ,m_path(p.m_path)
-                ,m_absolute(p.m_absolute)
-                {}
-            
-            path(path&& p) noexcept
-                :m_type(native_path)
-                ,m_path(std::move(p.m_path))
-                ,m_absolute(p.m_absolute)
-                {}
-            
-            path(char* st)              { set(st); }
-            path(char const* st)        { set(st); }
-            path(std::string const& st) { set(st); }
+            path(char* st);
+            path(char const* st);
+            path(std::string const& st);
             
             explicit path(int descriptor);
             explicit path(const void* address);
             explicit path(detail::stringvec_t const& vec, bool absolute = false);
             explicit path(detail::stringlist_t list);
             
-            inline std::size_t size() const { return static_cast<std::size_t>(m_path.size()); }
-            inline bool is_absolute() const { return m_absolute; }
-            inline bool empty() const       { return m_path.empty(); }
+            std::size_t size() const;
+            bool is_absolute() const;
+            bool empty() const;
+            detail::inode_t inode() const;
             
             /// return a new and fully-absolute path wrapper,
             /// based on the path in question
@@ -272,8 +264,8 @@ namespace filesystem {
             /// rename a file (using ::rename()),
             /// specifying the new name with a new path instance
             bool rename(path const& newpath);
-            bool rename(char const* newpath)        { return rename(path(newpath)); }
-            bool rename(std::string const& newpath) { return rename(path(newpath)); }
+            bool rename(char const* newpath);
+            bool rename(std::string const& newpath);
             
             /// Static forwarder for path::rename<P, Q>(p, q)
             template <typename P, typename Q> inline
@@ -284,8 +276,8 @@ namespace filesystem {
             /// duplicate a file (using ::fcopyfile() or ::sendfile()),
             /// specifying the new name with a new path instance
             path duplicate(path const& newpath);
-            path duplicate(char const* newpath)        { return duplicate(path(newpath)); }
-            path duplicate(std::string const& newpath) { return duplicate(path(newpath)); }
+            path duplicate(char const* newpath);
+            path duplicate(std::string const& newpath);
             
             /// Static forwarder for path::rename<P, Q>(p, q)
             template <typename P, typename Q> inline
@@ -307,7 +299,7 @@ namespace filesystem {
             /// Get back the parent path (also known as the 'dirname' if you are
             /// a fan of the Python os.path module, which meh I could take or leave)
             path parent() const;
-            inline path dirname() const { return parent(); }
+            path dirname() const;
             
             /// join a path with a new trailing path fragment
             path join(path const& other) const;
@@ -354,20 +346,18 @@ namespace filesystem {
             std::string str() const;
             
             /// Convenience function to get a C-style string, a la std::string's API
-            inline char const* c_str() const { return str().c_str(); }
+            char const* c_str() const;
             
             /// Static functions for getting both the current, system temp, and user/home directories
             static path getcwd();
-            static path cwd()                { return path::getcwd(); }
-            static path gettmp()             { return path(detail::tmpdir()); }
-            static path tmp()                { return path(detail::tmpdir()); }
-            static path home()               { return path(detail::userdir()); }
-            static path user()               { return path(detail::userdir()); }
-            static path executable()         { return path(detail::execpath()); }
+            static path cwd();
+            static path gettmp();
+            static path tmp();
+            static path home();
+            static path user();
+            static path executable();
             
-            static detail::stringvec_t system() {
-                return tokenize(detail::syspaths(), detail::posix_pathvar_separator);
-            }
+            static detail::stringvec_t system();
             
             /// Conversion operators -- in theory you can pass your paths to functions
             /// expecting either std::strings or const char*s with these...
@@ -375,11 +365,7 @@ namespace filesystem {
             operator char const*()           { return c_str(); }
             
             /// Set and tokenize the path using a std::string (mainly used internally)
-            void set(std::string const& str) {
-                m_type = native_path;
-                m_path = tokenize(str, sep);
-                m_absolute = !str.empty() && str[0] == sep;
-            }
+            void set(std::string const& str);
             
             /// ... and here, we have the requisite assign operators
             path &operator=(std::string const& str) { set(str); return *this; }
@@ -421,24 +407,8 @@ namespace filesystem {
             
         protected:
             static detail::stringvec_t tokenize(std::string const& source,
-                                                character_type const delim) {
-                detail::stringvec_t tokens;
-                size_type lastPos = 0,
-                          pos = source.find_first_of(delim, lastPos);
-                
-                while (lastPos != std::string::npos) {
-                    if (pos != lastPos) {
-                        tokens.push_back(source.substr(lastPos, pos - lastPos));
-                    }
-                    lastPos = pos;
-                    if (lastPos == std::string::npos || lastPos + 1 == source.length()) { break; }
-                    pos = source.find_first_of(delim, ++lastPos);
-                }
-                
-                return tokens;
-            }
+                                                character_type const delim);
             
-        protected:
             path_type m_type;
             detail::stringvec_t m_path;
             bool m_absolute;

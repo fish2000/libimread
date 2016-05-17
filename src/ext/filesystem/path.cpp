@@ -23,6 +23,7 @@
 #include <numeric>
 #include <iterator>
 #include <algorithm>
+#include <type_traits>
 
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/directory.h>
@@ -36,11 +37,12 @@ namespace filesystem {
         using stat_t = struct stat;
         using passwd_t = struct passwd;
         using rehasher_t = hash::rehasher<std::string>;
-        using dlinfo_t = Dl_info;
+        // using inode_t = std::make_signed_t<::ino_t>;
+        using dlinfo_t = ::Dl_info;
         
-        const char* tmpdir() noexcept {
+        char const* tmpdir() noexcept {
             /// cribbed/tweaked from boost
-            const char* dirname;
+            char const* dirname;
             dirname = std::getenv("TMPDIR");
             if (NULL == dirname) { dirname = std::getenv("TMP"); }
             if (NULL == dirname) { dirname = std::getenv("TEMP"); }
@@ -48,8 +50,8 @@ namespace filesystem {
             return dirname;
         }
         
-        const char* userdir() noexcept {
-            const char* dirname;
+        char const* userdir() noexcept {
+            char const* dirname;
             dirname = std::getenv("HOME");
             if (NULL == dirname) {
                 passwd_t* pw = ::getpwuid(::geteuid());
@@ -59,8 +61,8 @@ namespace filesystem {
             return dirname;
         }
         
-        const char* syspaths() noexcept {
-            const char* syspaths;
+        char const* syspaths() noexcept {
+            char const* syspaths;
             syspaths = std::getenv("PATH");
             if (NULL == syspaths) { syspaths = "/bin:/usr/bin"; }
             return syspaths;
@@ -116,6 +118,27 @@ namespace filesystem {
     constexpr path::character_type path::sep;
     constexpr path::character_type path::extsep;
     
+    path::path()
+        :m_type(native_path)
+        ,m_absolute(false)
+        {}
+    
+    path::path(path const& p)
+        :m_type(native_path)
+        ,m_path(p.m_path)
+        ,m_absolute(p.m_absolute)
+        {}
+    
+    path::path(path&& p) noexcept
+        :m_type(native_path)
+        ,m_path(std::move(p.m_path))
+        ,m_absolute(p.m_absolute)
+        {}
+    
+    path::path(char* st)              { set(st); }
+    path::path(char const* st)        { set(st); }
+    path::path(std::string const& st) { set(st); }
+    
     path::path(int descriptor) {
         char fdpath[PATH_MAX];
         int return_value = ::fcntl(descriptor, F_GETPATH, fdpath);
@@ -149,6 +172,16 @@ namespace filesystem {
         ,m_path(list)
         {}
     
+    std::size_t path::size() const { return static_cast<std::size_t>(m_path.size()); }
+    bool path::is_absolute() const { return m_absolute; }
+    bool path::empty() const       { return m_path.empty(); }
+    
+    detail::inode_t path::inode() const  {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return detail::null_inode_v; }
+        return static_cast<detail::inode_t>(sb.st_ino);
+    }
+    
     #define REGEX_FLAGS case_sensitive ? regex_flags_icase : regex_flags
     
     bool path::match(std::regex const& pattern, bool case_sensitive) const {
@@ -173,8 +206,7 @@ namespace filesystem {
         char temp[PATH_MAX];
         if (::realpath(c_str(), temp) == NULL) {
             imread_raise(FileSystemError,
-                "In reference to path value:",
-                c_str(),
+                "In reference to path value:", c_str(),
                 "FATAL internal error raised during path::make_absolute() call to ::realpath():",
                 std::strerror(errno));
         }
@@ -368,30 +400,30 @@ namespace filesystem {
     
     bool path::exists() const {
         detail::stat_t sb;
-        return ::stat(c_str(), &sb) == 0;
+        return ::lstat(c_str(), &sb) == 0;
     }
     
     bool path::is_file() const {
         detail::stat_t sb;
-        if (::stat(c_str(), &sb)) { return false; }
+        if (::lstat(c_str(), &sb)) { return false; }
         return S_ISREG(sb.st_mode);
     }
     
     bool path::is_link() const {
         detail::stat_t sb;
-        if (::stat(c_str(), &sb)) { return false; }
+        if (::lstat(c_str(), &sb)) { return false; }
         return S_ISLNK(sb.st_mode);
     }
     
     bool path::is_directory() const {
         detail::stat_t sb;
-        if (::stat(c_str(), &sb)) { return false; }
+        if (::lstat(c_str(), &sb)) { return false; }
         return S_ISDIR(sb.st_mode);
     }
     
     bool path::is_file_or_link() const {
         detail::stat_t sb;
-        if (::stat(c_str(), &sb)) { return false; }
+        if (::lstat(c_str(), &sb)) { return false; }
         return bool(S_ISREG(sb.st_mode)) || bool(S_ISLNK(sb.st_mode));
     }
     
@@ -419,6 +451,8 @@ namespace filesystem {
         if (status) { set(newpath.make_absolute().str()); }
         return status;
     }
+    bool path::rename(char const* newpath)        { return rename(path(newpath)); }
+    bool path::rename(std::string const& newpath) { return rename(path(newpath)); }
     
     path path::duplicate(path const& newpath) {
         path out;
@@ -427,10 +461,12 @@ namespace filesystem {
         if (status) { out = path::absolute(newpath); }
         return out;
     }
+    path path::duplicate(char const* newpath)        { return duplicate(path(newpath)); }
+    path path::duplicate(std::string const& newpath) { return duplicate(path(newpath)); }
     
     std::string path::extension() const {
         if (empty()) { return ""; }
-        const std::string& last = m_path.back();
+        std::string const& last = m_path.back();
         size_type pos = last.find_last_of(extsep);
         if (pos == std::string::npos) { return ""; }
         return last.substr(pos+1);
@@ -456,6 +492,7 @@ namespace filesystem {
         }
         return result;
     }
+    path path::dirname() const { return parent(); }
     
     path path::join(path const& other) const {
         if (other.m_absolute) {
@@ -491,18 +528,40 @@ namespace filesystem {
         return out;
     }
     
+    char const* path::c_str() const {
+        return str().c_str();
+    }
+    
     path path::getcwd() {
         char temp[PATH_MAX];
         if (::getcwd(temp, PATH_MAX) == NULL) {
             imread_raise(FileSystemError,
-                "Internal error in getcwd():", std::strerror(errno));
+                "Internal error in getcwd():",
+                std::strerror(errno));
         }
         return path(temp);
     }
     
+    path path::cwd()                { return path::getcwd(); }
+    path path::gettmp()             { return path(detail::tmpdir()); }
+    path path::tmp()                { return path(detail::tmpdir()); }
+    path path::home()               { return path(detail::userdir()); }
+    path path::user()               { return path(detail::userdir()); }
+    path path::executable()         { return path(detail::execpath()); }
+    
+    detail::stringvec_t path::system() {
+        return tokenize(detail::syspaths(), detail::posix_pathvar_separator);
+    }
+    
+    void path::set(std::string const& str) {
+        m_type = native_path;
+        m_path = tokenize(str, sep);
+        m_absolute = !str.empty() && str[0] == sep;
+    }
+    
     /// calculate the hash value for the path
     std::size_t path::hash() const noexcept {
-        std::size_t seed = static_cast<std::size_t>(is_absolute());
+        std::size_t seed = static_cast<std::size_t>(m_absolute);
         return std::accumulate(m_path.begin(), m_path.end(),
                                seed, detail::rehasher_t());
     }
@@ -520,6 +579,25 @@ namespace filesystem {
                   std::back_inserter(out));
         return out;
     }
+    
+    detail::stringvec_t path::tokenize(std::string const& source,
+                                       path::character_type const delim) {
+        detail::stringvec_t tokens;
+        path::size_type lastPos = 0,
+                        pos = source.find_first_of(delim, lastPos);
+        
+        while (lastPos != std::string::npos) {
+            if (pos != lastPos) {
+                tokens.push_back(source.substr(lastPos, pos - lastPos));
+            }
+            lastPos = pos;
+            if (lastPos == std::string::npos || lastPos + 1 == source.length()) { break; }
+            pos = source.find_first_of(delim, ++lastPos);
+        }
+        
+        return tokens;
+    }
+    
     
     /// define static mutex,
     /// as declared in switchdir struct:
