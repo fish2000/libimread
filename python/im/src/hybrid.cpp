@@ -242,7 +242,7 @@ namespace im {
 #define xDEPTH d2
     
     HybridFactory::HybridFactory()
-        :nm("")
+        :nm("Image")
         {}
     
     HybridFactory::HybridFactory(std::string const& n)
@@ -486,7 +486,7 @@ namespace im {
 #define xDEPTH d2
     
     ArrayFactory::ArrayFactory()
-        :nm("")
+        :nm("Array")
         {}
     
     ArrayFactory::ArrayFactory(std::string const& n)

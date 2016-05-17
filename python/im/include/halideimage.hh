@@ -226,9 +226,8 @@ namespace py {
                        Py_TPFLAGS_HAVE_NEWBUFFER;
             }
             
-            static char const* typedoc() {
-                return "Python buffer model object";
-            }
+            static char const* typestring() { return "im.Buffer"; }
+            static char const* typedoc()    { return "Python buffer model object"; }
             
         }; /* BufferModelBase */
         
@@ -415,6 +414,14 @@ namespace py {
                                               newstruct,
                                               array_destructor<PyArrayInterface>());
                 }
+            
+                static char const* typestring() {
+                    static FactoryType factory;
+                    static std::string name = "im." + factory.name() + ".Buffer";
+                    return name.c_str();
+                }
+                
+                static char const* typedoc()    { return "Python image-backed buffer"; }
                 
             }; /* BufferModel */
             
@@ -904,9 +911,13 @@ namespace py {
                        Py_TPFLAGS_HAVE_NEWBUFFER;
             }
             
-            static char const* typedoc() {
-                return "Python image model object";
+            static char const* typestring() {
+                static FactoryType factory;
+                static std::string name = "im." + factory.name();
+                return name.c_str();
             }
+            
+            static char const* typedoc()    { return "Python image model object"; }
             
         }; /* ImageModelBase */
         

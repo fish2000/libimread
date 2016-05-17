@@ -59,7 +59,7 @@ PyTypeObject HybridImageModel_Type = {
 PyTypeObject BufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                  /* ob_size */
-    "im.Buffer",                                                        /* tp_name */
+    py::ext::BufferModelBase<buffer_t>::typestring(),                   /* tp_name */
     sizeof(py::ext::BufferModelBase<buffer_t>),                         /* tp_basicsize */
     0,                                                                  /* tp_itemsize */
     (destructor)py::ext::buffer::dealloc<buffer_t>,                     /* tp_dealloc */
@@ -110,7 +110,7 @@ PyTypeObject BufferModel_Type = {
 PyTypeObject ImageModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                  /* ob_size */
-    "im.Image",                                                         /* tp_name */
+    py::ext::ImageModel::typestring(),                                  /* tp_name */
     sizeof(ImageModel),                                                 /* tp_basicsize */
     0,                                                                  /* tp_itemsize */
     (destructor)py::ext::image::dealloc<HalideNumpyImage, buffer_t>,    /* tp_dealloc */
@@ -136,9 +136,9 @@ PyTypeObject ImageModel_Type = {
     py::detail::offset(&ImageModel::weakrefs),                          /* tp_weaklistoffset */
     0,                                                                  /* tp_iter */
     0,                                                                  /* tp_iternext */
-    Image_methods,                                                      /* tp_methods */
+    py::ext::image::methods::basic<HalideNumpyImage>(),                 /* tp_methods */
     0,                                                                  /* tp_members */
-    Image_getset,                                                       /* tp_getset */
+    py::ext::image::methods::getset<HalideNumpyImage>(),                /* tp_getset */
     0,                                                                  /* tp_base */
     0,                                                                  /* tp_dict */
     0,                                                                  /* tp_descr_get */
@@ -161,7 +161,7 @@ PyTypeObject ImageModel_Type = {
 PyTypeObject ImageBufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                      /* ob_size */
-    "im.Image.Buffer",                                                      /* tp_name */
+    py::ext::ImageModel::BufferModel::typestring(),                         /* tp_name */
     sizeof(ImageBufferModel),                                               /* tp_basicsize */
     0,                                                                      /* tp_itemsize */
     (destructor)py::ext::buffer::dealloc<buffer_t, ImageBufferModel>,       /* tp_dealloc */
@@ -212,7 +212,7 @@ PyTypeObject ImageBufferModel_Type = {
 PyTypeObject ArrayModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                  /* ob_size */
-    "im.Array",                                                         /* tp_name */
+    py::ext::ArrayModel::typestring(),                                  /* tp_name */
     sizeof(ArrayModel),                                                 /* tp_basicsize */
     0,                                                                  /* tp_itemsize */
     (destructor)py::ext::image::dealloc<ArrayImage, buffer_t>,          /* tp_dealloc */
@@ -238,9 +238,9 @@ PyTypeObject ArrayModel_Type = {
     py::detail::offset(&ArrayModel::weakrefs),                          /* tp_weaklistoffset */
     0,                                                                  /* tp_iter */
     0,                                                                  /* tp_iternext */
-    Array_methods,                                                      /* tp_methods */
+    py::ext::image::methods::basic<ArrayImage>(),                       /* tp_methods */
     0,                                                                  /* tp_members */
-    Array_getset,                                                       /* tp_getset */
+    py::ext::image::methods::getset<ArrayImage>(),                      /* tp_getset */
     0,                                                                  /* tp_base */
     0,                                                                  /* tp_dict */
     0,                                                                  /* tp_descr_get */
@@ -263,7 +263,7 @@ PyTypeObject ArrayModel_Type = {
 PyTypeObject ArrayBufferModel_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                                                      /* ob_size */
-    "im.Array.Buffer",                                                      /* tp_name */
+    py::ext::ArrayModel::BufferModel::typestring(),                         /* tp_name */
     sizeof(ArrayBufferModel),                                               /* tp_basicsize */
     0,                                                                      /* tp_itemsize */
     (destructor)py::ext::buffer::dealloc<buffer_t, ArrayBufferModel>,       /* tp_dealloc */
