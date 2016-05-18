@@ -83,6 +83,7 @@ SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
 SET(INTERPOL_DIR "${DEPS_DIR}/interpol")
 SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
 SET(AFNETWORKING_DIR "${DEPS_DIR}/AFNetworking")
+SET(LIBBF_DIR "${DEPS_DIR}/libbf/src")
 SET(MABLOCKCLOSURE_DIR "${DEPS_DIR}/MABlockClosure")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
 SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
@@ -122,6 +123,7 @@ include_directories("${DOCOPT_DIR}")
 include_directories("${IMAGECOMPRESSION_DIR}")
 include_directories("${INTERPOL_DIR}")
 include_directories("${AFNETWORKING_DIR}")
+include_directories("${LIBBF_DIR}")
 include_directories("${MABLOCKCLOSURE_DIR}")
 include_directories("${IOD_DIR}")
 include_directories("${SG14_DIR}")
@@ -165,6 +167,8 @@ add_dependencies(imread "imagecompression")
 add_dependencies(imread "interpol")
 # add_dependencies(libimread "libAFNetworking")
 add_dependencies(imread "AFNetworking")
+# add_dependencies(libimread "libbf")
+add_dependencies(imread "libbf")
 # add_dependencies(libimread "libMABlockClosure")
 add_dependencies(imread "MABlockClosure")
 # add_dependencies(libimread "libsszip")
@@ -203,7 +207,7 @@ set_source_files_properties(
 #     ${HDF5_LIBRARIES})
 
 target_link_libraries(imread
-    png z guid
+    z libbf png guid
     MABlockClosure
     imagecompression
     interpol
@@ -249,6 +253,7 @@ add_dependencies(imread_tests "iod_symbolize")
 add_dependencies(imread_tests "guid")
 add_dependencies(imread_tests "imagecompression")
 add_dependencies(imread_tests "interpol")
+add_dependencies(imread_tests "libbf")
 add_dependencies(imread_tests "MABlockClosure")
 add_dependencies(imread_tests "AFNetworking")
 add_dependencies(imread_tests "sszip")
@@ -260,7 +265,7 @@ target_link_libraries(imread_tests
     MABlockClosure
     imagecompression
     interpol
-    guid png z
+    guid png libbf z
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
