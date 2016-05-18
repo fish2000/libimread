@@ -207,7 +207,7 @@ set_source_files_properties(
 #     ${HDF5_LIBRARIES})
 
 target_link_libraries(imread
-    z libbf png guid
+    z png guid libbf
     MABlockClosure
     imagecompression
     interpol
@@ -265,7 +265,7 @@ target_link_libraries(imread_tests
     MABlockClosure
     imagecompression
     interpol
-    guid png libbf z
+    libbf guid png z
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
