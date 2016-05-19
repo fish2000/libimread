@@ -30,6 +30,9 @@ _viewers = []
 
 
 def register(viewer, order=1):
+    # A class registry in Python without metaclasses
+    # is as satisfying as an unfrosted sheet cake
+    # ... sorry dogg but it's true
     try:
         if issubclass(viewer, Viewer):
             viewer = viewer()
@@ -60,9 +63,11 @@ def show(image, title=None, **options):
 # Base class for viewers.
 
 class Viewer(object):
-
-    # main api
-
+    
+    # format = None
+    format = "jpg"
+    prefix = "yo-dogg-"
+    
     def pil_show(self, image, **options):
         # save temporary image to disk
         if image.mode[:4] == "I;16":
@@ -79,16 +84,23 @@ class Viewer(object):
         return self.show_image(image, **options)
     
     def show(self, image, **options):
-        """save temporary file"""
+        """ Save an im.Image or im.Array out to a temporary file, 
+            then fire off an external viewer to show it.
+        """
         
         s = ".%s" % self.format
-        p = "yo-dogg-"
-        output = ""
-        destination = ""
+        p = self.prefix
+        output = destination = ""
         
         with NamedTemporaryFile(suffix=s, prefix=p) as tf:
+            # options needs a 'format' entry if we're writing
+            # to a Python file object -- so copy and update:
             writeopts = copy(options)
-            writeopts.update({ 'format' : self.format })
+            if not 'format' in writeopts:
+                writeopts.update({ 'format' : self.format })
+            
+            # hey dogg so image.write() could throw a thing,
+            # I'm just sayin
             output = image.write(
                 file=tf.file,
                 options=writeopts)
@@ -98,26 +110,22 @@ class Viewer(object):
         
         return destination
     
-    # hook methods
-    
-    # format = None
-    format = "jpg"
-    
     def get_format(self, image):
         # return format name, or None to save as PGM/PPM
         return self.format
-
+    
     def get_command(self, file, **options):
         raise NotImplementedError
-
+    
     def save_image(self, image):
         # save to temporary file, and return filename
+        # DOGG: THIS RIGHT HERE IS SOME PIL-CENTRIC SHIT
         return image._dump(format=self.get_format(image))
-
+    
     def show_image(self, image, **options):
         # display given image
         return self.show_file(self.save_image(image), **options)
-
+    
     def show_file(self, file, **options):
         # display given file
         os.system(self.get_command(file, **options))
@@ -155,7 +163,7 @@ elif sys.platform == "darwin":
 else:
 
     # unixoids
-
+    
     def which(executable):
         path = os.environ.get("PATH")
         if not path:
@@ -166,7 +174,7 @@ else:
                 # FIXME: make sure it's executable
                 return filename
         return None
-
+    
     class UnixViewer(Viewer):
         def show_file(self, file, **options):
             command, executable = self.get_command_ex(file, **options)
@@ -174,17 +182,17 @@ else:
                                               quote(file))
             os.system(command)
             return 1
-
+    
     # implementations
-
+    
     class DisplayViewer(UnixViewer):
         def get_command_ex(self, file, **options):
             command = executable = "display"
             return command, executable
-
+    
     if which("display"):
         register(DisplayViewer)
-
+    
     class XVViewer(UnixViewer):
         def get_command_ex(self, file, title=None, **options):
             # note: xv is pretty outdated.  most modern systems have
@@ -193,9 +201,10 @@ else:
             if title:
                 command += " -name %s" % quote(title)
             return command, executable
-
+    
     if which("xv"):
         register(XVViewer)
+
 
 if __name__ == "__main__":
     # usage: python ImageShow.py imagefile [title]

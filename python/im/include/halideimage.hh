@@ -1487,7 +1487,7 @@ namespace py {
                                               FILESYSTEM_TEMP_FILENAME,                /// prefix (filename template)
                                               false);                                  /// cleanup on scope exit
                         dststr = std::string(tf.filepath.make_absolute().str());
-                    } else {
+                    } else if (!use_file) {
                         /// save as file -- extract the filename from the buffer
                         py::gil::release nogil;
                         py::buffer::source dest(view);
@@ -1543,7 +1543,7 @@ namespace py {
                             removed = path::remove(dststr);
                         }
                         if (!removed) {
-                            PyErr_Format(PyExc_ValueError,
+                            PyErr_Format(PyExc_IOError,
                                 "Failed to remove temporary file %s",
                                 dststr.c_str());
                             return NULL;
@@ -1551,7 +1551,7 @@ namespace py {
                     }
                     out = py::string(data);
                     if (out == NULL) {
-                        PyErr_SetString(PyExc_ValueError,
+                        PyErr_SetString(PyExc_IOError,
                             "Failed converting output to Python string");
                     }
                     return out;

@@ -13,3 +13,5 @@ from im import (
     Array,
     
     hybridimage_check)
+
+from compat.show import show
