@@ -215,65 +215,6 @@ namespace im {
             }
     };
     
-    // class HalideRuntimeFactory : public ImageFactory {
-    //
-    //     public:
-    //         using pixel_t  = uint8_t;
-    //         using image_t  = HybridImage<uint8_t>;
-    //         // detail::halide_t<pixel_t>()
-    //         using unique_t  = std::unique_ptr<Image>;
-    //         using shared_t  = std::shared_ptr<Image>;
-    //         using haltype_t = Halide::Type;
-    //
-    //     private:
-    //         std::string factory_name;
-    //         haltype_t factory_type;
-    //
-    //     public:
-    //
-    //         HalideFactory()
-    //             :factory_name("")
-    //             ,factory_type(Halide::Handle())
-    //             {}
-    //         HalideFactory(std::string const& n)
-    //             :factory_name(n)
-    //             ,factory_type(Halide::Handle())
-    //             {}
-    //         HalideFactory(haltype_t const& haltype)
-    //             :factory_name("")
-    //             ,factory_type(haltype)
-    //             {}
-    //         HalideFactory(haltype_t const& haltype, std::string const& n)
-    //             :factory_name(n)
-    //             ,factory_type(haltype)
-    //             {}
-    //         /// and why not
-    //         HalideFactory(std::string const& n, haltype_t const& haltype)
-    //             :factory_name(n)
-    //             ,factory_type(haltype)
-    //             {}
-    //
-    //         virtual ~HalideFactory() {}
-    //
-    //         Halide::Type type()                                 { return factory_type; }
-    //         std::string const& name()                           { return factory_name; }
-    //         std::string const& name(std::string const& nm)      { factory_name = nm; return name(); }
-    //
-    //     protected:
-    //         virtual unique_t create(int nbits,
-    //                                 int xHEIGHT, int xWIDTH, int xDEPTH,
-    //                                 int d3, int d4) override {
-    //             return unique_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
-    //         }
-    //
-    //         virtual shared_t shared(int nbits,
-    //                                 int xHEIGHT, int xWIDTH, int xDEPTH,
-    //                                 int d3, int d4) override {
-    //             return shared_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
-    //         }
-    // };
-    
-    
 #undef xWIDTH
 #undef xHEIGHT
 #undef xDEPTH
@@ -307,7 +248,6 @@ namespace im {
         inline void write_multi(ImageList& input, std::string const& filename,
                                                   options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
-            // std::unique_ptr<FileSink> output(new FileSink(filename));
             std::unique_ptr<handle::sink> output(new handle::sink(filename));
             options_map default_opts = format->add_options(opts);
             format->write_multi(input, output.get(), default_opts);

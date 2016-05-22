@@ -105,7 +105,7 @@ namespace im {
             using unique_t = std::unique_ptr<image_t>;
             using shared_t = std::shared_ptr<image_t>;
             
-            virtual ~ImageFactory() {}
+            virtual ~ImageFactory();
             
             virtual unique_t create(int nbits,
                     int d0, int d1, int d2,
@@ -127,17 +127,12 @@ namespace im {
     
     class ImageWithMetadata {
         public:
-            ImageWithMetadata()
-                :meta("")
-                {}
-            ImageWithMetadata(std::string const& m)
-                :meta(m)
-                {}
+            ImageWithMetadata();
+            ImageWithMetadata(std::string const& m);
+            virtual ~ImageWithMetadata();
             
-            virtual ~ImageWithMetadata() {}
-            
-            std::string const& get_meta() const { return meta; }
-            void set_meta(std::string const& m) { meta = m; }
+            std::string const& get_meta() const;
+            void set_meta(std::string const& m);
             
         private:
             std::string meta;

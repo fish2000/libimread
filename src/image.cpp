@@ -35,6 +35,21 @@ namespace im {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
     }
     
+    ImageFactory::~ImageFactory() {}
+    
+    ImageWithMetadata::ImageWithMetadata()
+        :meta("")
+        {}
+    ImageWithMetadata::ImageWithMetadata(std::string const& m)
+        :meta(m)
+        {}
+    
+    ImageWithMetadata::~ImageWithMetadata() {}
+    
+    std::string const& ImageWithMetadata::get_meta() const { return meta; }
+    
+    void ImageWithMetadata::set_meta(std::string const& m) { meta = m; }
+    
     ImageList::ImageList(ImageList::pointerlist_t pointerlist)
         :content(pointerlist)
         {

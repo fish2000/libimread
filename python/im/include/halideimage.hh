@@ -29,7 +29,6 @@
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
 #include <libimread/pixels.hh>
-#include <libimread/preview.hh>
 
 namespace py {
     
@@ -1566,132 +1565,6 @@ namespace py {
                 return py::string(dststr);
             }
             
-            template <typename ImageType = HalideNumpyImage,
-                      typename BufferType = buffer_t,
-                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject* write_nextgen(PyObject* self, PyObject* args, PyObject* kwargs) {
-                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* py_as_blob = NULL;
-                PyObject* options = NULL;
-                PyObject* blob = NULL;
-                PyObject* file = NULL;
-                Py_buffer view;
-                options_map opts;
-                char const* keywords[] = { "destination", "file", "as_blob", "options", NULL };
-                std::string dststr;
-                bool as_blob = false;
-                bool did_save = false;
-                
-                if (!PyArg_ParseTupleAndKeywords(
-                    args, kwargs, "|s*OOO", const_cast<char**>(keywords),
-                    &view,                      /// "destination", buffer with file path
-                    &file,                      /// "file", possible file-like object
-                    &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
-                    &options))                  /// "options", read-options dict
-                {
-                    return NULL;
-                }
-                
-                /// Options! Options! Options!
-                as_blob = py::options::truth(py_as_blob);
-                if (options == NULL) { options = PyDict_New(); }
-                if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    /// some exception was raised somewhere
-                    return NULL;
-                }
-                
-                try {
-                    opts = pyim->writeopts();
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return NULL;
-                }
-                
-                if (file) {
-                    /// save through PyFile interface
-                    did_save = pyim->savefilelike(file, opts);
-                } else if (as_blob) {
-                    /// save as blob -- write into PyObject string
-                    blob = pyim->saveblob(opts);
-                    did_save = blob != nullptr;
-                } else {
-                    /// save as file -- extract the filename from the buffer
-                    /// into a temporary string for passing
-                    {
-                        py::gil::release nogil;
-                        py::buffer::source dest(view);
-                        dststr = std::string(dest.str());
-                    }
-                    did_save = pyim->save(dststr.c_str(), opts);
-                }
-                
-                if (!did_save) {
-                    /// If this is false, PyErr has already been set
-                    /// ... presumably by problems loading an ImageFormat
-                    /// or opening the file at the specified image path
-                    return NULL;
-                }
-                
-                if (as_blob) {
-                    return blob;
-                } else if (file) {
-                    return file;
-                } else {
-                    return py::string(dststr);
-                }
-            }
-            
-            template <typename ImageType = HalideNumpyImage,
-                      typename BufferType = buffer_t,
-                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject* preview(PyObject* self, PyObject* args, PyObject* kwargs) {
-                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* options = NULL;
-                options_map opts;
-                char const* keywords[] = { "options", NULL };
-                path dst;
-                std::string dststr;
-                bool did_save = false;
-                
-                if (!PyArg_ParseTupleAndKeywords(
-                    args, kwargs, "|O", const_cast<char**>(keywords),
-                    &options))                  /// "options", read-options dict
-                {
-                    return py::False();
-                }
-                if (options == NULL) { options = PyDict_New(); }
-                if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    return py::False();
-                }
-                
-                try {
-                    opts = pyim->writeopts();
-                    if (!opts.has("format")) {
-                        PyErr_SetString(PyExc_AttributeError,
-                            "Output format unspecified in options dict");
-                        return py::False();
-                    }
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return py::False();
-                }
-                
-                {
-                    py::gil::release nogil;
-                    NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
-                                        FILESYSTEM_TEMP_FILENAME,                  /// prefix (filename template)
-                                        false);                                    /// cleanup on scope exit
-                    dst = tf.filepath.make_absolute();
-                    dststr = std::string(dst.str());
-                }
-                
-                did_save = pyim->save(dststr.c_str(), opts);
-                if (!did_save) { return py::False(); }
-                im::image::preview(dst);
-                path::remove(dst);
-                return py::True();
-            }
-            
             /// HybridImage.dtype getter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
@@ -1977,11 +1850,6 @@ namespace py {
                                 (PyCFunction)py::ext::image::write<ImageType, BufferType>,
                                 METH_VARARGS | METH_KEYWORDS,
                                 "Format and write image data to file or blob" },
-                        {
-                            "preview",
-                                (PyCFunction)py::ext::image::preview<ImageType, BufferType>,
-                                METH_VARARGS | METH_KEYWORDS,
-                                "Preview image in external viewer" },
                         {
                             "format_read_opts",
                                 (PyCFunction)py::ext::image::format_read_opts<ImageType, BufferType>,
