@@ -19,27 +19,32 @@ from tempfile import NamedTemporaryFile
 from copy import copy
 import sys, os
 
-if sys.version_info >= (3, 3):
-    from shlex import quote
-else:
+try:
     from pipes import quote
+except ImportError: # 3.3+
+    from shlex import quote
 
-_viewers = []
+VIEWERS = []
 
 
 def register(viewer, order=1):
     # A class registry in Python without metaclasses
     # is as satisfying as an unfrosted sheet cake
     # ... sorry dogg but it's true
+    tmp = None
     try:
         if issubclass(viewer, Viewer):
-            viewer = viewer()
+            tmp = viewer()
     except TypeError:
-        pass  # raised if viewer wasn't a class
-    if order > 0:
-        _viewers.append(viewer)
-    elif order < 0:
-        _viewers.insert(0, viewer)
+        # raised if viewer wasn't a class
+        return
+    else:
+        if tmp is None:
+            return
+        if order > 0:
+            VIEWERS.append(viewer())
+        elif order < 0:
+            VIEWERS.insert(0, viewer())
 
 
 ##
@@ -50,9 +55,9 @@ def register(viewer, order=1):
 # @param **options Additional viewer options.
 # @return True if a suitable viewer was found, false otherwise.
 
-def show(image, title=None, **options):
-    for viewer in _viewers:
-        if viewer.show(image, title=title, **options):
+def show(image, **options):
+    for viewer in VIEWERS:
+        if viewer.show(image, **options):
             return True
     return False
 
@@ -62,11 +67,10 @@ def show(image, title=None, **options):
 
 class Viewer(object):
     
-    # format = None
-    format = "jpg"
+    suffix = "jpg"
     prefix = "yo-dogg-"
     
-    def pil_show(self, image, **options):
+    def _pil_show(self, image, **options):
         # save temporary image to disk
         if image.mode[:4] == "I;16":
             # @PIL88 @PIL101
@@ -86,7 +90,7 @@ class Viewer(object):
             then fire off an external viewer to show it.
         """
         
-        s = ".%s" % self.format
+        s = self.get_suffix()
         p = self.prefix
         did_show = False
         output = ""
@@ -96,7 +100,7 @@ class Viewer(object):
             # to a Python file object -- so copy and update:
             writeopts = copy(options)
             if not 'format' in writeopts:
-                writeopts.update({ 'format' : self.format })
+                writeopts.update({ 'format' : self.get_format(image) })
             
             # hey dogg so image.write() could throw a thing,
             # I'm just sayin
@@ -110,21 +114,34 @@ class Viewer(object):
         
         return did_show
     
-    def get_format(self, image):
-        # return format name, or None to save as PGM/PPM
-        return self.format
+    def get_format(self, image=None):
+        # return suffix name, or None to save as PGM/PPM
+        return self.suffix
+    
+    def get_suffix(self, image=None):
+        return ".%s" % self.suffix
     
     def get_command(self, filepath, **options):
         raise NotImplementedError
     
-    def save_image(self, image):
+    def save_image(self, image, **options):
         # save to temporary file, and return filename
-        # DOGG: THIS RIGHT HERE IS SOME PIL-CENTRIC SHIT
-        return image._dump(format=self.get_format(image))
+        with NamedTemporaryFile(suffix=self.get_suffix(),
+                                prefix=self.prefix,
+                                delete=False) as tf:
+            writeopts = copy(options)
+            if not 'format' in writeopts:
+                writeopts.update({ 'format' : self.get_format(image) })
+            
+            output = image.write(
+                file=tf.file,
+                options=writeopts)
+            
+            return output is None and tf.name or output
     
     def show_image(self, image, **options):
         # display given image
-        return self.show_file(self.save_image(image), **options)
+        return self.show_file(self.save_image(image, **options), **options)
     
     def show_file(self, filepath, **options):
         # display given file
@@ -136,7 +153,7 @@ class Viewer(object):
 if sys.platform == "win32":
     
     class WindowsViewer(Viewer):
-        format = "jpg"
+        suffix = "jpg"
         
         def get_command(self, filepath, **options):
             return ('start "Pillow" /WAIT "%s" '
@@ -148,14 +165,15 @@ if sys.platform == "win32":
 elif sys.platform == "darwin":
     
     class MacViewer(Viewer):
-        format = "jpg"
+        suffix = "jpg"
         app_command = "open -a /Applications/Preview.app"
         
         def get_command(self, filepath, **options):
             # on darwin open returns immediately resulting in the temp
             # file removal while app is opening
-            command = "(%s %s; sleep 20; rm -f %s)&" % (self.app_command, quote(filepath),
-                                                        quote(filepath))
+            command = "(%(cmd)s %(pth)s ; sleep 200 ; rm -f %(pth)s) &" % {
+                'cmd' : self.app_command,
+                'pth' : quote(filepath) }
             return command
     
     register(MacViewer)
@@ -176,10 +194,15 @@ else:
         return None
     
     class UnixViewer(Viewer):
+        suffix = "ppm"
+        
+        def get_command_ex(self, filepath, **options):
+            raise NotImplementedError
+        
         def show_file(self, filepath, **options):
             command, executable = self.get_command_ex(filepath, **options)
-            command = "(%s %s; rm -f %s)&" % (command, quote(filepath),
-                                              quote(filepath))
+            command = "(%s %s ; rm -f %s) &" % (command, quote(filepath),
+                                                quote(filepath))
             os.system(command)
             return 1
     
@@ -195,12 +218,12 @@ else:
         register(DisplayViewer)
     
     class XVViewer(UnixViewer):
-        def get_command_ex(self, filepath, title=None, **options):
+        def get_command_ex(self, filepath, **options):
             # note: xv is pretty outdated. most modern systems have
             # imagemagick's display command instead.
             command = executable = "xv"
             if title:
-                command += " -name %s" % quote(title)
+                command += " -name %s" % quote(options.get('title'))
             return command, executable
     
     if which("xv"):
@@ -210,4 +233,5 @@ else:
 if __name__ == "__main__":
     # usage: python ImageShow.py imagefile [title]
     from im import Image
-    print(show(Image(sys.argv[1]), *sys.argv[2:]))
+    title = sys.argv[2:] and sys.argv[2] or None
+    print(show(Image(sys.argv[1]), title=title))

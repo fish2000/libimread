@@ -1,8 +1,6 @@
 
 #include <cstddef>
 #include <iostream>
-#include <Python.h>
-#include <numpy/arrayobject.h>
 #include "module.hpp"
 
 PyTypeObject HybridImageModel_Type = {
@@ -359,144 +357,184 @@ static PyMethodDef module_functions[] = {
     { nullptr, nullptr, 0, nullptr }
 };
 
-PyDoc_STRVAR(module__doc__,
-"Python bindings for libimread");
+PyDoc_STRVAR(module__doc__,     "Python bindings for libimread");
+PyDoc_STRVAR(module__name__,    "im.im");
 
-PyMODINIT_FUNC initim(void) {
-    /// Bring in filesystem::path
-    using filesystem::path;
+namespace {
     
-    /// Declare some object pointers:
-    /// ... one, to the new module object;
+    bool initialize(PyObject* module) {
+        /// Bring in filesystem::path
+        using filesystem::path;
+        
+        /// Declare some object pointers:
+        /// ... one to the tuple of image-format suffix strings …
+        PyObject* format_tuple;
+        
+        /// ... another to the root dict of image-format info dicts …
+        PyObject* format_infodict;
+        
+        /// ... two more for endianness …
+        PyObject* _byteorder;
+        PyObject* _byteordermark;
+        
+        /// Initialize Python threads and GIL state
+        PyEval_InitThreads();
+        
+        /// Bring in NumPy's C-API
+        if (_import_array() < 0)                      { return false; }
+        
+        /// Nix the obsequeously scrupulous global I/O buffer behavior
+        /// ... doctor's orders, q.v. http://ubm.io/1VCwhdy
+        std::ios_base::sync_with_stdio(false);
+        std::cin.tie(0);
+        
+        /// Manually amend our declared types, as needed:
+        /// -- Specify that im.ImageBuffer subclasses im.Buffer
+        ImageBufferModel_Type.tp_base = &BufferModel_Type;
+        ArrayBufferModel_Type.tp_base = &BufferModel_Type;
+        
+        /// -- Prepare im.Image.__dict__ for our customizations
+        ImageModel_Type.tp_dict = PyDict_New();
+        if (!ImageModel_Type.tp_dict)                 { return false; }
+        ArrayModel_Type.tp_dict = PyDict_New();
+        if (!ArrayModel_Type.tp_dict)                 { return false; }
+        
+        /// Check readiness of our extension type declarations (?)
+        if (PyType_Ready(&HybridImageModel_Type) < 0) { return false; }
+        if (PyType_Ready(&BufferModel_Type) < 0)      { return false; }
+        if (PyType_Ready(&ImageModel_Type) < 0)       { return false; }
+        if (PyType_Ready(&ImageBufferModel_Type) < 0) { return false; }
+        if (PyType_Ready(&ArrayModel_Type) < 0)       { return false; }
+        if (PyType_Ready(&ArrayBufferModel_Type) < 0) { return false; }
+        
+        /// Get the path of the extension module --
+        /// via dladdr() on the module init function's address
+        path modulefile((const void*)initialize);
+        
+        /// Set the module object's __file__ attribute
+        PyObject_SetAttrString(module,
+            "__file__",
+            py::string(modulefile.make_absolute().str()));
+        
+        /// Set the module object's __path__ single-element list
+        PyObject_SetAttrString(module,
+            "__path__",
+            py::listify(modulefile.make_absolute().parent().str()));
+        
+        /// Add the HybridImageModel type object to the module
+        Py_INCREF(&HybridImageModel_Type);
+        PyModule_AddObject(module,
+            "HybridImage",
+            (PyObject*)&HybridImageModel_Type);
+        
+        /// Add the BufferModel type object to the module
+        Py_INCREF(&BufferModel_Type);
+        PyModule_AddObject(module,
+            "Buffer",
+            (PyObject*)&BufferModel_Type);
+        
+        /// Add the ImageBufferModel type object directly to im.Image.__dict__,
+        /// such that ImageBuffer presents as an inner class of im.Image, e.g.
+        /// 
+        ///     im.Image.ImageBuffer
+        /// 
+        /// ... thanks SO! http://stackoverflow.com/q/35954016/298171
+        Py_INCREF(&ImageBufferModel_Type);
+        PyDict_SetItemString(ImageModel_Type.tp_dict,
+            "Buffer",
+            (PyObject*)&ImageBufferModel_Type);
+        
+        /// Add the ImageModel type object to the module
+        Py_INCREF(&ImageModel_Type);
+        PyModule_AddObject(module,
+            "Image",
+            (PyObject*)&ImageModel_Type);
+        
+        Py_INCREF(&ArrayBufferModel_Type);
+        PyDict_SetItemString(ArrayModel_Type.tp_dict,
+            "Buffer",
+            (PyObject*)&ArrayBufferModel_Type);
+        
+        /// Add the ImageModel type object to the module
+        Py_INCREF(&ArrayModel_Type);
+        PyModule_AddObject(module,
+            "Array",
+            (PyObject*)&ArrayModel_Type);
+        
+        /// Get the master list of image format suffixes,
+        /// newly formatted as a Python tuple of strings,
+        /// and add this to the module as a static-ish constant
+        format_tuple = py::detail::formats_as_pytuple();
+        if (format_tuple == NULL)                     { return false; }
+        PyModule_AddObject(module,
+            "formats",
+            format_tuple);
+        
+        format_infodict = py::detail::formats_as_infodict();
+        if (format_infodict == NULL)                  { return false; }
+        PyModule_AddObject(module,
+            "format_info",
+            PyDictProxy_New(format_infodict));
+        
+        /// Store the byte order of the system in im._byteorder and im._byteordermark
+        /// ... note that the byte-order-determining function (in hybrid.cpp) uses
+        /// the exact same logic used in the python `sys` module's implementation
+        _byteorder = py::string(im::byteorder == im::Endian::Big ? "big" : "little");
+        _byteordermark = py::string((char)im::byteorder);
+        if (_byteorder == NULL)                       { return false; }
+        if (_byteordermark == NULL)                   { return false; }
+        PyModule_AddObject(module,
+            "_byteorder",
+            _byteorder);
+        PyModule_AddObject(module,
+            "_byteordermark",
+            _byteordermark);
+        
+        /// all is well:
+        return true;
+    }
+    
+}
+
+#if PY_VERSION_HEX >= 0x03000000
+#pragma mark - Python 3+ Module Initializer
+PyMODINIT_FUNC PyInit_im(void) {
     PyObject* module;
     
-    /// ... another to the tuple of image-format suffix strings …
-    PyObject* format_tuple;
-    
-    /// ... another to the root dict of image-format info dicts …
-    PyObject* format_infodict;
-    
-    /// ... two more for endianness …
-    PyObject* _byteorder;
-    PyObject* _byteordermark;
-    
-    /// Initialize Python threads and GIL state
-    PyEval_InitThreads();
-    
-    /// Bring in NumPy's C-API
-    import_array();
-    
-    /// Nix the obsequeously scrupulous global I/O buffer behavior
-    /// ... doctor's orders, q.v. http://ubm.io/1VCwhdy
-    std::ios_base::sync_with_stdio(false);
-    std::cin.tie(0);
-    
-    /// Manually amend our declared types, as needed:
-    /// -- Specify that im.ImageBuffer subclasses im.Buffer
-    ImageBufferModel_Type.tp_base = &BufferModel_Type;
-    ArrayBufferModel_Type.tp_base = &BufferModel_Type;
-    
-    /// -- Prepare im.Image.__dict__ for our customizations
-    ImageModel_Type.tp_dict = PyDict_New();
-    if (!ImageModel_Type.tp_dict)                 { return; }
-    ArrayModel_Type.tp_dict = PyDict_New();
-    if (!ArrayModel_Type.tp_dict)                 { return; }
-    
-    /// Check readiness of our extension type declarations (?)
-    if (PyType_Ready(&HybridImageModel_Type) < 0) { return; }
-    if (PyType_Ready(&BufferModel_Type) < 0)      { return; }
-    if (PyType_Ready(&ImageModel_Type) < 0)       { return; }
-    if (PyType_Ready(&ImageBufferModel_Type) < 0) { return; }
-    if (PyType_Ready(&ArrayModel_Type) < 0)       { return; }
-    if (PyType_Ready(&ArrayBufferModel_Type) < 0) { return; }
-    
-    /// Get the path of the extension module --
-    /// via dladdr() on the module init function's address
-    path modulefile((const void*)initim);
+    /// Static module-definition table
+    static PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        module__name__,     /* m_name */
+        module__doc__,      /* m_doc */
+        -1,                 /* m_size */
+        module_functions    /* m_methods */
+    };
     
     /// Actually initialize the module object,
-    /// setting up the module's external C-function table
-    module = Py_InitModule3("im.im",
+    /// using the new Python 3 module-definition table
+    module = PyModule_Create(&moduledef);
+    
+    /// Initialize and check module
+    if (module == NULL)                           { return NULL; }
+    if (!initialize(module))                      { return NULL; }
+    
+    /// Return module object
+    return module;
+}
+#else
+#pragma mark - Python 2 Module Initializer
+PyMODINIT_FUNC initim(void) {
+    PyObject* module;
+    
+    /// Actually initialize the module object,
+    /// setting up a module C-function table
+    module = Py_InitModule3(
+        module__name__,
         module_functions,
         module__doc__);
+    
+    /// Initialize and check module
     if (module == NULL)                           { return; }
-    
-    /// Set the module object's __file__ attribute
-    PyObject_SetAttrString(module,
-        "__file__",
-        py::string(modulefile.make_absolute().str()));
-    
-    /// Set the module object's __path__ single-element list
-    PyObject_SetAttrString(module,
-        "__path__",
-        py::listify(modulefile.make_absolute().parent().str()));
-    
-    /// Add the HybridImageModel type object to the module
-    Py_INCREF(&HybridImageModel_Type);
-    PyModule_AddObject(module,
-        "HybridImage",
-        (PyObject*)&HybridImageModel_Type);
-    
-    /// Add the BufferModel type object to the module
-    Py_INCREF(&BufferModel_Type);
-    PyModule_AddObject(module,
-        "Buffer",
-        (PyObject*)&BufferModel_Type);
-    
-    /// Add the ImageBufferModel type object directly to im.Image.__dict__,
-    /// such that ImageBuffer presents as an inner class of im.Image, e.g.
-    /// 
-    ///     im.Image.ImageBuffer
-    /// 
-    /// ... thanks SO! http://stackoverflow.com/q/35954016/298171
-    Py_INCREF(&ImageBufferModel_Type);
-    PyDict_SetItemString(ImageModel_Type.tp_dict,
-        "Buffer",
-        (PyObject*)&ImageBufferModel_Type);
-    
-    /// Add the ImageModel type object to the module
-    Py_INCREF(&ImageModel_Type);
-    PyModule_AddObject(module,
-        "Image",
-        (PyObject*)&ImageModel_Type);
-    
-    Py_INCREF(&ArrayBufferModel_Type);
-    PyDict_SetItemString(ArrayModel_Type.tp_dict,
-        "Buffer",
-        (PyObject*)&ArrayBufferModel_Type);
-    
-    /// Add the ImageModel type object to the module
-    Py_INCREF(&ArrayModel_Type);
-    PyModule_AddObject(module,
-        "Array",
-        (PyObject*)&ArrayModel_Type);
-    
-    /// Get the master list of image format suffixes,
-    /// newly formatted as a Python tuple of strings,
-    /// and add this to the module as a static-ish constant
-    format_tuple = py::detail::formats_as_pytuple();
-    if (format_tuple == NULL)                     { return; }
-    PyModule_AddObject(module,
-        "formats",
-        format_tuple);
-    
-    format_infodict = py::detail::formats_as_infodict();
-    if (format_infodict == NULL)                  { return; }
-    PyModule_AddObject(module,
-        "format_info",
-        PyDictProxy_New(format_infodict));
-    
-    /// Store the byte order of the system in im._byteorder and im._byteordermark
-    /// ... note that the byte-order-determining function (in hybrid.cpp) uses
-    /// the exact same logic used in the python `sys` module's implementation
-    _byteorder = py::string(im::byteorder == im::Endian::Big ? "big" : "little");
-    _byteordermark = py::string((char)im::byteorder);
-    if (_byteorder == NULL)                       { return; }
-    if (_byteordermark == NULL)                   { return; }
-    PyModule_AddObject(module,
-        "_byteorder",
-        _byteorder);
-    PyModule_AddObject(module,
-        "_byteordermark",
-        _byteordermark);
+    if (!initialize(module))                      { return; }
 }
+#endif

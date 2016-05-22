@@ -1,5 +1,6 @@
 
 #include <Python.h>
+#include <numpy/arrayobject.h>
 
 #include "hybridimage.hh"
 #include "halideimage.hh"
@@ -10,5 +11,9 @@
 #include <libimread/ext/filesystem/path.h>
 
 #ifndef PyMODINIT_FUNC
+#if PY_VERSION_HEX >= 0x03000000
+#define PyMODINIT_FUNC PyObject*
+#else
 #define PyMODINIT_FUNC void
+#endif
 #endif
