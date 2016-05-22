@@ -7,7 +7,7 @@
 #include <libimread/pixels.hh>
 
 extern "C" {
-    #include <jpeglib.h>
+#include <jpeglib.h>
 }
 
 namespace im {
@@ -161,12 +161,14 @@ namespace im {
                 jerr.error_message);
         }
         
-        // now read the header & image data
+        /// now read the header & image data
         jpeg_read_header(&decompressor.info, TRUE);
         jpeg_start_decompress(&decompressor.info);
         
         if (setjmp(jerr.setjmp_buffer)) {
-            throw CannotReadError(jerr.error_message);
+            imread_raise(CannotReadError,
+                "libjpeg internal error:",
+                jerr.error_message);
         }
         
         const int h = decompressor.info.output_height;
@@ -209,8 +211,10 @@ namespace im {
     void JPEGFormat::write(Image& input,
                            byte_sink* output,
                            const options_map& opts) {
+        
+        /// sanity-check input bit depth
         if (input.nbits() != 8) {
-            imread_raise(CannotReadError,
+            imread_raise(CannotWriteError,
                 FF("Image must be 8 bits for JPEG saving (got %i)",
                     input.nbits()));
         }
@@ -225,8 +229,9 @@ namespace im {
         /// destination
         compressor.info.dest = &adaptor.mgr;
         
+        /// error check
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError,
+            imread_raise(CannotWriteError,
                 "libjpeg internal error:",
                 jerr.error_message);
         }
@@ -235,39 +240,47 @@ namespace im {
         const int h = input.dim(1);
         const int d = std::min(3, input.dim(2));
         const int dims = input.ndims();
+        int quality;
         
+        /// assign image values
         compressor.info.image_width = w;
         compressor.info.image_height = h;
-        //compressor.info.input_components = (dims > 2 ? input.dim(2) : 1);
         compressor.info.input_components = d;
         compressor.info.in_color_space = color_space(compressor.info.input_components);
         
+        /// set 'defaults'
         jpeg_set_defaults(&compressor.info);
         
+        /// error check
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError,
+            imread_raise(CannotWriteError,
                 "libjpeg internal error:",
                 jerr.error_message);
         }
         
-        if (opts.has("jpg:quality")) {
-            auto quality = opts.cast<uint8_t>("jpg:quality");
-            if (quality > 100) { quality = 100; }
-            if (quality < 0) { quality = 0; }
-            jpeg_set_quality(&compressor.info, quality, FALSE);
-        }
+        /// set quality value (0 ≤ quality ≤ 100)
+        quality = opts.cast<int>("jpg:quality", 100);
+        if (quality > 100) { quality = 100; }
+        if (quality < 0) { quality = 0; }
+        jpeg_set_quality(&compressor.info, quality, FALSE);
         
+        /// start compression!
         jpeg_start_compress(&compressor.info, TRUE);
         
+        /// error check
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError,
+            imread_raise(CannotWriteError,
                 "libjpeg internal error:",
                 jerr.error_message);
         }
         
+        /// allocate row buffer
         JSAMPLE* rowbuf = new JSAMPLE[w * d]; /// width * channels
+        
+        /// access pixels as type JSAMPLE
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
+        /// write scanlines in pixel loop
         while (compressor.info.next_scanline < compressor.info.image_height) {
             JSAMPLE* __restrict__ dstPtr = rowbuf;
             for (int x = 0; x < w; x++) {
@@ -280,13 +293,17 @@ namespace im {
             jpeg_write_scanlines(&compressor.info, &rowbuf, 1);
         }
         
+        /// error check
         if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError,
+            imread_raise(CannotWriteError,
                 "libjpeg internal error:",
                 jerr.error_message);
         }
         
+        /// deallocate row buffer
         delete[] rowbuf;
+        
+        /// finish compression
         jpeg_finish_compress(&compressor.info);
     }
 }

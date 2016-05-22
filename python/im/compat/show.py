@@ -90,7 +90,7 @@ class Viewer(object):
             then fire off an external viewer to show it.
         """
         
-        s = self.get_suffix()
+        s = self.get_suffix(**options)
         p = self.prefix
         did_show = False
         output = ""
@@ -114,11 +114,15 @@ class Viewer(object):
         
         return did_show
     
-    def get_format(self, image=None):
+    def get_format(self, image=None, **options):
         # return suffix name, or None to save as PGM/PPM
+        if 'format' in options:
+            return options.get('format')
         return self.suffix
     
-    def get_suffix(self, image=None):
+    def get_suffix(self, image=None, **options):
+        if 'format' in options:
+            return ".%s" % options.get('format')
         return ".%s" % self.suffix
     
     def get_command(self, filepath, **options):
