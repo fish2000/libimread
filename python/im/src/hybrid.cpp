@@ -279,6 +279,7 @@ namespace im {
         ,array(nullptr), buffer(nullptr)
         {}
     
+    /// XXX: This needs to create a new PyArrayObject* and copy data from b->host
     ArrayImage::ArrayImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
         :PythonBufferImage(), MetaImage(name)
         ,array(reinterpret_cast<PyArrayObject*>(PyArray_New(&PyArray_Type,
