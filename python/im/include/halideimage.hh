@@ -1559,7 +1559,9 @@ namespace py {
                 
                 /// "else":
                 if (use_file) {
-                    return py::True();
+                    /// PyFile_Name() returns a borrowed reference, SOOOO...
+                    // return py::object(PyFile_Name(file));
+                    return py::None();
                 }
                 return py::string(dststr);
             }

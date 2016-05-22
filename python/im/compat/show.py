@@ -6,7 +6,7 @@
 #
 # History:
 # 2008-04-06 fl   Created
-# 2016-04-16 md   Copypastaed into libimread
+# 2016-04-16 ab   Copypastaed into libimread
 #
 # Copyright (c) Secret Labs AB 2008.
 # Alexander Bohn relinquishes rights to his meddlings.
@@ -15,10 +15,8 @@
 #
 from __future__ import print_function
 
-# from PIL import Image
 from tempfile import NamedTemporaryFile
 from copy import copy
-from im import Image
 import sys, os
 
 if sys.version_info >= (3, 3):
@@ -55,8 +53,8 @@ def register(viewer, order=1):
 def show(image, title=None, **options):
     for viewer in _viewers:
         if viewer.show(image, title=title, **options):
-            return 1
-    return 0
+            return True
+    return False
 
 
 ##
@@ -90,9 +88,10 @@ class Viewer(object):
         
         s = ".%s" % self.format
         p = self.prefix
-        output = destination = ""
+        did_show = False
+        output = ""
         
-        with NamedTemporaryFile(suffix=s, prefix=p) as tf:
+        with NamedTemporaryFile(suffix=s, prefix=p, delete=False) as tf:
             # options needs a 'format' entry if we're writing
             # to a Python file object -- so copy and update:
             writeopts = copy(options)
@@ -104,17 +103,18 @@ class Viewer(object):
             output = image.write(
                 file=tf.file,
                 options=writeopts)
+            
+            did_show = self.show_file(
+                output is None and tf.name or output,
+                **options)
         
-        if output:
-            destination = self.show_file(output, options)
-        
-        return destination
+        return did_show
     
     def get_format(self, image):
         # return format name, or None to save as PGM/PPM
         return self.format
     
-    def get_command(self, file, **options):
+    def get_command(self, filepath, **options):
         raise NotImplementedError
     
     def save_image(self, image):
@@ -126,10 +126,10 @@ class Viewer(object):
         # display given image
         return self.show_file(self.save_image(image), **options)
     
-    def show_file(self, file, **options):
+    def show_file(self, filepath, **options):
         # display given file
-        os.system(self.get_command(file, **options))
-        return 1
+        os.system(self.get_command(filepath, **options))
+        return True
 
 # --------------------------------------------------------------------
 
@@ -138,30 +138,30 @@ if sys.platform == "win32":
     class WindowsViewer(Viewer):
         format = "jpg"
         
-        def get_command(self, file, **options):
+        def get_command(self, filepath, **options):
             return ('start "Pillow" /WAIT "%s" '
                     '&& ping -n 2 127.0.0.1 >NUL '
-                    '&& del /f "%s"' % (file, file))
+                    '&& del /f "%s"' % (filepath, filepath))
         
     register(WindowsViewer)
-
+    
 elif sys.platform == "darwin":
     
     class MacViewer(Viewer):
         format = "jpg"
+        app_command = "open -a /Applications/Preview.app"
         
-        def get_command(self, file, **options):
+        def get_command(self, filepath, **options):
             # on darwin open returns immediately resulting in the temp
             # file removal while app is opening
-            command = "open -a /Applications/Preview.app"
-            command = "(%s %s; sleep 20; rm -f %s)&" % (command, quote(file),
-                                                        quote(file))
+            command = "(%s %s; sleep 20; rm -f %s)&" % (self.app_command, quote(filepath),
+                                                        quote(filepath))
             return command
-
+    
     register(MacViewer)
-
+    
 else:
-
+    
     # unixoids
     
     def which(executable):
@@ -176,17 +176,18 @@ else:
         return None
     
     class UnixViewer(Viewer):
-        def show_file(self, file, **options):
-            command, executable = self.get_command_ex(file, **options)
-            command = "(%s %s; rm -f %s)&" % (command, quote(file),
-                                              quote(file))
+        def show_file(self, filepath, **options):
+            command, executable = self.get_command_ex(filepath, **options)
+            command = "(%s %s; rm -f %s)&" % (command, quote(filepath),
+                                              quote(filepath))
             os.system(command)
             return 1
     
     # implementations
     
     class DisplayViewer(UnixViewer):
-        def get_command_ex(self, file, **options):
+        def get_command_ex(self, filepath, **options):
+            # this is part of imagemagick, dogg
             command = executable = "display"
             return command, executable
     
@@ -194,8 +195,8 @@ else:
         register(DisplayViewer)
     
     class XVViewer(UnixViewer):
-        def get_command_ex(self, file, title=None, **options):
-            # note: xv is pretty outdated.  most modern systems have
+        def get_command_ex(self, filepath, title=None, **options):
+            # note: xv is pretty outdated. most modern systems have
             # imagemagick's display command instead.
             command = executable = "xv"
             if title:
@@ -208,4 +209,5 @@ else:
 
 if __name__ == "__main__":
     # usage: python ImageShow.py imagefile [title]
-    print(show(Image.open(sys.argv[1]), *sys.argv[2:]))
+    from im import Image
+    print(show(Image(sys.argv[1]), *sys.argv[2:]))
