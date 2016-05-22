@@ -470,7 +470,7 @@ namespace py {
                     Py_INCREF(writeoptDict);
                 }
             
-            /// tag dipatch, reinterpret, depointerize, explicit-init-style construct
+            /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
             explicit ImageModelBase(PyObject* buffer, typename Tag::FromBuffer)
                 :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
                 {}
@@ -518,7 +518,6 @@ namespace py {
             
             void cleanup(bool force = false) {
                 if (!clean || force) {
-                    image.reset();
                     Py_CLEAR(dtype);
                     Py_CLEAR(imagebuffer);
                     Py_CLEAR(readoptDict);
