@@ -5,11 +5,7 @@
 #define LIBIMREAD_OBJC_RT_TRAITS_HH
 
 #include <cstdlib>
-#include <algorithm>
-#include <sstream>
 #include <string>
-#include <tuple>
-#include <array>
 #include <utility>
 #include <functional>
 #include <type_traits>
@@ -79,6 +75,9 @@ namespace objc {
                     enum { value = sizeof(test<composite>(0)) == 2 };
             };
             
+            template <typename Target>
+            bool has_isa_v = has_isa<Target>::value;
+            
             template <typename Target,
                       typename T = std::remove_pointer_t<
                                    std::decay_t<Target>>>
@@ -100,6 +99,9 @@ namespace objc {
                     typedef Target pointer_type;
                     enum { value = sizeof(test<composite>(0)) == 2 };
             };
+            
+            template <typename Target>
+            bool has_superclass_v = has_superclass<Target>::value;
             
             #pragma clang diagnostic pop
             

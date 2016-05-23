@@ -6,14 +6,10 @@
 
 #include <cstdlib>
 #include <algorithm>
-#include <sstream>
-#include <string>
 #include <tuple>
-#include <array>
 #include <utility>
 #include <functional>
 #include <type_traits>
-
 #include "types.hh"
 
 namespace objc {

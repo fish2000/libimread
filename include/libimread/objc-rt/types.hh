@@ -5,16 +5,11 @@
 #define LIBIMREAD_OBJC_RT_TYPES_HH
 
 #include <cstdlib>
-#include <algorithm>
-#include <sstream>
-#include <string>
-#include <tuple>
-#include <array>
 #include <utility>
-#include <functional>
 #include <type_traits>
 
 #ifdef __APPLE__
+#import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 #endif /// __APPLE__
@@ -63,6 +58,7 @@ namespace objc {
     namespace types {
         
         using ID = ::id __attribute__((NSObject));
+        using NS = NSObject __attribute__((NSObject));
         using object_t = struct ::objc_object;
         using selector = ::SEL;
         using cls = ::Class;

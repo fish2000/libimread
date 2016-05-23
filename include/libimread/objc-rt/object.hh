@@ -5,15 +5,10 @@
 #define LIBIMREAD_OBJC_RT_OBJECT_HH
 
 #include <cstdlib>
-#include <algorithm>
 #include <sstream>
 #include <string>
-#include <tuple>
-#include <array>
 #include <utility>
-#include <functional>
 #include <type_traits>
-
 #include "types.hh"
 #include "selector.hh"
 #include "message-args.hh"

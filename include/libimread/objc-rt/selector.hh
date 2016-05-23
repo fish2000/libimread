@@ -5,17 +5,11 @@
 #define LIBIMREAD_OBJC_RT_SELECTOR_HH
 
 #include <cstdlib>
-#include <algorithm>
 #include <sstream>
 #include <string>
-#include <tuple>
-#include <array>
 #include <utility>
-#include <functional>
 #include <type_traits>
-
 #include "types.hh"
-#import <Foundation/Foundation.h> /// This shit needs to skedaddle
 
 namespace objc {
     
