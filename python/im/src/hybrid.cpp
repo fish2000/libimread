@@ -280,20 +280,6 @@ namespace im {
         ,array(nullptr), buffer(nullptr)
         {}
     
-    /// XXX: This needs to create a new PyArrayObject* and copy data from b->host
-    // ArrayImage::ArrayImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
-    //     :PythonBufferImage(), MetaImage(name)
-    //     ,array(reinterpret_cast<PyArrayObject*>(PyArray_New(&PyArray_Type,
-    //             im::buffer::ndims(*b),
-    //             (npy_intp*)b->extent, (int)d,
-    //             (npy_intp*)b->stride, (void*)b->host,
-    //             b->elem_size,
-    //             NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE | NPY_ARRAY_ALIGNED,
-    //             nullptr)))
-    //     ,buffer(im::buffer::heapcopy(b))
-    //     ,deallocate(true)
-    //     {}
-    
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wmissing-braces"
     ArrayImage::ArrayImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
@@ -302,39 +288,70 @@ namespace im {
         ,buffer(im::buffer::heapcopy(b))
         ,deallocate(true)
         {
+            /// provision dimension/stride arrays for array creation
+            std::array<npy_intp, 1> dims1, stride1;
+            std::array<npy_intp, 2> dims2, stride2;
+            std::array<npy_intp, 3> dims3, stride3;
+            std::array<npy_intp, 4> dims4, stride4;
+            
+            static const int FLAGS = NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE | NPY_ARRAY_ALIGNED;
+            const int bufferdims   = im::buffer::ndims(*b);
+            PyTypeObject* newtype  = &PyArray_Type;
+            
             /// Create a new PyArrayObject* with dimensions to match the source buffer,
             /// allocating the underlying storage as needed
-            //npy_intp dims1[1], dims2[2], dims3[3], dims4[4];
-            std::array<npy_intp, 1> dims1;
-            std::array<npy_intp, 2> dims2;
-            std::array<npy_intp, 3> dims3;
-            std::array<npy_intp, 4> dims4;
-            switch (im::buffer::ndims(*buffer)) {
+            switch (bufferdims) {
                 case 1:
-                    dims1 = { static_cast<npy_intp>(buffer->extent[0]) };
+                    dims1   = { static_cast<npy_intp>(buffer->extent[0]) };
+                    stride1 = { static_cast<npy_intp>(buffer->stride[0]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_SimpleNew(dims1.size(), dims1.data(), d));
+                            PyArray_New(newtype, bufferdims,
+                                  dims1.data(),    d,
+                                stride1.data(),    nullptr,
+                                buffer->elem_size, FLAGS,
+                                nullptr));
                     break;
                 case 2:
-                    dims2 = { static_cast<npy_intp>(buffer->extent[0]),
-                              static_cast<npy_intp>(buffer->extent[1]) };
+                    dims2   = { static_cast<npy_intp>(buffer->extent[0]),
+                                static_cast<npy_intp>(buffer->extent[1]) };
+                    stride2 = { static_cast<npy_intp>(buffer->stride[0]),
+                                static_cast<npy_intp>(buffer->stride[1]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_SimpleNew(dims2.size(), dims2.data(), d));
+                            PyArray_New(newtype, bufferdims,
+                                  dims2.data(),    d,
+                                stride2.data(),    nullptr,
+                                buffer->elem_size, FLAGS,
+                                nullptr));
                     break;
                 case 3:
-                    dims3 = { static_cast<npy_intp>(buffer->extent[0]),
-                              static_cast<npy_intp>(buffer->extent[1]),
-                              static_cast<npy_intp>(buffer->extent[2]) };
+                    dims3 =   { static_cast<npy_intp>(buffer->extent[0]),
+                                static_cast<npy_intp>(buffer->extent[1]),
+                                static_cast<npy_intp>(buffer->extent[2]) };
+                    stride3 = { static_cast<npy_intp>(buffer->stride[0]),
+                                static_cast<npy_intp>(buffer->stride[1]),
+                                static_cast<npy_intp>(buffer->stride[2]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_SimpleNew(dims3.size(), dims3.data(), d));
+                            PyArray_New(newtype, bufferdims,
+                                  dims3.data(),    d,
+                                stride3.data(),    nullptr,
+                                buffer->elem_size, FLAGS,
+                                nullptr));
                     break;
                 case 4:
                     dims4 = { static_cast<npy_intp>(buffer->extent[0]),
                               static_cast<npy_intp>(buffer->extent[1]),
                               static_cast<npy_intp>(buffer->extent[2]),
                               static_cast<npy_intp>(buffer->extent[3]) };
+                    stride4 = { static_cast<npy_intp>(buffer->stride[0]),
+                                static_cast<npy_intp>(buffer->stride[1]),
+                                static_cast<npy_intp>(buffer->stride[2]),
+                                static_cast<npy_intp>(buffer->stride[3]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_SimpleNew(dims4.size(), dims4.data(), d));
+                            PyArray_New(newtype, bufferdims,
+                                  dims4.data(),    d,
+                                stride4.data(),    nullptr,
+                                buffer->elem_size, FLAGS,
+                                nullptr));
                     break;
             }
             
@@ -444,6 +461,9 @@ namespace im {
         ,deallocate(true)
         {
             PyArray_CopyInto(array, other.array);
+            
+            /// Point the local buffer copy at the array's now-populated storage
+            buffer->host = reinterpret_cast<uint8_t*>(PyArray_BYTES(array));
         }
     
     ArrayImage::ArrayImage(ArrayImage&& other) noexcept
@@ -455,6 +475,9 @@ namespace im {
         {
             PyArray_MoveInto(array, other.array);
             other.deallocate = false;
+            
+            /// Point the local buffer copy at the array's now-populated storage
+            buffer->host = reinterpret_cast<uint8_t*>(PyArray_BYTES(array));
         }
     
     ArrayImage::~ArrayImage() {
