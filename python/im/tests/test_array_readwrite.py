@@ -6,151 +6,140 @@ import os
 import im
 import json
 
-class ImageReadWriteTests(BaseCase):
+class ArrayReadWriteTests(BaseCase):
     
     def test_image_check(self):
-        # ''' Re-using `test_load_image_jpg_write_blob_jpg` here '''
+        # ''' Re-using `test_load_array_jpg_write_blob_jpg` here '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
-            self.assertTrue(im.Image.check(image))
+            self.assertTrue(im.Array.check(image))
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
-            self.assertIsNotNone(data)
-            self.assertFalse(im.Image.check(data))
-    
-    '''
-    def test_array_check(self):
-        for image_path in self.jpgs:
-            array = im.Array(image_path)
-            self.assertIsNotNone(array)
-            self.assertTrue(im.Array.check(array))
-            data = array.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
             self.assertFalse(im.Array.check(data))
-    '''
     
-    def test_load_image_jpg_write_blob_jpg(self):
+    def test_load_array_jpg_write_blob_jpg(self):
         ''' Load JPG files, write JPG blobs '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
     
-    def test_load_image_png_write_blob_jpg(self):
+    def test_load_array_png_write_blob_jpg(self):
         ''' Load PNG files, write JPG blobs '''
         for image_path in self.pngs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
     
-    def test_load_image_jpg_write_blob_png(self):
+    def test_load_array_jpg_write_blob_png(self):
         ''' Load JPG files, write PNG blobs '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
     
-    def test_load_image_png_write_blob_png(self):
+    def test_load_array_png_write_blob_png(self):
         ''' Load PNG files, write PNG blobs '''
         for image_path in self.pngs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
     
-    def test_load_image_jpg_write_blob_tif(self):
+    def test_load_array_jpg_write_blob_tif(self):
         ''' Load JPG files, write TIF blobs '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "tif" })
             self.assertIsNotNone(data)
     
-    def test_load_image_jpg_write_blob_png_readback(self):
+    def test_load_array_jpg_write_blob_png_readback(self):
         ''' Load JPG files, write PNG blobs with readback '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
-            image2 = im.Image(data, is_blob=True)
+            image2 = im.Array(data, is_blob=True)
             self.assertIsNotNone(image2)
             self.assertEqual(image.shape, image2.shape)
     
-    def test_load_image_png_write_blob_png_readback(self):
+    def test_load_array_png_write_blob_png_readback(self):
         ''' Load PNG files, write PNG blobs with readback '''
         for image_path in self.pngs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
-            image2 = im.Image(data, is_blob=True)
+            image2 = im.Array(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
             self.assertEqual(image.width, image2.width)
             self.assertEqual(image.height, image2.height)
     
-    def test_load_image_jpg_write_blob_jpg_readback(self):
+    def test_load_array_jpg_write_blob_jpg_readback(self):
         ''' Load JPG files, write PNG blobs with readback '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
-            image2 = im.Image(data, is_blob=True)
+            image2 = im.Array(data, is_blob=True)
             self.assertIsNotNone(image2)
             self.assertEqual(image.shape, image2.shape)
     
-    def test_load_image_png_write_blob_jpg_readback(self):
+    def test_load_array_png_write_blob_jpg_readback(self):
         ''' Load PNG files, write PNG blobs with readback '''
         for image_path in self.pngs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
-            image2 = im.Image(data, is_blob=True)
+            image2 = im.Array(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
             self.assertEqual(image.width, image2.width)
             self.assertEqual(image.height, image2.height)
     
-    def test_load_image_jpg_write_blob_tif_readback(self):
+    def test_load_array_jpg_write_blob_tif_readback(self):
         ''' Load JPG files, write TIF blobs with readback '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "tif" })
             self.assertIsNotNone(data)
-            image2 = im.Image(data, is_blob=True)
+            image2 = im.Array(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
             self.assertEqual(image.width, image2.width)
             self.assertEqual(image.height, image2.height)
     
-    def test_load_image_jpg_write_blob_tif_readback_options_good(self):
+    def test_load_array_jpg_write_blob_tif_readback_options_good(self):
         ''' Load JPG files, write TIF blobs with readback + meta-options (good) '''
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "tif", 'tiff:metadata'            : True,
                                                                          'metadata'                 : "YO DOGG",
                                                                          'tiff:software-signature'  : "I HEARD YOU LIKE METADATA" })
             self.assertIsNotNone(data)
-            image2 = im.Image(data, is_blob=True)
+            image2 = im.Array(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
             self.assertEqual(image.width, image2.width)
             self.assertEqual(image.height, image2.height)
     
-    def test_load_image_jpg_write_blob_tif_readback_options_weird(self):
+    def test_load_array_jpg_write_blob_tif_readback_options_weird(self):
         ''' Load JPG files, write TIF blobs with readback + meta-options (weird) '''
         types = (float, int, long, memoryview, str)
         doggkeys = ['yodogg:%s' % yipe.__name__ for yipe in types]
         for image_path in self.jpgs:
-            image = im.Image(image_path)
+            image = im.Array(image_path)
             self.assertIsNotNone(image)
             memview = memoryview('YO DOGG I HEARD YOU LIKE VIEWS OF MEMORY')
             data = image.write(as_blob=True, options={ 'format' : "tif", 'tiff:metadata'            : True,
@@ -206,7 +195,7 @@ class ImageReadWriteTests(BaseCase):
                 opts['yodogg:memoryview'].tobytes(),
                 'YO DOGG I HEARD YOU LIKE VIEWS OF MEMORY')
             
-            image2 = im.Image(data, is_blob=True)
+            image2 = im.Array(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
             self.assertEqual(image.width, image2.width)

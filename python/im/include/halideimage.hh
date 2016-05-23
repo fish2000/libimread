@@ -272,14 +272,7 @@ namespace py {
                     ,image(other.image)
                     {}
                 
-                /// reinterpret, depointerize, copy-construct
-                // explicit BufferModel(PyObject* other)
-                //     :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other))
-                //     :BufferModel(*reinterpret_cast<BufferModel*>(other))
-                //     {}
-                
                 /// tag dispatch, reinterpret, depointerize, copy-construct
-                /// , typename Tag::FromBuffer tag = typename Tag::FromBuffer{}
                 explicit BufferModel(PyObject* other)
                     :BufferModel(*reinterpret_cast<BufferModel*>(other))
                     {}
@@ -477,13 +470,13 @@ namespace py {
                 {}
             
             explicit ImageModelBase(int width, int height,
-                                    int depth = 1,
+                                    int planes = 1,
                                     int value = 0x00,
                                     int nbits = 8, bool is_signed = false)
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(
                        im::detail::for_nbits(nbits, is_signed),
-                                             width, height, depth))
+                                             width, height, planes))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
                 ,imagebuffer(reinterpret_cast<PyObject*>(
                              new typename ImageModelBase::BufferModel(image)))
@@ -1047,6 +1040,27 @@ namespace py {
             
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_width(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return im::buffer::width<BufferType>(*pybuf->internal.get());
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_height(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return im::buffer::height<BufferType>(*pybuf->internal.get());
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject*    get_planes(PyObject* self, void* closure) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                return im::buffer::planes<BufferType>(*pybuf->internal.get());
+            }
+            
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject*    get_array_interface(PyObject* self, void* closure) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
                 return pybuf->__array_interface__();
@@ -1208,6 +1222,24 @@ static PyGetSetDef Buffer_getset[] = {
             nullptr,
             (char*)"Buffer strides tuple",
             nullptr },
+    {
+        (char*)"width",
+            (getter)py::ext::buffer::get_width<buffer_t>,
+            nullptr,
+            (char*)"Buffer width",
+            nullptr },
+    {
+        (char*)"height",
+            (getter)py::ext::buffer::get_height<buffer_t>,
+            nullptr,
+            (char*)"Buffer height",
+            nullptr },
+    {
+        (char*)"planes",
+            (getter)py::ext::buffer::get_planes<buffer_t>,
+            nullptr,
+            (char*)"Buffer color planes",
+            nullptr },
     { nullptr, nullptr, nullptr, nullptr, nullptr }
 };
 
@@ -1261,12 +1293,7 @@ namespace py {
                     new PythonImageType());
             }
             
-            // explicit ImageModelBase(int width, int height,
-            //                         int depth = 1,
-            //                         int value = 0x00,
-            //                         int nbits = 8, bool is_signed = false)
-            
-            /// ALLOCATE / new(width, height, depth, fill, nbits, is_signed) implementation
+            /// ALLOCATE / new(width, height, planes, fill, nbits, is_signed) implementation
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
@@ -1277,17 +1304,17 @@ namespace py {
                 uint32_t unbits = 8;
                 int width   = -1,
                     height  = -1,
-                    depth   = 1,
+                    planes  = 1,
                     fill    = 0x00,
                     nbits   = 8;
-                char const* keywords[] = { "width", "height", "depth",
+                char const* keywords[] = { "width", "height", "planes",
                                            "fill",  "nbits",  "is_signed", nullptr };
                 
                 if (!PyArg_ParseTupleAndKeywords(
                     args, kwargs, "ii|iOIO:new", const_cast<char**>(keywords),
                     &width,                 /// "width", int, HOW WIDE <required>
                     &height,                /// "height", int, HOW HIGH <required>
-                    &depth,                 /// "depth", int, # of channels
+                    &planes,                /// "planes", int, # of channels
                     &py_fill,               /// "fill", Python object providing fill values (int or callable)
                     &unbits,                /// "nbits", unsigned int, # of bits
                     &py_is_signed))         /// "is_signed", Python boolean, value-signedness
@@ -1307,7 +1334,7 @@ namespace py {
                         break;
                     default:
                         PyErr_Format(PyExc_ValueError,
-                            "bad bit depth: %u (must be 1, 8, 16, 32, or 64)",
+                            "bad nbits value: %u (must be 1, 8, 16, 32, or 64)",
                             unbits);
                         return nullptr;
                 }
@@ -1335,7 +1362,7 @@ namespace py {
                 
                 /// create new PyObject* image model instance
                 PyObject* self = reinterpret_cast<PyObject*>(
-                    new PythonImageType(width, height, depth,
+                    new PythonImageType(width, height, planes,
                                         fill,  nbits,  is_signed));
                 
                 /// return the new instance
@@ -1640,8 +1667,6 @@ namespace py {
                 
                 if (!did_save) {
                     /// If this is false, PyErr has already been set
-                    /// ... presumably by problems loading an ImageFormat
-                    /// or opening the file at the specified image path
                     return nullptr;
                 }
                 
@@ -1649,12 +1674,11 @@ namespace py {
                     if (as_blob) {
                         PyErr_SetString(PyExc_ValueError,
                             "Blob output unexpectedly returned zero-length bytestring");
-                        return nullptr;
                     } else {
                         PyErr_SetString(PyExc_ValueError,
                             "File output destination path is unexpectedly zero-length");
-                        return nullptr;
                     }
+                    return nullptr;
                 }
                 
                 if (as_blob) {
@@ -1691,56 +1715,60 @@ namespace py {
                 }
                 
                 /// "else":
-                if (use_file) {
-                    /// PyFile_Name() returns a borrowed reference, SOOOO...
-                    // return py::object(PyFile_Name(file));
-                    return py::None();
-                }
+                if (use_file) { return py::None(); }
                 return py::string(dststr);
             }
             
-            /// HybridImage.dtype getter
-            template <typename ImageType = HalideNumpyImage,
-                      typename BufferType = buffer_t,
-                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject*    get_dtype(PyObject* self, void* closure) {
-                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return py::object(pyim->dtype);
+            namespace closures {
+                static char const* DTYPE   = "DTYPE";
+                static char const* BUFFER  = "BUFFER";
+                static char const* SHAPE   = "SHAPE";
+                static char const* STRIDES = "STRIDES";
+                static char const* WIDTH   = "WIDTH";
+                static char const* HEIGHT  = "HEIGHT";
+                static char const* PLANES  = "PLANES";
+                static char const* READ    = "READ";
+                static char const* WRITE   = "WRITE";
+                static char const* STRUCT    = "STRUCT";
+                static char const* INTERFACE = "INTERFACE";
             }
             
-            /// HybridImage.imagebuffer getter
+            /// ImageType.{dtype,buffer} getter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject*    get_imagebuffer(PyObject* self, void* closure) {
+            PyObject*    get_subobject(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                if ((char const*)closure == closures::DTYPE) {
+                    return py::object(pyim->dtype);
+                }
                 return py::object(pyim->imagebuffer);
             }
             
-            /// HybridImage.shape getter
+            /// ImageType.{shape,strides} getter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject*    get_shape(PyObject* self, void* closure) {
+            PyObject*    get_liminal_tuple(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                if ((char const*)closure == closures::STRIDES) {
+                    return py::detail::image_strides(*pyim->image.get());
+                }
                 return py::detail::image_shape(*pyim->image.get());
             }
             
-            /// HybridImage.strides getter
+            /// ImageType.{width,height,planes} getter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject*    get_strides(PyObject* self, void* closure) {
+            PyObject*    get_dimensional_attribute(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return py::detail::image_strides(*pyim->image.get());
+                int idx = (char const*)closure == closures::WIDTH  ? 0 :
+                          (char const*)closure == closures::HEIGHT ? 1 : 2;
+                return py::detail::image_dimensional_attribute(*pyim->image.get(), idx);
             }
             
-            namespace closures {
-                static char const* READ  = "READ";
-                static char const* WRITE = "WRITE";
-            }
-            
-            /// HybridImage.{read,write}_opts getter
+            /// ImageType.{read,write}_opts getter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
@@ -1751,7 +1779,7 @@ namespace py {
                 return py::object(target);
             }
             
-            /// HybridImage.{read,write}_opts setter
+            /// ImageType.{read,write}_opts setter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
@@ -1763,7 +1791,7 @@ namespace py {
                         "opts value must be dict-ish");
                     return -1;
                 }
-                /// switch on closure tag (?)
+                /// dispatch on closure tag
                 if ((char const*)closure == closures::READ) {
                     Py_CLEAR(pyim->readoptDict);
                     pyim->readoptDict = py::object(value);
@@ -1774,42 +1802,28 @@ namespace py {
                 return 0;
             }
             
+            /// ImageType.__array_{struct,interface}__ getter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject*    get_array_interface(PyObject* self, void* closure) {
+            PyObject*    get_array_attribute(PyObject* self, void* closure) {
                 using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
+                if ((char const*)closure == closures::STRUCT) {
+                    return imbuf->__array_struct__();
+                }
                 return imbuf->__array_interface__();
             }
             
-            template <typename ImageType = HalideNumpyImage,
-                      typename BufferType = buffer_t,
-                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject*    get_array_struct(PyObject* self, void* closure) {
-                using imagebuffer_t = typename PythonImageType::BufferModel;
-                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                return imbuf->__array_struct__();
-            }
-            
-            /// HybridImage.read_opts formatter
+            /// ImageType.read_opts formatter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    format_read_opts(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 std::string out;
-                options_map opts;
-                
-                try {
-                    opts = pyim->readopts();
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return nullptr;
-                }
-                
+                options_map opts = pyim->readopts();
                 {
                     py::gil::release nogil;
                     out = opts.format();
@@ -1817,38 +1831,24 @@ namespace py {
                 return py::string(out);
             }
             
-            /// HybridImage.read_opts file-dumper
+            /// ImageType.read_opts file-dumper
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    dump_read_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                options_map opts;
-                try {
-                    opts = pyim->readopts();
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return nullptr;
-                }
+                options_map opts = pyim->readopts();
                 return py::options::dump(self, args, kwargs, opts);
             }
             
-            /// HybridImage.write_opts formatter
+            /// ImageType.write_opts formatter
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    format_write_opts(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 std::string out;
-                options_map opts;
-                
-                try {
-                    opts = pyim->writeopts();
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return nullptr;
-                }
-                
+                options_map opts = pyim->writeopts();
                 {
                     py::gil::release nogil;
                     out = opts.format();
@@ -1856,25 +1856,17 @@ namespace py {
                 return py::string(out);
             }
             
-            /// HybridImage.write_opts file-dumper
+            /// ImageType.write_opts file-dumper
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    dump_write_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                options_map opts;
-                try {
-                    opts = pyim->writeopts();
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return nullptr;
-                }
+                options_map opts = pyim->writeopts();
                 return py::options::dump(self, args, kwargs, opts);
             }
             
             namespace methods {
-                
-                /// " + terminator::nameof<ImageType>() + "
                 
                 template <typename ImageType,
                           typename BufferType = buffer_t>
@@ -1891,14 +1883,10 @@ namespace py {
                           typename BufferType = buffer_t>
                 PySequenceMethods* sequence() {
                     static PySequenceMethods sequencemethods = {
-                        (lenfunc)py::ext::image::length<ImageType, BufferType>,         /* sq_length */
-                        0,                                                              /* sq_concat */
-                        0,                                                              /* sq_repeat */
-                        (ssizeargfunc)py::ext::image::atindex<ImageType, BufferType>,   /* sq_item */
-                        0,                                                              /* sq_slice */
-                        0,                                                              /* sq_ass_item HAHAHAHA */
-                        0,                                                              /* sq_ass_slice HEHEHE ASS <snort> HA */
-                        0                                                               /* sq_contains */
+                        (lenfunc)py::ext::image::length<ImageType, BufferType>,
+                        0, 0,
+                        (ssizeargfunc)py::ext::image::atindex<ImageType, BufferType>,
+                        0, 0, 0, 0
                     };
                     return &sequencemethods;
                 }
@@ -1909,40 +1897,58 @@ namespace py {
                     static PyGetSetDef getsets[] = {
                         {
                             (char*)"__array_interface__",
-                                (getter)py::ext::image::get_array_interface<ImageType, BufferType>,
+                                (getter)py::ext::image::get_array_attribute<ImageType, BufferType>,
                                 nullptr,
                                 (char*)"NumPy array interface (Python API)",
-                                nullptr },
+                                (void*)py::ext::image::closures::INTERFACE },
                         {
                             (char*)"__array_struct__",
-                                (getter)py::ext::image::get_array_struct<ImageType, BufferType>,
+                                (getter)py::ext::image::get_array_attribute<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"NumPy array interface (C-level API)",
-                                nullptr },
+                                (char*)"NumPy array struct (C-level API)",
+                                (void*)py::ext::image::closures::STRUCT },
                         {
                             (char*)"dtype",
-                                (getter)py::ext::image::get_dtype<ImageType, BufferType>,
+                                (getter)py::ext::image::get_subobject<ImageType, BufferType>,
                                 nullptr,
                                 (char*)"Image dtype",
-                                nullptr },
+                                (void*)py::ext::image::closures::DTYPE },
                         {
                             (char*)"buffer",
-                                (getter)py::ext::image::get_imagebuffer<ImageType, BufferType>,
+                                (getter)py::ext::image::get_subobject<ImageType, BufferType>,
                                 nullptr,
                                 (char*)"Underlying data buffer accessor object",
-                                nullptr },
+                                (void*)py::ext::image::closures::BUFFER },
                         {
                             (char*)"shape",
-                                (getter)py::ext::image::get_shape<ImageType, BufferType>,
+                                (getter)py::ext::image::get_liminal_tuple<ImageType, BufferType>,
                                 nullptr,
                                 (char*)"Image shape tuple",
-                                nullptr },
+                                (void*)py::ext::image::closures::SHAPE },
                         {
                             (char*)"strides",
-                                (getter)py::ext::image::get_strides<ImageType, BufferType>,
+                                (getter)py::ext::image::get_liminal_tuple<ImageType, BufferType>,
                                 nullptr,
                                 (char*)"Image strides tuple",
-                                nullptr },
+                                (void*)py::ext::image::closures::STRIDES },
+                        {
+                            (char*)"width",
+                                (getter)py::ext::image::get_dimensional_attribute<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Pixel width",
+                                (void*)py::ext::image::closures::WIDTH },
+                        {
+                            (char*)"height",
+                                (getter)py::ext::image::get_dimensional_attribute<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Pixel height",
+                                (void*)py::ext::image::closures::HEIGHT },
+                        {
+                            (char*)"planes",
+                                (getter)py::ext::image::get_dimensional_attribute<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image color planes (channels)",
+                                (void*)py::ext::image::closures::PLANES },
                         {
                             (char*)"read_opts",
                                 (getter)py::ext::image::get_opts<ImageType, BufferType>,
@@ -1973,10 +1979,10 @@ namespace py {
                             "new",
                                 (PyCFunction)py::ext::image::newfromsize<ImageType, BufferType>,
                                 METH_VARARGS | METH_KEYWORDS | METH_CLASS,
-                                "ImageType.new(width, height, depth=1, fill=0x00, nbits=8, is_signed=False)\n"
+                                "ImageType.new(width, height, planes=1, fill=0x00, nbits=8, is_signed=False)\n"
                                 "\t-> Return a new image of size (width, height) \n"
                                 "\t   optionally specifying: \n"
-                                "\t - number of color channels (depth) \n"
+                                "\t - number of color channels (planes) \n"
                                 "\t - a default fill value (fill) \n"
                                 "\t - number of bits per value and/or the signedness (nbits, is_signed)" },
                         {

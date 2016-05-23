@@ -33,8 +33,11 @@ build: distclean
 nosetests:
 	NOSE_REDNOSE=1 python runtests.py
 
-test:
+alltests:
 	py.test --color=yes --verbose -r a --full-trace
+
+test:
+	py.test -k 'not hybridimage' --color=yes --verbose -r a --full-trace
 
 profile:
 	py.test --color=yes --verbose -r a --profile-svg

@@ -336,6 +336,26 @@ namespace py {
         
         /// shortcuts for getting tuples from images
         template <typename ImageType> inline
+        PyObject* image_width(ImageType const& image) {
+            return py::convert(image.dim_or(0, 0));
+        }
+        
+        template <typename ImageType> inline
+        PyObject* image_height(ImageType const& image) {
+            return py::convert(image.dim_or(1, 0));
+        }
+        
+        template <typename ImageType> inline
+        PyObject* image_planes(ImageType const& image) {
+            return py::convert(image.dim_or(2, 0));
+        }
+        
+        template <typename ImageType> inline
+        PyObject* image_dimensional_attribute(ImageType const& image, int idx) {
+            return py::convert(image.dim_or(idx, 0));
+        }
+        
+        template <typename ImageType> inline
         PyObject* image_shape(ImageType const& image) {
             switch (image.ndims()) {
                 case 1:

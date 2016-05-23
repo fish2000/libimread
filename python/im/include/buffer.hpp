@@ -53,6 +53,21 @@ namespace im {
         }
         
         template <typename BufferType> inline
+        PyObject* width(BufferType const& buffer) {
+            return py::convert(buffer.extent[0] ? buffer.extent[0] : 0);
+        }
+        
+        template <typename BufferType> inline
+        PyObject* height(BufferType const& buffer) {
+            return py::convert(buffer.extent[1] ? buffer.extent[1] : 0);
+        }
+        
+        template <typename BufferType> inline
+        PyObject* planes(BufferType const& buffer) {
+            return py::convert(buffer.extent[2] ? buffer.extent[2] : 0);
+        }
+        
+        template <typename BufferType> inline
         PyObject* shape(BufferType const& buffer) {
             switch (im::buffer::ndims(buffer)) {
                 case 1:

@@ -521,8 +521,8 @@ namespace im {
         }
     
     ArrayImage::~ArrayImage() {
-        Py_XDECREF(array);
         if (deallocate) { delete buffer; }
+        Py_XDECREF(array);
     }
     
     /// This returns the same type of data as buffer_t.host
