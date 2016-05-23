@@ -15,7 +15,6 @@
 #include <type_traits>
 
 #ifdef __APPLE__
-// #import <libimread/ext/categories/NSString+STL.hh>
 #import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>

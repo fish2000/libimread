@@ -91,12 +91,12 @@ TEST_CASE("[SFINAE] Inspect the results from objc::traits::*ptr<T>::type and obj
     // T t = new im::InterleavedImage<>();
     T t = new std::remove_pointer_t<T>();
     
-    objc::traits::nullable_ptr<T>::type a1;
-    objc::traits::nonnull_ptr<T>::type a2;
-    objc::traits::unspecified_ptr<T>::type a3;
-    objc::traits::nullable_ptr_t<T> a4;
-    objc::traits::nonnull_ptr_t<T> a5;
-    objc::traits::unspecified_ptr_t<T> a6;
+    objc::nullable_ptr<T>::type a1;
+    objc::nonnull_ptr<T>::type a2;
+    objc::unspecified_ptr<T>::type a3;
+    objc::nullable_ptr_t<T> a4;
+    objc::nonnull_ptr_t<T> a5;
+    objc::unspecified_ptr_t<T> a6;
     
     WTF("Demangled typename from specifier traits:",
         

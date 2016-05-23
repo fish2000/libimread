@@ -19,12 +19,12 @@ namespace objc {
     namespace appkit {
         
         struct PasteboardSubBase : public objc::object<NSPasteboard> {
-            using pointer_t = objc::object<NSPasteboard>::pointer_t _Nonnull;
+            using pointer_t = objc::nonnull_ptr_t<objc::object<NSPasteboard>::pointer_t>;
             using object_t = objc::object<NSPasteboard>::object_t;
-            using typemap_t = std::unordered_map<std::string, NSString* _Nonnull>;
-            using typepam_t = std::unordered_map<NSString* _Nonnull, std::string>;
+            using typemap_t = std::unordered_map<std::string, objc::nonnull_ptr_t<NSString>>;
+            using typepam_t = std::unordered_map<objc::nonnull_ptr_t<NSString>, std::string>;
             using typeset_t = std::unordered_set<std::string>;
-            using stringarray_t = NSArray<NSString*>* _Nonnull;
+            using stringarray_t = objc::nonnull_ptr_t<NSArray<NSString*>>;
             
             static const typemap_t typemap;
             static const typepam_t typepam;
@@ -95,7 +95,7 @@ namespace objc {
             typeset_t typeset() const {
                 typeset_t out;
                 auto seterator = out.begin();
-                for (NSString* _Nonnull type in self.types) {
+                for (objc::nonnull_ptr_t<NSString> type in self.types) {
                     seterator = out.emplace_hint(seterator,
                                                  typepam.at(type));
                 }
@@ -157,7 +157,7 @@ namespace objc {
                         [NSPasteboard pasteboardWithUniqueName])
                     {}
                 
-                Pasteboard(NSString* _Nonnull name)
+                Pasteboard(objc::nonnull_ptr_t<NSString> name)
                     :Base(
                         [NSPasteboard pasteboardWithName:name])
                     {}
@@ -179,7 +179,7 @@ namespace objc {
                 using Base = PasteboardBase<FileSource>;
                 using Base::self;
                 
-                FileSource(NSURL* _Nonnull url)
+                FileSource(objc::nonnull_ptr_t<NSURL> url)
                     :Base(
                         [NSPasteboard pasteboardByFilteringFile:url.path])
                     {}
@@ -201,19 +201,18 @@ namespace objc {
                 using Base::self;
                 using Base::typemap;
                 
-                DataSource(objc::traits::nonnull_ptr<NSData*>::type datum,
-                           objc::traits::nonnull_ptr<NSString*>::type type)
+                DataSource(objc::nonnull_ptr_t<NSData> datum,
+                           objc::nonnull_ptr_t<NSString> type)
                     :Base(
                         [NSPasteboard pasteboardByFilteringData:datum
                                                          ofType:type])
                     {}
-                DataSource(objc::traits::nonnull_ptr<NSData*>::type datum,
+                DataSource(objc::nonnull_ptr_t<NSData> datum,
                            std::string const& type)
                     :Base(
                         [NSPasteboard pasteboardByFilteringData:datum
-                                                         ofType:objc::traits::nonnull_cast(
-                                                                typemap.at(
-                                                                pystring::lower(type)))])
+                                                         ofType:objc::nonnull_cast(
+                                                                typemap.at(pystring::lower(type)))])
                     {}
                 
                 ~DataSource() {
