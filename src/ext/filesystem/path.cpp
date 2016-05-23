@@ -424,7 +424,7 @@ namespace filesystem {
     
     bool path::is_directory() const {
         detail::stat_t sb;
-        if (::lstat(c_str(), &sb)) { return false; }
+        if (::stat(c_str(), &sb)) { return false; }
         return S_ISDIR(sb.st_mode);
     }
     

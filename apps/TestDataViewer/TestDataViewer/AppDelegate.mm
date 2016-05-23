@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <regex>
 #include <libimread/ext/filesystem/path.h>
 
 using filesystem::path;
@@ -21,7 +22,8 @@ using filesystem::path;
 @property (weak) IBOutlet NSWindow* window;
 @end
 
-static char const* kBasedir = "/Users/fish/Dropbox/libimread/tests/data";
+static char const* kBasedir = "/Users/fish/Dropbox/libimread/tests/";
+#define RE_FLAGS std::regex::extended | std::regex::icase
 
 @implementation AppDelegate
 
@@ -36,7 +38,9 @@ static char const* kBasedir = "/Users/fish/Dropbox/libimread/tests/data";
 
     /// 3) populate stuff
     path basedir(kBasedir);
-    const std::vector<path> jpgs = basedir.list("*.jpg");
+    path datadir(basedir.make_absolute() / "data");
+    std::regex re("(jpg|jpeg)$", RE_FLAGS);
+    const std::vector<path> jpgs = datadir.list(re);
     NSMutableArray* mutableStuff = [[NSMutableArray alloc] initWithCapacity:(NSUInteger)jpgs.size()];
 
     std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
@@ -47,6 +51,7 @@ static char const* kBasedir = "/Users/fish/Dropbox/libimread/tests/data";
         }
     });
 
+    self.stuff = [[NSArray alloc] initWithArray:mutableStuff];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification {
