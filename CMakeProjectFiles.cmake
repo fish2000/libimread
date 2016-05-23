@@ -336,5 +336,5 @@ add_definitions(
     ${OBJCXX_OPTIONS}
     -Wno-nullability-completeness
     -DWITH_SCHEMA
-    -O3 -mtune=native
+    -Ofast -funroll-loops -mtune=native
     -fstrict-aliasing)

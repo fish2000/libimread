@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <functional>
 #include <type_traits>
 #include <initializer_list>
 #include <Python.h>
@@ -276,6 +277,16 @@ namespace py {
             void operator()(std::add_pointer_t<B> ptr) { /*NOP*/ }
         };
         
+        /// pollyfills for C++17 std::clamp()
+        /// q.v. http://ideone.com/IpcDt9, http://en.cppreference.com/w/cpp/algorithm/clamp
+        template <class T, class Compare>
+        constexpr const T& clamp(const T& v, const T& lo, const T& hi, Compare comp) {
+            return comp(v, hi) ? std::max(v, lo, comp) : std::min(v, hi, comp);
+        }
+        template <class T>
+        constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
+            return clamp(v, lo, hi, std::less<>());
+        }
         
         /// C++11 constexpr-friendly reimplementation of `offsetof()` --
         /// see also: https://gist.github.com/graphitemaster/494f21190bb2c63c5516
@@ -386,55 +397,55 @@ namespace py {
         #pragma clang diagnostic ignored "-Wswitch"
         template <typename ImageType> inline
         PyObject* image_typed_idx(ImageType const& image,
-                                  int tc = NPY_UINT, std::size_t nidx = 0) {
+                                  int tc = NPY_UINT8, std::size_t nidx = 0) {
             switch (tc) {
                 case NPY_FLOAT: {
-                    float op = image->template rowp_as<float>(0)[nidx];
+                    float op = static_cast<float*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
                 case NPY_DOUBLE:
                 case NPY_LONGDOUBLE: {
-                    double op = image->template rowp_as<double>(0)[nidx];
+                    double op = static_cast<double*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
                 case NPY_SHORT:
                 case NPY_BYTE: {
-                    byte op = image->template rowp_as<byte>(0)[nidx];
+                    byte op = static_cast<byte*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
                 case NPY_USHORT:
                 case NPY_UBYTE: {
-                    unsigned char op = image->template rowp_as<unsigned char>(0)[nidx];
+                    uint8_t op = static_cast<uint8_t*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
                 case NPY_INT: {
-                    int32_t op = image->template rowp_as<int32_t>(0)[nidx];
+                    int32_t op = static_cast<int32_t*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
                 case NPY_UINT: {
-                    uint32_t op = image->template rowp_as<uint32_t>(0)[nidx];
+                    uint32_t op = static_cast<uint32_t*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
                 case NPY_LONG:
                 case NPY_LONGLONG: {
-                    int64_t op = image->template rowp_as<int64_t>(0)[nidx];
+                    int64_t op = static_cast<int64_t*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
                 case NPY_ULONG:
                 case NPY_ULONGLONG: {
-                    uint64_t op = image->template rowp_as<uint64_t>(0)[nidx];
+                    uint64_t op = static_cast<uint64_t*>(image->rowp(0))[nidx];
                     return py::convert(op);
                 }
                 break;
             }
-            uint32_t op = image->template rowp_as<uint32_t>(0)[nidx];
+            uint8_t op = image->template rowp_as<uint8_t>(0)[nidx];
             return py::convert(op);
         }
         #pragma clang diagnostic pop

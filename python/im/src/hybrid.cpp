@@ -100,7 +100,7 @@ namespace im {
         view->shape             = new Py_ssize_t[dimensions];
         view->strides           = new Py_ssize_t[dimensions];
         view->itemsize          = static_cast<Py_ssize_t>(bytes);
-        view->suboffsets        = NULL;
+        view->suboffsets        = nullptr;
         
         int len = 1;
         for (int idx = 0; idx < dimensions; idx++) {
@@ -113,7 +113,7 @@ namespace im {
         view->len               = len * bytes;
         view->readonly          = 1; /// true
         view->internal          = (void*)"YO DOGG";
-        view->obj               = NULL;
+        view->obj               = nullptr;
         
         /// per the Python API:
         return 0;

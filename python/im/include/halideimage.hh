@@ -2,6 +2,7 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_HALIDEIMAGE_HH_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_HALIDEIMAGE_HH_
 
+#include <cmath>
 #include <array>
 #include <memory>
 #include <string>
@@ -63,7 +64,7 @@ namespace py {
             void operator delete(void* voidself) {
                 BufferModelBase* self = reinterpret_cast<BufferModelBase*>(voidself);
                 PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
-                if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
+                if (self->weakrefs != nullptr) { PyObject_ClearWeakRefs(pyself); }
                 self->cleanup();
                 type_ptr()->tp_free(pyself);
             }
@@ -143,7 +144,7 @@ namespace py {
                        (internal->extent[3] ? internal->extent[3] : 1);
             }
             
-            PyObject* __index__(Py_ssize_t idx, int tc = NPY_UINT) {
+            PyObject* __index__(Py_ssize_t idx, int tc = NPY_UINT8) {
                 return py::convert(internal->host[idx]);
             }
             
@@ -187,7 +188,7 @@ namespace py {
                     view->shape = new Py_ssize_t[view->ndim];
                     view->strides = new Py_ssize_t[view->ndim];
                     view->itemsize = static_cast<Py_ssize_t>(internal_ptr->elem_size);
-                    view->suboffsets = NULL;
+                    view->suboffsets = nullptr;
                     
                     int len = 1;
                     for (int idx = 0; idx < view->ndim; idx++) {
@@ -199,7 +200,7 @@ namespace py {
                     view->len = len * view->itemsize;
                     view->readonly = 1; /// true
                     view->internal = (void*)"I HEARD YOU LIKE BUFFERS";
-                    view->obj = NULL;
+                    view->obj = nullptr;
                 }
                 return 0;
             }
@@ -250,7 +251,7 @@ namespace py {
                 void operator delete(void* voidself) {
                     BufferModel* self = reinterpret_cast<BufferModel*>(voidself);
                     PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
-                    if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
+                    if (self->weakrefs != nullptr) { PyObject_ClearWeakRefs(pyself); }
                     self->cleanup();
                     FactoryType::buffer_type()->tp_free(pyself);
                 }
@@ -293,7 +294,7 @@ namespace py {
                     return out;
                 }
                 
-                PyObject*   __index__(Py_ssize_t idx, int tc = NPY_UINT) {
+                PyObject*   __index__(Py_ssize_t idx, int tc = NPY_UINT8) {
                     Py_ssize_t siz;
                     std::size_t nidx;
                     shared_image_t strong;
@@ -306,7 +307,7 @@ namespace py {
                     if (siz <= idx || idx < 0) {
                         PyErr_SetString(PyExc_IndexError,
                             "index out of range");
-                        return NULL;
+                        return nullptr;
                     }
                     return py::detail::image_typed_idx(strong, tc, nidx);
                 }
@@ -384,7 +385,7 @@ namespace py {
             void operator delete(void* voidself) {
                 ImageModelBase* self = reinterpret_cast<ImageModelBase*>(voidself);
                 PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
-                if (self->weakrefs != NULL) { PyObject_ClearWeakRefs(pyself); }
+                if (self->weakrefs != nullptr) { PyObject_ClearWeakRefs(pyself); }
                 self->cleanup();
                 FactoryType::image_type()->tp_free(pyself);
             }
@@ -474,6 +475,32 @@ namespace py {
             explicit ImageModelBase(PyObject* buffer, typename Tag::FromBuffer)
                 :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
                 {}
+            
+            explicit ImageModelBase(int width, int height,
+                                    int depth = 1,
+                                    int value = 0x00,
+                                    int nbits = 8, bool is_signed = false)
+                :weakrefs(nullptr)
+                ,image(std::make_shared<ImageType>(
+                       im::detail::for_nbits(nbits, is_signed),
+                                             width, height, depth))
+                ,dtype(PyArray_DescrFromType(image->dtype()))
+                ,imagebuffer(reinterpret_cast<PyObject*>(
+                             new typename ImageModelBase::BufferModel(image)))
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
+                ,clean(false)
+                {
+                    Py_INCREF(dtype);
+                    Py_INCREF(imagebuffer);
+                    Py_INCREF(readoptDict);
+                    Py_INCREF(writeoptDict);
+                    if (value > -1) {
+                        py::gil::release nogil;
+                        std::memset(image->rowp(0), value,
+                                    image->size() * dtype->elsize);
+                    }
+                }
             
             ImageModelBase& operator=(ImageModelBase const& other) {
                 if (&other != this) {
@@ -898,15 +925,36 @@ namespace py {
                 if (!bufferhost) {
                     PyErr_SetString(PyExc_ValueError,
                         "missing Py_buffer host argument");
-                    return NULL;
+                    return nullptr;
                 }
                 if (!PyObject_CheckBuffer(bufferhost)) {
                     PyErr_SetString(PyExc_ValueError,
                         "invalid Py_buffer host");
-                    return NULL;
+                    return nullptr;
                 }
                 return reinterpret_cast<PyObject*>(
                     new PythonBufferType(bufferhost, tag_t{}));
+            }
+            
+            /// ALLOCATE / frombuffer(bufferInstance) implementation
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject* newfrombuffer(PyObject* _nothing_, PyObject* buffer) {
+                using tag_t = typename PythonBufferType::Tag::FromBuffer;
+                if (!buffer) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "missing im.Buffer argument");
+                    return nullptr;
+                }
+                if (!BufferModel_Check(buffer) &&
+                    !ImageBufferModel_Check(buffer) &&
+                    !ArrayBufferModel_Check(buffer)) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "invalid im.Buffer instance");
+                    return nullptr;
+                }
+                return reinterpret_cast<PyObject*>(
+                    new PythonBufferType(buffer, tag_t{}));
             }
             
             template <typename BufferType = buffer_t,
@@ -1170,6 +1218,11 @@ static PyMethodDef Buffer_methods[] = {
             METH_O | METH_CLASS,
             "Check the type of an instance against im.Buffer" },
     {
+        "frombuffer",
+            (PyCFunction)py::ext::buffer::newfrombuffer<buffer_t>,
+            METH_O | METH_STATIC,
+            "Return a new im.Buffer based on a buffer_t host object" },
+    {
         "frompybuffer",
             (PyCFunction)py::ext::buffer::newfrompybuffer<buffer_t>,
             METH_O | METH_STATIC,
@@ -1208,6 +1261,88 @@ namespace py {
                     new PythonImageType());
             }
             
+            // explicit ImageModelBase(int width, int height,
+            //                         int depth = 1,
+            //                         int value = 0x00,
+            //                         int nbits = 8, bool is_signed = false)
+            
+            /// ALLOCATE / new(width, height, depth, fill, nbits, is_signed) implementation
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* newfromsize(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
+                PyObject* py_is_signed = nullptr;
+                PyObject* py_fill = nullptr;
+                bool is_signed = false;
+                uint32_t unbits = 8;
+                int width   = -1,
+                    height  = -1,
+                    depth   = 1,
+                    fill    = 0x00,
+                    nbits   = 8;
+                char const* keywords[] = { "width", "height", "depth",
+                                           "fill",  "nbits",  "is_signed", nullptr };
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    args, kwargs, "ii|iOIO:new", const_cast<char**>(keywords),
+                    &width,                 /// "width", int, HOW WIDE <required>
+                    &height,                /// "height", int, HOW HIGH <required>
+                    &depth,                 /// "depth", int, # of channels
+                    &py_fill,               /// "fill", Python object providing fill values (int or callable)
+                    &unbits,                /// "nbits", unsigned int, # of bits
+                    &py_is_signed))         /// "is_signed", Python boolean, value-signedness
+                {
+                    return nullptr;
+                }
+                
+                is_signed = py::options::truth(py_is_signed);
+                
+                switch (unbits) {
+                    case 1:
+                    case 8:
+                    case 16:
+                    case 32:
+                    case 64:
+                        nbits = static_cast<int>(unbits);
+                        break;
+                    default:
+                        PyErr_Format(PyExc_ValueError,
+                            "bad bit depth: %u (must be 1, 8, 16, 32, or 64)",
+                            unbits);
+                        return nullptr;
+                }
+                
+                if (py_fill) {
+                    if (PyCallable_Check(py_fill)) {
+                        /// DO ALL SORTS OF SHIT HERE WITH PyObject_CallObject
+                        PyErr_SetString(PyExc_NotImplementedError,
+                            "callable filling not implemented");
+                        return nullptr;
+                    } else {
+                        /// We can't use the commented-out line below,
+                        /// because 'fill' is currently implemented with
+                        /// std::memset() in the constructor we call below.
+                        /// Even though std::memset()'s value arg is an int,
+                        /// it internally converts it to an unsigned char
+                        /// before setting the mem. 
+                        if (PyLong_Check(py_fill) || PyInt_Check(py_fill)) {
+                            Py_ssize_t fillval = PyInt_AsSsize_t(py_fill);
+                            // fill = detail::clamp(fillval, 0L, std::pow(2L, unbits));
+                            fill = detail::clamp(fillval, 0L, 255L);
+                        }
+                    }
+                }
+                
+                /// create new PyObject* image model instance
+                PyObject* self = reinterpret_cast<PyObject*>(
+                    new PythonImageType(width, height, depth,
+                                        fill,  nbits,  is_signed));
+                
+                /// return the new instance
+                return self;
+            }
+            
+            
             /// ALLOCATE / frombuffer(bufferInstance) implementation
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
@@ -1217,14 +1352,14 @@ namespace py {
                 if (!buffer) {
                     PyErr_SetString(PyExc_ValueError,
                         "missing im.Buffer argument");
-                    return NULL;
+                    return nullptr;
                 }
                 if (!BufferModel_Check(buffer) &&
                     !ImageBufferModel_Check(buffer) &&
                     !ArrayBufferModel_Check(buffer)) {
                     PyErr_SetString(PyExc_ValueError,
                         "invalid im.Buffer instance");
-                    return NULL;
+                    return nullptr;
                 }
                 return reinterpret_cast<PyObject*>(
                     new PythonImageType(buffer, tag_t{}));
@@ -1239,13 +1374,13 @@ namespace py {
                 if (!other) {
                     PyErr_SetString(PyExc_ValueError,
                         "missing im.Image argument");
-                    return NULL;
+                    return nullptr;
                 }
                 if (!ImageModel_Check(other) &&
                     !ArrayModel_Check(other)) {
                     PyErr_SetString(PyExc_ValueError,
                         "invalid im.Image instance");
-                    return NULL;
+                    return nullptr;
                 }
                 return reinterpret_cast<PyObject*>(
                     new PythonImageType(other, tag_t{}));
@@ -1258,17 +1393,17 @@ namespace py {
             int init(PyObject* self, PyObject* args, PyObject* kwargs) {
                 using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* py_is_blob = NULL;
-                PyObject* options = NULL;
-                PyObject* file = NULL;
+                PyObject* py_is_blob = nullptr;
+                PyObject* options = nullptr;
+                PyObject* file = nullptr;
                 Py_buffer view;
                 options_map opts;
-                char const* keywords[] = { "source", "file", "is_blob", "options", NULL };
+                char const* keywords[] = { "source", "file", "is_blob", "options", nullptr };
                 bool is_blob = false;
                 bool did_load = false;
                 
                 if (!PyArg_ParseTupleAndKeywords(
-                    args, kwargs, "|s*OOO", const_cast<char**>(keywords),
+                    args, kwargs, "|s*OOO:__init__", const_cast<char**>(keywords),
                     &view,                      /// "view", buffer with file path or image data
                     &file,                      /// "file", possible file-like object
                     &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
@@ -1277,7 +1412,7 @@ namespace py {
                     return -1;
                 }
                 
-                /// test is necessary, the next line chokes on NULL:
+                /// test is necessary, the next line chokes on nullptr:
                 is_blob = py::options::truth(py_is_blob);
                 opts = py::options::parse(options);
                 
@@ -1438,34 +1573,34 @@ namespace py {
             PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
                 using iosource_t = typename py::gil::with::source_t;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* py_as_blob = NULL;
-                PyObject* options = NULL;
-                PyObject* file = NULL;
+                PyObject* py_as_blob = nullptr;
+                PyObject* options = nullptr;
+                PyObject* file = nullptr;
                 Py_buffer view;
-                char const* keywords[] = { "destination", "file", "as_blob", "options", NULL };
+                char const* keywords[] = { "destination", "file", "as_blob", "options", nullptr };
                 std::string dststr;
                 bool as_blob = false;
                 bool use_file = false;
                 bool did_save = false;
                 
                 if (!PyArg_ParseTupleAndKeywords(
-                    args, kwargs, "|s*OOO", const_cast<char**>(keywords),
+                    args, kwargs, "|s*OOO:write", const_cast<char**>(keywords),
                     &view,                      /// "destination", buffer with file path
                     &file,
                     &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
                     &options))                  /// "options", read-options dict
                 {
-                    return NULL;
+                    return nullptr;
                 }
                 
-                /// tests are necessary, the next lines choke on NULL:
+                /// tests are necessary, the next lines choke on nullptr:
                 as_blob = py::options::truth(py_as_blob);
                 if (file) { use_file = PyFile_Check(file); }
-                if (options == NULL) { options = PyDict_New(); }
+                if (options == nullptr) { options = PyDict_New(); }
                 
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     /// some exception was raised somewhere
-                    return NULL;
+                    return nullptr;
                 }
                 
                 try {
@@ -1475,7 +1610,7 @@ namespace py {
                         if (!opts.has("format")) {
                             PyErr_SetString(PyExc_AttributeError,
                                 "Output format unspecified in options dict");
-                            return NULL;
+                            return nullptr;
                         }
                     }
                     
@@ -1500,31 +1635,31 @@ namespace py {
                     
                 } catch (im::OptionsError& exc) {
                     PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return NULL;
+                    return nullptr;
                 }
                 
                 if (!did_save) {
                     /// If this is false, PyErr has already been set
                     /// ... presumably by problems loading an ImageFormat
                     /// or opening the file at the specified image path
-                    return NULL;
+                    return nullptr;
                 }
                 
                 if (!dststr.size() && !use_file) {
                     if (as_blob) {
                         PyErr_SetString(PyExc_ValueError,
                             "Blob output unexpectedly returned zero-length bytestring");
-                        return NULL;
+                        return nullptr;
                     } else {
                         PyErr_SetString(PyExc_ValueError,
                             "File output destination path is unexpectedly zero-length");
-                        return NULL;
+                        return nullptr;
                     }
                 }
                 
                 if (as_blob) {
                     std::vector<byte> data;
-                    PyObject* out = NULL;
+                    PyObject* out = nullptr;
                     bool removed = false;
                     if (use_file) {
                         py::gil::with iohandle(file);
@@ -1544,11 +1679,11 @@ namespace py {
                             PyErr_Format(PyExc_IOError,
                                 "Failed to remove temporary file %s",
                                 dststr.c_str());
-                            return NULL;
+                            return nullptr;
                         }
                     }
                     out = py::string(data);
-                    if (out == NULL) {
+                    if (out == nullptr) {
                         PyErr_SetString(PyExc_IOError,
                             "Failed converting output to Python string");
                     }
@@ -1672,7 +1807,7 @@ namespace py {
                     opts = pyim->readopts();
                 } catch (im::OptionsError& exc) {
                     PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return NULL;
+                    return nullptr;
                 }
                 
                 {
@@ -1693,7 +1828,7 @@ namespace py {
                     opts = pyim->readopts();
                 } catch (im::OptionsError& exc) {
                     PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return NULL;
+                    return nullptr;
                 }
                 return py::options::dump(self, args, kwargs, opts);
             }
@@ -1711,7 +1846,7 @@ namespace py {
                     opts = pyim->writeopts();
                 } catch (im::OptionsError& exc) {
                     PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return NULL;
+                    return nullptr;
                 }
                 
                 {
@@ -1732,7 +1867,7 @@ namespace py {
                     opts = pyim->writeopts();
                 } catch (im::OptionsError& exc) {
                     PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return NULL;
+                    return nullptr;
                 }
                 return py::options::dump(self, args, kwargs, opts);
             }
@@ -1834,6 +1969,16 @@ namespace py {
                                 (PyCFunction)py::ext::check,
                                 METH_O | METH_CLASS,
                                 "Check that an instance is of this type" },
+                        {
+                            "new",
+                                (PyCFunction)py::ext::image::newfromsize<ImageType, BufferType>,
+                                METH_VARARGS | METH_KEYWORDS | METH_CLASS,
+                                "ImageType.new(width, height, depth=1, fill=0x00, nbits=8, is_signed=False)\n"
+                                "\t-> Return a new image of size (width, height) \n"
+                                "\t   optionally specifying: \n"
+                                "\t - number of color channels (depth) \n"
+                                "\t - a default fill value (fill) \n"
+                                "\t - number of bits per value and/or the signedness (nbits, is_signed)" },
                         {
                             "frombuffer",
                                 (PyCFunction)py::ext::image::newfrombuffer<ImageType, BufferType>,

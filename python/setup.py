@@ -262,7 +262,11 @@ for key, sources in extensions.iteritems():
         define_macros=define_macros,
         sources=sources,
         extra_compile_args=[
-            '-O3', '-mtune=native',
+            # '-O3',
+            # '-fno-verbose-asm',
+            '-Ofast',
+            '-funroll-loops',
+            '-mtune=native',
             '-std=c++1z',
             '-stdlib=libc++'
         ] + other_flags))
