@@ -39,6 +39,16 @@ namespace im {
         }
         
         template <typename BufferType> inline
+        std::size_t length(BufferType const& buffer) {
+            std::size_t out = static_cast<std::size_t>(buffer.elem_size);
+            out *= buffer.extent[0] ? buffer.extent[0] : 1;
+            out *= buffer.extent[1] ? buffer.extent[1] : 1;
+            out *= buffer.extent[2] ? buffer.extent[2] : 1;
+            out *= buffer.extent[3] ? buffer.extent[3] : 1;
+            return out;
+        }
+        
+        template <typename BufferType> inline
         PyObject* shape(BufferType const& buffer) {
             switch (im::buffer::ndims(buffer)) {
                 case 1:

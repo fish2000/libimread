@@ -2,6 +2,7 @@
 #define NO_IMPORT_ARRAY
 
 #include <cstring>
+#include <array>
 #include <type_traits>
 #include "hybrid.hh"
 #include "buffer.hpp"
@@ -280,18 +281,71 @@ namespace im {
         {}
     
     /// XXX: This needs to create a new PyArrayObject* and copy data from b->host
+    // ArrayImage::ArrayImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
+    //     :PythonBufferImage(), MetaImage(name)
+    //     ,array(reinterpret_cast<PyArrayObject*>(PyArray_New(&PyArray_Type,
+    //             im::buffer::ndims(*b),
+    //             (npy_intp*)b->extent, (int)d,
+    //             (npy_intp*)b->stride, (void*)b->host,
+    //             b->elem_size,
+    //             NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE | NPY_ARRAY_ALIGNED,
+    //             nullptr)))
+    //     ,buffer(im::buffer::heapcopy(b))
+    //     ,deallocate(true)
+    //     {}
+    
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wmissing-braces"
     ArrayImage::ArrayImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
         :PythonBufferImage(), MetaImage(name)
-        ,array(reinterpret_cast<PyArrayObject*>(PyArray_New(&PyArray_Type,
-                im::buffer::ndims(*b),
-                (npy_intp*)b->extent, (int)d,
-                (npy_intp*)b->stride, (void*)b->host,
-                b->elem_size,
-                NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE | NPY_ARRAY_ALIGNED,
-                nullptr)))
+        ,array(nullptr)
         ,buffer(im::buffer::heapcopy(b))
         ,deallocate(true)
-        {}
+        {
+            /// Create a new PyArrayObject* with dimensions to match the source buffer,
+            /// allocating the underlying storage as needed
+            //npy_intp dims1[1], dims2[2], dims3[3], dims4[4];
+            std::array<npy_intp, 1> dims1;
+            std::array<npy_intp, 2> dims2;
+            std::array<npy_intp, 3> dims3;
+            std::array<npy_intp, 4> dims4;
+            switch (im::buffer::ndims(*buffer)) {
+                case 1:
+                    dims1 = { static_cast<npy_intp>(buffer->extent[0]) };
+                    array = reinterpret_cast<PyArrayObject*>(
+                            PyArray_SimpleNew(dims1.size(), dims1.data(), d));
+                    break;
+                case 2:
+                    dims2 = { static_cast<npy_intp>(buffer->extent[0]),
+                              static_cast<npy_intp>(buffer->extent[1]) };
+                    array = reinterpret_cast<PyArrayObject*>(
+                            PyArray_SimpleNew(dims2.size(), dims2.data(), d));
+                    break;
+                case 3:
+                    dims3 = { static_cast<npy_intp>(buffer->extent[0]),
+                              static_cast<npy_intp>(buffer->extent[1]),
+                              static_cast<npy_intp>(buffer->extent[2]) };
+                    array = reinterpret_cast<PyArrayObject*>(
+                            PyArray_SimpleNew(dims3.size(), dims3.data(), d));
+                    break;
+                case 4:
+                    dims4 = { static_cast<npy_intp>(buffer->extent[0]),
+                              static_cast<npy_intp>(buffer->extent[1]),
+                              static_cast<npy_intp>(buffer->extent[2]),
+                              static_cast<npy_intp>(buffer->extent[3]) };
+                    array = reinterpret_cast<PyArrayObject*>(
+                            PyArray_SimpleNew(dims4.size(), dims4.data(), d));
+                    break;
+            }
+            
+            /// Copy data to the new array's freshly-allocated storage,
+            /// using the source buffer's pointer and calculated length
+            std::memcpy(PyArray_DATA(array), (const void*)b->host, im::buffer::length(*b));
+            
+            /// Point the local buffer copy at the array's now-populated storage
+            buffer->host = reinterpret_cast<uint8_t*>(PyArray_BYTES(array));
+        }
+        #pragma clang diagnostic pop
     
     ArrayImage::ArrayImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
         :PythonBufferImage(), MetaImage(name)
