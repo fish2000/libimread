@@ -1,6 +1,7 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
-
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 #include "buffer.hpp"
 
 namespace im {
@@ -38,6 +39,90 @@ namespace im {
                 false,
                 false
             };
+            return out;
+        }
+        
+        buffer_t* heapcopy(PyArrayObject* array) {
+            buffer_t* out;
+            switch (PyArray_NDIM(array)) {
+                case 1:
+                    out = new buffer_t{ 0,
+                        reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
+                        {
+                            static_cast<int32_t>(PyArray_DIM(array, 0)),
+                            0, 0, 0
+                        },
+                        {
+                            static_cast<int32_t>(PyArray_STRIDE(array, 0)),
+                            0, 0, 0
+                        },
+                        { 0, 0, 0, 0 },
+                        static_cast<int32_t>(PyArray_ITEMSIZE(array)),
+                        false, false
+                    };
+                    break;
+                case 2:
+                    out = new buffer_t{ 0,
+                        reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
+                        {
+                            static_cast<int32_t>(PyArray_DIM(array, 0)),
+                            static_cast<int32_t>(PyArray_DIM(array, 1)),
+                            0, 0
+                        },
+                        {
+                            static_cast<int32_t>(PyArray_STRIDE(array, 0)),
+                            static_cast<int32_t>(PyArray_STRIDE(array, 1)),
+                            0, 0
+                        },
+                        { 0, 0, 0, 0 },
+                        static_cast<int32_t>(PyArray_ITEMSIZE(array)),
+                        false, false
+                    };
+                    break;
+                case 3:
+                    out = new buffer_t{ 0,
+                        reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
+                        {
+                            static_cast<int32_t>(PyArray_DIM(array, 0)),
+                            static_cast<int32_t>(PyArray_DIM(array, 1)),
+                            static_cast<int32_t>(PyArray_DIM(array, 2)),
+                            0
+                        },
+                        {
+                            static_cast<int32_t>(PyArray_STRIDE(array, 0)),
+                            static_cast<int32_t>(PyArray_STRIDE(array, 1)),
+                            static_cast<int32_t>(PyArray_STRIDE(array, 2)),
+                            0
+                        },
+                        { 0, 0, 0, 0 },
+                        static_cast<int32_t>(PyArray_ITEMSIZE(array)),
+                        false, false
+                    };
+                    break;
+                case 4:
+                    out = new buffer_t{ 0,
+                        reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
+                        {
+                            static_cast<int32_t>(PyArray_DIM(array, 0)),
+                            static_cast<int32_t>(PyArray_DIM(array, 1)),
+                            static_cast<int32_t>(PyArray_DIM(array, 2)),
+                            static_cast<int32_t>(PyArray_DIM(array, 3))
+                        },
+                        {
+                            static_cast<int32_t>(PyArray_STRIDE(array, 0)),
+                            static_cast<int32_t>(PyArray_STRIDE(array, 1)),
+                            static_cast<int32_t>(PyArray_STRIDE(array, 2)),
+                            static_cast<int32_t>(PyArray_STRIDE(array, 3))
+                        },
+                        { 0, 0, 0, 0 },
+                        static_cast<int32_t>(PyArray_ITEMSIZE(array)),
+                        false, false
+                    };
+                    break;
+                default:
+                    out = nullptr;
+                    break;
+            }
             return out;
         }
         

@@ -280,6 +280,13 @@ namespace im {
         ,array(nullptr), buffer(nullptr)
         {}
     
+    static const int FLAGS = NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE | NPY_ARRAY_ALIGNED;
+    
+    PyTypeObject* newtype() {
+        static PyTypeObject* nt = &PyArray_Type;
+        return nt;
+    }
+    
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wmissing-braces"
     ArrayImage::ArrayImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
@@ -293,10 +300,7 @@ namespace im {
             std::array<npy_intp, 2> dims2, stride2;
             std::array<npy_intp, 3> dims3, stride3;
             std::array<npy_intp, 4> dims4, stride4;
-            
-            static const int FLAGS = NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_WRITEABLE | NPY_ARRAY_ALIGNED;
             const int bufferdims   = im::buffer::ndims(*b);
-            PyTypeObject* newtype  = &PyArray_Type;
             
             /// Create a new PyArrayObject* with dimensions to match the source buffer,
             /// allocating the underlying storage as needed
@@ -305,7 +309,7 @@ namespace im {
                     dims1   = { static_cast<npy_intp>(buffer->extent[0]) };
                     stride1 = { static_cast<npy_intp>(buffer->stride[0]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_New(newtype, bufferdims,
+                            PyArray_New(newtype(), bufferdims,
                                   dims1.data(),    d,
                                 stride1.data(),    nullptr,
                                 buffer->elem_size, FLAGS,
@@ -317,7 +321,7 @@ namespace im {
                     stride2 = { static_cast<npy_intp>(buffer->stride[0]),
                                 static_cast<npy_intp>(buffer->stride[1]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_New(newtype, bufferdims,
+                            PyArray_New(newtype(), bufferdims,
                                   dims2.data(),    d,
                                 stride2.data(),    nullptr,
                                 buffer->elem_size, FLAGS,
@@ -331,7 +335,7 @@ namespace im {
                                 static_cast<npy_intp>(buffer->stride[1]),
                                 static_cast<npy_intp>(buffer->stride[2]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_New(newtype, bufferdims,
+                            PyArray_New(newtype(), bufferdims,
                                   dims3.data(),    d,
                                 stride3.data(),    nullptr,
                                 buffer->elem_size, FLAGS,
@@ -347,7 +351,7 @@ namespace im {
                                 static_cast<npy_intp>(buffer->stride[2]),
                                 static_cast<npy_intp>(buffer->stride[3]) };
                     array = reinterpret_cast<PyArrayObject*>(
-                            PyArray_New(newtype, bufferdims,
+                            PyArray_New(newtype(), bufferdims,
                                   dims4.data(),    d,
                                 stride4.data(),    nullptr,
                                 buffer->elem_size, FLAGS,
@@ -362,7 +366,6 @@ namespace im {
             /// Point the local buffer copy at the array's now-populated storage
             buffer->host = reinterpret_cast<uint8_t*>(PyArray_BYTES(array));
         }
-        #pragma clang diagnostic pop
     
     ArrayImage::ArrayImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
         :PythonBufferImage(), MetaImage(name)
@@ -370,8 +373,17 @@ namespace im {
         ,buffer(nullptr)
         ,deallocate(true)
         {
-            npy_intp dims[4] = { x, y, z, w };
-            array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(sizeof(dims)/sizeof(npy_intp), dims, d));
+            std::array<npy_intp, 4> dimensions{ x, y, z, w };
+            std::array<npy_intp, 4> stridings{ 1, x, x*y, x*y*z };
+            
+            array = reinterpret_cast<PyArrayObject*>(
+                    PyArray_New(newtype(),
+                        dimensions.size(),
+                        dimensions.data(), d,
+                        stridings.data(), nullptr,
+                        detail::for_dtype(d).bytes(),
+                        FLAGS, nullptr));
+            
             buffer = new buffer_t{ 0,
                 reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
                 { x, y, z, w },
@@ -393,8 +405,17 @@ namespace im {
         ,buffer(nullptr)
         ,deallocate(true)
         {
-            npy_intp dims[3] = { x, y, z };
-            array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(sizeof(dims)/sizeof(npy_intp), dims, d));
+            std::array<npy_intp, 3> dimensions{ x, y, z };
+            std::array<npy_intp, 3> stridings{ 1, x, x*y };
+            
+            array = reinterpret_cast<PyArrayObject*>(
+                    PyArray_New(newtype(),
+                        dimensions.size(),
+                        dimensions.data(), d,
+                        stridings.data(), nullptr,
+                        detail::for_dtype(d).bytes(),
+                        FLAGS, nullptr));
+            
             buffer = new buffer_t{ 0,
                 reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
                 { x, y, z, 0 },
@@ -416,8 +437,17 @@ namespace im {
         ,buffer(nullptr)
         ,deallocate(true)
         {
-            npy_intp dims[2] = { x, y };
-            array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(sizeof(dims)/sizeof(npy_intp), dims, d));
+            std::array<npy_intp, 2> dimensions{ x, y };
+            std::array<npy_intp, 2> stridings{ 1, x };
+            
+            array = reinterpret_cast<PyArrayObject*>(
+                    PyArray_New(newtype(),
+                        dimensions.size(),
+                        dimensions.data(), d,
+                        stridings.data(), nullptr,
+                        detail::for_dtype(d).bytes(),
+                        FLAGS, nullptr));
+            
             buffer = new buffer_t{ 0,
                 reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
                 { x, y, 0, 0 },
@@ -438,8 +468,17 @@ namespace im {
         ,buffer(nullptr)
         ,deallocate(true)
         {
-            npy_intp dims[1] = { x };
-            array = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(sizeof(dims)/sizeof(npy_intp), dims, d));
+            std::array<npy_intp, 1> dimensions{ x };
+            std::array<npy_intp, 1> stridings{ 1 };
+            
+            array = reinterpret_cast<PyArrayObject*>(
+                    PyArray_New(newtype(),
+                        dimensions.size(),
+                        dimensions.data(), d,
+                        stridings.data(), nullptr,
+                        detail::for_dtype(d).bytes(),
+                        FLAGS, nullptr));
+            
             buffer = new buffer_t{ 0,
                 reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
                 { x, 0, 0, 0 },
@@ -452,6 +491,7 @@ namespace im {
                 false, false
             };
         }
+    #pragma clang diagnostic pop
     
     ArrayImage::ArrayImage(ArrayImage const& other)
         :PythonBufferImage(), MetaImage(other.get_meta())
