@@ -24,6 +24,14 @@ try:
 except ImportError: # 3.3+
     from shlex import quote
 
+commander = os.system
+try:
+    import subprocess
+except ImportError:
+    pass
+else:
+    commander = lambda cmd: subprocess.call(cmd, shell=True)
+
 VIEWERS = []
 
 
@@ -149,7 +157,7 @@ class Viewer(object):
     
     def show_file(self, filepath, **options):
         # display given file
-        os.system(self.get_command(filepath, **options))
+        commander(self.get_command(filepath, **options))
         return True
 
 # --------------------------------------------------------------------

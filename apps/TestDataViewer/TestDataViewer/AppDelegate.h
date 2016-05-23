@@ -10,6 +10,7 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
+@property (nonatomic, strong) IBOutlet NSArray<NSURL*>* stuff;
 
 @end
 

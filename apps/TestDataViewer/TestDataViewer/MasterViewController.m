@@ -17,6 +17,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do view setup here.
+    NSLog(@"%@ (%li) - %@ %@ %@",
+          self.view.identifier,
+          (long)self.view.tag,
+          self.view.description,
+          self.view.className,
+          self.view.classDescription);
+
+    
 }
 
 @end
