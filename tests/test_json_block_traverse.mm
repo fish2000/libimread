@@ -1,7 +1,6 @@
 
 #include <string>
 #include <iostream>
-#import <Foundation/Foundation.h>
 #import <BlockClosure.h>
 
 #include <libimread/libimread.hpp>

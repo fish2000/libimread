@@ -1,5 +1,4 @@
 
-#import <Foundation/Foundation.h>
 #import <SSZipArchive.h>
 
 #include <libimread/libimread.hpp>

@@ -4,10 +4,6 @@
 #ifndef LIBIMREAD_OBJC_RT_NAMESPACE_IM_HH
 #define LIBIMREAD_OBJC_RT_NAMESPACE_IM_HH
 
-#include <cstdlib>
-#include <string>
-#include <utility>
-#include <type_traits>
 #include "types.hh"
 #include "selector.hh"
 #include "message-args.hh"

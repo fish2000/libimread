@@ -4,9 +4,6 @@
 #ifndef LIBIMREAD_OBJC_RT_MESSAGE_HH
 #define LIBIMREAD_OBJC_RT_MESSAGE_HH
 
-#include <cstdlib>
-#include <utility>
-#include <type_traits>
 #include "types.hh"
 #include "selector.hh"
 #include "message-args.hh"

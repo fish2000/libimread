@@ -4,20 +4,14 @@
 #ifndef LIBIMREAD_OBJC_RT_TRAITS_HH
 #define LIBIMREAD_OBJC_RT_TRAITS_HH
 
-#include <cstdlib>
-#include <string>
-#include <utility>
-#include <functional>
-#include <type_traits>
-
 #ifdef __APPLE__
 #import  <CoreFoundation/CoreFoundation.h>
 #import  <Foundation/Foundation.h>
 #import  <Cocoa/Cocoa.h>
 #import  <objc/message.h>
 #import  <objc/runtime.h>
-#include "types.hh"
 #endif /// __APPLE__
+#include "types.hh"
 
 namespace objc {
     

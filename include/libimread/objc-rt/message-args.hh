@@ -4,12 +4,7 @@
 #ifndef LIBIMREAD_OBJC_RT_MESSAGE_ARGS_HH
 #define LIBIMREAD_OBJC_RT_MESSAGE_ARGS_HH
 
-#include <cstdlib>
-#include <algorithm>
 #include <tuple>
-#include <utility>
-#include <functional>
-#include <type_traits>
 #include "types.hh"
 
 namespace objc {

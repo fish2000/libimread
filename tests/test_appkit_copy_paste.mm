@@ -2,8 +2,6 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
-#import  <Foundation/Foundation.h>
-#import  <AppKit/AppKit.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>

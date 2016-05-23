@@ -4,11 +4,8 @@
 #ifndef LIBIMREAD_OBJC_RT_SELECTOR_HH
 #define LIBIMREAD_OBJC_RT_SELECTOR_HH
 
-#include <cstdlib>
 #include <sstream>
 #include <string>
-#include <utility>
-#include <type_traits>
 #include "types.hh"
 
 namespace objc {
