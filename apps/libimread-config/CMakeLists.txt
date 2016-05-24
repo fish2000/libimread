@@ -24,7 +24,8 @@ add_definitions(
 
 set(EXTRA_LIBS
     ${EXTRA_LIBS}
-    imread docopt)
+    imread_shared
+    docopt)
 
 set(hdrs "libimread-config.h")
 set(srcs "main.cpp")

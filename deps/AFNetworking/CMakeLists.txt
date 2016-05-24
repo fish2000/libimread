@@ -58,17 +58,12 @@ set(hdrs
     "AFNetworking/AFURLResponseSerialization.h"
     "AFNetworking/AFURLSessionManager.h")
 
-# add_library(libAFNetworking STATIC ${srcs} ${hdrs})
 add_library(AFNetworking SHARED ${srcs} ${hdrs})
 
-# set_target_properties(libAFNetworking
-#     PROPERTIES OUTPUT_NAME "AFNetworking")
 set_target_properties(AFNetworking
     PROPERTIES OUTPUT_NAME "AFNetworking")
-# target_link_libraries(libAFNetworking ${EXTRA_LIBS})
 target_link_libraries(AFNetworking ${EXTRA_LIBS})
 
-# install(TARGETS libAFNetworking DESTINATION lib)
 install(TARGETS AFNetworking DESTINATION lib)
 install(DIRECTORY ./ DESTINATION include/AFNetworking
     FILES_MATCHING PATTERN "*.h")

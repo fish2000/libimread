@@ -147,34 +147,29 @@ include_directories(
 include(CMakeProjectFiles.cmake)
 
 # Build the library
-# add_library(libimread STATIC ${srcs} ${hdrs})
-add_library(imread SHARED ${srcs} ${hdrs})
-# set_target_properties(libimread
-#     PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
+add_library(imread OBJECT ${srcs} ${hdrs})
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
-# set_target_properties(libimread
-#     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 set_target_properties(imread
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
-# add_dependencies(libimread "project_header")
 add_dependencies(imread "project_header")
-# add_dependencies(libimread "libguid")
 add_dependencies(imread "guid")
-# add_dependencies(libimread "libimagecompression")
 add_dependencies(imread "imagecompression")
-# add_dependencies(libimread "libinterpol")
 add_dependencies(imread "interpol")
-# add_dependencies(libimread "libAFNetworking")
 add_dependencies(imread "AFNetworking")
-# add_dependencies(libimread "libbf")
 add_dependencies(imread "libbf")
-# add_dependencies(libimread "libMABlockClosure")
 add_dependencies(imread "MABlockClosure")
-# add_dependencies(libimread "libsszip")
-# add_dependencies(imread "sszip")
-# add_dependencies(libimread "iod_symbolize")
 add_dependencies(imread "iod_symbolize")
+
+set_property(
+    TARGET imread
+    PROPERTY POSITION_INDEPENDENT_CODE 1)
+add_library(imread_shared SHARED $<TARGET_OBJECTS:imread>)
+add_library(imread_static STATIC $<TARGET_OBJECTS:imread>)
+set_target_properties(imread_shared
+    PROPERTIES LIBRARY_OUTPUT_NAME "imread")
+set_target_properties(imread_static
+    PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
 
 # deal with config variables
 get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
@@ -194,19 +189,19 @@ set_source_files_properties(
     ${PROJECT_HEADER}
     PROPERTIES GENERATED TRUE)
 
-# target_link_libraries(libimread
-#     libguid libdocopt
-#     libMABlockClosure
-#     libimagecompression
-#     libsszip libinterpol
-#     png z ${EXTRA_LIBS}
-#     ${TIFF_LIBRARIES}
-#     ${JPEG_LIBRARIES}
-#     ${WEBP_LIBRARIES}
-#     ${HALIDE_LIBRARIES}
-#     ${HDF5_LIBRARIES})
+target_link_libraries(imread_shared
+    z png guid libbf
+    MABlockClosure
+    imagecompression
+    interpol
+    ${EXTRA_LIBS}
+    ${TIFF_LIBRARIES}
+    ${JPEG_LIBRARIES}
+    ${WEBP_LIBRARIES}
+    ${HALIDE_LIBRARIES}
+    ${HDF5_LIBRARIES})
 
-target_link_libraries(imread
+target_link_libraries(imread_static
     z png guid libbf
     MABlockClosure
     imagecompression
@@ -245,7 +240,6 @@ set(imread_tests "test_${PROJECT_NAME}")
 add_executable(imread_tests ${TEST_SOURCES})
 set_target_properties(imread_tests
     PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
-# add_dependencies("test_data_header" libimread)
 add_dependencies("test_data_header" imread)
 add_dependencies(imread_tests "project_header")
 add_dependencies(imread_tests "test_data_header")
@@ -260,7 +254,7 @@ add_dependencies(imread_tests "sszip")
 add_dependencies(imread_tests "imread")
 link_directories(${CMAKE_BINARY_DIR})
 target_link_libraries(imread_tests
-    imread sszip
+    imread_shared sszip
     AFNetworking
     MABlockClosure
     imagecompression
@@ -296,8 +290,8 @@ add_imread_test("libsszip")
 add_imread_test("terminator")
 add_imread_test("interleaved-io")
 
-# install(TARGETS libimread DESTINATION lib)
-install(TARGETS imread DESTINATION lib)
+install(TARGETS imread_shared DESTINATION lib)
+install(TARGETS imread_static DESTINATION lib)
 install(DIRECTORY ${PROJECT_BINARY_DIR}/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "libimread.hpp")
 install(DIRECTORY include/libimread/private/ DESTINATION include/libimread/private

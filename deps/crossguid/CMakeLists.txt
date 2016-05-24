@@ -38,18 +38,13 @@ endforeach()
 set(hdrs
     "guid.h")
 
-# add_library(libguid STATIC ${srcs} ${hdrs})
 add_library(guid SHARED ${srcs} ${hdrs})
 
-# set_target_properties(libguid
-#     PROPERTIES ARCHIVE_OUTPUT_NAME "guid")
 set_target_properties(guid
     PROPERTIES LIBRARY_OUTPUT_NAME "guid")
-# target_link_libraries(libguid)
 target_link_libraries(guid
     ${COREFOUNDATION_LIBRARY})
 
-# install(TARGETS libguid DESTINATION lib)
 install(TARGETS guid DESTINATION lib)
 install(DIRECTORY ./ DESTINATION include/libguid
     FILES_MATCHING PATTERN "*.h")

@@ -33,6 +33,7 @@
 		CF19040B1C61D63C000974D4 /* MasterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MasterViewController.h; sourceTree = "<group>"; };
 		CF19040C1C61D63C000974D4 /* MasterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MasterViewController.m; sourceTree = "<group>"; };
 		CF19040D1C61D63C000974D4 /* MasterViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MasterViewController.xib; sourceTree = "<group>"; };
+		CF2C8FE61CF3BA6A00AF76CA /* TestDataViewer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = TestDataViewer.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +68,7 @@
 		CF1903F61C61C479000974D4 /* TestDataViewer */ = {
 			isa = PBXGroup;
 			children = (
+				CF2C8FE61CF3BA6A00AF76CA /* TestDataViewer.entitlements */,
 				CF1904081C61C4A8000974D4 /* Resources */,
 				CF1903F71C61C479000974D4 /* AppDelegate.h */,
 				CF1903F81C61C479000974D4 /* AppDelegate.mm */,
@@ -125,11 +127,20 @@
 		CF1903EC1C61C479000974D4 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = "Objects In Space And Time";
 				TargetAttributes = {
 					CF1903F31C61C479000974D4 = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = Y6PRVABLB2;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.Mac = {
+								enabled = 0;
+							};
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -195,10 +206,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				ASSETCATALOG_COMPILER_OPTIMIZATION = time;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
@@ -208,19 +221,21 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
+				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -238,10 +253,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				ASSETCATALOG_COMPILER_OPTIMIZATION = time;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
@@ -251,13 +268,15 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
+				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -274,8 +293,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_OPTIMIZATION = time;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
+				CODE_SIGN_ENTITLEMENTS = TestDataViewer/TestDataViewer.entitlements;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = /usr/local/Cellar/libimread/0.2.0/include;
 				INFOPLIST_FILE = TestDataViewer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -285,6 +313,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ost.yodogg.TestDataViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				REEXPORTED_LIBRARY_NAMES = "";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Debug;
 		};
@@ -292,8 +323,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_OPTIMIZATION = time;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
+				CODE_SIGN_ENTITLEMENTS = TestDataViewer/TestDataViewer.entitlements;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = /usr/local/Cellar/libimread/0.2.0/include;
 				INFOPLIST_FILE = TestDataViewer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -301,8 +340,12 @@
 					"$(inherited)",
 					/usr/local/Cellar/libimread/0.2.0/lib,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = ost.yodogg.TestDataViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				REEXPORTED_LIBRARY_NAMES = "";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};

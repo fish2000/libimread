@@ -49,17 +49,12 @@ foreach(FLAG IN LISTS ${COMMON_LINK_FLAGS})
 
 endforeach()
 
-# add_library(libimagecompression STATIC ${srcs} ${hdrs})
 add_library(imagecompression SHARED ${srcs} ${hdrs})
 
-# set_target_properties(libimagecompression
-#     PROPERTIES ARCHIVE_OUTPUT_NAME "guid")
 set_target_properties(imagecompression
     PROPERTIES LIBRARY_OUTPUT_NAME "imagecompression")
-# target_link_libraries(libimagecompression)
 target_link_libraries(imagecompression)
 
-# install(TARGETS libimagecompression DESTINATION lib)
 install(TARGETS imagecompression DESTINATION lib)
 install(DIRECTORY ./base/ DESTINATION include/imagecompression/base
     FILES_MATCHING PATTERN "*.h")

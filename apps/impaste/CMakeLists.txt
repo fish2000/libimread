@@ -42,7 +42,7 @@ set(EXTRA_LIBS
     ${COCOA_LIBRARY}
     ${FOUNDATION_LIBRARY}
     ${COREFOUNDATION_LIBRARY}
-    imread docopt)
+    imread_shared docopt)
 
 set(hdrs "impaste.hh")
 set(srcs "impaste.mm")

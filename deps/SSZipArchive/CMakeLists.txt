@@ -69,18 +69,12 @@ set(hdrs
     "aes/pwd2key.h"
     "aes/sha1.h")
     
-
-# add_library(libsszip STATIC ${srcs} ${hdrs})
 add_library(sszip SHARED ${srcs} ${hdrs})
 
-# set_target_properties(libsszip
-#     PROPERTIES OUTPUT_NAME "sszip")
 set_target_properties(sszip
     PROPERTIES OUTPUT_NAME "sszip")
-# target_link_libraries(libsszip ${EXTRA_LIBS})
 target_link_libraries(sszip ${EXTRA_LIBS})
 
-# install(TARGETS libsszip DESTINATION lib)
 install(TARGETS sszip DESTINATION lib)
 install(DIRECTORY ./ DESTINATION include/libsszip
     FILES_MATCHING PATTERN "*.h")

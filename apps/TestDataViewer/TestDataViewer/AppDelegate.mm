@@ -22,7 +22,8 @@ using filesystem::path;
 @property (weak) IBOutlet NSWindow* window;
 @end
 
-static char const* kBasedir = "/Users/fish/Dropbox/libimread/tests/";
+//static char const* kBasedir = "/Users/fish/Pictures/libimread-test-data";
+static char const* kBasedir = "/Users/fish/Pictures/libimread-test-data";
 #define RE_FLAGS std::regex::extended | std::regex::icase
 
 @implementation AppDelegate
@@ -38,7 +39,7 @@ static char const* kBasedir = "/Users/fish/Dropbox/libimread/tests/";
 
     /// 3) populate stuff
     path basedir(kBasedir);
-    path datadir(basedir.make_absolute() / "data");
+    path datadir(path::cwd().make_absolute());
     std::regex re("(jpg|jpeg)$", RE_FLAGS);
     const std::vector<path> jpgs = datadir.list(re);
     NSMutableArray* mutableStuff = [[NSMutableArray alloc] initWithCapacity:(NSUInteger)jpgs.size()];

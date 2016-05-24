@@ -37,17 +37,12 @@ set(hdrs
     "BlockFptr.h"
     "BlockClosure.h")
 
-# add_library(libMABlockClosure STATIC ${srcs} ${hdrs})
 add_library(MABlockClosure SHARED ${srcs} ${hdrs})
 
-# set_target_properties(libMABlockClosure
-#     PROPERTIES OUTPUT_NAME "MABlockClosure")
 set_target_properties(MABlockClosure
     PROPERTIES OUTPUT_NAME "MABlockClosure")
-# target_link_libraries(libMABlockClosure ${EXTRA_LIBS})
 target_link_libraries(MABlockClosure ${EXTRA_LIBS})
 
-# install(TARGETS libMABlockClosure DESTINATION lib)
 install(TARGETS MABlockClosure DESTINATION lib)
 install(DIRECTORY ./ DESTINATION include/MABlockClosure
     FILES_MATCHING PATTERN "*.h")
