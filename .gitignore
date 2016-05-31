@@ -16,6 +16,7 @@
 .tm_properties
 .cache/
 .prof/
+__pycache__/
 
 /xcode/fmwk/
 !/xcode/fmwk/libimread.xcodeproj/

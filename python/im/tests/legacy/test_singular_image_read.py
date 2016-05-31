@@ -1,6 +1,6 @@
 
 from __future__ import print_function
-from basecase import BaseCase
+from ..basecase import BaseCase
 
 import im
 import numpy
