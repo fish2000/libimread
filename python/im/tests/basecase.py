@@ -9,15 +9,25 @@ from os.path import join, abspath, expanduser, dirname
 class BaseCase(TestCase):
     
     def setUp(self):
+        # imports
+        import im
+        from collections import namedtuple
+        
+        # get and store all paths
         self._image_paths = map(
             lambda nm: expanduser(join(dirname(dirname(dirname(dirname(__file__)))), 'tests', 'data', nm)),
-                listdir(abspath(expanduser(join(dirname(dirname(dirname(dirname(__file__)))), 'tests', 'data'))))
-                )
+                listdir(abspath(expanduser(join(dirname(dirname(dirname(dirname(__file__)))), 'tests', 'data')))))
+        
+        # filter paths, per file extension
         self.image_paths = set([pth for pth in self._image_paths if pth.lower().endswith('jpg')])
         self.jpgs = set([pth for pth in self._image_paths if pth.lower().endswith('jpg')])
         self.pngs = set([pth for pth in self._image_paths if pth.lower().endswith('png')])
         self.tifs = set([pth for pth in self._image_paths if pth.lower().endswith('tif')])
         self.pvrs = set([pth for pth in self._image_paths if pth.lower().endswith('pvr')])
+        
+        # store local references to im.Image and im.Array
+        ImageTypeTuple = namedtuple('ImageTypes', ['Image', 'Array'])
+        self.imagetypes = ImageTypeTuple(im.Image, im.Array)
         
 
 def main(discover=False):

@@ -37,7 +37,7 @@ alltests:
 	py.test --color=yes --verbose -r a --full-trace
 
 test:
-	py.test -k 'not hybridimage' --color=yes --verbose -r a --full-trace
+	py.test -k 'not hybridimage and not singular' --color=yes --verbose -r a --full-trace
 
 profile:
 	py.test --color=yes --verbose -r a --profile-svg

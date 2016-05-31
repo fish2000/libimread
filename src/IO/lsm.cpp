@@ -150,6 +150,8 @@ namespace {
 
 namespace im {
     
+    DECLARE_FORMAT_OPTIONS(LSMFormat);
+    
     namespace {
         
         class LSMReader {
@@ -1114,7 +1116,7 @@ namespace im {
                 for (int timepoint = 0; timepoint < this->dimensions_[3]; ++timepoint) {
                     for (int ch = 0; ch < this->dimensions_[4]; ++ch) {
                         this->ConstructSliceOffsets(ch);
-                        byte *imdata = imstart + (z
+                        byte* imdata = imstart + (z
                                 * (this->dimensions_[3] * this->dimensions_[4])
                                 + timepoint * this->dimensions_[4] + ch)
                                 * this->dimensions_[0] * this->dimensions_[1]
@@ -1128,7 +1130,9 @@ namespace im {
                                              imdata, true);
                         
                         if (bytes != readSize) {
-                            imread_raise(ProgrammingError, "Could not read data");
+                            imread_raise(ProgrammingError,
+                                "Could not read data:"
+                                "bytes != readSize");
                         }
                         if (this->compression_ == LSM_COMPRESSED) {
                             this->DecodeLZWCompression(
@@ -1144,7 +1148,7 @@ namespace im {
     
     std::unique_ptr<Image> LSMFormat::read(byte_source* s,
                                            ImageFactory* factory,
-                                           const options_map& opts)  {
+                                           options_map const& opts)  {
         LSMReader reader(s);
         return reader.read(factory, opts);
     }

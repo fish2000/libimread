@@ -5,17 +5,31 @@
 #define LIBIMREAD_IO_TIFF_HH_
 
 #include <utility>
-#include <sstream>
-#include <iostream>
-#include <cstdio>
-#include <cstring>
+#include <string>
 
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/pixels.hh>
 
 namespace im {
-
+    
+    class STKFormat : public ImageFormatBase<STKFormat> {
+        public:
+            using can_read_multi = std::true_type;
+            
+            DECLARE_OPTIONS(
+                _signatures = {
+                    SIGNATURE("\x49\x49\x2a\x00", 4)
+                },
+                _suffixes = { "stk" },
+                _mimetype = "image/stk"
+            );
+            
+            virtual ImageList read_multi(byte_source* src,
+                                         ImageFactory* factory,
+                                         options_map const& opts) override;
+    };
+    
     class TIFFFormat : public ImageFormatBase<TIFFFormat> {
         public:
             using can_read = std::true_type;
@@ -25,10 +39,8 @@ namespace im {
             
             DECLARE_OPTIONS(
                 _signatures = {
-                    SIGNATURE("\x4d\x4d\x00", 3),
                     SIGNATURE("\x4d\x4d\x00\x2a", 4),
-                    SIGNATURE("\x4d\x4d\x00\x2b", 4),
-                    SIGNATURE("\x49\x49\x2a\x00", 4)
+                    SIGNATURE("\x4d\x4d\x00\x2b", 4)
                 },
                 _suffixes = { "tif", "tiff" },
                 _mimetype = "image/tiff",
@@ -47,55 +59,41 @@ namespace im {
             
             static bool match_format(byte_source* src) {
                 return match_magic(src, "\x4d\x4d\x00\x2a", 4) ||
-                       match_magic(src, "\x4d\x4d\x00\x2b", 4) ||
-                       match_magic(src, "\x49\x49\x2a\x00", 4);
+                       match_magic(src, "\x4d\x4d\x00\x2b", 4);
             }
             
-            virtual std::unique_ptr<Image> read(byte_source* s,
-                                                ImageFactory* f,
-                                                const options_map &opts) override {
-                ImageList pages = this->do_read(s, f, false);
-                if (pages.size() != 1) { throw ProgrammingError(); }
-                return pages.pop();
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
+                                                options_map const& opts) override {
+                ImageList pages = this->do_read(src, factory, false, opts);
+                std::unique_ptr<Image> out = pages.pop();
+                return out;
             }
             
-            virtual ImageList read_multi(byte_source* s,
-                                         ImageFactory* f,
-                                         const options_map& opts) override {
-                return this->do_read(s, f, true);
+            virtual ImageList read_multi(byte_source* src,
+                                         ImageFactory* factory,
+                                         options_map const& opts) override {
+                if (opts.cast<std::string>("format", "tif") == "stk") {
+                    std::unique_ptr<STKFormat> delegate = std::make_unique<STKFormat>();
+                    return delegate->read_multi(src, factory, opts);
+                }
+                return this->do_read(src, factory, true, opts);
             }
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               const options_map& opts) override;
+                               options_map const& opts) override;
             
         private:
-            ImageList do_read(byte_source* s,
-                              ImageFactory* f,
-                              bool is_multi);
-    };
-    
-    class STKFormat : public ImageFormatBase<STKFormat> {
-        public:
-            using can_read_multi = std::true_type;
-            
-            DECLARE_OPTIONS(
-                _signatures = {
-                    D(_bytes    = base64::encode("\x49\x49\x2a\x00", 4),
-                      _length   = 4)
-                },
-                _suffixes = { "stk" },
-                _mimetype = "image/stk"
-            );
-            
-            virtual ImageList read_multi(byte_source* s,
-                                         ImageFactory* f,
-                                         const options_map &opts) override;
+            ImageList do_read(byte_source* src,
+                              ImageFactory* factory,
+                              bool is_multi,
+                              options_map const& opts);
     };
     
     namespace format {
-        using TIFF = TIFFFormat;
         using STK = STKFormat;
+        using TIFF = TIFFFormat;
     }
     
 }

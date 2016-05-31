@@ -3,7 +3,12 @@
 
 #define NO_IMPORT_ARRAY
 
+#include <cstdio>
+#include <cstring>
+#include <sstream>
+#include <iostream>
 #include <type_traits>
+
 #include <iod/json.hh>
 #include <libimread/IO/tiff.hh>
 
@@ -12,6 +17,8 @@ extern "C" {
 }
 
 namespace im {
+    
+    DECLARE_FORMAT_OPTIONS(STKFormat);
     
     DECLARE_FORMAT_OPTIONS(TIFFFormat);
     
@@ -110,19 +117,19 @@ namespace im {
         };
         
         template <typename ReadType> inline
-        ReadType tiff_get(const tif_holder& t, const int tag) {
+        ReadType tiff_get(tif_holder const& t, const int tag) {
             ReadType val;
             if (!TIFFGetField(t.tif, tag, &val)) {
                 imread_raise(CannotReadError,
-                    "Cannot find necessary tag:",
+                    "Could not get tag from TIFF:",
                  FF("\t>>> %s", tag));
             }
             return val;
         }
         
         template <typename ReadType> inline
-        ReadType tiff_get(const tif_holder& t, const int tag,
-                          const ReadType default_value) {
+        ReadType tiff_get(tif_holder const& t, const int tag,
+                                               const ReadType default_value) {
             ReadType val;
             if (!TIFFGetField(t.tif, tag, &val)) {
                 return default_value;
@@ -131,7 +138,7 @@ namespace im {
         }
         
         template <> inline
-        std::string tiff_get<std::string>(const tif_holder& t, const int tag,
+        std::string tiff_get<std::string>(tif_holder const& t, const int tag,
                                           const std::string default_value) {
             char* val;
             if (!TIFFGetField(t.tif, tag, &val)) {
@@ -204,11 +211,10 @@ namespace im {
         
     } /// namespace
     
-    DECLARE_FORMAT_OPTIONS(STKFormat);
     
     ImageList STKFormat::read_multi(byte_source* src,
                                     ImageFactory* factory,
-                                    const options_map& opts)  {
+                                    options_map const& opts)  {
         shift_source moved(src);
         stk_extend ext;
         tiff_warn_error twe;
@@ -243,7 +249,8 @@ namespace im {
             for (int st = 0; st != n_strips; ++st) {
                 const int offset = TIFFReadEncodedStrip(t.tif, st, start, strip_size);
                 if (offset == -1) {
-                    imread_raise(CannotReadError, "Error reading strip");
+                    imread_raise(CannotReadError,
+                        "Error reading STK-encoded TIFF strip");
                 }
                 start += offset;
             }
@@ -252,9 +259,8 @@ namespace im {
         return images;
     }
     
-    ImageList TIFFFormat::do_read(byte_source* src,
-                                  ImageFactory* factory,
-                                  bool is_multi)  {
+    ImageList TIFFFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
+                                  options_map const& opts)  {
         tiff_warn_error twe;
         tif_holder t = read_client(src);
         ImageList images;
@@ -286,7 +292,8 @@ namespace im {
                     // byte* __restrict__ srcPtr = inter->rowp_as<byte>(r);
                     byte* srcPtr = output->rowp_as<byte>(r);
                     if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
-                        imread_raise(CannotReadError, "Error reading scanline");
+                        imread_raise(CannotReadError,
+                            "Error reading TIFF scanline");
                     }
                     for (int x = 0; x < w; x++) {
                         for (int c = 0; c < depth; c++) {
@@ -304,7 +311,8 @@ namespace im {
                     // byte* __restrict__ srcPtr = inter->rowp_as<byte>(r);
                     byte* srcPtr = output->rowp_as<byte>(r);
                     if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
-                        imread_raise(CannotReadError, "Error reading scanline");
+                        imread_raise(CannotReadError,
+                            "Error reading TIFF scanline");
                     }
                     for (int x = 0; x < w; x++) {
                         for (int c = 0; c < depth; c++) {
@@ -324,7 +332,7 @@ namespace im {
         return images;
     }
     
-    void TIFFFormat::write(Image& input, byte_sink* output, const options_map& opts)  {
+    void TIFFFormat::write(Image& input, byte_sink* output, options_map const& opts)  {
         tiff_warn_error twe;
         tif_holder t = TIFFClientOpen(
                         "internal",
@@ -338,15 +346,19 @@ namespace im {
                         NULL,
                         NULL);
         std::vector<byte> bufdata;
-        void* __restrict__ bufp = 0;
-        bool copy_data = false;
+        byte* __restrict__ bufp = 0;
+        bool copy_data = opts.cast<bool>("tiff:copy-data", false);
         const uint32_t h = input.dim(0);
-        const uint16_t photometric = ((input.ndims() == 3 && input.dim(2)) ?
+        const uint32_t w = input.dim(1);
+        const uint32_t ch = input.dim(2);
+        const uint32_t siz = input.size();
+        const uint32_t nbytes = input.nbytes();
+        const uint16_t photometric = ((input.ndims() == 3 && ch) ?
                                                         PHOTOMETRIC_RGB :
                                                         PHOTOMETRIC_MINISBLACK);
         
         TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH,        static_cast<uint32_t>(h));
-        TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH,         static_cast<uint32_t>(input.dim(1)));
+        TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH,         static_cast<uint32_t>(w));
         
         TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE,      static_cast<uint16_t>(input.nbits()));
         TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL,    static_cast<uint16_t>(input.dim_or(2, 1)));
@@ -363,11 +375,7 @@ namespace im {
             const bool prediction_default = input.nbits() != 8;
             if (opts.cast<bool>("tiff:horizontal-predictor", prediction_default)) {
                 TIFFSetField(t.tif, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
-                if (!copy_data) {
-                    bufdata.resize(input.dim(1) * input.nbytes());
-                    bufp = &bufdata[0];
-                    copy_data = true;
-                }
+                if (!copy_data) { copy_data = true; }
             }
         }
         
@@ -394,15 +402,17 @@ namespace im {
                 opts.cast<int>("tiff:orientation", ORIENTATION_TOPLEFT));
         }
         
+        if (copy_data) {
+            bufdata.resize(siz * nbytes);
+            bufp = &bufdata[0];
+            std::memcpy(bufp, input.rowp(0), siz * nbytes);
+        }
         
         for (uint32_t r = 0; r != h; ++r) {
-            void* __restrict__ rowp = input.rowp(r);
-            if (copy_data) {
-                std::memcpy(bufp, rowp, input.dim(1) * input.nbytes());
-                rowp = bufp;
-            }
+            void* __restrict__ rowp = copy_data ? bufp + (r * h * nbytes) : input.rowp(r);
             if (TIFFWriteScanline(t.tif, rowp, r) == -1) {
-                imread_raise(CannotWriteError, "Error writing TIFF file");
+                imread_raise(CannotWriteError,
+                    "Error writing TIFF file");
             }
         }
         TIFFFlush(t.tif);

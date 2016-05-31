@@ -22,7 +22,7 @@ namespace im { namespace test {
     
     static const std::string basedir = "/Users/fish/Dropbox/libimread/tests/data";
     
-    static const int num_jpg = 46;
+    static const int num_jpg = 47;
     static const std::string jpg[] = {
         "10350540_10152447396343587_37416966729730477_n.jpg",
         "10954288_342637995941364_1354507656_n.jpg",
@@ -58,6 +58,7 @@ namespace im { namespace test {
         "cube_quest_arcade.jpg",
         "Destruct_sequence_engaged.jpg",
         "DIET-PEPSI-UH-HUH-EXCLAMAITION-MARK.jpg",
+        "DROWNED-CAT-IS-VERY-UPSET.jpg",
         "environ-ctr-PURGE.jpg",
         "GLOVE-OF-NINTENDO-POWER-PLUS-ONE.jpg",
         "HANG-IN-THERE.jpg",
