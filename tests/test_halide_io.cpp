@@ -130,6 +130,9 @@ namespace {
         im::halide::write(halim3, td.dirpath/"PPM_OH_DOGGGGG.ppm");
         U8Image halim4 = im::halide::read(td.dirpath/"PPM_OH_DOGGGGG.ppm");
         im::halide::write(halim4, td.dirpath/"PPM_IMG_DOGGGGGGGGG.png");
+        
+        U8Image halim5 = im::halide::read(D("RGB888.pvr"));
+        im::halide::write(halim5, td.dirpath/"POWERDOGGGGG.png");
     }
     
     TEST_CASE("[halide-io] Write multiple formats as TIFF",
@@ -146,6 +149,9 @@ namespace {
         im::halide::write(halim3, td.dirpath/"TIFF_OH_DOGGGGG.tiff");
         U8Image halim4 = im::halide::read(td.dirpath/"TIFF_OH_DOGGGGG.tiff");
         im::halide::write(halim4, td.dirpath/"TIFF_IMG_DOGGGGGGGGG.tif");
+        
+        U8Image halim5 = im::halide::read(D("RGB888.pvr"));
+        im::halide::write(halim5, td.dirpath/"POWERDOGGGGG.tif");
     }
     
     /// LSM WRITING NOT IMPLEMENTED

@@ -41,6 +41,12 @@ namespace py {
                 return pos = (view.len-delta-1);
             }
             
+            std::vector<byte> source::full_data() {
+                std::vector<byte> out(view.len);
+                std::memcpy(&out[0], view.buf, view.len);
+                return out;
+            }
+            
             std::string source::str() const {
                 return std::string((char const*)view.buf, view.len);
             }

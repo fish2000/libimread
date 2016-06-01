@@ -2,7 +2,6 @@
 from __future__ import print_function
 from basecase import BaseCase
 
-import im
 import numpy
 
 class ReadTests(BaseCase):
@@ -26,6 +25,14 @@ class ReadTests(BaseCase):
     def test_load_tif(self):
         for ImageType in self.imagetypes:
             for image_path in self.tifs:
+                image = ImageType(image_path)
+                self.assertIsNotNone(image)
+                self.assertEqual(image.shape, image.buffer.shape)
+                self.assertEqual(image.strides, image.buffer.strides)
+    
+    def test_load_pvr(self):
+        for ImageType in self.imagetypes:
+            for image_path in self.pvrs:
                 image = ImageType(image_path)
                 self.assertIsNotNone(image)
                 self.assertEqual(image.shape, image.buffer.shape)
@@ -98,6 +105,15 @@ class ReadTests(BaseCase):
     def test_load_tif_as_blob(self):
         for ImageType in self.imagetypes:
             for image_path in self.tifs:
+                with open(image_path, 'rb') as image_fh:
+                    image_blob = image_fh.read()
+                    image = ImageType(image_blob, is_blob=True)
+                    self.assertIsNotNone(image)
+                    self.assertEqual(image.shape, image.buffer.shape)
+    
+    def test_load_pvr_as_blob(self):
+        for ImageType in self.imagetypes:
+            for image_path in self.pvrs:
                 with open(image_path, 'rb') as image_fh:
                     image_blob = image_fh.read()
                     image = ImageType(image_blob, is_blob=True)

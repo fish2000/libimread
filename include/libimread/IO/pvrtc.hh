@@ -22,6 +22,8 @@ namespace im {
                 _mimetype = "image/x-pvr"
             );
             
+            static bool match_format(byte_source* src);
+            
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
                                                 const options_map& opts) override;

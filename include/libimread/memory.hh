@@ -21,6 +21,7 @@ namespace im {
             virtual std::size_t seek_absolute(std::size_t p);
             virtual std::size_t seek_relative(int delta);
             virtual std::size_t seek_end(int delta);
+            virtual std::vector<byte> full_data();
         
         private:
             const byte* data;

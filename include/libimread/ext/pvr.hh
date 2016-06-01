@@ -56,21 +56,39 @@ enum ePVRLoadResult
     PVR_LOAD_UNKNOWN_ERROR,
 };
 
-struct PVRTexture
-{
+typedef struct PVRHeader {
+    uint32_t      size;
+    uint32_t      height;
+    uint32_t      width;
+    uint32_t      mipcount;
+    uint32_t      flags;
+    uint32_t      texdatasize;
+    uint32_t      bpp;
+    uint32_t      rmask;
+    uint32_t      gmask;
+    uint32_t      bmask;
+    uint32_t      amask;
+    uint32_t      magic;
+    uint32_t      numtex;
+} PVRHeader;
+
+unsigned int countBits(unsigned int x);
+
+struct PVRTexture {
+    
     PVRTexture();
     ~PVRTexture();
     
     ePVRLoadResult load(uint8_t* data, unsigned int size);
     bool loadApplePVRTC(uint8_t* data, int size);
-
+    
     unsigned int width;
     unsigned int height;
     unsigned int numMips;
     unsigned int bpp;
     const char* format;
-
     uint8_t* data;
+    
 };
 
 #endif /// LIBIMREAD_EXT_PVR_H_

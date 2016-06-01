@@ -70,22 +70,6 @@ const char* typeStrings[] = {
     "PVRTC2", "PVRTC4"
 };
 
-typedef struct PVRHeader {
-    uint32_t      size;
-    uint32_t      height;
-    uint32_t      width;
-    uint32_t      mipcount;
-    uint32_t      flags;
-    uint32_t      texdatasize;
-    uint32_t      bpp;
-    uint32_t      rmask;
-    uint32_t      gmask;
-    uint32_t      bmask;
-    uint32_t      amask;
-    uint32_t      magic;
-    uint32_t      numtex;
-} PVRHeader;
-
 PVRTexture::PVRTexture() : data(NULL) {}
 
 PVRTexture::~PVRTexture() {
@@ -101,11 +85,11 @@ bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
             return false;
         }
     }
-
+    
     // default to 2bpp, 8x8
     int mode = 1;
     int res = 8;
-
+    
     // this is a tough one, could be 2bpp 8x8, 4bpp 8x8
     if (size == 32) {
         // assume 4bpp, 8x8
@@ -116,7 +100,7 @@ bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
         int shift = 0;
         int test2bpp = 0x40; // 16x16
         int test4bpp = 0x80; // 16x16
-
+        
         while (shift < 10) {
             int s2 = shift << 1;
             if ((test2bpp << s2) & size) {
@@ -139,13 +123,13 @@ bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
             return false;
         }
     }
-
+    
     // there is no reliable way to know if it's a 2bpp or 4bpp file. Assuming
     this->width = res;
     this->height = res;
     this->bpp = (mode + 1) * 2;
     this->numMips = 0;
-    this->data = (uint8_t*)malloc(this->width * this->height * 4);
+    this->data = (uint8_t*)std::malloc(this->width * this->height * 4);
     
     Decompress((AMTC_BLOCK_STRUCT*)data, mode,
                 this->width, this->height, 0,
@@ -209,7 +193,7 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
     this->height = header->height;
     this->numMips = header->mipcount;
     this->bpp = header->bpp;
-    this->data = (uint8_t*)malloc(this->width * this->height * 4);
+    this->data = (uint8_t*)std::malloc(this->width * this->height * 4);
     
     if (ptype < PVR_MAX_TYPE) {
         this->format = typeStrings[ptype];
@@ -372,10 +356,8 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
         break;
         
         default: {
-#ifdef PVRTC_DEBUG
-            printf("pvr.cpp: unknown PVR type %i!\n", ptype);
-#endif
-            free(this->data);
+            // printf("pvr.cpp: unknown PVR type %i!\n", ptype);
+            std::free(this->data);
             this->data = NULL;
             return PVR_LOAD_UNKNOWN_TYPE;
         }

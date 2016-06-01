@@ -28,6 +28,12 @@ namespace im {
     std::size_t memory_source::seek_relative(int delta) { return pos += delta; }
     std::size_t memory_source::seek_end(int delta) { return pos = (length-delta-1); }
     
+    std::vector<byte> memory_source::full_data() {
+        std::vector<byte> result(length);
+        std::memcpy(&result[0], data, length);
+        return result;
+    }
+    
     memory_sink::memory_sink(byte* c, std::size_t len)
         :data(c)
         ,membuf(memory::sink(data, len))
