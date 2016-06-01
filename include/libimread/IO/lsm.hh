@@ -74,7 +74,7 @@ namespace im {
                 _signatures = {
                     SIGNATURE("\x49\x49\x2a\x00", 4)
                 },
-                _suffixes = { "lsm" },
+                _suffixes = { "lsm", "tif", "tiff" },
                 _mimetype = "image/lsm"
             );
             

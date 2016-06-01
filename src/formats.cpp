@@ -71,6 +71,7 @@ namespace im {
         if (format::GIF::match_format(src))     { return "gif";  }
         if (format::HDF5::match_format(src))    { return "hdf5"; }
         if (format::TIFF::match_format(src))    { return "tif";  }
+        if (format::STK::match_format(src))     { return "tif";  }
         if (format::WebP::match_format(src))    { return "webp"; }
         if (format::PPM::match_format(src))     { return "ppm";  }
         // if (format::PVR::match_format(src))  { return "pvr";  }

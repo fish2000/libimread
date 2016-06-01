@@ -13,21 +13,58 @@
 
 namespace im {
     
+    namespace detail {
+        
+        inline decltype(auto) writeopts() {
+            return D(
+                _compress = true,
+                _horizontal_predictor = false,
+                _metadata = false,
+                _software_signature = "libimread (OST-MLOBJ/747)",
+                _x_resolution = 72,
+                _y_resolution = 72,
+                _resolution_unit = 1,   /// RESUNIT_INCH
+                _orientation = 1        /// ORIENTATION_TOPLEFT
+            );
+        }
+        
+    }
+    
     class STKFormat : public ImageFormatBase<STKFormat> {
         public:
+            using can_read = std::true_type;
             using can_read_multi = std::true_type;
             
             DECLARE_OPTIONS(
                 _signatures = {
                     SIGNATURE("\x49\x49\x2a\x00", 4)
                 },
-                _suffixes = { "stk" },
-                _mimetype = "image/stk"
+                _suffixes = { "stk", "tif", "tiff" },
+                _mimetype = "image/stk",
+                _metadata = "<TIFF/STK METADATA STRING>",
+                _writeopts = detail::writeopts()
             );
             
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
+                                                options_map const& opts) override {
+                ImageList pages = this->do_read(src, factory, false, opts);
+                std::unique_ptr<Image> out = pages.pop();
+                return out;
+            }
+            
             virtual ImageList read_multi(byte_source* src,
-                                         ImageFactory* factory,
-                                         options_map const& opts) override;
+                                        ImageFactory* factory,
+                                        options_map const& opts) override {
+                return this->do_read(src, factory, true, opts);
+            }
+            
+        private:
+            ImageList do_read(byte_source* src,
+                              ImageFactory* factory,
+                              bool is_multi,
+                              options_map const& opts);
+        
     };
     
     class TIFFFormat : public ImageFormatBase<TIFFFormat> {
@@ -46,16 +83,7 @@ namespace im {
                 _suffixes = { "tif", "tiff" },
                 _mimetype = "image/tiff",
                 _metadata = "<TIFF METADATA STRING>",
-                _writeopts = D(
-                    _compress = true,
-                    _horizontal_predictor = false,
-                    _metadata = false,
-                    _software_signature = "libimread (OST-MLOBJ/747)",
-                    _x_resolution = 72,
-                    _y_resolution = 72,
-                    _resolution_unit = 1,   /// RESUNIT_INCH
-                    _orientation = 1        /// ORIENTATION_TOPLEFT
-                )
+                _writeopts = detail::writeopts()
             );
             
             static bool match_format(byte_source* src) {

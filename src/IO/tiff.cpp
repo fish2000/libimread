@@ -212,9 +212,8 @@ namespace im {
     } /// namespace
     
     
-    ImageList STKFormat::read_multi(byte_source* src,
-                                    ImageFactory* factory,
-                                    options_map const& opts)  {
+    ImageList STKFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
+                                 options_map const& opts)  {
         shift_source moved(src);
         stk_extend ext;
         tiff_warn_error twe;
@@ -230,6 +229,7 @@ namespace im {
         const int strip_size = TIFFStripSize(t.tif);
         const int n_strips = TIFFNumberOfStrips(t.tif);
         int raw_strip_size = 0;
+        int z = 0;
         int32_t n_planes;
         void* __restrict__ data;
         
@@ -239,13 +239,13 @@ namespace im {
             raw_strip_size += TIFFRawStripSize(t.tif, st);
         }
         
-        for (int z = 0; z < n_planes; ++z) {
+        // for (int z = 0; z < n_planes; ++z) {
+        do {
             /// Monkey patch strip offsets -- 
             /// This is very hacky, but it seems to work!
             moved.shift(z * raw_strip_size);
             std::unique_ptr<Image> output(factory->create(bits_per_sample, h, w, depth));
             byte* start = output->rowp_as<byte>(0);
-            
             for (int st = 0; st != n_strips; ++st) {
                 const int offset = TIFFReadEncodedStrip(t.tif, st, start, strip_size);
                 if (offset == -1) {
@@ -255,7 +255,9 @@ namespace im {
                 start += offset;
             }
             images.push_back(std::move(output));
-        }
+            ++z;
+        } while (is_multi && z < n_planes);
+        
         return images;
     }
     
