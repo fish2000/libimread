@@ -65,7 +65,7 @@
 #include <libimread/base.hh>
 
 namespace im {
-
+    
     class LSMFormat : public ImageFormatBase<LSMFormat> {
         public:
             using can_read = std::true_type;

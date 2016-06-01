@@ -1146,10 +1146,10 @@ namespace im {
         
     } /* namespace (anon.) */
     
-    std::unique_ptr<Image> LSMFormat::read(byte_source* s,
+    std::unique_ptr<Image> LSMFormat::read(byte_source* src,
                                            ImageFactory* factory,
                                            options_map const& opts)  {
-        LSMReader reader(s);
+        LSMReader reader(src);
         return reader.read(factory, opts);
     }
     

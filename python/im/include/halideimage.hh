@@ -26,6 +26,7 @@
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/ext/base64.hh>
 #include <libimread/errors.hh>
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
@@ -805,7 +806,9 @@ namespace py {
                 std::string ext;
                 options_map default_opts;
                 bool can_write = false,
-                     removed = false;
+                     removed = false,
+                     as_url = false,
+                     as_html = false;
                 
                 if (!opts.has("format")) {
                     PyErr_SetString(PyExc_AttributeError,
@@ -872,7 +875,22 @@ namespace py {
                     return nullptr;
                 }
                 
-                return py::string(data);
+                as_html = opts.cast<bool>("as_html", false);
+                as_url = opts.cast<bool>("as_url", as_html);
+                if (!as_url) { return py::string(data); }
+                
+                std::string out("data:");
+                {
+                    py::gil::release nogil;
+                    if (as_url) {
+                        out += format->get_mimetype() + ";base64,";
+                        out += im::base64::encode(&data[0], data.size());
+                        if (as_html) {
+                            out = std::string("<img src='") + out + "'>";
+                        }
+                    }
+                }
+                return py::string(out);
             }
             
             static constexpr Py_ssize_t typeflags() {
@@ -1615,7 +1633,7 @@ namespace py {
                 if (!PyArg_ParseTupleAndKeywords(
                     args, kwargs, "|s*OOO:write", const_cast<char**>(keywords),
                     &view,                      /// "destination", buffer with file path
-                    &file,
+                    &file,                      /// "file", PyFileObject*-castable I/O handle
                     &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
                     &options))                  /// "options", read-options dict
                 {
@@ -1745,6 +1763,23 @@ namespace py {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("jpg"));
+                if (PyDict_Update(pyim->writeoptDict, options) == -1) {
+                    Py_DECREF(options);
+                    return nullptr;
+                }
+                options_map opts = pyim->writeopts();
+                PyObject* out = pyim->saveblob(opts);
+                return out;
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* jupyter_repr_html(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                PyObject* options = PyDict_New();
+                py::detail::setitemstring(options, "format", py::string("jpg"));
+                py::detail::setitemstring(options, "as_html", py::True());
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     Py_DECREF(options);
                     return nullptr;
@@ -2016,6 +2051,12 @@ namespace py {
                                 (PyCFunction)py::ext::image::jupyter_repr_png<ImageType, BufferType>,
                                 METH_NOARGS,
                                 "Return the image data in the PNG format"
+                                "* This method is for use by ipython/jupyter" },
+                        {
+                            "_repr_html_",
+                                (PyCFunction)py::ext::image::jupyter_repr_html<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "Return the image data as a base64-encoded `data:` URL inside an HTML <img> tag"
                                 "* This method is for use by ipython/jupyter" },
                         {
                             "check",
