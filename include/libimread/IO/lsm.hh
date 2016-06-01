@@ -57,10 +57,6 @@
 // Pasi Kankaanpää <ppkank@bytl.jyu.fi>
 //
 
-#include <vector>
-#include <string>
-#include <ostream>
-
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 

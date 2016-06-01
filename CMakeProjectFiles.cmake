@@ -116,6 +116,7 @@ set(hdrs
     ${hdrs_dir}/ext/base64.hh
     ${hdrs_dir}/ext/butteraugli.hh
     ${hdrs_dir}/ext/exif.hh
+    ${hdrs_dir}/ext/lzw.hh
     ${hdrs_dir}/ext/iod.hh
     ${hdrs_dir}/ext/pvr.hh
     ${hdrs_dir}/ext/pystring.hh
@@ -221,6 +222,7 @@ set(srcs
     ${srcs_dir}/ext/base64.cpp
     ${srcs_dir}/ext/butteraugli.cpp
     ${srcs_dir}/ext/exif.cpp
+    ${srcs_dir}/ext/lzw.cpp
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
     ${srcs_dir}/ext/pystring.cpp
@@ -233,7 +235,6 @@ set(srcs
     ${srcs_dir}/IO/hdf5.cpp
     ${srcs_dir}/IO/jpeg.cpp
     ${srcs_dir}/IO/lsm.cpp
-    ${srcs_dir}/IO/lzw.cpp
     ${srcs_dir}/IO/png.cpp
     ${srcs_dir}/IO/ppm.cpp
     ${srcs_dir}/IO/pvrtc.cpp

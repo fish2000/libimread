@@ -39,12 +39,13 @@
 =========================================================================
 */
 
+#include <vector>
+#include <string>
+#include <ostream>
+
 #include <iod/json.hh>
 #include <libimread/IO/lsm.hh>
-
-namespace {
-    #include "lzw.cpp"
-}
+#include <libimread/ext/lzw.hh>
 
 #define TIF_NEWSUBFILETYPE 254
 #define TIF_IMAGEWIDTH 256
@@ -974,7 +975,7 @@ namespace im {
                                              int size,
                                              int bytes) {
             //throw ProgrammingError("Not tested");
-            std::vector<unsigned char> decoded = lzw_decode(buffer, size);
+            std::vector<unsigned char> decoded = im::lzw::decode(buffer, size);
             unsigned char* outbufp = &decoded[0];
             int width = this->dimensions_[0];
             int lines = size / (width * bytes);

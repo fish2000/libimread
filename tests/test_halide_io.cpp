@@ -148,6 +148,24 @@ namespace {
         im::halide::write(halim4, td.dirpath/"TIFF_IMG_DOGGGGGGGGG.tif");
     }
     
+    /// LSM WRITING NOT IMPLEMENTED
+    
+    // TEST_CASE("[halide-io] Write multiple formats as LSM",
+    //           "[halide-read-multiple-write-lsm]")
+    // {
+    //     im::fs::TemporaryDirectory td("test-halide-io");
+    //
+    //     U8Image halim = im::halide::read(D("ptlobos.tif"));
+    //     im::halide::write(halim, td.dirpath/"TIFF_DUG986.lsm");
+    //     U8Image halim2 = im::halide::read(td.dirpath/"TIFF_DUG986.tiff");
+    //     im::halide::write(halim2, td.dirpath/"TIFF_YO_DOGG222.lsm");
+    //
+    //     U8Image halim3 = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
+    //     im::halide::write(halim3, td.dirpath/"TIFF_OH_DOGGGGG.lsm");
+    //     U8Image halim4 = im::halide::read(td.dirpath/"TIFF_OH_DOGGGGG.tiff");
+    //     im::halide::write(halim4, td.dirpath/"TIFF_IMG_DOGGGGGGGGG.lsm");
+    // }
+    
     TEST_CASE("[halide-io] Check the dimensions of an image",
               "[halide-read-jpg-png-image-dims]")
     {
