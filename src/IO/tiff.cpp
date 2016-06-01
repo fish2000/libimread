@@ -34,7 +34,7 @@ namespace im {
         void tiff_error(const char* module, const char* fmt, va_list ap) {
             char buffer[4096];
             std::vsnprintf(buffer, sizeof(char)*4096, fmt, ap);
-            imread_raise(CannotReadError, "FATAL in TIFF I/O",
+            imread_raise(TIFFIOError, "FATAL in TIFF I/O",
                 FF("[TIFF/ERROR***] %s: ", module),
                 FF("%s\n", std::string(buffer).c_str()));
         }
@@ -360,6 +360,7 @@ namespace im {
                         tiff_size<byte_sink>,
                         nullptr,
                         nullptr);
+        
         std::vector<byte> bufdata;
         byte* __restrict__ bufp = 0;
         bool copy_data = opts.cast<bool>("tiff:copy-data", false);
