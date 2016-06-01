@@ -34,6 +34,8 @@ namespace im {
         return result;
     }
     
+    std::size_t memory_source::size() { return length; }
+    
     memory_sink::memory_sink(byte* c, std::size_t len)
         :data(c)
         ,membuf(memory::sink(data, len))

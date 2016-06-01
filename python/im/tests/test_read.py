@@ -6,10 +6,14 @@ import numpy
 
 class ReadTests(BaseCase):
     
-    def check_path(self, pth):
+    def _check_path(self, pth):
         from os.path import basename
         return not (basename(pth).lower().startswith("rgb") or \
                     basename(pth).lower().startswith("apple"))
+    
+    def check_path(self, pth):
+        from os.path import basename
+        return not basename(pth).lower().startswith("apple")
     
     def test_load_jpg(self):
         for ImageType in self.imagetypes:
@@ -143,7 +147,6 @@ class ReadTests(BaseCase):
                     self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
-    """
     def test_load_tif_as_blob_from_filehandle(self):
         ''' This does not work for some reason -- likely due to the
             wackadoo source/sink manipulation in IO/tiff.cpp
@@ -154,7 +157,6 @@ class ReadTests(BaseCase):
                     image = ImageType(file=image_fh, is_blob=True)
                     self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
-    """
     
     def test_load_pvr_as_blob_from_filehandle(self):
         for ImageType in self.imagetypes:

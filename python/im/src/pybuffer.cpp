@@ -47,6 +47,10 @@ namespace py {
                 return out;
             }
             
+            std::size_t source::size() {
+                return view.len;
+            }
+            
             std::string source::str() const {
                 return std::string((char const*)view.buf, view.len);
             }

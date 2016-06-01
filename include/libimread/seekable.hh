@@ -47,6 +47,12 @@ namespace im {
                 return result;
             }
             
+            virtual std::size_t size() {
+                /// super-naive implementation...
+                /// OVERRIDE THIS HORRIDNESS, DOGG
+                std::vector<byte> all_of_it = this->full_data();
+                return all_of_it.size();
+            }
     };
     
     class byte_sink : virtual public seekable {
@@ -69,10 +75,8 @@ namespace im {
             std::size_t writef(const char* format, Args... args) {
                 char buffer[1024];
                 std::snprintf(buffer, 1024, format, args...);
-                return this->write(
-                    buffer,
-                    std::strlen(
-                        static_cast<const char*>(buffer)));
+                return this->write(buffer, std::strlen(
+                                   static_cast<const char*>(buffer)));
             }
     };
 

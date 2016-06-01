@@ -191,6 +191,10 @@ namespace im {
                 virtual std::size_t seek_relative(int n) { return s->seek_relative(n)-shift_; }
                 virtual std::size_t seek_end(int n) { return s->seek_end(n+shift_)-shift_; }
                 
+                /// delegate these fully, to avoid using naive implementations:
+                virtual std::vector<byte> full_data() { return s->full_data(); }
+                virtual std::size_t size() { return s->size(); }
+                
                 void shift(int nshift) {
                     s->seek_relative(nshift - shift_);
                     shift_ = nshift;

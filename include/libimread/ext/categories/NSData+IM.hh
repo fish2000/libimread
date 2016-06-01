@@ -58,6 +58,8 @@ namespace im {
                 std::memcpy(&out[0], (byte*)data.bytes, out.size());
                 return out;
             }
+            
+            virtual std::size_t size() { return data.length; }
         
         private:
             NSData* data;

@@ -28,6 +28,7 @@ namespace py {
                 virtual std::size_t seek_relative(int delta);
                 virtual std::size_t seek_end(int delta);
                 virtual std::vector<byte> full_data();
+                virtual std::size_t size();
                 
                 operator Py_buffer() const { return view; }
                 std::string str() const;

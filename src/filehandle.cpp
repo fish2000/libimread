@@ -82,6 +82,11 @@ namespace im {
         return result;
     }
     
+    std::size_t handle_source_sink::size() {
+        detail::stat_t info = this->stat();
+        return info.st_size * sizeof(byte);
+    }
+    
     int handle_source_sink::fd() const noexcept {
         return ::fileno(handle);
     }

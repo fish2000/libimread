@@ -94,6 +94,11 @@ namespace im {
         return result;
     }
     
+    std::size_t fd_source_sink::size() {
+        detail::stat_t info = this->stat();
+        return info.st_size * sizeof(byte);
+    }
+    
     int fd_source_sink::fd() const noexcept {
         return descriptor;
     }
