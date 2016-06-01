@@ -68,7 +68,7 @@ namespace {
         const std::vector<path> pngs = basedir.list("*.png");
         const std::vector<path> jpgs = basedir.list("*.jpg");
         
-        std::for_each(pngs.begin(), pngs.end(), [&basedir, &td](const path &p) {
+        std::for_each(pngs.begin(), pngs.end(), [&basedir, &td](path const& p) {
             auto png = im::apple::read(basedir/p);
             // WTF("Read image file:", (basedir/p).str(),
             //     FF("Image size: %i x %i x %i", png.dim(0), png.dim(1), png.dim(2)));
@@ -77,7 +77,7 @@ namespace {
             im::apple::write(png, npext);
         });
         
-        std::for_each(jpgs.begin(), jpgs.end(), [&basedir, &td](const path &p) {
+        std::for_each(jpgs.begin(), jpgs.end(), [&basedir, &td](path const& p) {
             auto jpg = im::apple::read(basedir/p);
             path np = td.dirpath/p;
             path npext = np + ".png";
@@ -87,7 +87,7 @@ namespace {
         const std::vector<path> apples = td.dirpath.list("*.png");
         CHECK(apples.size() == pngs.size() + jpgs.size());
         
-        std::for_each(apples.begin(), apples.end(), [&basedir, &td](const path &p) {
+        std::for_each(apples.begin(), apples.end(), [&basedir, &td](path const& p) {
             path np = td.dirpath/p;
             auto mcintosh = im::halide::read(np);
             REQUIRE(mcintosh.dim(0) > 0);

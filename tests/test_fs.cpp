@@ -174,7 +174,7 @@ namespace {
         }
     }
     
-    TEST_CASE("[filesystem] Check count of test tiff files (should be 0)",
+    TEST_CASE("[filesystem] Check count of test tiff files",
               "[fs-count-tiff]") {
         path basedir(im::test::basedir);
         std::vector<path> v = basedir.list("*.tiff");

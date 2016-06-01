@@ -340,6 +340,7 @@ namespace im {
             }
             
             images.push_back(std::move(output));
+            if (TIFFLastDirectory(t.tif) != 0) { break; }
         
         } while (is_multi && TIFFReadDirectory(t.tif));
         

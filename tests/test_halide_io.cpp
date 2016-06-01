@@ -6,6 +6,7 @@
 #include <libimread/IO/png.hh>
 #include <libimread/IO/tiff.hh>
 
+#include "include/test_data.hpp"
 #include "include/catch.hpp"
 
 #define D(pth) "/Users/fish/Dropbox/libimread/tests/data/" pth
@@ -74,14 +75,20 @@ namespace {
         CHECK(path::remove(tf4));
     }
     
-    TEST_CASE("[halide-io] Read a TIFF, rewrite it as a PNG using tmpwrite()",
+    TEST_CASE("[halide-io] Read TIFF files, rewrite each as a PNG using tmpwrite()",
               "[halide-read-tiff-write-png-tmpwrite]")
     {
         using im::format::PNG;
         
-        U8Image halim = im::halide::read(D("ptlobos.tif"));
-        auto tf = im::halide::tmpwrite<PNG>(halim);
-        CHECK(path::remove(tf));
+        path basedir(im::test::basedir);
+        const std::vector<path> tifs = basedir.list("*.tif*");
+        
+        std::for_each(tifs.begin(), tifs.end(), [&basedir](path const& p) {
+            auto tif = im::halide::read(basedir/p);
+            auto pngpath = im::halide::tmpwrite<PNG>(tif);
+            CHECK(path::remove(pngpath));
+        });
+        
     }
     
     TEST_CASE("[halide-io] Read a JPEG and rewrite it as a TIFF using tmpwrite()",
