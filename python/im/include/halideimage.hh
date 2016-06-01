@@ -642,28 +642,28 @@ namespace py {
                     input = iohandle.source();
                     format = im::for_source(input.get());
                     can_read = format->format_can_read();
+                    if (can_read) {
+                        default_opts = format->add_options(opts);
+                        output = format->read(input.get(), &factory, default_opts);
+                        image.reset(dynamic_cast<ImageType*>(output.release()));
+                        return true;
+                    }
                 } catch (im::FormatNotFound& exc) {
                     PyErr_SetString(PyExc_ValueError,
                         "Can't match blob data to a suitable I/O format");
                     return false;
                 }
                 
-                if (!can_read) {
+                if (format.get()) {
                     std::string mime = format->get_mimetype();
                     PyErr_Format(PyExc_ValueError,
                         "Unimplemented read() in I/O format %s",
                         mime.c_str());
-                    return false;
+                } else {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Bad I/O format pointer returned for blob data");
                 }
-                
-                {
-                    py::gil::release nogil;
-                    default_opts = format->add_options(opts);
-                    output = format->read(input.get(), &factory, default_opts);
-                    image.reset(dynamic_cast<ImageType*>(output.release()));
-                }
-                
-                return true;
+                return false;
             }
             
             bool loadblob(Py_buffer const& view, options_map const& opts) {

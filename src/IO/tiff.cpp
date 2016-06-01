@@ -80,6 +80,12 @@ namespace im {
             return toff_t(size);
         }
         
+        toff_t tiff_size_source(thandle_t handle) {
+            using pointer_t = std::add_pointer_t<byte_source>;
+            pointer_t source = static_cast<pointer_t>(handle);
+            return toff_t(source->size());
+        }
+        
         int tiff_close(thandle_t handle) { return 0; }
         
         struct tif_holder {
@@ -157,7 +163,7 @@ namespace im {
                             tiff_no_write,
                             tiff_seek<byte_source>,
                             tiff_close,
-                            tiff_size<byte_source>,
+                            tiff_size_source,
                             nullptr,
                             nullptr);
         }
