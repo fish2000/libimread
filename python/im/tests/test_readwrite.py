@@ -3,7 +3,6 @@ from __future__ import print_function
 from basecase import BaseCase
 
 import os
-import im
 import json
 
 class ReadWriteTests(BaseCase):

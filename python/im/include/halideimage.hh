@@ -801,6 +801,8 @@ namespace py {
                 std::unique_ptr<ImageFormat> format;
                 std::unique_ptr<im::FileSink> output;
                 std::unique_ptr<im::FileSource> readback;
+                std::vector<byte> data;
+                std::string ext;
                 options_map default_opts;
                 bool can_write = false,
                      removed = false;
@@ -813,13 +815,13 @@ namespace py {
                 
                 try {
                     py::gil::release nogil;
-                    format = im::get_format(
-                        opts.cast<char const*>("format"));
+                    ext = opts.cast<std::string>("format");
+                    format = im::get_format(ext.c_str());
                     can_write = format->format_can_write();
                 } catch (im::FormatNotFound& exc) {
                     PyErr_Format(PyExc_ValueError,
                         "Can't find I/O format: %s",
-                        opts.cast<char const*>("format"));
+                        ext.c_str());
                     return nullptr;
                 }
                 
@@ -831,8 +833,6 @@ namespace py {
                     return nullptr;
                 }
                 
-                std::vector<byte> data;
-                
                 {
                     py::gil::release nogil;
                     NamedTemporaryFile tf(format->get_suffix(true),
@@ -840,8 +840,10 @@ namespace py {
                                           false);
                     
                     std::string pth = tf.filepath.make_absolute().str();
+                    tf.filepath.remove();
                     output = std::unique_ptr<im::FileSink>(
                         new im::FileSink(pth.c_str()));
+                    
                     default_opts = format->add_options(opts);
                     format->write(dynamic_cast<Image&>(*image.get()),
                                                        output.get(), default_opts);
@@ -1627,6 +1629,7 @@ namespace py {
                 
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     /// some exception was raised somewhere
+                    Py_DECREF(options);
                     return nullptr;
                 }
                 
@@ -1717,6 +1720,38 @@ namespace py {
                 /// "else":
                 if (use_file) { return py::None(); }
                 return py::string(dststr);
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                PyObject* options = PyDict_New();
+                py::detail::setitemstring(options, "format", py::string("png"));
+                if (PyDict_Update(pyim->writeoptDict, options) == -1) {
+                    Py_DECREF(options);
+                    return nullptr;
+                }
+                options_map opts = pyim->writeopts();
+                PyObject* out = pyim->saveblob(opts);
+                return out;
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* jupyter_repr_jpeg(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                PyObject* options = PyDict_New();
+                py::detail::setitemstring(options, "format", py::string("jpg"));
+                if (PyDict_Update(pyim->writeoptDict, options) == -1) {
+                    Py_DECREF(options);
+                    return nullptr;
+                }
+                options_map opts = pyim->writeopts();
+                PyObject* out = pyim->saveblob(opts);
+                return out;
             }
             
             namespace closures {
@@ -1970,6 +2005,18 @@ namespace py {
                           typename BufferType = buffer_t>
                 PyMethodDef* basic() {
                     static PyMethodDef basics[] = {
+                        {
+                            "_repr_jpeg_",
+                                (PyCFunction)py::ext::image::jupyter_repr_jpeg<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "Return the image data in the JPEG format"
+                                "* This method is for use by ipython/jupyter" },
+                        {
+                            "_repr_png_",
+                                (PyCFunction)py::ext::image::jupyter_repr_png<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "Return the image data in the PNG format"
+                                "* This method is for use by ipython/jupyter" },
                         {
                             "check",
                                 (PyCFunction)py::ext::check,

@@ -34,10 +34,10 @@ nosetests:
 	NOSE_REDNOSE=1 python runtests.py
 
 alltests:
-	py.test --color=yes --verbose -r a --full-trace
+	py.test --color=yes --verbose -r a --durations=20 --tb=long
 
 test:
-	py.test -k 'not hybridimage and not singular' --color=yes --verbose -r a --full-trace
+	py.test -k 'not hybridimage and not singular' --color=yes --verbose -r a --durations=20 --tb=long
 
 profile:
 	py.test --color=yes --verbose -r a --profile-svg
