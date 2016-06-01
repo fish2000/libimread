@@ -3,8 +3,9 @@
 
 #define NO_IMPORT_ARRAY
 
-#include <cstdio>
 #include <cstring>
+#include <cstdio>
+#include <array>
 #include <sstream>
 #include <iostream>
 #include <type_traits>
@@ -157,8 +158,8 @@ namespace im {
                             tiff_seek<byte_source>,
                             tiff_close,
                             tiff_size<byte_source>,
-                            NULL,
-                            NULL);
+                            nullptr,
+                            nullptr);
         }
         
         const int UIC1Tag = 33628;
@@ -166,17 +167,17 @@ namespace im {
         const int UIC3Tag = 33630;
         const int UIC4Tag = 33631;
         
-        const TIFFFieldInfo stkTags[] = {
-            { UIC1Tag, -1,-1, TIFF_LONG, FIELD_CUSTOM, true, true,   const_cast<char*>("UIC1Tag") },
-            { UIC1Tag, -1,-1, TIFF_RATIONAL, FIELD_CUSTOM, true, true,   const_cast<char*>("UIC1Tag") },
-            //{ UIC2Tag, -1, -1, TIFF_RATIONAL, FIELD_CUSTOM, true, true,   const_cast<char*>("UIC2Tag") },
-            { UIC2Tag, -1, -1, TIFF_LONG, FIELD_CUSTOM, true, true,   const_cast<char*>("UIC2Tag") },
-            { UIC3Tag, -1,-1, TIFF_RATIONAL, FIELD_CUSTOM, true, true,   const_cast<char*>("UIC3Tag") },
-            { UIC4Tag, -1,-1, TIFF_LONG, FIELD_CUSTOM, true, true,   const_cast<char*>("UIC4Tag") },
-        };
+        std::array<TIFFFieldInfo, 5> stkTags{{
+            { UIC1Tag, -1,-1,   TIFF_LONG,        FIELD_CUSTOM, true, true,   const_cast<char*>("UIC1Tag") },
+            { UIC1Tag, -1,-1,   TIFF_RATIONAL,    FIELD_CUSTOM, true, true,   const_cast<char*>("UIC1Tag") },
+          //{ UIC2Tag, -1, -1,  TIFF_RATIONAL,    FIELD_CUSTOM, true, true,   const_cast<char*>("UIC2Tag") },
+            { UIC2Tag, -1, -1,  TIFF_LONG,        FIELD_CUSTOM, true, true,   const_cast<char*>("UIC2Tag") },
+            { UIC3Tag, -1,-1,   TIFF_RATIONAL,    FIELD_CUSTOM, true, true,   const_cast<char*>("UIC3Tag") },
+            { UIC4Tag, -1,-1,   TIFF_LONG,        FIELD_CUSTOM, true, true,   const_cast<char*>("UIC4Tag") },
+        }};
         
         void set_stk_tags(TIFF* tif) {
-            TIFFMergeFieldInfo(tif, stkTags, sizeof(stkTags)/sizeof(stkTags[0]));
+            TIFFMergeFieldInfo(tif, stkTags.data(), stkTags.size());
         }
         
         class shift_source : public byte_source {
@@ -231,7 +232,7 @@ namespace im {
         int raw_strip_size = 0;
         int z = 0;
         int32_t n_planes;
-        void* __restrict__ data;
+        void* __restrict__ data; /// UNUSED, WAT
         
         TIFFGetField(t.tif, UIC3Tag, &n_planes, &data);
         
@@ -239,12 +240,19 @@ namespace im {
             raw_strip_size += TIFFRawStripSize(t.tif, st);
         }
         
-        // for (int z = 0; z < n_planes; ++z) {
+        /// ORIGINALLY: for (int z = 0; z < n_planes; ++z) {…}
+        
         do {
             /// Monkey patch strip offsets -- 
             /// This is very hacky, but it seems to work!
             moved.shift(z * raw_strip_size);
             std::unique_ptr<Image> output(factory->create(bits_per_sample, h, w, depth));
+            
+            if (ImageWithMetadata* metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
+                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
+                metaout->set_meta(description);
+            }
+            
             byte* start = output->rowp_as<byte>(0);
             for (int st = 0; st != n_strips; ++st) {
                 const int offset = TIFFReadEncodedStrip(t.tif, st, start, strip_size);
@@ -267,13 +275,13 @@ namespace im {
         tif_holder t = read_client(src);
         ImageList images;
         
+        const uint32_t h                = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
+        const uint32_t w                = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
+        const uint16_t nr_samples       = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL);
+        const uint16_t bits_per_sample  = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE);
+        const int depth = nr_samples > 1 ? nr_samples : -1;
+        
         do {
-            const uint32_t h                = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
-            const uint32_t w                = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
-            const uint16_t nr_samples       = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL);
-            const uint16_t bits_per_sample  = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE);
-            
-            const int depth = nr_samples > 1 ? nr_samples : -1;
             
             // std::unique_ptr<Image> inter = factory->create(bits_per_sample, h, w, depth);
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
@@ -345,8 +353,8 @@ namespace im {
                         tiff_seek<byte_sink>,
                         tiff_close,
                         tiff_size<byte_sink>,
-                        NULL,
-                        NULL);
+                        nullptr,
+                        nullptr);
         std::vector<byte> bufdata;
         byte* __restrict__ bufp = 0;
         bool copy_data = opts.cast<bool>("tiff:copy-data", false);
