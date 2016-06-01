@@ -30,7 +30,7 @@ namespace {
     #pragma clang diagnostic ignored "-Wexit-time-destructors"
     std::unique_ptr<std::remove_pointer_t<std::terminate_handler>,
                     decltype(std::set_terminate)&> terminate_handler {
-                        std::set_terminate(backtrace_on_terminate),
+                        std::set_terminate(std::get_terminate()),
                         std::set_terminate };
     #pragma clang diagnostic pop
     
@@ -58,6 +58,29 @@ namespace {
         std::_Exit(EXIT_FAILURE);
     }
 
+}
+
+
+namespace terminator {
+    
+    bool set(std::terminate_handler h) {
+        terminate_handler.release();
+        terminate_handler.reset(std::set_terminate(h));
+        return terminate_handler.get() != nullptr;
+    }
+    
+    std::terminate_handler get() {
+        return terminate_handler.get();
+    }
+    
+    bool setup() {
+        static bool did_setup = false;
+        if (!did_setup) {
+            did_setup = terminator::set(backtrace_on_terminate);
+        }
+        return did_setup;
+    }
+    
 }
 
 #endif /// LIBIMREAD_EXT_ERRORS_TERMINATOR_HH_

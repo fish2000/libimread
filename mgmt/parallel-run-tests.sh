@@ -11,6 +11,7 @@ PROJECT_PATH="/Users/fish/Dropbox/libimread"
 
 : ${COLOR_TRACE:="ON"}
 : ${VERBOSE:="ON"}
+: ${TERMINATOR:="OFF"}
 
 pushd $PROJECT_PATH
     rm -rf ./build ./dist
@@ -20,6 +21,7 @@ pushd $PROJECT_PATH
             -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist" \
             -DIM_COLOR_TRACE=$COLOR_TRACE \
             -DIM_VERBOSE=$VERBOSE \
+            -DIM_TERMINATOR=$TERMINATOR \
             -Wno-dev && \
         make -j4 install && \
         ctest -j4 -D Experimental --output-on-failure

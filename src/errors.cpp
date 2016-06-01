@@ -6,6 +6,11 @@
 #include <libimread/errors.hh>
 #include <libimread/objc-rt/objc-rt.hh> /// This is not OK in the long run
 
+/// set up the terminator
+#ifdef IM_TERMINATOR
+static bool did_setup_terminator = terminator::setup();
+#endif
+
 namespace im {
 
 #ifndef ST

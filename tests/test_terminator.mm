@@ -53,7 +53,7 @@ namespace {
     }
     
     /// Uncomment this to manually test out libimread/ext/errors/terminator.hh
-
+    
     // TEST_CASE("[terminator] Directly call std::terminate()", "[terminator-directly-call-std-terminate]") {
     //     std::terminate();
     // }
