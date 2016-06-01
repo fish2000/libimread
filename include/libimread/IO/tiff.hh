@@ -39,6 +39,7 @@ namespace im {
             
             DECLARE_OPTIONS(
                 _signatures = {
+                    SIGNATURE("\x4d\x4d\x00", 3),
                     SIGNATURE("\x4d\x4d\x00\x2a", 4),
                     SIGNATURE("\x4d\x4d\x00\x2b", 4)
                 },
