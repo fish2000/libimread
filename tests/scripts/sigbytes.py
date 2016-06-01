@@ -26,6 +26,7 @@ Options:
 """
 
 from __future__ import print_function
+from collections import OrderedDict
 from os.path import exists, isdir, dirname, expanduser
 from docopt import docopt
 import sys
@@ -54,27 +55,41 @@ def cli(argv=None):
     cleanr = lambda b: repr(b).replace(r'\x', ' ').upper()
     process_bytes = clean and cleanr or repr
     
+    signatures = OrderedDict()
+    
     for ipth in ipths:
-        fp = None
-        if opth != 'stdout':
-            if exists(opth) or isdir(dirname(opth)):
-                raise AttributeError("Bad output file")
-            else:
-                fp = open(opth, 'wb')
         with open(ipth, 'rb') as fh:
             header_bytes = fh.read(siz)
-            if opth == 'stdout':
-                if verbose:
-                    print(">>> Header bytes (%s) for %s" % (siz, ipth))
-                    print(">>> %s" % process_bytes(header_bytes))
-                else:
-                    print(process_bytes(header_bytes)[1:-1])
+            signatures.update({ ipth : header_bytes })
+    
+    if verbose:
+        print("")
+        print("*** Found %s byte signatures" % len(signatures))
+    
+    fp = None
+    if opth != 'stdout':
+        if exists(opth) or isdir(dirname(opth)):
+            raise AttributeError("Bad output file")
+        else:
+            fp = open(opth, 'wb')
+    
+    for pth, signature in signatures.iteritems():
+        if opth == 'stdout':
+            if verbose:
+                print(">>> Header bytes (%s) for %s:" % (siz, pth))
+                print(">>> %s" % process_bytes(signature)[1:-1])
             else:
-                fp.write(header_bytes)
-                fp.write("\n")
-        if fp is not None:
-            fp.flush()
-            fp.close()
+                print(process_bytes(signature)[1:-1])
+        else:
+            fp.write(signature)
+            fp.write("\n")
+    
+    if fp is not None:
+        fp.flush()
+        fp.close()
+    elif verbose:
+        print("")
+
 
 if __name__ == '__main__':
     cli(sys.argv)
