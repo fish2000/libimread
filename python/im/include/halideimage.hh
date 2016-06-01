@@ -1476,7 +1476,9 @@ namespace py {
                 
                 if (!did_load) {
                     /// If this is true, PyErr has already been set
-                    return -1;
+                    PyErr_SetString(PyExc_AttributeError,
+                        "Image binary load failed");
+                        return -1;
                 }
                 
                 /// create and set a dtype based on the loaded image data's type

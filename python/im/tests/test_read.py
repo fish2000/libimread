@@ -124,12 +124,12 @@ class ReadTests(BaseCase):
         ''' Need to ensure Apple PVR data is recognized '''
         for ImageType in self.imagetypes:
             for image_path in self.pvrs:
-                if self.check_path(image_path):
-                    with open(image_path, 'rb') as image_fh:
-                        image_blob = image_fh.read()
-                        image = ImageType(image_blob, is_blob=True)
-                        self.assertIsNotNone(image)
-                        self.assertEqual(image.shape, image.buffer.shape)
+                # if self.check_path(image_path):
+                with open(image_path, 'rb') as image_fh:
+                    image_blob = image_fh.read()
+                    image = ImageType(image_blob, is_blob=True)
+                    self.assertIsNotNone(image)
+                    self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_jpg_as_blob_from_filehandle(self):
         for ImageType in self.imagetypes:
@@ -146,7 +146,7 @@ class ReadTests(BaseCase):
                     image = ImageType(file=image_fh, is_blob=True)
                     self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
-    """
+    
     def test_load_tif_as_blob_from_filehandle(self):
         ''' This does not work for some reason -- likely due to the
             wackadoo source/sink manipulation in IO/tiff.cpp
@@ -157,7 +157,6 @@ class ReadTests(BaseCase):
                     image = ImageType(file=image_fh, is_blob=True)
                     self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
-    """
     
     def test_load_pvr_as_blob_from_filehandle(self):
         for ImageType in self.imagetypes:
