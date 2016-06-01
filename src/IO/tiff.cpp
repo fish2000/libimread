@@ -230,7 +230,7 @@ namespace im {
         const uint16_t nr_samples           = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, 1);
         const uint16_t bits_per_sample      = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE, 8);
         
-        const int depth = nr_samples > 1 ? nr_samples : -1;
+        const int depth = nr_samples > 1 ? nr_samples : 1;
         const int strip_size = TIFFStripSize(t.tif);
         const int n_strips = TIFFNumberOfStrips(t.tif);
         int raw_strip_size = 0;
@@ -283,7 +283,7 @@ namespace im {
         const uint32_t w                = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
         const uint16_t nr_samples       = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL);
         const uint16_t bits_per_sample  = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE);
-        const int depth = nr_samples > 1 ? nr_samples : -1;
+        const int depth = nr_samples > 1 ? nr_samples : 1;
         
         do {
             

@@ -104,14 +104,17 @@ namespace im { namespace test {
         "yo-dogg-OHHH-DOGGGG.png"
     };
     
-    static const int num_tif = 1;
+    static const int num_tif = 4;
     static const std::string tif[] = {
+        "g8960_ct000508.tif",
+        "lena_g4_500.tif",
+        "LOGO_SCAN.tif",
         "ptlobos.tif"
     };
     
-    static const int num_tiff = 0;
+    static const int num_tiff = 1;
     static const std::string tiff[] = {
-
+        "visuallyinterestingtype.tiff"
     };
     
     static const int num_hdf5 = 0;
