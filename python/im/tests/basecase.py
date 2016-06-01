@@ -22,7 +22,8 @@ class BaseCase(TestCase):
         self.image_paths = set([pth for pth in self._image_paths if pth.lower().endswith('jpg')])
         self.jpgs = set([pth for pth in self._image_paths if pth.lower().endswith('jpg')])
         self.pngs = set([pth for pth in self._image_paths if pth.lower().endswith('png')])
-        self.tifs = set([pth for pth in self._image_paths if pth.lower().endswith('tif')])
+        self.tifs = set([pth for pth in self._image_paths if pth.lower().endswith('tif') and \
+                                                             pth.lower().startswith('re')])
         self.pvrs = set([pth for pth in self._image_paths if pth.lower().endswith('pvr')])
         
         # store local references to im.Image and im.Array
