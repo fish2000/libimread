@@ -6,6 +6,11 @@ import numpy
 
 class ReadTests(BaseCase):
     
+    def check_path(self, pth):
+        from os.path import basename
+        return not (basename(pth).lower().startswith("rgb") or \
+                    basename(pth).lower().startswith("apple"))
+    
     def test_load_jpg(self):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
@@ -115,11 +120,12 @@ class ReadTests(BaseCase):
         ''' Need to ensure Apple PVR data is recognized '''
         for ImageType in self.imagetypes:
             for image_path in self.pvrs:
-                with open(image_path, 'rb') as image_fh:
-                    image_blob = image_fh.read()
-                    image = ImageType(image_blob, is_blob=True)
-                    self.assertIsNotNone(image)
-                    self.assertEqual(image.shape, image.buffer.shape)
+                if self.check_path(image_path):
+                    with open(image_path, 'rb') as image_fh:
+                        image_blob = image_fh.read()
+                        image = ImageType(image_blob, is_blob=True)
+                        self.assertIsNotNone(image)
+                        self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_jpg_as_blob_from_filehandle(self):
         for ImageType in self.imagetypes:
@@ -149,3 +155,11 @@ class ReadTests(BaseCase):
                     self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     """
+    
+    def test_load_pvr_as_blob_from_filehandle(self):
+        for ImageType in self.imagetypes:
+            for image_path in self.pvrs:
+                with open(image_path, 'rb') as image_fh:
+                    image = ImageType(file=image_fh, is_blob=True)
+                    self.assertIsNotNone(image)
+                    self.assertEqual(image.shape, image.buffer.shape)
