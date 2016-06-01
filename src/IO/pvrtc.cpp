@@ -15,6 +15,10 @@ namespace im {
     bool PVRTCFormat::match_format(byte_source* src) {
         /// Adapted from the standard match_format() case, using techniques found in
         /// PVRTexture::loadApplePVRTC() and PVRTexture::load(), from ext/pvr.cpp
+        // bool quick = match_magic(src,
+        //     base64::decode(PVRTCFormat::options.signatures[0].bytes).get(),
+        //                    PVRTCFormat::options.signatures[0].length);
+        // if (quick) { return true; }
         std::vector<byte> headerbuf(sizeof(PVRHeader));
         const int bytesread = static_cast<int>(src->read(&headerbuf.front(), sizeof(PVRHeader)));
         src->seek_relative(-bytesread);

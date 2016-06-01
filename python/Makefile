@@ -37,7 +37,7 @@ alltests:
 	py.test --color=yes --verbose -r a --durations=20 --tb=long
 
 test:
-	py.test -k 'not hybridimage and not singular' --color=yes --verbose -r a --durations=20 --tb=long
+	py.test -k 'not hybridimage and not singular' --color=yes --verbose -r a --showlocals --durations=20 --tb=long
 
 profile:
 	py.test --color=yes --verbose -r a --profile-svg
