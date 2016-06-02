@@ -3,6 +3,7 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_DETAIL_HPP_
 
 #include <tuple>
+#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -288,6 +289,19 @@ namespace py {
         template <class T>
         constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
             return clamp(v, lo, hi, std::less<>());
+        }
+        
+        /// polyfills for std::experimental::to_array()
+        /// q.v. http://en.cppreference.com/w/cpp/experimental/to_array
+        template <class T, std::size_t N, std::size_t ...I>
+        constexpr std::array<std::remove_cv_t<T>, N> to_array_impl(T (&a)[N],
+                                                                   std::index_sequence<I...>) {
+            return {{ a[I]... }};
+        }
+        
+        template <class T, std::size_t N>
+        constexpr std::array<std::remove_cv_t<T>, N> to_array(T (&a)[N]) {
+            return to_array_impl(a, std::make_index_sequence<N>{});
         }
         
         /// C++11 constexpr-friendly reimplementation of `offsetof()` --
