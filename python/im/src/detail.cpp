@@ -138,8 +138,8 @@ namespace py {
     PyObject* convert(std::wstring const& operand,
                       std::size_t length)           { return PyUnicode_FromWideChar(operand.data(), length); }
     PyObject* convert(Py_buffer* operand)           { return PyMemoryView_FromBuffer(operand); }
-    PyObject* convert(std::exception const& exc)    { return PyErr_NewExceptionWithDoc("NativeException",
-                                                                                       exc.what(),
+    PyObject* convert(std::exception const& exc)    { return PyErr_NewExceptionWithDoc(const_cast<char*>("NativeException"),
+                                                                                       const_cast<char*>(exc.what()),
                                                                                        nullptr, nullptr); }
     
     PyObject* tuplize()                             { return PyTuple_New(0); }

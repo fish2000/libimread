@@ -306,8 +306,6 @@ namespace im {
                 /// Hardcoding uint8_t as the type for now
                 int c_stride = (depth == 1) ? 0 : output->stride(2);
                 
-                WTF("About to enter 8-bit pixel loop...");
-                
                 for (uint32_t r = 0; r != h; ++r) {
                     /// NB. This is highly specious
                     byte* ptr = output->rowp_as<byte>(r);

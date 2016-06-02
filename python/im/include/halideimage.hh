@@ -983,11 +983,11 @@ namespace py {
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject* repr(PyObject* self) {
+                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
                 static bool named = false;
                 static char const* pytypename;
                 if (!named) {
                     py::gil::release nogil;
-                    PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
                     pytypename = terminator::nameof(pybuf);
                     named = true;
                 }
@@ -1526,12 +1526,12 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* repr(PyObject* self) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 static bool named = false;
                 static char const* pytypename;
                 if (!named) {
                     py::gil::release nogil;
-                    PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                    pytypename = terminator::nameof(pybuf);
+                    pytypename = terminator::nameof(pyim);
                     named = true;
                 }
                 return PyString_FromFormat(
