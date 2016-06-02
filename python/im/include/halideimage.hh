@@ -28,7 +28,7 @@
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/base64.hh>
 #include <libimread/errors.hh>
-#include <libimread/memory.hh>
+// #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
 #include <libimread/pixels.hh>
 
@@ -228,7 +228,7 @@ namespace py {
             }
             
             static char const* typestring() { return "im.Buffer"; }
-            static char const* typedoc()    { return "Python buffer model object"; }
+            static char const* typedoc()    { return "Python buffer model base class\n"; }
             
         }; /* BufferModelBase */
         
@@ -367,7 +367,7 @@ namespace py {
                     return name.c_str();
                 }
                 
-                static char const* typedoc()    { return "Python image-backed buffer"; }
+                static char const* typedoc()    { return "Python image-backed buffer class\n"; }
                 
             }; /* BufferModel */
             
@@ -909,7 +909,7 @@ namespace py {
                 return name.c_str();
             }
             
-            static char const* typedoc()    { return "Python image model object"; }
+            static char const* typedoc()    { return "Buffered-image multibackend model base class\n"; }
             
         }; /* ImageModelBase */
         
@@ -983,11 +983,13 @@ namespace py {
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject* repr(PyObject* self) {
-                PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                char const* pytypename;
-                {
+                static bool named = false;
+                static char const* pytypename;
+                if (!named) {
                     py::gil::release nogil;
+                    PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
                     pytypename = terminator::nameof(pybuf);
+                    named = true;
                 }
                 return PyString_FromFormat(
                     "< %s @ %p >",
@@ -1163,13 +1165,13 @@ namespace py {
                             (char*)"__array_interface__",
                                 (getter)py::ext::buffer::get_array_interface<BufferType, PythonBufferType>,
                                 nullptr,
-                                (char*)"NumPy array interface (Python API)",
+                                (char*)"NumPy array interface (Python API) -> dict\n",
                                 nullptr },
                         {
                             (char*)"__array_struct__",
                                 (getter)py::ext::buffer::get_array_struct<BufferType, PythonBufferType>,
                                 nullptr,
-                                (char*)"NumPy array interface (C-level API)",
+                                (char*)"NumPy array interface (C-level API) -> PyCObject\n",
                                 nullptr },
                         { nullptr, nullptr, nullptr, nullptr, nullptr }
                     };
@@ -1184,17 +1186,20 @@ namespace py {
                             "check",
                                 (PyCFunction)py::ext::check,
                                 METH_O | METH_CLASS,
-                                "Check the type of an instance against im.Image.Buffer" },
+                                "BufferType.check(putative)\n"
+                                "\t-> Check the type of an instance against BufferType\n" },
                         {
                             "tobytes",
                                 (PyCFunction)py::ext::buffer::tostring<BufferType, PythonBufferType>,
                                 METH_NOARGS,
-                                "Get bytes from image buffer as a string" },
+                                "buffer.tobytes()\n"
+                                "\t-> Get bytes from image buffer\n" },
                         {
                             "tostring",
                                 (PyCFunction)py::ext::buffer::tostring<BufferType, PythonBufferType>,
                                 METH_NOARGS,
-                                "Get bytes from image buffer as a string" },
+                                "buffer.tostring()\n"
+                                "\t-> Get bytes from image buffer (buffer.tobytes() alias)\n" },
                         { nullptr, nullptr, 0, nullptr }
                     };
                     return basics;
@@ -1230,37 +1235,37 @@ static PyGetSetDef Buffer_getset[] = {
         (char*)"T",
             (getter)py::ext::buffer::get_transpose<buffer_t>,
             nullptr,
-            (char*)"Buffer with transposed axes",
+            (char*)"Transpose of buffer array data (per buffer.transpose()) -> im.Buffer\n",
             nullptr },
     {
         (char*)"shape",
             (getter)py::ext::buffer::get_shape<buffer_t>,
             nullptr,
-            (char*)"Buffer shape tuple",
+            (char*)"Buffer shape -> (int, int, int)\n",
             nullptr },
     {
         (char*)"strides",
             (getter)py::ext::buffer::get_strides<buffer_t>,
             nullptr,
-            (char*)"Buffer strides tuple",
+            (char*)"Buffer strides -> (int, int, int)\n",
             nullptr },
     {
         (char*)"width",
             (getter)py::ext::buffer::get_width<buffer_t>,
             nullptr,
-            (char*)"Buffer width",
+            (char*)"Buffer width -> int\n",
             nullptr },
     {
         (char*)"height",
             (getter)py::ext::buffer::get_height<buffer_t>,
             nullptr,
-            (char*)"Buffer height",
+            (char*)"Buffer height -> int\n",
             nullptr },
     {
         (char*)"planes",
             (getter)py::ext::buffer::get_planes<buffer_t>,
             nullptr,
-            (char*)"Buffer color planes",
+            (char*)"Buffer color planes -> int\n",
             nullptr },
     { nullptr, nullptr, nullptr, nullptr, nullptr }
 };
@@ -1270,32 +1275,41 @@ static PyMethodDef Buffer_methods[] = {
         "check",
             (PyCFunction)py::ext::check,
             METH_O | METH_CLASS,
-            "Check the type of an instance against im.Buffer" },
+            "im.Buffer.check(putative)\n"
+            "\t-> Check the type of an instance against im.Buffer\n" },
     {
         "frombuffer",
             (PyCFunction)py::ext::buffer::newfrombuffer<buffer_t>,
             METH_O | METH_STATIC,
-            "Return a new im.Buffer based on a buffer_t host object" },
+            "im.Buffer.frombuffer(buffer)\n"
+            "\t-> Return a new im.Buffer based on a buffer_t host object\n" },
     {
         "frompybuffer",
             (PyCFunction)py::ext::buffer::newfrompybuffer<buffer_t>,
             METH_O | METH_STATIC,
-            "Return a new im.Buffer based on a Py_buffer host object" },
+            "im.Buffer.frombuffer(pybuffer_host)\n"
+            "\t-> Return a new im.Buffer based on a Py_buffer host object\n" },
     {
         "tobytes",
             (PyCFunction)py::ext::buffer::tostring<buffer_t>,
             METH_NOARGS,
-            "Get bytes from buffer as a string" },
+            "buffer.tobytes()\n"
+            "\t-> Get bytes from buffer\n" },
     {
         "tostring",
             (PyCFunction)py::ext::buffer::tostring<buffer_t>,
             METH_NOARGS,
-            "Get bytes from buffer as a string" },
+            "buffer.tostring()\n"
+            "\t-> Get bytes from buffer (buffer.tobytes() alias)\n" },
     {
         "transpose",
             (PyCFunction)py::ext::buffer::transpose<buffer_t>,
             METH_NOARGS,
-            "Get copy of buffer with transposed axes" },
+            "buffer.transpose()\n"
+            "\t-> Get a transpose of the image array\n"
+            "\t   SEE ALSO:\n"
+            "\t - buffer.T (property)\n"
+            "\t - numpy.array.transpose() and numpy.array.T\n" },
     { nullptr, nullptr, 0, nullptr }
 };
 
@@ -1512,11 +1526,13 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* repr(PyObject* self) {
-                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                char const* pytypename;
-                {
+                static bool named = false;
+                static char const* pytypename;
+                if (!named) {
                     py::gil::release nogil;
-                    pytypename = terminator::nameof(pyim);
+                    PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                    pytypename = terminator::nameof(pybuf);
+                    named = true;
                 }
                 return PyString_FromFormat(
                     "< %s @ %p >",
@@ -1793,18 +1809,22 @@ namespace py {
                 return out;
             }
             
+            #define DECLARE_CLOSURE(name) static char const* name = #name
+            #define CHECK_CLOSURE(name) (char const*)closure == closures::name
+            #define BIND_CLOSURE(name) (void*)py::ext::image::closures::name
+            
             namespace closures {
-                static char const* DTYPE   = "DTYPE";
-                static char const* BUFFER  = "BUFFER";
-                static char const* SHAPE   = "SHAPE";
-                static char const* STRIDES = "STRIDES";
-                static char const* WIDTH   = "WIDTH";
-                static char const* HEIGHT  = "HEIGHT";
-                static char const* PLANES  = "PLANES";
-                static char const* READ    = "READ";
-                static char const* WRITE   = "WRITE";
-                static char const* STRUCT    = "STRUCT";
-                static char const* INTERFACE = "INTERFACE";
+                DECLARE_CLOSURE(DTYPE);
+                DECLARE_CLOSURE(BUFFER);
+                DECLARE_CLOSURE(SHAPE);
+                DECLARE_CLOSURE(STRIDES);
+                DECLARE_CLOSURE(WIDTH);
+                DECLARE_CLOSURE(HEIGHT);
+                DECLARE_CLOSURE(PLANES);
+                DECLARE_CLOSURE(READ);
+                DECLARE_CLOSURE(WRITE);
+                DECLARE_CLOSURE(STRUCT);
+                DECLARE_CLOSURE(INTERFACE);
             }
             
             /// ImageType.{dtype,buffer} getter
@@ -1813,7 +1833,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_subobject(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                if ((char const*)closure == closures::DTYPE) {
+                if (CHECK_CLOSURE(DTYPE)) {
                     return py::object(pyim->dtype);
                 }
                 return py::object(pyim->imagebuffer);
@@ -1825,7 +1845,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_liminal_tuple(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                if ((char const*)closure == closures::STRIDES) {
+                if (CHECK_CLOSURE(STRIDES)) {
                     return py::detail::image_strides(*pyim->image.get());
                 }
                 return py::detail::image_shape(*pyim->image.get());
@@ -1837,8 +1857,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_dimensional_attribute(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                int idx = (char const*)closure == closures::WIDTH  ? 0 :
-                          (char const*)closure == closures::HEIGHT ? 1 : 2;
+                int idx = CHECK_CLOSURE(WIDTH)  ? 0 : CHECK_CLOSURE(HEIGHT) ? 1 : 2;
                 return py::detail::image_dimensional_attribute(*pyim->image.get(), idx);
             }
             
@@ -1848,8 +1867,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_opts(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* target = (char const*)closure == closures::READ ? pyim->readoptDict :
-                                                                            pyim->writeoptDict;
+                PyObject* target = CHECK_CLOSURE(READ) ? pyim->readoptDict : pyim->writeoptDict;
                 return py::object(target);
             }
             
@@ -1866,7 +1884,7 @@ namespace py {
                     return -1;
                 }
                 /// dispatch on closure tag
-                if ((char const*)closure == closures::READ) {
+                if (CHECK_CLOSURE(READ)) {
                     Py_CLEAR(pyim->readoptDict);
                     pyim->readoptDict = py::object(value);
                 } else {
@@ -1884,7 +1902,7 @@ namespace py {
                 using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                if ((char const*)closure == closures::STRUCT) {
+                if (CHECK_CLOSURE(STRUCT)) {
                     return imbuf->__array_struct__();
                 }
                 return imbuf->__array_interface__();
@@ -1973,68 +1991,68 @@ namespace py {
                             (char*)"__array_interface__",
                                 (getter)py::ext::image::get_array_attribute<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"NumPy array interface (Python API)",
-                                (void*)py::ext::image::closures::INTERFACE },
+                                (char*)"NumPy array interface (Python API) -> dict\n",
+                                BIND_CLOSURE(INTERFACE) },
                         {
                             (char*)"__array_struct__",
                                 (getter)py::ext::image::get_array_attribute<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"NumPy array struct (C-level API)",
-                                (void*)py::ext::image::closures::STRUCT },
+                                (char*)"NumPy array struct (C-level API) -> PyCObject\n",
+                                BIND_CLOSURE(STRUCT) },
                         {
                             (char*)"dtype",
                                 (getter)py::ext::image::get_subobject<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"Image dtype",
-                                (void*)py::ext::image::closures::DTYPE },
+                                (char*)"Image dtype -> numpy.dtype\n",
+                                BIND_CLOSURE(DTYPE) },
                         {
                             (char*)"buffer",
                                 (getter)py::ext::image::get_subobject<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"Underlying data buffer accessor object",
-                                (void*)py::ext::image::closures::BUFFER },
+                                (char*)"Underlying data buffer accessor object -> im.Buffer\n",
+                                BIND_CLOSURE(BUFFER) },
                         {
                             (char*)"shape",
                                 (getter)py::ext::image::get_liminal_tuple<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"Image shape tuple",
-                                (void*)py::ext::image::closures::SHAPE },
+                                (char*)"Image shape tuple -> (int, int, int)\n",
+                                BIND_CLOSURE(SHAPE) },
                         {
                             (char*)"strides",
                                 (getter)py::ext::image::get_liminal_tuple<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"Image strides tuple",
-                                (void*)py::ext::image::closures::STRIDES },
+                                (char*)"Image strides tuple -> (int, int, int)\n",
+                                BIND_CLOSURE(STRIDES) },
                         {
                             (char*)"width",
                                 (getter)py::ext::image::get_dimensional_attribute<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"Pixel width",
-                                (void*)py::ext::image::closures::WIDTH },
+                                (char*)"Pixel width -> int\n",
+                                BIND_CLOSURE(WIDTH) },
                         {
                             (char*)"height",
                                 (getter)py::ext::image::get_dimensional_attribute<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"Pixel height",
-                                (void*)py::ext::image::closures::HEIGHT },
+                                (char*)"Pixel height -> int\n",
+                                BIND_CLOSURE(HEIGHT) },
                         {
                             (char*)"planes",
                                 (getter)py::ext::image::get_dimensional_attribute<ImageType, BufferType>,
                                 nullptr,
-                                (char*)"Image color planes (channels)",
-                                (void*)py::ext::image::closures::PLANES },
+                                (char*)"Image color planes (channels) -> int\n",
+                                BIND_CLOSURE(PLANES) },
                         {
                             (char*)"read_opts",
                                 (getter)py::ext::image::get_opts<ImageType, BufferType>,
                                 (setter)py::ext::image::set_opts<ImageType, BufferType>,
-                                (char*)"Read options dict",
-                                (void*)py::ext::image::closures::READ },
+                                (char*)"Read options -> dict\n",
+                                BIND_CLOSURE(READ) },
                         {
                             (char*)"write_opts",
                                 (getter)py::ext::image::get_opts<ImageType, BufferType>,
                                 (setter)py::ext::image::set_opts<ImageType, BufferType>,
-                                (char*)"Write options dict",
-                                (void*)py::ext::image::closures::WRITE },
+                                (char*)"Write options -> dict\n",
+                                BIND_CLOSURE(WRITE) },
                         { nullptr, nullptr, nullptr, nullptr, nullptr }
                     };
                     return getsets;
@@ -2048,25 +2066,29 @@ namespace py {
                             "_repr_jpeg_",
                                 (PyCFunction)py::ext::image::jupyter_repr_jpeg<ImageType, BufferType>,
                                 METH_NOARGS,
-                                "Return the image data in the JPEG format"
-                                "* This method is for use by ipython/jupyter" },
+                                "image._repr_jpeg_()\n"
+                                "\t-> Return the image data in the JPEG format\n"
+                                "\t-> This method is for use by ipython/jupyter\n" },
                         {
                             "_repr_png_",
                                 (PyCFunction)py::ext::image::jupyter_repr_png<ImageType, BufferType>,
                                 METH_NOARGS,
-                                "Return the image data in the PNG format"
-                                "* This method is for use by ipython/jupyter" },
+                                "image._repr_png_()\n"
+                                "\t-> Return the image data in the PNG format\n"
+                                "\t-> This method is for use by ipython/jupyter\n" },
                         {
                             "_repr_html_",
                                 (PyCFunction)py::ext::image::jupyter_repr_html<ImageType, BufferType>,
                                 METH_NOARGS,
-                                "Return the image data as a base64-encoded `data:` URL inside an HTML <img> tag"
-                                "* This method is for use by ipython/jupyter" },
+                                "image._repr_html_()\n"
+                                "\t-> Return the image data as a base64-encoded `data:` URL inside an HTML <img> tag\n"
+                                "\t-> This method is for use by ipython/jupyter\n" },
                         {
                             "check",
                                 (PyCFunction)py::ext::check,
                                 METH_O | METH_CLASS,
-                                "Check that an instance is of this type" },
+                                "ImageType.check(putative)\n"
+                                "\t-> Check that an instance is of this type\n" },
                         {
                             "new",
                                 (PyCFunction)py::ext::image::newfromsize<ImageType, BufferType>,
@@ -2076,42 +2098,59 @@ namespace py {
                                 "\t   optionally specifying: \n"
                                 "\t - number of color channels (planes) \n"
                                 "\t - a default fill value (fill) \n"
-                                "\t - number of bits per value and/or the signedness (nbits, is_signed)" },
+                                "\t - number of bits per value and/or the signedness (nbits, is_signed)\n" },
                         {
                             "frombuffer",
                                 (PyCFunction)py::ext::image::newfrombuffer<ImageType, BufferType>,
                                 METH_O | METH_STATIC,
-                                "Return a new image based on an im.Buffer instance" },
+                                "ImageType.frombuffer(buffer)\n"
+                                "\t-> Return a new image based on an im.Buffer instance\n" },
                         {
                             "fromimage",
                                 (PyCFunction)py::ext::image::newfromimage<ImageType, BufferType>,
                                 METH_O | METH_STATIC,
-                                "Return a new image based on an existing image instance" },
+                                "ImageType.fromimage(image)\n"
+                                "\t-> Return a new image based on an existing image instance\n" },
                         {
                             "write",
                                 (PyCFunction)py::ext::image::write<ImageType, BufferType>,
                                 METH_VARARGS | METH_KEYWORDS,
-                                "Format and write image data to file or blob" },
+                                "image.write(destination="", file=None, as_blob=False, options={})\n"
+                                "\t-> Format and write image data to file or blob\n"
+                                "\t   specifying one of: \n"
+                                "\t - a destination file path (destination)\n"
+                                "\t - a filehandle opened for writing (file)\n"
+                                "\t - a boolean flag requiring data to be returned as bytes (as_blob)\n"
+                                "\t   optionally specifying: \n"
+                                "\t - format-specific write options (options) \n"
+                                "\t   NOTE: \n"
+                                "\t - options must contain a 'format' entry, specifying the output format \n"
+                                "\t   when write() is called without a destination path. \n"
+                                 },
                         {
                             "format_read_opts",
                                 (PyCFunction)py::ext::image::format_read_opts<ImageType, BufferType>,
                                 METH_NOARGS,
-                                "Get the read options as a formatted JSON string" },
+                                "image.format_read_opts()\n"
+                                "\t-> Get the read options as a formatted JSON string\n" },
                         {
                             "format_write_opts",
                                 (PyCFunction)py::ext::image::format_write_opts<ImageType, BufferType>,
                                 METH_NOARGS,
-                                "Get the write options as a formatted JSON string" },
+                                "image.format_write_opts()\n"
+                                "\t-> Get the write options as a formatted JSON string\n" },
                         {
                             "dump_read_opts",
                                 (PyCFunction)py::ext::image::dump_read_opts<ImageType, BufferType>,
                                 METH_VARARGS | METH_KEYWORDS,
-                                "Dump the read options to a JSON file" },
+                                "image.dump_read_opts()\n"
+                                "\t-> Dump the read options to a JSON file\n" },
                         {
                             "dump_write_opts",
                                 (PyCFunction)py::ext::image::dump_write_opts<ImageType, BufferType>,
                                 METH_VARARGS | METH_KEYWORDS,
-                                "Dump the write options to a JSON file" },
+                                "image.dump_write_opts()\n"
+                                "\t-> Dump the write options to a JSON file\n" },
                         { nullptr, nullptr, 0, nullptr }
                     };
                     return basics;

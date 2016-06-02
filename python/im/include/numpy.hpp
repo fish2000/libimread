@@ -12,6 +12,67 @@
 
 namespace py {
     
+    namespace detail {
+        
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wswitch"
+        template <typename ImageType> inline
+        PyObject* image_typed_idx(ImageType const& image,
+                                  int tc = NPY_UINT8, std::size_t nidx = 0) {
+            switch (tc) {
+                case NPY_FLOAT: {
+                    float op = static_cast<float*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_DOUBLE:
+                case NPY_LONGDOUBLE: {
+                    double op = static_cast<double*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_SHORT:
+                case NPY_BYTE: {
+                    byte op = static_cast<byte*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_USHORT:
+                case NPY_UBYTE: {
+                    uint8_t op = static_cast<uint8_t*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_INT: {
+                    int32_t op = static_cast<int32_t*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_UINT: {
+                    uint32_t op = static_cast<uint32_t*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_LONG:
+                case NPY_LONGLONG: {
+                    int64_t op = static_cast<int64_t*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+                case NPY_ULONG:
+                case NPY_ULONGLONG: {
+                    uint64_t op = static_cast<uint64_t*>(image->rowp(0))[nidx];
+                    return py::convert(op);
+                }
+                break;
+            }
+            uint8_t op = image->template rowp_as<uint8_t>(0)[nidx];
+            return py::convert(op);
+        }
+        #pragma clang diagnostic pop
+        
+    }
+    
     namespace numpy {
         
         // tuple((),()...)  py::detail::structcode_to_dtype(char)

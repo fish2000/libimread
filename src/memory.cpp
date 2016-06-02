@@ -55,9 +55,14 @@ namespace im {
     }
     
     bool memory_sink::can_seek() const noexcept { return true; }
-    std::size_t memory_sink::seek_absolute(std::size_t pos) { return std::fseek(membuf.get(), pos, SEEK_SET); }
-    std::size_t memory_sink::seek_relative(int delta) { return std::fseek(membuf.get(), delta, SEEK_CUR); }
-    std::size_t memory_sink::seek_end(int delta) { return std::fseek(membuf.get(), delta, SEEK_END); }
+    std::size_t memory_sink::seek_absolute(std::size_t pos) { std::fseek(membuf.get(), pos, SEEK_SET);
+                                                              return std::ftell(membuf.get()); }
+    
+    std::size_t memory_sink::seek_relative(int delta) { std::fseek(membuf.get(), delta, SEEK_CUR);
+                                                        return std::ftell(membuf.get()); }
+    
+    std::size_t memory_sink::seek_end(int delta) { std::fseek(membuf.get(), delta, SEEK_END);
+                                                   return std::ftell(membuf.get()); }
     
     std::size_t memory_sink::write(const void* buffer, std::size_t n) {
         return std::fwrite(buffer, sizeof(byte), n, membuf.get());

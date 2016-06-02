@@ -16,9 +16,9 @@
 
 namespace im {
     
-    std::size_t handle_source_sink::seek_absolute(std::size_t pos) { return std::fseek(handle, pos, SEEK_SET); }
-    std::size_t handle_source_sink::seek_relative(int delta) { return std::fseek(handle, delta, SEEK_CUR); }
-    std::size_t handle_source_sink::seek_end(int delta) { return std::fseek(handle, delta, SEEK_END); }
+    std::size_t handle_source_sink::seek_absolute(std::size_t pos) { std::fseek(handle, pos, SEEK_SET); return std::ftell(handle); }
+    std::size_t handle_source_sink::seek_relative(int delta) { std::fseek(handle, delta, SEEK_CUR); return std::ftell(handle); }
+    std::size_t handle_source_sink::seek_end(int delta) { std::fseek(handle, delta, SEEK_END); return std::ftell(handle); }
     
     std::size_t handle_source_sink::read(byte* buffer, std::size_t n) {
         std::size_t out = std::fread(buffer, sizeof(byte), n, handle);
@@ -62,13 +62,13 @@ namespace im {
         /// grab stat struct and store initial seek position
         detail::stat_t info = this->stat();
         std::size_t fsize = info.st_size * sizeof(byte);
-        std::size_t orig = std::fseek(handle, 0, SEEK_CUR);
+        std::size_t orig = std::ftell(handle);
         
         /// allocate output vector per size of file
         std::vector<byte> result(fsize);
         
         /// start as you mean to go on
-        std::fseek(handle, 0, SEEK_SET);
+        std::rewind(handle);
         
         /// read directly from filehandle:
         if (std::fread(&result[0], sizeof(byte), fsize, handle) == -1) {

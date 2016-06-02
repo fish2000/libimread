@@ -9,9 +9,10 @@ source "${PRAXONS}/gmalloc.sh"
 
 PROJECT_PATH="/Users/fish/Dropbox/libimread"
 
+: ${APPS:="OFF"}
 : ${COLOR_TRACE:="ON"}
 : ${VERBOSE:="ON"}
-: ${TERMINATOR:="OFF"}
+: ${TERMINATOR:="ON"}
 
 pushd $PROJECT_PATH
     rm -rf ./build ./dist
@@ -19,6 +20,7 @@ pushd $PROJECT_PATH
     pushd ./build
         cmake .. \
             -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist" \
+            -DIM_APPS=$APPS \
             -DIM_COLOR_TRACE=$COLOR_TRACE \
             -DIM_VERBOSE=$VERBOSE \
             -DIM_TERMINATOR=$TERMINATOR \

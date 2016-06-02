@@ -7,23 +7,23 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <exception>
 #include <functional>
 #include <type_traits>
 #include <initializer_list>
 #include <Python.h>
-#define NO_IMPORT_ARRAY
-#include <numpy/ndarraytypes.h>
 #include <libimread/libimread.hpp>
 
 /// forward-declare PyArray_Descr from numpy
-// struct _PyArray_Descr;
-// typedef _PyArray_Descr PyArray_Descr;
+struct _PyArray_Descr;
+typedef _PyArray_Descr PyArray_Descr;
 
 namespace py {
     
     using im::byte;
     using bytevec_t = std::vector<byte>;
     using charvec_t = std::vector<char>;
+    using stringvec_t = std::vector<std::string>;
     
     PyObject* None();
     PyObject* True();
@@ -53,8 +53,9 @@ namespace py {
     
     PyObject* convert(PyObject*);
     PyObject* convert(std::nullptr_t);
-    PyObject* convert(bool);
+    PyObject* convert(void);
     PyObject* convert(void*);
+    PyObject* convert(bool);
     PyObject* convert(std::size_t);
     PyObject* convert(Py_ssize_t);
     PyObject* convert(int8_t);
@@ -77,6 +78,7 @@ namespace py {
     PyObject* convert(std::wstring const&);
     PyObject* convert(std::wstring const&, std::size_t);
     PyObject* convert(Py_buffer*);
+    PyObject* convert(std::exception const&);
     
     template <typename Cast,
               typename Original,
@@ -128,7 +130,7 @@ namespace py {
     
     template <typename ...Args>
     using convertible = std::is_same<std::add_pointer_t<PyObject>,
-                                     decltype(py::convert(Args{}...))>;
+                                     decltype(py::convert(std::declval<Args>()...))>;
     
     template <typename ...Args>
     bool convertible_v = py::convertible<Args...>::value;
@@ -412,63 +414,6 @@ namespace py {
             }
             return py::tuplize();
         }
-        
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Wswitch"
-        template <typename ImageType> inline
-        PyObject* image_typed_idx(ImageType const& image,
-                                  int tc = NPY_UINT8, std::size_t nidx = 0) {
-            switch (tc) {
-                case NPY_FLOAT: {
-                    float op = static_cast<float*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-                case NPY_DOUBLE:
-                case NPY_LONGDOUBLE: {
-                    double op = static_cast<double*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-                case NPY_SHORT:
-                case NPY_BYTE: {
-                    byte op = static_cast<byte*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-                case NPY_USHORT:
-                case NPY_UBYTE: {
-                    uint8_t op = static_cast<uint8_t*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-                case NPY_INT: {
-                    int32_t op = static_cast<int32_t*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-                case NPY_UINT: {
-                    uint32_t op = static_cast<uint32_t*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-                case NPY_LONG:
-                case NPY_LONGLONG: {
-                    int64_t op = static_cast<int64_t*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-                case NPY_ULONG:
-                case NPY_ULONGLONG: {
-                    uint64_t op = static_cast<uint64_t*>(image->rowp(0))[nidx];
-                    return py::convert(op);
-                }
-                break;
-            }
-            uint8_t op = image->template rowp_as<uint8_t>(0)[nidx];
-            return py::convert(op);
-        }
-        #pragma clang diagnostic pop
         
         /// Version of PyDict_SetItemString that STEALS REFERENCES:
         int setitemstring(PyObject* dict, char const* key, PyObject* value);

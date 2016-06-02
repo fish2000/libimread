@@ -7,12 +7,14 @@ cmake_minimum_required(VERSION 3.3)
 # Set a new CMake project
 project(libimread)
 
+option(IM_TESTS             "Compile and run tests"                             ON)
+option(IM_APPS              "Compile and run companion apps"                    ON)
 option(IM_USE_GCC           "Compile using GCC"                                 OFF)
 option(IM_RESYMBOLIZE       "Regenerate include/libimread/symbols.hpp"          OFF)
 option(IM_GENERATE_HEADER   "Only generate libimread.hpp (do not compile)"      OFF)
 option(IM_COLOR_TRACE       "Use ANSI color in debug and error trace output"    OFF)
 option(IM_VERBOSE           "Print (highly nerd-oriented) verbose debug output" ON)
-option(IM_TERMINATOR        "Use a libunwind-based termination handler"         OFF)
+option(IM_TERMINATOR        "Use a libunwind-based termination handler"         ON)
 
 if(IM_USE_GCC)
     # hardcode homebrew path for now
@@ -215,81 +217,85 @@ target_link_libraries(imread_static
     ${HDF5_LIBRARIES})
 
 # Add the apps
-add_subdirectory(${APPS_DIR})
+if(IM_APPS)
+    add_subdirectory(${APPS_DIR})
+endif(IM_APPS)
 
 # Build the tests
-add_subdirectory(${TEST_SOURCE_DIR})
-# add_custom_command(
-#     OUTPUT ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist
-#     COMMAND ${TEST_SCRIPT_DIR}/generate-test-filemap.py > ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
-# add_custom_target("test_data_plist"
-#     DEPENDS ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
-# set_target_properties("test_data_plist"
-#     PROPERTIES GENERATED TRUE)
-# set_target_properties("test_data_plist"
-#     PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
-# add_dependencies("test_data_plist" imread)
-add_custom_command(
-    OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
-    COMMAND ${TEST_SCRIPT_DIR}/generate-test-header.py > ${TEST_INCLUDE_DIR}/test_data.hpp)
-add_custom_target("test_data_header"
-    DEPENDS ${TEST_INCLUDE_DIR}/test_data.hpp)
-set_source_files_properties(
-    ${TEST_INCLUDE_DIR}/test_data.hpp
-    PROPERTIES GENERATED TRUE)
-set(imread_tests "test_${PROJECT_NAME}")
-add_executable(imread_tests ${TEST_SOURCES})
-set_target_properties(imread_tests
-    PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
-add_dependencies("test_data_header" imread)
-add_dependencies(imread_tests "project_header")
-add_dependencies(imread_tests "test_data_header")
-add_dependencies(imread_tests "iod_symbolize")
-add_dependencies(imread_tests "guid")
-add_dependencies(imread_tests "imagecompression")
-add_dependencies(imread_tests "interpol")
-add_dependencies(imread_tests "libbf")
-add_dependencies(imread_tests "MABlockClosure")
-add_dependencies(imread_tests "AFNetworking")
-add_dependencies(imread_tests "sszip")
-add_dependencies(imread_tests "imread")
-link_directories(${CMAKE_BINARY_DIR})
-target_link_libraries(imread_tests
-    imread_shared sszip
-    AFNetworking
-    MABlockClosure
-    imagecompression
-    interpol
-    libbf guid png z
-    ${EXTRA_LIBS}
-    ${TIFF_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES}
-    ${HDF5_LIBRARIES})
-
-# set up ctest and cdash
-# … the add_imread_test() macro is defined in tests/CMakeLists.txt
-enable_testing()
-include(CTest)
-add_imread_test("appkit-copy-paste")
-add_imread_test("apple-io")
-add_imread_test("blockhash")
-add_imread_test("filesystem")
-add_imread_test("gif-write")
-add_imread_test("halide-io")
-add_imread_test("hdf5-io")
-add_imread_test("imageformat-options")
-add_imread_test("json-block-traverse")
-add_imread_test("libguid")
-add_imread_test("nsdictionary-options-map")
-add_imread_test("nsurl-image-types")
-add_imread_test("objc-rt")
-# add_imread_test("refcount")
-add_imread_test("sfinae")
-add_imread_test("libsszip")
-add_imread_test("terminator")
-add_imread_test("interleaved-io")
+if(IM_TESTS)
+    add_subdirectory(${TEST_SOURCE_DIR})
+    # add_custom_command(
+    #     OUTPUT ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist
+    #     COMMAND ${TEST_SCRIPT_DIR}/generate-test-filemap.py > ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
+    # add_custom_target("test_data_plist"
+    #     DEPENDS ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
+    # set_target_properties("test_data_plist"
+    #     PROPERTIES GENERATED TRUE)
+    # set_target_properties("test_data_plist"
+    #     PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
+    # add_dependencies("test_data_plist" imread)
+    add_custom_command(
+        OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
+        COMMAND ${TEST_SCRIPT_DIR}/generate-test-header.py > ${TEST_INCLUDE_DIR}/test_data.hpp)
+    add_custom_target("test_data_header"
+        DEPENDS ${TEST_INCLUDE_DIR}/test_data.hpp)
+    set_source_files_properties(
+        ${TEST_INCLUDE_DIR}/test_data.hpp
+        PROPERTIES GENERATED TRUE)
+    set(imread_tests "test_${PROJECT_NAME}")
+    add_executable(imread_tests ${TEST_SOURCES})
+    set_target_properties(imread_tests
+        PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
+    add_dependencies("test_data_header" imread)
+    add_dependencies(imread_tests "project_header")
+    add_dependencies(imread_tests "test_data_header")
+    add_dependencies(imread_tests "iod_symbolize")
+    add_dependencies(imread_tests "guid")
+    add_dependencies(imread_tests "imagecompression")
+    add_dependencies(imread_tests "interpol")
+    add_dependencies(imread_tests "libbf")
+    add_dependencies(imread_tests "MABlockClosure")
+    add_dependencies(imread_tests "AFNetworking")
+    add_dependencies(imread_tests "sszip")
+    add_dependencies(imread_tests "imread")
+    link_directories(${CMAKE_BINARY_DIR})
+    target_link_libraries(imread_tests
+        imread_shared sszip
+        AFNetworking
+        MABlockClosure
+        imagecompression
+        interpol
+        libbf guid png z
+        ${EXTRA_LIBS}
+        ${TIFF_LIBRARIES}
+        ${JPEG_LIBRARIES}
+        ${WEBP_LIBRARIES}
+        ${HALIDE_LIBRARIES}
+        ${HDF5_LIBRARIES})
+    
+    # set up ctest and cdash
+    # … the add_imread_test() macro is defined in tests/CMakeLists.txt
+    enable_testing()
+    include(CTest)
+    add_imread_test("appkit-copy-paste")
+    add_imread_test("apple-io")
+    add_imread_test("blockhash")
+    add_imread_test("filesystem")
+    add_imread_test("gif-write")
+    add_imread_test("halide-io")
+    add_imread_test("hdf5-io")
+    add_imread_test("imageformat-options")
+    add_imread_test("json-block-traverse")
+    add_imread_test("libguid")
+    add_imread_test("nsdictionary-options-map")
+    add_imread_test("nsurl-image-types")
+    add_imread_test("objc-rt")
+    # add_imread_test("refcount")
+    add_imread_test("sfinae")
+    add_imread_test("libsszip")
+    add_imread_test("terminator")
+    add_imread_test("interleaved-io")
+endif(IM_TESTS)
 
 install(TARGETS imread_shared DESTINATION lib)
 install(TARGETS imread_static DESTINATION lib)

@@ -20,7 +20,6 @@ extern "C" {
 namespace im {
     
     DECLARE_FORMAT_OPTIONS(STKFormat);
-    
     DECLARE_FORMAT_OPTIONS(TIFFFormat);
     
     namespace {
@@ -96,7 +95,7 @@ namespace im {
                 {}
             
             ~tif_holder() {
-                TIFFClose(tif);
+                // TIFFClose(tif);
             }
             
         };
@@ -127,8 +126,8 @@ namespace im {
         ReadType tiff_get(tif_holder const& t, const int tag) {
             ReadType val;
             if (!TIFFGetField(t.tif, tag, &val)) {
-                imread_raise(CannotReadError,
-                    "Could not get tag from TIFF:",
+                imread_raise(TIFFIOError,
+                    "Could not get tag:",
                  FF("\t>>> %s", tag));
             }
             return val;
@@ -225,12 +224,13 @@ namespace im {
     
     ImageList STKFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
                                  options_map const& opts)  {
-        shift_source moved(src);
+        
         stk_extend ext;
         tiff_warn_error twe;
-        
-        tif_holder t = read_client(&moved);
+        std::unique_ptr<shift_source> moved = std::make_unique<shift_source>(src);
+        tif_holder t = read_client(moved.get());
         ImageList images;
+        
         const uint32_t h                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
         const uint32_t w                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
         const uint16_t nr_samples           = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, 1);
@@ -241,6 +241,7 @@ namespace im {
         const int n_strips = TIFFNumberOfStrips(t.tif);
         int raw_strip_size = 0;
         int z = 0;
+        
         int32_t n_planes;
         void* __restrict__ data; /// UNUSED, WAT
         
@@ -255,7 +256,7 @@ namespace im {
         do {
             /// Monkey patch strip offsets -- 
             /// This is very hacky, but it seems to work!
-            moved.shift(z * raw_strip_size);
+            moved->shift(z * raw_strip_size);
             std::unique_ptr<Image> output(factory->create(bits_per_sample, h, w, depth));
             
             if (ImageWithMetadata* metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
@@ -267,14 +268,16 @@ namespace im {
             for (int st = 0; st != n_strips; ++st) {
                 const int offset = TIFFReadEncodedStrip(t.tif, st, start, strip_size);
                 if (offset == -1) {
-                    imread_raise(CannotReadError,
-                        "Error reading STK-encoded TIFF strip");
+                    imread_raise(TIFFIOError,
+                        "Error reading encoded STK strip");
                 }
                 start += offset;
             }
             images.push_back(std::move(output));
             ++z;
         } while (is_multi && z < n_planes);
+        
+        TIFFClose(t.tif);
         
         return images;
     }
@@ -292,8 +295,6 @@ namespace im {
         const int depth = nr_samples > 1 ? nr_samples : 1;
         
         do {
-            
-            // std::unique_ptr<Image> inter = factory->create(bits_per_sample, h, w, depth);
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
             if (ImageWithMetadata* metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
@@ -301,55 +302,57 @@ namespace im {
                 metaout->set_meta(description);
             }
             
-            //WTF("About to enter pixel loop", FF("bits_per_sample = %i", bits_per_sample));
-            
             if (bits_per_sample == 8) {
                 /// Hardcoding uint8_t as the type for now
                 int c_stride = (depth == 1) ? 0 : output->stride(2);
-                uint8_t* ptr = static_cast<uint8_t*>(output->rowp_as<uint8_t>(0));
+                
+                WTF("About to enter 8-bit pixel loop...");
                 
                 for (uint32_t r = 0; r != h; ++r) {
-                    // byte* __restrict__ srcPtr = inter->rowp_as<byte>(r);
-                    byte* srcPtr = output->rowp_as<byte>(r);
-                    if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
-                        imread_raise(CannotReadError,
-                            "Error reading TIFF scanline");
+                    /// NB. This is highly specious
+                    byte* ptr = output->rowp_as<byte>(r);
+                    byte* dstPtr = output->rowp_as<byte>(r);
+                    if (TIFFReadScanline(t.tif, ptr, r) == -1) {
+                        imread_raise(TIFFIOError, "Error reading scanline");
                     }
                     for (int x = 0; x < w; x++) {
                         for (int c = 0; c < depth; c++) {
-                            pix::convert(*srcPtr++, ptr[c*c_stride]);
+                            pix::convert(*ptr++, dstPtr[c*c_stride]);
                         }
-                        ptr++;
+                        dstPtr++;
                     }
                 }
+                
             } else if (bits_per_sample == 16) {
                 /// Hardcoding uint16_t as the type for now
                 int c_stride = (depth == 1) ? 0 : output->stride(2);
-                uint16_t* ptr = static_cast<uint16_t*>(output->rowp_as<uint16_t>(0));
+                uint16_t* ptr16 = (uint16_t*)std::calloc(sizeof(uint16_t), TIFFScanlineSize(t.tif)*3);
+                
+                WTF("About to enter 16-bit pixel loop...");
                 
                 for (uint32_t r = 0; r != h; ++r) {
-                    // byte* __restrict__ srcPtr = inter->rowp_as<byte>(r);
-                    byte* srcPtr = output->rowp_as<byte>(r);
-                    if (TIFFReadScanline(t.tif, srcPtr, r) == -1) {
-                        imread_raise(CannotReadError,
-                            "Error reading TIFF scanline");
+                    byte* dstPtr = output->rowp_as<byte>(r);
+                    if (TIFFReadScanline(t.tif, ptr16, r) == -1) {
+                        std::free(ptr16);
+                        imread_raise(TIFFIOError, "Error reading scanline");
                     }
                     for (int x = 0; x < w; x++) {
                         for (int c = 0; c < depth; c++) {
-                            uint16_t hi = (*srcPtr++) << 8;
-                            uint16_t lo = hi | (*srcPtr++);
-                            pix::convert(lo, ptr[c*c_stride]);
+                            uint16_t hi = (*ptr16++) << 8;
+                            uint16_t lo = hi | (*ptr16++);
+                            pix::convert(lo, dstPtr[c*c_stride]);
                         }
-                        ptr++;
+                        dstPtr++;
                     }
                 }
+                std::free(ptr16);
             }
             
             images.push_back(std::move(output));
-            if (TIFFLastDirectory(t.tif) != 0) { break; }
         
         } while (is_multi && TIFFReadDirectory(t.tif));
         
+        TIFFClose(t.tif);
         return images;
     }
     
@@ -433,11 +436,12 @@ namespace im {
         for (uint32_t r = 0; r != h; ++r) {
             void* __restrict__ rowp = copy_data ? bufp + (r * h * nbytes) : input.rowp(r);
             if (TIFFWriteScanline(t.tif, rowp, r) == -1) {
-                imread_raise(CannotWriteError,
-                    "Error writing TIFF file");
+                imread_raise(TIFFIOError,
+                    "Error writing scanline");
             }
         }
         TIFFFlush(t.tif);
+        TIFFClose(t.tif);
     }
     
 }

@@ -93,8 +93,9 @@ namespace py {
     
     PyObject* convert(PyObject* operand)            { return py::object(operand); }
     PyObject* convert(std::nullptr_t operand)       { return Py_BuildValue("O", Py_None); }
-    PyObject* convert(bool operand)                 { return Py_BuildValue("O", operand ? Py_True : Py_False); }
+    PyObject* convert(void)                         { return Py_BuildValue("O", Py_None); }
     PyObject* convert(void* operand)                { return py::capsule::encapsulate(operand); }
+    PyObject* convert(bool operand)                 { return Py_BuildValue("O", operand ? Py_True : Py_False); }
     PyObject* convert(std::size_t operand)          { return PyInt_FromSize_t(operand); }
     PyObject* convert(Py_ssize_t operand)           { return PyInt_FromSsize_t(operand); }
     PyObject* convert(int8_t operand)               { return PyInt_FromSsize_t(static_cast<Py_ssize_t>(operand)); }
@@ -137,13 +138,16 @@ namespace py {
     PyObject* convert(std::wstring const& operand,
                       std::size_t length)           { return PyUnicode_FromWideChar(operand.data(), length); }
     PyObject* convert(Py_buffer* operand)           { return PyMemoryView_FromBuffer(operand); }
+    PyObject* convert(std::exception const& exc)    { return PyErr_NewExceptionWithDoc("NativeException",
+                                                                                       exc.what(),
+                                                                                       nullptr, nullptr); }
     
     PyObject* tuplize()                             { return PyTuple_New(0); }
     PyObject* listify()                             { return PyList_New(0);  }
     
     namespace detail {
         
-        using structcode::stringvec_t;
+        // using structcode::stringvec_t;
         
         int setitemstring(PyObject* dict, char const* key, PyObject* value) {
             int out = PyDict_SetItemString(dict, key, value);
@@ -175,7 +179,7 @@ namespace py {
             if (imax < 1) {
                 PyErr_Format(PyExc_ValueError,
                     "Structcode %.200s parsed to zero-length", code);
-                return NULL;
+                return nullptr;
             }
             
             /// Make python list of tuples

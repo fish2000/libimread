@@ -37,6 +37,7 @@ using im::NSDataSink;
     return [[NSData alloc] initWithBytes:(const void*)buffer.get()
                                   length:(NSInteger)bytes];
 }
+
 - initWithByteVector:(std::vector<byte> const&)byteVector {
     return [self initWithBytes:(const void*)&byteVector[0]
                         length:(NSInteger)byteVector.size()];

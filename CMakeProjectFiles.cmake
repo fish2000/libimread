@@ -92,14 +92,14 @@ set(hdrs
     ${hdrs_dir}/ext/categories/NSColor+IM.hh
     ${hdrs_dir}/ext/categories/NSData+IM.hh
     ${hdrs_dir}/ext/categories/NSDictionary+IM.hh
-    ${hdrs_dir}/ext/categories/NSImage+CGImage.h
-    ${hdrs_dir}/ext/categories/NSImage+QuickLook.h
-    ${hdrs_dir}/ext/categories/NSImage+Resize.h
-    ${hdrs_dir}/ext/categories/NSImage+ResizeBestFit.h
+    # ${hdrs_dir}/ext/categories/NSImage+CGImage.h
+    # ${hdrs_dir}/ext/categories/NSImage+QuickLook.h
+    # ${hdrs_dir}/ext/categories/NSImage+Resize.h
+    # ${hdrs_dir}/ext/categories/NSImage+ResizeBestFit.h
     ${hdrs_dir}/ext/categories/NSString+STL.hh
     ${hdrs_dir}/ext/categories/NSURL+IM.hh
-    ${hdrs_dir}/ext/classes/AXCoreGraphicsImageRep.h
-    ${hdrs_dir}/ext/classes/AXInterleavedImageRep.hh
+    # ${hdrs_dir}/ext/classes/AXCoreGraphicsImageRep.h
+    # ${hdrs_dir}/ext/classes/AXInterleavedImageRep.hh
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
@@ -110,7 +110,7 @@ set(hdrs
     ${hdrs_dir}/ext/filesystem/resolver.h
     ${hdrs_dir}/ext/filesystem/temporary.h
     ${hdrs_dir}/ext/memory/fmemopen.hh
-    ${hdrs_dir}/ext/memory/open_memstream.hh
+    # ${hdrs_dir}/ext/memory/open_memstream.hh
     # ${hdrs_dir}/ext/memory/refcount.hh
     ${hdrs_dir}/ext/JSON/json11.h
     ${hdrs_dir}/ext/base64.hh
@@ -138,9 +138,9 @@ set(hdrs
     
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
-    ${hdrs_dir}/private/singleton.hh
+    # ${hdrs_dir}/private/singleton.hh
     ${hdrs_dir}/private/static_image.h
-    ${hdrs_dir}/private/vpp_symbols.hh
+    # ${hdrs_dir}/private/vpp_symbols.hh
     
     # ${hdrs_dir}/process/jitresize.hh
     ${hdrs_dir}/process/neuquant.hh
@@ -201,21 +201,21 @@ set(srcs
     ${srcs_dir}/ext/categories/NSColor+IM.mm
     ${srcs_dir}/ext/categories/NSData+IM.mm
     ${srcs_dir}/ext/categories/NSDictionary+IM.mm
-    ${srcs_dir}/ext/categories/NSImage+CGImage.m
-    ${srcs_dir}/ext/categories/NSImage+QuickLook.m
-    ${srcs_dir}/ext/categories/NSImage+Resize.m
-    ${srcs_dir}/ext/categories/NSImage+ResizeBestFit.m
+    # ${srcs_dir}/ext/categories/NSImage+CGImage.m
+    # ${srcs_dir}/ext/categories/NSImage+QuickLook.m
+    # ${srcs_dir}/ext/categories/NSImage+Resize.m
+    # ${srcs_dir}/ext/categories/NSImage+ResizeBestFit.m
     ${srcs_dir}/ext/categories/NSString+STL.mm
     ${srcs_dir}/ext/categories/NSURL+IM.mm
-    ${srcs_dir}/ext/classes/AXCoreGraphicsImageRep.m
-    ${srcs_dir}/ext/classes/AXInterleavedImageRep.mm
+    # ${srcs_dir}/ext/classes/AXCoreGraphicsImageRep.m
+    # ${srcs_dir}/ext/classes/AXInterleavedImageRep.mm
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/opaques.cpp
     ${srcs_dir}/ext/filesystem/path.cpp
     ${srcs_dir}/ext/filesystem/temporary.cpp
     ${srcs_dir}/ext/memory/fmemopen.cpp
-    ${srcs_dir}/ext/memory/open_memstream.cpp
+    # ${srcs_dir}/ext/memory/open_memstream.cpp
     # ${srcs_dir}/ext/memory/refcount.cpp
     ${srcs_dir}/ext/JSON/json11.cpp
     ${srcs_dir}/ext/JSON/schema.cpp
@@ -228,7 +228,7 @@ set(srcs
     ${srcs_dir}/ext/pystring.cpp
     ${srcs_dir}/ext/WriteGIF.cpp
     
-    ${srcs_dir}/IO/ansi.cpp
+    # ${srcs_dir}/IO/ansi.cpp
     ${srcs_dir}/IO/apple.mm
     ${srcs_dir}/IO/bmp.cpp
     ${srcs_dir}/IO/gif.cpp
@@ -251,24 +251,24 @@ set(srcs
     ${srcs_dir}/objc-rt/types.mm
     ${srcs_dir}/objc-rt/traits.mm
     
-    ${srcs_dir}/ansicolor.cpp
-    ${srcs_dir}/base.cpp
-    ${srcs_dir}/color.cpp
+    # ${srcs_dir}/ansicolor.cpp
+    # ${srcs_dir}/base.cpp
+    # ${srcs_dir}/color.cpp
     ${srcs_dir}/coregraphics.mm
     ${srcs_dir}/errors.cpp
     ${srcs_dir}/file.cpp
     ${srcs_dir}/filehandle.cpp
     ${srcs_dir}/formats.cpp
-    ${srcs_dir}/fs.cpp
-    ${srcs_dir}/halide.cpp
+    # ${srcs_dir}/fs.cpp
+    # ${srcs_dir}/halide.cpp
     ${srcs_dir}/hashing.cpp
     ${srcs_dir}/image.cpp
     ${srcs_dir}/imageformat.cpp
-    ${srcs_dir}/interleaved.cpp
+    # ${srcs_dir}/interleaved.cpp
     ${srcs_dir}/memory.cpp
     ${srcs_dir}/options.cpp
-    ${srcs_dir}/palette.cpp
-    ${srcs_dir}/symbols.cpp
+    # ${srcs_dir}/palette.cpp
+    # ${srcs_dir}/symbols.cpp
     ${preview_src}
 )
 
