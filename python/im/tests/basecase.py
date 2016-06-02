@@ -4,7 +4,7 @@ from __future__ import print_function
 from unittest2 import TestCase
 import sys
 from os import listdir
-from os.path import join, abspath, expanduser, dirname
+from os.path import join, abspath, expanduser, dirname, basename
 
 class BaseCase(TestCase):
     
@@ -22,9 +22,11 @@ class BaseCase(TestCase):
         self.image_paths = set([pth for pth in self._image_paths if pth.lower().endswith('jpg')])
         self.jpgs = set([pth for pth in self._image_paths if pth.lower().endswith('jpg')])
         self.pngs = set([pth for pth in self._image_paths if pth.lower().endswith('png')])
-        self.tifs = set([pth for pth in self._image_paths if pth.lower().endswith('tif') and \
-                                                             pth.lower().startswith('re')])
+        self.tifs = set([pth for pth in self._image_paths if basename(pth).lower().startswith('re')])
         self.pvrs = set([pth for pth in self._image_paths if pth.lower().endswith('pvr')])
+        
+        # from pprint import pformat
+        # print(pformat(self.tifs, indent=4))
         
         # store local references to im.Image and im.Array
         ImageTypeTuple = namedtuple('ImageTypes', ['Image', 'Array'])

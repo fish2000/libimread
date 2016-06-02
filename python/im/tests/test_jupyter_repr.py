@@ -24,7 +24,7 @@ class JupyterReprTests(BaseCase):
             compare to image._repr_png_() '''
         for ImageType in self.imagetypes:
             
-            for image_path in list(self.jpgs | self.pngs)[:20]:
+            for image_path in list(self.jpgs | self.pngs)[:10]:
                 image = ImageType(image_path)
                 self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "png" })

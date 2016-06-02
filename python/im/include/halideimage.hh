@@ -634,6 +634,7 @@ namespace py {
                 std::unique_ptr<ImageFormat> format;
                 typename py::gil::with::source_t input;
                 std::unique_ptr<Image> output;
+                std::string suffix;
                 options_map default_opts;
                 bool can_read = false;
                 
@@ -642,6 +643,7 @@ namespace py {
                     input = iohandle.source();
                     format = im::for_source(input.get());
                     can_read = format->format_can_read();
+                    suffix = format->get_suffix();
                     if (can_read) {
                         default_opts = format->add_options(opts);
                         output = format->read(input.get(), &factory, default_opts);
