@@ -6,6 +6,9 @@
 
 #include <cstdio>
 #include <vector>
+#include <memory>
+#include <functional>
+#include <utility>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
@@ -15,6 +18,7 @@ namespace im {
     
     namespace detail {
         using stat_t = struct stat;
+        using mapped_t = std::unique_ptr<void, std::function<void(void*)>>;
     }
     
     class handle_source_sink : public byte_source, public byte_sink {
@@ -25,9 +29,7 @@ namespace im {
                 :handle(fh), external(true)
                 {}
             
-            virtual ~handle_source_sink() {
-                if (!external) { close(); }
-            }
+            virtual ~handle_source_sink() { close(); }
             
             virtual bool can_seek() const noexcept { return true; }
             virtual std::size_t seek_absolute(std::size_t pos);
@@ -55,7 +57,7 @@ namespace im {
             
         private:
             FILE* handle = nullptr;
-            void* mapped = nullptr;
+            detail::mapped_t mapped;
             bool external = false;
     };
     

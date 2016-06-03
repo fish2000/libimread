@@ -110,16 +110,24 @@ namespace im {
             offset = pageoffset * ::getpagesize();
         }
         /// NB. MAP_POPULATE doesn't work on OS X
-        mapped = ::mmap(nullptr, fsize, PROT_READ,
-                                        MAP_PRIVATE,
-                                        descriptor,
-                                        offset);
-        if (mapped == MAP_FAILED) {
+        void* mapped_ptr = ::mmap(nullptr, fsize, PROT_READ,
+                                                  MAP_PRIVATE,
+                                                  descriptor,
+                                                  offset);
+        if (mapped_ptr == MAP_FAILED) {
             imread_raise(FileSystemError,
                 "error mapping file descriptor for reading:",
                 std::strerror(errno));
         }
-        return mapped;
+        mapped = detail::mapped_t{ mapped_ptr, [fsize](void* mp) {
+                if (::munmap(mp, fsize) != 0) {
+                    imread_raise(FileSystemError,
+                        "error unmapping file descriptor:",
+                        std::strerror(errno));
+                }
+            }
+        };
+        return mapped_ptr;
     }
     
     int fd_source_sink::fd() const noexcept {
@@ -172,13 +180,7 @@ namespace im {
     int fd_source_sink::close() {
         using std::swap;
         int out = -1;
-        if (mapped) {
-            if (::munmap(mapped, size()) != 0) {
-                imread_raise(FileSystemError,
-                    "error unmapping file descriptor:",
-                    std::strerror(errno));
-            }
-        }
+        mapped.reset(nullptr);
         if (descriptor > 0) {
             if (::close(descriptor) == -1) {
                 imread_raise(FileSystemError,

@@ -96,16 +96,24 @@ namespace im {
             offset = pageoffset * ::getpagesize();
         }
         /// NB. MAP_POPULATE doesn't work on OS X
-        mapped = ::mmap(nullptr, fsize, PROT_READ,
-                                        MAP_PRIVATE,
-                                        ::fileno(handle),
-                                        offset);
-        if (mapped == MAP_FAILED) {
+        void* mapped_ptr = ::mmap(nullptr, fsize, PROT_READ,
+                                                  MAP_PRIVATE,
+                                                  ::fileno(handle),
+                                                  offset);
+        if (mapped_ptr == MAP_FAILED) {
             imread_raise(FileSystemError,
-                "error mapping filehandle descriptor for reading:",
+                "error mapping filehandle for reading:",
                 std::strerror(errno));
         }
-        return mapped;
+        mapped = detail::mapped_t{ mapped_ptr, [fsize](void* mp) {
+                if (::munmap(mp, fsize) != 0) {
+                    imread_raise(FileSystemError,
+                        "error unmapping filehandle:",
+                        std::strerror(errno));
+                }
+            }
+        };
+        return mapped_ptr;
     }
     
     int handle_source_sink::fd() const noexcept {
@@ -152,14 +160,8 @@ namespace im {
     FILE* handle_source_sink::close() {
         using std::swap;
         FILE* out = nullptr;
-        if (mapped) {
-            if (::munmap(mapped, size()) != 0) {
-                imread_raise(FileSystemError,
-                    "error unmapping filehandle:",
-                    std::strerror(errno));
-            }
-        }
-        if (handle) {
+        mapped.reset(nullptr);
+        if (handle && !external) {
             if (std::fclose(handle) == -1) {
                 imread_raise(FileSystemError,
                     "error closing filehandle:",

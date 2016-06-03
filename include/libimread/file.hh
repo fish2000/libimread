@@ -7,6 +7,9 @@
 #include <fcntl.h>
 #include <cstdio>
 #include <vector>
+#include <memory>
+#include <functional>
+#include <utility>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/opaques.h>
@@ -17,6 +20,7 @@ namespace im {
     
     namespace detail {
         using stat_t = struct stat;
+        using mapped_t = std::unique_ptr<void, std::function<void(void*)>>;
     }
     
     class fd_source_sink : public byte_source, public byte_sink {
@@ -63,7 +67,7 @@ namespace im {
             
         private:
             int descriptor = -1;
-            void* mapped = nullptr;
+            detail::mapped_t mapped;
     };
     
     class file_source_sink : public fd_source_sink {

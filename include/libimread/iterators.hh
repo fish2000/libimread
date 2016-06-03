@@ -12,98 +12,87 @@
 
 namespace im {
     
-    namespace detail {
-        
-        template <typename IteratorType>
-        class iterator_base {
-            
-            public:
-                using difference_type = std::ptrdiff_t;
-                using idx_t = difference_type; /// Not into typing it out over and over
-                using value_type = byte;
-                using reference = std::add_lvalue_reference_t<value_type>;
-                using pointer = std::add_pointer_t<value_type>;
-                using iterator_category = std::forward_iterator_tag;
-                
-                iterator_base() {}
-                
-                iterator_base(iterator_base const& other)
-                    :idx(other.idx)
-                    {}
-                
-                virtual ~iterator_base() {}
-                
-                IteratorType& operator=(IteratorType const& other) {
-                    IteratorType(other).swap(*this);
-                    return *this;
-                }
-                
-                IteratorType& operator++() {
-                    ++idx;
-                    return *this;
-                }
-                
-                friend void swap(iterator_base& lhs, iterator_base& rhs) {
-                    using std::swap;
-                    swap(lhs.idx, rhs.idx);
-                }
-                
-            protected:
-                idx_t pushidx() {
-                    stash.push(idx);
-                    return idx;
-                }
-                
-                idx_t popidx() {
-                    idx_t out = stash.top();
-                    stash.pop();
-                    return out;
-                }
-                
-            protected:
-                idx_t idx = 0;
-                std::stack<idx_t> stash;
-        };
-        
-    }
-    
-    class source_iterator : public virtual detail::iterator_base<source_iterator> {
-        
-        using iterator_base_t = detail::iterator_base<source_iterator>;
+    class source_iterator {
         
         public:
-            source_iterator(source_iterator const& other)
-                :iterator_base_t(other)
-                ,source(other.source)
-                {}
+            using size_type = std::size_t
+            using difference_type = std::ptrdiff_t;
+            using idx_t = difference_type; /// Not into typing it out over and over
+            using value_type = byte;
+            using reference = std::add_lvalue_reference_t<value_type>;
+            using pointer = std::add_pointer_t<value_type>;
+            using iterator_category = std::random_access_iterator_tag;
             
             explicit source_iterator(byte_source* s)
-                :idx(source->seek_relative(0))
-                ,source(s)
-                ,onebyte{ new byte[1] }
-                {
-                    pushidx();
-                }
+                :source(s)
+                ,sourcemap(source->readmap())
+                {}
             
-            virtual ~source_iterator() {
-                source->seek_absolute(popidx());
+            source_iterator(source_iterator const& other)
+                :source(other.source)
+                ,sourcemap(other.sourcemap)
+                {}
+            
+            virtual ~source_iterator() {}
+            
+            source_iterator& operator=(source_iterator const& other) {
+                source_iterator(other).swap(*this);
+                return *this;
             }
             
+            /// prefix increment
+            source_iterator& operator++() {
+                ++sourcemap;
+                return *this;
+            }
+            
+            /// postfix increment
+            source_iterator operator++(int) {
+                source_iterator out(*this);
+                out.sourcemap++;
+                return out;
+            }
+            
+            /// prefix decrement
+            source_iterator& operator--() {
+                --sourcemap;
+                return *this;
+            }
+            
+            /// postfix decrement
+            source_iterator operator--(int) {
+                source_iterator out(*this);
+                out.sourcemap--;
+                return out;
+            }
+            
+            
+            
             value_type operator*() const {
-                source->seek_absolute(idx);
-                source->read(onebyte.get(), 1);
-                return onebyte.get();
+                return *sourcemap;
+            }
+            
+            pointer operator->() const {
+                return sourcemap;
+            }
+            
+            friend bool operator==(source_iterator const& lhs, source_iterator const& rhs) {
+                return lhs.sourcemap == rhs.sourcemap;
+            }
+            
+            friend bool operator!=(source_iterator const& lhs, source_iterator const& rhs) {
+                return lhs.sourcemap != rhs.sourcemap;
             }
             
             friend void swap(source_iterator& lhs, source_iterator& rhs) {
                 using std::swap;
-                swap(lhs.idx,    rhs.idx);
-                swap(lhs.source, rhs.source);
+                swap(lhs.source,    rhs.source);
+                swap(lhs.sourcemap, rhs.sourcemap);
             }
-        
+            
         private:
-            byte_source* source = nullptr;
-            std::unique_ptr<byte[]> onebyte;
+            byte_source* source;
+            byte* sourcemap;
     };
     
 }
