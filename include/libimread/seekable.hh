@@ -4,30 +4,32 @@
 #ifndef LIBIMREAD_SEEKABLE_HH_
 #define LIBIMREAD_SEEKABLE_HH_
 
-#include <memory>
 #include <vector>
-#include <string>
-#include <cstring>
 #include <cstdio>
-#include <unistd.h>
 
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
 
 namespace im {
     
+    /// forward declarations
+    class source_iterator;
+    class source_const_iterator;
+    
     struct seekable {
-        virtual ~seekable() {}
-        virtual bool can_seek() const noexcept { return false; }
-        virtual std::size_t seek_absolute(std::size_t) { imread_raise_default(NotImplementedError); }
-        virtual std::size_t seek_relative(int) { imread_raise_default(NotImplementedError); }
-        virtual std::size_t seek_end(int) { imread_raise_default(NotImplementedError); }
+        virtual ~seekable();
+        virtual bool can_seek() const noexcept;
+        virtual std::size_t seek_absolute(std::size_t);
+        virtual std::size_t seek_relative(int);
+        virtual std::size_t seek_end(int);
     };
     
     class byte_source : virtual public seekable {
         
         public:
-            virtual ~byte_source() {}
+            using iterator = source_iterator;
+            using const_iterator = source_iterator;
+            
+            virtual ~byte_source();
             virtual std::size_t read(byte* buffer, std::size_t) warn_unused = 0;
             virtual void* readmap(std::size_t pageoffset = 0) = 0;
             
@@ -38,28 +40,14 @@ namespace im {
             //     }
             // }
             
-            virtual std::vector<byte> full_data() {
-                std::vector<byte> result;
-                std::size_t n;
-                byte buffer[4096];
-                while ((n = this->read(buffer, sizeof(buffer)))) {
-                    result.insert(result.end(), buffer, buffer + n);
-                }
-                return result;
-            }
-            
-            virtual std::size_t size() {
-                /// super-naive implementation...
-                /// OVERRIDE THIS HORRIDNESS, DOGG
-                std::vector<byte> all_of_it = this->full_data();
-                return all_of_it.size();
-            }
+            virtual std::vector<byte> full_data();
+            virtual std::size_t size();
     };
     
     class byte_sink : virtual public seekable {
         
         public:
-            virtual ~byte_sink() {}
+            virtual ~byte_sink();
             virtual std::size_t write(const void* buffer, std::size_t n) = 0;
             
             // void write_check(const byte* buffer, std::size_t n) {
@@ -70,7 +58,7 @@ namespace im {
             //             FF("\tout = %i", out));
             // }
             
-            virtual void flush() {}
+            virtual void flush();
             
             template <typename ...Args>
             std::size_t writef(const char* format, Args... args) {
@@ -82,5 +70,7 @@ namespace im {
     };
 
 }
+
+#include <libimread/iterators.hh>
 
 #endif /// LIBIMREAD_SEEKABLE_HH_

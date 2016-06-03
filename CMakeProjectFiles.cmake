@@ -172,6 +172,7 @@ set(hdrs
     ${hdrs_dir}/image.hh
     ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/interleaved.hh
+    ${hdrs_dir}/iterators.hh
     ${hdrs_dir}/memory.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/palette.hh
@@ -268,6 +269,8 @@ set(srcs
     ${srcs_dir}/memory.cpp
     ${srcs_dir}/options.cpp
     # ${srcs_dir}/palette.cpp
+    # ${srcs_dir}/pixels.cpp
+    ${srcs_dir}/seekable.cpp
     # ${srcs_dir}/symbols.cpp
     ${preview_src}
 )
