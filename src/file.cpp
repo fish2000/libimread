@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 
 #include <cerrno>
@@ -27,6 +28,8 @@ namespace im {
     int fd_source_sink::open_write(char* p, int mask) const {
         return ::open(p, WRITE_FLAGS, mask);
     }
+    
+    fd_source_sink::~fd_source_sink() { close(); }
     
     std::size_t fd_source_sink::seek_absolute(std::size_t pos) { return ::lseek(descriptor, pos, SEEK_SET); }
     std::size_t fd_source_sink::seek_relative(int delta) { return ::lseek(descriptor, delta, SEEK_CUR); }
@@ -99,6 +102,26 @@ namespace im {
         return info.st_size * sizeof(byte);
     }
     
+    void* fd_source_sink::readmap(std::size_t pageoffset) {
+        detail::stat_t info = this->stat();
+        std::size_t fsize = info.st_size * sizeof(byte);
+        off_t offset = 0;
+        if (pageoffset) {
+            offset = pageoffset * ::getpagesize();
+        }
+        /// NB. MAP_POPULATE doesn't work on OS X
+        mapped = ::mmap(nullptr, fsize, PROT_READ,
+                                        MAP_PRIVATE,
+                                        descriptor,
+                                        offset);
+        if (mapped == MAP_FAILED) {
+            imread_raise(FileSystemError,
+                "error mapping file descriptor for reading:",
+                std::strerror(errno));
+        }
+        return mapped;
+    }
+    
     int fd_source_sink::fd() const noexcept {
         return descriptor;
     }
@@ -149,6 +172,13 @@ namespace im {
     int fd_source_sink::close() {
         using std::swap;
         int out = -1;
+        if (mapped) {
+            if (::munmap(mapped, size()) != 0) {
+                imread_raise(FileSystemError,
+                    "error unmapping file descriptor:",
+                    std::strerror(errno));
+            }
+        }
         if (descriptor > 0) {
             if (::close(descriptor) == -1) {
                 imread_raise(FileSystemError,

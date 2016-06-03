@@ -29,6 +29,7 @@ namespace py {
                 virtual std::size_t seek_end(int delta);
                 virtual std::vector<byte> full_data();
                 virtual std::size_t size();
+                virtual void* readmap(std::size_t pageoffset = 0);
                 
                 operator Py_buffer() const { return view; }
                 std::string str() const;

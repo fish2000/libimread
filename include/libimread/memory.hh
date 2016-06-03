@@ -23,6 +23,8 @@ namespace im {
             virtual std::size_t seek_end(int delta);
             virtual std::vector<byte> full_data();
             virtual std::size_t size();
+            
+            virtual void* readmap(std::size_t pageoffset = 0);
         
         private:
             const byte* data;

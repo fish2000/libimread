@@ -29,6 +29,7 @@ namespace im {
         public:
             virtual ~byte_source() {}
             virtual std::size_t read(byte* buffer, std::size_t) warn_unused = 0;
+            virtual void* readmap(std::size_t pageoffset = 0) = 0;
             
             // void read_check(byte* buffer, std::size_t n) {
             //     if (this->read(buffer, n) != n) {

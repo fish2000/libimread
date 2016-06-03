@@ -1,6 +1,7 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <unistd.h>
 #include <cstdio>
 #include <cstring>
 #include <libimread/libimread.hpp>
@@ -35,6 +36,14 @@ namespace im {
     }
     
     std::size_t memory_source::size() { return length; }
+    
+    void* memory_source::readmap(std::size_t pageoffset) {
+        byte* out = const_cast<byte*>(data);
+        if (pageoffset) {
+            out += pageoffset * ::getpagesize();
+        }
+        return static_cast<void*>(out);
+    }
     
     memory_sink::memory_sink(byte* c, std::size_t len)
         :data(c)

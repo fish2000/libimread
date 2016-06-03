@@ -42,6 +42,8 @@ namespace im {
             virtual detail::stat_t stat() const;
             virtual void flush();
             
+            virtual void* readmap(std::size_t pageoffset = 0);
+            
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
             virtual FILE* fh() const noexcept;
@@ -53,6 +55,7 @@ namespace im {
             
         private:
             FILE* handle = nullptr;
+            void* mapped = nullptr;
             bool external = false;
     };
     

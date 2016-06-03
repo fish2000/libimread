@@ -1,6 +1,7 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <unistd.h>
 #include <cstring>
 #include "pybuffer.hpp"
 
@@ -49,6 +50,14 @@ namespace py {
             
             std::size_t source::size() {
                 return view.len;
+            }
+            
+            void* memory_source::readmap(std::size_t pageoffset) {
+                byte* out = (byte*)view.buf;
+                if (pageoffset) {
+                    out += pageoffset * ::getpagesize();
+                }
+                return static_cast<void*>(out);
             }
             
             std::string source::str() const {

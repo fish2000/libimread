@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 
 #include <cerrno>
@@ -87,6 +88,26 @@ namespace im {
         return info.st_size * sizeof(byte);
     }
     
+    void* handle_source_sink::readmap(std::size_t pageoffset) {
+        detail::stat_t info = this->stat();
+        std::size_t fsize = info.st_size * sizeof(byte);
+        off_t offset = 0;
+        if (pageoffset) {
+            offset = pageoffset * ::getpagesize();
+        }
+        /// NB. MAP_POPULATE doesn't work on OS X
+        mapped = ::mmap(nullptr, fsize, PROT_READ,
+                                        MAP_PRIVATE,
+                                        ::fileno(handle),
+                                        offset);
+        if (mapped == MAP_FAILED) {
+            imread_raise(FileSystemError,
+                "error mapping filehandle descriptor for reading:",
+                std::strerror(errno));
+        }
+        return mapped;
+    }
+    
     int handle_source_sink::fd() const noexcept {
         return ::fileno(handle);
     }
@@ -131,6 +152,13 @@ namespace im {
     FILE* handle_source_sink::close() {
         using std::swap;
         FILE* out = nullptr;
+        if (mapped) {
+            if (::munmap(mapped, size()) != 0) {
+                imread_raise(FileSystemError,
+                    "error unmapping filehandle:",
+                    std::strerror(errno));
+            }
+        }
         if (handle) {
             if (std::fclose(handle) == -1) {
                 imread_raise(FileSystemError,

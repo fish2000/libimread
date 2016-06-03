@@ -35,7 +35,7 @@ namespace im {
                 :descriptor(fd)
                 {}
             
-            virtual ~fd_source_sink() { close(); }
+            virtual ~fd_source_sink();
             
             virtual bool can_seek() const noexcept { return true; }
             virtual std::size_t seek_absolute(std::size_t pos);
@@ -50,6 +50,8 @@ namespace im {
             virtual detail::stat_t stat() const;
             virtual void flush();
             
+            virtual void* readmap(std::size_t pageoffset = 0);
+            
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
             virtual filesystem::file fh() const noexcept;
@@ -61,6 +63,7 @@ namespace im {
             
         private:
             int descriptor = -1;
+            void* mapped = nullptr;
     };
     
     class file_source_sink : public fd_source_sink {

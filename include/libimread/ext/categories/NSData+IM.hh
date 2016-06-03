@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #endif /// __OBJC__
 
+#include <unistd.h>
 #include <cstdlib>
 #include <memory>
 #include <vector>
@@ -60,6 +61,14 @@ namespace im {
             }
             
             virtual std::size_t size() { return data.length; }
+            
+            virtual void* readmap(std::size_t pageoffset = 0) {
+                byte* out = (byte*)data.bytes;
+                if (pageoffset) {
+                    out += pageoffset * ::getpagesize();
+                }
+                return static_cast<void*>(out);
+            }
         
         private:
             NSData* data;
