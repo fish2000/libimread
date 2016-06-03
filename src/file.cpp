@@ -103,31 +103,30 @@ namespace im {
     }
     
     void* fd_source_sink::readmap(std::size_t pageoffset) {
-        detail::stat_t info = this->stat();
-        std::size_t fsize = info.st_size * sizeof(byte);
-        off_t offset = 0;
-        if (pageoffset) {
-            offset = pageoffset * ::getpagesize();
-        }
-        /// NB. MAP_POPULATE doesn't work on OS X
-        void* mapped_ptr = ::mmap(nullptr, fsize, PROT_READ,
-                                                  MAP_PRIVATE,
-                                                  descriptor,
-                                                  offset);
-        if (mapped_ptr == MAP_FAILED) {
-            imread_raise(FileSystemError,
-                "error mapping file descriptor for reading:",
-                std::strerror(errno));
-        }
-        mapped = detail::mapped_t{ mapped_ptr, [fsize](void* mp) {
-                if (::munmap(mp, fsize) != 0) {
-                    imread_raise(FileSystemError,
-                        "error unmapping file descriptor:",
-                        std::strerror(errno));
-                }
+        if (!mapped.get()) {
+            detail::stat_t info = this->stat();
+            std::size_t fsize = info.st_size * sizeof(byte);
+            off_t offset = pageoffset ? pageoffset * ::getpagesize() : 0;
+            /// NB. MAP_POPULATE doesn't work on OS X
+            void* mapped_ptr = ::mmap(nullptr, fsize, PROT_READ,
+                                                      MAP_PRIVATE,
+                                                      descriptor,
+                                                      offset);
+            if (mapped_ptr == MAP_FAILED) {
+                imread_raise(FileSystemError,
+                    "error mapping file descriptor for reading:",
+                    std::strerror(errno));
             }
-        };
-        return mapped_ptr;
+            mapped = detail::mapped_t{ mapped_ptr, [fsize](void* mp) {
+                    if (::munmap(mp, fsize) != 0) {
+                        imread_raise(FileSystemError,
+                            "error unmapping file descriptor:",
+                            std::strerror(errno));
+                    }
+                }
+            };
+        }
+        return mapped.get();
     }
     
     int fd_source_sink::fd() const noexcept {

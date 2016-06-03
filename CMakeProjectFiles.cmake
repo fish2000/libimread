@@ -266,6 +266,7 @@ set(srcs
     ${srcs_dir}/image.cpp
     ${srcs_dir}/imageformat.cpp
     # ${srcs_dir}/interleaved.cpp
+    ${srcs_dir}/iterators.cpp
     ${srcs_dir}/memory.cpp
     ${srcs_dir}/options.cpp
     # ${srcs_dir}/palette.cpp

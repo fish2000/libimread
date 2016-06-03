@@ -71,6 +71,4 @@ namespace im {
 
 }
 
-#include <libimread/iterators.hh>
-
 #endif /// LIBIMREAD_SEEKABLE_HH_
