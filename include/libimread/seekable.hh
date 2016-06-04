@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <cstdio>
+#include <iterator>
 
 #include <libimread/libimread.hpp>
 
@@ -26,8 +27,15 @@ namespace im {
     class byte_source : virtual public seekable {
         
         public:
+            using value_type = byte;
+            using difference_type = std::ptrdiff_t;
+            using size_type = std::size_t;
+            using reference = std::add_lvalue_reference_t<value_type>;
+            using const_reference = std::add_const_t<reference>;
             using iterator = source_iterator;
             using const_iterator = source_iterator;
+            using reverse_iterator = std::reverse_iterator<iterator>;
+            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
             
             virtual ~byte_source();
             virtual std::size_t read(byte* buffer, std::size_t) warn_unused = 0;
@@ -47,6 +55,16 @@ namespace im {
     class byte_sink : virtual public seekable {
         
         public:
+            using value_type = byte;
+            using difference_type = std::ptrdiff_t;
+            using size_type = std::size_t;
+            using reference = std::add_lvalue_reference_t<value_type>;
+            using const_reference = std::add_const_t<reference>;
+            // using iterator = source_iterator;
+            // using const_iterator = source_iterator;
+            // using reverse_iterator = std::reverse_iterator<iterator>;
+            // using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+            
             virtual ~byte_sink();
             virtual std::size_t write(const void* buffer, std::size_t n) = 0;
             

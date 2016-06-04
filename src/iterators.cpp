@@ -27,10 +27,23 @@ namespace im {
         ,sourceidx(other.sourceidx)
         {}
     
+    source_iterator::source_iterator(source_iterator&& other) noexcept
+        :source(std::move(other.source))
+        ,sourcemap(std::move(other.sourcemap))
+        ,sourceidx(std::move(other.sourceidx))
+        {}
+    
     source_iterator::~source_iterator() {}
     
     source_iterator& source_iterator::operator=(source_iterator const& other) {
         source_iterator(other).swap(*this);
+        return *this;
+    }
+    
+    source_iterator& source_iterator::operator=(source_iterator&& other) noexcept {
+        source = std::move(other.source);
+        sourcemap = std::move(other.sourcemap);
+        sourceidx = std::move(other.sourceidx);
         return *this;
     }
     

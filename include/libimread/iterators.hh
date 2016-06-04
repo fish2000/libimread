@@ -30,9 +30,11 @@ namespace im {
             explicit source_iterator(byte_source* s);
             explicit source_iterator(byte_source* s, size_type initial_idx);
             source_iterator(source_iterator const& other);
+            source_iterator(source_iterator&& other) noexcept;
             virtual ~source_iterator();
             
             source_iterator& operator=(source_iterator const& other);
+            source_iterator& operator=(source_iterator&& other) noexcept;
             
             /// prefix increment
             source_iterator& operator++();
