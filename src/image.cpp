@@ -27,6 +27,14 @@ namespace im {
         return this->stride(dim);
     }
     
+    int Image::width() const {
+        return dim(0);
+    }
+    
+    int Image::height() const {
+        return dim(1);
+    }
+    
     int Image::planes() const {
         return dim_or(2);
     }

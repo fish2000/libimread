@@ -3,9 +3,9 @@
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
+#include <iod/json.hh>
 
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
 #include <libimread/IO/apple.hh>
 #include <libimread/ext/categories/NSBitmapImageRep+IM.hh>
 #include <libimread/ext/categories/NSData+IM.hh>
@@ -13,8 +13,11 @@
 
 namespace im {
     
+    DECLARE_FORMAT_OPTIONS(NSImageFormat);
+    
     namespace detail {
         
+        __attribute__((ns_returns_retained))
         NSDictionary* translate_options(options_map const& opts) {
             NSMutableDictionary* out = [NSMutableDictionary dictionaryWithDictionary:@{
                 NSImageColorSyncProfileData     : [NSNull null],    /// NSData containing ICC profile data
@@ -54,8 +57,7 @@ namespace im {
                                                options_map const& opts)  {
         @autoreleasepool {
             NSBitmapImageRep* rep = [NSBitmapImageRep imageRepWithByteVector:src->full_data()];
-            std::unique_ptr<Image> output = [rep imageUsingImageFactory:factory];
-            return output;
+            return [rep imageUsingImageFactory:factory];
         }
     }
     

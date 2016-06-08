@@ -3,6 +3,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSURL+IM.hh>
+#include <libimread/ext/categories/NSString+STL.hh>
 #include <libimread/objc-rt/types.hh>
 
 namespace objc {

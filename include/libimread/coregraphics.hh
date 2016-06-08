@@ -29,6 +29,8 @@ namespace im {
             std::unique_ptr<ImageFormat> format(new format::Apple());
             std::unique_ptr<FileSource> input(new FileSource(filename));
             options_map readopts(format->add_options(opts));
+            readopts.set("filename", filename);
+            readopts.set("extension", path::extension(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory, readopts);
             ImageType<T> image(dynamic_cast<ImageType<T>&>(*output));
             return image;

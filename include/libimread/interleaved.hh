@@ -588,8 +588,8 @@ namespace im {
             virtual int size() const override { return meta.size(); }
             int dimensions() const { return Dimensions; }
             
-            int width() const { return meta.extents[0]; }
-            int height() const { return meta.extents[1]; }
+            int width() const override { return meta.extents[0]; }
+            int height() const override { return meta.extents[1]; }
             int channels() const { return C; }
             
             int stride_(int dim) const { return meta.strides[dim]; }

@@ -1,10 +1,124 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <unistd.h>
+#include <cstring>
 #include <algorithm>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSData+IM.hh>
 #include <libimread/ext/categories/NSString+STL.hh>
+
+namespace im {
+    
+    NSDataSource::NSDataSource(NSData* d)
+        :data(d), pos(0)
+        {
+            #if !__has_feature(objc_arc)
+                [data retain];
+            #endif
+        }
+    
+    NSDataSource::NSDataSource(NSMutableData* d)
+        :data([NSData dataWithData:d]), pos(0)
+        {
+            #if !__has_feature(objc_arc)
+                [data retain];
+            #endif
+        }
+    
+    NSDataSource::~NSDataSource() {
+        #if !__has_feature(objc_arc)
+            [data release];
+        #endif
+    }
+    
+    std::size_t NSDataSource::read(byte* buffer, std::size_t n) {
+        if (pos + n > data.length) { n = data.length-pos; }
+        std::memmove(buffer, (byte*)data.bytes + pos, n);
+        pos += n;
+        return n;
+    }
+    
+    bool NSDataSource::can_seek() const noexcept { return true; }
+    
+    std::size_t NSDataSource::seek_absolute(std::size_t p) {
+        return pos = p;
+    }
+    
+    std::size_t NSDataSource::seek_relative(int delta) {
+        return pos += delta;
+    }
+    
+    std::size_t NSDataSource::seek_end(int delta) {
+        return pos = (data.length-delta-1);
+    }
+    
+    std::vector<byte> NSDataSource::full_data() {
+        std::vector<byte> out(data.length);
+        std::memcpy(&out[0], (byte*)data.bytes, out.size());
+        return out;
+    }
+    
+    std::size_t NSDataSource::size() { return data.length; }
+    
+    void* NSDataSource::readmap(std::size_t pageoffset) {
+        byte* out = (byte*)data.bytes;
+        if (pageoffset) {
+            out += pageoffset * ::getpagesize();
+        }
+        return static_cast<void*>(out);
+    }
+    
+    NSDataSink::NSDataSink(NSData* d)
+        :data([NSMutableData dataWithData:d]), pos(0)
+        {
+            #if !__has_feature(objc_arc)
+                [data retain];
+            #endif
+        }
+    
+    NSDataSink::NSDataSink(NSMutableData* d)
+        :data(d), pos(0)
+        {
+            #if !__has_feature(objc_arc)
+                [data retain];
+            #endif
+        }
+    
+    NSDataSink::~NSDataSink() {
+        #if !__has_feature(objc_arc)
+            [data release];
+        #endif
+    }
+    
+    bool NSDataSink::can_seek() const noexcept { return true; }
+    
+    std::size_t NSDataSink::seek_absolute(std::size_t p) {
+        return pos = p;
+    }
+    
+    std::size_t NSDataSink::seek_relative(int delta) {
+        return pos += delta;
+    }
+    
+    std::size_t NSDataSink::seek_end(int delta) {
+        return pos = (data.length-delta-1);
+    }
+    
+    std::size_t NSDataSink::write(const void* buffer, std::size_t n) {
+        if (pos + n > data.length) { n = data.length-pos; }
+        std::memmove((byte*)data.mutableBytes + pos, (byte*)buffer, n);
+        pos += n;
+        return n;
+    }
+    
+    std::vector<byte> NSDataSink::contents() {
+        std::vector<byte> out(data.length);
+        std::memcpy(&out[0], (byte*)data.bytes, out.size());
+        return out;
+    }
+
+}
 
 using im::byte;
 using im::byte_source;

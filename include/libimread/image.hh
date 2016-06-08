@@ -32,6 +32,8 @@ namespace im {
             
             virtual int dim_or(int dim, int default_value = 1) const;
             virtual int stride_or(int dim, int default_value = 1) const;
+            virtual int width() const;
+            virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
             

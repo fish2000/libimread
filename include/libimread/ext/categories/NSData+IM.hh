@@ -9,116 +9,57 @@
 #import <Cocoa/Cocoa.h>
 #endif /// __OBJC__
 
-#include <unistd.h>
-#include <cstdlib>
 #include <memory>
 #include <vector>
 #include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
-#include <libimread/ext/categories/NSString+STL.hh>
 
 namespace im {
     
     class NSDataSource : public byte_source {
+        
         public:
-            NSDataSource(NSData* d)
-                :data(d), pos(0)
-                {
-                    #if !__has_feature(objc_arc)
-                        [data retain];
-                    #endif
-                }
-            NSDataSource(NSMutableData* d)
-                :data([NSData dataWithData:d]), pos(0)
-                {
-                    #if !__has_feature(objc_arc)
-                        [data retain];
-                    #endif
-                }
+            NSDataSource(NSData* d);
+            NSDataSource(NSMutableData* d);
+            virtual ~NSDataSource();
             
-            virtual ~NSDataSource() {
-                #if !__has_feature(objc_arc)
-                    [data release];
-                #endif
-            }
+            virtual std::size_t read(byte* buffer, std::size_t n);
             
-            virtual std::size_t read(byte* buffer, std::size_t n) {
-                if (pos + n > data.length) { n = data.length-pos; }
-                std::memmove(buffer, (byte*)data.bytes + pos, n);
-                pos += n;
-                return n;
-            }
+            virtual bool can_seek() const noexcept;
+            virtual std::size_t seek_absolute(std::size_t p);
+            virtual std::size_t seek_relative(int delta);
+            virtual std::size_t seek_end(int delta);
             
-            virtual bool can_seek() const noexcept { return true; }
-            virtual std::size_t seek_absolute(std::size_t p) { return pos = p; }
-            virtual std::size_t seek_relative(int delta) { return pos += delta; }
-            virtual std::size_t seek_end(int delta) { return pos = (data.length-delta-1); }
+            virtual std::vector<byte> full_data();
+            virtual std::size_t size();
             
-            virtual std::vector<byte> full_data() {
-                std::vector<byte> out(data.length);
-                std::memcpy(&out[0], (byte*)data.bytes, out.size());
-                return out;
-            }
-            
-            virtual std::size_t size() { return data.length; }
-            
-            virtual void* readmap(std::size_t pageoffset = 0) {
-                byte* out = (byte*)data.bytes;
-                if (pageoffset) {
-                    out += pageoffset * ::getpagesize();
-                }
-                return static_cast<void*>(out);
-            }
+            virtual void* readmap(std::size_t pageoffset = 0);
         
         private:
             NSData* data;
             std::size_t pos;
+    
     };
     
     class NSDataSink : public byte_sink {
+        
         public:
-            NSDataSink(NSData* d)
-                :data([NSMutableData dataWithData:d]), pos(0)
-                {
-                    #if !__has_feature(objc_arc)
-                        [data retain];
-                    #endif
-                }
-            NSDataSink(NSMutableData* d)
-                :data(d), pos(0)
-                {
-                    #if !__has_feature(objc_arc)
-                        [data retain];
-                    #endif
-                }
+            NSDataSink(NSData* d);
+            NSDataSink(NSMutableData* d);
+            virtual ~NSDataSink();
             
-            virtual ~NSDataSink() {
-                #if !__has_feature(objc_arc)
-                    [data release];
-                #endif
-            }
+            virtual bool can_seek() const noexcept;
+            virtual std::size_t seek_absolute(std::size_t p);
+            virtual std::size_t seek_relative(int delta);
+            virtual std::size_t seek_end(int delta);
             
-            virtual bool can_seek() const noexcept { return true; }
-            virtual std::size_t seek_absolute(std::size_t p) { return pos = p; }
-            virtual std::size_t seek_relative(int delta) { return pos += delta; }
-            virtual std::size_t seek_end(int delta) { return pos = (data.length-delta-1); }
-            
-            virtual std::size_t write(const void* buffer, std::size_t n) {
-                if (pos + n > data.length) { n = data.length-pos; }
-                std::memmove((byte*)data.mutableBytes + pos, (byte*)buffer, n);
-                pos += n;
-                return n;
-            }
-            
-            virtual std::vector<byte> contents() {
-                std::vector<byte> out(data.length);
-                std::memcpy(&out[0], (byte*)data.bytes, out.size());
-                return out;
-            }
+            virtual std::size_t write(const void* buffer, std::size_t n);
+            virtual std::vector<byte> contents();
             
         private:
             NSMutableData* data;
             std::size_t pos;
+    
     };
 
 }

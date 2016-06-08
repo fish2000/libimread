@@ -31,10 +31,10 @@ using im::ImageFactory;
 }
 
 - initWithImage:(Image const&)image {
-    BOOL alpha = objc::boolean(image.ndims() > 2 ? image.dim(2) > 3 : false);
-    NSInteger width = (NSInteger)image.dim(0);
-    NSInteger height = (NSInteger)image.dim(1);
-    NSInteger channels = (NSInteger)(image.ndims() > 2 ? image.dim(2) : 1);
+    BOOL alpha = objc::boolean(image.planes() > 3);
+    NSInteger width = (NSInteger)image.width();
+    NSInteger height = (NSInteger)image.height();
+    NSInteger channels = (NSInteger)image.planes();
     NSInteger bps = (NSInteger)image.nbits();
     int siz = (bps / 8) + bool(bps % 8);
     
@@ -50,8 +50,8 @@ using im::ImageFactory;
                           isPlanar:NO
                     colorSpaceName:NSCalibratedRGBColorSpace
                       bitmapFormat:NSAlphaNonpremultipliedBitmapFormat
-                       bytesPerRow:(NSInteger)image.dim(0) * (image.ndims() > 2 ? image.dim(2) : 1)
-                      bitsPerPixel:(NSInteger)(image.ndims() > 2 ? image.dim(2) * 8 : 8)];
+                       bytesPerRow:(NSInteger)(image.planes() * image.width())
+                      bitsPerPixel:(NSInteger)(image.planes() * 8)];
     
     /// Manually copy the image buffer to [self bitmapData] --
     std::memcpy([self bitmapData], image.rowp_as<byte * _Nullable>(0),

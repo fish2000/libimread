@@ -5,16 +5,31 @@
 #define LIBIMREAD_IO_APPLE_HH_
 
 #include <libimread/libimread.hpp>
-#include <libimread/image.hh>
-#include <libimread/imageformat.hh>
+#include <libimread/errors.hh>
+#include <libimread/base.hh>
 
 namespace im {
+    
+    // namespace detail {
+    //
+    //     __attribute__((ns_returns_retained))
+    //     NSDictionary* translate_options(options_map const& opts);
+    //
+    // }
     
     class NSImageFormat : public ImageFormatBase<NSImageFormat> {
         
         public:
             using can_read = std::true_type;
             using can_write = std::true_type;
+            
+            DECLARE_OPTIONS(
+                _signatures = {
+                    SIGNATURE("AppleImage", 10)
+                },
+                _suffixes = { "ns", "objc" },
+                _mimetype = "x-image/apple"
+            );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
