@@ -14,16 +14,16 @@
 #endif /// FUNC_NAME_WTF
 
 #if TARGET_RT_BIG_ENDIAN
-    const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32BE);
+const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32BE);
 #else
-    const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32LE);
+const NSStringEncoding kSTLWideStringEncoding = FUNC_NAME_WTF(kCFStringEncodingUTF32LE);
 #endif /// TARGET_RT_BIG_ENDIAN
 
-@interface NSString (IMStringAdditions)
-+ (instancetype) stringWithSTLString:(const std::string&)str;
-+ (instancetype) stringWithSTLWideString:(const std::wstring&)wstr;
--                initWithSTLString:(const std::string&)str;
--                initWithSTLWideString:(const std::wstring&)wstr;
+@interface NSString (AXStringAdditions)
++ (instancetype) stringWithSTLString:(std::string const&)str;
++ (instancetype) stringWithSTLWideString:(std::wstring const&)wstr;
+-                initWithSTLString:(std::string const&)str;
+-                initWithSTLWideString:(std::wstring const&)wstr;
 - (std::string)  STLString;
 - (std::string)  STLStringUsingEncoding:(NSStringEncoding)encoding;
 - (std::wstring) STLWideString;
