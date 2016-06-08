@@ -52,7 +52,7 @@ namespace py {
                 return view.len;
             }
             
-            void* memory_source::readmap(std::size_t pageoffset) {
+            void* source::readmap(std::size_t pageoffset) {
                 byte* out = (byte*)view.buf;
                 if (pageoffset) {
                     out += pageoffset * ::getpagesize();
