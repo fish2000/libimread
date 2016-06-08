@@ -29,6 +29,7 @@ namespace im {
             }
             return res;
         }
+        
         unsigned short code_stream::get(int nbits) {
             unsigned short res = 0;
             for (int idx = 0; idx != nbits; ++idx) {
@@ -49,8 +50,9 @@ namespace im {
                 return table.at(idx - 258);
             }
             
-            void write_string(bytevec_t& output, std::string s) {
-                output.insert(output.end(), s.begin(), s.end());
+            void write_string(bytevec_t& output, std::string const& s) {
+                output.insert(output.end(),
+                              s.begin(), s.end());
             }
             
         } /* namespace detail */

@@ -33,7 +33,7 @@ namespace im {
         
         namespace detail {
             std::string table_at(stringvec_t const& table, unsigned short idx);
-            void write_string(bytevec_t& output, std::string s);
+            void write_string(bytevec_t& output, std::string const& s);
         }
         
         /// this is the main public-facing API function
