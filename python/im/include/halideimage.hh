@@ -603,8 +603,7 @@ namespace py {
                 
                 {
                     py::gil::release nogil;
-                    input = std::unique_ptr<im::FileSource>(
-                        new im::FileSource(source));
+                    input = std::make_unique<im::FileSource>(source);
                     exists = input->exists();
                 }
                 
@@ -678,32 +677,31 @@ namespace py {
                 
                 try {
                     py::gil::release nogil;
-                    input = std::unique_ptr<py::buffer::source>(
-                        new py::buffer::source(view));
+                    input = std::make_unique<py::buffer::source>(view);
                     format = im::for_source(input.get());
                     can_read = format->format_can_read();
+                    if (can_read) {
+                        default_opts = format->add_options(opts);
+                        output = format->read(input.get(), &factory, default_opts);
+                        image.reset(dynamic_cast<ImageType*>(output.release()));
+                        return true;
+                    }
                 } catch (im::FormatNotFound& exc) {
                     PyErr_SetString(PyExc_ValueError,
                         "Can't match blob data to a suitable I/O format");
                     return false;
                 }
                 
-                if (!can_read) {
+                if (format.get()) {
                     std::string mime = format->get_mimetype();
                     PyErr_Format(PyExc_ValueError,
                         "Unimplemented read() in I/O format %s",
                         mime.c_str());
-                    return false;
+                } else {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Bad I/O format pointer returned for blob data");
                 }
-                
-                {
-                    py::gil::release nogil;
-                    default_opts = format->add_options(opts);
-                    output = format->read(input.get(), &factory, default_opts);
-                    image.reset(dynamic_cast<ImageType*>(output.release()));
-                }
-                
-                return true;
+                return false;
             }
             
             bool save(char const* destination, options_map const& opts) {
@@ -846,8 +844,7 @@ namespace py {
                     
                     std::string pth = tf.filepath.make_absolute().str();
                     tf.filepath.remove();
-                    output = std::unique_ptr<im::FileSink>(
-                        new im::FileSink(pth.c_str()));
+                    output = std::make_unique<im::FileSink>(pth.c_str());
                     
                     default_opts = format->add_options(opts);
                     format->write(dynamic_cast<Image&>(*image.get()),
@@ -861,9 +858,7 @@ namespace py {
                         return nullptr;
                     }
                     
-                    readback = std::unique_ptr<im::FileSource>(
-                        new im::FileSource(pth.c_str()));
-                    
+                    readback = std::make_unique<im::FileSource>(pth.c_str());
                     data = readback->full_data();
                     readback->close();
                     readback.reset(nullptr);
