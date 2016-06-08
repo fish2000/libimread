@@ -15,7 +15,6 @@
 namespace {
     
     using namespace Halide;
-    // using namespace im::format;
     using filesystem::path;
     using U8Image = im::HybridImage<uint8_t>;
     
@@ -126,7 +125,7 @@ namespace {
     TEST_CASE("[halide-io] Write multiple formats as PPM",
               "[halide-read-multiple-write-ppm]")
     {
-        im::fs::TemporaryDirectory td("test-halide-io");
+        filesystem::TemporaryDirectory td("test-halide-io");
         
         U8Image halim = im::halide::read(D("ptlobos.tif"));
         im::halide::write(halim, td.dirpath/"PPM_DUG986.ppm");
@@ -145,7 +144,7 @@ namespace {
     TEST_CASE("[halide-io] Write multiple formats as TIFF",
               "[halide-read-multiple-write-tiff]")
     {
-        im::fs::TemporaryDirectory td("test-halide-io");
+        filesystem::TemporaryDirectory td("test-halide-io");
         
         U8Image halim = im::halide::read(D("ptlobos.tif"));
         im::halide::write(halim, td.dirpath/"TIFF_DUG986.tiff");
@@ -166,7 +165,7 @@ namespace {
     // TEST_CASE("[halide-io] Write multiple formats as LSM",
     //           "[halide-read-multiple-write-lsm]")
     // {
-    //     im::fs::TemporaryDirectory td("test-halide-io");
+    //     filesystem::TemporaryDirectory td("test-halide-io");
     //
     //     U8Image halim = im::halide::read(D("ptlobos.tif"));
     //     im::halide::write(halim, td.dirpath/"TIFF_DUG986.lsm");

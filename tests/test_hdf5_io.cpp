@@ -3,7 +3,13 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/halide.hh>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/mode.h>
+#include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/directory.h>
+#include <libimread/ext/filesystem/resolver.h>
+#include <libimread/ext/filesystem/temporary.h>
+#include <libimread/file.hh>
+#include <libimread/filehandle.hh>
 #include <libimread/IO/hdf5.hh>
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
@@ -15,7 +21,7 @@ namespace {
     TEST_CASE("[hdf5-io] Read PNG and JPEG files and write as individual HDF5 binary store files",
               "[hdf5-read-png-jpeg-write-individual-hdf5-files]")
     {
-        im::fs::TemporaryDirectory td("test-hdf5-io");
+        filesystem::TemporaryDirectory td("test-hdf5-io");
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         const std::vector<path> jpgs = basedir.list("*.jpg");
@@ -49,7 +55,7 @@ namespace {
     TEST_CASE("[hdf5-io] Read TIFF files and write as individual HDF5 binary store files",
               "[hdf5-read-tiff-write-individual-hdf5-files]")
     {
-        im::fs::TemporaryDirectory td("test-hdf5-io");
+        filesystem::TemporaryDirectory td("test-hdf5-io");
         path basedir(im::test::basedir);
         const std::vector<path> tifs = basedir.list("*.tif*");
         

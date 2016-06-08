@@ -166,7 +166,6 @@ set(hdrs
     ${hdrs_dir}/file.hh
     ${hdrs_dir}/filehandle.hh
     ${hdrs_dir}/formats.hh
-    ${hdrs_dir}/fs.hh
     ${hdrs_dir}/halide.hh
     ${hdrs_dir}/hashing.hh
     ${hdrs_dir}/image.hh
@@ -260,7 +259,6 @@ set(srcs
     ${srcs_dir}/file.cpp
     ${srcs_dir}/filehandle.cpp
     ${srcs_dir}/formats.cpp
-    # ${srcs_dir}/fs.cpp
     # ${srcs_dir}/halide.cpp
     ${srcs_dir}/hashing.cpp
     ${srcs_dir}/image.cpp

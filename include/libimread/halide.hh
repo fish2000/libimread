@@ -14,9 +14,11 @@
 #include <Halide.h>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/filesystem/temporary.h>
 #include <libimread/private/buffer_t.h>
 #include <libimread/errors.hh>
-#include <libimread/fs.hh>
+#include <libimread/file.hh>
+#include <libimread/filehandle.hh>
 #include <libimread/image.hh>
 #include <libimread/formats.hh>
 
@@ -256,9 +258,9 @@ namespace im {
         template <typename Format, typename T = byte> inline
         std::string tmpwrite(HybridImage<T>& input,
                              options_map const& opts = halide_default_opts) {
-            im::fs::NamedTemporaryFile tf("." + Format::suffix(),       /// suffix
-                                          FILESYSTEM_TEMP_FILENAME,     /// prefix (filename template)
-                                          false); tf.remove();          /// cleanup on scope exit
+            filesystem::NamedTemporaryFile tf("." + Format::suffix(),       /// suffix
+                                              FILESYSTEM_TEMP_FILENAME,     /// prefix (filename template)
+                                              false); tf.remove();          /// cleanup on scope exit
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
             options_map default_opts = format->add_options(opts);

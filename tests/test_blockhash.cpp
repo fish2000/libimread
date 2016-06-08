@@ -7,7 +7,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/halide.hh>
 #include <libimread/hashing.hh>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/path.h>
 
 #include "include/test_data.hpp"
 #include "include/catch.hpp"

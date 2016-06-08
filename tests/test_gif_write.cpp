@@ -3,7 +3,13 @@
 #include <memory>
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/mode.h>
+#include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/directory.h>
+#include <libimread/ext/filesystem/resolver.h>
+#include <libimread/ext/filesystem/temporary.h>
+#include <libimread/file.hh>
+#include <libimread/filehandle.hh>
 #include <libimread/halide.hh>
 
 #include "include/test_data.hpp"
@@ -12,7 +18,7 @@
 namespace {
     
     using namespace Halide;
-    using namespace im::fs;
+    using namespace filesystem;
     using U8Image = im::HybridImage<uint8_t>;
     
     TEST_CASE("[gif-write] Read PNG files and write as individual GIF files",

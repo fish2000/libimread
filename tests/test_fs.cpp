@@ -7,17 +7,24 @@
 #include <regex>
 
 #include <libimread/libimread.hpp>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/mode.h>
+#include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/directory.h>
+#include <libimread/ext/filesystem/resolver.h>
+#include <libimread/ext/filesystem/temporary.h>
+#include <libimread/file.hh>
+#include <libimread/filehandle.hh>
+
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
 namespace {
     
-    using im::fs::path;
-    using im::fs::switchdir;
-    using im::fs::resolver;
-    using im::fs::NamedTemporaryFile;
-    using im::fs::TemporaryDirectory;
+    using filesystem::path;
+    using filesystem::switchdir;
+    using filesystem::resolver;
+    using filesystem::NamedTemporaryFile;
+    using filesystem::TemporaryDirectory;
     
     TEST_CASE("[filesystem] Check if `basedir` is a directory",
               "[fs-basedir-isdirectory]") {

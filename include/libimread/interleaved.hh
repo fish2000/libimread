@@ -18,10 +18,11 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/ext/filesystem/temporary.h>
 #include <libimread/private/buffer_t.h>
 #include <libimread/color.hh>
 #include <libimread/pixels.hh>
-#include <libimread/fs.hh>
+#include <libimread/file.hh>
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/formats.hh>
@@ -808,7 +809,7 @@ namespace im {
         std::string tmpwrite(InterleavedImage<Color>& input,
                              const options_map& opts) {
             // if (input.dim(2) > 3) { return ""; }
-            im::fs::NamedTemporaryFile tf("." + Format::suffix());
+            filesystem::NamedTemporaryFile tf("." + Format::suffix());
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
             options_map default_opts = format->add_options(opts);

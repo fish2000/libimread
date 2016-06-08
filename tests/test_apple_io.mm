@@ -2,7 +2,9 @@
 #include <libimread/libimread.hpp>
 #include <libimread/coregraphics.hh>
 #include <libimread/interleaved.hh>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/temporary.h>
+
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
@@ -13,6 +15,7 @@ namespace {
     
     using U8ImagePtr = im::apple::image_ptr<uint8_t>;
     using U8Image = im::apple::ImageType<uint8_t>;
+    using filesystem::path;
     
     namespace ext {
         using namespace Halide;
@@ -26,21 +29,21 @@ namespace {
     
     TEST_CASE("[apple-io] Read a JPEG and rewrite it as a PNG via image_io.h",
               "[apple-read-jpeg-write-png]") {
-        im::fs::TemporaryDirectory td("test-apple-io");
+        filesystem::TemporaryDirectory td("test-apple-io");
         U8Image halim = im::apple::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         ext::save(halim, td.dirpath/"apple_YO_DOGG222.png");
     }
     
     TEST_CASE("[apple-io] Read a PNG and rewrite it as a PNG via image_io.h",
               "[apple-read-png]") {
-        im::fs::TemporaryDirectory td("test-apple-io");
+        filesystem::TemporaryDirectory td("test-apple-io");
         U8Image halim = im::apple::read(D("IMG_7333.jpeg"));
         ext::save(halim, td.dirpath/"apple_OH_DAWG666.png");
     }
     
     TEST_CASE("[apple-io] Read a TIFF and rewrite it as a PNG via image_io.h",
               "[apple-read-tiff]") {
-        im::fs::TemporaryDirectory td("test-apple-io");
+        filesystem::TemporaryDirectory td("test-apple-io");
         U8Image halim = im::apple::read(D("ptlobos.tif"));
         ext::save(halim, td.dirpath/"apple_TIFF_DUG986.png");
     }
@@ -58,12 +61,10 @@ namespace {
         U8Image halim2 = im::apple::read(D("IMG_4332.jpg"));
     }
     
-    using filesystem::path;
-    
     TEST_CASE("[apple-io] Read PNG and JPEG files and write as PNGs with im::apple::write()",
               "[apple-read-png-jpeg-write-jpegs-with-im-apple-write]")
     {
-        im::fs::TemporaryDirectory td("test-apple-io");
+        filesystem::TemporaryDirectory td("test-apple-io");
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         const std::vector<path> jpgs = basedir.list("*.jpg");

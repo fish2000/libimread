@@ -4,7 +4,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSString+STL.hh>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/temporary.h>
 
 #include "include/catch.hpp"
 
@@ -14,8 +14,8 @@ namespace {
               "[libsszip-create-zip-with-directory]")
     {
         @autoreleasepool {
-            im::fs::TemporaryDirectory td("test-libsszip");
-            im::fs::path zpth = td.dirpath/"test-directory.zip";
+            filesystem::TemporaryDirectory td("test-libsszip");
+            filesystem::path zpth = td.dirpath/"test-directory.zip";
             NSString *zipPath = [NSString stringWithSTLString:zpth.str()];
             NSString *dirPath = @"/Users/fish/Dropbox/libimread/tests/data";
             BOOL created = [SSZipArchive createZipFileAtPath:zipPath

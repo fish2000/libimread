@@ -6,17 +6,21 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/categories/NSURL+IM.hh>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/directory.h>
+#include <libimread/ext/filesystem/resolver.h>
+#include <libimread/ext/filesystem/temporary.h>
+
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
 namespace {
     
-    using im::fs::path;
-    using im::fs::switchdir;
-    using im::fs::resolver;
-    using im::fs::NamedTemporaryFile;
-    using im::fs::TemporaryDirectory;
+    using filesystem::path;
+    using filesystem::switchdir;
+    using filesystem::resolver;
+    using filesystem::NamedTemporaryFile;
+    using filesystem::TemporaryDirectory;
     using NSTYPE = NSBitmapImageFileType;
     
     std::array<NSTYPE, 6> types = {

@@ -6,7 +6,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/objc-rt/objc-rt.hh>
-#include <libimread/fs.hh>
+#include <libimread/ext/filesystem/temporary.h>
 
 #include "include/catch.hpp"
 #import "helpers/IMTestReceiver.h"
@@ -158,7 +158,7 @@ namespace {
     }
     
     TEST_CASE("[objc-rt] Send a message via objc::msg::send()", "[objc-rt-msg-send]") {
-        im::fs::NamedTemporaryFile temporary;
+        filesystem::NamedTemporaryFile temporary;
         NSData *datum;
         NSString *filepath;
         NSURL *url;
