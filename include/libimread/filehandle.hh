@@ -24,14 +24,12 @@ namespace im {
     class handle_source_sink : public byte_source, public byte_sink {
         
         public:
-            handle_source_sink() {}
-            handle_source_sink(FILE* fh)
-                :handle(fh), external(true)
-                {}
+            handle_source_sink();
+            handle_source_sink(FILE* fh);
             
-            virtual ~handle_source_sink() { close(); }
+            virtual ~handle_source_sink();
             
-            virtual bool can_seek() const noexcept { return true; }
+            virtual bool can_seek() const noexcept;
             virtual std::size_t seek_absolute(std::size_t pos);
             virtual std::size_t seek_relative(int delta);
             virtual std::size_t seek_end(int delta);

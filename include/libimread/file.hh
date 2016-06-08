@@ -34,14 +34,12 @@ namespace im {
             int open_write(char* p, int mask = WRITE_CREATE_MASK) const;
         
         public:
-            fd_source_sink() {}
-            fd_source_sink(int fd)
-                :descriptor(fd)
-                {}
+            fd_source_sink();
+            fd_source_sink(int fd);
             
             virtual ~fd_source_sink();
             
-            virtual bool can_seek() const noexcept { return true; }
+            virtual bool can_seek() const noexcept;
             virtual std::size_t seek_absolute(std::size_t pos);
             virtual std::size_t seek_relative(int delta);
             virtual std::size_t seek_end(int delta);

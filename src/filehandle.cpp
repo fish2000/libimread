@@ -17,6 +17,15 @@
 
 namespace im {
     
+    handle_source_sink::handle_source_sink() {}
+    handle_source_sink::handle_source_sink(FILE* fh)
+        :handle(fh), external(true)
+        {}
+    
+    handle_source_sink::~handle_source_sink() { close(); }
+    
+    bool handle_source_sink::can_seek() const noexcept { return true; }
+    
     std::size_t handle_source_sink::seek_absolute(std::size_t pos) { std::fseek(handle, pos, SEEK_SET); return std::ftell(handle); }
     std::size_t handle_source_sink::seek_relative(int delta) { std::fseek(handle, delta, SEEK_CUR); return std::ftell(handle); }
     std::size_t handle_source_sink::seek_end(int delta) { std::fseek(handle, delta, SEEK_END); return std::ftell(handle); }
