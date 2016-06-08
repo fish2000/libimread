@@ -1661,51 +1661,31 @@ namespace py {
                 if (options == nullptr) { options = PyDict_New(); }
                 
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    /// some exception was raised somewhere
                     Py_DECREF(options);
                     return nullptr;
                 }
                 
-                try {
-                    options_map opts = pyim->writeopts();
-                    
-                    if (as_blob || use_file) {
-                        if (!opts.has("format")) {
-                            PyErr_SetString(PyExc_AttributeError,
-                                "Output format unspecified in options dict");
-                            return nullptr;
-                        }
+                options_map opts = pyim->writeopts();
+                
+                if (as_blob || use_file) {
+                    if (!opts.has("format")) {
+                        PyErr_SetString(PyExc_AttributeError,
+                            "Output format unspecified in options dict");
+                        return nullptr;
                     }
-                    
-                    if (as_blob) {
-                        py::gil::release nogil;
-                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
-                                              FILESYSTEM_TEMP_FILENAME,                /// prefix (filename template)
-                                              false);                                  /// cleanup on scope exit
-                        dststr = std::string(tf.filepath.make_absolute().str());
-                    } else if (!use_file) {
-                        /// save as file -- extract the filename from the buffer
-                        py::gil::release nogil;
-                        py::buffer::source dest(view);
-                        dststr = std::string(dest.str());
-                    }
-                    
-                    if (use_file) {
-                        did_save = pyim->savefilelike(file, opts);
-                    } else {
-                        did_save = pyim->save(dststr.c_str(), opts);
-                    }
-                    
-                } catch (im::OptionsError& exc) {
-                    PyErr_SetString(PyExc_AttributeError, exc.what());
-                    return nullptr;
                 }
                 
-                if (!did_save) {
-                    /// If this is false, PyErr has already been set
-                    return nullptr;
+                if (as_blob) {
+                    py::gil::release nogil;
+                    NamedTemporaryFile tf("." + opts.cast<std::string>("format"),
+                                        FILESYSTEM_TEMP_FILENAME, false); /// boolean cleanup on scope exit
+                    dststr = std::string(tf.filepath.make_absolute().str());
+                } else if (!use_file) {
+                    /// save as file -- extract the filename from the buffer
+                    py::gil::release nogil;
+                    py::buffer::source dest(view);
+                    dststr = std::string(dest.str());
                 }
-                
                 if (!dststr.size() && !use_file) {
                     if (as_blob) {
                         PyErr_SetString(PyExc_ValueError,
@@ -1717,9 +1697,17 @@ namespace py {
                     return nullptr;
                 }
                 
+                if (use_file) {
+                    did_save = pyim->savefilelike(file, opts);
+                } else {
+                    did_save = pyim->save(dststr.c_str(), opts);
+                }
+                if (!did_save) {
+                    return nullptr; /// If this is false, PyErr has been set
+                }
+                
                 if (as_blob) {
                     std::vector<byte> data;
-                    PyObject* out = nullptr;
                     bool removed = false;
                     if (use_file) {
                         py::gil::with iohandle(file);
@@ -1742,14 +1730,8 @@ namespace py {
                             return nullptr;
                         }
                     }
-                    out = py::string(data);
-                    if (out == nullptr) {
-                        PyErr_SetString(PyExc_IOError,
-                            "Failed converting output to Python string");
-                    }
-                    return out;
+                    return py::string(data);
                 }
-                
                 /// "else":
                 if (use_file) { return py::None(); }
                 return py::string(dststr);
@@ -1766,9 +1748,7 @@ namespace py {
                     Py_DECREF(options);
                     return nullptr;
                 }
-                options_map opts = pyim->writeopts();
-                PyObject* out = pyim->saveblob(opts);
-                return out;
+                return pyim->saveblob(pyim->writeopts());
             }
             
             template <typename ImageType = HalideNumpyImage,
@@ -1782,9 +1762,7 @@ namespace py {
                     Py_DECREF(options);
                     return nullptr;
                 }
-                options_map opts = pyim->writeopts();
-                PyObject* out = pyim->saveblob(opts);
-                return out;
+                return pyim->saveblob(pyim->writeopts());
             }
             
             template <typename ImageType = HalideNumpyImage,
@@ -1799,9 +1777,7 @@ namespace py {
                     Py_DECREF(options);
                     return nullptr;
                 }
-                options_map opts = pyim->writeopts();
-                PyObject* out = pyim->saveblob(opts);
-                return out;
+                return pyim->saveblob(pyim->writeopts());
             }
             
             #define DECLARE_CLOSURE(name) static char const* name = #name
