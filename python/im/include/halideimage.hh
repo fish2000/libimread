@@ -1804,10 +1804,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_subobject(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                if (CHECK_CLOSURE(DTYPE)) {
-                    return py::object(pyim->dtype);
-                }
-                return py::object(pyim->imagebuffer);
+                return py::object(CHECK_CLOSURE(DTYPE) ? static_cast<PyObject*>(pyim->dtype) : pyim->imagebuffer);
             }
             
             /// ImageType.{shape,strides} getter
@@ -1816,10 +1813,8 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_liminal_tuple(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                if (CHECK_CLOSURE(STRIDES)) {
-                    return py::detail::image_strides(*pyim->image.get());
-                }
-                return py::detail::image_shape(*pyim->image.get());
+                return CHECK_CLOSURE(STRIDES) ? py::detail::image_strides(*pyim->image.get()) :
+                                                py::detail::image_shape(*pyim->image.get());
             }
             
             /// ImageType.{width,height,planes} getter
@@ -1828,8 +1823,8 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_dimensional_attribute(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                int idx = CHECK_CLOSURE(WIDTH)  ? 0 : CHECK_CLOSURE(HEIGHT) ? 1 : 2;
-                return py::detail::image_dimensional_attribute(*pyim->image.get(), idx);
+                return py::detail::image_dimensional_attribute(*pyim->image.get(), CHECK_CLOSURE(WIDTH) ? 0 :
+                                                                                   CHECK_CLOSURE(HEIGHT) ? 1 : 2);
             }
             
             /// ImageType.{read,write}_opts getter
@@ -1838,8 +1833,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_opts(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* target = CHECK_CLOSURE(READ) ? pyim->readoptDict : pyim->writeoptDict;
-                return py::object(target);
+                return py::object(CHECK_CLOSURE(READ) ? pyim->readoptDict : pyim->writeoptDict);
             }
             
             /// ImageType.{read,write}_opts setter
@@ -1873,10 +1867,7 @@ namespace py {
                 using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                if (CHECK_CLOSURE(STRUCT)) {
-                    return imbuf->__array_struct__();
-                }
-                return imbuf->__array_interface__();
+                return CHECK_CLOSURE(STRUCT) ? imbuf->__array_struct__() : imbuf->__array_interface__();
             }
             
             /// ImageType.read_opts formatter
@@ -1885,13 +1876,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    format_read_opts(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                std::string out;
-                options_map opts = pyim->readopts();
-                {
-                    py::gil::release nogil;
-                    out = opts.format();
-                }
-                return py::string(out);
+                return py::string(pyim->readopts().format());
             }
             
             /// ImageType.read_opts file-dumper
@@ -1900,8 +1885,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    dump_read_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                options_map opts = pyim->readopts();
-                return py::options::dump(self, args, kwargs, opts);
+                return py::options::dump(self, args, kwargs, pyim->readopts());
             }
             
             /// ImageType.write_opts formatter
@@ -1910,13 +1894,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    format_write_opts(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                std::string out;
-                options_map opts = pyim->writeopts();
-                {
-                    py::gil::release nogil;
-                    out = opts.format();
-                }
-                return py::string(out);
+                return py::string(pyim->writeopts().format());
             }
             
             /// ImageType.write_opts file-dumper
@@ -1925,8 +1903,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    dump_write_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                options_map opts = pyim->writeopts();
-                return py::options::dump(self, args, kwargs, opts);
+                return py::options::dump(self, args, kwargs, pyim->writeopts());
             }
             
             namespace methods {

@@ -529,8 +529,8 @@ class Json {
         static Json object() { return new Object(); }  // returns empty object
         
         /// file I/O: dump and load
-        Json& dump(std::string const& dest, bool overwrite = false);
-        std::string dumptmp();
+        Json const& dump(std::string const& dest, bool overwrite = false) const;
+        std::string dumptmp() const;
         static Json load(std::string const& source);
         
         struct parse_error : im::JSONParseError {

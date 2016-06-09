@@ -25,7 +25,7 @@ namespace py {
         PyObject* revert(Json const& value);
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject *kwargs,
-                       options_map& opts);
+                       options_map const& opts);
         
     }
     

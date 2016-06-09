@@ -21,11 +21,11 @@ test:
 
 checkall:
 		@test -d build || echo "Can't run tests: no build folder\n"
-		@test -d build && pushd build && imread_tests --success --durations yes --abortx 10 && popd
+		@test -d build && pushd build && ./imread_tests --success --durations yes --abortx 10 && popd
 
 check:
 		@test -d build || echo "Can't run tests: no build folder\n"
-		@test -d build && pushd build && imread_tests --durations yes --abortx 20 && popd
+		@test -d build && pushd build && ./imread_tests --durations yes --abortx 20 && popd
 
 scantests:
 		tests/scripts/generate-test-filemap.py > apps/TestDataViewer/TestDataViewer/TestData.plist

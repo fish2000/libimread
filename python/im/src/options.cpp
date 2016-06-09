@@ -210,7 +210,7 @@ namespace py {
         }
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject* kwargs,
-                       options_map& opts) {
+                       options_map const& opts) {
             PyObject* py_overwrite = NULL;
             PyObject* py_tempfile = NULL;
             char const* keywords[] = { "destination", "overwrite", "tempfile", NULL };

@@ -1009,7 +1009,7 @@ Json Json::parse(std::string const& str) {
     throw parse_error("JSON format error", is);
 }
 
-Json& Json::dump(std::string const& dest, bool overwrite) {
+Json const& Json::dump(std::string const& dest, bool overwrite) const {
     using filesystem::path;
     using filesystem::NamedTemporaryFile;
     std::string destination(dest);
@@ -1050,7 +1050,7 @@ Json& Json::dump(std::string const& dest, bool overwrite) {
     return *this;
 }
 
-std::string Json::dumptmp() {
+std::string Json::dumptmp() const {
     using filesystem::NamedTemporaryFile;
     NamedTemporaryFile tf(".json", FILESYSTEM_TEMP_FILENAME, false);
     tf.open();
