@@ -252,6 +252,7 @@ namespace im {
                     }
                     ptr++;
                 }
+                delete[] row_pointers[y];
             }
         } else if (bit_depth == 16) {
             for (int y = 0; y < h; y++) {
@@ -264,11 +265,12 @@ namespace im {
                     }
                     ptr++;
                 }
+                delete[] row_pointers[y];
             }
         }
         
         /// clean up
-        for (int y = 0; y < h; y++) { delete[] row_pointers[y]; }
+        // for (int y = 0; y < h; y++) { delete[] row_pointers[y]; }
         delete[] row_pointers;
         
         return output;
@@ -292,7 +294,7 @@ namespace im {
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                      PNG_FILTER_TYPE_BASE);
         
-        const int compression = opts.cast<int>("png:compression", 6);
+        const int compression = opts.cast<int>("png:compression", -1);
         if (compression && compression != -1) {
             png_set_compression_level(p.png_ptr, compression);
         }
@@ -315,25 +317,27 @@ namespace im {
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (x = 0; x < width; x++) {
                     for (c = 0; c < channels; c++) {
-                        pix::convert(srcPtr[c*c_stride], out);
-                        *dstPtr++ = out;
+                        pix::convert(srcPtr[c*c_stride], *dstPtr++);
+                        // *dstPtr++ = out;
                     }
                     srcPtr++;
                 }
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
-            uint8_t* __restrict__ srcPtr = input.rowp_as<uint8_t>(0);
+            // uint8_t* __restrict__ srcPtr = input.rowp_as<uint8_t>(0);
+            pix::accessor<byte> at = input.access();
             
             for (y = 0; y < height; y++) {
                 row_pointers[y] = new png_byte[rowbytes];
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (x = 0; x < width; x++) {
                     for (c = 0; c < channels; c++) {
-                        pix::convert(srcPtr[c*c_stride], out);
-                        *dstPtr++ = out;
+                        // pix::convert(srcPtr[c*c_stride], *dstPtr++);
+                        // *dstPtr++ = out;
+                        pix::convert(at(x, y, c)[0], *dstPtr++);
                     }
-                    srcPtr++;
+                    // srcPtr++;
                 }
             }
         } else {
@@ -342,8 +346,8 @@ namespace im {
         }
         
         // write data
-        imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
-            "[write_png_file] Error during writing bytes");
+        // imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
+        //     "[write_png_file] Error during writing bytes");
         png_write_image(p.png_ptr, row_pointers);
         
         // finish write

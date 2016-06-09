@@ -151,7 +151,7 @@ namespace im {
             HalideNumpyImage(NPY_TYPES d, int x,                        std::string const& name = "");
             
             explicit HalideNumpyImage(HalideNumpyImage const& other,
-                                      int zidx = 0,                     std::string const& name = "");
+                                      int const zidx = 0,               std::string const& name = "");
             explicit HalideNumpyImage(HalideNumpyImage const& basis,
                                       HalideNumpyImage const& etc,      std::string const& name = "");
             
@@ -243,7 +243,7 @@ namespace im {
             ArrayImage(ArrayImage&& other) noexcept;
             
             explicit ArrayImage(ArrayImage const& other,
-                                int zidx = 0,                     std::string const& name = "");
+                                int const zidx = 0,               std::string const& name = "");
             explicit ArrayImage(ArrayImage const& basis,
                                 ArrayImage const& etc,            std::string const& name = "");
             

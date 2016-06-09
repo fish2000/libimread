@@ -158,7 +158,7 @@ namespace im {
         ,dtype_(d)
         {}
     
-    HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& other, int zidx, std::string const& name)
+    HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& other, int const zidx, std::string const& name)
         :HalBase(other.type(), other.dim(0), other.dim(1), 1, 0, name)
         ,PythonBufferImage(), MetaImage(name)
         ,dtype_(other.dtype())
@@ -168,11 +168,10 @@ namespace im {
             pix::accessor<byte> target = this->access<byte>();
             const int w = other.dim(0);
             const int h = other.dim(1);
-            const int c = zidx;
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    pix::convert(source(x, y, c)[0],
-                                 target(x, y, 0)[0]);
+                    pix::convert(source(x, y, zidx)[0],
+                                 target(x, y,    0)[0]);
                 }
             }
         }
@@ -572,7 +571,7 @@ namespace im {
     
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wmissing-braces"
-    ArrayImage::ArrayImage(ArrayImage const& other, int zidx, std::string const& name)
+    ArrayImage::ArrayImage(ArrayImage const& other, int const zidx, std::string const& name)
         :PythonBufferImage(), MetaImage(name)
         ,array(nullptr)
         ,buffer(nullptr)
@@ -610,11 +609,10 @@ namespace im {
             /// rely on Halide's use of planar image strides
             pix::accessor<byte> source = other.access<byte>();
             pix::accessor<byte> target = this->access<byte>();
-            const int c = zidx;
             for (int yy = 0; yy < y; ++yy) {
                 for (int xx = 0; xx < x; ++xx) {
-                    pix::convert(source(xx, yy, c)[0],
-                                 target(xx, yy, 0)[0]);
+                    pix::convert(source(xx, yy, zidx)[0],
+                                 target(xx, yy,    0)[0]);
                 }
             }
         }

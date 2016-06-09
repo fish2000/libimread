@@ -6,7 +6,8 @@ class PlanarOperationTests(BaseCase):
     
     def test_jpg_split(self):
         ''' Load some JPG files, split into plane image tuple,
-            compare plane features (size etc) to image features '''
+            compare plane features (size etc) to image features
+        '''
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
@@ -21,7 +22,8 @@ class PlanarOperationTests(BaseCase):
     def test_jpg_split_merge(self):
         ''' Load some JPG files, split into plane image tuple,
             compare plane features (size etc) to image features,
-            re-merge into composite image '''
+            re-merge into composite image
+        '''
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
@@ -36,8 +38,13 @@ class PlanarOperationTests(BaseCase):
                                  image2.buffer.tostring())
     
     def test_jpg_alpha(self):
-        ''' Load some JPG files, split into plane image tuple,
-            compare plane features (size etc) to image features '''
+        ''' Load some JPG files, check for an alpha channel --
+            if alpha is present: check the mode and the number of planes;
+            if not: create a new image with an alpha channel
+                    from the image we loaded, check the mode
+                    and the number of planes, and test the
+                    new image width/height against the original.
+        '''
         alpha_modes = ('LA', 'RGBA')
         alpha_planes = (2, 4)
         for ImageType in self.imagetypes:
