@@ -25,12 +25,12 @@ except ImportError: # 3.3+
     from shlex import quote
 
 commander = os.system
-try:
-    import subprocess
-except ImportError:
-    pass
-else:
-    commander = lambda cmd: subprocess.call(cmd, shell=True)
+# try:
+#     import subprocess
+# except ImportError:
+#     pass
+# else:
+#     commander = lambda cmd: subprocess.call(cmd, shell=True)
 
 VIEWERS = []
 
@@ -107,8 +107,7 @@ class Viewer(object):
             # options needs a 'format' entry if we're writing
             # to a Python file object -- so copy and update:
             writeopts = copy(options)
-            if not 'format' in writeopts:
-                writeopts.update({ 'format' : self.get_format(image) })
+            writeopts.update({ 'format' : self.get_format(image, **options) })
             
             # hey dogg so image.write() could throw a thing,
             # I'm just sayin
@@ -124,14 +123,10 @@ class Viewer(object):
     
     def get_format(self, image=None, **options):
         # return suffix name, or None to save as PGM/PPM
-        if 'format' in options:
-            return options.get('format')
-        return self.suffix
+        return options.get('format', self.suffix)
     
     def get_suffix(self, image=None, **options):
-        if 'format' in options:
-            return ".%s" % options.get('format')
-        return ".%s" % self.suffix
+        return ".%s" % options.get('format', self.suffix)
     
     def get_command(self, filepath, **options):
         raise NotImplementedError
@@ -142,8 +137,7 @@ class Viewer(object):
                                 prefix=self.prefix,
                                 delete=False) as tf:
             writeopts = copy(options)
-            if not 'format' in writeopts:
-                writeopts.update({ 'format' : self.get_format(image) })
+            writeopts.update({ 'format' : self.get_format(image, **options) })
             
             output = image.write(
                 file=tf.file,

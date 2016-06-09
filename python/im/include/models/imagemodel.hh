@@ -573,6 +573,7 @@ namespace py {
             bool savefilelike(PyObject* file, options_map const& opts) {
                 std::unique_ptr<ImageFormat> format;
                 typename py::gil::with::sink_t output;
+                std::string ext;
                 options_map default_opts;
                 bool can_write = false;
                 
@@ -585,8 +586,8 @@ namespace py {
                 try {
                     py::gil::with iohandle(file);
                     output = iohandle.sink();
-                    format = im::get_format(
-                        opts.cast<char const*>("format"));
+                    ext = opts.cast<std::string>("format");
+                    format = im::get_format(ext.c_str());
                     can_write = format->format_can_write();
                 } catch (im::FormatNotFound& exc) {
                     PyErr_Format(PyExc_ValueError,
