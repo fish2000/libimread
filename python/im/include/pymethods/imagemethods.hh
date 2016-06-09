@@ -53,7 +53,7 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
-            PyObject* newfromsize(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
+            PyObject* newfromsize(PyObject* _nothing_, PyObject* args, PyObject* kwargs) {
                 PyObject* py_is_signed = nullptr;
                 PyObject* py_fill = nullptr;
                 bool is_signed = false;
@@ -765,7 +765,7 @@ namespace py {
                         {
                             "new",
                                 (PyCFunction)py::ext::image::newfromsize<ImageType, BufferType>,
-                                METH_VARARGS | METH_KEYWORDS | METH_CLASS,
+                                METH_VARARGS | METH_KEYWORDS | METH_STATIC,
                                 "ImageType.new(width, height, planes=1, fill=0x00, nbits=8, is_signed=False)\n"
                                 "\t-> Return a new image of size (width, height) \n"
                                 "\t   optionally specifying: \n"
