@@ -248,7 +248,7 @@ namespace py {
                 ,image(std::make_shared<ImageType>(*other.image.get(), zidx))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
                 ,imagebuffer(reinterpret_cast<PyObject*>(
-                            new typename ImageModelBase::BufferModel(image)))
+                             new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
@@ -265,7 +265,7 @@ namespace py {
                                                      *etc.image.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
                 ,imagebuffer(reinterpret_cast<PyObject*>(
-                            new typename ImageModelBase::BufferModel(image)))
+                             new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
@@ -338,7 +338,8 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(
                        im::detail::for_nbits(nbits, is_signed),
-                                             width, height, planes))
+                                             width, height,
+                                             planes > 0 ? planes : 1))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
                 ,imagebuffer(reinterpret_cast<PyObject*>(
                              new typename ImageModelBase::BufferModel(image)))
