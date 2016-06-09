@@ -3,7 +3,8 @@
 #include <numpy/arrayobject.h>
 
 #include "hybridimage.hh"
-#include "halideimage.hh"
+#include "models/models.hh"
+#include "pymethods/pymethods.hh"
 #include "detail.hpp"
 #include "hybrid.hh"
 

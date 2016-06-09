@@ -28,7 +28,6 @@
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/base64.hh>
 #include <libimread/errors.hh>
-// #include <libimread/memory.hh>
 #include <libimread/hashing.hh>
 #include <libimread/pixels.hh>
 
@@ -1804,7 +1803,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_subobject(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return py::object(CHECK_CLOSURE(DTYPE) ? static_cast<PyObject*>(pyim->dtype) : pyim->imagebuffer);
+                return py::object(CHECK_CLOSURE(DTYPE) ? reinterpret_cast<PyObject*>(pyim->dtype) : pyim->imagebuffer);
             }
             
             /// ImageType.{shape,strides} getter
