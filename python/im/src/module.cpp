@@ -4,7 +4,7 @@
 #include "module.hpp"
 
 PyTypeObject HybridImageModel_Type = {
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)
     0,                                                                  /* ob_size */
     "im.HybridImage",                                                   /* tp_name */
     sizeof(HybridImageModel),                                           /* tp_basicsize */
@@ -64,7 +64,7 @@ using py::ext::ImageBufferModel;
 using py::ext::ArrayBufferModel;
 
 PyTypeObject BufferModel_Type = {
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)
     0,                                                                  /* ob_size */
     py::ext::BufferModelBase<buffer_t>::typestring(),                   /* tp_name */
     sizeof(py::ext::BufferModelBase<buffer_t>),                         /* tp_basicsize */
@@ -115,7 +115,7 @@ PyTypeObject BufferModel_Type = {
 };
 
 PyTypeObject ImageModel_Type = {
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)
     0,                                                                  /* ob_size */
     py::ext::ImageModel::typestring(),                                  /* tp_name */
     sizeof(ImageModel),                                                 /* tp_basicsize */
@@ -166,7 +166,7 @@ PyTypeObject ImageModel_Type = {
 };
 
 PyTypeObject ImageBufferModel_Type = {
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)
     0,                                                                      /* ob_size */
     py::ext::ImageModel::BufferModel::typestring(),                         /* tp_name */
     sizeof(ImageBufferModel),                                               /* tp_basicsize */
@@ -217,7 +217,7 @@ PyTypeObject ImageBufferModel_Type = {
 };
 
 PyTypeObject ArrayModel_Type = {
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)
     0,                                                                  /* ob_size */
     py::ext::ArrayModel::typestring(),                                  /* tp_name */
     sizeof(ArrayModel),                                                 /* tp_basicsize */
@@ -268,7 +268,7 @@ PyTypeObject ArrayModel_Type = {
 };
 
 PyTypeObject ArrayBufferModel_Type = {
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)
     0,                                                                      /* ob_size */
     py::ext::ArrayModel::BufferModel::typestring(),                         /* tp_name */
     sizeof(ArrayBufferModel),                                               /* tp_basicsize */
@@ -465,13 +465,13 @@ namespace {
         /// newly formatted as a Python tuple of strings,
         /// and add this to the module as a static-ish constant
         format_tuple = py::detail::formats_as_pytuple();
-        if (format_tuple == NULL)                     { return false; }
+        if (format_tuple == nullptr)                  { return false; }
         PyModule_AddObject(module,
             "formats",
             format_tuple);
         
         format_infodict = py::detail::formats_as_infodict();
-        if (format_infodict == NULL)                  { return false; }
+        if (format_infodict == nullptr)               { return false; }
         PyModule_AddObject(module,
             "format_info",
             PyDictProxy_New(format_infodict));
@@ -481,8 +481,8 @@ namespace {
         /// the exact same logic used in the python `sys` module's implementation
         _byteorder = py::string(im::byteorder == im::Endian::Big ? "big" : "little");
         _byteordermark = py::string((char)im::byteorder);
-        if (_byteorder == NULL)                       { return false; }
-        if (_byteordermark == NULL)                   { return false; }
+        if (_byteorder == nullptr)                    { return false; }
+        if (_byteordermark == nullptr)                { return false; }
         PyModule_AddObject(module,
             "_byteorder",
             _byteorder);
@@ -504,10 +504,10 @@ PyMODINIT_FUNC PyInit_im(void) {
     /// Static module-definition table
     static PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        module__name__,     /* m_name */
-        module__doc__,      /* m_doc */
-        -1,                 /* m_size */
-        module_functions    /* m_methods */
+        module__name__,                           /* m_name */
+        module__doc__,                            /* m_doc */
+        -1,                                       /* m_size */
+        module_functions                          /* m_methods */
     };
     
     /// Actually initialize the module object,
@@ -515,8 +515,8 @@ PyMODINIT_FUNC PyInit_im(void) {
     module = PyModule_Create(&moduledef);
     
     /// Initialize and check module
-    if (module == NULL)                           { return NULL; }
-    if (!initialize(module))                      { return NULL; }
+    if (module == nullptr)                        { return nullptr; }
+    if (!initialize(module))                      { return nullptr; }
     
     /// Return module object
     return module;
@@ -534,7 +534,7 @@ PyMODINIT_FUNC initim(void) {
         module__doc__);
     
     /// Initialize and check module
-    if (module == NULL)                           { return; }
+    if (module == nullptr)                        { return; }
     if (!initialize(module))                      { return; }
 }
 #endif
