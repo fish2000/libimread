@@ -22,6 +22,7 @@
 #include "../pycapsule.hpp"
 #include "../typecode.hpp"
 #include "../hybrid.hh"
+#include "base.hh"
 
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -50,7 +51,7 @@ namespace py {
         template <typename ImageType,
                   typename BufferType = buffer_t,
                   typename FactoryType = typename ImageType::factory_t>
-        struct ImageModelBase {
+        struct ImageModelBase : public ModelBase {
             
             using shared_image_t = std::shared_ptr<ImageType>;
             using weak_image_t = std::weak_ptr<ImageType>;
@@ -204,6 +205,7 @@ namespace py {
                 struct FromBuffer           {};
                 struct FromImageBuffer      {};
                 struct FromOtherImageBuffer {};
+                struct FromImagePlane       {};
             };
             
             PyObject_HEAD
@@ -239,6 +241,21 @@ namespace py {
                     Py_INCREF(writeoptDict);
                     PyDict_Update(readoptDict,  other.readoptDict);
                     PyDict_Update(writeoptDict, other.writeoptDict);
+                }
+            
+            explicit ImageModelBase(ImageModelBase const& other, int zidx)
+                :weakrefs(nullptr)
+                ,image(std::make_shared<ImageType>(*other.image.get(), zidx))
+                ,dtype(PyArray_DescrFromType(image->dtype()))
+                ,imagebuffer(reinterpret_cast<PyObject*>(
+                            new typename ImageModelBase::BufferModel(image)))
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
+                {
+                    Py_INCREF(dtype);
+                    Py_INCREF(imagebuffer);
+                    Py_INCREF(readoptDict);
+                    Py_INCREF(writeoptDict);
                 }
             
             ImageModelBase(ImageModelBase&& other) noexcept
@@ -283,6 +300,11 @@ namespace py {
             /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
             explicit ImageModelBase(PyObject* buffer, typename Tag::FromBuffer)
                 :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
+                {}
+            
+            /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
+            explicit ImageModelBase(PyObject* source, int zidx, typename Tag::FromImagePlane = typename Tag::FromImagePlane{})
+                :ImageModelBase(*reinterpret_cast<ImageModelBase*>(source), zidx)
                 {}
             
             explicit ImageModelBase(int width, int height,

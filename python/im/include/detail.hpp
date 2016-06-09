@@ -14,6 +14,7 @@
 #include <initializer_list>
 #include <Python.h>
 #include <libimread/libimread.hpp>
+#include "models/base.hh"
 
 /// forward-declare PyArray_Descr from numpy
 struct _PyArray_Descr;
@@ -22,6 +23,7 @@ typedef _PyArray_Descr PyArray_Descr;
 namespace py {
     
     using im::byte;
+    using py::ext::ModelBase;
     using bytevec_t = std::vector<byte>;
     using charvec_t = std::vector<char>;
     using stringvec_t = std::vector<std::string>;
@@ -38,8 +40,9 @@ namespace py {
     PyObject* string(char const*);
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);
-    PyObject* object(PyObject* arg = nullptr);
-    PyObject* object(PyArray_Descr* arg = nullptr);
+    PyObject* object(PyObject* arg);
+    PyObject* object(PyArray_Descr* arg);
+    PyObject* object(ModelBase* arg);
     
     template <typename ...Args> inline
     PyObject* tuple(Args&& ...args) {
@@ -53,6 +56,8 @@ namespace py {
     }
     
     PyObject* convert(PyObject*);
+    PyObject* convert(PyArray_Descr*);
+    PyObject* convert(ModelBase*);
     PyObject* convert(std::nullptr_t);
     PyObject* convert(void);
     PyObject* convert(void*);

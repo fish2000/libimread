@@ -22,6 +22,7 @@
 #include "../pycapsule.hpp"
 #include "../typecode.hpp"
 #include "../hybrid.hh"
+#include "base.hh"
 
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -48,7 +49,7 @@ namespace py {
         using filesystem::NamedTemporaryFile;
         
         template <typename BufferType = buffer_t>
-        struct BufferModelBase {
+        struct BufferModelBase : public ModelBase {
             
             using pixel_t = byte;
             using unique_buffer_t = std::unique_ptr<BufferType>;

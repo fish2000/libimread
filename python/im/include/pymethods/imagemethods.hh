@@ -465,6 +465,22 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* split(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                const int planes = pyim->image->planes();
+                if (planes > 1) {
+                    PyObject* out = PyTuple_New(planes);
+                    for (int idx = 0; idx < planes; ++idx) {
+                        PyTuple_SET_ITEM(out, idx, py::convert(new PythonImageType(self, idx)));
+                    }
+                    return out;
+                }
+                return py::tuplize(new PythonImageType(self, 0));
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* options = PyDict_New();
@@ -800,6 +816,13 @@ namespace py {
                                 "\t - options must contain a 'format' entry, specifying the output format \n"
                                 "\t   when write() is called without a destination path. \n"
                                  },
+                        {
+                            "split",
+                                (PyCFunction)py::ext::image::split<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "image.split()\n"
+                                "\t-> Return a tuple of new images, one for each plane in the original,\n"
+                                "\t   containing a monochrome copy of the given planes' data\n" },
                         {
                             "format_read_opts",
                                 (PyCFunction)py::ext::image::format_read_opts<ImageType, BufferType>,

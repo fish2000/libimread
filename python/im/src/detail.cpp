@@ -90,8 +90,13 @@ namespace py {
     PyObject* object(PyArray_Descr* arg) {
         return py::object((PyObject*)arg);
     }
+    PyObject* object(ModelBase* arg) {
+        return py::object((PyObject*)arg);
+    }
     
-    PyObject* convert(PyObject* operand)            { return py::object(operand); }
+    PyObject* convert(PyObject* operand)            { return operand; }
+    PyObject* convert(PyArray_Descr* operand)       { return (PyObject*)operand; }
+    PyObject* convert(ModelBase* operand)           { return (PyObject*)operand; }
     PyObject* convert(std::nullptr_t operand)       { return Py_BuildValue("O", Py_None); }
     PyObject* convert(void)                         { return Py_BuildValue("O", Py_None); }
     PyObject* convert(void* operand)                { return py::capsule::encapsulate(operand); }
