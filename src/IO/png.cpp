@@ -179,7 +179,7 @@ namespace im {
         
         PP_CHECK(p.png_ptr, "PNG read struct setup failure");
         
-        const int w = png_get_image_width (p.png_ptr, p.png_info);
+        const int w =  png_get_image_width(p.png_ptr, p.png_info);
         const int h = png_get_image_height(p.png_ptr, p.png_info);
         volatile int channels = png_get_channels(p.png_ptr, p.png_info);
         volatile int bit_depth = png_get_bit_depth(p.png_ptr, p.png_info);
@@ -215,7 +215,7 @@ namespace im {
             }
         }
         
-        PP_CHECK(p.png_ptr, "PNG read elaboration failure");
+        // PP_CHECK(p.png_ptr, "PNG read elaboration failure");
         
         png_set_interlace_handling(p.png_ptr);
         png_read_update_info(p.png_ptr, p.png_info);
@@ -228,7 +228,7 @@ namespace im {
             row_pointers[y] = new png_byte[row_bytes];
         }
         
-        PP_CHECK(p.png_ptr, "PNG read rowbytes failure");
+        // PP_CHECK(p.png_ptr, "PNG read rowbytes failure");
         
         png_read_image(p.png_ptr, row_pointers);
         
@@ -325,7 +325,6 @@ namespace im {
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
-            // uint8_t* __restrict__ srcPtr = input.rowp_as<uint8_t>(0);
             pix::accessor<byte> at = input.access();
             
             for (y = 0; y < height; y++) {
@@ -333,11 +332,8 @@ namespace im {
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (x = 0; x < width; x++) {
                     for (c = 0; c < channels; c++) {
-                        // pix::convert(srcPtr[c*c_stride], *dstPtr++);
-                        // *dstPtr++ = out;
                         pix::convert(at(x, y, c)[0], *dstPtr++);
                     }
-                    // srcPtr++;
                 }
             }
         } else {
