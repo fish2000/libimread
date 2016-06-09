@@ -199,7 +199,7 @@ namespace py {
                 PythonImageType* initial = reinterpret_cast<PythonImageType*>(pynitial);
                 int width = initial->image->dim(0),
                     height = initial->image->dim(1);
-                for (idx = 0; idx < len; idx++) {
+                for (idx = 1; idx < len; idx++) {
                     PythonImageType* item = reinterpret_cast<PythonImageType*>(
                                             PySequence_Fast_GET_ITEM(sequence, idx));
                     if (type != Py_TYPE(item)) {
@@ -226,6 +226,7 @@ namespace py {
                     }
                 } else if (len == 1) {
                     basis = PySequence_Fast_GET_ITEM(sequence, 0);
+                    Py_INCREF(basis);
                 }
                 Py_DECREF(sequence);
                 return basis;
