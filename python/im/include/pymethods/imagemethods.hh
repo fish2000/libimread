@@ -618,6 +618,17 @@ namespace py {
                 DECLARE_CLOSURE(WRITE);
                 DECLARE_CLOSURE(STRUCT);
                 DECLARE_CLOSURE(INTERFACE);
+                DECLARE_CLOSURE(MODE);
+                DECLARE_CLOSURE(HAS_ALPHA);
+            }
+            
+            /// ImageType.{mode,has_alpha} getter
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    get_mode_property(PyObject* self, void* closure) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return CHECK_CLOSURE(MODE) ? pyim->mode() : pyim->has_alpha();
             }
             
             /// ImageType.{dtype,buffer} getter
@@ -728,6 +739,15 @@ namespace py {
                 return py::options::dump(self, args, kwargs, pyim->writeopts());
             }
             
+            /// ImageType.add_alpha() method
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    add_alpha(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return pyim->add_alpha();
+            }
+            
             namespace methods {
                 
                 template <typename ImageType,
@@ -769,6 +789,18 @@ namespace py {
                                 nullptr,
                                 (char*)"NumPy array struct (C-level API) -> PyCObject\n",
                                 BIND_CLOSURE(STRUCT) },
+                        {
+                            (char*)"mode",
+                                (getter)py::ext::image::get_mode_property<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image mode -> str\n",
+                                BIND_CLOSURE(MODE) },
+                        {
+                            (char*)"has_alpha",
+                                (getter)py::ext::image::get_mode_property<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image does or does not have an alpha channel -> bool\n",
+                                BIND_CLOSURE(HAS_ALPHA) },
                         {
                             (char*)"dtype",
                                 (getter)py::ext::image::get_subobject<ImageType, BufferType>,
@@ -911,6 +943,13 @@ namespace py {
                                 "image.split()\n"
                                 "\t-> Return a tuple of new images, one for each plane in the original,\n"
                                 "\t   containing a monochrome copy of the given planes' data\n" },
+                        {
+                            "add_alpha",
+                                (PyCFunction)py::ext::image::add_alpha<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "image.add_alpha()\n"
+                                "\t-> Add an alpha channel (if appropriate) to a copy of the image,\n"
+                                "\t   and return the copy. \n"},
                         {
                             "format_read_opts",
                                 (PyCFunction)py::ext::image::format_read_opts<ImageType, BufferType>,

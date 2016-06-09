@@ -4,7 +4,7 @@ from basecase import BaseCase
 
 class PlanarOperationTests(BaseCase):
     
-    def test_jpg_check_split(self):
+    def test_jpg_split(self):
         ''' Load some JPG files, split into plane image tuple,
             compare plane features (size etc) to image features '''
         for ImageType in self.imagetypes:
@@ -18,7 +18,7 @@ class PlanarOperationTests(BaseCase):
                     self.assertEqual(plane.height, image.height)
                     self.assertEqual(plane.planes, 1)
     
-    def test_jpg_check_split_merge(self):
+    def test_jpg_split_merge(self):
         ''' Load some JPG files, split into plane image tuple,
             compare plane features (size etc) to image features,
             re-merge into composite image '''
@@ -34,4 +34,25 @@ class PlanarOperationTests(BaseCase):
                 self.assertEqual(image.planes, image2.planes)
                 self.assertEqual(image.buffer.tostring(),
                                  image2.buffer.tostring())
+    
+    def test_jpg_alpha(self):
+        ''' Load some JPG files, split into plane image tuple,
+            compare plane features (size etc) to image features '''
+        alpha_modes = ('LA', 'RGBA')
+        alpha_planes = (2, 4)
+        for ImageType in self.imagetypes:
+            for image_path in self.jpgs:
+                image = ImageType(image_path)
+                self.assertIsNotNone(image)
+                if not image.has_alpha:
+                    # no alpha channel - try to add one:
+                    alpha_image = image.add_alpha()
+                    self.assertTrue(alpha_image.mode in alpha_modes)
+                    self.assertTrue(alpha_image.planes in alpha_planes)
+                    self.assertEqual(alpha_image.width, image.width)
+                    self.assertEqual(alpha_image.height, image.height)
+                else:
+                    # alpha channel already present:
+                    self.assertTrue(image.mode in alpha_modes)
+                    self.assertTrue(image.planes in alpha_planes)
     

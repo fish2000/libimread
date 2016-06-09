@@ -428,6 +428,47 @@ namespace py {
                 return out;
             }
             
+            PyObject* mode() {
+                switch (image->planes()) {
+                    case 1: return py::string("L");
+                    case 2: return py::string("LA");
+                    case 3: return py::string("RGB");
+                    case 4: return py::string("RGBA");
+                    default:
+                        std::string out("WAT;");
+                        out += std::to_string(image->planes());
+                        return py::string(out);
+                }
+            }
+            
+            PyObject* has_alpha() {
+                return py::boolean(!bool(image->planes() % 2));
+            }
+            
+            PyObject* add_alpha() {
+                switch (image->planes()) {
+                    case 1:
+                    case 3: {
+                        Py_INCREF(this);
+                        ImageModelBase* alpha = new ImageModelBase(
+                            image->dim(0), image->dim(1),
+                            1, 0xFF,       image->nbits());
+                        ImageModelBase* out = new ImageModelBase(
+                            py::convert(this),
+                            py::convert(alpha));
+                        delete alpha;
+                        return py::convert(out);
+                    }
+                    case 2:
+                    case 4:
+                    default: {
+                        PyErr_SetString(PyExc_AttributeError,
+                            "Can't add alpha to mode LA/RGBA/WAT image");
+                        return nullptr;
+                    }
+                }
+            }
+            
             options_map readopts() {
                 return py::options::parse(readoptDict);
             }

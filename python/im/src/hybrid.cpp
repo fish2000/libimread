@@ -169,8 +169,8 @@ namespace im {
             const int w = other.dim(0);
             const int h = other.dim(1);
             const int c = zidx;
-            for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
                     pix::convert(source(x, y, c)[0],
                                  target(x, y, 0)[0]);
                 }
@@ -190,13 +190,17 @@ namespace im {
             const int h = basis.dim(1);
             const int p = basis.dim(2);
             const int px = etc.dim(2);
-            for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
-                    for (int cc = 0; cc < p; cc++) {
+            for (int cc = 0; cc < p; ++cc) {
+                for (int y = 0; y < h; ++y) {
+                    for (int x = 0; x < w; ++x) {
                         pix::convert(source(x, y, cc)[0],
                                      target(x, y, cc)[0]);
                     }
-                    for (int cc = 0; cc < px; cc++) {
+                }
+            }
+            for (int cc = 0; cc < px; ++cc) {
+                for (int y = 0; y < h; ++y) {
+                    for (int x = 0; x < w; ++x) {
                         pix::convert(extend(x, y,   cc)[0],
                                      target(x, y, p+cc)[0]);
                     }
@@ -607,8 +611,8 @@ namespace im {
             pix::accessor<byte> source = other.access<byte>();
             pix::accessor<byte> target = this->access<byte>();
             const int c = zidx;
-            for (int xx = 0; xx < x; xx++) {
-                for (int yy = 0; yy < y; yy++) {
+            for (int yy = 0; yy < y; ++yy) {
+                for (int xx = 0; xx < x; ++xx) {
                     pix::convert(source(xx, yy, c)[0],
                                  target(xx, yy, 0)[0]);
                 }
@@ -658,13 +662,17 @@ namespace im {
             const int h = basis.dim(1);
             const int p = basis.dim(2);
             const int px = etc.dim(2);
-            for (int xx = 0; xx < w; xx++) {
-                for (int yy = 0; yy < h; yy++) {
-                    for (int cc = 0; cc < p; cc++) {
+            for (int cc = 0; cc < p; ++cc) {
+                for (int yy = 0; yy < h; ++yy) {
+                    for (int xx = 0; xx < w; ++xx) {
                         pix::convert(source(xx, yy, cc)[0],
                                      target(xx, yy, cc)[0]);
                     }
-                    for (int cc = 0; cc < px; cc++) {
+                }
+            }
+            for (int cc = 0; cc < px; ++cc) {
+                for (int yy = 0; yy < h; ++yy) {
+                    for (int xx = 0; xx < w; ++xx) {
                         pix::convert(extend(xx, yy,   cc)[0],
                                      target(xx, yy, p+cc)[0]);
                     }
