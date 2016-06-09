@@ -15,3 +15,4 @@ from im import (
     hybridimage_check)
 
 from compat.show import show
+from compat.to_PIL import to_PIL
