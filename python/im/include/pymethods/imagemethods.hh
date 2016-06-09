@@ -174,7 +174,6 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* newfrommerge(PyTypeObject* type, PyObject* planes) {
-                // using tag_t = typename PythonImageType::Tag::FromImage;
                 if (!planes) {
                     PyErr_SetString(PyExc_ValueError,
                         "missing ImageType sequence");
@@ -185,20 +184,35 @@ namespace py {
                         "invalid ImageType sequence");
                     return nullptr;
                 }
+                
                 PyObject* basis = nullptr;
                 PyObject* sequence = PySequence_Fast(planes, "Sequence expected");
                 int idx = 0,
                     len = PySequence_Fast_GET_SIZE(sequence);
+                
+                if (len < 1) {
+                    Py_DECREF(sequence);
+                    PyErr_SetString(PyExc_ValueError,
+                        "Sequence has no items");
+                    return nullptr;
+                }
+                
+                /// check the initial sequence item type
                 PyObject* pynitial = PySequence_Fast_GET_ITEM(sequence, idx);
                 if (type != Py_TYPE(pynitial)) {
                     Py_DECREF(sequence);
                     PyErr_SetString(PyExc_TypeError,
-                        "Mismatched sequence item type");
+                        "Wrong sequence item type");
                     return nullptr;
                 }
+                
+                /// store the initial sequence items' dimensions
                 PythonImageType* initial = reinterpret_cast<PythonImageType*>(pynitial);
                 int width = initial->image->dim(0),
                     height = initial->image->dim(1);
+                
+                /// loop and check sequence items against a) type and
+                /// b) the initial item's stored dimensions
                 for (idx = 1; idx < len; idx++) {
                     PythonImageType* item = reinterpret_cast<PythonImageType*>(
                                             PySequence_Fast_GET_ITEM(sequence, idx));
@@ -212,10 +226,12 @@ namespace py {
                         item->image->dim(1) != height) {
                         Py_DECREF(sequence);
                         PyErr_SetString(PyExc_AttributeError,
-                            "Mismatched image size");
+                            "Mismatched image dimensions");
                         return nullptr;
                     }
                 }
+                
+                /// actual allocation loop
                 if (len > 1) {
                     basis = PySequence_Fast_GET_ITEM(sequence, 0);
                     Py_INCREF(basis);
@@ -228,6 +244,8 @@ namespace py {
                     basis = PySequence_Fast_GET_ITEM(sequence, 0);
                     Py_INCREF(basis);
                 }
+                
+                /// clean up fast-sequence before returning
                 Py_DECREF(sequence);
                 return basis;
             }
