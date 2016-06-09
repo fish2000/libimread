@@ -329,7 +329,6 @@ namespace py {
                                 *reinterpret_cast<ImageModelBase*>(etc))
                 {
                     Py_DECREF(basis);
-                    // Py_DECREF(etc);
                 }
             
             explicit ImageModelBase(int width, int height,

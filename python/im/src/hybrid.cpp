@@ -188,7 +188,6 @@ namespace im {
             pix::accessor<byte> target = this->access<byte>();
             const int w = basis.dim(0);
             const int h = basis.dim(1);
-            // const int c = basis.dim(2) + etc.dim(2);
             const int p = basis.dim(2);
             const int px = etc.dim(2);
             for (int x = 0; x < w; x++) {
@@ -657,7 +656,6 @@ namespace im {
             pix::accessor<byte> target = this->access<byte>();
             const int w = basis.dim(0);
             const int h = basis.dim(1);
-            // const int c = basis.dim(2) + etc.dim(2);
             const int p = basis.dim(2);
             const int px = etc.dim(2);
             for (int xx = 0; xx < w; xx++) {

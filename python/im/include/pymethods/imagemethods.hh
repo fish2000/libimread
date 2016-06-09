@@ -198,14 +198,14 @@ namespace py {
                                             PySequence_Fast_GET_ITEM(sequence, idx));
                     if (type != Py_TYPE(item)) {
                         Py_DECREF(sequence);
-                        PyErr_SetString(PyExc_ValueError,
+                        PyErr_SetString(PyExc_TypeError,
                             "Mismatched image type");
                         return nullptr;
                     }
                     if (item->image->dim(0) != width ||
                         item->image->dim(1) != height) {
                         Py_DECREF(sequence);
-                        PyErr_SetString(PyExc_ValueError,
+                        PyErr_SetString(PyExc_AttributeError,
                             "Mismatched image size");
                         return nullptr;
                     }
