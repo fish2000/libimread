@@ -189,8 +189,14 @@ namespace py {
                 PyObject* sequence = PySequence_Fast(planes, "Sequence expected");
                 int idx = 0,
                     len = PySequence_Fast_GET_SIZE(sequence);
-                PythonImageType* initial = reinterpret_cast<PythonImageType*>(
-                                           PySequence_Fast_GET_ITEM(sequence, idx));
+                PyObject* pynitial = PySequence_Fast_GET_ITEM(sequence, idx);
+                if (type != Py_TYPE(pynitial)) {
+                    Py_DECREF(sequence);
+                    PyErr_SetString(PyExc_TypeError,
+                        "Mismatched sequence item type");
+                    return nullptr;
+                }
+                PythonImageType* initial = reinterpret_cast<PythonImageType*>(pynitial);
                 int width = initial->image->dim(0),
                     height = initial->image->dim(1);
                 for (idx = 0; idx < len; idx++) {
@@ -212,6 +218,7 @@ namespace py {
                 }
                 if (len > 1) {
                     basis = PySequence_Fast_GET_ITEM(sequence, 0);
+                    Py_INCREF(basis);
                     for (idx = 1; idx < len; idx++) {
                         basis = reinterpret_cast<PyObject*>(
                                 new PythonImageType(basis,
