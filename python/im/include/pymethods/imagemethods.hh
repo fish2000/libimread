@@ -156,17 +156,72 @@ namespace py {
                 using tag_t = typename PythonImageType::Tag::FromImage;
                 if (!other) {
                     PyErr_SetString(PyExc_ValueError,
-                        "missing im.Image argument");
+                        "missing ImageType argument");
                     return nullptr;
                 }
                 if (!ImageModel_Check(other) &&
                     !ArrayModel_Check(other)) {
                     PyErr_SetString(PyExc_ValueError,
-                        "invalid im.Image instance");
+                        "invalid ImageType instance");
                     return nullptr;
                 }
                 return reinterpret_cast<PyObject*>(
                     new PythonImageType(other, tag_t{}));
+            }
+            
+            /// ALLOCATE / merge(tuple(imageInstance, imageInstance [...])) implementation
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* newfrommerge(PyTypeObject* type, PyObject* planes) {
+                // using tag_t = typename PythonImageType::Tag::FromImage;
+                if (!planes) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "missing ImageType sequence");
+                    return nullptr;
+                }
+                if (!PySequence_Check(planes)) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "invalid ImageType sequence");
+                    return nullptr;
+                }
+                PyObject* basis = nullptr;
+                PyObject* sequence = PySequence_Fast(planes, "Sequence expected");
+                int idx = 0,
+                    len = PySequence_Fast_GET_SIZE(sequence);
+                PythonImageType* initial = reinterpret_cast<PythonImageType*>(
+                                           PySequence_Fast_GET_ITEM(sequence, idx));
+                int width = initial->image->dim(0),
+                    height = initial->image->dim(1);
+                for (idx = 0; idx < len; idx++) {
+                    PythonImageType* item = reinterpret_cast<PythonImageType*>(
+                                            PySequence_Fast_GET_ITEM(sequence, idx));
+                    if (type != Py_TYPE(item)) {
+                        Py_DECREF(sequence);
+                        PyErr_SetString(PyExc_ValueError,
+                            "Mismatched image type");
+                        return nullptr;
+                    }
+                    if (item->image->dim(0) != width ||
+                        item->image->dim(1) != height) {
+                        Py_DECREF(sequence);
+                        PyErr_SetString(PyExc_ValueError,
+                            "Mismatched image size");
+                        return nullptr;
+                    }
+                }
+                if (len > 1) {
+                    basis = PySequence_Fast_GET_ITEM(sequence, 0);
+                    for (idx = 1; idx < len; idx++) {
+                        basis = reinterpret_cast<PyObject*>(
+                                new PythonImageType(basis,
+                                    PySequence_Fast_GET_ITEM(sequence, idx)));
+                    }
+                } else if (len == 1) {
+                    basis = PySequence_Fast_GET_ITEM(sequence, 0);
+                }
+                Py_DECREF(sequence);
+                return basis;
             }
             
             /// __init__ implementation
@@ -788,6 +843,13 @@ namespace py {
                                 "\t - number of color channels (planes) \n"
                                 "\t - a default fill value (fill) \n"
                                 "\t - number of bits per value and/or the signedness (nbits, is_signed)\n" },
+                        {
+                            "merge",
+                                (PyCFunction)py::ext::image::newfrommerge<ImageType, BufferType>,
+                                METH_O | METH_CLASS,
+                                "ImageType.merge(tuple(ImageType...))\n"
+                                "\t-> Return a new image, of the same size as the images in the tuple, \n"
+                                "\t   with planar data merged from all images \n" },
                         {
                             "frombuffer",
                                 (PyCFunction)py::ext::image::newfrombuffer<ImageType, BufferType>,

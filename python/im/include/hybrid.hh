@@ -152,6 +152,8 @@ namespace im {
             
             explicit HalideNumpyImage(HalideNumpyImage const& other,
                                       int zidx = 0,                     std::string const& name = "");
+            explicit HalideNumpyImage(HalideNumpyImage const& basis,
+                                      HalideNumpyImage const& etc,      std::string const& name = "");
             
             virtual ~HalideNumpyImage();
             
@@ -242,6 +244,8 @@ namespace im {
             
             explicit ArrayImage(ArrayImage const& other,
                                 int zidx = 0,                     std::string const& name = "");
+            explicit ArrayImage(ArrayImage const& basis,
+                                ArrayImage const& etc,            std::string const& name = "");
             
             virtual ~ArrayImage();
             

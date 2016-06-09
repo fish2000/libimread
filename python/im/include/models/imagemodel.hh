@@ -258,6 +258,23 @@ namespace py {
                     Py_INCREF(writeoptDict);
                 }
             
+            explicit ImageModelBase(ImageModelBase const& basis,
+                                    ImageModelBase const& etc)
+                :weakrefs(nullptr)
+                ,image(std::make_shared<ImageType>(*basis.image.get(),
+                                                     *etc.image.get()))
+                ,dtype(PyArray_DescrFromType(image->dtype()))
+                ,imagebuffer(reinterpret_cast<PyObject*>(
+                            new typename ImageModelBase::BufferModel(image)))
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
+                {
+                    Py_INCREF(dtype);
+                    Py_INCREF(imagebuffer);
+                    Py_INCREF(readoptDict);
+                    Py_INCREF(writeoptDict);
+                }
+            
             ImageModelBase(ImageModelBase&& other) noexcept
                 :weakrefs(other.weakrefs)
                 ,image(std::move(other.image))
@@ -306,6 +323,14 @@ namespace py {
             explicit ImageModelBase(PyObject* source, int zidx, typename Tag::FromImagePlane = typename Tag::FromImagePlane{})
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(source), zidx)
                 {}
+            
+            explicit ImageModelBase(PyObject* basis, PyObject* etc)
+                :ImageModelBase(*reinterpret_cast<ImageModelBase*>(basis),
+                                *reinterpret_cast<ImageModelBase*>(etc))
+                {
+                    Py_DECREF(basis);
+                    // Py_DECREF(etc);
+                }
             
             explicit ImageModelBase(int width, int height,
                                     int planes = 1,
