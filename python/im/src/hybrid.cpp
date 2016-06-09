@@ -578,13 +578,11 @@ namespace im {
             /// rely on Halide's use of planar image strides
             pix::accessor<byte> source = other.access<byte>();
             pix::accessor<byte> target = this->access<byte>();
-            const int w = dim(0);
-            const int h = dim(1);
             const int c = zidx;
-            for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
-                    pix::convert(source(x, y, c)[0],
-                                 target(x, y, 0)[0]);
+            for (int xx = 0; xx < x; xx++) {
+                for (int yy = 0; yy < y; yy++) {
+                    pix::convert(source(xx, yy, c)[0],
+                                 target(xx, yy, 0)[0]);
                 }
             }
         }
