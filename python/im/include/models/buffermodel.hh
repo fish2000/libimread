@@ -173,7 +173,7 @@ namespace py {
                 return reinterpret_cast<PyObject*>(transposed);
             }
             
-            int getbuffer(Py_buffer* view, int flags) {
+            int getbuffer(Py_buffer* view, int flags, NPY_TYPES dtypenum = NPY_UINT8) {
                 {
                     py::gil::release nogil;
                     BufferType* internal_ptr = internal.get();
@@ -185,7 +185,7 @@ namespace py {
                     view->ndim += internal_ptr->extent[2] ? 1 : 0;
                     view->ndim += internal_ptr->extent[3] ? 1 : 0;
                     
-                    view->format = ::strdup(im::detail::structcode(NPY_UINT8));
+                    view->format = ::strdup(im::detail::structcode(dtypenum));
                     view->shape = new Py_ssize_t[view->ndim];
                     view->strides = new Py_ssize_t[view->ndim];
                     view->itemsize = static_cast<Py_ssize_t>(internal_ptr->elem_size);

@@ -393,7 +393,7 @@ namespace py {
                 using imagebuffer_t = typename PythonImageType::BufferModel;
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
-                return imbuf->getbuffer(view, flags);
+                return imbuf->getbuffer(view, flags, static_cast<NPY_TYPES>(pyim->dtype->type_num));
             }
             
             template <typename ImageType = HalideNumpyImage,
