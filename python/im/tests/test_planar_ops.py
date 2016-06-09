@@ -28,10 +28,6 @@ class PlanarOperationTests(BaseCase):
                 self.assertIsNotNone(image)
                 planes = image.split()
                 self.assertEqual(int(image.planes), len(planes))
-                for plane in planes:
-                    self.assertEqual(plane.width,  image.width)
-                    self.assertEqual(plane.height, image.height)
-                    self.assertEqual(plane.planes, 1)
                 image2 = ImageType.merge(planes)
                 self.assertEqual(image.width,  image2.width)
                 self.assertEqual(image.height, image2.height)
