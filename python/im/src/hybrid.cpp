@@ -158,6 +158,24 @@ namespace im {
         ,dtype_(d)
         {}
     
+    HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& other, int zidx, std::string const& name)
+        :HalBase(other.type(), other.dim(0), other.dim(1), 1, 0, name), PythonBufferImage(), MetaImage(name)
+        ,dtype_(other.dtype())
+        {
+            /// rely on Halide's use of planar image strides
+            pix::accessor<byte> source = other.access<byte>();
+            pix::accessor<byte> target = this->access<byte>();
+            const int w = dim(0);
+            const int h = dim(1);
+            const int c = zidx;
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    pix::convert(source(x, y, c)[0],
+                                 target(x, y, 1)[0]);
+                }
+            }
+        }
+    
     HalideNumpyImage::~HalideNumpyImage() {}
     
     /// This returns the same type of data as buffer_t.host
@@ -519,6 +537,58 @@ namespace im {
             /// Point the local buffer copy at the array's now-populated storage
             buffer->host = reinterpret_cast<uint8_t*>(PyArray_BYTES(array));
         }
+    
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wmissing-braces"
+    ArrayImage::ArrayImage(ArrayImage const& other, int zidx, std::string const& name)
+        :PythonBufferImage(), MetaImage(name)
+        ,array(nullptr)
+        ,buffer(nullptr)
+        ,deallocate(true)
+        {
+            const int x = other.dim(0);
+            const int y = other.dim(1);
+            const int z = 1;
+            const NPY_TYPES d = other.dtype();
+            std::array<npy_intp, 3> dimensions{ x, y, z };
+            std::array<npy_intp, 3> stridings{ 1, x, x*y };
+            
+            array = reinterpret_cast<PyArrayObject*>(
+                    PyArray_New(newtype(),
+                        dimensions.size(),
+                        dimensions.data(), d,
+                        stridings.data(), nullptr,
+                        detail::for_dtype(d).bytes(),
+                        FLAGS, nullptr));
+            
+            buffer = new buffer_t{ 0,
+                reinterpret_cast<uint8_t*>(PyArray_DATA(array)),
+                { x, y, z, 0 },
+                {
+                    static_cast<int32_t>(PyArray_STRIDE(array, 0)),
+                    static_cast<int32_t>(PyArray_STRIDE(array, 1)),
+                    static_cast<int32_t>(PyArray_STRIDE(array, 2)),
+                    0
+                },
+                { 0, 0, 0, 0 },
+                static_cast<int32_t>(PyArray_ITEMSIZE(array)),
+                false, false
+            };
+            
+            /// rely on Halide's use of planar image strides
+            pix::accessor<byte> source = other.access<byte>();
+            pix::accessor<byte> target = this->access<byte>();
+            const int w = dim(0);
+            const int h = dim(1);
+            const int c = zidx;
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    pix::convert(source(x, y, c)[0],
+                                 target(x, y, 1)[0]);
+                }
+            }
+        }
+    #pragma clang diagnostic pop
     
     ArrayImage::~ArrayImage() {
         if (deallocate) { delete buffer; }
