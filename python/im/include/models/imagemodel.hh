@@ -243,6 +243,9 @@ namespace py {
                     PyDict_Update(writeoptDict, other.writeoptDict);
                 }
             
+            /// Plane-copy constructor:
+            /// Construct a new ImageModelBase instance from a single plane
+            /// of another (as specified by `zidx`)
             explicit ImageModelBase(ImageModelBase const& other, int zidx)
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(*other.image.get(), zidx))
@@ -258,6 +261,9 @@ namespace py {
                     Py_INCREF(writeoptDict);
                 }
             
+            /// Plane-merge constructor:
+            /// Construct a new ImageModelBase instance by appending the planes
+            /// of the RHS image (`etc`) to those of the LHS (`basis`).
             explicit ImageModelBase(ImageModelBase const& basis,
                                     ImageModelBase const& etc)
                 :weakrefs(nullptr)
@@ -275,6 +281,10 @@ namespace py {
                     Py_INCREF(writeoptDict);
                 }
             
+            /// Move constructor:
+            /// Steal all the resources of the other instance and populate
+            /// a new instance with them; mark the other instance as 'clean'
+            /// (preventing deallocation)
             ImageModelBase(ImageModelBase&& other) noexcept
                 :weakrefs(other.weakrefs)
                 ,image(std::move(other.image))
@@ -324,6 +334,16 @@ namespace py {
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(source), zidx)
                 {}
             
+            /// Convenience plane-merge forward constructor:
+            /// Takes PyObject* instances and forwards the stack values
+            /// (q.v. plane-merge constructor supra.) -- NB, this will
+            /// Py_DECREF() the LHS (née `basis`); this is so it can be
+            /// used on itself in a loop e.g.
+            /// 
+            ///     pything = new ImageModelBase(pything, addendum);
+            /// 
+            /// (q.v. py::ext::image::newfrommerge<ImageType, BufferType> sub.)
+            /// … sorry if that's awkward, just Py_INCREF() your basis doggie
             explicit ImageModelBase(PyObject* basis, PyObject* etc)
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(basis),
                                 *reinterpret_cast<ImageModelBase*>(etc))
@@ -331,6 +351,8 @@ namespace py {
                     Py_DECREF(basis);
                 }
             
+            /// Value constructor
+            /// Coming soon: CALLABLE SUPPORT OH SHIT
             explicit ImageModelBase(int width, int height,
                                     int planes = 1,
                                     int value = 0x00,
