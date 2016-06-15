@@ -443,17 +443,21 @@ namespace py {
                 return out;
             }
             
-            PyObject* mode() {
+            std::string modestring() {
                 switch (image->planes()) {
-                    case 1: return py::string("L");
-                    case 2: return py::string("LA");
-                    case 3: return py::string("RGB");
-                    case 4: return py::string("RGBA");
+                    case 1: return "L";
+                    case 2: return "LA";
+                    case 3: return "RGB";
+                    case 4: return "RGBA";
                     default:
                         std::string out("WAT;");
                         out += std::to_string(image->planes());
-                        return py::string(out);
+                        return out;
                 }
+            }
+            
+            PyObject* mode() {
+                return py::string(modestring());
             }
             
             PyObject* has_alpha() {

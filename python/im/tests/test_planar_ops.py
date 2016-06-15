@@ -4,6 +4,34 @@ from basecase import BaseCase
 
 class PlanarOperationTests(BaseCase):
     
+    def test_jpg_plane_at_lexical_index(self):
+        ''' Load some JPG files, lexically iterate each images' planes,
+            compare plane features (size etc) to image features
+        '''
+        for ImageType in self.imagetypes:
+            for image_path in self.jpgs:
+                image = ImageType(image_path)
+                self.assertIsNotNone(image)
+                for plane_letter in image.mode:
+                    plane = image.plane_at(plane=plane_letter)
+                    self.assertEqual(plane.width,  image.width)
+                    self.assertEqual(plane.height, image.height)
+                    self.assertEqual(plane.planes, 1)
+    
+    def test_jpg_plane_at_numeric_index(self):
+        ''' Load some JPG files, numerically iterate each images' planes,
+            compare plane features (size etc) to image features
+        '''
+        for ImageType in self.imagetypes:
+            for image_path in self.jpgs:
+                image = ImageType(image_path)
+                self.assertIsNotNone(image)
+                for idx in xrange(image.planes):
+                    plane = image.plane_at(idx)
+                    self.assertEqual(plane.width,  image.width)
+                    self.assertEqual(plane.height, image.height)
+                    self.assertEqual(plane.planes, 1)
+    
     def test_jpg_split(self):
         ''' Load some JPG files, split into plane image tuple,
             compare plane features (size etc) to image features
@@ -38,9 +66,12 @@ class PlanarOperationTests(BaseCase):
                                  image2.buffer.tostring())
     
     def test_jpg_alpha(self):
-        ''' Load some JPG files, check for an alpha channel --
-            if alpha is present: check the mode and the number of planes;
-            if not: create a new image with an alpha channel
+        ''' Load some JPG files, check for an alpha channel:
+            ... if alpha is present: create a new alpha-less image
+                    from the image we loaded, check the mode
+                    and the number of planes, and test the
+                    new image width/height against the original.
+            ... if not: create a new image with an alpha channel
                     from the image we loaded, check the mode
                     and the number of planes, and test the
                     new image width/height against the original.
