@@ -12,7 +12,6 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-#include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/halide.hh>
 #include "check.hh"

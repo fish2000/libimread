@@ -377,16 +377,16 @@ namespace {
         PyObject* _byteorder;
         PyObject* _byteordermark;
         
+        /// Nix the obsequeously scrupulous global I/O buffer behavior
+        /// ... doctor's orders, q.v. http://ubm.io/1VCwhdy
+        std::ios_base::sync_with_stdio(false);
+        std::cin.tie(0);
+        
         /// Initialize Python threads and GIL state
         PyEval_InitThreads();
         
         /// Bring in NumPy's C-API
         if (_import_array() < 0)                      { return false; }
-        
-        /// Nix the obsequeously scrupulous global I/O buffer behavior
-        /// ... doctor's orders, q.v. http://ubm.io/1VCwhdy
-        std::ios_base::sync_with_stdio(false);
-        std::cin.tie(0);
         
         /// Manually amend our declared types, as needed:
         /// -- Specify that im.ImageBuffer subclasses im.Buffer

@@ -16,9 +16,6 @@ namespace py {
         using ArrayModel = ImageModelBase<ArrayImage, buffer_t>;
         using ArrayBufferModel = ArrayModel::BufferModel;
         
-        /// check() has a forward declaration!
-        PyObject* check(PyTypeObject* type, PyObject* evaluee);
-        
     }
     
 }

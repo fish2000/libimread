@@ -1,5 +1,6 @@
 
 #define NO_IMPORT_ARRAY
+#include "pymethods/typecheck.hh"
 #include "pymethods/pymethods.hh"
 #include "detail.hpp"
 

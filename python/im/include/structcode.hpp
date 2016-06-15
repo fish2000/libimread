@@ -13,72 +13,9 @@ namespace structcode {
     
     struct structcodemaps {
         
-        static stringmap_t init_byteorder() {
-            stringmap_t _byteorder_map = {
-                {"@", "="},
-                {"|", "|"},
-                {"=", "="},
-                {"<", "<"},
-                {">", ">"},
-                {"^", "="},
-                {"!", ">"},
-            };
-            return _byteorder_map;
-        }
-        
-        static stringmap_t init_native() {
-            stringmap_t _native_map = {
-                {"?", "?"},
-                {"b", "b"},
-                {"B", "B"},
-                {"h", "h"},
-                {"H", "H"},
-                {"i", "i"},
-                {"I", "I"},
-                {"l", "l"},
-                {"L", "L"},
-                {"q", "q"},
-                {"Q", "Q"},
-                {"e", "e"},
-                {"f", "f"},
-                {"d", "d"},
-                {"g", "g"}, 
-                {"Zf", "F"},
-                {"Zd", "D"},
-                {"Zg", "G"},
-                {"s", "S"},
-                {"w", "U"},
-                {"O", "O"},
-                {"x", "V"}, /// padding
-            };
-            return _native_map;
-        }
-        
-        static stringmap_t init_standard() {
-            stringmap_t _standard_map = {
-                {"?", "?"},
-                {"b", "b"},
-                {"B", "B"},
-                {"h", "i2"},
-                {"H", "u2"},
-                {"i", "i4"},
-                {"I", "u4"},
-                {"l", "i4"},
-                {"L", "u4"},
-                {"q", "i8"},
-                {"Q", "u8"},
-                {"e", "f2"},
-                {"f", "f"},
-                {"d", "d"},
-                {"Zf", "F"},
-                {"Zd", "D"},
-                {"s", "S"},
-                {"w", "U"},
-                {"O", "O"},
-                {"x", "V"}, /// padding
-            };
-            return _standard_map;
-        }
+        static stringmap_t init_byteorder();
+        static stringmap_t init_native();
+        static stringmap_t init_standard();
         
         static const stringmap_t byteorder;
         static const stringmap_t native;

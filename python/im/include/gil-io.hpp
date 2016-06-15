@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <memory>
 #include <Python.h>
-#include <libimread/libimread.hpp>
 #include <libimread/filehandle.hh>
 
 #if PY_MAJOR_VERSION >= 3

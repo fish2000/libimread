@@ -7,9 +7,6 @@ namespace py {
     
     namespace ext {
         
-        PyObject* check(PyTypeObject* type, PyObject* evaluee) {
-            return py::boolean(type == Py_TYPE(evaluee));
-        }
         
     }
 

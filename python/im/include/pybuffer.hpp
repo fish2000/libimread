@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 #include <Python.h>
-#include <libimread/libimread.hpp>
 #include <libimread/seekable.hh>
 
 namespace py {

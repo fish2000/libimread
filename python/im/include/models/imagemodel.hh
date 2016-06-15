@@ -3,14 +3,11 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_MODELS_IMAGEMODEL_HH_
 
 #include <cmath>
-#include <array>
 #include <memory>
 #include <string>
-#include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
-#include "../private/buffer_t.h"
 #include "../buffer.hpp"
 #include "../check.hh"
 #include "../gil.hpp"
@@ -20,17 +17,13 @@
 #include "../options.hpp"
 #include "../pybuffer.hpp"
 #include "../pycapsule.hpp"
-#include "../typecode.hpp"
 #include "../hybrid.hh"
 #include "base.hh"
 
-#include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/base64.hh>
-#include <libimread/errors.hh>
 #include <libimread/hashing.hh>
-#include <libimread/pixels.hh>
 
 namespace py {
     

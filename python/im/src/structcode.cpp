@@ -7,6 +7,73 @@
 
 namespace structcode {
     
+    stringmap_t structcodemaps::init_byteorder() {
+        stringmap_t _byteorder_map = {
+            {"@", "="},
+            {"|", "|"},
+            {"=", "="},
+            {"<", "<"},
+            {">", ">"},
+            {"^", "="},
+            {"!", ">"},
+        };
+        return _byteorder_map;
+    }
+    
+    stringmap_t structcodemaps::init_native() {
+        stringmap_t _native_map = {
+            {"?", "?"},
+            {"b", "b"},
+            {"B", "B"},
+            {"h", "h"},
+            {"H", "H"},
+            {"i", "i"},
+            {"I", "I"},
+            {"l", "l"},
+            {"L", "L"},
+            {"q", "q"},
+            {"Q", "Q"},
+            {"e", "e"},
+            {"f", "f"},
+            {"d", "d"},
+            {"g", "g"}, 
+            {"Zf", "F"},
+            {"Zd", "D"},
+            {"Zg", "G"},
+            {"s", "S"},
+            {"w", "U"},
+            {"O", "O"},
+            {"x", "V"}, /// padding
+        };
+        return _native_map;
+    }
+    
+    stringmap_t structcodemaps::init_standard() {
+        stringmap_t _standard_map = {
+            {"?", "?"},
+            {"b", "b"},
+            {"B", "B"},
+            {"h", "i2"},
+            {"H", "u2"},
+            {"i", "i4"},
+            {"I", "u4"},
+            {"l", "i4"},
+            {"L", "u4"},
+            {"q", "i8"},
+            {"Q", "u8"},
+            {"e", "f2"},
+            {"f", "f"},
+            {"d", "d"},
+            {"Zf", "F"},
+            {"Zd", "D"},
+            {"s", "S"},
+            {"w", "U"},
+            {"O", "O"},
+            {"x", "V"}, /// padding
+        };
+        return _standard_map;
+    }
+    
     field_namer::field_namer()
         :idx(0)
         {}
@@ -179,8 +246,8 @@ namespace structcode {
                 
                 default:
                     std::size_t codelen = 1;
-                    std::string code = "";
-                    std::string name = "";
+                    std::string code("");
+                    std::string name("");
                     std::string dtypechar;
                     
                     /// add next character

@@ -1,6 +1,5 @@
 
 #include "gil-io.hpp"
-#include <libimread/errors.hh>
 
 namespace py {
     
@@ -77,11 +76,11 @@ namespace py {
         }
         
         with::source_t with::source() {
-            if (!active) {
-                imread_raise(CannotReadError,
-                    "py::gil::with::source():",
-                    "\tGIL guard not active");
-            }
+            // if (!active) {
+            //     imread_raise(CannotReadError,
+            //         "py::gil::with::source():",
+            //         "\tGIL guard not active");
+            // }
             
             PyEval_RestoreThread(state);                                        /// acquire the GIL;
             auto out = with::source_t(new py::handle::source(file,              /// wrap object + handle in handle::source,
@@ -91,11 +90,12 @@ namespace py {
         }
         
         with::sink_t with::sink() {
-            if (!active) {
-                imread_raise(CannotWriteError,
-                    "py::gil::with::sink():",
-                    "\tGIL guard not active");
-            }
+            // if (!active) {
+            //     imread_raise(CannotWriteError,
+            //         "py::gil::with::sink():",
+            //         "\tGIL guard not active");
+            // }
+            
             PyEval_RestoreThread(state);                                        /// acquire the GIL;
             auto out = with::sink_t(new py::handle::sink(file,                  /// wrap object + handle in handle::sink,
                                     reinterpret_cast<PyObject*>(object)));      /// incrementing refcount and use count;

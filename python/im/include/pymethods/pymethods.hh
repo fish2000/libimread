@@ -2,6 +2,7 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_PYMETHODS_PYMETHODS_HH_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_PYMETHODS_PYMETHODS_HH_
 
+#include "typecheck.hh"
 #include "buffermethods.hh"
 #include "imagemethods.hh"
 

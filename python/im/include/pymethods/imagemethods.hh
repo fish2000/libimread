@@ -3,31 +3,22 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_PYMETHODS_IMAGEMETHODS_HH_
 
 #include <cmath>
-#include <array>
 #include <memory>
 #include <string>
-#include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
-#include "../private/buffer_t.h"
 #include "../buffer.hpp"
 #include "../check.hh"
 #include "../gil.hpp"
 #include "../gil-io.hpp"
 #include "../detail.hpp"
-#include "../numpy.hpp"
 #include "../options.hpp"
 #include "../pybuffer.hpp"
-#include "../pycapsule.hpp"
-#include "../typecode.hpp"
-#include "../hybrid.hh"
 
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
-#include <libimread/ext/base64.hh>
-#include <libimread/errors.hh>
 #include <libimread/hashing.hh>
 #include <libimread/pixels.hh>
 
@@ -881,7 +872,7 @@ namespace py {
                                 "\t-> This method is for use by ipython/jupyter\n" },
                         {
                             "check",
-                                (PyCFunction)py::ext::check,
+                                (PyCFunction)py::ext::typecheck,
                                 METH_O | METH_CLASS,
                                 "ImageType.check(putative)\n"
                                 "\t-> Check that an instance is of this type\n" },

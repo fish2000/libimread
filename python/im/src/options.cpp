@@ -126,7 +126,7 @@ namespace py {
             if (!set) { return out; }
             if (!PyAnySet_Check(set)) { return out; }
             PyObject* iterator = PyObject_GetIter(set);
-            if (iterator == NULL) {
+            if (iterator == nullptr) {
                 PyErr_SetString(PyExc_ValueError,
                     "Set object not iterable");
                 return options_list::undefined;
@@ -211,10 +211,10 @@ namespace py {
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject* kwargs,
                        options_map const& opts) {
-            PyObject* py_overwrite = NULL;
-            PyObject* py_tempfile = NULL;
-            char const* keywords[] = { "destination", "overwrite", "tempfile", NULL };
-            char const* destination = NULL;
+            PyObject* py_overwrite = nullptr;
+            PyObject* py_tempfile = nullptr;
+            char const* keywords[] = { "destination", "overwrite", "tempfile", nullptr };
+            char const* destination = nullptr;
             bool overwrite = false;
             bool tempfile = false;
             
@@ -223,12 +223,12 @@ namespace py {
                 &destination,
                 &py_overwrite,
                 &py_tempfile))
-                    { return NULL; }
+                    { return nullptr; }
             
             if (!py_tempfile && !destination) {
                 PyErr_SetString(PyExc_AttributeError,
                     "Must specify either destination path or tempfile=True");
-                return NULL;
+                return nullptr;
             }
             overwrite = py::options::truth(py_overwrite);
             tempfile  = py::options::truth(py_tempfile);
@@ -236,14 +236,14 @@ namespace py {
             try {
                 py::gil::release nogil;
                 if (tempfile) {
-                    std::string dest = opts.dumptmp();
+                    std::string dest(opts.dumptmp());
                     destination = dest.c_str();
                 } else {
                     opts.dump(destination, overwrite);
                 }
             } catch (im::JSONIOError& exc) {
                 PyErr_SetString(PyExc_IOError, exc.what());
-                return NULL;
+                return nullptr;
             }
             
             return py::string(destination);

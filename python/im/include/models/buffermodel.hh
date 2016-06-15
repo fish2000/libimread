@@ -2,34 +2,20 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_MODELS_BUFFERMODEL_HH_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_MODELS_BUFFERMODEL_HH_
 
-#include <cmath>
-#include <array>
+#include <cstring>
 #include <memory>
 #include <string>
-#include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
-#include "../private/buffer_t.h"
 #include "../buffer.hpp"
 #include "../check.hh"
 #include "../gil.hpp"
-#include "../gil-io.hpp"
 #include "../detail.hpp"
-#include "../numpy.hpp"
 #include "../options.hpp"
-#include "../pybuffer.hpp"
-#include "../pycapsule.hpp"
-#include "../typecode.hpp"
-#include "../hybrid.hh"
+#include "../numpy.hpp"
 #include "base.hh"
 
-#include <libimread/ext/errors/demangle.hh>
-#include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/filesystem/temporary.h>
-#include <libimread/ext/base64.hh>
-#include <libimread/errors.hh>
-#include <libimread/hashing.hh>
 #include <libimread/pixels.hh>
 
 namespace py {
@@ -38,15 +24,6 @@ namespace py {
         
         using im::byte;
         using im::options_map;
-        using im::Image;
-        using im::ImageFormat;
-        using im::HalideNumpyImage;
-        using im::ArrayImage;
-        using im::HybridFactory;
-        using im::ArrayFactory;
-        
-        using filesystem::path;
-        using filesystem::NamedTemporaryFile;
         
         template <typename BufferType = buffer_t>
         struct BufferModelBase : public ModelBase {

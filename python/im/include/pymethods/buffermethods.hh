@@ -2,36 +2,21 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_PYMETHODS_BUFFERMETHODS_HH_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_PYMETHODS_BUFFERMETHODS_HH_
 
-#include <cmath>
-#include <array>
 #include <memory>
 #include <string>
-#include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
-#include "../private/buffer_t.h"
 #include "../buffer.hpp"
 #include "../check.hh"
 #include "../gil.hpp"
-#include "../gil-io.hpp"
 #include "../detail.hpp"
-#include "../numpy.hpp"
-#include "../options.hpp"
-#include "../pybuffer.hpp"
-#include "../pycapsule.hpp"
-#include "../typecode.hpp"
-#include "../hybrid.hh"
 
 #include <libimread/ext/errors/demangle.hh>
-#include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/filesystem/temporary.h>
-#include <libimread/ext/base64.hh>
-#include <libimread/errors.hh>
-#include <libimread/hashing.hh>
 #include <libimread/pixels.hh>
 
-#include "../models/models.hh"
+#include "typecheck.hh"
+#include "../models/buffermodel.hh"
 
 namespace py {
     
@@ -41,13 +26,6 @@ namespace py {
         using im::options_map;
         using im::Image;
         using im::ImageFormat;
-        using im::HalideNumpyImage;
-        using im::ArrayImage;
-        using im::HybridFactory;
-        using im::ArrayFactory;
-        
-        using filesystem::path;
-        using filesystem::NamedTemporaryFile;
         
         namespace buffer {
             
@@ -310,7 +288,7 @@ namespace py {
                     static PyMethodDef basics[] = {
                         {
                             "check",
-                                (PyCFunction)py::ext::check,
+                                (PyCFunction)py::ext::typecheck,
                                 METH_O | METH_CLASS,
                                 "BufferType.check(putative)\n"
                                 "\t-> Check the type of an instance against BufferType\n" },
@@ -399,7 +377,7 @@ static PyGetSetDef Buffer_getset[] = {
 static PyMethodDef Buffer_methods[] = {
     {
         "check",
-            (PyCFunction)py::ext::check,
+            (PyCFunction)py::ext::typecheck,
             METH_O | METH_CLASS,
             "im.Buffer.check(putative)\n"
             "\t-> Check the type of an instance against im.Buffer\n" },

@@ -4,12 +4,10 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_BUFFER_HPP_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_BUFFER_HPP_
 
-#include <string>
 #include <type_traits>
 #include <Python.h>
 #include "private/buffer_t.h"
 #include "detail.hpp"
-#include <libimread/libimread.hpp>
 
 /// forward-declare PyArrayObject
 typedef struct tagPyArrayObject PyArrayObject;

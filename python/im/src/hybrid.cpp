@@ -4,6 +4,7 @@
 #include <cstring>
 #include <array>
 #include <type_traits>
+
 #include "hybrid.hh"
 #include "buffer.hpp"
 #include "structcode.hpp"
