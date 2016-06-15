@@ -174,17 +174,14 @@ namespace py {
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* newfrommerge(PyTypeObject* type, PyObject* planes) {
-                if (!planes) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "missing ImageType sequence");
-                    return nullptr;
-                }
+                /// check our argument
                 if (!PySequence_Check(planes)) {
                     PyErr_SetString(PyExc_ValueError,
                         "invalid ImageType sequence");
                     return nullptr;
                 }
                 
+                /// set up fast-sequence iterable
                 PyObject* basis = nullptr;
                 PyObject* sequence = PySequence_Fast(planes, "Sequence expected");
                 int idx = 0,
@@ -197,7 +194,7 @@ namespace py {
                     return nullptr;
                 }
                 
-                /// check the initial sequence item type
+                /// check the sequences' type (essentially against `type(self)`)
                 PyObject* pynitial = PySequence_Fast_GET_ITEM(sequence, idx);
                 if (type != Py_TYPE(pynitial)) {
                     Py_DECREF(sequence);
@@ -211,8 +208,8 @@ namespace py {
                 int width = initial->image->dim(0),
                     height = initial->image->dim(1);
                 
-                /// loop and check sequence items against a) type and
-                /// b) the initial item's stored dimensions
+                /// loop and check all sequence items a) for correct type
+                /// and b) that their dimensions match those of the initial item
                 for (idx = 1; idx < len; idx++) {
                     PythonImageType* item = reinterpret_cast<PythonImageType*>(
                                             PySequence_Fast_GET_ITEM(sequence, idx));
@@ -232,20 +229,17 @@ namespace py {
                 }
                 
                 /// actual allocation loop
+                basis = PySequence_Fast_GET_ITEM(sequence, 0);
+                Py_INCREF(basis);
                 if (len > 1) {
-                    basis = PySequence_Fast_GET_ITEM(sequence, 0);
-                    Py_INCREF(basis);
                     for (idx = 1; idx < len; idx++) {
                         basis = reinterpret_cast<PyObject*>(
                                 new PythonImageType(basis,
                                     PySequence_Fast_GET_ITEM(sequence, idx)));
                     }
-                } else if (len == 1) {
-                    basis = PySequence_Fast_GET_ITEM(sequence, 0);
-                    Py_INCREF(basis);
                 }
                 
-                /// clean up fast-sequence before returning
+                /// clean up fast-sequence iterable before returning
                 Py_DECREF(sequence);
                 return basis;
             }

@@ -152,8 +152,6 @@ namespace py {
     
     namespace detail {
         
-        // using structcode::stringvec_t;
-        
         int setitemstring(PyObject* dict, char const* key, PyObject* value) {
             int out = PyDict_SetItemString(dict, key, value);
             Py_DECREF(value);
@@ -203,10 +201,10 @@ namespace py {
         using im::options_map;
         
         stringvec_t& formats_as_vector() {
-            static auto DMV = ImageFormat::registry();
             static stringvec_t out;
             static bool listed = false;
             if (!listed) {
+                auto DMV = ImageFormat::registry();
                 std::transform(DMV.begin(), DMV.end(),
                                std::back_inserter(out),
                             [](auto const& registrant) {
