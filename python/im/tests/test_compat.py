@@ -34,7 +34,7 @@ class CompatibilityTests(BaseCase):
     
     """
     def test_tif_convert_to_PIL(self):
-        ''' Load some PNG files,
+        ''' Load some TIF files,
             convert to PIL.Image instances,
             compare image features (size etc) '''
         for ImageType in self.imagetypes:
@@ -49,7 +49,7 @@ class CompatibilityTests(BaseCase):
     """
     
     def test_pvr_convert_to_PIL(self):
-        ''' Load some PNG files,
+        ''' Load some PVR files,
             convert to PIL.Image instances,
             compare image features (size etc) '''
         for ImageType in self.imagetypes:

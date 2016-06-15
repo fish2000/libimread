@@ -23,14 +23,16 @@ namespace {
     using filesystem::TemporaryDirectory;
     using NSTYPE = NSBitmapImageFileType;
     
-    std::array<NSTYPE, 6> types = {
+    std::array<NSTYPE, 7> types = {
         NSTIFFFileType, NSBMPFileType, NSGIFFileType,
-        NSJPEGFileType, NSPNGFileType, NSJPEG2000FileType
+        NSJPEGFileType, NSPNGFileType, NSJPEG2000FileType,
+        AXPVRFileType
     };
     
-    std::array<std::string, 6> suffixes = {
+    std::array<std::string, 7> suffixes = {
         "tiff",     "bmp",      "gif",
-        "jpg",      "png",      "jp2"
+        "jpg",      "png",      "jp2",
+        "pvr"
     };
     
     TEST_CASE("[nsurl-image-types] Check suffixes and image type functions",
@@ -61,7 +63,6 @@ namespace {
             std::for_each(files.begin(), files.end(),
                           [&](path const& p) {
                 if (!p.is_file()) { return; }
-                if (p.extension() == "pvr") { return; } /// TEMPORARY. NB Tim Cook, These Are Also Images Dogg
                 NSURL* urlpath = [NSURL fileURLWithFilesystemPath:p];
                 CHECK([urlpath isImage] == YES);
                 CHECK([urlpath imageFileType] == objc::image::filetype(p.extension()));

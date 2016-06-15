@@ -16,6 +16,7 @@ namespace objc {
         DECLARE_CONSTEXPR_CHAR(suffix_t<NSJPEGFileType>::str,       "jpg");
         DECLARE_CONSTEXPR_CHAR(suffix_t<NSPNGFileType>::str,        "png");
         DECLARE_CONSTEXPR_CHAR(suffix_t<NSJPEG2000FileType>::str,   "jp2");
+        DECLARE_CONSTEXPR_CHAR(suffix_t<AXPVRFileType>::str,        "pvr");
         
         std::string suffix(NSBitmapImageFileType nstype) {
             switch (nstype) {
@@ -25,6 +26,7 @@ namespace objc {
                 case NSGIFFileType:         { return suffix_t<NSGIFFileType>::str;      }
                 case NSBMPFileType:         { return suffix_t<NSBMPFileType>::str;      }
                 case NSJPEG2000FileType:    { return suffix_t<NSJPEG2000FileType>::str; }
+                case AXPVRFileType:         { return suffix_t<AXPVRFileType>::str;      }
                 default:                    { return "";                                }
             }
         }
@@ -33,17 +35,20 @@ namespace objc {
             if (suffix == "tiff" || suffix == ".tiff" ||
                 suffix == "tif"  || suffix == ".tif") {
                 return static_cast<NSInteger>(NSTIFFFileType);
-            } else if (suffix == "bmp" || suffix == ".bmp") {
+            } else if (suffix == "bmp"   || suffix == ".bmp") {
                 return static_cast<NSInteger>(NSBMPFileType);
-            } else if (suffix == "gif" || suffix == ".gif") {
+            } else if (suffix == "gif"   || suffix == ".gif") {
                 return static_cast<NSInteger>(NSGIFFileType);
-            } else if (suffix == "jpg"  || suffix == ".jpg" ||
-                       suffix == "jpeg" || suffix == ".jpeg") {
+            } else if (suffix == "jpg"   || suffix == ".jpg" ||
+                       suffix == "jpeg"  || suffix == ".jpeg") {
                 return static_cast<NSInteger>(NSJPEGFileType);
-            } else if (suffix == "png" || suffix == ".png") {
+            } else if (suffix == "png"   || suffix == ".png") {
                 return static_cast<NSInteger>(NSPNGFileType);
-            } else if (suffix == "jp2" || suffix == ".jp2") {
+            } else if (suffix == "jp2"   || suffix == ".jp2") {
                 return static_cast<NSInteger>(NSJPEG2000FileType);
+            } else if (suffix == "pvr"   || suffix == ".pvr" ||
+                       suffix == "pvrtc" || suffix == ".pvrtc") {
+                return static_cast<NSInteger>(AXPVRFileType);
             } else {
                 /// NO MATCH
                 return -1;
@@ -52,8 +57,6 @@ namespace objc {
         
     }
 }
-
-#ifdef __OBJC__
 
 @implementation NSURL (AXURLAdditions)
 
@@ -113,5 +116,3 @@ namespace objc {
 }
 
 @end
-
-#endif /// __OBJC__

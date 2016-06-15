@@ -15,6 +15,8 @@
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
 
+static constexpr NSBitmapImageFileType AXPVRFileType = static_cast<NSBitmapImageFileType>(444);
+
 namespace objc {
     
     namespace image {
@@ -37,6 +39,7 @@ namespace objc {
         DEFINE_SUFFIX("jpg",  NSJPEGFileType);
         DEFINE_SUFFIX("png",  NSPNGFileType);
         DEFINE_SUFFIX("jp2",  NSJPEG2000FileType);
+        DEFINE_SUFFIX("pvr",  AXPVRFileType);
         
         template <NSBitmapImageFileType nstype>
         char const* suffix_value = suffix_t<nstype>::str;
