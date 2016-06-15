@@ -24,15 +24,13 @@ namespace py {
         
         using im::byte;
         using im::options_map;
-        using im::Image;
-        using im::ImageFormat;
         
         namespace buffer {
             
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
-                return reinterpret_cast<PyObject*>(
+                return py::convert(
                     new PythonBufferType());
             }
             
@@ -51,7 +49,7 @@ namespace py {
                         "invalid Py_buffer host");
                     return nullptr;
                 }
-                return reinterpret_cast<PyObject*>(
+                return py::convert(
                     new PythonBufferType(bufferhost, tag_t{}));
             }
             
@@ -72,7 +70,7 @@ namespace py {
                         "invalid im.Buffer instance");
                     return nullptr;
                 }
-                return reinterpret_cast<PyObject*>(
+                return py::convert(
                     new PythonBufferType(buffer, tag_t{}));
             }
             

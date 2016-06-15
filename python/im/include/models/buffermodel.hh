@@ -147,7 +147,7 @@ namespace py {
                         transposed->internal->min[idx]    = internal->min[permutation[idx]];
                     }
                 }
-                return reinterpret_cast<PyObject*>(transposed);
+                return py::convert(transposed);
             }
             
             int getbuffer(Py_buffer* view, int flags, NPY_TYPES dtypenum = NPY_UINT8) {
@@ -205,7 +205,9 @@ namespace py {
             }
             
             static char const* typestring() { return "im.Buffer"; }
-            static char const* typedoc()    { return "Python buffer model base class\n"; }
+            static char const* typedoc() { 
+                return "Python buffer model base class\n";
+            }
             
         }; /* BufferModelBase */
         

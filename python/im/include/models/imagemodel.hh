@@ -19,6 +19,7 @@
 #include "../pycapsule.hpp"
 #include "../hybrid.hh"
 #include "base.hh"
+#include "buffermodel.hh"
 
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
@@ -38,6 +39,8 @@ namespace py {
         using im::HybridFactory;
         using im::ArrayFactory;
         
+        using im::FileSource;
+        using im::FileSink;
         using filesystem::path;
         using filesystem::NamedTemporaryFile;
         
@@ -176,7 +179,9 @@ namespace py {
                     return name.c_str();
                 }
                 
-                static char const* typedoc()    { return "Python image-backed buffer class\n"; }
+                static char const* typedoc() {
+                    return "Python image-backed buffer class\n";
+                }
                 
             }; /* BufferModel */
             
@@ -495,7 +500,7 @@ namespace py {
             bool load(char const* source, options_map const& opts) {
                 FactoryType factory;
                 std::unique_ptr<ImageFormat> format;
-                std::unique_ptr<im::FileSource> input;
+                std::unique_ptr<FileSource> input;
                 std::unique_ptr<Image> output;
                 bool exists = false,
                      can_read = false;
@@ -505,9 +510,20 @@ namespace py {
                     py::gil::release nogil;
                     format = im::for_filename(source);
                     can_read = format->format_can_read();
+                    if (can_read) {
+                        input = std::make_unique<FileSource>(source);
+                        exists = input->exists();
+                        if (exists) {
+                            default_opts = format->add_options(opts);
+                            output = format->read(input.get(), &factory, default_opts);
+                            image.reset(dynamic_cast<ImageType*>(output.release()));
+                            return true;
+                        }
+                    }
                 } catch (im::FormatNotFound& exc) {
                     PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format for file: %s", source);
+                        "Can't find I/O format for file: %s",
+                        source);
                     return false;
                 }
                 
@@ -516,29 +532,12 @@ namespace py {
                     PyErr_Format(PyExc_ValueError,
                         "Unimplemented read() in I/O format %s",
                         mime.c_str());
-                    return false;
+                } else if (!exists) {
+                    PyErr_Format(PyExc_IOError,
+                        "Can't find image file: %s",
+                        source);
                 }
-                
-                {
-                    py::gil::release nogil;
-                    input = std::make_unique<im::FileSource>(source);
-                    exists = input->exists();
-                }
-                
-                if (!exists) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find image file: %s", source);
-                    return false;
-                }
-                
-                {
-                    py::gil::release nogil;
-                    default_opts = format->add_options(opts);
-                    output = format->read(input.get(), &factory, default_opts);
-                    image.reset(dynamic_cast<ImageType*>(output.release()));
-                }
-                
-                return true;
+                return false;
             }
             
             bool load(Py_buffer const& view, options_map const& opts) {
@@ -551,7 +550,6 @@ namespace py {
                 std::unique_ptr<ImageFormat> format;
                 typename py::gil::with::source_t input;
                 std::unique_ptr<Image> output;
-                std::string suffix;
                 options_map default_opts;
                 bool can_read = false;
                 
@@ -560,7 +558,6 @@ namespace py {
                     input = iohandle.source();
                     format = im::for_source(input.get());
                     can_read = format->format_can_read();
-                    suffix = format->get_suffix();
                     if (can_read) {
                         default_opts = format->add_options(opts);
                         output = format->read(input.get(), &factory, default_opts);
@@ -635,7 +632,8 @@ namespace py {
                     can_write = format->format_can_write();
                 } catch (im::FormatNotFound& exc) {
                     PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format for file: %s", destination);
+                        "Can't find I/O format for file: %s",
+                        destination);
                     return false;
                 }
                 
@@ -654,17 +652,15 @@ namespace py {
                 }
                 
                 if (exists && !overwrite) {
-                    PyErr_Format(PyExc_ValueError,
+                    PyErr_Format(PyExc_IOError,
                         "File exists (opts['overwrite'] == False): %s",
                         destination);
                     return false;
                 }
                 {
                     py::gil::release nogil;
-                    if (exists && overwrite) {
-                        path::remove(destination);
-                    }
-                    std::unique_ptr<im::FileSink> output(new im::FileSink(destination));
+                    if (exists && overwrite) { path::remove(destination); }
+                    std::unique_ptr<FileSink> output(new FileSink(destination));
                     default_opts = format->add_options(opts);
                     format->write(dynamic_cast<Image&>(*image.get()),
                                                        output.get(), default_opts);
@@ -692,10 +688,16 @@ namespace py {
                     ext = opts.cast<std::string>("format");
                     format = im::get_format(ext.c_str());
                     can_write = format->format_can_write();
+                    if (can_write) {
+                        default_opts = format->add_options(opts);
+                        format->write(dynamic_cast<Image&>(*image.get()),
+                                                           output.get(), default_opts);
+                        return true;
+                    }
                 } catch (im::FormatNotFound& exc) {
                     PyErr_Format(PyExc_ValueError,
                         "Can't find I/O format: %s",
-                        opts.cast<char const*>("format"));
+                        ext.c_str());
                     return false;
                 }
                 
@@ -704,25 +706,14 @@ namespace py {
                     PyErr_Format(PyExc_ValueError,
                         "Unimplemented write() in I/O format %s",
                         mime.c_str());
-                    return false;
                 }
-                
-                {
-                    py::gil::release nogil;
-                    default_opts = format->add_options(opts);
-                    format->write(dynamic_cast<Image&>(*image.get()),
-                                                       output.get(), default_opts);
-                }
-                
-                return true;
+                return false;
             }
             
             PyObject* saveblob(options_map const& opts) {
                 std::unique_ptr<ImageFormat> format;
-                std::unique_ptr<im::FileSink> output;
-                std::unique_ptr<im::FileSource> readback;
                 std::vector<byte> data;
-                std::string ext;
+                std::string ext, pth;
                 options_map default_opts;
                 bool can_write = false,
                      removed = false,
@@ -755,38 +746,40 @@ namespace py {
                     return nullptr;
                 }
                 
+                NamedTemporaryFile tf(format->get_suffix(true),
+                                      FILESYSTEM_TEMP_FILENAME,
+                                      false);
+                
                 {
                     py::gil::release nogil;
-                    NamedTemporaryFile tf(format->get_suffix(true),
-                                          FILESYSTEM_TEMP_FILENAME,
-                                          false);
-                    
-                    std::string pth = tf.filepath.make_absolute().str();
+                    pth = std::string(tf.filepath.make_absolute().str());
                     tf.filepath.remove();
-                    output = std::make_unique<im::FileSink>(pth.c_str());
+                    auto output = std::make_unique<FileSink>(pth.c_str());
                     
                     default_opts = format->add_options(opts);
                     format->write(dynamic_cast<Image&>(*image.get()),
                                                        output.get(), default_opts);
                     output->flush();
-                    
-                    if (!path::exists(pth)) {
-                        py::gil::ensure yesgil;
-                        PyErr_SetString(PyExc_ValueError,
-                            "Temporary file is AWOL");
-                        return nullptr;
-                    }
-                    
-                    readback = std::make_unique<im::FileSource>(pth.c_str());
+                    output->close();
+                }
+                
+                if (!path::exists(pth)) {
+                    PyErr_SetString(PyExc_IOError,
+                        "Temporary file is AWOL");
+                    return nullptr;
+                }
+                
+                {
+                    py::gil::release nogil;
+                    auto readback = std::make_unique<FileSource>(pth.c_str());
                     data = readback->full_data();
                     readback->close();
-                    readback.reset(nullptr);
                     tf.close();
                     removed = tf.remove();
                 }
                 
                 if (!removed) {
-                    PyErr_SetString(PyExc_ValueError,
+                    PyErr_SetString(PyExc_IOError,
                         "Failed to remove temporary file");
                     return nullptr;
                 }
@@ -823,7 +816,9 @@ namespace py {
                 return name.c_str();
             }
             
-            static char const* typedoc()    { return "Buffered-image multibackend model base class\n"; }
+            static char const* typedoc() {
+                return "Buffered-image multibackend model base class\n";
+            }
             
         }; /* ImageModelBase */
         

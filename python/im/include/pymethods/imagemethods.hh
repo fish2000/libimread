@@ -36,7 +36,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
                 // using tag_t = typename PythonImageType::Tag::FromImage;
-                return reinterpret_cast<PyObject*>(
+                return py::convert(
                     new PythonImageType());
             }
             
@@ -108,7 +108,7 @@ namespace py {
                 }
                 
                 /// create new PyObject* image model instance
-                PyObject* self = reinterpret_cast<PyObject*>(
+                PyObject* self = py::convert(
                     new PythonImageType(width, height, planes,
                                         fill,  nbits,  is_signed));
                 
@@ -135,7 +135,7 @@ namespace py {
                         "invalid im.Buffer instance");
                     return nullptr;
                 }
-                return reinterpret_cast<PyObject*>(
+                return py::convert(
                     new PythonImageType(buffer, tag_t{}));
             }
             
@@ -156,7 +156,7 @@ namespace py {
                         "invalid ImageType instance");
                     return nullptr;
                 }
-                return reinterpret_cast<PyObject*>(
+                return py::convert(
                     new PythonImageType(other, tag_t{}));
             }
             
@@ -224,7 +224,7 @@ namespace py {
                 Py_INCREF(basis);
                 if (len > 1) {
                     for (idx = 1; idx < len; idx++) {
-                        basis = reinterpret_cast<PyObject*>(
+                        basis = py::convert(
                                 new PythonImageType(basis,
                                     PySequence_Fast_GET_ITEM(sequence, idx)));
                     }
@@ -278,7 +278,7 @@ namespace py {
                 
                 if (!did_load) {
                     /// If this is true, PyErr has already been set
-                    PyErr_SetString(PyExc_AttributeError,
+                    PyErr_SetString(PyExc_IOError,
                         "Image binary load failed");
                         return -1;
                 }
@@ -290,7 +290,7 @@ namespace py {
                 
                 /// allocate a new image buffer
                 Py_CLEAR(pyim->imagebuffer);
-                pyim->imagebuffer = reinterpret_cast<PyObject*>(new imagebuffer_t(pyim->image));
+                pyim->imagebuffer = py::convert(new imagebuffer_t(pyim->image));
                 Py_INCREF(pyim->imagebuffer);
                 
                 /// store the read options dict
@@ -507,8 +507,8 @@ namespace py {
                     } else {
                         {
                             py::gil::release nogil;
-                            std::unique_ptr<im::FileSource> readback(
-                                new im::FileSource(dststr.c_str()));
+                            std::unique_ptr<FileSource> readback(
+                                new FileSource(dststr.c_str()));
                             data = readback->full_data();
                             readback->close();
                             readback.reset(nullptr);
@@ -919,8 +919,7 @@ namespace py {
                                 "\t - format-specific write options (options) \n"
                                 "\t   NOTE: \n"
                                 "\t - options must contain a 'format' entry, specifying the output format \n"
-                                "\t   when write() is called without a destination path. \n"
-                                 },
+                                "\t   when write() is called without a destination path. \n" },
                         {
                             "split",
                                 (PyCFunction)py::ext::image::split<ImageType, BufferType>,
