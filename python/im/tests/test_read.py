@@ -148,9 +148,6 @@ class ReadTests(BaseCase):
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_tif_as_blob_from_filehandle(self):
-        ''' This does not work for some reason -- likely due to the
-            wackadoo source/sink manipulation in IO/tiff.cpp
-        '''
         for ImageType in self.imagetypes:
             for image_path in self.tifs:
                 with open(image_path, 'rb') as image_fh:

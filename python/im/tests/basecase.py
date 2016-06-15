@@ -5,18 +5,24 @@ from unittest2 import TestCase
 import sys
 from os import listdir
 from os.path import join, abspath, expanduser, dirname, basename
+from collections import namedtuple
+
+ImageTypeTuple = namedtuple('ImageTypes', ['Image', 'Array'])
 
 class BaseCase(TestCase):
     
     def setUp(self):
         # imports
+        # from pprint import pformat
         import im
-        from collections import namedtuple
         
         # get and store all paths
+        self._testdata = abspath(expanduser(join(
+            dirname(dirname(dirname(dirname(__file__)))),
+            'tests', 'data')))
         self._image_paths = map(
-            lambda nm: expanduser(join(dirname(dirname(dirname(dirname(__file__)))), 'tests', 'data', nm)),
-                listdir(abspath(expanduser(join(dirname(dirname(dirname(dirname(__file__)))), 'tests', 'data')))))
+            lambda nm: join(self._testdata, nm),
+                listdir(self._testdata))
         
         # filter paths, per file extension
         self.image_paths = set([pth for pth in self._image_paths if pth.lower().endswith('jpg')])
@@ -29,7 +35,6 @@ class BaseCase(TestCase):
         # print(pformat(self.tifs, indent=4))
         
         # store local references to im.Image and im.Array
-        ImageTypeTuple = namedtuple('ImageTypes', ['Image', 'Array'])
         self.imagetypes = ImageTypeTuple(im.Image, im.Array)
         
 

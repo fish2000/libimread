@@ -32,8 +32,7 @@ class CompatibilityTests(BaseCase):
                 self.assertEqual(pil_image.width,  image.width)
                 self.assertEqual(pil_image.height, image.height)
     
-    """
-    def test_tif_convert_to_PIL(self):
+    def _test_tif_convert_to_PIL(self):
         ''' Load some TIF files,
             convert to PIL.Image instances,
             compare image features (size etc) '''
@@ -46,7 +45,6 @@ class CompatibilityTests(BaseCase):
                 ''' BUGGGG: TIFs are still fucking transposed '''
                 # self.assertEqual(pil_image.width,  image.width)
                 # self.assertEqual(pil_image.height, image.height)
-    """
     
     def test_pvr_convert_to_PIL(self):
         ''' Load some PVR files,
