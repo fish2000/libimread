@@ -4,7 +4,26 @@ from basecase import BaseCase
 
 class PlanarOperationTests(BaseCase):
     
-    def test_jpg_plane_at_lexical_index(self):
+    def test_jpg_plane_at(self):
+        ''' Load some JPG files, iterate each images' planes,
+            compare plane features (size etc) to image features
+        '''
+        for ImageType in self.imagetypes:
+            for image_path in self.jpgs:
+                image = ImageType(image_path)
+                self.assertIsNotNone(image)
+                idx = 0
+                for plane_letter in image.mode:
+                    planeX = image.plane_at(plane=plane_letter)
+                    self.assertEqual(planeX.width,  image.width)
+                    self.assertEqual(planeX.height, image.height)
+                    self.assertEqual(planeX.planes, 1)
+                    plane0 = image.plane_at(idx)
+                    self.assertEqual(planeX.buffer.tostring(),
+                                     plane0.buffer.tostring())
+                    idx += 1
+    
+    def _test_jpg_plane_at_lexical_index(self):
         ''' Load some JPG files, lexically iterate each images' planes,
             compare plane features (size etc) to image features
         '''
@@ -18,7 +37,7 @@ class PlanarOperationTests(BaseCase):
                     self.assertEqual(plane.height, image.height)
                     self.assertEqual(plane.planes, 1)
     
-    def test_jpg_plane_at_numeric_index(self):
+    def _test_jpg_plane_at_numeric_index(self):
         ''' Load some JPG files, numerically iterate each images' planes,
             compare plane features (size etc) to image features
         '''
