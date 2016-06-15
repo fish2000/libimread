@@ -36,8 +36,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
                 // using tag_t = typename PythonImageType::Tag::FromImage;
-                return py::convert(
-                    new PythonImageType());
+                return py::convert(new PythonImageType());
             }
             
             /// ALLOCATE / new(width, height, planes, fill, nbits, is_signed) implementation
@@ -135,8 +134,7 @@ namespace py {
                         "invalid im.Buffer instance");
                     return nullptr;
                 }
-                return py::convert(
-                    new PythonImageType(buffer, tag_t{}));
+                return py::convert(new PythonImageType(buffer, tag_t{}));
             }
             
             /// ALLOCATE / fromimage(imageInstance) implementation
@@ -156,8 +154,7 @@ namespace py {
                         "invalid ImageType instance");
                     return nullptr;
                 }
-                return py::convert(
-                    new PythonImageType(other, tag_t{}));
+                return py::convert(new PythonImageType(other, tag_t{}));
             }
             
             /// ALLOCATE / merge(tuple(imageInstance, imageInstance [...])) implementation

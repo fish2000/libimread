@@ -228,8 +228,7 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(other.image)
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(reinterpret_cast<PyObject*>(
-                             new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
@@ -248,8 +247,7 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(*other.image.get(), zidx))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(reinterpret_cast<PyObject*>(
-                             new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
@@ -268,8 +266,7 @@ namespace py {
                 ,image(std::make_shared<ImageType>(*basis.image.get(),
                                                      *etc.image.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(reinterpret_cast<PyObject*>(
-                             new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
@@ -310,8 +307,7 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi.internal.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(reinterpret_cast<PyObject*>(
-                             new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 ,clean(false)
@@ -361,8 +357,7 @@ namespace py {
                                              width, height,
                                              planes > 0 ? planes : 1))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(reinterpret_cast<PyObject*>(
-                             new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 ,clean(false)

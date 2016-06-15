@@ -30,8 +30,7 @@ namespace py {
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
-                return py::convert(
-                    new PythonBufferType());
+                return py::convert(new PythonBufferType());
             }
             
             /// ALLOCATE / frompybuffer(pybuffer_host) implementation
@@ -49,8 +48,7 @@ namespace py {
                         "invalid Py_buffer host");
                     return nullptr;
                 }
-                return py::convert(
-                    new PythonBufferType(bufferhost, tag_t{}));
+                return py::convert(new PythonBufferType(bufferhost, tag_t{}));
             }
             
             /// ALLOCATE / frombuffer(bufferInstance) implementation
@@ -70,8 +68,7 @@ namespace py {
                         "invalid im.Buffer instance");
                     return nullptr;
                 }
-                return py::convert(
-                    new PythonBufferType(buffer, tag_t{}));
+                return py::convert(new PythonBufferType(buffer, tag_t{}));
             }
             
             template <typename BufferType = buffer_t,
