@@ -730,6 +730,15 @@ namespace py {
                 return pyim->add_alpha();
             }
             
+            /// ImageType.remove_alpha() method
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    remove_alpha(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return pyim->remove_alpha();
+            }
+            
             namespace methods {
                 
                 template <typename ImageType,
@@ -930,6 +939,13 @@ namespace py {
                                 METH_NOARGS,
                                 "image.add_alpha()\n"
                                 "\t-> Add an alpha channel (if appropriate) to a copy of the image,\n"
+                                "\t   and return the copy. \n"},
+                        {
+                            "remove_alpha",
+                                (PyCFunction)py::ext::image::remove_alpha<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "image.remove_alpha()\n"
+                                "\t-> Remove the alpha channel (if appropriate) from a copy of the image,\n"
                                 "\t   and return the copy. \n"},
                         {
                             "format_read_opts",

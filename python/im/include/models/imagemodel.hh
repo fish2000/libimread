@@ -484,6 +484,43 @@ namespace py {
                 }
             }
             
+            PyObject* remove_alpha() {
+                switch (image->planes()) {
+                    case 2: {
+                        return py::convert(new ImageModelBase(py::convert(this), 0));
+                    }
+                    case 4: {
+                        ImageModelBase* basis = new ImageModelBase(py::convert(this), 0);
+                        ImageModelBase* etc;
+                        int idx = 1,
+                            len = 3;
+                        for (Py_INCREF(basis); idx < len; ++idx) {
+                            etc = new ImageModelBase(py::convert(this), idx);
+                            basis = new ImageModelBase(py::convert(basis),
+                                                       py::convert(etc));
+                            Py_DECREF(etc);
+                        }
+                        return py::convert(basis);
+                    }
+                    case 1:
+                    case 3:
+                    default: {
+                        PyErr_SetString(PyExc_AttributeError,
+                            "Can't remove alpha from mode L/RGB/WAT image");
+                        return nullptr;
+                    }
+                }
+            }
+            
+            PyObject* plane_at(int zidx) {
+                if (zidx >= image->planes() || zidx < 0) {
+                    PyErr_SetString(PyExc_IndexError,
+                        "plane_at(): index out of range");
+                    return nullptr;
+                }
+                return py::convert(new ImageModelBase(py::convert(this), zidx));
+            }
+            
             options_map readopts() {
                 return py::options::parse(readoptDict);
             }

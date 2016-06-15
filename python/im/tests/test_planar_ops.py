@@ -56,10 +56,13 @@ class PlanarOperationTests(BaseCase):
                     alpha_image = image.add_alpha()
                     self.assertTrue(alpha_image.mode in alpha_modes)
                     self.assertTrue(alpha_image.planes in alpha_planes)
-                    self.assertEqual(alpha_image.width, image.width)
+                    self.assertEqual(alpha_image.width,  image.width)
                     self.assertEqual(alpha_image.height, image.height)
                 else:
-                    # alpha channel already present:
+                    # alpha channel already present - try to remove it:
+                    image_sans_alpha = image.remove_alpha()
                     self.assertTrue(image.mode in alpha_modes)
                     self.assertTrue(image.planes in alpha_planes)
+                    self.assertEqual(image_sans_alpha.width,  image.width)
+                    self.assertEqual(image_sans_alpha.height, image.height)
     
