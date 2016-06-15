@@ -115,7 +115,7 @@ namespace py {
                             "index out of range");
                         return nullptr;
                     }
-                    return py::detail::image_typed_idx(strong, tc, nidx);
+                    return py::detail::image_typed_idx(strong.get(), tc, nidx);
                 }
                 
                 template <typename Pointer = PyArrayInterface,
