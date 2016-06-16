@@ -13,7 +13,8 @@ class ReadWriteTests(BaseCase):
             for image_path in self.jpgs:
                 image = ImageType(image_path)
                 self.assertTrue(ImageType.check(image))
-                self.assertFalse(ImageType.check(image_path))
+                self.assertTrue(ImageType.typecheck(image))
+                # self.assertFalse(ImageType.check(image_path))
                 # data = image.write(as_blob=True, options={ 'format' : "jpg" })
                 # self.assertFalse(ImageType.check(data))
     

@@ -10,6 +10,7 @@ namespace py {
         
         /// typecheck() has a forward declaration!
         PyObject* typecheck(PyTypeObject* type, PyObject* evaluee);
+        PyObject* subtypecheck(PyTypeObject* type, PyObject* evaluee);
         
     }
     

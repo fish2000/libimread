@@ -184,7 +184,7 @@ namespace py {
                 
                 /// check the sequences' type (essentially against `type(self)`)
                 PyObject* pynitial = PySequence_Fast_GET_ITEM(sequence, idx);
-                if (type != Py_TYPE(pynitial)) {
+                if (!PyObject_TypeCheck(pynitial, type)) {
                     Py_DECREF(sequence);
                     PyErr_SetString(PyExc_TypeError,
                         "Wrong sequence item type");
@@ -201,7 +201,7 @@ namespace py {
                 for (idx = 1; idx < len; idx++) {
                     PythonImageType* item = reinterpret_cast<PythonImageType*>(
                                             PySequence_Fast_GET_ITEM(sequence, idx));
-                    if (type != Py_TYPE(item)) {
+                    if (!PyObject_TypeCheck(py::convert(item), type)) {
                         Py_DECREF(sequence);
                         PyErr_SetString(PyExc_TypeError,
                             "Mismatched image type");
@@ -954,10 +954,16 @@ namespace py {
                                 "\t-> This method is for use by ipython/jupyter\n" },
                         {
                             "check",
-                                (PyCFunction)py::ext::typecheck,
+                                (PyCFunction)py::ext::subtypecheck,
                                 METH_O | METH_CLASS,
                                 "ImageType.check(putative)\n"
-                                "\t-> Check that an instance is of this type\n" },
+                                "\t-> Check that an instance is of this type (or a subtype)\n" },
+                        {
+                            "typecheck",
+                                (PyCFunction)py::ext::typecheck,
+                                METH_O | METH_CLASS,
+                                "ImageType.typecheck(putative)\n"
+                                "\t-> Check that an instance is strictly an instance of this type\n" },
                         {
                             "new",
                                 (PyCFunction)py::ext::image::newfromsize<ImageType, BufferType>,
