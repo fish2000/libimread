@@ -15,7 +15,6 @@ class JupyterReprTests(BaseCase):
                 image = ImageType(image_path)
                 self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "jpg" })
-                self.assertIsNotNone(data)
                 repr_jpeg = image._repr_jpeg_()
                 self.assertEqual(data, repr_jpeg)
     
@@ -28,7 +27,6 @@ class JupyterReprTests(BaseCase):
                 image = ImageType(image_path)
                 self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "png" })
-                self.assertIsNotNone(data)
                 repr_png = image._repr_png_()
                 self.assertEqual(data, repr_png)
     
@@ -42,7 +40,6 @@ class JupyterReprTests(BaseCase):
                 image = ImageType(image_path)
                 self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "jpg" })
-                self.assertIsNotNone(data)
                 tag = "<img src='data:image/jpeg;base64,%s'>" % base64.b64encode(data)
                 repr_html = image._repr_html_()
                 self.assertEqual(tag, repr_html)

@@ -19,7 +19,7 @@ class ReadTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 self.assertEqual(image.shape, image.buffer.shape)
                 self.assertEqual(image.strides, image.buffer.strides)
     
@@ -27,7 +27,7 @@ class ReadTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.pngs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 self.assertEqual(image.shape, image.buffer.shape)
                 self.assertEqual(image.strides, image.buffer.strides)
     
@@ -35,7 +35,7 @@ class ReadTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.tifs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 self.assertEqual(image.shape, image.buffer.shape)
                 self.assertEqual(image.strides, image.buffer.strides)
     
@@ -43,7 +43,7 @@ class ReadTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.pvrs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 self.assertEqual(image.shape, image.buffer.shape)
                 self.assertEqual(image.strides, image.buffer.strides)
     
@@ -51,7 +51,7 @@ class ReadTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path, options=dict(yo="dogg"))
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 self.assertEqual(image.read_opts['yo'], "dogg")
                 image.read_opts = dict(iheard="you like options dicts")
                 self.assertFalse('yo' in image.read_opts)
@@ -99,7 +99,7 @@ class ReadTests(BaseCase):
                 with open(image_path, 'rb') as image_fh:
                     image_blob = image_fh.read()
                     image = ImageType(image_blob, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_png_as_blob(self):
@@ -108,7 +108,7 @@ class ReadTests(BaseCase):
                 with open(image_path, 'rb') as image_fh:
                     image_blob = image_fh.read()
                     image = ImageType(image_blob, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_tif_as_blob(self):
@@ -117,7 +117,7 @@ class ReadTests(BaseCase):
                 with open(image_path, 'rb') as image_fh:
                     image_blob = image_fh.read()
                     image = ImageType(image_blob, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_pvr_as_blob(self):
@@ -128,7 +128,7 @@ class ReadTests(BaseCase):
                 with open(image_path, 'rb') as image_fh:
                     image_blob = image_fh.read()
                     image = ImageType(image_blob, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_jpg_as_blob_from_filehandle(self):
@@ -136,7 +136,7 @@ class ReadTests(BaseCase):
             for image_path in self.jpgs:
                 with open(image_path, 'rb') as image_fh:
                     image = ImageType(file=image_fh, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_png_as_blob_from_filehandle(self):
@@ -144,7 +144,7 @@ class ReadTests(BaseCase):
             for image_path in self.pngs:
                 with open(image_path, 'rb') as image_fh:
                     image = ImageType(file=image_fh, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_tif_as_blob_from_filehandle(self):
@@ -152,7 +152,7 @@ class ReadTests(BaseCase):
             for image_path in self.tifs:
                 with open(image_path, 'rb') as image_fh:
                     image = ImageType(file=image_fh, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)
     
     def test_load_pvr_as_blob_from_filehandle(self):
@@ -160,5 +160,5 @@ class ReadTests(BaseCase):
             for image_path in self.pvrs:
                 with open(image_path, 'rb') as image_fh:
                     image = ImageType(file=image_fh, is_blob=True)
-                    self.assertIsNotNone(image)
+                    # self.assertIsNotNone(image)
                     self.assertEqual(image.shape, image.buffer.shape)

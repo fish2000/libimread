@@ -30,7 +30,7 @@ class PlanarOperationTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 for plane_letter in image.mode:
                     plane = image.plane_at(plane=plane_letter)
                     self.assertEqual(plane.width,  image.width)
@@ -44,7 +44,7 @@ class PlanarOperationTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 for idx in xrange(image.planes):
                     plane = image.plane_at(idx)
                     self.assertEqual(plane.width,  image.width)
@@ -58,7 +58,7 @@ class PlanarOperationTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 planes = image.split()
                 self.assertEqual(int(image.planes), len(planes))
                 for plane in planes:
@@ -74,7 +74,7 @@ class PlanarOperationTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 planes = image.split()
                 self.assertEqual(int(image.planes), len(planes))
                 image2 = ImageType.merge(planes)
@@ -100,7 +100,7 @@ class PlanarOperationTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 if not image.has_alpha:
                     # no alpha channel - try to add one:
                     alpha_image = image.add_alpha()

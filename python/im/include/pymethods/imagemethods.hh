@@ -429,9 +429,9 @@ namespace py {
                 Py_buffer view;
                 char const* keywords[] = { "destination", "file", "as_blob", "options", nullptr };
                 std::string dststr;
-                bool as_blob = false;
-                bool use_file = false;
-                bool did_save = false;
+                bool as_blob = false,
+                     use_file = false,
+                     did_save = false;
                 
                 if (!PyArg_ParseTupleAndKeywords(
                     args, kwargs, "|s*OOO:write", const_cast<char**>(keywords),
@@ -450,65 +450,67 @@ namespace py {
                 
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     Py_DECREF(options);
+                    PyErr_SetString(PyExc_SystemError,
+                        "Dictionary update failure");
                     return nullptr;
                 }
                 
                 options_map opts = pyim->writeopts();
+                Py_DECREF(options);
                 
                 if (as_blob || use_file) {
                     if (!opts.has("format")) {
                         PyErr_SetString(PyExc_AttributeError,
-                            "Output format unspecified in options dict");
+                            "Output format unspecified");
                         return nullptr;
                     }
                 }
                 
-                if (as_blob) {
-                    py::gil::release nogil;
-                    NamedTemporaryFile tf("." + opts.cast<std::string>("format"),
-                                        FILESYSTEM_TEMP_FILENAME, false); /// boolean cleanup on scope exit
-                    dststr = std::string(tf.filepath.make_absolute().str());
-                } else if (!use_file) {
-                    /// save as file -- extract the filename from the buffer
-                    py::gil::release nogil;
-                    py::buffer::source dest(view);
-                    dststr = std::string(dest.str());
-                }
-                if (!dststr.size() && !use_file) {
+                if (!use_file) {
                     if (as_blob) {
-                        PyErr_SetString(PyExc_ValueError,
-                            "Blob output unexpectedly returned zero-length bytestring");
+                        py::gil::release nogil;
+                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"),
+                                            FILESYSTEM_TEMP_FILENAME, false); /// boolean cleanup on scope exit
+                        dststr = std::string(tf.filepath.make_absolute().str());
                     } else {
-                        PyErr_SetString(PyExc_ValueError,
-                            "File output destination path is unexpectedly zero-length");
+                        /// save as file -- extract the filename from the buffer
+                        py::gil::release nogil;
+                        py::buffer::source dest(view);
+                        dststr = std::string(dest.str());
                     }
-                    return nullptr;
+                    if (!dststr.size()) {
+                        if (as_blob) {
+                            PyErr_SetString(PyExc_ValueError,
+                                "Blob output unexpectedly returned zero-length bytestring");
+                        } else {
+                            PyErr_SetString(PyExc_ValueError,
+                                "File output destination path is unexpectedly zero-length");
+                        }
+                        return nullptr;
+                    }
+                    did_save = pyim->save(dststr.c_str(), opts);
+                } else {
+                    did_save = pyim->savefilelike(file, opts);
                 }
                 
-                if (use_file) {
-                    did_save = pyim->savefilelike(file, opts);
-                } else {
-                    did_save = pyim->save(dststr.c_str(), opts);
-                }
                 if (!did_save) {
                     return nullptr; /// If this is false, PyErr has been set
                 }
                 
                 if (as_blob) {
                     std::vector<byte> data;
-                    bool removed = false;
                     if (use_file) {
                         py::gil::with iohandle(file);
                         iosource_t readback = iohandle.source();
                         data = readback->full_data();
                     } else {
+                        bool removed = false;
                         {
                             py::gil::release nogil;
                             std::unique_ptr<FileSource> readback(
                                 new FileSource(dststr.c_str()));
                             data = readback->full_data();
                             readback->close();
-                            readback.reset(nullptr);
                             removed = path::remove(dststr);
                         }
                         if (!removed) {
@@ -594,8 +596,11 @@ namespace py {
                 py::detail::setitemstring(options, "format", py::string("png"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     Py_DECREF(options);
+                    PyErr_SetString(PyExc_SystemError,
+                        "Dictionary update failure");
                     return nullptr;
                 }
+                Py_DECREF(options);
                 return pyim->saveblob(pyim->writeopts());
             }
             
@@ -608,8 +613,11 @@ namespace py {
                 py::detail::setitemstring(options, "format", py::string("jpg"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     Py_DECREF(options);
+                    PyErr_SetString(PyExc_SystemError,
+                        "Dictionary update failure");
                     return nullptr;
                 }
+                Py_DECREF(options);
                 return pyim->saveblob(pyim->writeopts());
             }
             
@@ -623,8 +631,11 @@ namespace py {
                 py::detail::setitemstring(options, "as_html", py::True());
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     Py_DECREF(options);
+                    PyErr_SetString(PyExc_SystemError,
+                        "Dictionary update failure");
                     return nullptr;
                 }
+                Py_DECREF(options);
                 return pyim->saveblob(pyim->writeopts());
             }
             
