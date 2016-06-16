@@ -675,8 +675,8 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_subobject(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                return py::object(CHECK_CLOSURE(DTYPE) ? reinterpret_cast<PyObject*>(pyim->dtype) :
-                                                                                     pyim->imagebuffer);
+                return py::object(CHECK_CLOSURE(DTYPE) ? py::convert(pyim->dtype) :
+                                                                     pyim->imagebuffer);
             }
             
             /// ImageType.{shape,strides} getter
