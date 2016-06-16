@@ -379,6 +379,22 @@ namespace py {
         }
         
         template <typename ImageType> inline
+        PyObject* image_size(ImageType const& image) {
+            switch (image.ndims()) {
+                case 1:
+                    return py::tuplize(image.dim(0), 1);
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    return py::tuplize(image.dim(0),
+                                       image.dim(1));
+                default:
+                    return py::tuplize();
+            }
+        }
+        
+        template <typename ImageType> inline
         PyObject* image_shape(ImageType const& image) {
             switch (image.ndims()) {
                 case 1:
@@ -404,7 +420,6 @@ namespace py {
                 default:
                     return py::tuplize();
             }
-            return py::tuplize();
         }
         
         template <typename ImageType> inline
@@ -433,7 +448,6 @@ namespace py {
                 default:
                     return py::tuplize();
             }
-            return py::tuplize();
         }
         
         /// Version of PyDict_SetItemString that STEALS REFERENCES:

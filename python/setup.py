@@ -65,10 +65,10 @@ define_macros.append(
     ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'))
 define_macros.append(
     ('PY_ARRAY_UNIQUE_SYMBOL', 'YO_DOGG'))
-define_macros.append(
-    ('IM_COLOR_TRACE', '1'))
-define_macros.append(
-    ('IM_VERBOSE', '1'))
+# define_macros.append(
+#     ('IM_COLOR_TRACE', '1'))
+# define_macros.append(
+#     ('IM_VERBOSE', '1'))
 
 if DEBUG:
     # undef_macros = ['NDEBUG', '__OBJC__', '__OBJC2__']
@@ -77,14 +77,16 @@ if DEBUG:
             ('IM_DEBUG', DEBUG))
         define_macros.append(
             ('_GLIBCXX_DEBUG', '1'))
-        define_macros.append(
-            ('IM_VERBOSE', '1'))
+        # define_macros.append(
+        #     ('IM_VERBOSE', '1'))
         auxilliary_macros.append(
             ('IM_DEBUG', DEBUG))
         auxilliary_macros.append(
             ('_GLIBCXX_DEBUG', '1'))
-        auxilliary_macros.append(
-            ('IM_VERBOSE', '1'))
+        # auxilliary_macros.append(
+        #     ('IM_VERBOSE', '1'))
+
+undef_macros = ['IM_VERBOSE', 'IM_COLOR_TRACE']
 
 print('')
 print('')
@@ -265,8 +267,6 @@ for key, sources in extensions.iteritems():
         sources=sources,
         extra_compile_args=[
             '-O3',
-            # '-fno-verbose-asm',
-            # '-Ofast',
             '-funroll-loops',
             '-mtune=native',
             '-std=c++1z',

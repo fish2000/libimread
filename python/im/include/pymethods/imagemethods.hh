@@ -334,6 +334,26 @@ namespace py {
                 return py::string(string_ptr, string_size);
             }
             
+            /// cmp(image0, image1) implementation
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            int compare(PyObject* pylhs, PyObject* pyrhs) {
+                using imagebuffer_t = typename PythonImageType::BufferModel;
+                PythonImageType* lhs = reinterpret_cast<PythonImageType*>(pylhs);
+                PythonImageType* rhs = reinterpret_cast<PythonImageType*>(pyrhs);
+                imagebuffer_t* lhsbuf = reinterpret_cast<imagebuffer_t*>(lhs->imagebuffer);
+                imagebuffer_t* rhsbuf = reinterpret_cast<imagebuffer_t*>(rhs->imagebuffer);
+                std::size_t lhs_siz = static_cast<std::size_t>(lhsbuf->__len__());
+                std::size_t rhs_siz = static_cast<std::size_t>(rhsbuf->__len__());
+                PyObject* lhs_compare = py::string((char const*)lhsbuf->internal->host, lhs_siz);
+                PyObject* rhs_compare = py::string((char const*)rhsbuf->internal->host, rhs_siz);
+                int out = PyObject_Compare(lhs_compare, rhs_compare);
+                Py_DECREF(lhs_compare);
+                Py_DECREF(rhs_compare);
+                return out;
+            }
+            
             /// __hash__ implementation
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
@@ -352,6 +372,40 @@ namespace py {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 imagebuffer_t* imbuf = reinterpret_cast<imagebuffer_t*>(pyim->imagebuffer);
                 return imbuf->__len__();
+            }
+            
+            /// sq_concat implementation
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* concat(PyObject* pylhs, PyObject* pyrhs) {
+                return py::convert(new PythonImageType(py::object(pylhs), pyrhs));
+            }
+            
+            /// sq_repeat implementation
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* repeat(PyObject* basis, Py_ssize_t count) {
+                switch (count) {
+                    case 0: {
+                        PyErr_SetString(PyExc_ValueError,
+                            "OH SHI---");
+                        return nullptr;
+                    }
+                    case 1: {
+                        return basis;
+                    }
+                    default: {
+                        Py_ssize_t idx = 0,
+                                   max = count;
+                        for (Py_INCREF(basis); idx < max; ++idx) {
+                            basis = py::convert(new PythonImageType(basis, basis));
+                            Py_INCREF(basis);
+                        }
+                        return basis;
+                    }
+                }
             }
             
             template <typename ImageType = HalideNumpyImage,
@@ -644,6 +698,7 @@ namespace py {
                 DECLARE_CLOSURE(BUFFER);
                 DECLARE_CLOSURE(SHAPE);
                 DECLARE_CLOSURE(STRIDES);
+                DECLARE_CLOSURE(SIZE);
                 DECLARE_CLOSURE(WIDTH);
                 DECLARE_CLOSURE(HEIGHT);
                 DECLARE_CLOSURE(PLANES);
@@ -693,7 +748,8 @@ namespace py {
             PyObject*    get_liminal_tuple(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 return CHECK_CLOSURE(STRIDES) ? py::detail::image_strides(*pyim->image.get()) :
-                                                py::detail::image_shape(*pyim->image.get());
+                         CHECK_CLOSURE(SHAPE) ? py::detail::image_shape(*pyim->image.get()) :
+                                                py::detail::image_size(*pyim->image.get());
             }
             
             /// ImageType.{width,height,planes} getter
@@ -821,7 +877,8 @@ namespace py {
                 PySequenceMethods* sequence() {
                     static PySequenceMethods sequencemethods = {
                         (lenfunc)py::ext::image::length<ImageType, BufferType>,
-                        0, 0,
+                        (binaryfunc)py::ext::image::concat<ImageType, BufferType>,
+                        (ssizeargfunc)py::ext::image::repeat<ImageType, BufferType>,
                         (ssizeargfunc)py::ext::image::atindex<ImageType, BufferType>,
                         0, 0, 0, 0
                     };
@@ -892,6 +949,12 @@ namespace py {
                                 nullptr,
                                 (char*)"Image strides tuple -> (int, int, int)\n",
                                 BIND_CLOSURE(STRIDES) },
+                        {
+                            (char*)"size",
+                                (getter)py::ext::image::get_liminal_tuple<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"PIL-compatible image size tuple -> (int, int)\n",
+                                BIND_CLOSURE(SIZE) },
                         {
                             (char*)"width",
                                 (getter)py::ext::image::get_dimensional_attribute<ImageType, BufferType>,

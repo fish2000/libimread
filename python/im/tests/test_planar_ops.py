@@ -19,8 +19,8 @@ class PlanarOperationTests(BaseCase):
                     self.assertEqual(planeX.height, image.height)
                     self.assertEqual(planeX.planes, 1)
                     plane0 = image.plane_at(idx)
-                    self.assertEqual(planeX.buffer.tostring(),
-                                     plane0.buffer.tostring())
+                    self.assertEqual(planeX.buffer,
+                                     plane0.buffer)
                     idx += 1
     
     def _test_jpg_plane_at_lexical_index(self):
@@ -81,8 +81,7 @@ class PlanarOperationTests(BaseCase):
                 self.assertEqual(image.width,  image2.width)
                 self.assertEqual(image.height, image2.height)
                 self.assertEqual(image.planes, image2.planes)
-                self.assertEqual(image.buffer.tostring(),
-                                 image2.buffer.tostring())
+                self.assertEqual(image, image2)
     
     def test_jpg_alpha(self):
         ''' Load some JPG files, check for an alpha channel:

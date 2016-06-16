@@ -104,6 +104,18 @@ namespace py {
                 return py::string((char const*)pybuf->internal->host, string_size);
             }
             
+            /// cmp(buffer0, buffer1) implementaton (uses __str__)
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            int compare(PyObject* pylhs, PyObject* pyrhs) {
+                PyObject* lhs_compare = PyObject_Str(pylhs);
+                PyObject* rhs_compare = PyObject_Str(pyrhs);
+                int out = PyObject_Compare(lhs_compare, rhs_compare);
+                Py_DECREF(lhs_compare);
+                Py_DECREF(rhs_compare);
+                return out;
+            }
+            
             /// __len__ implementaton
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>

@@ -73,7 +73,7 @@ PyTypeObject BufferModel_Type = {
     0,                                                                  /* tp_print */
     0,                                                                  /* tp_getattr */
     0,                                                                  /* tp_setattr */
-    0,                                                                  /* tp_compare */
+    (cmpfunc)py::ext::buffer::compare<buffer_t>,                        /* tp_compare */
     (reprfunc)py::ext::buffer::repr<buffer_t>,                          /* tp_repr */
     0,                                                                  /* tp_as_number */
     &Buffer_SequenceMethods,                                            /* tp_as_sequence */
@@ -124,7 +124,7 @@ PyTypeObject ImageModel_Type = {
     0,                                                                  /* tp_print */
     0,                                                                  /* tp_getattr */
     0,                                                                  /* tp_setattr */
-    0,                                                                  /* tp_compare */
+    (cmpfunc)py::ext::image::compare<HalideNumpyImage, buffer_t>,       /* tp_compare */
     (reprfunc)py::ext::image::repr<HalideNumpyImage, buffer_t>,         /* tp_repr */
     0,                                                                  /* tp_as_number */
     py::ext::image::methods::sequence<HalideNumpyImage>(),              /* tp_as_sequence */
@@ -175,7 +175,7 @@ PyTypeObject ImageBufferModel_Type = {
     0,                                                                      /* tp_print */
     0,                                                                      /* tp_getattr */
     0,                                                                      /* tp_setattr */
-    0,                                                                      /* tp_compare */
+    (cmpfunc)py::ext::buffer::compare<buffer_t, ImageBufferModel>,          /* tp_compare */
     (reprfunc)py::ext::buffer::repr<buffer_t, ImageBufferModel>,            /* tp_repr */
     0,                                                                      /* tp_as_number */
     py::ext::buffer::methods::sequence<buffer_t, ImageBufferModel>(),       /* tp_as_sequence */
@@ -226,7 +226,7 @@ PyTypeObject ArrayModel_Type = {
     0,                                                                  /* tp_print */
     0,                                                                  /* tp_getattr */
     0,                                                                  /* tp_setattr */
-    0,                                                                  /* tp_compare */
+    (cmpfunc)py::ext::image::compare<ArrayImage, buffer_t>,             /* tp_compare */
     (reprfunc)py::ext::image::repr<ArrayImage, buffer_t>,               /* tp_repr */
     0,                                                                  /* tp_as_number */
     py::ext::image::methods::sequence<ArrayImage>(),                    /* tp_as_sequence */
@@ -277,7 +277,7 @@ PyTypeObject ArrayBufferModel_Type = {
     0,                                                                      /* tp_print */
     0,                                                                      /* tp_getattr */
     0,                                                                      /* tp_setattr */
-    0,                                                                      /* tp_compare */
+    (cmpfunc)py::ext::buffer::compare<buffer_t, ArrayBufferModel>,          /* tp_compare */
     (reprfunc)py::ext::buffer::repr<buffer_t, ArrayBufferModel>,            /* tp_repr */
     0,                                                                      /* tp_as_number */
     py::ext::buffer::methods::sequence<buffer_t, ArrayBufferModel>(),       /* tp_as_sequence */

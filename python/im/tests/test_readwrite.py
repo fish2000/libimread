@@ -23,7 +23,7 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "jpg" })
                 # self.assertIsNotNone(data)
     
@@ -32,7 +32,7 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.pngs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "jpg" })
                 # self.assertIsNotNone(data)
     
@@ -41,7 +41,7 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "png" })
                 # self.assertIsNotNone(data)
     
@@ -50,7 +50,7 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.pngs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "png" })
                 # self.assertIsNotNone(data)
     
@@ -59,7 +59,7 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "tif" })
                 # self.assertIsNotNone(data)
     
@@ -68,21 +68,22 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "png" })
                 image2 = ImageType(data, is_blob=True)
-                self.assertIsNotNone(image2)
-                self.assertEqual(image.shape, image2.shape)
+                # self.assertIsNotNone(image2)
+                # self.assertEqual(image.shape, image2.shape)
+                self.assertEqual(image, image2)
     
     def test_load_png_write_blob_png_readback(self):
         ''' Load PNG files, write PNG blobs with readback '''
         for ImageType in self.imagetypes:
             for image_path in self.pngs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "png" })
                 image2 = ImageType(data, is_blob=True)
-                self.assertIsNotNone(image2)
+                # self.assertIsNotNone(image2)
                 # self.assertEqual(image.shape[:2], image2.shape[:2])
                 self.assertEqual(image.width, image2.width)
                 self.assertEqual(image.height, image2.height)
@@ -92,49 +93,52 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "jpg" })
                 image2 = ImageType(data, is_blob=True)
-                self.assertIsNotNone(image2)
-                self.assertEqual(image.shape, image2.shape)
+                # self.assertIsNotNone(image2)
+                # self.assertEqual(image.shape, image2.shape)
+                self.assertEqual(image, image2)
     
     def _test_load_tif_write_blob_png_readback(self):
         ''' Load TIFF files, write PNG blobs with readback '''
         for ImageType in self.imagetypes:
             for image_path in self.tifs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "png" })
                 image2 = ImageType(data, is_blob=True)
-                self.assertIsNotNone(image2)
-                self.assertEqual(image.shape, image2.shape)
-                self.assertEqual(image.width, image2.width)
-                self.assertEqual(image.height, image2.height)
-                self.assertEqual(image.planes, image2.planes)
+                # self.assertIsNotNone(image2)
+                # self.assertEqual(image.shape, image2.shape)
+                # self.assertEqual(image.width, image2.width)
+                # self.assertEqual(image.height, image2.height)
+                # self.assertEqual(image.planes, image2.planes)
+                self.assertEqual(image, image2)
     
     def _test_load_tif_write_blob_jpg_readback(self):
         ''' Load TIFF files, write PNG blobs with readback '''
         for ImageType in self.imagetypes:
             for image_path in self.tifs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "jpg" })
                 image2 = ImageType(data, is_blob=True)
-                self.assertIsNotNone(image2)
-                self.assertEqual(image.shape, image2.shape)
-                self.assertEqual(image.width, image2.width)
-                self.assertEqual(image.height, image2.height)
-                self.assertEqual(image.planes, image2.planes)
+                # self.assertIsNotNone(image2)
+                # self.assertEqual(image.shape, image2.shape)
+                # self.assertEqual(image.width, image2.width)
+                # self.assertEqual(image.height, image2.height)
+                # self.assertEqual(image.planes, image2.planes)
+                self.assertEqual(image, image2)
     
     def test_load_tif_write_blob_tif_readback(self):
         ''' Load TIFF files, write TIFF blobs with readback '''
         for ImageType in self.imagetypes:
             for image_path in self.tifs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "tif" })
                 image2 = ImageType(data, is_blob=True)
-                self.assertIsNotNone(image2)
+                # self.assertIsNotNone(image2)
                 """ BUGGG: height and width are reversed, e.g.:
                     image.width  == image2.height &&
                     image.height == image2.width
@@ -147,21 +151,22 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.pngs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "jpg" })
                 image2 = ImageType(data, is_blob=True)
-                self.assertIsNotNone(image2)
+                imageX = image.has_alpha and image.remove_alpha() or image
+                # self.assertIsNotNone(image2)
                 self.assertEqual(image.width, image2.width)
                 self.assertEqual(image.height, image2.height)
                 """ BUGGG: deal with alpha channels """
-                # self.assertEqual(image.planes, image2.planes)
+                self.assertEqual(imageX.planes, image2.planes)
     
     def test_load_jpg_write_blob_tif_readback(self):
         ''' Load JPG files, write TIF blobs with readback '''
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 data = image.write(as_blob=True, options={ 'format' : "tif" })
                 image2 = ImageType(data, is_blob=True)
                 self.assertIsNotNone(image2)
@@ -174,7 +179,7 @@ class ReadWriteTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 image.write(as_blob=True, options={ 'format' : "tif", 'tiff:metadata'            : True,
                                                                       'metadata'                 : "YO DOGG",
                                                                       'tiff:software-signature'  : "I HEARD YOU LIKE METADATA" })
