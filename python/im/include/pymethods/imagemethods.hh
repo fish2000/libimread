@@ -283,22 +283,18 @@ namespace py {
                 /// create and set a dtype based on the loaded image data's type
                 Py_CLEAR(pyim->dtype);
                 pyim->dtype = PyArray_DescrFromType(pyim->image->dtype());
-                Py_INCREF(pyim->dtype);
                 
                 /// allocate a new image buffer
                 Py_CLEAR(pyim->imagebuffer);
                 pyim->imagebuffer = py::convert(new imagebuffer_t(pyim->image));
-                Py_INCREF(pyim->imagebuffer);
                 
                 /// store the read options dict
                 Py_CLEAR(pyim->readoptDict);
-                pyim->readoptDict = options ? options : PyDict_New();
-                Py_INCREF(pyim->readoptDict);
+                pyim->readoptDict = options ? py::object(options) : PyDict_New();
                 
                 /// ... and now OK, store an empty write options dict
                 Py_CLEAR(pyim->writeoptDict);
                 pyim->writeoptDict = PyDict_New();
-                Py_INCREF(pyim->writeoptDict);
                 
                 /// ALL IS WELL:
                 return 0;

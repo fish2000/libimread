@@ -41,8 +41,10 @@ namespace py {
             
             void operator delete(void* voidself) {
                 BufferModelBase* self = reinterpret_cast<BufferModelBase*>(voidself);
-                PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
-                if (self->weakrefs != nullptr) { PyObject_ClearWeakRefs(pyself); }
+                PyObject* pyself = py::convert(self);
+                if (self->weakrefs != nullptr) {
+                    PyObject_ClearWeakRefs(pyself);
+                }
                 self->cleanup();
                 type_ptr()->tp_free(pyself);
             }
@@ -105,7 +107,7 @@ namespace py {
             }
             
             void cleanup(bool force = false) {
-                if (clean && !force) {
+                if (clean || !force) {
                     internal.release();
                 } else {
                     internal.reset(nullptr);

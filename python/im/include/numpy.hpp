@@ -92,9 +92,10 @@ namespace py {
             PyArrayInterface* out   = nullptr;
             void* data              = image.rowp(0);
             int ndims               = image.ndims();
+            int nbytes              = image.nbytes();
             int flags               = include_descriptor ? NPY_ARR_HAS_DESCR : 0;
             NPY_TYPES typecode      = image.dtype();
-            NPY_TYPECHAR typechar   = typecode::typechar(typecode);
+            char typechar           = (char)typecode::typechar(typecode);
             char const* structcode  = im::detail::structcode(typecode);
             PyObject* descriptor    = nullptr;
             
@@ -103,12 +104,9 @@ namespace py {
                 descriptor = py::detail::structcode_to_dtype(structcode);
             }
             
-            out = new PyArrayInterface {
-                2,                          /// brought to you by
-                ndims,
-                (char)typechar,
-                sizeof(uint8_t),            /// need to not hardcode this
-                flags,
+            out = new PyArrayInterface { 2,
+                ndims,  typechar,
+                nbytes, flags,
                 new Py_intptr_t[ndims],     /// shape
                 new Py_intptr_t[ndims],     /// strides
                 data,                       /// void* data

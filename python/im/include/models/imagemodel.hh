@@ -63,8 +63,10 @@ namespace py {
                 
                 void operator delete(void* voidself) {
                     BufferModel* self = reinterpret_cast<BufferModel*>(voidself);
-                    PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
-                    if (self->weakrefs != nullptr) { PyObject_ClearWeakRefs(pyself); }
+                    PyObject* pyself = py::convert(self);
+                    if (self->weakrefs != nullptr) {
+                        PyObject_ClearWeakRefs(pyself);
+                    }
                     self->cleanup();
                     FactoryType::buffer_type()->tp_free(pyself);
                 }
@@ -192,8 +194,10 @@ namespace py {
             
             void operator delete(void* voidself) {
                 ImageModelBase* self = reinterpret_cast<ImageModelBase*>(voidself);
-                PyObject* pyself = reinterpret_cast<PyObject*>(voidself);
-                if (self->weakrefs != nullptr) { PyObject_ClearWeakRefs(pyself); }
+                PyObject* pyself = py::convert(self);
+                if (self->weakrefs != nullptr) {
+                    PyObject_ClearWeakRefs(pyself);
+                }
                 self->cleanup();
                 FactoryType::image_type()->tp_free(pyself);
             }
@@ -232,10 +236,6 @@ namespace py {
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
-                    Py_INCREF(dtype);
-                    Py_INCREF(imagebuffer);
-                    Py_INCREF(readoptDict);
-                    Py_INCREF(writeoptDict);
                     PyDict_Update(readoptDict,  other.readoptDict);
                     PyDict_Update(writeoptDict, other.writeoptDict);
                 }
@@ -250,12 +250,7 @@ namespace py {
                 ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
-                {
-                    Py_INCREF(dtype);
-                    Py_INCREF(imagebuffer);
-                    Py_INCREF(readoptDict);
-                    Py_INCREF(writeoptDict);
-                }
+                {}
             
             /// Plane-merge constructor:
             /// Construct a new ImageModelBase instance by appending the planes
@@ -269,12 +264,7 @@ namespace py {
                 ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
-                {
-                    Py_INCREF(dtype);
-                    Py_INCREF(imagebuffer);
-                    Py_INCREF(readoptDict);
-                    Py_INCREF(writeoptDict);
-                }
+                {}
             
             /// Move constructor:
             /// Steal all the resources of the other instance and populate
@@ -311,12 +301,7 @@ namespace py {
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 ,clean(false)
-                {
-                    Py_INCREF(dtype);
-                    Py_INCREF(imagebuffer);
-                    Py_INCREF(readoptDict);
-                    Py_INCREF(writeoptDict);
-                }
+                {}
             
             /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
             explicit ImageModelBase(PyObject* buffer, typename Tag::FromBuffer)
@@ -362,10 +347,6 @@ namespace py {
                 ,writeoptDict(PyDict_New())
                 ,clean(false)
                 {
-                    Py_INCREF(dtype);
-                    Py_INCREF(imagebuffer);
-                    Py_INCREF(readoptDict);
-                    Py_INCREF(writeoptDict);
                     if (value > -1) {
                         py::gil::release nogil;
                         std::memset(image->rowp(0), value,
@@ -415,11 +396,11 @@ namespace py {
             }
             
             void cleanup(bool force = false) {
-                if (!clean || force) {
-                    Py_DECREF(dtype);
-                    Py_DECREF(imagebuffer);
-                    Py_DECREF(readoptDict);
-                    Py_DECREF(writeoptDict);
+                if (!clean && force) {
+                    Py_CLEAR(dtype);
+                    Py_CLEAR(imagebuffer);
+                    Py_CLEAR(readoptDict);
+                    Py_CLEAR(writeoptDict);
                     clean = !force;
                 }
             }
