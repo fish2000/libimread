@@ -646,6 +646,8 @@ namespace py {
                 DECLARE_CLOSURE(INTERFACE);
                 DECLARE_CLOSURE(MODE);
                 DECLARE_CLOSURE(HAS_ALPHA);
+                DECLARE_CLOSURE(BITS);
+                DECLARE_CLOSURE(BYTES);
             }
             
             /// ImageType.{mode,has_alpha} getter
@@ -655,6 +657,16 @@ namespace py {
             PyObject*    get_mode_property(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 return CHECK_CLOSURE(MODE) ? pyim->mode() : pyim->has_alpha();
+            }
+            
+            /// ImageType.{bits,bytes} getter
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    get_size_property(PyObject* self, void* closure) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return py::convert(CHECK_CLOSURE(BITS) ? pyim->image->nbits() :
+                                                         pyim->image->nbytes());
             }
             
             /// ImageType.{dtype,buffer} getter
@@ -825,6 +837,18 @@ namespace py {
                                 nullptr,
                                 (char*)"NumPy array struct (C-level API) -> PyCObject\n",
                                 BIND_CLOSURE(STRUCT) },
+                        {
+                            (char*)"bits",
+                                (getter)py::ext::image::get_size_property<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image element size (in bits) -> int\n",
+                                BIND_CLOSURE(BITS) },
+                        {
+                            (char*)"bytes",
+                                (getter)py::ext::image::get_size_property<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image element size (in bytes) -> int\n",
+                                BIND_CLOSURE(BYTES) },
                         {
                             (char*)"mode",
                                 (getter)py::ext::image::get_mode_property<ImageType, BufferType>,
