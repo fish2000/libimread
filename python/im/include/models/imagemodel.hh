@@ -416,10 +416,10 @@ namespace py {
             
             void cleanup(bool force = false) {
                 if (!clean || force) {
-                    Py_CLEAR(dtype);
-                    Py_CLEAR(imagebuffer);
-                    Py_CLEAR(readoptDict);
-                    Py_CLEAR(writeoptDict);
+                    Py_DECREF(dtype);
+                    Py_DECREF(imagebuffer);
+                    Py_DECREF(readoptDict);
+                    Py_DECREF(writeoptDict);
                     clean = !force;
                 }
             }
@@ -566,7 +566,7 @@ namespace py {
                 
                 if (!can_read) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_ValueError,
+                    PyErr_Format(PyExc_IOError,
                         "Unimplemented read() in I/O format %s",
                         mime.c_str());
                 } else if (!exists) {
@@ -609,7 +609,7 @@ namespace py {
                 
                 if (format.get()) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_ValueError,
+                    PyErr_Format(PyExc_IOError,
                         "Unimplemented read() in I/O format %s",
                         mime.c_str());
                 } else {
@@ -646,7 +646,7 @@ namespace py {
                 
                 if (format.get()) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_ValueError,
+                    PyErr_Format(PyExc_IOError,
                         "Unimplemented read() in I/O format %s",
                         mime.c_str());
                 } else {
@@ -667,6 +667,11 @@ namespace py {
                     py::gil::release nogil;
                     format = im::for_filename(destination);
                     can_write = format->format_can_write();
+                    exists = path::exists(destination);
+                    overwrite = opts.cast<bool>("overwrite", overwrite);
+                    if (can_write && exists && overwrite) {
+                        path::remove(destination);
+                    }
                 } catch (im::FormatNotFound& exc) {
                     PyErr_Format(PyExc_ValueError,
                         "Can't find I/O format for file: %s",
@@ -676,16 +681,10 @@ namespace py {
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_ValueError,
+                    PyErr_Format(PyExc_IOError,
                         "Unimplemented write() in I/O format %s",
                         mime.c_str());
                     return false;
-                }
-                
-                {
-                    py::gil::release nogil;
-                    exists = path::exists(destination);
-                    overwrite = opts.cast<bool>("overwrite", true);
                 }
                 
                 if (exists && !overwrite) {
@@ -694,9 +693,9 @@ namespace py {
                         destination);
                     return false;
                 }
+                
                 {
                     py::gil::release nogil;
-                    if (exists && overwrite) { path::remove(destination); }
                     std::unique_ptr<FileSink> output(new FileSink(destination));
                     default_opts = format->add_options(opts);
                     format->write(dynamic_cast<Image&>(*image.get()),
@@ -715,7 +714,7 @@ namespace py {
                 
                 if (!opts.has("format")) {
                     PyErr_SetString(PyExc_AttributeError,
-                        "Output format unspecified in options dict");
+                        "Output format unspecified");
                     return false;
                 }
                 
@@ -740,7 +739,7 @@ namespace py {
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_ValueError,
+                    PyErr_Format(PyExc_IOError,
                         "Unimplemented write() in I/O format %s",
                         mime.c_str());
                 }
@@ -753,13 +752,14 @@ namespace py {
                 std::string ext, pth;
                 options_map default_opts;
                 bool can_write = false,
+                     exists = false,
                      removed = false,
                      as_url = false,
                      as_html = false;
                 
                 if (!opts.has("format")) {
                     PyErr_SetString(PyExc_AttributeError,
-                        "Output format unspecified in options dict");
+                        "Output format unspecified");
                     return nullptr;
                 }
                 
@@ -777,7 +777,7 @@ namespace py {
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_ValueError,
+                    PyErr_Format(PyExc_IOError,
                         "Unimplemented write() in I/O format %s",
                         mime.c_str());
                     return nullptr;
@@ -792,15 +792,13 @@ namespace py {
                     pth = std::string(tf.filepath.make_absolute().str());
                     tf.filepath.remove();
                     auto output = std::make_unique<FileSink>(pth.c_str());
-                    
                     default_opts = format->add_options(opts);
                     format->write(dynamic_cast<Image&>(*image.get()),
                                                        output.get(), default_opts);
-                    output->flush();
-                    output->close();
+                    exists = path::exists(pth);
                 }
                 
-                if (!path::exists(pth)) {
+                if (!exists) {
                     PyErr_SetString(PyExc_IOError,
                         "Temporary file is AWOL");
                     return nullptr;
@@ -810,7 +808,6 @@ namespace py {
                     py::gil::release nogil;
                     auto readback = std::make_unique<FileSource>(pth.c_str());
                     data = readback->full_data();
-                    readback->close();
                     tf.close();
                     removed = tf.remove();
                 }
@@ -821,7 +818,7 @@ namespace py {
                     return nullptr;
                 }
                 
-                as_html = opts.cast<bool>("as_html", false);
+                as_html = opts.cast<bool>("as_html", as_html);
                 as_url = opts.cast<bool>("as_url", as_html);
                 if (!as_url) { return py::string(data); }
                 
