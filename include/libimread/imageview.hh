@@ -36,33 +36,13 @@ namespace im {
             using weak_imageview_t   = std::weak_ptr<ImageView>;
             using imageview_ptr_t    = std::add_pointer_t<ImageView>;
             
-            ImageView(ImageView const& other)
-                :source(other.source)
-                {}
-                
-            ImageView(ImageView&& other) noexcept
-                :source(std::move(other.source))
-                {}
+            ImageView(ImageView const& other);
+            ImageView(ImageView&& other) noexcept;
+            explicit ImageView(Image* image);
             
-            explicit ImageView(Image* image)
-                :source(image)
-                {}
-            
-            ImageView& operator=(ImageView const& other) {
-                ImageView(other).swap(*this);
-                return *this;
-            }
-            
-            ImageView& operator=(ImageView&& other) noexcept {
-                ImageView(std::move(other)).swap(*this);
-                return *this;
-            }
-            
-            /// take ownership when assigned with an image pointer
-            ImageView& operator=(Image* image_ptr) {
-                source = image_ptr;
-                return *this;
-            }
+            ImageView& operator=(ImageView const& other);
+            ImageView& operator=(ImageView&& other) noexcept;
+            ImageView& operator=(Image* image_ptr);
             
             /// delegate the core Image API methods
             /// back to the source image
@@ -86,14 +66,8 @@ namespace im {
             virtual shared_imageview_t shared();
             virtual weak_imageview_t weak();
             
-            void swap(ImageView& other) {
-                using std::swap;
-                swap(source, other.source);
-            }
-            friend void swap(ImageView& lhs, ImageView& rhs) {
-                using std::swap;
-                swap(lhs.source, rhs.source);
-            }
+            void swap(ImageView& other);
+            friend void swap(ImageView& lhs, ImageView& rhs);
             
         protected:
             Image* source;

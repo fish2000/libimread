@@ -6,6 +6,33 @@
 
 namespace im {
     
+    ImageView::ImageView(ImageView const& other)
+        :source(other.source)
+        {}
+        
+    ImageView::ImageView(ImageView&& other) noexcept
+        :source(std::move(other.source))
+        {}
+    
+    ImageView::ImageView(Image* image)
+        :source(image)
+        {}
+    
+    ImageView& ImageView::operator=(ImageView const& other) {
+        ImageView(other).swap(*this);
+        return *this;
+    }
+    
+    ImageView& ImageView::operator=(ImageView&& other) noexcept {
+        ImageView(std::move(other)).swap(*this);
+        return *this;
+    }
+    
+    ImageView& ImageView::operator=(Image* image_ptr) {
+        source = image_ptr;
+        return *this;
+    }
+    
     void* ImageView::rowp(int r) const {
         return source->rowp(r);
     }
@@ -68,5 +95,16 @@ namespace im {
         return weak_imageview_t(
                std::const_pointer_cast<ImageView>(shared_from_this()));
     }
+    
+    void ImageView::swap(ImageView& other) {
+        using std::swap;
+        swap(source, other.source);
+    }
+    
+    void swap(ImageView& lhs, ImageView& rhs) {
+        using std::swap;
+        swap(lhs.source, rhs.source);
+    }
+    
     
 } /* namespace im */
