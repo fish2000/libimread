@@ -63,8 +63,7 @@ namespace im {
             floatva_t histofloat = histogram * histosize;
             floatva_t divisor = histofloat.apply([](float d) -> float {
                 float out = d * std::log(d);
-                if (std::isnan(out)) { return 0.00; }
-                return out;
+                return std::isnan(out) ? 0.00 : out;
             });
             entropy_value = -divisor.sum();
             entropy_calculated = true;
