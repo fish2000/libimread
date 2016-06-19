@@ -43,6 +43,22 @@ namespace im {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
     }
     
+    Image::shared_image_t Image::shared() {
+        return shared_from_this();
+    }
+    
+    Image::const_shared_image_t Image::shared() const {
+        return shared_from_this();
+    }
+    
+    Image::weak_image_t Image::weak() {
+        return weak_image_t(shared_from_this());
+    }
+    
+    Image::const_weak_image_t Image::weak() const {
+        return const_weak_image_t(shared_from_this());
+    }
+    
     ImageFactory::~ImageFactory() {}
     
     ImageWithMetadata::ImageWithMetadata()

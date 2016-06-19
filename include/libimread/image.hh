@@ -17,9 +17,27 @@
 
 namespace im {
     
-    class Image {
+    class Image : public std::enable_shared_from_this<Image> {
         
         public:
+            using unique_image_t = std::unique_ptr<Image>;
+            using shared_image_t = std::shared_ptr<Image>;
+            using weak_image_t   = std::weak_ptr<Image>;
+            using image_ptr_t    = std::add_pointer_t<Image>;
+            
+            using const_unique_image_t = std::unique_ptr<Image const>;
+            using const_shared_image_t = std::shared_ptr<Image const>;
+            using const_weak_image_t   = std::weak_ptr<Image const>;
+            using const_image_ptr_t    = std::add_pointer_t<Image const>;
+            
+            // enum class Type : std::size_t {
+            //     UINT8   = sizeof(uint8_t),
+            //     INT32   = sizeof(int32_t),
+            //     FLOAT   = 128+sizeof(float),
+            //     DOUBLE  = 128+sizeof(double),
+            //     VOIDPTR = 256+sizeof(std::ptrdiff_t)
+            // };
+            
             virtual ~Image() {}
             
             virtual void* rowp(int r) const = 0;
@@ -29,6 +47,8 @@ namespace im {
             virtual int ndims() const = 0;
             virtual int dim(int) const = 0;
             virtual int stride(int) const = 0;
+            virtual bool is_signed() const = 0;
+            virtual bool is_floating_point() const = 0;
             
             virtual int dim_or(int dim, int default_value = 1) const;
             virtual int stride_or(int dim, int default_value = 1) const;
@@ -36,6 +56,11 @@ namespace im {
             virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
+            
+            virtual shared_image_t shared();
+            virtual const_shared_image_t shared() const;
+            virtual weak_image_t weak();
+            virtual const_weak_image_t weak() const;
             
             template <typename T> inline
             T* rowp_as(const int r) const {

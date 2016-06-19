@@ -10,6 +10,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdint>
+#include <type_traits>
 
 #include <Halide.h>
 
@@ -156,6 +157,14 @@ namespace im {
                 return halide_image_t::stride(s);
             }
             
+            virtual bool is_signed() const override {
+                return std::is_signed<pT>::value;
+            }
+            
+            virtual bool is_floating_point() const override {
+                return std::is_floating_point<pT>::value;
+            }
+            
             inline off_t rowp_stride() const {
                 return halide_image_t::channels() == 1 ? 0 : off_t(halide_image_t::stride(1));
             }
@@ -236,6 +245,18 @@ namespace im {
             HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output.get()));
             image.set_host_dirty();
             return image;
+        }
+        
+        template <typename T = byte> inline
+        std::unique_ptr<Image> unique(std::string const& filename,
+                                      options_map const& opts = halide_default_opts) {
+            HalideFactory<T> factory(filename);
+            std::unique_ptr<ImageFormat> format(for_filename(filename));
+            std::unique_ptr<FileSource> input(new FileSource(filename));
+            options_map default_opts = format->add_options(opts);
+            std::unique_ptr<Image> out = format->read(input.get(), &factory, default_opts);
+            // out->set_host_dirty();
+            return out;
         }
         
         template <typename T = byte> inline

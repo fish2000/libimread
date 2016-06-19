@@ -10,8 +10,8 @@ source "${PRAXONS}/gmalloc.sh"
 PROJECT_PATH="/Users/fish/Dropbox/libimread"
 
 : ${APPS:="OFF"}
-: ${COLOR_TRACE:="OFF"}
-: ${VERBOSE:="OFF"}
+: ${COLOR_TRACE:="ON"}
+: ${VERBOSE:="ON"}
 : ${TERMINATOR:="ON"}
 
 pushd $PROJECT_PATH

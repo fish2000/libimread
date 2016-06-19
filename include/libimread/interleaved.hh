@@ -675,6 +675,14 @@ namespace im {
                 return stride_(s);
             }
             
+            virtual bool is_signed() const override {
+                return std::is_signed<channel_t>::value;
+            }
+            
+            virtual bool is_floating_point() const override {
+                return std::is_floating_point<channel_t>::value;
+            }
+            
             inline off_t rowp_stride() const {
                 return off_t(meta.strides[1]);
             }

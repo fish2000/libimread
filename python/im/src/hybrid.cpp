@@ -254,6 +254,16 @@ namespace im {
         return HalBase::stride(s);
     }
     
+    bool HalideNumpyImage::is_signed() const {
+        /// If it's not UInt, it's signed --
+        /// it's either Float, Int, or someshit.
+        return !HalBase::buffer.type().is_uint();
+    }
+    
+    bool HalideNumpyImage::is_floating_point() const {
+        return HalBase::buffer.type().is_float();
+    }
+    
     off_t HalideNumpyImage::rowp_stride() const {
         return HalBase::channels() == 1 ? 0 : off_t(HalBase::stride(1));
     }
@@ -728,6 +738,14 @@ namespace im {
     
     int ArrayImage::stride(int s) const {
         return PyArray_STRIDE(array, s);
+    }
+    
+    bool ArrayImage::is_signed() const {
+        return !type().is_uint();
+    }
+    
+    bool ArrayImage::is_floating_point() const {
+        return type().is_float();
     }
     
     void* ArrayImage::rowp(int r) const {
