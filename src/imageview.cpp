@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/imageview.hh>
+#include <libimread/histogram.hh>
 #include <libimread/image.hh>
 
 namespace im {
@@ -94,6 +95,10 @@ namespace im {
     ImageView::weak_imageview_t ImageView::weak() {
         return weak_imageview_t(
                std::const_pointer_cast<ImageView>(shared_from_this()));
+    }
+    
+    ImageView::shared_histogram_t ImageView::histogram() {
+        return std::make_shared<Histogram>(source);
     }
     
     void ImageView::swap(ImageView& other) {

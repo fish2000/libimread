@@ -3,10 +3,12 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <unordered_map>
 
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 #include <libimread/imageview.hh>
+#include <libimread/histogram.hh>
 #include <libimread/halide.hh>
 #include <libimread/image.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -30,13 +32,14 @@ namespace {
     using unique_hybridimage_t = std::unique_ptr<HybridImage>;
     using shared_hybridimage_t = std::shared_ptr<HybridImage>;
     using im::ImageView;
+    using im::Histogram;
     using unique_t = std::unique_ptr<ImageView>;
     using shared_t = std::shared_ptr<ImageView>;
+    using histogram_t = std::shared_ptr<Histogram>;
     
     TEST_CASE("[imageview] Create shared ImageView from an Image",
               "[imageview-create-shared-imageview-from-image]")
     {
-        // filesystem::TemporaryDirectory td("test-imageview");
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         const std::vector<path> jpgs = basedir.list("*.jpg");
@@ -82,5 +85,34 @@ namespace {
     }
     
     
+    TEST_CASE("[imageview] Calculate Histogram data from Image using ImageView",
+              "[imageview-calculate-histogram-data-from-image-using-imageview]")
+    {
+        path basedir(im::test::basedir);
+        const std::vector<path> pngs = basedir.list("*.png");
+        const std::vector<path> jpgs = basedir.list("*.jpg");
+        std::unordered_map<path, float> entropies;
+        
+        /// 20 'nanf' values so far
+        
+        std::for_each(pngs.begin(), pngs.end(), [&](path const& p) {
+            path imagepath = basedir/p;
+            auto png = im::halide::unique(imagepath);
+            shared_t png_view = std::make_shared<ImageView>(png.get());
+            histogram_t histo = png_view->histogram();
+            CHECK(histo->entropy() != 0.00);
+            entropies.insert({ imagepath, histo->entropy() });
+        });
+        
+        std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
+            path imagepath = basedir/p;
+            auto jpg = im::halide::unique(imagepath);
+            shared_t jpg_view = std::make_shared<ImageView>(jpg.get());
+            histogram_t histo = jpg_view->histogram();
+            CHECK(histo->entropy() != 0.00);
+            entropies.insert({ imagepath, histo->entropy() });
+        });
+        
+    }
     
 };
