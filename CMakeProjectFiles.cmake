@@ -172,6 +172,7 @@ set(hdrs
     ${hdrs_dir}/histogram.hh
     ${hdrs_dir}/image.hh
     ${hdrs_dir}/imageformat.hh
+    ${hdrs_dir}/imagelist.hh
     ${hdrs_dir}/imageview.hh
     ${hdrs_dir}/interleaved.hh
     ${hdrs_dir}/iterators.hh
@@ -267,6 +268,7 @@ set(srcs
     ${srcs_dir}/histogram.cpp
     ${srcs_dir}/image.cpp
     ${srcs_dir}/imageformat.cpp
+    ${srcs_dir}/imagelist.cpp
     ${srcs_dir}/imageview.cpp
     # ${srcs_dir}/interleaved.cpp
     ${srcs_dir}/iterators.cpp

@@ -15,6 +15,7 @@
 #include <libimread/ext/base64.hh>
 #include <libimread/seekable.hh>
 #include <libimread/image.hh>
+#include <libimread/imagelist.hh>
 #include <libimread/symbols.hh>
 #include <libimread/options.hh>
 #include <libimread/traits.hh>

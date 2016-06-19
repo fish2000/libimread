@@ -14,6 +14,7 @@
 #include <libimread/errors.hh>
 #include <libimread/seekable.hh>
 #include <libimread/image.hh>
+#include <libimread/imagelist.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/traits.hh>
 #include <libimread/symbols.hh>
