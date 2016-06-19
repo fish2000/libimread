@@ -17,7 +17,7 @@
 
 namespace im {
     
-    class Image : public std::enable_shared_from_this<Image> {
+    class Image {
         
         public:
             using unique_image_t = std::unique_ptr<Image>;
@@ -30,17 +30,10 @@ namespace im {
             using const_weak_image_t   = std::weak_ptr<Image const>;
             using const_image_ptr_t    = std::add_pointer_t<Image const>;
             
-            // enum class Type : std::size_t {
-            //     UINT8   = sizeof(uint8_t),
-            //     INT32   = sizeof(int32_t),
-            //     FLOAT   = 128+sizeof(float),
-            //     DOUBLE  = 128+sizeof(double),
-            //     VOIDPTR = 256+sizeof(std::ptrdiff_t)
-            // };
-            
             virtual ~Image() {}
             
             virtual void* rowp(int r) const = 0;
+            virtual void* rowp() const;
             virtual int nbits() const = 0;
             
             virtual int nbytes() const;
@@ -56,11 +49,6 @@ namespace im {
             virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
-            
-            virtual shared_image_t shared();
-            virtual const_shared_image_t shared() const;
-            virtual weak_image_t weak();
-            virtual const_weak_image_t weak() const;
             
             template <typename T> inline
             T* rowp_as(const int r) const {

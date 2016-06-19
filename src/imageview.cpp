@@ -6,18 +6,6 @@
 
 namespace im {
     
-    ImageView::ImageView(ImageView::shared_image_t shared_image)
-        :source(shared_image->shared())
-        {}
-    
-    ImageView::ImageView(ImageView::const_shared_image_t shared_image)
-        :source(shared_image->shared())
-        {}
-    
-    ImageView::ImageView(ImageView::const_unique_image_t unique_image, typename ImageView::Tag::Unique)
-        :source(std::move(unique_image))
-        {}
-    
     void* ImageView::rowp(int r) const {
         return source->rowp(r);
     }
@@ -80,13 +68,13 @@ namespace im {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
     }
     
-    ImageView::shared_image_t ImageView::shared() {
-        return std::const_pointer_cast<Image>(source->shared());
+    ImageView::shared_imageview_t ImageView::shared() {
+        return std::const_pointer_cast<ImageView>(shared_from_this());
     }
     
-    ImageView::weak_image_t ImageView::weak() {
-        return weak_image_t(
-               std::const_pointer_cast<Image>(source->shared()));
+    ImageView::weak_imageview_t ImageView::weak() {
+        return weak_imageview_t(
+               std::const_pointer_cast<ImageView>(shared_from_this()));
     }
     
 } /* namespace im */

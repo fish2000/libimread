@@ -168,6 +168,7 @@ set(hdrs
     ${hdrs_dir}/formats.hh
     ${hdrs_dir}/halide.hh
     ${hdrs_dir}/hashing.hh
+    ${hdrs_dir}/histogram.hh
     ${hdrs_dir}/image.hh
     ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/imageview.hh
@@ -262,6 +263,7 @@ set(srcs
     ${srcs_dir}/formats.cpp
     # ${srcs_dir}/halide.cpp
     ${srcs_dir}/hashing.cpp
+    ${srcs_dir}/histogram.cpp
     ${srcs_dir}/image.cpp
     ${srcs_dir}/imageformat.cpp
     ${srcs_dir}/imageview.cpp

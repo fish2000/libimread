@@ -12,6 +12,10 @@ namespace im {
         using rehasher_t = hash::rehasher<ImageList::pointer_t>;
     }
     
+    void* Image::rowp() const {
+        return this->rowp(0);
+    }
+    
     int Image::nbytes() const {
         const int bits = this->nbits();
         return (bits / 8) + bool(bits % 8);
@@ -41,22 +45,6 @@ namespace im {
     
     int Image::size() const {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
-    }
-    
-    Image::shared_image_t Image::shared() {
-        return shared_from_this();
-    }
-    
-    Image::const_shared_image_t Image::shared() const {
-        return shared_from_this();
-    }
-    
-    Image::weak_image_t Image::weak() {
-        return weak_image_t(shared_from_this());
-    }
-    
-    Image::const_weak_image_t Image::weak() const {
-        return const_weak_image_t(shared_from_this());
     }
     
     ImageFactory::~ImageFactory() {}

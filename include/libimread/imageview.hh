@@ -14,10 +14,9 @@ namespace im {
     
     class Image;
     
-    class ImageView {
+    class ImageView : public std::enable_shared_from_this<ImageView> {
         
         public:
-            // friend class Image;
             struct Tag {
                 struct Shared   {};
                 struct Unique   {};
@@ -33,6 +32,10 @@ namespace im {
             using const_weak_image_t   = std::weak_ptr<Image const>;
             using const_image_ptr_t    = std::add_pointer_t<Image const>;
             
+            using shared_imageview_t = std::shared_ptr<ImageView>;
+            using weak_imageview_t   = std::weak_ptr<ImageView>;
+            using imageview_ptr_t    = std::add_pointer_t<ImageView>;
+            
             ImageView(ImageView const& other)
                 :source(other.source)
                 {}
@@ -41,26 +44,13 @@ namespace im {
                 :source(std::move(other.source))
                 {}
             
-            // template <typename ImageType>
-            // explicit ImageView(ImageType const& image)
-            //     :source(new ImageType(image))
-            //     {}
-            
-            // explicit ImageView(Image const& image)
-            //     :ImageView(new ImageView(image, typename Tag::Heap{}), typename Tag::Heap{})
-            //     {}
-            //
-            // explicit ImageView(Image const& image, typename Tag::Heap)
-            //     :source(image)
-            //     {}
-            //
             explicit ImageView(Image* image)
                 :source(image)
                 {}
             
-            explicit ImageView(shared_image_t shared_image);
-            explicit ImageView(const_shared_image_t shared_image);
-            explicit ImageView(const_unique_image_t unique_image, typename Tag::Unique);
+            // explicit ImageView(shared_image_t shared_image);
+            // explicit ImageView(const_shared_image_t shared_image);
+            // explicit ImageView(const_unique_image_t unique_image, typename Tag::Unique);
             
             ImageView& operator=(ImageView const& other) {
                 ImageView(other).swap(*this);
@@ -74,7 +64,7 @@ namespace im {
             
             /// take ownership when assigned with an image pointer
             ImageView& operator=(Image* image_ptr) {
-                source = const_shared_image_t(image_ptr);
+                source = image_ptr;
                 return *this;
             }
             
@@ -96,8 +86,8 @@ namespace im {
             virtual int planes() const;
             virtual int size() const;
             
-            virtual shared_image_t shared();
-            virtual weak_image_t weak();
+            virtual shared_imageview_t shared();
+            virtual weak_imageview_t weak();
             
             void swap(ImageView& other) {
                 using std::swap;
@@ -109,7 +99,7 @@ namespace im {
             }
             
         protected:
-            const_shared_image_t source;
+            Image* source;
             ImageView(void);
     };
     

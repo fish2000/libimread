@@ -11,9 +11,10 @@ namespace im {
     Histogram::Histogram(Image* image)
         :data(std::valarray<byte>((byte*)image->rowp(),
                                          image->size()))
+        ,histogram(std::cref(flinitial), UCHAR_MAX)
         {
             std::for_each(std::begin(data), std::end(data),
-                          [&histogram](byte const& b) { histogram[b] += 1.0; });
+                          [this](byte const& b) { histogram[b] += 1.0; });
         }
     
     Histogram::begin_t Histogram::begin() {
@@ -40,17 +41,17 @@ namespace im {
         return histogram.max();
     }
     
-    float Histogram::entropy() const {
+    float Histogram::entropy() {
         if (!entropy_calculated) {
             float histosize = 1.0 / float(histogram.sum());
             std::valarray<float> histofloat = histogram * histosize;
             std::valarray<float> divisor = histofloat.apply([](float d) -> float {
                 return d * std::log2(d);
             });
-            entropy = -divisor.sum();
+            entropy_value = -divisor.sum();
             entropy_calculated = true;
         }
-        return entropy;
+        return entropy_value;
     }
     
     std::valarray<byte> const& Histogram::sourcedata() const {

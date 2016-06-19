@@ -4,10 +4,12 @@
 #ifndef LIBIMREAD_HISTOGRAM_HH_
 #define LIBIMREAD_HISTOGRAM_HH_
 
+#include <valarray>
 #include <iterator>
 #include <functional>
 #include <type_traits>
 #include <algorithm>
+#include <utility>
 
 #include <libimread/libimread.hpp>
 
@@ -91,8 +93,8 @@ namespace im {
     
     class Histogram {
         
-        using begin_t = decltype(std::begin(std::declval<std::valarray>(UCHAR_MAX)));
-        using   end_t = decltype(  std::end(std::declval<std::valarray>(UCHAR_MAX)));
+        using begin_t = decltype(std::begin(std::declval<std::valarray<float>>()));
+        using   end_t = decltype(  std::end(std::declval<std::valarray<float>>()));
         
         public:
             explicit Histogram(Image*);
@@ -103,17 +105,17 @@ namespace im {
             float sum() const;
             float min() const;
             float max() const;
-            float entropy() const;
+            float entropy();
             std::valarray<byte> const& sourcedata() const;
             std::valarray<float>& values();
             std::valarray<float> const& values() const;
         
         protected:
             float flinitial = 0.00000000;
-            float entropy = 0.0;
+            float entropy_value = 0.0;
             bool entropy_calculated = false;
             std::valarray<byte> data;
-            std::valarray<float> histogram(std::cref(flinitial), UCHAR_MAX);
+            std::valarray<float> histogram;
         
     };
     
