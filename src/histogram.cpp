@@ -5,6 +5,7 @@
 #include <numeric>
 #include <libimread/ext/valarray.hh>
 #include <libimread/histogram.hh>
+#include <libimread/errors.hh>
 #include <libimread/image.hh>
 #include <libimread/rehash.hh>
 
@@ -61,7 +62,9 @@ namespace im {
             float histosize = 1.0 / histogram.sum();
             floatva_t histofloat = histogram * histosize;
             floatva_t divisor = histofloat.apply([](float d) -> float {
-                return d * std::log2(d);
+                float out = d * std::log(d);
+                if (std::isnan(out)) { return 0.00; }
+                return out;
             });
             entropy_value = -divisor.sum();
             entropy_calculated = true;
