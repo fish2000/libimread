@@ -43,10 +43,15 @@ namespace im {
             byteva_t const& sourcedata() const;
             floatva_t& values();
             floatva_t const& values() const;
+            
+            /// noexcept member swap
+            void swap(Histogram& other) noexcept;
+            
+            /// member hash method
+            std::size_t hash(std::size_t seed = 0) const noexcept;
         
         protected:
             
-            float flinitial = 0.00000000;
             mutable float entropy_value = 0.0;
             mutable bool entropy_calculated = false;
             byteva_t data;
@@ -55,5 +60,28 @@ namespace im {
     };
     
 }
+
+namespace std {
+    
+    template <>
+    void swap(im::Histogram& p0, im::Histogram& p1) noexcept;
+    
+    /// std::hash specialization for im::Histogram
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<im::Histogram> {
+        
+        typedef im::Histogram argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& histogram) const {
+            return static_cast<result_type>(histogram.hash());
+        }
+        
+    };
+    
+}; /* namespace std */
 
 #endif /// LIBIMREAD_HISTOGRAM_HH_

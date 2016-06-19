@@ -235,7 +235,7 @@ namespace std {
     template <>
     void swap(im::ImageList& p0, im::ImageList& p1) noexcept;
     
-    /// std::hash specialization for filesystem::path
+    /// std::hash specialization for im::ImageList
     /// ... following the recipe found here:
     ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
     

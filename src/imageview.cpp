@@ -4,6 +4,7 @@
 #include <libimread/imageview.hh>
 #include <libimread/histogram.hh>
 #include <libimread/image.hh>
+#include <libimread/rehash.hh>
 
 namespace im {
     
@@ -101,6 +102,11 @@ namespace im {
         return std::make_shared<Histogram>(source);
     }
     
+    std::size_t ImageView::hash(std::size_t seed) const noexcept {
+        hash::rehash<ImageView::image_ptr_t>(seed, source);
+        return seed;
+    }
+    
     void ImageView::swap(ImageView& other) {
         using std::swap;
         swap(source, other.source);
@@ -110,6 +116,5 @@ namespace im {
         using std::swap;
         swap(lhs.source, rhs.source);
     }
-    
     
 } /* namespace im */

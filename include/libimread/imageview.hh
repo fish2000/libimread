@@ -69,6 +69,7 @@ namespace im {
             virtual weak_imageview_t weak();
             virtual shared_histogram_t histogram();
             
+            std::size_t hash(std::size_t seed = 0) const noexcept;
             void swap(ImageView& other);
             friend void swap(ImageView& lhs, ImageView& rhs);
             
@@ -79,5 +80,25 @@ namespace im {
     };
     
 }
+
+namespace std {
+    
+    /// std::hash specialization for im::ImageView
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<im::ImageView> {
+        
+        typedef im::ImageView argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& imageview) const {
+            return static_cast<result_type>(imageview.hash());
+        }
+        
+    };
+    
+}; /* namespace std */
 
 #endif /// LIBIMREAD_IMAGEVIEW_HH_
