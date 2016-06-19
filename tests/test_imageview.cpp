@@ -32,7 +32,6 @@ namespace {
     using HybridImage = im::HybridImage<byte>;
     using unique_hybridimage_t = std::unique_ptr<HybridImage>;
     using shared_hybridimage_t = std::shared_ptr<HybridImage>;
-    // using ImageView = im::ImageView<HybridImage>;
     using im::ImageView;
     using unique_t = std::unique_ptr<ImageView>;
     using shared_t = std::shared_ptr<ImageView>;
@@ -46,23 +45,11 @@ namespace {
         const std::vector<path> jpgs = basedir.list("*.jpg");
         
         std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
-            // using unique_tag = ImageView::Tag::Unique;
             auto png = im::halide::unique(basedir/p);
-            // shared_t png_view = std::make_shared<ImageView>(std::move(
-            //                     im::halide::unique(basedir/p)), unique_tag{});
             shared_t png_view = std::make_shared<ImageView>(png.get());
             
-            // CHECK(png_view->nbits() == png_unique->nbits());
-            // auto whatisaid = png_unique->nbits();
-            // CHECK(png_view->nbits() == whatisaid);
-            // auto whatisaid = png_view->nbits();
-            // CHECK(png_unique->nbits() == whatisaid);
-            
-            HybridImage hybrid = im::halide::read(basedir/p);
-            HybridImage* heaprid = new HybridImage(hybrid);
-            // ImageView view(heaprid);
-            // shared_t unrelated_png_view = std::make_shared<ImageView>();
-            shared_t unrelated_png_view = std::make_shared<ImageView>(heaprid);
+            HybridImage* hybrid = new HybridImage(im::halide::read(basedir/p));
+            shared_t unrelated_png_view = std::make_shared<ImageView>(hybrid);
             shared_t another_png_view = png_view->shared();
             
             CHECK(png_view->nbytes() == unrelated_png_view->nbytes());
@@ -76,7 +63,7 @@ namespace {
             CHECK(png_view->is_floating_point() == another_png_view->is_floating_point());
             
             /// clean up
-            delete heaprid;
+            delete hybrid;
         });
         
         // std::for_each(jpgs.begin(), jpgs.end(), [&basedir](path const& p) {

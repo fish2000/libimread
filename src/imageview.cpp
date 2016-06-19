@@ -34,12 +34,6 @@ namespace im {
         return source->is_floating_point();
     }
     
-    /// if we have successfully constructed `source`, we can
-    /// go ahead and call source->shared() and source->weak()
-    /// as the fuck much as we would like
-    ///
-    ///     auto s = source->shared(); /// fine to do in instance methods
-    
     // int ImageView::nbytes() const {
     //     const int bits = this->nbits();
     //     return (bits / 8) + bool(bits % 8);
