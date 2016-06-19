@@ -71,6 +71,7 @@ namespace im {
             /// delegate the core Image API methods
             /// back to the source image
             virtual void* rowp(int r) const;
+            virtual void* rowp() const;
             virtual int nbits() const;
             virtual int nbytes() const;
             virtual int ndims() const;

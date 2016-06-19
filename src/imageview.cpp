@@ -9,6 +9,9 @@ namespace im {
     void* ImageView::rowp(int r) const {
         return source->rowp(r);
     }
+    void* ImageView::rowp() const {
+        return source->rowp(0);
+    }
     int ImageView::nbits() const {
         return source->nbits();
     }
