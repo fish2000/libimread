@@ -48,8 +48,8 @@ namespace {
             auto png = im::halide::unique(basedir/p);
             shared_t png_view = std::make_shared<ImageView>(png.get());
             
-            HybridImage* hybrid = new HybridImage(im::halide::read(basedir/p));
-            shared_t unrelated_png_view = std::make_shared<ImageView>(hybrid);
+            std::unique_ptr<HybridImage> hybrid(new HybridImage(im::halide::read(basedir/p)));
+            shared_t unrelated_png_view = std::make_shared<ImageView>(hybrid.get());
             shared_t another_png_view = png_view->shared();
             
             CHECK(png_view->nbytes() == unrelated_png_view->nbytes());
@@ -61,9 +61,6 @@ namespace {
             CHECK(png_view->ndims() == another_png_view->ndims());
             CHECK(png_view->is_signed() == another_png_view->is_signed());
             CHECK(png_view->is_floating_point() == another_png_view->is_floating_point());
-            
-            /// clean up
-            delete hybrid;
         });
         
         // std::for_each(jpgs.begin(), jpgs.end(), [&basedir](path const& p) {

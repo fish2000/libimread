@@ -48,10 +48,6 @@ namespace im {
                 :source(image)
                 {}
             
-            // explicit ImageView(shared_image_t shared_image);
-            // explicit ImageView(const_shared_image_t shared_image);
-            // explicit ImageView(const_unique_image_t unique_image, typename Tag::Unique);
-            
             ImageView& operator=(ImageView const& other) {
                 ImageView(other).swap(*this);
                 return *this;

@@ -120,6 +120,7 @@ set(hdrs
     ${hdrs_dir}/ext/iod.hh
     ${hdrs_dir}/ext/pvr.hh
     ${hdrs_dir}/ext/pystring.hh
+    ${hdrs_dir}/ext/valarray.hh
     ${hdrs_dir}/ext/WriteGIF.hh
     
     ${hdrs_dir}/IO/ansi.hh

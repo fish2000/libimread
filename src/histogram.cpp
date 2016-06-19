@@ -3,6 +3,7 @@
 
 #include <cmath>
 
+#include <libimread/ext/valarray.hh>
 #include <libimread/histogram.hh>
 #include <libimread/image.hh>
 

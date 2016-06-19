@@ -34,11 +34,6 @@ namespace im {
         return source->is_floating_point();
     }
     
-    // int ImageView::nbytes() const {
-    //     const int bits = this->nbits();
-    //     return (bits / 8) + bool(bits % 8);
-    // }
-    
     int ImageView::dim_or(int dim, int default_value) const {
         if (dim >= this->ndims()) { return default_value; }
         return this->dim(dim);
