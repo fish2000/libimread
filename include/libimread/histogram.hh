@@ -32,15 +32,15 @@ namespace im {
             float sum() const;
             float min() const;
             float max() const;
-            float entropy();
+            float entropy() const;
             std::valarray<byte> const& sourcedata() const;
             std::valarray<float>& values();
             std::valarray<float> const& values() const;
         
         protected:
             float flinitial = 0.00000000;
-            float entropy_value = 0.0;
-            bool entropy_calculated = false;
+            mutable float entropy_value = 0.0;
+            mutable bool entropy_calculated = false;
             std::valarray<byte> data;
             std::valarray<float> histogram;
         

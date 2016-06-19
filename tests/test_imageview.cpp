@@ -1,15 +1,12 @@
 
 #include <string>
 #include <vector>
-// #include <numeric>
 #include <algorithm>
 #include <memory>
 
 #include <libimread/libimread.hpp>
-// #include <libimread/errors.hh>
 #include <libimread/image.hh>
 #include <libimread/imageview.hh>
-// #include <libimread/base.hh>
 #include <libimread/halide.hh>
 #include <libimread/image.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -36,8 +33,8 @@ namespace {
     using unique_t = std::unique_ptr<ImageView>;
     using shared_t = std::shared_ptr<ImageView>;
     
-    TEST_CASE("[imageview] Create a shared image view from an Image unique_ptr",
-              "[imageview-shared-imageview-from-image-unique_ptr]")
+    TEST_CASE("[imageview] Create shared ImageView from an Image",
+              "[imageview-create-shared-imageview-from-image]")
     {
         // filesystem::TemporaryDirectory td("test-imageview");
         path basedir(im::test::basedir);
@@ -63,27 +60,24 @@ namespace {
             CHECK(png_view->is_floating_point() == another_png_view->is_floating_point());
         });
         
-        // std::for_each(jpgs.begin(), jpgs.end(), [&basedir](path const& p) {
-        //     // auto jpg = im::halide::read(basedir/p);
-        //     using unique_tag = ImageView::Tag::Unique;
-        //     unique_image_t jpg_unique = im::halide::unique(basedir/p);
-        //     shared_t jpg_view = std::make_shared<ImageView>(std::move(jpg_unique), unique_tag{});
-        //     CHECK(jpg_view->nbits() == jpg_unique->nbits());
-        //     CHECK(jpg_view->nbytes() == jpg_unique->nbytes());
-        //     CHECK(jpg_view->ndims() == jpg_unique->ndims());
-        //     CHECK(jpg_view->is_signed() == jpg_unique->is_signed());
-        //     CHECK(jpg_view->is_floating_point() == jpg_unique->is_floating_point());
-        // });
-        
-        // const std::vector<path> hdfs = td.dirpath.list("*.hdf5");
-        // CHECK(hdfs.size() == pngs.size() + jpgs.size());
-        //
-        // std::for_each(hdfs.begin(), hdfs.end(), [&basedir, &td](path const& p) {
-        //     path np = td.dirpath/p;
-        //     auto hdf = im::halide::read(np);
-        //     REQUIRE(hdf.dim(0) > 0);
-        //     REQUIRE(hdf.dim(1) > 0);
-        // });
+        std::for_each(jpgs.begin(), jpgs.end(), [&basedir](path const& p) {
+            auto jpg = im::halide::unique(basedir/p);
+            shared_t jpg_view = std::make_shared<ImageView>(jpg.get());
+            
+            std::unique_ptr<HybridImage> hybrid(new HybridImage(im::halide::read(basedir/p)));
+            shared_t unrelated_jpg_view = std::make_shared<ImageView>(hybrid.get());
+            shared_t another_jpg_view = jpg_view->shared();
+            
+            CHECK(jpg_view->nbytes() == unrelated_jpg_view->nbytes());
+            CHECK(jpg_view->ndims() == unrelated_jpg_view->ndims());
+            CHECK(jpg_view->is_signed() == unrelated_jpg_view->is_signed());
+            CHECK(jpg_view->is_floating_point() == unrelated_jpg_view->is_floating_point());
+            
+            CHECK(jpg_view->nbytes() == another_jpg_view->nbytes());
+            CHECK(jpg_view->ndims() == another_jpg_view->ndims());
+            CHECK(jpg_view->is_signed() == another_jpg_view->is_signed());
+            CHECK(jpg_view->is_floating_point() == another_jpg_view->is_floating_point());
+        });
         
     }
     

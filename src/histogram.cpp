@@ -42,7 +42,7 @@ namespace im {
         return histogram.max();
     }
     
-    float Histogram::entropy() {
+    float Histogram::entropy() const {
         if (!entropy_calculated) {
             float histosize = 1.0 / float(histogram.sum());
             std::valarray<float> histofloat = histogram * histosize;
