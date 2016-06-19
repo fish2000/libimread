@@ -12,15 +12,12 @@
 
 namespace im {
     
+    /// forward-declare im::Image
     class Image;
     
     class ImageView : public std::enable_shared_from_this<ImageView> {
         
         public:
-            struct Tag {
-                struct Shared   {};
-                struct Unique   {};
-            };
             
             using unique_image_t = std::unique_ptr<Image>;
             using shared_image_t = std::shared_ptr<Image>;
@@ -70,6 +67,7 @@ namespace im {
             friend void swap(ImageView& lhs, ImageView& rhs);
             
         protected:
+            
             Image* source;
             ImageView(void);
     };

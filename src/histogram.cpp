@@ -2,7 +2,6 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <cmath>
-
 #include <libimread/ext/valarray.hh>
 #include <libimread/histogram.hh>
 #include <libimread/image.hh>
@@ -10,8 +9,8 @@
 namespace im {
     
     Histogram::Histogram(Image* image)
-        :data(std::valarray<byte>((byte*)image->rowp(),
-                                         image->size()))
+        :data(byteva_t((byte*)image->rowp(),
+                              image->size()))
         ,histogram(std::cref(flinitial), UCHAR_MAX)
         {
             std::for_each(std::begin(data), std::end(data),
@@ -23,6 +22,14 @@ namespace im {
     }
     
     Histogram::end_t Histogram::end() {
+        return std::end(histogram);
+    }
+    
+    Histogram::const_begin_t Histogram::begin() const {
+        return std::begin(histogram);
+    }
+    
+    Histogram::const_end_t Histogram::end() const {
         return std::end(histogram);
     }
     
@@ -45,8 +52,8 @@ namespace im {
     float Histogram::entropy() const {
         if (!entropy_calculated) {
             float histosize = 1.0 / float(histogram.sum());
-            std::valarray<float> histofloat = histogram * histosize;
-            std::valarray<float> divisor = histofloat.apply([](float d) -> float {
+            floatva_t histofloat = histogram * histosize;
+            floatva_t divisor = histofloat.apply([](float d) -> float {
                 return d * std::log2(d);
             });
             entropy_value = -divisor.sum();
@@ -55,15 +62,20 @@ namespace im {
         return entropy_value;
     }
     
-    std::valarray<byte> const& Histogram::sourcedata() const {
+    Histogram::floatva_t Histogram::normalized() const {
+        floatva_t out = histogram / histogram.max();
+        return out;
+    }
+    
+    Histogram::byteva_t const& Histogram::sourcedata() const {
         return data;
     }
     
-    std::valarray<float>& Histogram::values() {
+    Histogram::floatva_t& Histogram::values() {
         return histogram;
     }
     
-    std::valarray<float> const& Histogram::values() const {
+    Histogram::floatva_t const& Histogram::values() const {
         return histogram;
     }
     

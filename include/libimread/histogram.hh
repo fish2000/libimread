@@ -8,8 +8,6 @@
 #include <iterator>
 #include <functional>
 #include <type_traits>
-#include <algorithm>
-#include <utility>
 
 #include <libimread/libimread.hpp>
 
@@ -20,29 +18,39 @@ namespace im {
     
     class Histogram {
         
-        using begin_t = decltype(std::begin(std::declval<std::valarray<float>>()));
-        using   end_t = decltype(  std::end(std::declval<std::valarray<float>>()));
-        
         public:
+            
+            using byteva_t  = std::valarray<byte>;
+            using floatva_t = std::valarray<float>;
+            
+            using begin_t = decltype(std::begin(std::declval<floatva_t>()));
+            using   end_t = decltype(  std::end(std::declval<floatva_t>()));
+            using const_begin_t = decltype(std::begin(std::declval<floatva_t const&>()));
+            using   const_end_t = decltype(  std::end(std::declval<floatva_t const&>()));
+            
             explicit Histogram(Image*);
             
             std::size_t size() const;
             begin_t begin();
             end_t end();
+            const_begin_t begin() const;
+            const_end_t end() const;
             float sum() const;
             float min() const;
             float max() const;
             float entropy() const;
-            std::valarray<byte> const& sourcedata() const;
-            std::valarray<float>& values();
-            std::valarray<float> const& values() const;
+            floatva_t normalized() const;
+            byteva_t const& sourcedata() const;
+            floatva_t& values();
+            floatva_t const& values() const;
         
         protected:
+            
             float flinitial = 0.00000000;
             mutable float entropy_value = 0.0;
             mutable bool entropy_calculated = false;
-            std::valarray<byte> data;
-            std::valarray<float> histogram;
+            byteva_t data;
+            floatva_t histogram;
         
     };
     
