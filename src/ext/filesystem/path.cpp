@@ -560,6 +560,10 @@ namespace filesystem {
         return tokenize(detail::syspaths(), detail::posix_pathvar_separator);
     }
     
+    bool path::operator<(path const& rhs) const noexcept {
+        return str() < rhs.str();
+    }
+    
     void path::set(std::string const& str) {
         m_type = native_path;
         m_path = tokenize(str, sep);

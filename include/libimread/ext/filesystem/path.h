@@ -365,6 +365,9 @@ namespace filesystem {
             operator std::string()           { return str(); }
             operator char const*()           { return c_str(); }
             
+            /// less-than operator -- allows the use of filesystem::path in e.g. std::map
+            bool operator<(path const& rhs) const noexcept;
+            
             /// Set and tokenize the path using a std::string (mainly used internally)
             void set(std::string const& str);
             
