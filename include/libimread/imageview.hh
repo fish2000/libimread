@@ -41,6 +41,7 @@ namespace im {
             ImageView(ImageView const& other);
             ImageView(ImageView&& other) noexcept;
             explicit ImageView(Image* image);
+            virtual ~ImageView();
             
             ImageView& operator=(ImageView const& other);
             ImageView& operator=(ImageView&& other) noexcept;

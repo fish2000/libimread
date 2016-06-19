@@ -4,6 +4,7 @@
 #include <numeric>
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
+#include <libimread/histogram.hh>
 #include <libimread/rehash.hh>
 
 namespace im {
@@ -45,6 +46,15 @@ namespace im {
     
     int Image::size() const {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
+    }
+    
+    Histogram Image::histogram() const {
+        return Histogram(this);
+    }
+    
+    float Image::entropy() const {
+        Histogram histo = Histogram(this);
+        return histo.entropy();
     }
     
     ImageFactory::~ImageFactory() {}

@@ -17,6 +17,8 @@
 
 namespace im {
     
+    class Histogram;
+    
     class Image {
         
         public:
@@ -49,6 +51,9 @@ namespace im {
             virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
+            
+            virtual Histogram histogram() const;
+            virtual float entropy() const;
             
             template <typename T> inline
             T* rowp_as(const int r) const {

@@ -20,6 +20,8 @@ namespace im {
         :source(image)
         {}
     
+    ImageView::~ImageView() {}
+    
     ImageView& ImageView::operator=(ImageView const& other) {
         ImageView(other).swap(*this);
         return *this;

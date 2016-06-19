@@ -16,7 +16,7 @@ namespace im {
         static const float flinitial = 0.00000000;
     }
     
-    Histogram::Histogram(Image* image)
+    Histogram::Histogram(Image const* image)
         :data(byteva_t((byte*)image->rowp(),
                               image->size()))
         ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
@@ -24,6 +24,8 @@ namespace im {
             std::for_each(std::begin(data), std::end(data),
                           [this](byte const& b) { histogram[b] += 1.0; });
         }
+    
+    Histogram::~Histogram() {}
     
     Histogram::begin_t Histogram::begin() {
         return std::begin(histogram);
@@ -96,6 +98,10 @@ namespace im {
         swap(entropy_calculated, other.entropy_calculated);
     }
     
+    void swap(im::Histogram& p0, im::Histogram& p1) noexcept {
+        p0.swap(p1);
+    }
+    
     std::size_t Histogram::hash(std::size_t seed) const noexcept {
         return std::accumulate(std::begin(histogram),
                                std::end(histogram),
@@ -103,12 +109,3 @@ namespace im {
     }
     
 }
-
-namespace std {
-    
-    template <>
-    void swap(im::Histogram& p0, im::Histogram& p1) noexcept {
-        p0.swap(p1);
-    }
-    
-}; /* namespace std */

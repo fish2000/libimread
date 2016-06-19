@@ -94,8 +94,6 @@ namespace {
         const std::vector<path> jpgs = basedir.list("*.jpg");
         std::unordered_map<path, float> entropies;
         
-        /// 20 'nanf' values right now
-        
         std::for_each(pngs.begin(), pngs.end(), [&](path const& p) {
             path imagepath = basedir/p;
             auto png = im::halide::unique(imagepath);
@@ -115,6 +113,11 @@ namespace {
             CHECK(!std::isnan(histo->entropy()));
             entropies.insert({ imagepath, histo->entropy() });
         });
+        
+        for (auto const& p : entropies) {
+            auto image = im::halide::read(p.first.str());
+            CHECK(p.second == image.entropy());
+        }
         
     }
     

@@ -28,7 +28,8 @@ namespace im {
             using const_begin_t = decltype(std::begin(std::declval<floatva_t const&>()));
             using   const_end_t = decltype(  std::end(std::declval<floatva_t const&>()));
             
-            explicit Histogram(Image*);
+            explicit Histogram(Image const*);
+            virtual ~Histogram();
             
             std::size_t size() const;
             begin_t begin();
@@ -46,10 +47,11 @@ namespace im {
             
             /// noexcept member swap
             void swap(Histogram& other) noexcept;
+            friend void swap(Histogram& lhs, Histogram& rhs) noexcept;
             
             /// member hash method
             std::size_t hash(std::size_t seed = 0) const noexcept;
-        
+            
         protected:
             
             mutable float entropy_value = 0.0;
@@ -62,9 +64,6 @@ namespace im {
 }
 
 namespace std {
-    
-    template <>
-    void swap(im::Histogram& p0, im::Histogram& p1) noexcept;
     
     /// std::hash specialization for im::Histogram
     /// ... following the recipe found here:
