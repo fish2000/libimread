@@ -23,7 +23,7 @@ namespace im {
     /// forward declarations
     class Image;
     class ImageFactory;
-    class ImageList;
+    struct ImageList;
     
     bool match_magic(byte_source*, char const*, std::size_t const);
     bool match_magic(byte_source*, std::string const&);
