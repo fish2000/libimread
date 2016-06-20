@@ -34,10 +34,25 @@ class PlanarOperationTests(BaseCase):
                 idx = 0
                 for plane_letter in image.mode:
                     histogramX = image.histogram_at(plane=plane_letter)
-                    self.assertEqual(len(histogramX), 255)
+                    self.assertEqual(len(histogramX), 256)
                     histogram0 = image.histogram_at(idx)
                     self.assertEqual(histogramX,
                                      histogram0)
+                    idx += 1
+    
+    def test_jpg_entropy_at(self):
+        ''' Load some JPG files, iterate each images' planes,
+            check entropy values
+        '''
+        for ImageType in self.imagetypes:
+            for image_path in self.jpgs:
+                image = ImageType(image_path)
+                idx = 0
+                entropies = image.entropy()
+                for plane_letter in image.mode:
+                    entropyX = image.entropy_at(plane=plane_letter)
+                    self.assertEqual(entropyX, entropies[idx])
+                    self.assertEqual(entropyX, image.entropy_at(idx))
                     idx += 1
     
     def _test_jpg_plane_at_lexical_index(self):

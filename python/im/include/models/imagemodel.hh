@@ -582,12 +582,15 @@ namespace py {
             
             bool load(char const* source, options_map const& opts) {
                 FactoryType factory;
+                options_map default_opts;
                 std::unique_ptr<ImageFormat> format;
                 std::unique_ptr<FileSource> input;
                 std::unique_ptr<Image> output;
                 bool exists = false,
                      can_read = false;
-                options_map default_opts;
+                
+                // py::detail::setitemstring(readoptDict, "filename",
+                //                           py::string(source));
                 
                 try {
                     py::gil::release nogil;
@@ -748,6 +751,8 @@ namespace py {
                                                        output.get(), default_opts);
                 }
                 
+                // py::detail::setitemstring(writeoptDict, "filename",
+                //                           py::string(destination));
                 return true;
             }
             

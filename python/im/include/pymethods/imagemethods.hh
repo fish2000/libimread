@@ -520,7 +520,7 @@ namespace py {
                     if (as_blob) {
                         py::gil::release nogil;
                         NamedTemporaryFile tf("." + opts.cast<std::string>("format"),
-                                            FILESYSTEM_TEMP_FILENAME, false); /// boolean cleanup on scope exit
+                                              FILESYSTEM_TEMP_FILENAME, false); /// boolean cleanup on scope exit
                         dststr = std::string(tf.filepath.make_absolute().str());
                     } else {
                         /// save as file -- extract the filename from the buffer
