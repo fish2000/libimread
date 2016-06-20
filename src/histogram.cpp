@@ -16,6 +16,14 @@ namespace im {
         static const float flinitial = 0.00000000;
     }
     
+    Histogram::Histogram(Histogram::bytevec_t const& plane)
+        :data(plane.data(), plane.size())
+        ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
+        {
+            std::for_each(std::begin(data), std::end(data),
+                          [this](byte const& b) { histogram[b] += 1.0; });
+        }
+    
     Histogram::Histogram(Image const* image)
         :data((byte*)image->rowp(), image->size())
         ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
@@ -24,13 +32,9 @@ namespace im {
                           [this](byte const& b) { histogram[b] += 1.0; });
         }
     
-    Histogram::Histogram(Histogram::bytevec_t const& plane)
-        :data(plane.data(), plane.size())
-        ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
-        {
-            std::for_each(std::begin(data), std::end(data),
-                          [this](byte const& b) { histogram[b] += 1.0; });
-        }
+    Histogram::Histogram(Image const* image, int zidx)
+        :Histogram(image->template plane<byte>(zidx))
+        {}
     
     Histogram::~Histogram() {}
     

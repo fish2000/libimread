@@ -31,8 +31,9 @@ namespace im {
             using const_begin_t = decltype(std::begin(std::declval<floatva_t const&>()));
             using   const_end_t = decltype(  std::end(std::declval<floatva_t const&>()));
             
-            explicit Histogram(Image const*);
             explicit Histogram(bytevec_t const&);
+            explicit Histogram(Image const*);
+            explicit Histogram(Image const*, int);
             virtual ~Histogram();
             
             std::size_t size() const;
