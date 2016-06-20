@@ -39,6 +39,8 @@ namespace im {
             float sum() const;
             float min() const;
             float max() const;
+            int min_value() const;
+            int max_value() const;
             float entropy() const;
             floatva_t normalized() const;
             byteva_t const& sourcedata() const;

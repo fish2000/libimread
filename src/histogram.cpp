@@ -17,9 +17,10 @@ namespace im {
     }
     
     Histogram::Histogram(Image const* image)
-        :data(byteva_t((byte*)image->rowp(),
-                              image->size()))
-        ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
+        :data((byte*)image->rowp(),
+                     image->size())
+        ,histogram(std::cref(detail::flinitial),
+                   UCHAR_MAX)
         {
             std::for_each(std::begin(data), std::end(data),
                           [this](byte const& b) { histogram[b] += 1.0; });
@@ -57,6 +58,22 @@ namespace im {
     
     float Histogram::max() const {
         return histogram.max();
+    }
+    
+    int Histogram::min_value() const {
+        /// the most infrequently occuring value
+        auto result = std::find(std::begin(histogram),
+                                std::end(histogram),
+                                histogram.min());
+        return result == std::end(histogram) ? -1 : *result;
+    }
+    
+    int Histogram::max_value() const {
+        /// the most frequently occuring value
+        auto result = std::find(std::begin(histogram),
+                                std::end(histogram),
+                                histogram.max());
+        return result == std::end(histogram) ? -1 : *result;
     }
     
     float Histogram::entropy() const {
