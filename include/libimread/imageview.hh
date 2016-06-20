@@ -4,11 +4,13 @@
 #ifndef LIBIMREAD_IMAGEVIEW_HH_
 #define LIBIMREAD_IMAGEVIEW_HH_
 
+#include <vector>
 #include <memory>
 #include <utility>
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/pixels.hh>
 
 namespace im {
     
@@ -65,6 +67,29 @@ namespace im {
             virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
+            
+            template <typename T> inline
+            T* rowp_as(const int r) const {
+                return static_cast<T*>(this->rowp(r));
+            }
+            
+            template <typename T = byte> inline
+            pix::accessor<T> access() const {
+                return pix::accessor<T>(rowp_as<T>(0), stride(0),
+                                                       stride(1),
+                                                       stride(2));
+            }
+            
+            template <typename T> inline
+            std::vector<T*> allrows() const {
+                using pointervec_t = std::vector<T*>;
+                pointervec_t rows;
+                const int h = this->dim(0);
+                for (int r = 0; r != h; ++r) {
+                    rows.push_back(this->rowp_as<T>(r));
+                }
+                return rows;
+            }
             
             virtual shared_imageview_t shared();
             virtual weak_imageview_t weak();

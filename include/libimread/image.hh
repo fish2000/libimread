@@ -10,7 +10,6 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
-// #include <libimread/seekable.hh>
 #include <libimread/pixels.hh>
 
 namespace im {
