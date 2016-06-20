@@ -168,6 +168,7 @@ namespace im {
             virtual int ndims() const override;
             virtual int dim(int d) const override;
             virtual int stride(int s) const override;
+            virtual int min(int s) const override;
             virtual bool is_signed() const override;
             virtual bool is_floating_point() const override;
             inline off_t rowp_stride() const;
@@ -262,6 +263,7 @@ namespace im {
             virtual int ndims() const override;
             virtual int dim(int d) const override;
             virtual int stride(int s) const override;
+            virtual int min(int s) const override;
             virtual bool is_signed() const override;
             virtual bool is_floating_point() const override;
             virtual void* rowp(int r) const override;

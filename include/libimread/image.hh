@@ -39,15 +39,22 @@ namespace im {
             virtual int ndims() const = 0;
             virtual int dim(int) const = 0;
             virtual int stride(int) const = 0;
+            virtual int min(int) const;
             virtual bool is_signed() const = 0;
             virtual bool is_floating_point() const = 0;
             
             virtual int dim_or(int dim, int default_value = 1) const;
             virtual int stride_or(int dim, int default_value = 1) const;
+            virtual int min_or(int dim, int default_value = 1) const;
+            
             virtual int width() const;
             virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
+            virtual int left() const;
+            virtual int right() const;
+            virtual int top() const;
+            virtual int bottom() const;
             
             virtual Histogram histogram() const;
             virtual float entropy() const;

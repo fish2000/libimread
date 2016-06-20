@@ -157,6 +157,10 @@ namespace im {
                 return halide_image_t::stride(s);
             }
             
+            virtual int min(int s) const override {
+                return halide_image_t::min(s);
+            }
+            
             virtual bool is_signed() const override {
                 return std::is_signed<pT>::value;
             }

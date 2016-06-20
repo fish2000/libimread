@@ -18,6 +18,10 @@ namespace im {
         return (bits / 8) + bool(bits % 8);
     }
     
+    int Image::min(int dim) const {
+        return 0;
+    }
+    
     int Image::dim_or(int dim, int default_value) const {
         if (dim >= this->ndims()) { return default_value; }
         return this->dim(dim);
@@ -26,6 +30,11 @@ namespace im {
     int Image::stride_or(int dim, int default_value) const {
         if (dim >= this->ndims()) { return default_value; }
         return this->stride(dim);
+    }
+    
+    int Image::min_or(int dim, int default_value) const {
+        if (dim >= this->ndims()) { return default_value; }
+        return this->min(dim);
     }
     
     int Image::width() const {
@@ -42,6 +51,26 @@ namespace im {
     
     int Image::size() const {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
+    }
+    
+    int Image::left() const {
+        if (ndims() < 1) { return 0; }
+        return min(0);
+    }
+    
+    int Image::right() const {
+        if (ndims() < 1) { return 0; }
+        return min(0) + dim(0) - 1;
+    }
+    
+    int Image::top() const {
+        if (ndims() < 2) { return 0; }
+        return min(1);
+    }
+    
+    int Image::bottom() const {
+        if (ndims() < 2) { return 0; }
+        return min(1) + dim(1) - 1;
     }
     
     Histogram Image::histogram() const {

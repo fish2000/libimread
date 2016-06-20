@@ -254,6 +254,10 @@ namespace im {
         return HalBase::stride(s);
     }
     
+    int HalideNumpyImage::min(int s) const {
+        return HalBase::min(s);
+    }
+    
     bool HalideNumpyImage::is_signed() const {
         /// If it's not UInt, it's signed --
         /// it's either Float, Int, or someshit.
@@ -738,6 +742,10 @@ namespace im {
     
     int ArrayImage::stride(int s) const {
         return PyArray_STRIDE(array, s);
+    }
+    
+    int ArrayImage::min(int s) const {
+        return buffer->min[s]; /// Huh.
     }
     
     bool ArrayImage::is_signed() const {

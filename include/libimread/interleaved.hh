@@ -594,7 +594,7 @@ namespace im {
             int channels() const { return C; }
             
             int stride_(int dim) const { return meta.strides[dim]; }
-            int min(int dim) const { return meta.min[dim]; }
+            virtual int min(int dim) const override { return meta.min[dim]; }
             int extent(int dim) const { return meta.extents[dim]; }
             
             void set_min(int x, int y = 0, int z = 0, int w = 0) {
