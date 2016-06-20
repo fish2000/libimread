@@ -518,7 +518,7 @@ namespace py {
                         "histogram_at(): index out of range");
                     return nullptr;
                 }
-                std::valarray<byte> bytehisto;
+                std::valarray<int> inthisto;
                 {
                     py::gil::release nogil;
                     Histogram histo(image.get(), zidx);
