@@ -3,13 +3,12 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <unordered_map>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/iterators.hh>
-#include <libimread/seekable.hh>
-#include <libimread/image.hh>
+// #include <libimread/seekable.hh>
+// #include <libimread/image.hh>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 

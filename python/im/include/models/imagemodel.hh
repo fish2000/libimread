@@ -522,9 +522,9 @@ namespace py {
                 {
                     py::gil::release nogil;
                     Histogram histo(image.get(), zidx);
-                    bytehisto = valarray::cast<byte>(histo.values());
+                    inthisto = valarray::cast<int>(histo.values());
                 }
-                return py::convert(bytehisto);
+                return py::convert(inthisto);
             }
             
             options_map readopts() {
