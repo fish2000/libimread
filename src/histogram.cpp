@@ -18,18 +18,18 @@ namespace im {
     }
     
     Histogram::Histogram(Histogram::bytevec_t const& plane)
-        :data(plane.data(), plane.size())
+        :source(plane.data(), plane.size())
         ,histogram(std::cref(detail::flinitial), detail::histogram_size)
         {
-            std::for_each(std::begin(data), std::end(data),
+            std::for_each(std::begin(source), std::end(source),
                           [this](byte b) { histogram[std::size_t(b)] += 1.0; });
         }
     
     Histogram::Histogram(Image const* image)
-        :data((byte*)image->rowp(), image->size())
+        :source((byte*)image->rowp(), image->size())
         ,histogram(std::cref(detail::flinitial), detail::histogram_size)
         {
-            std::for_each(std::begin(data), std::end(data),
+            std::for_each(std::begin(source), std::end(source),
                           [this](byte b) { histogram[std::size_t(b)] += 1.0; });
         }
     
@@ -55,8 +55,28 @@ namespace im {
         return std::end(histogram);
     }
     
+    Histogram::reverse_iterator Histogram::rbegin() {
+        return std::make_reverse_iterator(std::begin(histogram));
+    }
+    
+    Histogram::reverse_iterator Histogram::rend() {
+        return std::make_reverse_iterator(std::end(histogram));
+    }
+    
+    Histogram::const_reverse_iterator Histogram::rbegin() const {
+        return std::make_reverse_iterator(std::begin(histogram));
+    }
+    
+    Histogram::const_reverse_iterator Histogram::rend() const {
+        return std::make_reverse_iterator(std::end(histogram));
+    }
+    
     std::size_t Histogram::size() const {
         return histogram.size();
+    }
+    
+    bool Histogram::empty() const {
+        return histogram.size() == 0;
     }
     
     float Histogram::sum() const {
@@ -107,7 +127,7 @@ namespace im {
     }
     
     Histogram::byteva_t const& Histogram::sourcedata() const {
-        return data;
+        return source;
     }
     
     Histogram::floatva_t& Histogram::values() {
@@ -118,9 +138,13 @@ namespace im {
         return histogram;
     }
     
+    float* Histogram::data() {
+        return &histogram[0];
+    }
+    
     void Histogram::swap(Histogram& other) noexcept {
         using std::swap;
-        swap(data,               other.data);
+        swap(source,             other.source);
         swap(histogram,          other.histogram);
         swap(entropy_value,      other.entropy_value);
         swap(entropy_calculated, other.entropy_calculated);

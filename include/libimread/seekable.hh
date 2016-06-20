@@ -30,10 +30,14 @@ namespace im {
         
         public:
             using value_type = byte;
+            
             using difference_type = std::ptrdiff_t;
             using size_type = std::size_t;
+            using reference_type = std::add_lvalue_reference_t<value_type>;
             using reference = std::add_lvalue_reference_t<value_type>;
             using const_reference = std::add_const_t<reference>;
+            using pointer = std::add_pointer_t<value_type>;
+            
             using iterator = source_iterator;
             using const_iterator = source_iterator;
             using reverse_iterator = std::reverse_iterator<iterator>;
@@ -52,11 +56,17 @@ namespace im {
             
             virtual std::vector<byte> full_data();
             virtual std::size_t size() const;
+            bool empty() const;
+            byte* data() const;
             
             iterator begin();
             iterator end();
             const_iterator begin() const;
             const_iterator end() const;
+            reverse_iterator rbegin();
+            reverse_iterator rend();
+            const_reverse_iterator rbegin() const;
+            const_reverse_iterator rend() const;
     };
     
     class byte_sink : virtual public seekable {

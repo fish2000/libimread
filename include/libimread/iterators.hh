@@ -24,6 +24,8 @@ namespace im {
             using idx_t = difference_type; /// Not into typing it out over and over
             using value_type = byte;
             using reference_type = std::add_lvalue_reference_t<value_type>;
+            using reference = std::add_lvalue_reference_t<value_type>;
+            using const_reference = std::add_const_t<reference>;
             using pointer = std::add_pointer_t<value_type>;
             using iterator_category = std::random_access_iterator_tag;
             

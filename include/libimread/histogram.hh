@@ -31,26 +31,42 @@ namespace im {
             using const_begin_t = decltype(std::begin(std::declval<floatva_t const&>()));
             using   const_end_t = decltype(  std::end(std::declval<floatva_t const&>()));
             
+            using iterator = begin_t;
+            using const_iterator = const_begin_t;
+            using reverse_iterator = std::reverse_iterator<iterator>;
+            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+            
             explicit Histogram(bytevec_t const&);
             explicit Histogram(Image const*);
             explicit Histogram(Image const*, int);
             virtual ~Histogram();
             
             std::size_t size() const;
+            bool empty() const;
+            
             begin_t begin();
             end_t end();
             const_begin_t begin() const;
             const_end_t end() const;
+            
+            reverse_iterator rbegin();
+            reverse_iterator rend();
+            const_reverse_iterator rbegin() const;
+            const_reverse_iterator rend() const;
+            
             float sum() const;
             float min() const;
             float max() const;
             int min_value() const;
             int max_value() const;
+            
             float entropy() const;
+            
             floatva_t normalized() const;
             byteva_t const& sourcedata() const;
             floatva_t& values();
             floatva_t const& values() const;
+            float* data();
             
             /// noexcept member swap
             void swap(Histogram& other) noexcept;
@@ -63,7 +79,7 @@ namespace im {
             
             mutable float entropy_value = 0.0;
             mutable bool entropy_calculated = false;
-            byteva_t data;
+            byteva_t source;
             floatva_t histogram;
         
     };

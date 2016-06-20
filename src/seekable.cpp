@@ -49,6 +49,14 @@ namespace im {
         return all_of_it.size();
     }
     
+    bool byte_source::empty() const {
+        return size() == 0;
+    }
+    
+    byte* byte_source::data() const {
+        return (byte*)readmap();
+    }
+    
     byte_source::iterator byte_source::begin() {
         return byte_source::iterator(this, 0);
     }
@@ -65,6 +73,21 @@ namespace im {
         return byte_source::const_iterator(this, size());
     }
     
+    byte_source::reverse_iterator byte_source::rbegin() {
+        return byte_source::reverse_iterator(byte_source::iterator(this, size()));
+    }
+    
+    byte_source::reverse_iterator byte_source::rend() {
+        return byte_source::reverse_iterator(byte_source::iterator(this, 0));
+    }
+    
+    byte_source::const_reverse_iterator byte_source::rbegin() const {
+        return byte_source::const_reverse_iterator(byte_source::const_iterator(this, size()));
+    }
+    
+    byte_source::const_reverse_iterator byte_source::rend() const {
+        return byte_source::const_reverse_iterator(byte_source::const_iterator(this, 0));
+    }
     
     byte_sink::~byte_sink() {}
     void byte_sink::flush() {}
