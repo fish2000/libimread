@@ -14,13 +14,16 @@
 #include <libimread/ext/iod.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/seekable.hh>
-#include <libimread/image.hh>
-#include <libimread/imagelist.hh>
 #include <libimread/symbols.hh>
 #include <libimread/options.hh>
 #include <libimread/traits.hh>
 
 namespace im {
+    
+    /// forward declarations
+    class Image;
+    class ImageFactory;
+    class ImageList;
     
     bool match_magic(byte_source*, char const*, std::size_t const);
     bool match_magic(byte_source*, std::string const&);

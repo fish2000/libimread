@@ -6,6 +6,8 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/imageformat.hh>
+#include <libimread/image.hh>
+#include <libimread/imagelist.hh>
 #include <iod/json.hh>
 
 namespace im {
