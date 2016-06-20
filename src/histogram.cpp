@@ -13,23 +13,24 @@ namespace im {
     
     namespace detail {
         using rehasher_t = hash::rehasher<float>;
+        static const std::size_t histogram_size = UCHAR_MAX + 1;
         static const float flinitial = 0.00000000;
     }
     
     Histogram::Histogram(Histogram::bytevec_t const& plane)
         :data(plane.data(), plane.size())
-        ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
+        ,histogram(std::cref(detail::flinitial), detail::histogram_size)
         {
             std::for_each(std::begin(data), std::end(data),
-                          [this](byte const& b) { histogram[b] += 1.0; });
+                          [this](byte b) { histogram[std::size_t(b)] += 1.0; });
         }
     
     Histogram::Histogram(Image const* image)
         :data((byte*)image->rowp(), image->size())
-        ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
+        ,histogram(std::cref(detail::flinitial), detail::histogram_size)
         {
             std::for_each(std::begin(data), std::end(data),
-                          [this](byte const& b) { histogram[b] += 1.0; });
+                          [this](byte b) { histogram[std::size_t(b)] += 1.0; });
         }
     
     Histogram::Histogram(Image const* image, int zidx)

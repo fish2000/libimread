@@ -527,6 +527,22 @@ namespace py {
                 return py::convert(inthisto);
             }
             
+            PyObject* histogram_all() {
+                std::vector<int> intvec;
+                {
+                    py::gil::release nogil;
+                    int idx = 0,
+                        max = image->planes();
+                    for (; idx < max; ++idx) {
+                        Histogram histo(image.get(), idx);
+                        std::transform(histo.begin(), histo.end(),
+                                       std::back_inserter(intvec),
+                                       [](float v) -> int { return int(v); });
+                    }
+                }
+                return py::convert(intvec);
+            }
+            
             options_map readopts() {
                 return py::options::parse(readoptDict);
             }

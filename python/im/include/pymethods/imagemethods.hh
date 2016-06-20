@@ -684,6 +684,14 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* histogram(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return pyim->histogram_all();
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* options = PyDict_New();
@@ -1140,6 +1148,13 @@ namespace py {
                                 "\t   which the specification may be made by either:\n"
                                 "\t - a numeric index (via the `index` kwarg), or\n"
                                 "\t - a lexical index (via the `plane` kwarg)\n" },
+                        {
+                            "histogram",
+                                (PyCFunction)py::ext::image::histogram<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "image.histogram()\n"
+                                "\t-> Return histogram data for all planes in the image\n"
+                                "\t   (q.v. PIL.Image.Image.histogram() sub.) \n"},
                         {
                             "add_alpha",
                                 (PyCFunction)py::ext::image::add_alpha<ImageType, BufferType>,
