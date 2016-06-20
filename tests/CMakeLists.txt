@@ -9,6 +9,7 @@ set(TEST_SOURCES ${TEST_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/test_appkit_copy_paste.mm
     ${CMAKE_CURRENT_LIST_DIR}/test_apple_io.mm
     ${CMAKE_CURRENT_LIST_DIR}/test_blockhash.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/test_byte_source_iterators.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_fs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_gif_write.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_halide_io.cpp
