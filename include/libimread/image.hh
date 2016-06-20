@@ -45,7 +45,7 @@ namespace im {
             
             virtual int dim_or(int dim, int default_value = 1) const;
             virtual int stride_or(int dim, int default_value = 1) const;
-            virtual int min_or(int dim, int default_value = 1) const;
+            virtual int min_or(int dim, int default_value = 0) const;
             
             virtual int width() const;
             virtual int height() const;
