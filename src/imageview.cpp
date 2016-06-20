@@ -58,6 +58,9 @@ namespace im {
     int ImageView::stride(int s) const {
         return source->stride(s);
     }
+    int ImageView::min(int s) const {
+        return source->min(s);
+    }
     bool ImageView::is_signed() const {
         return source->is_signed();
     }
@@ -73,6 +76,11 @@ namespace im {
     int ImageView::stride_or(int dim, int default_value) const {
         if (dim >= this->ndims()) { return default_value; }
         return this->stride(dim);
+    }
+    
+    int ImageView::min_or(int dim, int default_value) const {
+        if (dim >= this->ndims()) { return default_value; }
+        return this->min(dim);
     }
     
     int ImageView::width() const {
@@ -91,6 +99,35 @@ namespace im {
         return dim_or(0) * dim_or(1) * dim_or(2) * dim_or(3);
     }
     
+    int ImageView::left() const {
+        if (ndims() < 1) { return 0; }
+        return min(0);
+    }
+    
+    int ImageView::right() const {
+        if (ndims() < 1) { return 0; }
+        return min(0) + dim(0) - 1;
+    }
+    
+    int ImageView::top() const {
+        if (ndims() < 2) { return 0; }
+        return min(1);
+    }
+    
+    int ImageView::bottom() const {
+        if (ndims() < 2) { return 0; }
+        return min(1) + dim(1) - 1;
+    }
+    
+    Histogram ImageView::histogram() const {
+        return Histogram(source);
+    }
+    
+    float ImageView::entropy() const {
+        Histogram histo(source);
+        return histo.entropy();
+    }
+    
     ImageView::shared_imageview_t ImageView::shared() {
         return std::const_pointer_cast<ImageView>(shared_from_this());
     }
@@ -98,10 +135,6 @@ namespace im {
     ImageView::weak_imageview_t ImageView::weak() {
         return weak_imageview_t(
                std::const_pointer_cast<ImageView>(shared_from_this()));
-    }
-    
-    ImageView::shared_histogram_t ImageView::histogram() {
-        return std::make_shared<Histogram>(source);
     }
     
     std::size_t ImageView::hash(std::size_t seed) const noexcept {

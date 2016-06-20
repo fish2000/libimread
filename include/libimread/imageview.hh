@@ -58,15 +58,25 @@ namespace im {
             virtual int ndims() const;
             virtual int dim(int d) const;
             virtual int stride(int s) const;
+            virtual int min(int s) const;
             virtual bool is_signed() const;
             virtual bool is_floating_point() const;
             
             virtual int dim_or(int dim, int default_value = 1) const;
             virtual int stride_or(int dim, int default_value = 1) const;
+            virtual int min_or(int dim, int default_value = 1) const;
+            
             virtual int width() const;
             virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
+            virtual int left() const;
+            virtual int right() const;
+            virtual int top() const;
+            virtual int bottom() const;
+            
+            virtual Histogram histogram() const;
+            virtual float entropy() const;
             
             template <typename T> inline
             T* rowp_as(const int r) const {
@@ -93,7 +103,6 @@ namespace im {
             
             virtual shared_imageview_t shared();
             virtual weak_imageview_t weak();
-            virtual shared_histogram_t histogram();
             
             std::size_t hash(std::size_t seed = 0) const noexcept;
             void swap(ImageView& other);

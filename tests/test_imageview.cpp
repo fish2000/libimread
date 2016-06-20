@@ -98,20 +98,20 @@ namespace {
             path imagepath = basedir/p;
             auto png = im::halide::unique(imagepath);
             shared_t png_view = std::make_shared<ImageView>(png.get());
-            histogram_t histo = png_view->histogram();
-            CHECK(histo->entropy() != 0.00);
-            CHECK(!std::isnan(histo->entropy()));
-            entropies.insert({ imagepath, histo->entropy() });
+            Histogram histo = png_view->histogram();
+            CHECK(histo.entropy() != 0.00);
+            CHECK(!std::isnan(histo.entropy()));
+            entropies.insert({ imagepath, histo.entropy() });
         });
         
         std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
             path imagepath = basedir/p;
             auto jpg = im::halide::unique(imagepath);
             shared_t jpg_view = std::make_shared<ImageView>(jpg.get());
-            histogram_t histo = jpg_view->histogram();
-            CHECK(histo->entropy() != 0.00);
-            CHECK(!std::isnan(histo->entropy()));
-            entropies.insert({ imagepath, histo->entropy() });
+            Histogram histo = jpg_view->histogram();
+            CHECK(histo.entropy() != 0.00);
+            CHECK(!std::isnan(histo.entropy()));
+            entropies.insert({ imagepath, histo.entropy() });
         });
         
         for (auto const& p : entropies) {
