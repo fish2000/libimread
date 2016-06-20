@@ -684,9 +684,61 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* entropy_at(PyObject* self, PyObject* args, PyObject* kwargs) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                std::string::size_type midx;
+                int idx = -1;
+                char const* planeptr = nullptr;
+                char const* keywords[] = { "index", "plane", nullptr };
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    args, kwargs, "|Is:entropy_at", const_cast<char**>(keywords),
+                    &idx,                   /// "index", uint, WHICH PLANE (numerically)
+                    &planeptr))             /// "plane", string, WHICH PLANE (lexically)
+                {
+                    return nullptr;
+                }
+                
+                if (idx == -1 && planeptr == nullptr) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "index (unsigned int) or plane (string) required");
+                    return nullptr;
+                } else if (idx > 0 && planeptr != nullptr) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "specify index (unsigned int) or plane (string) but not both");
+                    return nullptr;
+                }
+                
+                if (planeptr) {
+                    std::string mode = pyim->modestring();
+                    midx = mode.find(planeptr[0]);
+                    if (midx == std::string::npos) {
+                        /// not found
+                        PyErr_Format(PyExc_ValueError,
+                            "plane '%c' not found in mode '%s'",
+                            planeptr[0], mode.c_str());
+                        return nullptr;
+                    }
+                    idx = static_cast<int>(midx);
+                }
+                
+                return pyim->entropy_at(idx);
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* histogram(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 return pyim->histogram_all();
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* entropy(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return pyim->entropy_all();
             }
             
             template <typename ImageType = HalideNumpyImage,
@@ -1144,7 +1196,16 @@ namespace py {
                                 (PyCFunction)py::ext::image::histogram_at<ImageType, BufferType>,
                                 METH_VARARGS | METH_KEYWORDS,
                                 "image.histogram_at(index=0, plane=\"R|G|B|A|...\")\n"
-                                "\t-> Return histogram data calculcated from the specified plane,\n"
+                                "\t-> Return histogram data calculated from the specified plane,\n"
+                                "\t   which the specification may be made by either:\n"
+                                "\t - a numeric index (via the `index` kwarg), or\n"
+                                "\t - a lexical index (via the `plane` kwarg)\n" },
+                        {
+                            "entropy_at",
+                                (PyCFunction)py::ext::image::entropy_at<ImageType, BufferType>,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "image.entropy_at(index=0, plane=\"R|G|B|A|...\")\n"
+                                "\t-> Return image entropy, calculated from histogram data for the specified plane,\n"
                                 "\t   which the specification may be made by either:\n"
                                 "\t - a numeric index (via the `index` kwarg), or\n"
                                 "\t - a lexical index (via the `plane` kwarg)\n" },
@@ -1155,6 +1216,12 @@ namespace py {
                                 "image.histogram()\n"
                                 "\t-> Return histogram data for all planes in the image\n"
                                 "\t   (q.v. PIL.Image.Image.histogram() sub.) \n"},
+                        {
+                            "entropy",
+                                (PyCFunction)py::ext::image::entropy<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "image.entropy()\n"
+                                "\t-> Return entupled entropy values for each plane in the image\n" },
                         {
                             "add_alpha",
                                 (PyCFunction)py::ext::image::add_alpha<ImageType, BufferType>,

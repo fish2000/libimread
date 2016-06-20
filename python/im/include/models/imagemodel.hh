@@ -527,6 +527,21 @@ namespace py {
                 return py::convert(inthisto);
             }
             
+            PyObject* entropy_at(int zidx) {
+                if (zidx >= image->planes() || zidx < 0) {
+                    PyErr_SetString(PyExc_IndexError,
+                        "entropy_at(): index out of range");
+                    return nullptr;
+                }
+                float entropy = 0.0;
+                {
+                    py::gil::release nogil;
+                    Histogram histo(image.get(), zidx);
+                    entropy = histo.entropy();
+                }
+                return py::convert(entropy);
+            }
+            
             PyObject* histogram_all() {
                 std::vector<int> intvec;
                 {
@@ -541,6 +556,20 @@ namespace py {
                     }
                 }
                 return py::convert(intvec);
+            }
+            
+            PyObject* entropy_all() {
+                std::vector<float> floatvec;
+                {
+                    py::gil::release nogil;
+                    int idx = 0,
+                        max = image->planes();
+                    for (; idx < max; ++idx) {
+                        Histogram histo(image.get(), idx);
+                        floatvec.push_back(histo.entropy());
+                    }
+                }
+                return py::convert(floatvec);
             }
             
             options_map readopts() {
