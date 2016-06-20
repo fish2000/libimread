@@ -17,10 +17,16 @@ namespace im {
     }
     
     Histogram::Histogram(Image const* image)
-        :data((byte*)image->rowp(),
-                     image->size())
-        ,histogram(std::cref(detail::flinitial),
-                   UCHAR_MAX)
+        :data((byte*)image->rowp(), image->size())
+        ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
+        {
+            std::for_each(std::begin(data), std::end(data),
+                          [this](byte const& b) { histogram[b] += 1.0; });
+        }
+    
+    Histogram::Histogram(Histogram::bytevec_t const& plane)
+        :data(plane.data(), plane.size())
+        ,histogram(std::cref(detail::flinitial), UCHAR_MAX)
         {
             std::for_each(std::begin(data), std::end(data),
                           [this](byte const& b) { histogram[b] += 1.0; });

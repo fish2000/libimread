@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_HISTOGRAM_HH_
 #define LIBIMREAD_HISTOGRAM_HH_
 
+#include <vector>
 #include <valarray>
 #include <iterator>
 #include <functional>
@@ -22,6 +23,7 @@ namespace im {
             
             using byteva_t  = std::valarray<byte>;
             using floatva_t = std::valarray<float>;
+            using bytevec_t = std::vector<byte>;
             
             using value_type = float;
             using begin_t = decltype(std::begin(std::declval<floatva_t>()));
@@ -30,6 +32,7 @@ namespace im {
             using   const_end_t = decltype(  std::end(std::declval<floatva_t const&>()));
             
             explicit Histogram(Image const*);
+            explicit Histogram(bytevec_t const&);
             virtual ~Histogram();
             
             std::size_t size() const;

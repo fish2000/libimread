@@ -24,6 +24,7 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/base64.hh>
+#include <libimread/histogram.hh>
 #include <libimread/hashing.hh>
 
 namespace py {
@@ -505,6 +506,16 @@ namespace py {
                     return nullptr;
                 }
                 return py::convert(new ImageModelBase(py::convert(this), zidx));
+            }
+            
+            PyObject* histogram_at(int zidx) {
+                if (zidx >= image->planes() || zidx < 0) {
+                    PyErr_SetString(PyExc_IndexError,
+                        "histogram_at(): index out of range");
+                    return nullptr;
+                }
+                Histogram histo(image->plane<byte>(zidx));
+                return py::convert(histo);
             }
             
             options_map readopts() {

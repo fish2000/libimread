@@ -49,7 +49,7 @@ namespace im {
     }
     
     float Image::entropy() const {
-        Histogram histo = Histogram(this);
+        Histogram histo(this);
         return histo.entropy();
     }
     
