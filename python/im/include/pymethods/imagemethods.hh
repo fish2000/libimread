@@ -640,6 +640,50 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* histogram_at(PyObject* self, PyObject* args, PyObject* kwargs) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                std::string::size_type midx;
+                int idx = -1;
+                char const* planeptr = nullptr;
+                char const* keywords[] = { "index", "plane", nullptr };
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    args, kwargs, "|Is:histogram_at", const_cast<char**>(keywords),
+                    &idx,                   /// "index", uint, WHICH PLANE (numerically)
+                    &planeptr))             /// "plane", string, WHICH PLANE (lexically)
+                {
+                    return nullptr;
+                }
+                
+                if (idx == -1 && planeptr == nullptr) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "index (unsigned int) or plane (string) required");
+                    return nullptr;
+                } else if (idx > 0 && planeptr != nullptr) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "specify index (unsigned int) or plane (string) but not both");
+                    return nullptr;
+                }
+                
+                if (planeptr) {
+                    std::string mode = pyim->modestring();
+                    midx = mode.find(planeptr[0]);
+                    if (midx == std::string::npos) {
+                        /// not found
+                        PyErr_Format(PyExc_ValueError,
+                            "plane '%c' not found in mode '%s'",
+                            planeptr[0], mode.c_str());
+                        return nullptr;
+                    }
+                    idx = static_cast<int>(midx);
+                }
+                
+                return pyim->histogram_at(idx);
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 PyObject* options = PyDict_New();
@@ -1084,6 +1128,15 @@ namespace py {
                                 METH_VARARGS | METH_KEYWORDS,
                                 "image.plane_at(index=0, plane=\"R|G|B|A|...\")\n"
                                 "\t-> Return a new image with the planar data from the specified plane,\n"
+                                "\t   which the specification may be made by either:\n"
+                                "\t - a numeric index (via the `index` kwarg), or\n"
+                                "\t - a lexical index (via the `plane` kwarg)\n" },
+                        {
+                            "histogram_at",
+                                (PyCFunction)py::ext::image::histogram_at<ImageType, BufferType>,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "image.histogram_at(index=0, plane=\"R|G|B|A|...\")\n"
+                                "\t-> Return histogram data calculcated from the specified plane,\n"
                                 "\t   which the specification may be made by either:\n"
                                 "\t - a numeric index (via the `index` kwarg), or\n"
                                 "\t - a lexical index (via the `plane` kwarg)\n" },

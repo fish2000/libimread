@@ -3,8 +3,10 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_MODELS_IMAGEMODEL_HH_
 
 #include <cmath>
-#include <memory>
 #include <string>
+#include <memory>
+#include <vector>
+#include <valarray>
 #include <Python.h>
 #include <structmember.h>
 
@@ -24,6 +26,7 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/base64.hh>
+#include <libimread/ext/valarray.hh>
 #include <libimread/histogram.hh>
 #include <libimread/hashing.hh>
 
@@ -35,6 +38,7 @@ namespace py {
         using im::options_map;
         using im::Image;
         using im::ImageFormat;
+        using im::Histogram;
         using im::HalideNumpyImage;
         using im::ArrayImage;
         using im::HybridFactory;
@@ -514,8 +518,9 @@ namespace py {
                         "histogram_at(): index out of range");
                     return nullptr;
                 }
-                Histogram histo(image->plane<byte>(zidx));
-                return py::convert(histo);
+                Histogram histo(image->template plane<byte>(zidx));
+                std::valarray<byte> bytehisto = valarray::cast<byte>(histo.values());
+                return py::convert(bytehisto);
             }
             
             options_map readopts() {

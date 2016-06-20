@@ -11,7 +11,7 @@ class PlanarOperationTests(BaseCase):
         for ImageType in self.imagetypes:
             for image_path in self.jpgs:
                 image = ImageType(image_path)
-                self.assertIsNotNone(image)
+                # self.assertIsNotNone(image)
                 idx = 0
                 for plane_letter in image.mode:
                     planeX = image.plane_at(plane=plane_letter)
@@ -21,6 +21,23 @@ class PlanarOperationTests(BaseCase):
                     plane0 = image.plane_at(idx)
                     self.assertEqual(planeX.buffer,
                                      plane0.buffer)
+                    idx += 1
+    
+    def test_jpg_histogram_at(self):
+        ''' Load some JPG files, iterate each images' planes,
+            compare histogram features
+        '''
+        for ImageType in self.imagetypes:
+            for image_path in self.jpgs:
+                image = ImageType(image_path)
+                # self.assertIsNotNone(image)
+                idx = 0
+                for plane_letter in image.mode:
+                    histogramX = image.histogram_at(plane=plane_letter)
+                    self.assertEqual(len(histogramX), 255)
+                    histogram0 = image.histogram_at(idx)
+                    self.assertEqual(histogramX,
+                                     histogram0)
                     idx += 1
     
     def _test_jpg_plane_at_lexical_index(self):
