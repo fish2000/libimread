@@ -59,9 +59,9 @@ namespace im {
         return out;
     }
     
-    std::size_t NSDataSource::size() { return data.length; }
+    std::size_t NSDataSource::size() const { return data.length; }
     
-    void* NSDataSource::readmap(std::size_t pageoffset) {
+    void* NSDataSource::readmap(std::size_t pageoffset) const {
         byte* out = (byte*)data.bytes;
         if (pageoffset) {
             out += pageoffset * ::getpagesize();

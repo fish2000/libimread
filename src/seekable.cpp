@@ -4,6 +4,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/seekable.hh>
+#include <libimread/iterators.hh>
 
 namespace im {
     
@@ -35,12 +36,35 @@ namespace im {
         return result;
     }
     
-    std::size_t byte_source::size() {
+    std::size_t byte_source::size() const {
         /// super-naive implementation...
         /// OVERRIDE THIS HORRIDNESS, DOGG
-        std::vector<byte> all_of_it = this->full_data();
+        std::vector<byte> all_of_it;
+        std::size_t n;
+        byte buffer[4096];
+        byte_source* mutablethis = const_cast<byte_source*>(this);
+        while ((n = mutablethis->read(buffer, sizeof(buffer)))) {
+            all_of_it.insert(all_of_it.end(), buffer, buffer + n);
+        }
         return all_of_it.size();
     }
+    
+    byte_source::iterator byte_source::begin() {
+        return byte_source::iterator(this, 0);
+    }
+    
+    byte_source::iterator byte_source::end() {
+        return byte_source::iterator(this, size());
+    }
+    
+    byte_source::const_iterator byte_source::begin() const {
+        return byte_source::const_iterator(this, 0);
+    }
+    
+    byte_source::const_iterator byte_source::end() const {
+        return byte_source::const_iterator(this, size());
+    }
+    
     
     byte_sink::~byte_sink() {}
     void byte_sink::flush() {}

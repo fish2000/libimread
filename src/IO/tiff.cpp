@@ -199,7 +199,9 @@ namespace im {
                 /// delegate these fully, to avoid using naive implementations:
                 virtual std::vector<byte> full_data() { return s->full_data(); }
                 virtual std::size_t size() { return s->size(); }
-                virtual void* readmap(std::size_t pageoffset = 0) { return s->readmap(pageoffset); }
+                virtual void* readmap(std::size_t pageoffset = 0) const {
+                    return s->readmap(pageoffset);
+                }
                 
                 void shift(int nshift) {
                     s->seek_relative(nshift - shift_);

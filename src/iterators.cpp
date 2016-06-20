@@ -7,13 +7,13 @@
 
 namespace im {
     
-    source_iterator::source_iterator(byte_source* s)
+    source_iterator::source_iterator(byte_source const* s)
         :source(s)
         ,sourcemap(static_cast<byte*>(source->readmap()))
         ,sourceidx(sourcemap)
         {}
     
-    source_iterator::source_iterator(byte_source* s, size_type initial_idx)
+    source_iterator::source_iterator(byte_source const* s, size_type initial_idx)
         :source(s)
         ,sourcemap(static_cast<byte*>(source->readmap()))
         ,sourceidx(sourcemap)
@@ -83,27 +83,27 @@ namespace im {
         return *this;
     }
     
-    // friend source_iterator operator+(source_iterator const& lhs, size_type rhs) {
-    //     source_iterator out(lhs);
-    //     out.sourcemap += rhs;
-    //     return out;
-    // }
-    //
-    // friend source_iterator operator+(size_type lhs, source_iterator const& rhs) {
-    //     source_iterator out(rhs);
-    //     out.sourcemap += lhs;
-    //     return out;
-    // }
-    //
-    // friend source_iterator operator-(source_iterator const& lhs, size_type rhs) {
-    //     source_iterator out(lhs);
-    //     out.sourcemap -= rhs;
-    //     return out;
-    // }
-    //
-    // friend idx_t operator-(source_iterator lhs, source_iterator rhs) {
-    //     return (idx_t)lhs.sourcemap - (idx_t)rhs.sourcemap;
-    // }
+    source_iterator operator+(source_iterator const& lhs, source_iterator::size_type rhs) {
+        source_iterator out(lhs);
+        out.sourcemap += rhs;
+        return out;
+    }
+    
+    source_iterator operator+(source_iterator::size_type lhs, source_iterator const& rhs) {
+        source_iterator out(rhs);
+        out.sourcemap += lhs;
+        return out;
+    }
+    
+    source_iterator operator-(source_iterator const& lhs, source_iterator::size_type rhs) {
+        source_iterator out(lhs);
+        out.sourcemap -= rhs;
+        return out;
+    }
+    
+    source_iterator::idx_t operator-(source_iterator lhs, source_iterator rhs) {
+        return (source_iterator::idx_t)lhs.sourcemap - (source_iterator::idx_t)rhs.sourcemap;
+    }
     
     source_iterator::value_type source_iterator::operator*() const {
         return sourcemap[0];
@@ -117,29 +117,29 @@ namespace im {
         return sourceidx[idx];
     }
     
-    // friend bool operator<(source_iterator const& lhs, source_iterator const& rhs) {
-    //     return lhs.sourcemap < rhs.sourcemap;
-    // }
-    //
-    // friend bool operator>(source_iterator const& lhs, source_iterator const& rhs) {
-    //     return lhs.sourcemap > rhs.sourcemap;
-    // }
-    //
-    // friend bool operator<=(source_iterator const& lhs, source_iterator const& rhs) {
-    //     return lhs.sourcemap <= rhs.sourcemap;
-    // }
-    //
-    // friend bool operator>=(source_iterator const& lhs, source_iterator const& rhs) {
-    //     return lhs.sourcemap >= rhs.sourcemap;
-    // }
-    //
-    // friend bool operator==(source_iterator const& lhs, source_iterator const& rhs) {
-    //     return lhs.sourcemap == rhs.sourcemap;
-    // }
-    //
-    // friend bool operator!=(source_iterator const& lhs, source_iterator const& rhs) {
-    //     return lhs.sourcemap != rhs.sourcemap;
-    // }
+    bool operator<(source_iterator const& lhs, source_iterator const& rhs) {
+        return lhs.sourcemap < rhs.sourcemap;
+    }
+    
+    bool operator>(source_iterator const& lhs, source_iterator const& rhs) {
+        return lhs.sourcemap > rhs.sourcemap;
+    }
+    
+    bool operator<=(source_iterator const& lhs, source_iterator const& rhs) {
+        return lhs.sourcemap <= rhs.sourcemap;
+    }
+    
+    bool operator>=(source_iterator const& lhs, source_iterator const& rhs) {
+        return lhs.sourcemap >= rhs.sourcemap;
+    }
+    
+    bool operator==(source_iterator const& lhs, source_iterator const& rhs) {
+        return lhs.sourcemap == rhs.sourcemap;
+    }
+    
+    bool operator!=(source_iterator const& lhs, source_iterator const& rhs) {
+        return lhs.sourcemap != rhs.sourcemap;
+    }
     
     void source_iterator::swap(source_iterator& other) {
         using std::swap;
@@ -148,11 +148,11 @@ namespace im {
         swap(sourceidx, other.sourceidx);
     }
     
-    // friend void swap(source_iterator& lhs, source_iterator& rhs) {
-    //     using std::swap;
-    //     swap(lhs.source,    rhs.source);
-    //     swap(lhs.sourcemap, rhs.sourcemap);
-    //     swap(lhs.sourceidx, rhs.sourceidx);
-    // }
+    void swap(source_iterator& lhs, source_iterator& rhs) {
+        using std::swap;
+        swap(lhs.source,    rhs.source);
+        swap(lhs.sourcemap, rhs.sourcemap);
+        swap(lhs.sourceidx, rhs.sourceidx);
+    }
     
 }

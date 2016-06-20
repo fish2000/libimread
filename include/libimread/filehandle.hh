@@ -36,13 +36,13 @@ namespace im {
             
             virtual std::size_t read(byte* buffer, std::size_t n);
             virtual std::vector<byte> full_data();
-            virtual std::size_t size();
+            virtual std::size_t size() const;
             virtual std::size_t write(const void* buffer, std::size_t n);
             virtual std::size_t write(std::vector<byte> const& bv);
             virtual detail::stat_t stat() const;
             virtual void flush();
             
-            virtual void* readmap(std::size_t pageoffset = 0);
+            virtual void* readmap(std::size_t pageoffset = 0) const;
             
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
@@ -54,8 +54,8 @@ namespace im {
             virtual FILE* close();
             
         private:
-            FILE* handle = nullptr;
-            detail::mapped_t mapped;
+            mutable FILE* handle = nullptr;
+            mutable detail::mapped_t mapped;
             bool external = false;
     };
     

@@ -35,9 +35,9 @@ namespace im {
         return result;
     }
     
-    std::size_t memory_source::size() { return length; }
+    std::size_t memory_source::size() const { return length; }
     
-    void* memory_source::readmap(std::size_t pageoffset) {
+    void* memory_source::readmap(std::size_t pageoffset) const {
         byte* out = const_cast<byte*>(data);
         if (pageoffset) {
             out += pageoffset * ::getpagesize();

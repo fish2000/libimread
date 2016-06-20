@@ -27,8 +27,8 @@ namespace im {
             using pointer = std::add_pointer_t<value_type>;
             using iterator_category = std::random_access_iterator_tag;
             
-            explicit source_iterator(byte_source* s);
-            explicit source_iterator(byte_source* s, size_type initial_idx);
+            explicit source_iterator(byte_source const* s);
+            explicit source_iterator(byte_source const* s, size_type initial_idx);
             source_iterator(source_iterator const& other);
             source_iterator(source_iterator&& other) noexcept;
             virtual ~source_iterator();
@@ -51,70 +51,32 @@ namespace im {
             source_iterator& operator+=(size_type offset);
             source_iterator& operator-=(size_type offset);
             
-            friend source_iterator operator+(source_iterator const& lhs, size_type rhs) {
-                source_iterator out(lhs);
-                out.sourcemap += rhs;
-                return out;
-            }
-            
-            friend source_iterator operator+(size_type lhs, source_iterator const& rhs) {
-                source_iterator out(rhs);
-                out.sourcemap += lhs;
-                return out;
-            }
-            
-            friend source_iterator operator-(source_iterator const& lhs, size_type rhs) {
-                source_iterator out(lhs);
-                out.sourcemap -= rhs;
-                return out;
-            }
-            
-            friend idx_t operator-(source_iterator lhs, source_iterator rhs) {
-                return (idx_t)lhs.sourcemap - (idx_t)rhs.sourcemap;
-            }
+            friend source_iterator operator+(source_iterator const& lhs, size_type rhs);
+            friend source_iterator operator+(size_type lhs, source_iterator const& rhs);
+            friend source_iterator operator-(source_iterator const& lhs, size_type rhs);
+            friend idx_t operator-(source_iterator lhs, source_iterator rhs);
             
             value_type operator*() const;
             pointer operator->() const;
             reference_type operator[](size_type idx) const;
             
-            friend bool operator<(source_iterator const& lhs, source_iterator const& rhs) {
-                return lhs.sourcemap < rhs.sourcemap;
-            }
-            
-            friend bool operator>(source_iterator const& lhs, source_iterator const& rhs) {
-                return lhs.sourcemap > rhs.sourcemap;
-            }
-            
-            friend bool operator<=(source_iterator const& lhs, source_iterator const& rhs) {
-                return lhs.sourcemap <= rhs.sourcemap;
-            }
-            
-            friend bool operator>=(source_iterator const& lhs, source_iterator const& rhs) {
-                return lhs.sourcemap >= rhs.sourcemap;
-            }
-            
-            friend bool operator==(source_iterator const& lhs, source_iterator const& rhs) {
-                return lhs.sourcemap == rhs.sourcemap;
-            }
-            
-            friend bool operator!=(source_iterator const& lhs, source_iterator const& rhs) {
-                return lhs.sourcemap != rhs.sourcemap;
-            }
+            friend bool operator<(source_iterator const& lhs, source_iterator const& rhs);
+            friend bool operator>(source_iterator const& lhs, source_iterator const& rhs);
+            friend bool operator<=(source_iterator const& lhs, source_iterator const& rhs);
+            friend bool operator>=(source_iterator const& lhs, source_iterator const& rhs);
+            friend bool operator==(source_iterator const& lhs, source_iterator const& rhs);
+            friend bool operator!=(source_iterator const& lhs, source_iterator const& rhs);
             
             void swap(source_iterator& other);
-            
-            friend void swap(source_iterator& lhs, source_iterator& rhs) {
-                using std::swap;
-                swap(lhs.source,    rhs.source);
-                swap(lhs.sourcemap, rhs.sourcemap);
-                swap(lhs.sourceidx, rhs.sourceidx);
-            }
+            friend void swap(source_iterator& lhs, source_iterator& rhs);
             
         private:
-            byte_source* source;
+            byte_source const* source;
             byte* sourcemap;
             byte* sourceidx;
     };
+    
+    class source_const_iterator : public source_iterator {};
     
 }
 

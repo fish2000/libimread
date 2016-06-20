@@ -4,9 +4,11 @@
 #ifndef LIBIMREAD_SEEKABLE_HH_
 #define LIBIMREAD_SEEKABLE_HH_
 
-#include <vector>
 #include <cstdio>
+#include <vector>
+#include <utility>
 #include <iterator>
+#include <type_traits>
 
 #include <libimread/libimread.hpp>
 
@@ -39,7 +41,7 @@ namespace im {
             
             virtual ~byte_source();
             virtual std::size_t read(byte* buffer, std::size_t) warn_unused = 0;
-            virtual void* readmap(std::size_t pageoffset = 0) = 0;
+            virtual void* readmap(std::size_t pageoffset = 0) const = 0;
             
             // void read_check(byte* buffer, std::size_t n) {
             //     if (this->read(buffer, n) != n) {
@@ -49,7 +51,12 @@ namespace im {
             // }
             
             virtual std::vector<byte> full_data();
-            virtual std::size_t size();
+            virtual std::size_t size() const;
+            
+            iterator begin();
+            iterator end();
+            const_iterator begin() const;
+            const_iterator end() const;
     };
     
     class byte_sink : virtual public seekable {

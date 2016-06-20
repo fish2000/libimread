@@ -104,12 +104,12 @@ namespace im {
         return result;
     }
     
-    std::size_t fd_source_sink::size() {
+    std::size_t fd_source_sink::size() const {
         detail::stat_t info = this->stat();
         return info.st_size * sizeof(byte);
     }
     
-    void* fd_source_sink::readmap(std::size_t pageoffset) {
+    void* fd_source_sink::readmap(std::size_t pageoffset) const {
         if (!mapped.get()) {
             detail::stat_t info = this->stat();
             std::size_t fsize = info.st_size * sizeof(byte);

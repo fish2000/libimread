@@ -48,11 +48,11 @@ namespace py {
                 return out;
             }
             
-            std::size_t source::size() {
+            std::size_t source::size() const {
                 return view.len;
             }
             
-            void* source::readmap(std::size_t pageoffset) {
+            void* source::readmap(std::size_t pageoffset) const {
                 byte* out = (byte*)view.buf;
                 if (pageoffset) {
                     out += pageoffset * ::getpagesize();
