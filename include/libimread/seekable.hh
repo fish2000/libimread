@@ -78,10 +78,6 @@ namespace im {
             using size_type = std::size_t;
             using reference = std::add_lvalue_reference_t<value_type>;
             using const_reference = std::add_const_t<reference>;
-            // using iterator = source_iterator;
-            // using const_iterator = source_iterator;
-            // using reverse_iterator = std::reverse_iterator<iterator>;
-            // using const_reverse_iterator = std::reverse_iterator<const_iterator>;
             
             virtual ~byte_sink();
             virtual std::size_t write(const void* buffer, std::size_t n) = 0;
@@ -109,33 +105,30 @@ namespace im {
 
 namespace std {
     
-    using im::byte_source;
+    decltype(std::declval<im::byte_source>().begin())
+        begin(im::byte_source*);
     
-    decltype(std::declval<byte_source>().begin())
-        begin(byte_source*);
+    decltype(std::declval<im::byte_source>().end())
+        end(im::byte_source*);
     
-    decltype(std::declval<byte_source>().end())
-        end(byte_source*);
+    decltype(std::declval<im::byte_source>().rbegin())
+        rbegin(im::byte_source*);
     
-    decltype(std::declval<byte_source>().rbegin())
-        rbegin(byte_source*);
+    decltype(std::declval<im::byte_source>().rend())
+        rend(im::byte_source*);
     
-    decltype(std::declval<byte_source>().rend())
-        rend(byte_source*);
+    decltype(std::declval<im::byte_source const>().begin())
+        cbegin(im::byte_source const*);
     
-    decltype(std::declval<byte_source const>().begin())
-        cbegin(byte_source const*);
+    decltype(std::declval<im::byte_source const>().end())
+        cend(im::byte_source const*);
     
-    decltype(std::declval<byte_source const>().end())
-        cend(byte_source const*);
+    decltype(std::declval<im::byte_source const>().rbegin())
+        crbegin(im::byte_source const*);
     
-    decltype(std::declval<byte_source const>().rbegin())
-        crbegin(byte_source const*);
-    
-    decltype(std::declval<byte_source const>().rend())
-        crend(byte_source const*);
+    decltype(std::declval<im::byte_source const>().rend())
+        crend(im::byte_source const*);
     
 } /* namespace std */
-
 
 #endif /// LIBIMREAD_SEEKABLE_HH_
