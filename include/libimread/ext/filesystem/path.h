@@ -310,9 +310,9 @@ namespace filesystem {
             ///     path q = p / "i-heard";
             ///     path r = q / "you-like";
             ///     path s = r / "to-join-paths";
-            path operator/(path const& other) const        { return join(other); }
-            path operator/(char const* other) const        { return join(path(other)); }
-            path operator/(std::string const& other) const { return join(path(other)); }
+            path operator/(path const& other) const;
+            path operator/(char const* other) const;
+            path operator/(std::string const& other) const;
             
             /// Static forwarder for path::join<P, Q>(p, q) --
             /// sometimes you want to just join stuff mainually like:
@@ -331,9 +331,9 @@ namespace filesystem {
             ///     path q = p + "_i_heard";
             ///     path r = q + "_you_dont_necessarily_like";
             ///     path s = r + "_segment_based_append_operations";
-            path operator+(path const& other) const        { return append(other.str()); }
-            path operator+(char const* other) const        { return append(other); }
-            path operator+(std::string const& other) const { return append(other); }
+            path operator+(path const& other) const;
+            path operator+(char const* other) const;
+            path operator+(std::string const& other) const;
             
             /// Static forwarder for path::append<P, Q>(p, q) --
             /// you *get* this by now, rite? It's just like some shorthand for
@@ -372,27 +372,13 @@ namespace filesystem {
             void set(std::string const& str);
             
             /// ... and here, we have the requisite assign operators
-            path &operator=(std::string const& str) { set(str); return *this; }
-            path &operator=(char const* str)        { set(str); return *this; }
-            path &operator=(path const& p) {
-                if (!compare(p, *this)) {
-                    path(p).swap(*this);
-                }
-                return *this;
-            }
-            path &operator=(path&& p) noexcept {
-                if (!compare(p, *this)) {
-                    // m_type = native_path;
-                    m_path = std::move(p.m_path);
-                    m_absolute = p.m_absolute;
-                }
-                return *this;
-            }
+            path& operator=(std::string const& str);
+            path& operator=(char const* str);
+            path& operator=(path const& p);
+            path& operator=(path&& p) noexcept;
             
             /// Stringify the path to an ostream
-            friend std::ostream &operator<<(std::ostream& os, path const& p) {
-                return os << p.str();
-            }
+            friend std::ostream& operator<<(std::ostream& os, path const& p);
             
             /// calculate the hash value for the path
             std::size_t hash() const noexcept;

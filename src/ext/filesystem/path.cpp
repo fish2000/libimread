@@ -517,11 +517,19 @@ namespace filesystem {
         return result;
     }
     
+    path path::operator/(path const& other) const        { return join(other); }
+    path path::operator/(char const* other) const        { return join(path(other)); }
+    path path::operator/(std::string const& other) const { return join(path(other)); }
+    
     path path::append(std::string const& appendix) const {
         path out(m_path.empty() ? detail::stringvec_t{ "" } : m_path, m_absolute);
         out.m_path.back().append(appendix);
         return out;
     }
+    
+    path path::operator+(path const& other) const        { return append(other.str()); }
+    path path::operator+(char const* other) const        { return append(other); }
+    path path::operator+(std::string const& other) const { return append(other); }
     
     std::string path::str() const {
         std::string out = "";
@@ -568,6 +576,27 @@ namespace filesystem {
         m_type = native_path;
         m_path = tokenize(str, sep);
         m_absolute = !str.empty() && str[0] == sep;
+    }
+    
+    path& path::operator=(std::string const& str) { set(str); return *this; }
+    path& path::operator=(char const* str)        { set(str); return *this; }
+    path& path::operator=(path const& p) {
+        if (!compare(p, *this)) {
+            path(p).swap(*this);
+        }
+        return *this;
+    }
+    path& path::operator=(path&& p) noexcept {
+        if (!compare(p, *this)) {
+            // m_type = native_path;
+            m_path = std::move(p.m_path);
+            m_absolute = p.m_absolute;
+        }
+        return *this;
+    }
+    
+    std::ostream& operator<<(std::ostream& os, path const& p) {
+        return os << p.str();
     }
     
     /// calculate the hash value for the path
