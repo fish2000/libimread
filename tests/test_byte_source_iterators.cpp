@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
@@ -62,6 +63,30 @@ namespace {
             CHECK(std::equal(data.begin(),     data.end(),
                              fulldata.begin(), fulldata.end(),
                              std::equal_to<byte>()));
+        });
+    }
+    
+    TEST_CASE("[byte-source-iterators] Search for EXIF tag markers",
+              "[byte-source-iterators-search-for-exif-tag-markers]")
+    {
+        path basedir(im::test::basedir);
+        const std::string marker = "Exif\0\0";
+        const std::vector<path> jpgs = basedir.list("*.jpg");
+        
+        std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
+            path imagepath = basedir/p;
+            std::vector<byte> data;
+            std::string pth = imagepath.str();
+            FileSource source(pth);
+            auto result = std::search(source.begin(), source.end(),
+                                      marker.begin(), marker.end());
+            bool has_exif = result == source.end();
+            if (has_exif) {
+                WTF("EXIF marker found at offset:", result - source.begin());
+            } else {
+                WTF("EXIF marker not found");
+            }
+            CHECK(has_exif == (result == source.end()));
         });
     }
     
