@@ -813,6 +813,8 @@ namespace py {
                 DECLARE_CLOSURE(HAS_ALPHA);
                 DECLARE_CLOSURE(BITS);
                 DECLARE_CLOSURE(BYTES);
+                DECLARE_CLOSURE(IS_SIGNED);
+                DECLARE_CLOSURE(IS_FLOATING_POINT);
             }
             
             /// ImageType.{mode,has_alpha} getter
@@ -831,7 +833,9 @@ namespace py {
             PyObject*    get_size_property(PyObject* self, void* closure) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 return py::convert(CHECK_CLOSURE(BITS) ? pyim->image->nbits() :
-                                                         pyim->image->nbytes());
+                                  CHECK_CLOSURE(BYTES) ? pyim->image->nbytes() :
+                              CHECK_CLOSURE(IS_SIGNED) ? pyim->image->is_signed() :
+                                                         pyim->image->is_floating_point());
             }
             
             /// ImageType.{dtype,buffer} getter
@@ -1016,6 +1020,18 @@ namespace py {
                                 nullptr,
                                 (char*)"Image element size (in bytes) -> int\n",
                                 BIND_CLOSURE(BYTES) },
+                        {
+                            (char*)"is_signed",
+                                (getter)py::ext::image::get_size_property<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image element signededness -> bool\n",
+                                BIND_CLOSURE(IS_SIGNED) },
+                        {
+                            (char*)"is_floating_point",
+                                (getter)py::ext::image::get_size_property<ImageType, BufferType>,
+                                nullptr,
+                                (char*)"Image element floating-point-edness -> bool\n",
+                                BIND_CLOSURE(IS_FLOATING_POINT) },
                         {
                             (char*)"mode",
                                 (getter)py::ext::image::get_mode_property<ImageType, BufferType>,
