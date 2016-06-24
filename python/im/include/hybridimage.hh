@@ -486,9 +486,7 @@ namespace py {
                     }
                     {
                         py::gil::release nogil;
-                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"),  /// suffix
-                                              FILESYSTEM_TEMP_FILENAME,                /// prefix (filename template)
-                                              false);                                  /// cleanup on scope exit
+                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"), false); /// cleanup on scope exit
                         dststr = std::string(tf.filepath.make_absolute().str());
                     }
                 } else {

@@ -837,9 +837,7 @@ namespace py {
                 
                 {
                     py::gil::release nogil;
-                    NamedTemporaryFile tf(format->get_suffix(true),
-                                          FILESYSTEM_TEMP_FILENAME,
-                                          false);
+                    NamedTemporaryFile tf(format->get_suffix(true), false);
                     
                     std::string pth = tf.filepath.make_absolute().str();
                     tf.filepath.remove();
@@ -1676,8 +1674,7 @@ namespace py {
                 
                 if (as_blob) {
                     py::gil::release nogil;
-                    NamedTemporaryFile tf("." + opts.cast<std::string>("format"),
-                                        FILESYSTEM_TEMP_FILENAME, false); /// boolean cleanup on scope exit
+                    NamedTemporaryFile tf("." + opts.cast<std::string>("format"), false); /// boolean cleanup on scope exit
                     dststr = std::string(tf.filepath.make_absolute().str());
                 } else if (!use_file) {
                     /// save as file -- extract the filename from the buffer

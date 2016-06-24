@@ -44,7 +44,7 @@ namespace {
     TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file",
               "[gif-write-multi-animated]")
     {
-        // NamedTemporaryFile composite(".gif", FILESYSTEM_TEMP_FILENAME, false);
+        // NamedTemporaryFile composite(".gif", false);
         NamedTemporaryFile composite(".gif");
         path basedir(im::test::basedir);
         std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));

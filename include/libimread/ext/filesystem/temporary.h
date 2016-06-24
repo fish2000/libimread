@@ -33,7 +33,7 @@ namespace filesystem {
         filesystem::path filepath;
         std::fstream stream;
         
-        explicit NamedTemporaryFile(char const* s = tfs, char const* p = tfp, bool c = true,
+        explicit NamedTemporaryFile(char const* s = tfs, bool c = true, char const* p = tfp,
                                     filesystem::mode m = filesystem::mode::WRITE,
                                     filesystem::path const& td = filesystem::path::tmp())
                                         :cleanup(c), deallocate(true)
@@ -44,7 +44,8 @@ namespace filesystem {
                                         {
                                             create();
                                         }
-        explicit NamedTemporaryFile(std::string const& s, std::string const& p = tfp, bool c = true,
+        
+        explicit NamedTemporaryFile(std::string const& s, bool c = true, std::string const& p = tfp,
                                     filesystem::mode m = filesystem::mode::WRITE,
                                     filesystem::path const& td = filesystem::path::tmp())
                                         :cleanup(c), deallocate(true)
@@ -153,8 +154,8 @@ namespace filesystem {
         NamedTemporaryFile get(std::string const& suffix = tfs,
                                std::string const& prefix = tfp,
                                mode m = mode::WRITE) { return NamedTemporaryFile(
-                                                          suffix, prefix,
-                                                          cleanup, m, dirpath); }
+                                                          suffix, cleanup,
+                                                          prefix, m, dirpath); }
         
         bool create();
         bool clean();

@@ -834,9 +834,7 @@ namespace py {
                     return nullptr;
                 }
                 
-                NamedTemporaryFile tf(format->get_suffix(true),
-                                      FILESYSTEM_TEMP_FILENAME,
-                                      false);
+                NamedTemporaryFile tf(format->get_suffix(true), false);
                 
                 {
                     py::gil::release nogil;

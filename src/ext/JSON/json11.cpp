@@ -1052,7 +1052,7 @@ Json const& Json::dump(std::string const& dest, bool overwrite) const {
 
 std::string Json::dumptmp() const {
     using filesystem::NamedTemporaryFile;
-    NamedTemporaryFile tf(".json", FILESYSTEM_TEMP_FILENAME, false);
+    NamedTemporaryFile tf(".json", false);
     tf.open();
     tf.stream << *this;
     tf.close();
