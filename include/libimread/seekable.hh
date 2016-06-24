@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/iterators.hh>
 
 namespace im {
     
@@ -104,6 +105,37 @@ namespace im {
             }
     };
 
-}
+} /* namespace im */
+
+namespace std {
+    
+    using im::byte_source;
+    
+    decltype(std::declval<byte_source>().begin())
+        begin(byte_source*);
+    
+    decltype(std::declval<byte_source>().end())
+        end(byte_source*);
+    
+    decltype(std::declval<byte_source>().rbegin())
+        rbegin(byte_source*);
+    
+    decltype(std::declval<byte_source>().rend())
+        rend(byte_source*);
+    
+    decltype(std::declval<byte_source const>().begin())
+        cbegin(byte_source const*);
+    
+    decltype(std::declval<byte_source const>().end())
+        cend(byte_source const*);
+    
+    decltype(std::declval<byte_source const>().rbegin())
+        crbegin(byte_source const*);
+    
+    decltype(std::declval<byte_source const>().rend())
+        crend(byte_source const*);
+    
+} /* namespace std */
+
 
 #endif /// LIBIMREAD_SEEKABLE_HH_

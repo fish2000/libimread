@@ -92,4 +92,34 @@ namespace im {
     byte_sink::~byte_sink() {}
     void byte_sink::flush() {}
 
-}
+} /* namespace im */
+
+namespace std {
+    
+    using im::byte_source;
+    
+    decltype(std::declval<byte_source>().begin())
+        begin(byte_source* source) { return source->begin(); }
+    
+    decltype(std::declval<byte_source>().end())
+        end(byte_source* source) { return source->end(); }
+    
+    decltype(std::declval<byte_source>().rbegin())
+        rbegin(byte_source* source) { return source->rbegin(); }
+    
+    decltype(std::declval<byte_source>().rend())
+        rend(byte_source* source) { return source->rend(); }
+    
+    decltype(std::declval<byte_source const>().begin())
+        cbegin(byte_source const* source) { return source->begin(); }
+    
+    decltype(std::declval<byte_source const>().end())
+        cend(byte_source const* source) { return source->end(); }
+    
+    decltype(std::declval<byte_source const>().rbegin())
+        crbegin(byte_source const* source) { return source->rbegin(); }
+    
+    decltype(std::declval<byte_source const>().rend())
+        crend(byte_source const* source) { return source->rend(); }
+    
+} /* namespace std */

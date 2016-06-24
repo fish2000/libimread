@@ -80,7 +80,7 @@ namespace im {
     
     class source_const_iterator : public source_iterator {};
     
-}
+} /* namespace im */
 
 
 #endif /// LIBIMREAD_ITERATORS_HH_

@@ -155,4 +155,5 @@ namespace im {
         swap(lhs.sourceidx, rhs.sourceidx);
     }
     
-}
+} /* namespace im */
+
