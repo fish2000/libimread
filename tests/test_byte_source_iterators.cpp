@@ -6,9 +6,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/iterators.hh>
-// #include <libimread/seekable.hh>
-// #include <libimread/image.hh>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 
@@ -28,7 +25,7 @@ namespace {
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         
-        std::for_each(pngs.begin(), pngs.end(), [&](path const& p) {
+        std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             path imagepath = basedir/p;
             std::vector<byte> data;
             std::string pth = imagepath.str();
@@ -52,7 +49,7 @@ namespace {
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
         
-        std::for_each(pngs.begin(), pngs.end(), [&](path const& p) {
+        std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             path imagepath = basedir/p;
             std::vector<byte> data;
             std::string pth = imagepath.str();

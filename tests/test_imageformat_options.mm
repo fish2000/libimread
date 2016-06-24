@@ -55,13 +55,13 @@ namespace {
                 auto format_ptr = ImageFormat::named(format);
                 options_map opts = format_ptr->get_options();
                 
-                WTF("",
-                    FF("FORMAT: %s", format.c_str()),
-                    "As JSON:",
-                    opts.format(), "",
-                    "As encoded IOD:",
-                    iod::json_encode(format_ptr->options),
-                    iod::json_encode(format_ptr->capacity));
+                // WTF("",
+                //     FF("FORMAT: %s", format.c_str()),
+                //     "As JSON:",
+                //     opts.format(), "",
+                //     "As encoded IOD:",
+                //     iod::json_encode(format_ptr->options),
+                //     iod::json_encode(format_ptr->capacity));
                 
             ++idx; }
         

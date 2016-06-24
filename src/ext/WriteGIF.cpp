@@ -33,11 +33,13 @@ using im::byte;
         trailer
 **************************************************/
 
-#if (IM_VERBOSE > 0)
-#define MAYBE(...) FORSURE(__VA_ARGS__)
-#else
+// #if (IM_VERBOSE > 0)
+// #define MAYBE(...) FORSURE(__VA_ARGS__)
+// #else
+// #define MAYBE(...)
+// #endif
+
 #define MAYBE(...)
-#endif
 
 namespace {
     
