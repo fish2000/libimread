@@ -5,8 +5,8 @@
 _imread.py: libimread shim
 
 This module is a shim, providing the functions that @luispedro imread
-furnishes in the _libimread.so extension module -- the function signatures
-are legible in _libimread.cpp within that codebase. 
+furnishes in the _imread.so extension module -- the function signatures
+are legible in _imread.cpp within that codebase.
 
 This shim module uses numpy and libimread's Python extension module to
 perform the necessary functions. 
