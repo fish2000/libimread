@@ -79,8 +79,8 @@ namespace im {
         protected:
             
             mutable float entropy_value = 0.0;
+            mutable int otsu_value = 0;
             mutable bool entropy_calculated = false;
-            mutable float otsu_value = 0.0;
             mutable bool otsu_calculated = false;
             byteva_t source;
             floatva_t histogram;
