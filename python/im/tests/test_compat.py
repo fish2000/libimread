@@ -45,12 +45,14 @@ class CompatibilityTests(BaseCase):
         for image_path in self.jpgs:
             format0 = imread.detect_format(image_path)
             format1 = luispedro.detect_format(image_path)
-            self.assertEqual(format0, format1)
+            self.assertEqual(format0, 'jpg')
+            self.assertEqual(format1, 'jpeg')
             with open(image_path, 'rb') as fh:
                 blob = fh.read()
                 blobformat0 = imread.detect_format(blob, is_blob=True)
                 blobformat1 = luispedro.detect_format(blob, is_blob=True)
-                self.assertEqual(blobformat0, blobformat1)
+                self.assertEqual(blobformat0, 'jpg')
+                self.assertEqual(blobformat1, 'jpeg')
     
     def test_imread_supports_format(self):
         """ Check format support in compat.imread

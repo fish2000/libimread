@@ -43,8 +43,7 @@ def imsave_multi(filename, formatstr, arrays, opts):
         "_imread.imsave_multi is as-of-yet unsupported")
 
 def detect_format(filename_or_blob, is_blob=False):
-    detected_format = im.detect(filename_or_blob, is_blob=bool(is_blob))
-    return detected_format
+    return im.detect(filename_or_blob, is_blob=bool(is_blob))
 
 def supports_format(formatstr):
     return formatstr.lower() in all_suffixes
