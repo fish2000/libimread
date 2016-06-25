@@ -542,6 +542,21 @@ namespace py {
                 return py::convert(entropy);
             }
             
+            PyObject* otsu_at(int zidx) {
+                if (zidx >= image->planes() || zidx < 0) {
+                    PyErr_SetString(PyExc_IndexError,
+                        "otsu_at(): index out of range");
+                    return nullptr;
+                }
+                int otsu = 0;
+                {
+                    py::gil::release nogil;
+                    Histogram histo(image.get(), zidx);
+                    otsu = histo.otsu();
+                }
+                return py::convert(otsu);
+            }
+            
             PyObject* histogram_all() {
                 std::vector<int> intvec;
                 {
@@ -570,6 +585,20 @@ namespace py {
                     }
                 }
                 return py::convert(floatvec);
+            }
+            
+            PyObject* otsu_all() {
+                std::vector<int> intvec;
+                {
+                    py::gil::release nogil;
+                    int idx = 0,
+                        max = image->planes();
+                    for (; idx < max; ++idx) {
+                        Histogram histo(image.get(), idx);
+                        intvec.push_back(histo.otsu());
+                    }
+                }
+                return py::convert(intvec);
             }
             
             options_map readopts() {
