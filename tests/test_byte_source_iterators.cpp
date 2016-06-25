@@ -7,6 +7,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/exif.hh>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 
@@ -18,7 +19,9 @@ namespace {
     using im::byte;
     using im::FileSource;
     using HandleSource = im::handle::source;
+    using im::byte_iterator;
     using filesystem::path;
+    using easyexif::EXIFInfo;
     
     TEST_CASE("[byte-source-iterators] Test FileSource iterators",
               "[byte-source-iterators-test-FileSource-iterators]")
@@ -66,11 +69,18 @@ namespace {
         });
     }
     
+    template <typename Iterator>
+    uint16_t parse_size(Iterator it) {
+        Iterator siz0 = std::next(it, 2);
+        Iterator siz1 = std::next(it, 3);
+        return (static_cast<uint16_t>(*siz0) << 8) | *siz1;
+    }
+    
     TEST_CASE("[byte-source-iterators] Search for EXIF tag markers",
               "[byte-source-iterators-search-for-exif-tag-markers]")
     {
         path basedir(im::test::basedir);
-        const std::string marker = "Exif\0\0";
+        const std::vector<byte> marker{ 0xFF, 0xE1 };
         const std::vector<path> jpgs = basedir.list("*.jpg");
         
         std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
@@ -78,15 +88,36 @@ namespace {
             std::vector<byte> data;
             std::string pth = imagepath.str();
             FileSource source(pth);
-            auto result = std::search(source.begin(), source.end(),
-                                      marker.begin(), marker.end());
-            bool has_exif = result == source.end();
+            byte_iterator result = std::search(source.begin(), source.end(),
+                                               marker.begin(), marker.end());
+            bool has_exif = result != source.end();
             if (has_exif) {
-                WTF("EXIF marker found at offset:", result - source.begin());
+                uint16_t size = parse_size(result);
+                std::advance(result, 4);
+                std::copy(result, result + size,
+                          std::back_inserter(data));
+                
+                // char m[6];
+                // std::memcpy(m, &result, sizeof(m));
+                // WTF("EXIF marker found at offset:", std::size_t(result),
+                //     "with size:", size,
+                //     "within size:", source.size(),
+                //  FF("with value: %s", m));
+                
+                EXIFInfo exif;
+                int parseResult = exif.parseFromEXIFSegment(&data[0], data.size());
+                CHECK(parseResult == PARSE_EXIF_SUCCESS);
+                
+                WTF("EXIF data extracted:",
+                    FF("\tImage Description: %s",   exif.ImageDescription.c_str()),
+                    FF("\tMake: %s",                exif.Make.c_str()),
+                    FF("\tModel: %s",               exif.Model.c_str()),
+                    FF("\tCopyright: %s",           exif.Copyright.c_str())
+                );
+                
             } else {
                 WTF("EXIF marker not found");
             }
-            CHECK(has_exif == (result == source.end()));
         });
     }
     

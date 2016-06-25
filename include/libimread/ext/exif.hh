@@ -154,6 +154,8 @@ namespace easyexif {
 
 // Parse was successful
 #define PARSE_EXIF_SUCCESS 0
+// No appropriate length to the buffer
+#define PARSE_EXIF_ERROR_NO_LENGTH 1981
 // No JPEG markers found in buffer, possibly invalid JPEG file
 #define PARSE_EXIF_ERROR_NO_JPEG 1982
 // No EXIF header found in JPEG file.

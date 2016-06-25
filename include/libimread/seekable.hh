@@ -16,8 +16,7 @@
 namespace im {
     
     /// forward declarations
-    class source_iterator;
-    class source_const_iterator;
+    class byte_iterator;
     
     struct seekable {
         virtual ~seekable();
@@ -39,8 +38,8 @@ namespace im {
             using const_reference = std::add_const_t<reference>;
             using pointer = std::add_pointer_t<value_type>;
             
-            using iterator = source_iterator;
-            using const_iterator = source_iterator;
+            using iterator = byte_iterator;
+            using const_iterator = byte_iterator;
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
             

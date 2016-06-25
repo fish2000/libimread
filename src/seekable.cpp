@@ -4,7 +4,6 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/seekable.hh>
-#include <libimread/iterators.hh>
 
 namespace im {
     
@@ -58,38 +57,39 @@ namespace im {
     }
     
     byte_source::iterator byte_source::begin() {
-        return byte_source::iterator(this, 0);
+        return byte_source::iterator(data(), 0);
     }
     
     byte_source::iterator byte_source::end() {
-        return byte_source::iterator(this, size());
+        return byte_source::iterator(data(), size());
     }
     
     byte_source::const_iterator byte_source::begin() const {
-        return byte_source::const_iterator(this, 0);
+        return byte_source::const_iterator(data(), 0);
     }
     
     byte_source::const_iterator byte_source::end() const {
-        return byte_source::const_iterator(this, size());
+        return byte_source::const_iterator(data(), size());
     }
     
     byte_source::reverse_iterator byte_source::rbegin() {
-        return byte_source::reverse_iterator(byte_source::iterator(this, size()));
+        return byte_source::reverse_iterator(byte_source::iterator(data(), size()));
     }
     
     byte_source::reverse_iterator byte_source::rend() {
-        return byte_source::reverse_iterator(byte_source::iterator(this, 0));
+        return byte_source::reverse_iterator(byte_source::iterator(data(), 0));
     }
     
     byte_source::const_reverse_iterator byte_source::rbegin() const {
-        return byte_source::const_reverse_iterator(byte_source::const_iterator(this, size()));
+        return byte_source::const_reverse_iterator(byte_source::const_iterator(data(), size()));
     }
     
     byte_source::const_reverse_iterator byte_source::rend() const {
-        return byte_source::const_reverse_iterator(byte_source::const_iterator(this, 0));
+        return byte_source::const_reverse_iterator(byte_source::const_iterator(data(), 0));
     }
     
     byte_sink::~byte_sink() {}
+    
     void byte_sink::flush() {}
 
 } /* namespace im */

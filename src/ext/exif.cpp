@@ -510,9 +510,8 @@ int easyexif::EXIFInfo::parseFromEXIFSegment(const unsigned char* buf,
     bool alignIntel = true;                  // byte alignment (defined in EXIF header)
     unsigned offs = 0;                       // current offset into buffer
     if (!buf || len < 6) {
-        return PARSE_EXIF_ERROR_NO_EXIF;
+        return PARSE_EXIF_ERROR_NO_LENGTH;
     }
-    
     
     if (!std::equal(buf, buf + 6, "Exif\0\0")) {
         return PARSE_EXIF_ERROR_NO_EXIF;

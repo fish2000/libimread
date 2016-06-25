@@ -7,150 +7,155 @@
 
 namespace im {
     
-    source_iterator::source_iterator(byte_source const* s)
-        :source(s)
-        ,sourcemap(static_cast<byte*>(source->readmap()))
-        ,sourceidx(sourcemap)
+    byte_iterator::byte_iterator(byte_iterator::pointer byteptr)
+        :sourcemap(byteptr)
+        ,sourceidx(byteptr)
         {}
     
-    source_iterator::source_iterator(byte_source const* s, size_type initial_idx)
-        :source(s)
-        ,sourcemap(static_cast<byte*>(source->readmap()))
-        ,sourceidx(sourcemap)
+    byte_iterator::byte_iterator(byte_iterator::pointer byteptr, size_type initial_idx)
+        :sourcemap(byteptr)
+        ,sourceidx(byteptr)
         {
             sourcemap += initial_idx;
         }
     
-    source_iterator::source_iterator(source_iterator const& other)
-        :source(other.source)
-        ,sourcemap(other.sourcemap)
+    byte_iterator::byte_iterator(byte_iterator const& other)
+        :sourcemap(other.sourcemap)
         ,sourceidx(other.sourceidx)
         {}
     
-    source_iterator::source_iterator(source_iterator&& other) noexcept
-        :source(std::move(other.source))
-        ,sourcemap(std::move(other.sourcemap))
+    byte_iterator::byte_iterator(byte_iterator&& other) noexcept
+        :sourcemap(std::move(other.sourcemap))
         ,sourceidx(std::move(other.sourceidx))
         {}
     
-    source_iterator::~source_iterator() {}
+    byte_iterator::~byte_iterator() {}
     
-    source_iterator& source_iterator::operator=(source_iterator const& other) {
-        source_iterator(other).swap(*this);
+    byte_iterator& byte_iterator::operator=(byte_iterator const& other) {
+        byte_iterator(other).swap(*this);
         return *this;
     }
     
-    source_iterator& source_iterator::operator=(source_iterator&& other) noexcept {
-        source = std::move(other.source);
+    byte_iterator& byte_iterator::operator=(byte_iterator&& other) noexcept {
         sourcemap = std::move(other.sourcemap);
         sourceidx = std::move(other.sourceidx);
         return *this;
     }
     
     /// prefix increment
-    source_iterator& source_iterator::operator++() {
+    byte_iterator& byte_iterator::operator++() {
         ++sourcemap;
         return *this;
     }
     
     /// postfix increment
-    source_iterator source_iterator::operator++(int) {
-        source_iterator out(*this);
+    byte_iterator byte_iterator::operator++(int) {
+        byte_iterator out(*this);
         out.sourcemap++;
         return out;
     }
     
     /// prefix decrement
-    source_iterator& source_iterator::operator--() {
+    byte_iterator& byte_iterator::operator--() {
         --sourcemap;
         return *this;
     }
     
     /// postfix decrement
-    source_iterator source_iterator::operator--(int) {
-        source_iterator out(*this);
+    byte_iterator byte_iterator::operator--(int) {
+        byte_iterator out(*this);
         out.sourcemap--;
         return out;
     }
     
-    source_iterator& source_iterator::operator+=(size_type offset) {
+    byte_iterator& byte_iterator::operator+=(size_type offset) {
         sourcemap += offset;
         return *this;
     }
     
-    source_iterator& source_iterator::operator-=(size_type offset) {
+    byte_iterator& byte_iterator::operator-=(size_type offset) {
         sourcemap -= offset;
         return *this;
     }
     
-    source_iterator operator+(source_iterator const& lhs, source_iterator::size_type rhs) {
-        source_iterator out(lhs);
+    byte_iterator operator+(byte_iterator const& lhs, byte_iterator::size_type rhs) {
+        byte_iterator out(lhs);
         out.sourcemap += rhs;
         return out;
     }
     
-    source_iterator operator+(source_iterator::size_type lhs, source_iterator const& rhs) {
-        source_iterator out(rhs);
+    byte_iterator operator+(byte_iterator::size_type lhs, byte_iterator const& rhs) {
+        byte_iterator out(rhs);
         out.sourcemap += lhs;
         return out;
     }
     
-    source_iterator operator-(source_iterator const& lhs, source_iterator::size_type rhs) {
-        source_iterator out(lhs);
+    byte_iterator operator-(byte_iterator const& lhs, byte_iterator::size_type rhs) {
+        byte_iterator out(lhs);
         out.sourcemap -= rhs;
         return out;
     }
     
-    source_iterator::idx_t operator-(source_iterator lhs, source_iterator rhs) {
-        return (source_iterator::idx_t)lhs.sourcemap - (source_iterator::idx_t)rhs.sourcemap;
+    byte_iterator::idx_t operator-(byte_iterator lhs, byte_iterator rhs) {
+        return (byte_iterator::idx_t)lhs.sourcemap - (byte_iterator::idx_t)rhs.sourcemap;
     }
     
-    source_iterator::value_type source_iterator::operator*() const {
+    byte_iterator::value_type byte_iterator::operator*() const {
         return sourcemap[0];
     }
     
-    source_iterator::pointer source_iterator::operator->() const {
+    byte_iterator::pointer byte_iterator::operator->() const {
         return sourcemap;
     }
     
-    source_iterator::reference_type source_iterator::operator[](size_type idx) const {
+    byte_iterator::pointer byte_iterator::operator&() const {
+        return sourcemap;
+    }
+    
+    byte_iterator::reference_type byte_iterator::operator[](size_type idx) const {
         return sourceidx[idx];
     }
     
-    bool operator<(source_iterator const& lhs, source_iterator const& rhs) {
+    byte_iterator::operator byte_iterator::value_type() const {
+        return sourcemap[0];
+    }
+    
+    byte_iterator::operator byte_iterator::size_type() const {
+        return (size_type)((byte_iterator::idx_t)sourcemap - (byte_iterator::idx_t)sourceidx);
+    }
+    
+    bool operator<(byte_iterator const& lhs, byte_iterator const& rhs) {
         return lhs.sourcemap < rhs.sourcemap;
     }
     
-    bool operator>(source_iterator const& lhs, source_iterator const& rhs) {
+    bool operator>(byte_iterator const& lhs, byte_iterator const& rhs) {
         return lhs.sourcemap > rhs.sourcemap;
     }
     
-    bool operator<=(source_iterator const& lhs, source_iterator const& rhs) {
+    bool operator<=(byte_iterator const& lhs, byte_iterator const& rhs) {
         return lhs.sourcemap <= rhs.sourcemap;
     }
     
-    bool operator>=(source_iterator const& lhs, source_iterator const& rhs) {
+    bool operator>=(byte_iterator const& lhs, byte_iterator const& rhs) {
         return lhs.sourcemap >= rhs.sourcemap;
     }
     
-    bool operator==(source_iterator const& lhs, source_iterator const& rhs) {
+    bool operator==(byte_iterator const& lhs, byte_iterator const& rhs) {
         return lhs.sourcemap == rhs.sourcemap;
     }
     
-    bool operator!=(source_iterator const& lhs, source_iterator const& rhs) {
+    bool operator!=(byte_iterator const& lhs, byte_iterator const& rhs) {
         return lhs.sourcemap != rhs.sourcemap;
     }
     
-    void source_iterator::swap(source_iterator& other) {
+    void byte_iterator::swap(byte_iterator& other) {
         using std::swap;
-        swap(source,    other.source);
         swap(sourcemap, other.sourcemap);
         swap(sourceidx, other.sourceidx);
     }
     
-    void swap(source_iterator& lhs, source_iterator& rhs) {
+    void swap(byte_iterator& lhs, byte_iterator& rhs) {
         using std::swap;
-        swap(lhs.source,    rhs.source);
         swap(lhs.sourcemap, rhs.sourcemap);
         swap(lhs.sourceidx, rhs.sourceidx);
     }
