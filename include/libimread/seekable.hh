@@ -15,9 +15,6 @@
 
 namespace im {
     
-    /// forward declarations
-    class byte_iterator;
-    
     struct seekable {
         virtual ~seekable();
         virtual bool can_seek() const noexcept;

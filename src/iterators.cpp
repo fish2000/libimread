@@ -3,7 +3,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/iterators.hh>
-#include <libimread/seekable.hh>
 
 namespace im {
     

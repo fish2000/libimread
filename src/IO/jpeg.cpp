@@ -42,7 +42,7 @@ namespace im {
             jpeg_source_adaptor* adaptor = reinterpret_cast<jpeg_source_adaptor*>(cinfo->src);
             adaptor->mgr.next_input_byte = adaptor->buf;
             adaptor->mgr.bytes_in_buffer = adaptor->s->read(adaptor->buf, buffer_size);
-            return TRUE;
+            return (boolean)true;
         }
         
         void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
@@ -63,7 +63,7 @@ namespace im {
                 buffer_size);
             adaptor->mgr.next_output_byte = adaptor->buf;
             adaptor->mgr.free_in_buffer = buffer_size;
-            return TRUE;
+            return (boolean)true;
         }
         
         void flush_output_buffer(j_compress_ptr cinfo) {

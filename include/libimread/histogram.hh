@@ -61,6 +61,7 @@ namespace im {
             int max_value() const;
             
             float entropy() const;
+            int otsu() const;
             
             floatva_t normalized() const;
             byteva_t const& sourcedata() const;
@@ -79,6 +80,8 @@ namespace im {
             
             mutable float entropy_value = 0.0;
             mutable bool entropy_calculated = false;
+            mutable float otsu_value = 0.0;
+            mutable bool otsu_calculated = false;
             byteva_t source;
             floatva_t histogram;
         

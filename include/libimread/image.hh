@@ -58,6 +58,7 @@ namespace im {
             
             virtual Histogram histogram() const;
             virtual float entropy() const;
+            virtual int otsu() const;
             
             template <typename T> inline
             T* rowp_as(const int r) const {

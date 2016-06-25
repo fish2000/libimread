@@ -12,9 +12,6 @@
 
 namespace im {
     
-    /// forward-declare byte source
-    class byte_source;
-    
     class byte_iterator {
         
         public:

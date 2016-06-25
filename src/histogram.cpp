@@ -121,6 +121,58 @@ namespace im {
         return entropy_value;
     }
     
+    int Histogram::otsu() const {
+        /// Otsu calculation lifted wholesale from mahotas:
+        /// https://github.com/luispedro/mahotas/blob/master/mahotas/_histogram.cpp#L64-L100
+        if (!otsu_calculated) {
+            int n = histogram.size();
+            std::vector<double> nB, nO;
+            if (n <= 1) { return 0; }
+            const double Hsum = std::accumulate(std::begin(histogram) + 1,
+                                                std::end(histogram),
+                                                double(0));
+            if (Hsum == 0) { return 0; }
+            
+            nB.resize(n);
+            nB[0] = histogram[0];
+            for (int i = 1; i != n; ++i) {
+                nB[i] = histogram[i] + nB[i-1];
+            }
+            
+            nO.resize(n);
+            for (int i = 0; i < n; ++i) {
+                nO[i] = nB[n-1] - nB[i];
+            }
+            
+            double mu_B = 0,
+                   mu_O = 0;
+            for (int i = 1; i != n; ++i) {
+                mu_O += i * histogram[i];
+            }
+            mu_O /= Hsum;
+            
+            double best = nB[0] * nO[0] * (mu_B - mu_O) * (mu_B - mu_O);
+            int bestT = 0;
+            
+            for (int T = 1; T != n; ++T) {
+                if (nB[T] == 0) { continue; }
+                if (nO[T] == 0) { break; }
+                mu_B = (mu_B * nB[T-1] + T * histogram[T]) / nB[T];
+                mu_O = (mu_O * nO[T-1] - T * histogram[T]) / nO[T];
+                const double sigma_between = nB[T] * nO[T] * (mu_B - mu_O) * (mu_B - mu_O);
+                if (sigma_between > best) {
+                    best = sigma_between;
+                    bestT = T;
+                }
+            }
+            
+            // return bestT;
+            otsu_value = bestT;
+            otsu_calculated = true;
+        }
+        return otsu_value;
+    }
+    
     Histogram::floatva_t Histogram::normalized() const {
         floatva_t out = histogram / histogram.max();
         return out;

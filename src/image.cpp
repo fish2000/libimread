@@ -82,6 +82,11 @@ namespace im {
         return histo.entropy();
     }
     
+    int Image::otsu() const {
+        Histogram histo(this);
+        return histo.otsu();
+    }
+    
     ImageFactory::~ImageFactory() {}
     
     ImageWithMetadata::ImageWithMetadata()

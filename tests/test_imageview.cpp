@@ -93,6 +93,7 @@ namespace {
         const std::vector<path> pngs = basedir.list("*.png");
         const std::vector<path> jpgs = basedir.list("*.jpg");
         std::unordered_map<path, float> entropies;
+        std::unordered_map<path, int> otsus;
         
         std::for_each(pngs.begin(), pngs.end(), [&](path const& p) {
             path imagepath = basedir/p;
@@ -100,8 +101,10 @@ namespace {
             shared_t png_view = std::make_shared<ImageView>(png.get());
             Histogram histo = png_view->histogram();
             CHECK(histo.entropy() != 0.00);
+            CHECK(histo.otsu() != 0);
             CHECK(!std::isnan(histo.entropy()));
             entropies.insert({ imagepath, histo.entropy() });
+            otsus.insert({ imagepath, histo.otsu() });
         });
         
         std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
@@ -110,13 +113,20 @@ namespace {
             shared_t jpg_view = std::make_shared<ImageView>(jpg.get());
             Histogram histo = jpg_view->histogram();
             CHECK(histo.entropy() != 0.00);
+            CHECK(histo.otsu() != 0);
             CHECK(!std::isnan(histo.entropy()));
             entropies.insert({ imagepath, histo.entropy() });
+            otsus.insert({ imagepath, histo.otsu() });
         });
         
         for (auto const& p : entropies) {
             auto image = im::halide::read(p.first.str());
             CHECK(p.second == image.entropy());
+        }
+        
+        for (auto const& p : otsus) {
+            auto image = im::halide::read(p.first.str());
+            CHECK(p.second == image.otsu());
         }
         
     }
