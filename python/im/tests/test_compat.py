@@ -52,6 +52,36 @@ class CompatibilityTests(BaseCase):
                 blobformat1 = luispedro.detect_format(blob, is_blob=True)
                 self.assertEqual(blobformat0, blobformat1)
     
+    def test_imread_supports_format(self):
+        """ Check format support in compat.imread
+            and luispedro imread
+        """
+        import imread as luispedro
+        self.assertTrue(luispedro.supports_format('bmp'))
+        self.assertTrue(luispedro.supports_format('png'))
+        self.assertTrue(luispedro.supports_format('tiff'))
+        self.assertTrue(luispedro.supports_format('tif'))
+        self.assertTrue(luispedro.supports_format('jpeg'))
+        self.assertTrue(luispedro.supports_format('jpg'))
+        self.assertFalse(luispedro.supports_format('ppm'))
+        self.assertFalse(luispedro.supports_format('pvr'))
+        self.assertFalse(luispedro.supports_format('gif'))
+        self.assertTrue(luispedro.supports_format('webp'))
+        self.assertFalse(luispedro.supports_format('hdf5'))
+        
+        from im.compat import imread
+        self.assertTrue(imread.supports_format('bmp'))
+        self.assertTrue(imread.supports_format('png'))
+        self.assertTrue(imread.supports_format('tiff'))
+        self.assertTrue(imread.supports_format('tif'))
+        self.assertTrue(imread.supports_format('jpeg'))
+        self.assertTrue(imread.supports_format('jpg'))
+        self.assertTrue(imread.supports_format('ppm'))
+        self.assertTrue(imread.supports_format('pvr'))
+        self.assertTrue(imread.supports_format('gif'))
+        self.assertTrue(imread.supports_format('webp'))
+        self.assertTrue(imread.supports_format('hdf5'))
+    
     def test_imread_imread_imsave(self):
         """ Load JPG files by filename, with both versions of imread:
             compat.imread (ours) and luispedro imread (the orig);
