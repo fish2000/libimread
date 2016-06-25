@@ -323,7 +323,7 @@ static PyMethodDef module_functions[] = {
         "detect",
             (PyCFunction)py::functions::detect,
             METH_VARARGS | METH_KEYWORDS,
-            "image.write(source=\"\", file=None, is_blob=False)\n"
+            "detect(source=\"\", file=None, is_blob=False)\n"
             "\t-> Detect the format of a file, blob, or file-like Python object\n"
             "\t   specifying: \n"
             "\t - a path or blob (source) OR \n"
