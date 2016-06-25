@@ -110,13 +110,15 @@ namespace {
                 
                 WTF("EXIF data extracted:",
                     FF("\tImage Description: %s",   exif.ImageDescription.c_str()),
+                    FF("\tSoftware Used: %s",       exif.Software.c_str()),
                     FF("\tMake: %s",                exif.Make.c_str()),
                     FF("\tModel: %s",               exif.Model.c_str()),
-                    FF("\tCopyright: %s",           exif.Copyright.c_str())
+                    FF("\tCopyright: %s",           exif.Copyright.c_str()),
+                    FF("\tImage Size: %ux%u",       exif.ImageWidth, exif.ImageHeight)
                 );
                 
             } else {
-                WTF("EXIF marker not found");
+                // WTF("EXIF marker not found");
             }
         });
     }
