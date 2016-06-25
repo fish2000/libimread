@@ -132,10 +132,11 @@ namespace im {
         inline J_COLOR_SPACE color_space(int components) {
             if (components == 1) { return JCS_GRAYSCALE; }
             if (components == 3) { return JCS_RGB; }
+            if (components == 4) { return JCS_CMYK; }
             imread_raise(CannotReadError,
                 "\tim::(anon)::color_space() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
              FF("\tim::(anon)::color_space() got:    `components` = (int){ %i }", components),
-                "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3 }");
+                "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3, 4 }");
         }
         
     } /// namespace (anon.)

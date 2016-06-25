@@ -151,16 +151,31 @@ namespace im {
     };
     
     class ImageWithMetadata {
+        
         public:
+            using bytevec_t = std::vector<byte>;
+            
             ImageWithMetadata();
             ImageWithMetadata(std::string const& m);
             virtual ~ImageWithMetadata();
             
+            bool has_meta() const;
             std::string const& get_meta() const;
-            void set_meta(std::string const& m);
+            std::string const& set_meta(std::string const&);
             
-        private:
+            bool has_icc_name() const;
+            std::string const& get_icc_name() const;
+            std::string const& set_icc_name(std::string const&);
+            
+            bool has_icc_data() const;
+            bytevec_t const& get_icc_data() const;
+            bytevec_t const& set_icc_data(bytevec_t const&);
+            bytevec_t const& set_icc_data(byte*, std::size_t);
+            
+        protected:
             std::string meta;
+            std::string icc_name;
+            bytevec_t icc_data;
     };
     
 } /* namespace im */

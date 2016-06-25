@@ -168,8 +168,7 @@ namespace im {
             
         }
         
-        
-    }
+    } /* namespace (anon.) */
     
     std::unique_ptr<Image> PNGFormat::read(byte_source* src, ImageFactory* factory, const options_map& opts) {
         png_holder p(png_holder::read_mode);
@@ -216,11 +215,29 @@ namespace im {
         }
         
         // PP_CHECK(p.png_ptr, "PNG read elaboration failure");
+        std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
+        
+        /// GET METADATA (just ICC data for now)
+        if (ImageWithMetadata* meta = dynamic_cast<ImageWithMetadata*>(output.get())) {
+            if (png_get_valid(p.png_ptr, p.png_info, PNG_INFO_iCCP)) {
+                /// extract the embedded ICC profile
+                int compression;
+                uint32_t length;
+                byte* data;
+                char* name;
+                
+                png_get_iCCP(p.png_ptr, p.png_info, &name,
+                                                    &compression,
+                                                    &data,
+                                                    &length);
+                
+                meta->set_icc_name(std::string(name));
+                meta->set_icc_data(&data[0], std::size_t(length));
+            }
+        }
         
         png_set_interlace_handling(p.png_ptr);
         png_read_update_info(p.png_ptr, p.png_info);
-        
-        std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         
         volatile int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
         png_bytep* __restrict__ row_pointers = new png_bytep[h];

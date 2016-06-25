@@ -300,9 +300,9 @@ namespace im {
         do {
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
-            if (ImageWithMetadata* metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
+            if (ImageWithMetadata* meta = dynamic_cast<ImageWithMetadata*>(output.get())) {
                 std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
-                metaout->set_meta(description);
+                meta->set_meta(description);
             }
             
             if (bits_per_sample == 8) {
