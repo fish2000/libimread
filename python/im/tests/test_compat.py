@@ -9,7 +9,7 @@ class CompatibilityTests(BaseCase):
     def test_imread_imread(self):
         """ Load JPG files by filename, with both versions of imread:
             compat.imread (ours) and luispedro imread (the orig);
-            Compare the returned arrays with numpy.all()
+            compare the returned arrays with numpy.all()
         """
         import numpy
         import imread as luispedro
@@ -51,6 +51,41 @@ class CompatibilityTests(BaseCase):
                 blobformat0 = imread.detect_format(blob, is_blob=True)
                 blobformat1 = luispedro.detect_format(blob, is_blob=True)
                 self.assertEqual(blobformat0, blobformat1)
+    
+    def test_imread_imread_imsave(self):
+        """ Load JPG files by filename, with both versions of imread:
+            compat.imread (ours) and luispedro imread (the orig);
+            compare the returned arrays with numpy.all();
+            resave each array with the complementary imread version --
+                ... e.g. that which was read with compat.imread,
+                         write with luispedro imread,
+                ... and vicea-versa;
+            re-read again, once more using complementary versions;
+            compare the final array result with numpy.allclose()
+                ... with high tolerances to account for variance
+                    in the JPEG compressor
+        """
+        import numpy
+        import imread as luispedro
+        from im.compat import imread
+        from tempfile import NamedTemporaryFile
+        s = ".jpg"
+        p = "yo-dogg-"
+        for image_path in list(self.jpgs)[:16]:
+            ar0 = imread.imread(image_path)
+            ar1 = luispedro.imread(image_path)
+            self.assertTrue(numpy.all(ar0 == ar1))
+            rr0 = rr1 = None
+            with NamedTemporaryFile(suffix=s, prefix=p) as tf:
+                luispedro.imsave(tf.name, ar0, formatstr='jpeg')
+                rr0 = imread.imread(tf.name)
+            with NamedTemporaryFile(suffix=s, prefix=p) as tf:
+                imread.imsave(tf.name, ar1, formatstr='jpeg')
+                rr1 = luispedro.imread(tf.name)
+            self.assertTrue(numpy.allclose(rr0.astype('float'),
+                                           rr1.astype('float'),
+                                           rtol=4.0,
+                                           atol=128.0))
     
     def test_jpg_convert_to_PIL(self):
         ''' Load some JPG files,
