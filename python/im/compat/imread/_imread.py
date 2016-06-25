@@ -1,3 +1,20 @@
+# Copyright (C) 2012-2016, Alexander Böhn <fish2000@gmail.com>
+# License: MIT (see COPYING.MIT file)
+
+"""
+_imread.py: libimread shim
+
+This module is a shim, providing the functions that @luispedro imread
+furnishes in the _libimread.so extension module -- the function signatures
+are legible in _libimread.cpp within that codebase. 
+
+This shim module uses numpy and libimread's Python extension module to
+perform the necessary functions. 
+
+At the time of writing, the *_multi functions aren't available from Python.
+"""
+
+from __future__ import print_function
 
 import im
 import numpy
