@@ -162,7 +162,7 @@ namespace im {
         // }
         
         /// now read the header & image data
-        jpeg_read_header(&decompressor.info, TRUE);
+        jpeg_read_header(&decompressor.info, (boolean)true);
         jpeg_start_decompress(&decompressor.info);
         
         if (setjmp(jerr.setjmp_buffer)) {
@@ -262,10 +262,10 @@ namespace im {
         quality = opts.cast<int>("jpg:quality", 100);
         if (quality > 100) { quality = 100; }
         if (quality < 0) { quality = 0; }
-        jpeg_set_quality(&compressor.info, quality, FALSE);
+        jpeg_set_quality(&compressor.info, quality, (boolean)false);
         
         /// start compression!
-        jpeg_start_compress(&compressor.info, TRUE);
+        jpeg_start_compress(&compressor.info, (boolean)true);
         
         /// error check
         if (setjmp(jerr.setjmp_buffer)) {
