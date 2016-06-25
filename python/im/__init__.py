@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2012-2016, Alexander Böhn <fish2000@gmail.com>
 # License: MIT (see COPYING.MIT file)
 
