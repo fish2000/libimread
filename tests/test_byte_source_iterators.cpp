@@ -97,7 +97,7 @@ namespace {
                 uint16_t size = parse_size(result);
                 std::advance(result, 4);
                 std::copy(result, result + size,
-                        std::back_inserter(data));
+                          std::back_inserter(data));
                 
                 // char m[6];
                 // std::memcpy(m, &result, sizeof(m));
@@ -107,8 +107,7 @@ namespace {
                 //  FF("with value: %s", m));
                 
                 EXIFInfo exif;
-                int parseResult = exif.parseFromEXIFSegment(&data[0], data.size());
-                CHECK(parseResult == PARSE_EXIF_SUCCESS);
+                CHECK(exif.parseFromEXIFSegment(&data[0], data.size()) == PARSE_EXIF_SUCCESS);
                 
                 // WTF("EXIF data extracted:",
                 //     FF("\tImage Description: %s",   exif.ImageDescription.c_str()),
@@ -118,9 +117,6 @@ namespace {
                 //     FF("\tCopyright: %s",           exif.Copyright.c_str()),
                 //     FF("\tImage Size: %ux%u",       exif.ImageWidth, exif.ImageHeight)
                 // );
-            
-            } else {
-                // WTF("EXIF marker not found");
             }
         };
         

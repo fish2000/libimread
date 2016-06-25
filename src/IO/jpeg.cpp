@@ -39,8 +39,7 @@ namespace im {
         void nop_dst(j_compress_ptr cinfo) {}
         
         boolean fill_input_buffer(j_decompress_ptr cinfo) {
-            jpeg_source_adaptor* adaptor
-                = reinterpret_cast<jpeg_source_adaptor*>(cinfo->src);
+            jpeg_source_adaptor* adaptor = reinterpret_cast<jpeg_source_adaptor*>(cinfo->src);
             adaptor->mgr.next_input_byte = adaptor->buf;
             adaptor->mgr.bytes_in_buffer = adaptor->s->read(adaptor->buf, buffer_size);
             return TRUE;
@@ -139,11 +138,11 @@ namespace im {
                 "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3 }");
         }
         
-    } /// namespace
+    } /// namespace (anon.)
     
     std::unique_ptr<Image> JPEGFormat::read(byte_source* src,
-                           ImageFactory* factory,
-                           const options_map& opts)  {
+                                            ImageFactory* factory,
+                                            options_map const& opts)  {
         
         jpeg_source_adaptor adaptor(src);
         jpeg_decompress_holder decompressor;
@@ -155,11 +154,11 @@ namespace im {
         /// source
         decompressor.info.src = &adaptor.mgr;
         
-        if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotReadError,
-                "libjpeg internal error:",
-                jerr.error_message);
-        }
+        // if (setjmp(jerr.setjmp_buffer)) {
+        //     imread_raise(CannotReadError,
+        //         "libjpeg internal error:",
+        //         jerr.error_message);
+        // }
         
         /// now read the header & image data
         jpeg_read_header(&decompressor.info, TRUE);
@@ -210,7 +209,7 @@ namespace im {
     
     void JPEGFormat::write(Image& input,
                            byte_sink* output,
-                           const options_map& opts) {
+                           options_map const& opts) {
         
         /// sanity-check input bit depth
         if (input.nbits() != 8) {
@@ -230,11 +229,11 @@ namespace im {
         compressor.info.dest = &adaptor.mgr;
         
         /// error check
-        if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotWriteError,
-                "libjpeg internal error:",
-                jerr.error_message);
-        }
+        // if (setjmp(jerr.setjmp_buffer)) {
+        //     imread_raise(CannotWriteError,
+        //         "libjpeg internal error:",
+        //         jerr.error_message);
+        // }
         
         const int w = input.dim(0);
         const int h = input.dim(1);
