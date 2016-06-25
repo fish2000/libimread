@@ -3,6 +3,7 @@ from im import (
     _byteorder,
     _byteordermark,
     
+    detect,
     formats,
     format_info,
     structcode_parse,

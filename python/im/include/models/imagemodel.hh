@@ -618,9 +618,6 @@ namespace py {
                 bool exists = false,
                      can_read = false;
                 
-                // py::detail::setitemstring(readoptDict, "filename",
-                //                           py::string(source));
-                
                 try {
                     py::gil::release nogil;
                     format = im::for_filename(source);
@@ -780,8 +777,6 @@ namespace py {
                                                        output.get(), default_opts);
                 }
                 
-                // py::detail::setitemstring(writeoptDict, "filename",
-                //                           py::string(destination));
                 return true;
             }
             

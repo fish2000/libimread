@@ -320,6 +320,16 @@ PyTypeObject ArrayBufferModel_Type = {
 
 static PyMethodDef module_functions[] = {
     {
+        "detect",
+            (PyCFunction)py::functions::detect,
+            METH_VARARGS | METH_KEYWORDS,
+            "image.write(source=\"\", file=None, is_blob=False)\n"
+            "\t-> Detect the format of a file, blob, or file-like Python object\n"
+            "\t   specifying: \n"
+            "\t - a path or blob (source) OR \n"
+            "\t - a filehandle opened for reading (file) AND OPTIONALLY \n"
+            "\t - a boolean flag indicating data to be read as bytes is passed in (is_blob)\n" },
+    {
         "structcode_parse",
             (PyCFunction)py::functions::structcode_parse,
             METH_VARARGS,
