@@ -82,8 +82,10 @@ namespace {
         path basedir(im::test::basedir);
         const std::vector<byte> marker{ 0xFF, 0xE1 };
         const std::vector<path> jpgs = basedir.list("*.jpg");
+        // const std::vector<path> pngs = basedir.list("*.png");
+        // const std::vector<path> tifs = basedir.list("*.tif");
         
-        std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
+        auto exif_extractor = [&](path const& p) {
             path imagepath = basedir/p;
             std::vector<byte> data;
             std::string pth = imagepath.str();
@@ -95,7 +97,7 @@ namespace {
                 uint16_t size = parse_size(result);
                 std::advance(result, 4);
                 std::copy(result, result + size,
-                          std::back_inserter(data));
+                        std::back_inserter(data));
                 
                 // char m[6];
                 // std::memcpy(m, &result, sizeof(m));
@@ -108,19 +110,23 @@ namespace {
                 int parseResult = exif.parseFromEXIFSegment(&data[0], data.size());
                 CHECK(parseResult == PARSE_EXIF_SUCCESS);
                 
-                WTF("EXIF data extracted:",
-                    FF("\tImage Description: %s",   exif.ImageDescription.c_str()),
-                    FF("\tSoftware Used: %s",       exif.Software.c_str()),
-                    FF("\tMake: %s",                exif.Make.c_str()),
-                    FF("\tModel: %s",               exif.Model.c_str()),
-                    FF("\tCopyright: %s",           exif.Copyright.c_str()),
-                    FF("\tImage Size: %ux%u",       exif.ImageWidth, exif.ImageHeight)
-                );
-                
+                // WTF("EXIF data extracted:",
+                //     FF("\tImage Description: %s",   exif.ImageDescription.c_str()),
+                //     FF("\tSoftware Used: %s",       exif.Software.c_str()),
+                //     FF("\tMake: %s",                exif.Make.c_str()),
+                //     FF("\tModel: %s",               exif.Model.c_str()),
+                //     FF("\tCopyright: %s",           exif.Copyright.c_str()),
+                //     FF("\tImage Size: %ux%u",       exif.ImageWidth, exif.ImageHeight)
+                // );
+            
             } else {
                 // WTF("EXIF marker not found");
             }
-        });
+        };
+        
+        std::for_each(jpgs.begin(), jpgs.end(), exif_extractor);
+        // std::for_each(pngs.begin(), pngs.end(), exif_extractor);
+        // std::for_each(tifs.begin(), tifs.end(), exif_extractor);
     }
     
 }
