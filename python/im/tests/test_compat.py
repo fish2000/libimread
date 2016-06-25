@@ -7,6 +7,10 @@ import im
 class CompatibilityTests(BaseCase):
     
     def test_imread_imread(self):
+        """ Load JPG files by filename, with both versions of imread:
+            compat.imread (ours) and luispedro imread (the orig);
+            Compare the returned arrays with numpy.all()
+        """
         import numpy
         import imread as luispedro
         from im.compat import imread
@@ -16,6 +20,10 @@ class CompatibilityTests(BaseCase):
             self.assertTrue(numpy.all(ar0 == ar1))
     
     def test_imread_imread_from_blob(self):
+        """ Load JPG files as blob data, with both versions of imread:
+            compat.imread (ours) and luispedro imread (the orig);
+            compare the returned arrays with numpy.all()
+        """
         import numpy
         import imread as luispedro
         from im.compat import imread
@@ -27,6 +35,11 @@ class CompatibilityTests(BaseCase):
                 self.assertTrue(numpy.all(ar0 == ar1))
     
     def test_imread_detect_format(self):
+        """ Detect format of JPGs, by both filename and as blob data,
+            using both versions of imread: compat.imread (ours)
+            and luispedro imread (the orig); compare the returned format
+            strings with one another as appropriate
+        """
         import imread as luispedro
         from im.compat import imread
         for image_path in self.jpgs:
