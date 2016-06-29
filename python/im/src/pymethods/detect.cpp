@@ -12,6 +12,7 @@
 #include "pybuffer.hpp"
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/filesystem/path.h>
 #include <libimread/file.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/formats.hh>
@@ -22,6 +23,7 @@ namespace py {
         
         using im::FileSource;
         using im::ImageFormat;
+        using filesystem::path;
         
         namespace detail {
             
@@ -31,8 +33,12 @@ namespace py {
                 
                 try {
                     py::gil::release nogil;
-                    input = std::make_unique<FileSource>(source);
-                    format = im::for_source(input.get());
+                    if (path::exists(source)) {
+                        input = std::make_unique<FileSource>(source);
+                        format = im::for_source(input.get());
+                    } else {
+                        format = im::for_filename(source);
+                    }
                     return format->get_suffix();
                 } catch (im::FormatNotFound& exc) {
                     return "";
