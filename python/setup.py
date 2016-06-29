@@ -20,7 +20,9 @@ else:
     ''' % setuptools.__name__)
 
 # PYTHON & NUMPY INCLUDES
-from utils import Install, HomebrewInstall, get_python_inc
+from utils import Install
+# from utils import HomebrewInstall
+from utils import get_python_inc
 from setuptools import setup, Extension, find_packages
 
 try:
@@ -34,8 +36,10 @@ except ImportError:
 # VERSION & METADATA
 __version__ = "<undefined>"
 exec(compile(
-    open(os.path.join(os.path.dirname(__file__), '__version__.py')).read(),
-    '__version__.py', 'exec'))
+    open(os.path.join(
+        os.path.dirname(__file__),
+        '__version__.py')).read(),
+        '__version__.py', 'exec'))
 
 long_description = """ Python bindings for libimread, dogg. """
 
@@ -45,17 +49,17 @@ long_description = """ Python bindings for libimread, dogg. """
 # libimread = Install(local_command)
 
 libimread = Install()
-libhalide = HomebrewInstall('halide')
+# libhalide = HomebrewInstall('halide')
 # libllvm = HomebrewInstall('llvm')
 
 # COMPILATION
 DEBUG = os.environ.get('DEBUG', '1')
-USE_PNG = os.environ.get('USE_PNG', '16')
-USE_JPEG = os.environ.get('USE_JPEG', '1')
-USE_TIFF = os.environ.get('USE_TIFF', '1')
-USE_LLVM = os.environ.get('USE_LLVM', '1')
-USE_WEBP = os.environ.get('USE_WEBP', '1')
-USE_EIGEN = os.environ.get('USE_EIGEN', '0')
+# USE_PNG = os.environ.get('USE_PNG', '16')
+# USE_JPEG = os.environ.get('USE_JPEG', '1')
+# USE_TIFF = os.environ.get('USE_TIFF', '1')
+# USE_LLVM = os.environ.get('USE_LLVM', '1')
+# USE_WEBP = os.environ.get('USE_WEBP', '1')
+# USE_EIGEN = os.environ.get('USE_EIGEN', '0')
 
 undef_macros = []
 auxilliary_macros = []
@@ -216,13 +220,7 @@ print(cyan(" " + ", ".join(libraries)))
 print('')
 
 print(red(""" %(s)s BUILD COMMENCING: %(s)s """ % dict(s='*' * 65)))
-
 print('')
-
-# from distutils.extension import Extension
-# from distutils.core import setup
-# language="c++",
-# '-x', 'c++',
 
 ext_modules = []
 for key, sources in extensions.iteritems():

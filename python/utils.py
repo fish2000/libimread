@@ -62,7 +62,8 @@ class Install(object):
         if ret == 0:
             self.prefix = out.strip()
         if out == '':
-            return # `imread-config --prefix` failed
+            # `imread-config --prefix` failed
+            raise IOError("command `%s` failed" % cmd)
     
     def bin(self):
         return os.path.join(self.prefix, "bin")
@@ -76,4 +77,5 @@ class Install(object):
 class HomebrewInstall(Install):
     
     def __init__(self, brew_name):
-        super(HomebrewInstall, self).__init__(cmd="brew --prefix %s" % brew_name)
+        cmd = "brew --prefix %s" % brew_name
+        super(HomebrewInstall, self).__init__(cmd)
