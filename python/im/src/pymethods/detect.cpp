@@ -4,7 +4,6 @@
 #define NO_IMPORT_ARRAY
 #include "pymethods/detect.hh"
 
-// #include "check.hh"
 #include "gil.hpp"
 #include "gil-io.hpp"
 #include "detail.hpp"

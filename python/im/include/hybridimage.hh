@@ -841,7 +841,6 @@ namespace py {
     
     namespace functions {
         
-        PyObject* structcode_parse(PyObject* self, PyObject* args);
         PyObject* hybridimage_check(PyObject* self, PyObject* args);
         
     }

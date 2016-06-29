@@ -3,7 +3,6 @@ from __future__ import division, print_function
 
 import sys, os
 from pprint import pformat
-# from clint.textui.colored import red, cyan, white
 from clint.textui.colored import red, cyan
 
 # SETUPTOOLS
@@ -21,9 +20,8 @@ else:
     ''' % setuptools.__name__)
 
 # PYTHON & NUMPY INCLUDES
-from utils import Install, HomebrewInstall, gosub
+from utils import Install, HomebrewInstall, get_python_inc
 from setuptools import setup, Extension, find_packages
-from distutils.sysconfig import get_python_inc
 
 try:
     import numpy
@@ -38,14 +36,17 @@ __version__ = "<undefined>"
 exec(compile(
     open(os.path.join(os.path.dirname(__file__), '__version__.py')).read(),
     '__version__.py', 'exec'))
-long_description = open('README.md').read()
+
+long_description = """ Python bindings for libimread, dogg. """
+
 # local_command = os.path.join('..', 'dist', 'bin', 'imread-config')
 # local_command +=  " --prefix"
 # print(local_command)
 # libimread = Install(local_command)
+
 libimread = Install()
 libhalide = HomebrewInstall('halide')
-libllvm = HomebrewInstall('llvm')
+# libllvm = HomebrewInstall('llvm')
 
 # COMPILATION
 DEBUG = os.environ.get('DEBUG', '1')
@@ -65,28 +66,27 @@ define_macros.append(
     ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'))
 define_macros.append(
     ('PY_ARRAY_UNIQUE_SYMBOL', 'YO_DOGG'))
-# define_macros.append(
-#     ('IM_COLOR_TRACE', '1'))
-# define_macros.append(
-#     ('IM_VERBOSE', '1'))
 
 if DEBUG:
-    # undef_macros = ['NDEBUG', '__OBJC__', '__OBJC2__']
     if int(DEBUG) > 2:
         define_macros.append(
             ('IM_DEBUG', DEBUG))
         define_macros.append(
             ('_GLIBCXX_DEBUG', '1'))
-        # define_macros.append(
-        #     ('IM_VERBOSE', '1'))
+        define_macros.append(
+            ('IM_VERBOSE', '1'))
+        define_macros.append(
+            ('IM_COLOR_TRACE', '1'))
         auxilliary_macros.append(
             ('IM_DEBUG', DEBUG))
         auxilliary_macros.append(
             ('_GLIBCXX_DEBUG', '1'))
-        # auxilliary_macros.append(
-        #     ('IM_VERBOSE', '1'))
+        auxilliary_macros.append(
+            ('IM_VERBOSE', '1'))
+        auxilliary_macros.append(
+            ('IM_COLOR_TRACE', '1'))
 
-undef_macros = ['IM_VERBOSE', 'IM_COLOR_TRACE']
+# undef_macros = ['IM_VERBOSE', 'IM_COLOR_TRACE']
 
 print('')
 print('')
@@ -94,7 +94,7 @@ print(red(""" %(s)s DEBUGGG LEVEL: %(lv)s %(s)s """ % dict(s='*' * 65, lv=DEBUG)
 
 include_dirs = [
     libimread.include(),
-    libhalide.include(),
+    # libhalide.include(),
     # libimread.dependency('imagecompression'),
     # libimread.dependency('iod'),
     # libimread.dependency('libdocopt'),
@@ -108,8 +108,9 @@ include_dirs = [
 
 library_dirs = [
     libimread.lib(),
-    libhalide.lib(),
-    libllvm.lib()]
+    # libhalide.lib(),
+    # libllvm.lib(),
+]
 
 other_flags = ['-Qunused-arguments']
 
@@ -132,15 +133,14 @@ extensions = {
         "im/src/detail.cpp",
         "im/src/gil.cpp",
         "im/src/gil-io.cpp",
-        # "im/src/models/models.cpp",
         "im/src/pymethods/detect.cpp",
+        "im/src/pymethods/structcode_parse.cpp",
         "im/src/pymethods/typecheck.cpp",
         "im/src/pymethods/pymethods.cpp",
         "im/src/hybrid.cpp",
         "im/src/hybridimage.cpp",
         "im/src/options.cpp",
         "im/src/pybuffer.cpp",
-        # "im/src/pycapsule.cpp",
         "im/src/structcode.cpp",
         "im/src/typecode.cpp",
         "im/src/module.cpp"
@@ -148,48 +148,14 @@ extensions = {
 }
 
 # the basics
-# libraries = ['jpeg', 'png', 'z', 'm', 'Halide', 'imread', 'c++']
-libraries = ['m', 'Halide', 'imread', 'c++']
-# PKG_CONFIG = which('pkg-config')
+libraries = ['imread']
 
 # the addenda
-def parse_config_flags(config, config_flags=None):
-    """ Get compiler/linker flags from pkg-config and similar CLI tools """
-    if config_flags is None: # need something in there
-        config_flags = ['']
-    for config_flag in config_flags:
-        out, err, ret = gosub(' '.join([config, config_flag]))
-        if len(out):
-            for flag in out.split():
-                if flag.startswith('-std'): # c++ version or library flag -- IGNORE IT!
-                    continue
-                if flag.startswith('-L'): # link path
-                    if os.path.exists(flag[2:]) and flag[2:] not in library_dirs:
-                        library_dirs.append(flag[2:])
-                    continue
-                if flag.startswith('-l'): # library link name
-                    if flag[2:] not in libraries:
-                        libraries.append(flag[2:])
-                    continue
-                if flag.startswith('-D'): # preprocessor define
-                    macro = flag[2:].split('=')
-                    if macro[0] not in dict(define_macros).keys():
-                        if len(macro) < 2:
-                            macro.append('1')
-                        define_macros.append(tuple(macro))
-                    continue
-                if flag.startswith('-I'):
-                    if os.path.exists(flag[2:]) and flag[2:] not in include_dirs:
-                        include_dirs.append(flag[2:])
-                    continue
-                if flag.startswith('-W'): # compiler options -- DONT STRIP THE THINGY:
-                    if flag not in other_flags:
-                        other_flags.append(flag)
-                    continue
-
 print('')
 
 # # if we're using it, ask it how to fucking work it
+# from utils import parse_config_flags, which
+# PKG_CONFIG = which('pkg-config')
 # if int(USE_EIGEN):
 #     print(white(""" imread.ext: Eigen3 support enabled """))
 #     parse_config_flags(
@@ -241,6 +207,9 @@ print(cyan(pformat(extensions)))
 print('')
 print(cyan(" DEFINED MACROS: %i" % len(define_macros)))
 print(cyan(pformat(define_macros)))
+print('')
+print(cyan(" INCLUDE DIRECTORIES: %i" % len(include_dirs)))
+print(cyan(pformat(include_dirs)))
 print('')
 print(cyan(" LINKED LIBRARIES: %i" % len(libraries)))
 print(cyan(" " + ", ".join(libraries)))
