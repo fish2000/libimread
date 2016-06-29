@@ -4,7 +4,7 @@
 #define NO_IMPORT_ARRAY
 #include "pymethods/detect.hh"
 
-#include "check.hh"
+// #include "check.hh"
 #include "gil.hpp"
 #include "gil-io.hpp"
 #include "detail.hpp"
@@ -13,9 +13,9 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/file.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/formats.hh>
+#include <libimread/file.hh>
 
 namespace py {
     
@@ -83,7 +83,7 @@ namespace py {
             bool is_blob = false;
             
             if (!PyArg_ParseTupleAndKeywords(
-                args, kwargs, "|s*OO:__init__", const_cast<char**>(keywords),
+                args, kwargs, "|s*OO:detect", const_cast<char**>(keywords),
                 &view,                      /// "view", buffer with file path or image data
                 &file,                      /// "file", possible file-like object
                 &py_is_blob))               /// "is_blob", Python boolean specifying blobbiness

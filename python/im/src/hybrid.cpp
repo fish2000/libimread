@@ -327,14 +327,6 @@ namespace im {
                 detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
     }
     
-    std::shared_ptr<Image> HybridFactory::shared(int nbits,
-                                                 int xHEIGHT, int xWIDTH, int xDEPTH,
-                                                 int d3, int d4) {
-        return std::shared_ptr<Image>(
-            new HalideNumpyImage(
-                detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
-    }
-    
 #undef xWIDTH
 #undef xHEIGHT
 #undef xDEPTH
@@ -806,14 +798,6 @@ namespace im {
                                                 int xHEIGHT, int xWIDTH, int xDEPTH,
                                                 int d3, int d4) {
         return std::unique_ptr<Image>(
-            new ArrayImage(
-                detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
-    }
-    
-    std::shared_ptr<Image> ArrayFactory::shared(int nbits,
-                                                int xHEIGHT, int xWIDTH, int xDEPTH,
-                                                int d3, int d4) {
-        return std::shared_ptr<Image>(
             new ArrayImage(
                 detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
     }

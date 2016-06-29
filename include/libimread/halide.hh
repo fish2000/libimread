@@ -222,12 +222,6 @@ namespace im {
                                     int d3, int d4) override {
                 return unique_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
             }
-            
-            virtual shared_t shared(int nbits,
-                                    int xHEIGHT, int xWIDTH, int xDEPTH,
-                                    int d3, int d4) override {
-                return shared_t(new image_t(xWIDTH, xHEIGHT, xDEPTH));
-            }
     };
     
 #undef xWIDTH
@@ -244,8 +238,8 @@ namespace im {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            options_map default_opts = format->add_options(opts);
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, default_opts);
+            std::unique_ptr<Image> output = format->read(input.get(), &factory,
+                                                         format->add_options(opts));
             HybridImage<T> image(dynamic_cast<HybridImage<T>&>(*output.get()));
             image.set_host_dirty();
             return image;
@@ -257,8 +251,8 @@ namespace im {
             HalideFactory<T> factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            options_map default_opts = format->add_options(opts);
-            std::unique_ptr<Image> out = format->read(input.get(), &factory, default_opts);
+            std::unique_ptr<Image> out = format->read(input.get(), &factory,
+                                                      format->add_options(opts));
             // out->set_host_dirty();
             return out;
         }
@@ -268,27 +262,28 @@ namespace im {
                                           options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            options_map default_opts = format->add_options(opts);
-            format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
+            format->write(dynamic_cast<Image&>(input), output.get(),
+                          format->add_options(opts));
         }
         
         inline void write_multi(ImageList& input, std::string const& filename,
                                                   options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<handle::sink> output(new handle::sink(filename));
-            options_map default_opts = format->add_options(opts);
-            format->write_multi(input, output.get(), default_opts);
+            format->write_multi(input, output.get(),
+                                format->add_options(opts));
         }
         
         template <typename Format, typename T = byte> inline
         std::string tmpwrite(HybridImage<T>& input,
                              options_map const& opts = halide_default_opts) {
-            filesystem::NamedTemporaryFile tf("." + Format::suffix(),       /// suffix
-                                              false); tf.remove();          /// cleanup on scope exit
+            using filesystem::NamedTemporaryFile;
+            NamedTemporaryFile tf(Format::suffix(true), false); /// cleanup on scope exit
+            tf.remove();
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
-            options_map default_opts = format->add_options(opts);
-            format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
+            format->write(dynamic_cast<Image&>(input), output.get(),
+                          format->add_options(opts));
             return tf.str();
         }
         

@@ -66,7 +66,7 @@ namespace {
                 NSURL* urlpath = [NSURL fileURLWithFilesystemPath:p];
                 CHECK([urlpath isImage] == YES);
                 CHECK([urlpath imageFileType] == objc::image::filetype(p.extension()));
-                //CHECK(objc::image::suffix([urlpath imageFileType]) == p.extension());
+                // CHECK(objc::image::suffix([urlpath imageFileType]) == p.extension());
             });
             
         };

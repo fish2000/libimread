@@ -1,15 +1,12 @@
 
+#include <regex>
 #include <vector>
 #include <memory>
+
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
-#include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/filesystem/directory.h>
-#include <libimread/ext/filesystem/resolver.h>
 #include <libimread/ext/filesystem/temporary.h>
-#include <libimread/file.hh>
-#include <libimread/filehandle.hh>
+#include <libimread/imagelist.hh>
 #include <libimread/halide.hh>
 
 #include "include/test_data.hpp"
@@ -17,38 +14,36 @@
 
 namespace {
     
-    using namespace Halide;
-    using namespace filesystem;
+    using filesystem::NamedTemporaryFile;
+    using filesystem::TemporaryDirectory;
+    using filesystem::path;
     using U8Image = im::HybridImage<uint8_t>;
+    using im::ImageList;
     
     TEST_CASE("[gif-write] Read PNG files and write as individual GIF files",
               "[gif-write-individual-files]")
     {
         TemporaryDirectory td("write-individual-gifs");
-        path individual_basedir(im::test::basedir);
-        std::size_t idx = 0;
-        std::vector<path> individual_sequence = individual_basedir.list("output_*.png");
-        std::for_each(individual_sequence.begin(), individual_sequence.end(),
+        path basedir(im::test::basedir);
+        const std::vector<path> outglob = basedir.list("output_*.png");
+        
+        std::for_each(outglob.begin(), outglob.end(),
                   [&](path const& p) {
-            path fullpath = individual_basedir/p;
+            path fullpath = basedir/p;
             path newpath((td.dirpath/p).str() + ".gif");
             U8Image halim = im::halide::read(fullpath.str());
             im::halide::write(halim, newpath.str());
             CHECK(newpath.is_file());
-            // path copy = newpath.duplicate("/tmp/output-" + std::to_string(idx) + ".gif");
-            // CHECK(copy.is_file());
-            idx++;
         });
     }
     
     TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file",
               "[gif-write-multi-animated]")
     {
-        // NamedTemporaryFile composite(".gif", false);
         NamedTemporaryFile composite(".gif");
+        ImageList outlist;
         path basedir(im::test::basedir);
-        std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
-        im::ImageList outlist;
+        const std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
         CHECK(composite.remove());
         std::for_each(sequence.begin(), sequence.end(),
@@ -56,15 +51,9 @@ namespace {
             U8Image* halim = new U8Image(im::halide::read((basedir/p).str()));
             outlist.push_back(halim);
         });
+        
         im::halide::write_multi(outlist, composite.str());
         CHECK(composite.filepath.is_file());
-        // WTF("COMPOSITE FILEPATH, DOGG:",
-        //     composite.filepath.str(),
-        //     composite.filepath.inode(),
-        //     composite.filepath.filesize());
-        // path dupe(composite.filepath.duplicate("/private/tmp/output-animated.gif"));
-        // WTF("DUPE FILEPATH, DOGG:", dupe.str(), dupe.inode(), dupe.filesize());
-        // CHECK(dupe.is_file());
     }
     
 }

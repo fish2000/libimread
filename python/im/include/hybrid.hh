@@ -216,10 +216,6 @@ namespace im {
             virtual std::unique_ptr<Image> create(int nbits,
                                           int xHEIGHT, int xWIDTH, int xDEPTH,
                                           int d3, int d4) override;
-            
-            virtual std::shared_ptr<Image> shared(int nbits,
-                                          int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) override;
     };
 
 #undef xWIDTH
@@ -310,10 +306,6 @@ namespace im {
         
         protected:
             virtual std::unique_ptr<Image> create(int nbits,
-                                          int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) override;
-            
-            virtual std::shared_ptr<Image> shared(int nbits,
                                           int xHEIGHT, int xWIDTH, int xDEPTH,
                                           int d3, int d4) override;
     };

@@ -189,6 +189,11 @@ namespace im {
                 return FormatType::options.suffixes[0];
             }
             
+            static std::string suffix(bool with_period) {
+                return with_period ? ("." + FormatType::options.suffixes[0]) :
+                                            FormatType::options.suffixes[0];
+            }
+            
             static std::string mimetype() {
                 return FormatType::options.mimetype;
             }

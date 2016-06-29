@@ -76,16 +76,16 @@ namespace {
             CHECK([(NSNumber*)dict[@"three"][1] isEqual:@333]);
             CHECK([(NSNumber*)dict[@"three"][2] isEqual:@3333]);
             
-            WTF("Inner dict value ('four'):",
-                [dict[@"four"][@"yo"] STLString],
-                [dict[@"four"][@"i"] STLString],
-                [dict[@"four"][@"you"] STLString],
-                [dict[@"four"][@"dicts"] STLString]);
+            // WTF("Inner dict value ('four'):",
+            //     [dict[@"four"][@"yo"] STLString],
+            //     [dict[@"four"][@"i"] STLString],
+            //     [dict[@"four"][@"you"] STLString],
+            //     [dict[@"four"][@"dicts"] STLString]);
             
             NSArray<NSString*>* keys = [dict[@"four"] allKeys];
             
             for (int idx = 0; idx < keys.count; idx++) {
-                WTF("Key value for 'four':", [keys[idx] STLString]);
+                // WTF("Key value for 'four':", [keys[idx] STLString]);
             }
             
             CHECK([(NSString*)dict[@"four"][@"yo"] isEqual:@"dogg"]);
