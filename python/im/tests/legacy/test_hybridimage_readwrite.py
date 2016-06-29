@@ -3,26 +3,27 @@ from __future__ import print_function
 from ..basecase import BaseCase
 
 import os
-import im
+# import im
 import json
+from im.im import HybridImage, hybridimage_check
 
 class HybridImageReadWriteTests(BaseCase):
     
     def test_hybridimage_check(self):
         # ''' Re-using `test_load_image_jpg_write_blob_jpg` here '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
-            self.assertTrue(im.hybridimage_check(image))
+            self.assertTrue(hybridimage_check(image))
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
-            self.assertFalse(im.hybridimage_check(data))
+            self.assertFalse(hybridimage_check(data))
     
     """
     def test_load_image_jpg_write_blob_jpg(self):
         ''' Load JPG files, write JPG blobs '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
@@ -32,7 +33,7 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_png_write_blob_jpg(self):
         ''' Load PNG files, write JPG blobs '''
         for image_path in self.pngs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
@@ -42,7 +43,7 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_jpg_write_blob_png(self):
         ''' Load JPG files, write PNG blobs '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
@@ -52,7 +53,7 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_png_write_blob_png(self):
         ''' Load PNG files, write PNG blobs '''
         for image_path in self.pngs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
@@ -61,7 +62,7 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_jpg_write_blob_tif(self):
         ''' Load JPG files, write TIF blobs '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "tif" })
             self.assertIsNotNone(data)
@@ -70,11 +71,11 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_jpg_write_blob_png_readback(self):
         ''' Load JPG files, write PNG blobs with readback '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
-            image2 = im.HybridImage(data, is_blob=True)
+            image2 = HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             self.assertEqual(image.shape, image2.shape)
     """
@@ -83,11 +84,11 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_png_write_blob_png_readback(self):
         ''' Load PNG files, write PNG blobs with readback '''
         for image_path in self.pngs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "png" })
             self.assertIsNotNone(data)
-            image2 = im.HybridImage(data, is_blob=True)
+            image2 = HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             self.assertEqual(image.shape[:2], image2.shape[:2])
     """
@@ -96,11 +97,11 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_jpg_write_blob_jpg_readback(self):
         ''' Load JPG files, write PNG blobs with readback '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
-            image2 = im.HybridImage(data, is_blob=True)
+            image2 = HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             self.assertEqual(image.shape, image2.shape)
     """
@@ -109,11 +110,11 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_png_write_blob_jpg_readback(self):
         ''' Load PNG files, write PNG blobs with readback '''
         for image_path in self.pngs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "jpg" })
             self.assertIsNotNone(data)
-            image2 = im.HybridImage(data, is_blob=True)
+            image2 = HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             self.assertEqual(image.shape[:2], image2.shape[:2])
     """
@@ -121,24 +122,24 @@ class HybridImageReadWriteTests(BaseCase):
     def test_load_image_jpg_write_blob_tif_readback(self):
         ''' Load JPG files, write TIF blobs with readback '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "tif" })
             self.assertIsNotNone(data)
-            image2 = im.HybridImage(data, is_blob=True)
+            image2 = HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
     
     def test_load_image_jpg_write_blob_tif_readback_options_good(self):
         ''' Load JPG files, write TIF blobs with readback + meta-options (good) '''
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             data = image.write(as_blob=True, options={ 'format' : "tif", 'tiff:metadata'            : True,
                                                                          'metadata'                 : "YO DOGG",
                                                                          'tiff:software-signature'  : "I HEARD YOU LIKE METADATA" })
             self.assertIsNotNone(data)
-            image2 = im.HybridImage(data, is_blob=True)
+            image2 = HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
     
@@ -147,7 +148,7 @@ class HybridImageReadWriteTests(BaseCase):
         types = (float, int, long, memoryview, str)
         doggkeys = ['yodogg:%s' % yipe.__name__ for yipe in types]
         for image_path in self.jpgs:
-            image = im.HybridImage(image_path)
+            image = HybridImage(image_path)
             self.assertIsNotNone(image)
             memview = memoryview('YO DOGG I HEARD YOU LIKE VIEWS OF MEMORY')
             data = image.write(as_blob=True, options={ 'format' : "tif", 'tiff:metadata'            : True,
@@ -205,7 +206,7 @@ class HybridImageReadWriteTests(BaseCase):
                 opts['yodogg:memoryview'].tobytes(),
                 'YO DOGG I HEARD YOU LIKE VIEWS OF MEMORY')
             
-            image2 = im.HybridImage(data, is_blob=True)
+            image2 = HybridImage(data, is_blob=True)
             self.assertIsNotNone(image2)
             # self.assertEqual(image.shape[:2], image2.shape[:2])
             

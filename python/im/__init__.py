@@ -3,20 +3,15 @@
 # License: MIT (see COPYING.MIT file)
 
 from im import (
-    _byteorder,
-    _byteordermark,
+    _byteorder, _byteordermark,
+    formats, format_info,
     
     detect,
-    formats,
-    format_info,
     structcode_parse,
     
-    HybridImage,
     Buffer,
     Image,
-    Array,
-    
-    hybridimage_check)
+    Array)
 
 from compat.show import show
 from compat.to_PIL import to_PIL
