@@ -224,7 +224,7 @@ namespace py {
         using Indices = std::index_sequence_for<Args...>;
         static_assert(
             sizeof...(Args) > 1,
-            "Can't tuplize a zero-length arglist");
+            "Can't listify a zero-length arglist");
         
         return py::listify(
             std::forward_as_tuple(args...),
