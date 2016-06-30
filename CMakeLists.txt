@@ -58,15 +58,25 @@ set(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
 # macro defined for the project.
 include(build_config)
 
+# Include the HalideGenerator.cmake library -- exposing the cmake function
+# halide_add_generator_dependency() allowing Halide generator use in-project.
+include(HalideProject)
+include(HalideGenerator)
+
+# Include IodSymbolize.cmake from the iod-symbolizer Python tool,
+# exposing the cmake function IOD_SYMBOLIZE()
+include(IodSymbolize)
+
 # Set the location of the library configuration file if it has not already been
 # set. This allow the library to be used by an external project without
-# overwritting the variable.
+# overwriting the variable.
 if_defined_set(${PROJECT_NAME}_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 SET(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 SET(TEST_SCRIPT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/scripts")
 SET(TEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
 
-include(IodSymbolize)
+# Set up the directories to feed to the IOD symbolizer,
+# and the target output header file to generate
 SET(IOD_SYMBOLS_HEADER  "${CMAKE_CURRENT_SOURCE_DIR}/include/libimread/symbols.hpp")
 SET(IOD_SYMBOLIZE_DIR0  "${CMAKE_CURRENT_SOURCE_DIR}/include/libimread")
 SET(IOD_SYMBOLIZE_DIR1  "${CMAKE_CURRENT_SOURCE_DIR}/python")
@@ -77,8 +87,12 @@ IOD_SYMBOLIZE(
     ${IOD_SYMBOLIZE_DIR1}
     ${IOD_SYMBOLIZE_DIR2})
 
-SET(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
-SET(APPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/apps")
+# Set variables for the deps and apps directories:
+SET(DEPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/deps")
+SET(APPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/apps")
+SET(HALOGEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/halogen")
+
+# Set variables for the individual deps directories:
 SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(CROSSGUID_DIR "${DEPS_DIR}/crossguid")
@@ -91,19 +105,28 @@ SET(MABLOCKCLOSURE_DIR "${DEPS_DIR}/MABlockClosure")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
 SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
 
+# Set variables for directories for the individual apps:
 SET(LIBIMREAD_CONFIG_DIR "${APPS_DIR}/libimread-config")
 SET(IMPASTE_DIR "${APPS_DIR}/impaste")
 
+# Add DEPS_DIR as a subdirectory ...
 add_subdirectory(${DEPS_DIR})
+
+# ... but exclude the IOD test directory from being built:
 set_property(DIRECTORY ${IOD_TEST_DIR}
              PROPERTY EXCLUDE_FROM_ALL TRUE)
 set_property(DIRECTORY ${IOD_TEST_DIR}
              PROPERTY TEST)
 
+# Add HALOGEN_DIR -- set up Halide generators:
+add_subdirectory(${HALOGEN_DIR})
+
 # Load the project configuration file. CMake will search in the directory setted
 # above for a module file named libimreadConfig.cmake. The configuration
-# file will set the different directories and libraries required by the library
+# file will set the different directories and libraries required by the library:
 find_package(${PROJECT_NAME} REQUIRED)
+
+# Find the required dependency libraries:
 find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(TIFF REQUIRED)
@@ -117,10 +140,12 @@ set(HDF5_ROOT /usr/local/opt/hdf5/)
 find_package(HDF5 REQUIRED
     COMPONENTS C CXX HL)
 
-# Add the project include directory
+# Include the project-specific `include` directories:
 include_directories(${${PROJECT_NAME}_include_dir})
 include_directories("${CMAKE_BINARY_DIR}/../include")
 include_directories("${CMAKE_BINARY_DIR}")
+
+# Include the `deps` library `include` directories:
 include_directories("${CROSSGUID_DIR}")
 include_directories("${DOCOPT_DIR}")
 include_directories("${IMAGECOMPRESSION_DIR}")
@@ -136,6 +161,7 @@ include_directories("${SSZIP_DIR}")
 link_directories(/usr/lib)
 link_directories(/usr/local/lib)
 
+# Include the required dependency `include` directories:
 include_directories(
     ${PNG_INCLUDE_DIR}
     ${JPEG_INCLUDE_DIR}
@@ -146,10 +172,11 @@ include_directories(
     ${LIBUNWIND_INCLUDE_DIR}
     ${HDF5_INCLUDE_DIRS})
 
-# Set the files and options required to build the library
+# Set the source files and source-file-specific options
+# required to build the library:
 include(CMakeProjectFiles.cmake)
 
-# Build the library
+# Actually build the library: set up an `OBJECT` target ...
 add_library(imread OBJECT ${srcs} ${hdrs})
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
@@ -164,6 +191,8 @@ add_dependencies(imread "libbf")
 add_dependencies(imread "MABlockClosure")
 add_dependencies(imread "iod_symbolize")
 
+# ... and build shared and static target libraries,
+# based on the `OBJECT` target:
 set_property(
     TARGET imread
     PROPERTY POSITION_INDEPENDENT_CODE 1)
@@ -174,13 +203,13 @@ set_target_properties(imread_shared
 set_target_properties(imread_static
     PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
 
-# deal with config variables
+# Set and pass on compile-time config variable values:
 get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
 get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
 get_target_property(IM_LINK_LIBRARIES imread LINK_LIBRARIES)
 get_target_property(IM_LINK_FLAGS imread LINK_FLAGS)
 
-# Configure the project-settings header file
+# Configure and generate the compile-time project header file:
 set(PROJECT_HEADER
     "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
 configure_file(
@@ -192,6 +221,9 @@ set_source_files_properties(
     ${PROJECT_HEADER}
     PROPERTIES GENERATED TRUE)
 
+# Actually build the library II: electric boogaloo
+# ... these two target_link_libraries() calls set up the actual
+# for-reals building up in all this:
 target_link_libraries(imread_shared
     z png guid libbf
     MABlockClosure
@@ -216,14 +248,18 @@ target_link_libraries(imread_static
     ${HALIDE_LIBRARIES}
     ${HDF5_LIBRARIES})
 
-# Add the apps
+# Add the apps subdirectory, if we're building apps:
 if(IM_APPS)
     add_subdirectory(${APPS_DIR})
 endif(IM_APPS)
 
-# Build the tests
+# Build the tests, if we're building tests:
 if(IM_TESTS)
+    
+    # Bring in the tests subdirectory --
+    # ... this defines add_imread_test(), see below:
     add_subdirectory(${TEST_SOURCE_DIR})
+    
     # add_custom_command(
     #     OUTPUT ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist
     #     COMMAND ${TEST_SCRIPT_DIR}/generate-test-filemap.py > ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
@@ -234,6 +270,8 @@ if(IM_TESTS)
     # set_target_properties("test_data_plist"
     #     PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
     # add_dependencies("test_data_plist" imread)
+    
+    # Generate the test data header, if necessary:
     add_custom_command(
         OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
         COMMAND ${TEST_SCRIPT_DIR}/generate-test-header.py > ${TEST_INCLUDE_DIR}/test_data.hpp)
@@ -242,6 +280,8 @@ if(IM_TESTS)
     set_source_files_properties(
         ${TEST_INCLUDE_DIR}/test_data.hpp
         PROPERTIES GENERATED TRUE)
+    
+    # Set up the `imread_tests` dependencies
     set(imread_tests "test_${PROJECT_NAME}")
     add_executable(imread_tests ${TEST_SOURCES})
     set_target_properties(imread_tests
@@ -259,6 +299,8 @@ if(IM_TESTS)
     add_dependencies(imread_tests "sszip")
     add_dependencies(imread_tests "imread")
     link_directories(${CMAKE_BINARY_DIR})
+    
+    # Link the `imread_tests` executable
     target_link_libraries(imread_tests
         imread_shared sszip
         AFNetworking
@@ -273,10 +315,12 @@ if(IM_TESTS)
         ${HALIDE_LIBRARIES}
         ${HDF5_LIBRARIES})
     
-    # set up ctest and cdash
-    # … the add_imread_test() macro is defined in tests/CMakeLists.txt
+    # Set up ctest and cdash:
     enable_testing()
     include(CTest)
+    
+    # Set up individual test suites --
+    # … the add_imread_test() macro is defined in tests/CMakeLists.txt:
     add_imread_test("appkit-copy-paste")
     add_imread_test("apple-io")
     add_imread_test("blockhash")
@@ -297,8 +341,10 @@ if(IM_TESTS)
     add_imread_test("libsszip")
     add_imread_test("terminator")
     add_imread_test("interleaved-io")
+    
 endif(IM_TESTS)
 
+# Install the built libraries and header files, as appropriate:
 install(TARGETS imread_shared DESTINATION lib)
 install(TARGETS imread_static DESTINATION lib)
 install(DIRECTORY ${PROJECT_BINARY_DIR}/libimread/ DESTINATION include/libimread

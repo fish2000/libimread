@@ -1,0 +1,12 @@
+
+function(halide_project name folder)
+  add_executable("${name}" ${ARGN})
+  target_link_libraries("${name}" PRIVATE Halide)
+  target_include_directories("${name}" PRIVATE "${CMAKE_SOURCE_DIR}/src")
+  set_target_properties("${name}" PROPERTIES FOLDER "${folder}")
+  if (MSVC)
+    set_target_properties("${name}" PROPERTIES LINK_FLAGS "/STACK:8388608,1048576")
+    target_compile_definitions("${name}" PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_link_libraries("${name}" PRIVATE Kernel32)
+  endif()
+endfunction(halide_project)

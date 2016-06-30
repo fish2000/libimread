@@ -74,7 +74,7 @@ namespace im {
             
             /// Start with a param to configure the processing pipeline
             //ImageParam input(Float(32), 3);
-            Halide::Var x("x"), y("y"), c("c"), k("k");
+            // Halide::Var x("x"), y("y"), c("c"), k("k");
             Halide::Func clamped = Halide::BoundaryConditions::repeat_edge(input);
             
             /// For downscaling, widen the interpolation kernel to perform lowpass
@@ -109,7 +109,6 @@ namespace im {
             Halide::Func resized_y("resized_y");
             resized_x(x, y, c) = sum(kernelx(x, domx) * Halide::cast<float>(clamped(domx + beginx, y, c)));
             resized_y(x, y, c) = sum(kernely(y, domy) * resized_x(x, domy + beginy, c));
-            
             final(x, y, c) = clamp(resized_y(x, y, c), 0.0f, 1.0f);
             
             /// Scheduling
