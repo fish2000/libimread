@@ -16,14 +16,16 @@ namespace im {
     
     namespace process {
         
+        using timeval_t = struct timeval;
+        
         template <typename T = byte>
         using HalImage = Halide::Image<T>;
         
         inline double now() {
-            struct timeval tv;
-            gettimeofday(&tv, NULL);
             static bool first_call = true;
             static time_t first_sec = 0;
+            timeval_t tv;
+            ::gettimeofday(&tv, nullptr);
             if (first_call) {
                 first_call = false;
                 first_sec = tv.tv_sec;
@@ -79,12 +81,13 @@ namespace im {
         
         template <typename T = byte, typename U = T>
         HalImage<T> resize(HalImage<U> im,
-                        float scaleFactor = 1.0f,
-                        InterpolationType interpolationType = CUBIC,
-                        int schedule = 0) {
-                            Resizer resizer(scaleFactor, interpolationType, schedule);
-                            return resizer.process(im);
-                        }
+                           float scaleFactor = 1.0f,
+                           InterpolationType interpolationType = CUBIC,
+                           int schedule = 0)
+        {
+            Resizer resizer(scaleFactor, interpolationType, schedule);
+            return resizer.process(im);
+        }
         
     }
     
