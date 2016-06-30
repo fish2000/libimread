@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_PYTHON_HYBRID_HH_
 #define LIBIMREAD_PYTHON_HYBRID_HH_
 
+#include <cstring>
 #include <vector>
 #include <memory>
 #include <string>
@@ -11,9 +12,18 @@
 #include <Python.h>
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
+#include <Halide.h>
 
-#include <libimread/base.hh>
-#include <libimread/halide.hh>
+#include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
+// #include <libimread/seekable.hh>
+#include <libimread/image.hh>
+// #include <libimread/imagelist.hh>
+// #include <libimread/imageformat.hh>
+// #include <libimread/traits.hh>
+// #include <libimread/symbols.hh>
+#include <libimread/options.hh>
+// #include <libimread/halide.hh>
 #include "check.hh"
 
 #ifdef __CPP1z__

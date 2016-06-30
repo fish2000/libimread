@@ -20,6 +20,11 @@
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/image.hh>
+#include <libimread/imageformat.hh>
+#include <libimread/formats.hh>
+#include <libimread/file.hh>
+#include <libimread/filehandle.hh>
 #include <libimread/errors.hh>
 #include <libimread/memory.hh>
 #include <libimread/hashing.hh>

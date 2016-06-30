@@ -95,10 +95,10 @@
 #endif
 
 
-#ifndef IOD_SYMBOL_import_array
-    #define IOD_SYMBOL_import_array
-    iod_define_symbol(import_array)
-#endif
+// #ifndef IOD_SYMBOL_import_array
+//     #define IOD_SYMBOL_import_array
+//     iod_define_symbol(import_array)
+// #endif
 
 
 #ifndef IOD_SYMBOL_integral_map
