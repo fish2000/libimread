@@ -459,15 +459,13 @@ namespace filesystem {
     bool path::rename(char const* newpath)        { return rename(path(newpath)); }
     bool path::rename(std::string const& newpath) { return rename(path(newpath)); }
     
-    path path::duplicate(path const& newpath) {
-        path out;
-        if (!exists() || newpath.exists()) { return out; }
+    path path::duplicate(path const& newpath) const {
+        if (!exists() || newpath.exists()) { return path(); }
         bool status = detail::copyfile(c_str(), newpath.c_str()) != -1;
-        if (status) { out = path::absolute(newpath); }
-        return out;
+        return status ? newpath.make_absolute() : path();
     }
-    path path::duplicate(char const* newpath)        { return duplicate(path(newpath)); }
-    path path::duplicate(std::string const& newpath) { return duplicate(path(newpath)); }
+    path path::duplicate(char const* newpath) const        { return duplicate(path(newpath)); }
+    path path::duplicate(std::string const& newpath) const { return duplicate(path(newpath)); }
     
     std::string path::extension() const {
         if (empty()) { return ""; }
@@ -527,9 +525,9 @@ namespace filesystem {
     static const std::string nulstring("");
     
     std::string path::str() const {
-        std::string start(m_absolute ? sepstring : nulstring);
         return std::accumulate(m_path.begin(),
-                               m_path.end(), start,
+                               m_path.end(),
+                               m_absolute ? sepstring : nulstring,
                            [&](std::string const& lhs,
                                std::string const& rhs) {
             return lhs + rhs + (rhs == m_path.back() ? nulstring : sepstring);
@@ -594,14 +592,15 @@ namespace filesystem {
     
     /// calculate the hash value for the path
     std::size_t path::hash() const noexcept {
-        std::size_t seed = static_cast<std::size_t>(m_absolute);
-        return std::accumulate(m_path.begin(), m_path.end(),
-                               seed, detail::rehasher_t());
+        return std::accumulate(m_path.begin(),
+                               m_path.end(),
+                               static_cast<std::size_t>(m_absolute),
+                               detail::rehasher_t());
     }
     
     void path::swap(path& other) noexcept {
         using std::swap;
-        swap(m_path, other.m_path);
+        swap(m_path,     other.m_path);
         swap(m_absolute, other.m_absolute);
     }
     

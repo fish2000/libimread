@@ -276,9 +276,9 @@ namespace filesystem {
             
             /// duplicate a file (using ::fcopyfile() or ::sendfile()),
             /// specifying the new name with a new path instance
-            path duplicate(path const& newpath);
-            path duplicate(char const* newpath);
-            path duplicate(std::string const& newpath);
+            path duplicate(path const& newpath) const;
+            path duplicate(char const* newpath) const;
+            path duplicate(std::string const& newpath) const;
             
             /// Static forwarder for path::rename<P, Q>(p, q)
             template <typename P, typename Q> inline
