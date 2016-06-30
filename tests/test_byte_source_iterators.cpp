@@ -1,4 +1,5 @@
 
+#include <array>
 #include <string>
 #include <vector>
 #include <memory>
@@ -80,7 +81,8 @@ namespace {
               "[byte-source-iterators-search-for-exif-tag-markers]")
     {
         path basedir(im::test::basedir);
-        const std::vector<byte> marker{ 0xFF, 0xE1 };
+        // const std::vector<byte> marker{ 0xFF, 0xE1 };
+        const std::array<byte, 2> marker{ 0xFF, 0xE1 };
         const std::vector<path> jpgs = basedir.list("*.jpg");
         // const std::vector<path> pngs = basedir.list("*.png");
         // const std::vector<path> tifs = basedir.list("*.tif");
