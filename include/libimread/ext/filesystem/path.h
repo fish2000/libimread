@@ -290,11 +290,44 @@ namespace filesystem {
             /// ... I never know when to include the fucking leading "." and so
             /// at any given time, half my functions support it and half don't. BLEAH.
             std::string extension() const;
+            std::string extensions() const;
             
-            /// Static forwarder for path::extension<P>(p)
+            /// Static forwarder for path::extension<P>(p) and path::extensions<P>(p)
             template <typename P> inline
             static std::string extension(P&& p) {
                 return path(std::forward<P>(p)).extension();
+            }
+            
+            template <typename P> inline
+            static std::string extensions(P&& p) {
+                return path(std::forward<P>(p)).extensions();
+            }
+            
+            /// Return a new path with the extension stripped off, e.g.
+            ///  path("/yo/dogg.tar.gz").strip_extension() == path("/yo/dogg.tar");
+            /// path("/yo/dogg.tar.gz").strip_extensions() == path("/yo/dogg");
+            path strip_extension() const;
+            path strip_extensions() const;
+            
+            /// Static forwarder for path::strip_extension<P>(p) and path::strip_extensions<P>(p)
+            template <typename P> inline
+            static path strip_extension(P&& p) {
+                return path(std::forward<P>(p)).strip_extension();
+            }
+            
+            template <typename P> inline
+            static path strip_extensions(P&& p) {
+                return path(std::forward<P>(p)).strip_extensions();
+            }
+            
+            /// Convenience method to get the result of path::extensions(),
+            /// split on path::extsep, as a vector of strings.
+            detail::stringvec_t split_extensions() const;
+            
+            /// Static forwarder for path::split_extensions<P>(p)
+            template <typename P> inline
+            static detail::stringvec_t split_extensions(P&& p) {
+                return path(std::forward<P>(p)).split_extensions();
             }
             
             /// Get back the parent path (also known as the 'dirname' if you are

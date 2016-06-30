@@ -14,6 +14,7 @@
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
+// #include <libimread/halide.hh>
 
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
@@ -248,7 +249,6 @@ namespace {
         (td.dirpath/"test-td-subdir1").makedir();
     }
     
-    
     TEST_CASE("[filesystem] Test the NamedTemporaryFile RAII struct's stream interface",
               "[fs-namedtemporaryfile-raii-stream-interface]")
     {
@@ -261,5 +261,33 @@ namespace {
         CHECK(tf.close());
     }
     
+    TEST_CASE("[filesystem] Test path::extension(), path::extensions(), path::strip_extension(), and path::strip_extensions()",
+              "[fs-test-path-extension-path-extensions-path-strip_extension-path-strip_extensions]") {
+        path basedir(im::test::basedir);
+        const std::vector<path> v = basedir.list("*.jpg");
+        REQUIRE(v.size() == im::test::num_jpg);
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
+            CHECK((basedir/p).is_file());
+            
+            path oldpth(basedir/p);
+            path newpth(oldpth + ".jpeg");
+            
+            CHECK(oldpth.extension() == "jpg");
+            CHECK(newpth.extension() == "jpeg");
+            CHECK(oldpth.extensions() == "jpg");
+            CHECK(newpth.extensions() == "jpg.jpeg");
+            
+            path oldstrip    = oldpth.strip_extension();
+            path oldstripped = oldpth.strip_extensions();
+            path newstrip    = newpth.strip_extension();
+            path newstripped = newpth.strip_extensions();
+            
+            CHECK(oldstrip    == oldstripped);
+            CHECK(newstrip    == oldpth);
+            CHECK(newstripped == oldpth.strip_extension());
+            
+            CHECK(newpth.split_extensions().size() == 2);
+        });
+    }
     
 }

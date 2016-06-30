@@ -28,6 +28,7 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/opaques.h>
+#include <libimread/ext/pystring.hh>
 #include <libimread/rehash.hh>
 
 using im::byte;
@@ -473,6 +474,40 @@ namespace filesystem {
         size_type pos = last.find_last_of(extsep);
         if (pos == std::string::npos) { return ""; }
         return last.substr(pos+1);
+    }
+    
+    std::string path::extensions() const {
+        if (empty()) { return ""; }
+        std::string const& last = m_path.back();
+        size_type pos = last.find_first_of(extsep);
+        if (pos == std::string::npos) { return ""; }
+        return last.substr(pos+1);
+    }
+    
+    path path::strip_extension() const {
+        if (empty()) { return path(); }
+        path result(m_path, m_absolute);
+        std::string const& ext(extension());
+        std::string& back(result.m_path.back());
+        back = back.substr(0, back.size() - (ext.size() + 1));
+        return result;
+    }
+    
+    path path::strip_extensions() const {
+        if (empty()) { return path(); }
+        path result(m_path, m_absolute);
+        std::string const& ext(extensions());
+        std::string& back(result.m_path.back());
+        back = back.substr(0, back.size() - (ext.size() + 1));
+        return result;
+    }
+    
+    static const std::string extsepstring(1, path::extsep);
+    
+    detail::stringvec_t path::split_extensions() const {
+        detail::stringvec_t out;
+        pystring::split(extensions(), out, extsepstring);
+        return out;
     }
     
     path path::parent() const {

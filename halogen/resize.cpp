@@ -54,7 +54,7 @@ namespace {
             }
             
             static Expr lanczos(Expr x) {
-                Expr value = Resize::sinc(x) * Resize::sinc(x/3);
+                Expr value = Resize::sinc(x) * Resize::sinc(x / 3);
                 
                 // Take care of singularity at zero
                 value = select(x == 0.0f,
@@ -69,7 +69,7 @@ namespace {
                 return value;
             }
             
-            using kernel_f = typename std::add_pointer<Expr(Expr)>::type;
+            using kernel_f = std::add_pointer_t<Expr(Expr)>;
             
             struct KernelInfo {
                 char const* name;
@@ -94,27 +94,27 @@ namespace {
                                                              { "lanczos", Interpolation::LANCZOS } }};
             
             /// RUNTIME PARAMS
-            ImageParam input{ input_type, 3, "input"              };
-            Param<float> scale_factor{       "scale_factor", 1.0f };
+            ImageParam input{ UInt(8), 3, "input"                               };
+            Param<float> scaling_factor{  "scale_factor", 1.0f, 0.05f, 16.0f    };
             
             Var x, y, c, k;
             
             Func build() {
                 using kernel_t = Resize::KernelInfo;
                 
-                /// Reset `input` ImageParam to reflect `input_type`
+                /// Rewrite `input` ImageParam to reflect `input_type`
                 input = ImageParam{ input_type, 3, "input" };
                 
                 /// Set up repeating boundary edge conditions on input image
                 Func clamped = BoundaryConditions::repeat_edge(input);
                 
                 /// For downscaling, widen the interpolation kernel to perform lowpass filtering.
-                Expr kernelScaling = min(scale_factor, 1.0f);
+                Expr kernelScaling = min(scaling_factor, 1.0f);
                 Expr kernelSize = Resize::kernels[interpolation].size / kernelScaling;
                 
                 /// source[xy] are the (non-integer) coordinates inside the source image
-                Expr sourcex = (x + 0.5f) / scale_factor;
-                Expr sourcey = (y + 0.5f) / scale_factor;
+                Expr sourcex = (x + 0.5f) / scaling_factor;
+                Expr sourcey = (y + 0.5f) / scaling_factor;
                 
                 /// Initialize interpolation kernels. Since we allow an arbitrary
                 /// scaling factor, the filter coefficients are different for each x
@@ -139,12 +139,12 @@ namespace {
                 Func resized_x("resized_x");
                 Func resized_y("resized_y");
                 Func penultimate("penultimate");
-                Func final("final");
+                Func output("output");
                 
                 resized_x(x, y, c) = sum(kernelx(x, domx) * Halide::cast<float>(clamped(domx + beginx, y, c)));
                 resized_y(x, y, c) = sum(kernely(y, domy) * resized_x(x, domy + beginy, c));
                 penultimate(x, y, c) = clamp(resized_y(x, y, c), 0.0f, 1.0f);
-                final(x, y, c) = cast(output_type, penultimate(x, y, c));
+                output(x, y, c) = cast(output_type, penultimate(x, y, c));
                 
                 /// Scheduling
                 // bool parallelize = (schedule >= 2);
@@ -152,20 +152,20 @@ namespace {
                 bool parallelize = true,
                      vectorize = true;
                 kernelx.compute_root();
-                kernely.compute_at(final, y);
+                kernely.compute_at(output, y);
                 if (vectorize) {
                     resized_x.vectorize(x, natural_vector_size(output_type)); /// originally 4
-                    final.vectorize(x, natural_vector_size(output_type)); /// originally 4
+                    output.vectorize(x, natural_vector_size(output_type)); /// originally 4
                 }
                 if (parallelize) {
                     Var yo, yi;
-                    final.split(y, yo, y, 32).parallel(yo);
-                    resized_x.store_at(final, yo).compute_at(final, y);
+                    output.split(y, yo, y, 32).parallel(yo);
+                    resized_x.store_at(output, yo).compute_at(output, y);
                 } else {
-                    resized_x.store_at(final, c).compute_at(final, y);
+                    resized_x.store_at(output, c).compute_at(output, y);
                 }
                 
-                return final;
+                return output;
             }
             
     };
