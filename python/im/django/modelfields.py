@@ -56,11 +56,11 @@ class ImageField(FileField):
     
     def _check_image_library_installed(self):
         try:
-            from im import Image
+            import im
         except ImportError:
             return [
                 checks.Error(
-                    'Can\'t use ImageField because libimread\'s Python extension is not installed.',
+                    'Can\'t use im.python.modelfields.ImageField because libimread\'s Python extension is not installed.',
                     hint=('Get libimread at https://github.com/fish2000/libimread '
                           'or run command "pip install libimread".'),
                     obj=self,
@@ -68,7 +68,15 @@ class ImageField(FileField):
                 )
             ]
         else:
-            return []
+            return hasattr(im, 'Image') and [] or [
+                checks.Error(
+                    'Can\'t use im.python.modelfields.ImageField because libimread\'s Python extension is not installed.',
+                    hint=('Get libimread at https://github.com/fish2000/libimread '
+                          'or run command "pip install libimread".'),
+                    obj=self,
+                    id='fields.E210',
+                )
+            ]
 
     def deconstruct(self):
         name, path, args, kwargs = super(ImageField, self).deconstruct()
