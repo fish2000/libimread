@@ -152,6 +152,6 @@ class ImageField(FileField):
             setattr(instance, self.height_field, height)
     
     def formfield(self, **kwargs):
-        defaults = {'form_class': ImageFormField}
+        defaults = { 'form_class': ImageFormField }
         defaults.update(kwargs)
         return super(ImageField, self).formfield(**defaults)
