@@ -112,10 +112,12 @@ namespace filesystem {
             return result;
         }
         
+        static constexpr std::regex::flag_type regex_flags          = std::regex::extended;
+        static constexpr std::regex::flag_type regex_flags_icase    = std::regex::extended | std::regex::icase;
+        static constexpr int glob_pattern_flags                     = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
+        static constexpr mode_t mkdir_flags                         = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
+        
     } /* namespace detail */
-    
-    static const std::regex::flag_type regex_flags        = std::regex::extended;
-    static const std::regex::flag_type regex_flags_icase  = std::regex::extended | std::regex::icase;
     
     constexpr path::character_type path::sep;
     constexpr path::character_type path::extsep;
@@ -190,7 +192,7 @@ namespace filesystem {
         return sb.st_size * sizeof(byte);
     }
     
-    #define REGEX_FLAGS case_sensitive ? regex_flags_icase : regex_flags
+    #define REGEX_FLAGS case_sensitive ? detail::regex_flags_icase : detail::regex_flags
     
     bool path::match(std::regex const& pattern, bool case_sensitive) const {
         return std::regex_match(str(), pattern);
@@ -222,7 +224,7 @@ namespace filesystem {
     }
     
     path path::expand_user() const {
-        const std::regex re("^~", regex_flags);
+        const std::regex re("^~", detail::regex_flags);
         if (m_path.empty()) { return path(); }
         if (m_path[0].substr(0, 1) != "~") { return path(*this); }
         return replace(re, detail::userdir());
@@ -330,23 +332,21 @@ namespace filesystem {
             std::move(files));
     }
     
-    static const int glob_pattern_flags = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
-    
     detail::pathvec_t path::list(char const* pattern, bool full_paths) const {
         /// list files with glob
-        if (!pattern) {
-            imread_raise(FileSystemError,
-                "Called path::list() with false-y pattern pointer on path:", str());
-        }
+        // if (!pattern) {
+        //     imread_raise(FileSystemError,
+        //         "Called path::list() with false-y pattern pointer on path:", str());
+        // }
         if (!is_directory()) {
             imread_raise(FileSystemError,
                 "Bad call to path::list() from a non-directory:", str());
         }
         path abspath = make_absolute();
-        glob_t g = { 0 };
+        ::glob_t g = { 0 };
         {
             filesystem::switchdir s(abspath);
-            ::glob(pattern, glob_pattern_flags, NULL, &g);
+            ::glob(pattern, detail::glob_pattern_flags, nullptr, &g);
         }
         detail::pathvec_t out;
         for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
@@ -440,11 +440,9 @@ namespace filesystem {
         return false;
     }
     
-    static const mode_t mkdir_flags = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
-    
     bool path::makedir() const {
         if (empty() || exists()) { return false; }
-        return bool(::mkdir(c_str(), mkdir_flags) != -1);
+        return bool(::mkdir(c_str(), detail::mkdir_flags) != -1);
     }
     
     std::string path::basename() const {
@@ -491,11 +489,9 @@ namespace filesystem {
                     "path::parent() can't get the parent of an empty absolute path");
             }
         } else {
-            size_type idx = 0,
-                      until = m_path.size() - 1;
-            for (; idx < until; ++idx) {
-                result.m_path.push_back(m_path[idx]);
-            }
+            std::copy(m_path.begin(),
+                      m_path.end() - 1,
+                      std::back_inserter(result.m_path));
         }
         return result;
     }
@@ -506,14 +502,10 @@ namespace filesystem {
             imread_raise(FileSystemError,
                 "path::join() expects a relative-path RHS");
         }
-        
         path result(m_path, m_absolute);
-        size_type idx = 0,
-                  max = other.m_path.size();
-        
-        for (; idx < max; ++idx) {
-            result.m_path.push_back(other.m_path[idx]);
-        }
+        std::copy(other.m_path.begin(),
+                  other.m_path.end(),
+                  std::back_inserter(result.m_path));
         return result;
     }
     
@@ -531,16 +523,17 @@ namespace filesystem {
     path path::operator+(char const* other) const        { return append(other); }
     path path::operator+(std::string const& other) const { return append(other); }
     
+    static const std::string sepstring(1, path::sep);
+    static const std::string nulstring("");
+    
     std::string path::str() const {
-        std::string out = "";
-        if (m_absolute) { out += sep; }
-        size_type idx = 0,
-                  siz = m_path.size();
-        for (; idx < siz; ++idx) {
-            out += m_path[idx];
-            if (idx + 1 < siz) { out += sep; }
-        }
-        return out;
+        std::string start(m_absolute ? sepstring : nulstring);
+        return std::accumulate(m_path.begin(),
+                               m_path.end(), start,
+                           [&](std::string const& lhs,
+                               std::string const& rhs) {
+            return lhs + rhs + (rhs == m_path.back() ? nulstring : sepstring);
+        });
     }
     
     char const* path::c_str() const {
@@ -601,8 +594,7 @@ namespace filesystem {
     
     /// calculate the hash value for the path
     std::size_t path::hash() const noexcept {
-        std::size_t seed = static_cast<std::size_t>(m_absolute) +
-                           static_cast<std::size_t>(inode());
+        std::size_t seed = static_cast<std::size_t>(m_absolute);
         return std::accumulate(m_path.begin(), m_path.end(),
                                seed, detail::rehasher_t());
     }

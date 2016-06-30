@@ -19,19 +19,20 @@ class Nimda(admin.ModelAdmin):
     actions_on_bottom = True
 
 class ThingyAdmin(Nimda):
-    list_display = ('pk', 'with_mimetype', 'with_image', 'w', 'h')
+    list_display = ('pk', 'with_mimetype', 'with_image', 'with_mode', 'w', 'h')
     readonly_fields = ('pk', 'createdate', 'modifydate', 'w', 'h')
     fieldsets = [
         (None, {
             'fields': [
                 'image',
-                ('w', 'h')
+                ('w', 'h',),
             ]
         }),
         ("Etc.", {
             'fields': [
-                'createdate',
                 'modifydate',
+                'createdate',
+                'pk',
             ],
             'classes': ['collapse'],
         }),
@@ -50,7 +51,7 @@ class ThingyAdmin(Nimda):
             edit="./%s/" % obj.pk,
             title=obj.image)
     
-    @column(desc="Image MIME Type")
+    @column(desc="MIME Type")
     def with_mimetype(self, obj):
         return u"""
             <nobr>
@@ -61,6 +62,15 @@ class ThingyAdmin(Nimda):
         """ % dict(
             edit="./%s/" % obj.pk,
             title=obj.mimetype)
+    
+    @column(desc="Mode")
+    def with_mode(self, obj):
+        return u"""
+            <nobr>
+                    %(title)s
+            </nobr>
+        """ % dict(
+            title=obj.image_struct.mode)
     
 
 

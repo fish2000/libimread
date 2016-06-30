@@ -51,7 +51,7 @@ namespace filesystem {
         /// use of, or assumptions about, the process' current working directory.
         /// ... and so yeah: "Block before chdir()" is the new "Use a condom".
         
-        explicit switchdir(path nd)
+        explicit switchdir(path const& nd)
             :olddir(path::cwd().str())
             ,newdir(nd.str())
             {
