@@ -97,7 +97,6 @@ namespace {
             ImageParam input{ input_type, 3, "input"              };
             Param<float> scale_factor{       "scale_factor", 1.0f };
             
-            // Var x("x"), y("y"), c("c"), k("k");
             Var x, y, c, k;
             
             Func build() {
@@ -105,7 +104,6 @@ namespace {
                 
                 /// Reset `input` ImageParam to reflect `input_type`
                 input = ImageParam{ input_type, 3, "input" };
-                // float scaleFactor = (float)scale_factor;
                 
                 /// Set up repeating boundary edge conditions on input image
                 Func clamped = BoundaryConditions::repeat_edge(input);

@@ -74,88 +74,44 @@ namespace im {
             filesystem::mode md;
         
         public:
-            file_source_sink(filesystem::mode fmode = filesystem::mode::READ)
-                :fd_source_sink(), md(fmode)
-                {}
-            
+            file_source_sink(filesystem::mode fmode = filesystem::mode::READ);
             file_source_sink(char* cpath,
-                             filesystem::mode fmode = filesystem::mode::READ)
-                :fd_source_sink(), pth(cpath), md(fmode)
-                {
-                    fd_source_sink::open(cpath, fmode);
-                }
-            
+                             filesystem::mode fmode = filesystem::mode::READ);
             file_source_sink(char const* ccpath,
-                             filesystem::mode fmode = filesystem::mode::READ)
-                :file_source_sink(const_cast<char*>(ccpath), fmode)
-                {}
-            
+                             filesystem::mode fmode = filesystem::mode::READ);
             file_source_sink(std::string& spath,
-                             filesystem::mode fmode = filesystem::mode::READ)
-                :file_source_sink(spath.c_str(), fmode)
-                {}
-            
+                             filesystem::mode fmode = filesystem::mode::READ);
             file_source_sink(std::string const& cspath,
-                             filesystem::mode fmode = filesystem::mode::READ)
-                :file_source_sink(cspath.c_str(), fmode)
-                {}
-            
+                             filesystem::mode fmode = filesystem::mode::READ);
             file_source_sink(filesystem::path const& ppath,
-                             filesystem::mode fmode = filesystem::mode::READ)
-                :file_source_sink(ppath.c_str(), fmode)
-                {}
+                             filesystem::mode fmode = filesystem::mode::READ);
             
-            virtual ~file_source_sink() { fd_source_sink::close(); }
+            virtual ~file_source_sink();
             
-            filesystem::path const& path() const { return pth; }
+            filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
-            
-            void mode(filesystem::mode m) { md = m; }
-            filesystem::mode mode() const { return md; }
+            filesystem::mode mode(filesystem::mode m);
+            filesystem::mode mode() const;
     };
     
     class FileSource : public file_source_sink {
         public:
-            FileSource()
-                :file_source_sink()
-                {}
-            FileSource(char* cpath)
-                :file_source_sink(cpath)
-                {}
-            FileSource(char const* ccpath)
-                :file_source_sink(ccpath)
-                {}
-            FileSource(std::string& spath)
-                :file_source_sink(spath)
-                {}
-            FileSource(std::string const& cspath)
-                :file_source_sink(cspath)
-                {}
-            FileSource(filesystem::path const& ppath)
-                :file_source_sink(ppath)
-                {}
+            FileSource();
+            FileSource(char* cpath);
+            FileSource(char const* ccpath);
+            FileSource(std::string& spath);
+            FileSource(std::string const& cspath);
+            FileSource(filesystem::path const& ppath);
     };
     
     class FileSink : public file_source_sink {
         public:
-            FileSink()
-                :file_source_sink(filesystem::mode::WRITE)
-                {}
-            FileSink(char* cpath)
-                :file_source_sink(cpath, filesystem::mode::WRITE)
-                {}
-            FileSink(char const* ccpath)
-                :file_source_sink(ccpath, filesystem::mode::WRITE)
-                {}
-            FileSink(std::string& spath)
-                :file_source_sink(spath, filesystem::mode::WRITE)
-                {}
-            FileSink(std::string const& cspath)
-                :file_source_sink(cspath, filesystem::mode::WRITE)
-                {}
-            FileSink(filesystem::path const& ppath)
-                :file_source_sink(ppath, filesystem::mode::WRITE)
-                {}
+            FileSink();
+            FileSink(char* cpath);
+            FileSink(char const* ccpath);
+            FileSink(std::string& spath);
+            FileSink(std::string const& cspath);
+            FileSink(filesystem::path const& ppath);
     };
     
 

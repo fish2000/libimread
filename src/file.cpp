@@ -198,6 +198,99 @@ namespace im {
         return out;
     }
     
-    bool file_source_sink::exists() const noexcept { return pth.exists(); }
+    file_source_sink::file_source_sink(filesystem::mode fmode)
+        :fd_source_sink(), md(fmode)
+        {}
+    
+    file_source_sink::file_source_sink(char* cpath, filesystem::mode fmode)
+        :fd_source_sink(), pth(cpath), md(fmode)
+        {
+            fd_source_sink::open(cpath, fmode);
+        }
+    
+    file_source_sink::file_source_sink(char const* ccpath, filesystem::mode fmode)
+        :file_source_sink(const_cast<char*>(ccpath), fmode)
+        {}
+    
+    file_source_sink::file_source_sink(std::string& spath, filesystem::mode fmode)
+        :file_source_sink(spath.c_str(), fmode)
+        {}
+    
+    file_source_sink::file_source_sink(std::string const& cspath, filesystem::mode fmode)
+        :file_source_sink(cspath.c_str(), fmode)
+        {}
+    
+    file_source_sink::file_source_sink(filesystem::path const& ppath, filesystem::mode fmode)
+        :file_source_sink(ppath.c_str(), fmode)
+        {}
+    
+    file_source_sink::~file_source_sink() {
+        fd_source_sink::close();
+    }
+    
+    filesystem::path const& file_source_sink::path() const {
+        return pth;
+    }
+    
+    bool file_source_sink::exists() const noexcept {
+        return pth.exists();
+    }
+    
+    filesystem::mode file_source_sink::mode(filesystem::mode m) {
+        md = m;
+        return md;
+    }
+    
+    filesystem::mode file_source_sink::mode() const {
+        return md;
+    }
+    
+    FileSource::FileSource()
+        :file_source_sink()
+        {}
+    
+    FileSource::FileSource(char* cpath)
+        :file_source_sink(cpath)
+        {}
+    
+    FileSource::FileSource(char const* ccpath)
+        :file_source_sink(ccpath)
+        {}
+    
+    FileSource::FileSource(std::string& spath)
+        :file_source_sink(spath)
+        {}
+    
+    FileSource::FileSource(std::string const& cspath)
+        :file_source_sink(cspath)
+        {}
+    
+    FileSource::FileSource(filesystem::path const& ppath)
+        :file_source_sink(ppath)
+        {}
+    
+    FileSink::FileSink()
+        :file_source_sink(filesystem::mode::WRITE)
+        {}
+    
+    FileSink::FileSink(char* cpath)
+        :file_source_sink(cpath, filesystem::mode::WRITE)
+        {}
+    
+    FileSink::FileSink(char const* ccpath)
+        :file_source_sink(ccpath, filesystem::mode::WRITE)
+        {}
+    
+    FileSink::FileSink(std::string& spath)
+        :file_source_sink(spath, filesystem::mode::WRITE)
+        {}
+    
+    FileSink::FileSink(std::string const& cspath)
+        :file_source_sink(cspath, filesystem::mode::WRITE)
+        {}
+    
+    FileSink::FileSink(filesystem::path const& ppath)
+        :file_source_sink(ppath, filesystem::mode::WRITE)
+        {}
     
 }
