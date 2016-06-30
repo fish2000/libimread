@@ -14,7 +14,6 @@
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
-// #include <libimread/halide.hh>
 
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
