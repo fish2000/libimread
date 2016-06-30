@@ -335,6 +335,11 @@ static PyMethodDef module_functions[] = {
             METH_VARARGS,
             "Parse struct code into list of dtype-string tuples" },
     {
+        "structcode_convert",
+            (PyCFunction)py::functions::structcode_convert,
+            METH_VARARGS,
+            "Directly convert struct code internal tuple to Python values" },
+    {
         "hybridimage_check",
             (PyCFunction)py::functions::hybridimage_check,
             METH_VARARGS,

@@ -9,6 +9,7 @@ namespace py {
     namespace functions {
         
         PyObject* structcode_parse(PyObject*, PyObject*);
+        PyObject* structcode_convert(PyObject*, PyObject*);
         
     }
     

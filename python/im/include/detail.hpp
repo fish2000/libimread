@@ -106,6 +106,12 @@ namespace py {
         return py::convert(reinterpret_cast<Cast>(orig));
     }
     
+    template <typename First, typename Second> inline
+    PyObject* convert(std::pair<First, Second> const& pair) {
+        return PyTuple_Pack(2,
+            py::convert(pair.first), py::convert(pair.second));
+    }
+    
     template <typename Mapping,
               typename Value = typename Mapping::mapped_type,
               typename std::enable_if_t<
@@ -142,6 +148,18 @@ namespace py {
     
     template <typename ...Args>
     bool convertible_v = py::convertible<Args...>::value;
+    
+    template <typename Pair,
+              typename First  = typename Pair::first_type,
+              typename Second = typename Pair::second_type,
+              typename std::enable_if_t<
+                        py::convertible<First, Second>::value,
+              int> = 0> inline
+    PyObject* convert(Pair&& pair) {
+        return PyTuple_Pack(2,
+             py::convert<First>(std::get<0>(std::forward<Pair>(pair))),
+            py::convert<Second>(std::get<1>(std::forward<Pair>(pair))));
+    }
     
     PyObject* tuplize();
     
