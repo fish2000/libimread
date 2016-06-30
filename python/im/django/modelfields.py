@@ -77,7 +77,7 @@ class ImageField(FileField):
                     id='fields.E210',
                 )
             ]
-
+    
     def deconstruct(self):
         name, path, args, kwargs = super(ImageField, self).deconstruct()
         if self.width_field:
@@ -85,7 +85,7 @@ class ImageField(FileField):
         if self.height_field:
             kwargs['height_field'] = self.height_field
         return name, path, args, kwargs
-
+    
     def contribute_to_class(self, cls, name, **kwargs):
         super(ImageField, self).contribute_to_class(cls, name, **kwargs)
         # Attach update_dimension_fields so that dimension fields declared
@@ -94,7 +94,7 @@ class ImageField(FileField):
         # Only run post-initialization dimension update on non-abstract models
         if not cls._meta.abstract:
             signals.post_init.connect(self.update_dimension_fields, sender=cls)
-
+    
     def update_dimension_fields(self, instance, force=False, *args, **kwargs):
         """
         Updates field's width and height fields, if defined.
