@@ -9,12 +9,11 @@ https://docs.djangoproject.com/en/dev/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
-
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+ALLOWED_HOSTS = []
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
@@ -24,9 +23,6 @@ SECRET_KEY = '-3vq)q*kt35t0)#5ll^u@mu!q7kw0122*6i8-i@xlvji3y!rh#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -71,7 +67,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'jangytest.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
@@ -82,25 +77,15 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
+auth_password_validators = ('UserAttributeSimilarityValidator', 'MinimumLengthValidator',
+                            'CommonPasswordValidator', 'NumericPasswordValidator')
+AUTH_PASSWORD_VALIDATORS = []
+for validator in auth_password_validators:
+    AUTH_PASSWORD_VALIDATORS.append(dict(
+        NAME="django.contrib.auth.password_validation.%s" % validator))
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -110,7 +95,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = False
 USE_L10N = False
 USE_TZ = False
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
