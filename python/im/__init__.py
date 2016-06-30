@@ -15,3 +15,8 @@ from im import (
 
 from compat.show import show
 from compat.to_PIL import to_PIL
+
+def mimetype(suffix):
+    if not suffix in format_info:
+        return None
+    return format_info[suffix].get('mimetype')
