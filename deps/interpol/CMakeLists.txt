@@ -13,6 +13,7 @@ include_directories(
 add_definitions(
     -Werror -Wall
     -x c -std=c11
+    -funroll-loops
     -O3 -m64
     -mtune=native)
 
