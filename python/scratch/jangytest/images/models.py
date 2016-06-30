@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from datetime import datetime
 from django.db import models
 from im.django import modelfields as imagemodels
 
@@ -44,12 +43,11 @@ class Thingy(models.Model):
     def image_struct(self):
         if hasattr(self, '_image_struct'):
             return self._image_struct
-        if (not self.pk) or (not self.image.name):
+        if (not self.pk) or (not hasattr(self.image, 'path')):
             return None
         try:
             import im
-            out = im.Image(self.image.storage.open(
-                           self.image.name))
+            out = im.Image(self.image.path)
         except ImportError:
             return None
         except IOError:
@@ -59,3 +57,56 @@ class Thingy(models.Model):
             return out
         return None
     
+    @property
+    def array_struct(self):
+        if hasattr(self, '_array_struct'):
+            return self._array_struct
+        if (not self.pk) or (not hasattr(self.image, 'path')):
+            return None
+        try:
+            import im
+            out = im.Array(self.image.path)
+        except ImportError:
+            return None
+        except IOError:
+            return None
+        else:
+            setattr(self, '_array_struct', out)
+            return out
+        return None
+    
+    @property
+    def suffix(self):
+        if hasattr(self, '_suffix'):
+            return self._suffix
+        if (not self.pk) or (not hasattr(self.image, 'path')):
+            return None
+        try:
+            import im
+            out = im.detect(self.image.path)
+        except ImportError:
+            return None
+        except IOError:
+            return None
+        else:
+            setattr(self, '_suffix', out)
+            return out
+        return None
+    
+    @property
+    def mimetype(self):
+        if hasattr(self, '_mimetype'):
+            return self._mimetype
+        if (not self.pk) or (not hasattr(self.image, 'path')):
+            return None
+        try:
+            import im
+            out = im.mimetype(im.detect(self.image.path))
+        except ImportError:
+            return None
+        except IOError:
+            return None
+        else:
+            setattr(self, '_mimetype', out)
+            return out
+        return None
