@@ -15,7 +15,7 @@ class ImageField(FileField):
             "image or a corrupted image."
         ),
     }
-
+    
     def to_python(self, data):
         """
         Checks that the file-upload field data contains a valid image (GIF, JPG,

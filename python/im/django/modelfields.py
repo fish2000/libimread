@@ -18,7 +18,7 @@ class ImageFileDescriptor(FileDescriptor):
     def __set__(self, instance, value):
         previous_file = instance.__dict__.get(self.field.name)
         super(ImageFileDescriptor, self).__set__(instance, value)
-
+        
         # To prevent recalculating image dimensions when we are instantiating
         # an object from the database (bug #11084), only update dimensions if
         # the field had a value before this assignment.  Since the default
@@ -90,13 +90,13 @@ class ImageField(FileField):
     def update_dimension_fields(self, instance, force=False, *args, **kwargs):
         """
         Updates field's width and height fields, if defined.
-
+        
         This method is hooked up to model's post_init signal to update
         dimensions after instantiating a model instance.  However, dimensions
         won't be updated if the dimensions fields are already populated.  This
         avoids unnecessary recalculation when loading an object from the
         database.
-
+        
         Dimensions can be forced to update with force=True, which is how
         ImageFileDescriptor.__set__ calls this method.
         """
