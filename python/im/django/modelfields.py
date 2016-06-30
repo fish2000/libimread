@@ -64,19 +64,11 @@ class ImageField(FileField):
                     hint=('Get libimread at https://github.com/fish2000/libimread '
                           'or run command "pip install libimread".'),
                     obj=self,
-                    id='fields.E210',
+                    id='fields.E666',
                 )
             ]
         else:
-            return hasattr(im, 'Image') and [] or [
-                checks.Error(
-                    'Can\'t use im.python.modelfields.ImageField because libimread\'s Python extension is not installed.',
-                    hint=('Get libimread at https://github.com/fish2000/libimread '
-                          'or run command "pip install libimread".'),
-                    obj=self,
-                    id='fields.E210',
-                )
-            ]
+            return []
     
     def deconstruct(self):
         name, path, args, kwargs = super(ImageField, self).deconstruct()
