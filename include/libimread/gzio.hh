@@ -5,11 +5,14 @@
 #define LIBIMREAD_GZIO_HH_
 
 #include <fcntl.h>
+#include <zlib.h>
+
 #include <cstdio>
 #include <vector>
 #include <memory>
 #include <functional>
 #include <utility>
+
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/opaques.h>
@@ -19,6 +22,7 @@
 namespace im {
     
     namespace detail {
+        // typedef struct gzFile_s *gzFile;
         using stat_t = struct stat;
         using gzhandle_t = gzFile;
         /// -- a camel-cased typename and a typedef that obfuscates a pointer ...
@@ -105,7 +109,6 @@ namespace im {
         class source : public gzfile_source_sink {
             public:
                 source();
-                // source(FILE* fh);
                 source(char* cpath);
                 source(char const* ccpath);
                 source(std::string& spath);
@@ -116,7 +119,6 @@ namespace im {
         class sink : public gzfile_source_sink {
             public:
                 sink();
-                // sink(FILE* fh);
                 sink(char* cpath);
                 sink(char const* ccpath);
                 sink(std::string& spath);

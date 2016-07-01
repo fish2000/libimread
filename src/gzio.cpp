@@ -5,7 +5,6 @@
 #include <sys/types.h>
 // #include <sys/mman.h>
 #include <sys/stat.h>
-#include <zlib.h>
 
 #include <cerrno>
 #include <cstring>
@@ -17,6 +16,10 @@
 #include <libimread/gzio.hh>
 
 namespace im {
+    
+    namespace detail {
+        using gzhandle_t = gzFile;
+    }
     
     constexpr int gzio_source_sink::READ_FLAGS;
     constexpr int gzio_source_sink::WRITE_FLAGS;
@@ -38,7 +41,7 @@ namespace im {
     
     gzio_source_sink::gzio_source_sink(int fd)
         :descriptor(fd)
-        ,gzhandle(::gzdopen(descriptor, "FUCK MODES"))
+        ,gzhandle{ ::gzdopen(descriptor, "FUCK MODES") }
         ,external(true)
         {}
     
@@ -163,12 +166,12 @@ namespace im {
         if (::gzclose(gzhandle) != Z_OK) {
             if (descriptor > 0) { ::close(descriptor); }
             imread_raise(FileSystemError,
-                "error closing gzhandle:",
+                FF("error closing gzhandle (with descriptor %i):", descriptor),
                 std::strerror(errno));
         } else if (descriptor > 0) {
             if (::close(descriptor) == -1) {
                 imread_raise(FileSystemError,
-                    "error closing file descriptor:",
+                    FF("error closing descriptor %i", descriptor),
                     std::strerror(errno));
             }
             swap(out, descriptor);
