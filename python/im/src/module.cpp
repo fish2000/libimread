@@ -369,6 +369,11 @@ static PyMethodDef module_functions[] = {
             (PyCFunction)py::functions::arraybuffer_check,
             METH_VARARGS,
             "Boolean function to test for im.Array.Buffer instances" },
+    {
+        "batch_check",
+            (PyCFunction)py::functions::batch_check,
+            METH_VARARGS,
+            "Boolean function to test for im.Batch instances" },
     { nullptr, nullptr, 0, nullptr }
 };
 

@@ -283,6 +283,4 @@ namespace im {
         :filehandle_source_sink(ppath, filesystem::mode::WRITE)
         {}
     
-    
-    
 }

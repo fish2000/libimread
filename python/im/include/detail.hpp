@@ -88,6 +88,31 @@ namespace py {
     PyObject* convert(Py_buffer*);
     PyObject* convert(std::exception const&);
     
+    /* >>>>>>>>>>>>>>>>>>> FORWARD DECLARATIONS <<<<<<<<<<<<<<<<<<<< */
+    
+    template <typename First, typename Second>
+    PyObject* convert(std::pair<First, Second> pair);
+    
+    template <typename ...Args>
+    PyObject* convert(std::tuple<Args...> argtuple);
+    
+    template <typename ...Args>
+    PyObject* convert(std::tuple<Args&&...> argtuple);
+    
+    template <typename Vector,
+              typename Value = typename Vector::value_type>
+    PyObject* convert(Vector const& vector);
+    
+    template <typename Mapping,
+              typename Value = typename Mapping::mapped_type,
+              typename std::enable_if_t<
+                       std::is_constructible<std::string,
+                                             typename Mapping::key_type>::value,
+              int> = 0>
+    PyObject* convert(Mapping const& mapping);
+    
+    /* >>>>>>>>>>>>>>>>>>> EXPLICIT CASTS <<<<<<<<<<<<<<<<<<<< */
+    
     template <typename Cast,
               typename Original,
               typename std::enable_if_t<std::is_arithmetic<Cast>::value &&
@@ -106,42 +131,6 @@ namespace py {
         return py::convert(reinterpret_cast<Cast>(orig));
     }
     
-    template <typename First, typename Second> inline
-    PyObject* convert(std::pair<First, Second> const& pair) {
-        return PyTuple_Pack(2,
-            py::convert(pair.first), py::convert(pair.second));
-    }
-    
-    template <typename Mapping,
-              typename Value = typename Mapping::mapped_type,
-              typename std::enable_if_t<
-                       std::is_constructible<std::string,
-                                             typename Mapping::key_type>::value,
-              int> = 0> inline
-    PyObject* convert(Mapping const& mapping) {
-        PyObject* dict = PyDict_New();
-        for (auto const& item : mapping) {
-            std::string key(item.first);
-            PyObject* pytem = py::convert(item.second);
-            PyDict_SetItemString(dict, key.c_str(), pytem);
-            Py_DECREF(pytem);
-        }
-        return dict;
-    }
-    
-    template <typename Vector,
-              typename Value = typename Vector::value_type> inline
-    PyObject* convert(Vector const& vector) {
-        Py_ssize_t idx = 0,
-                   max = vector.size();
-        PyObject* tuple = PyTuple_New(max);
-        for (Value const& item : vector) {
-            PyTuple_SET_ITEM(tuple, idx, py::convert(item));
-            idx++;
-        }
-        return tuple;
-    }
-    
     template <typename ...Args>
     using convertible = std::is_same<std::add_pointer_t<PyObject>,
                                      decltype(py::convert(std::declval<Args>()...))>;
@@ -149,17 +138,7 @@ namespace py {
     template <typename ...Args>
     bool convertible_v = py::convertible<Args...>::value;
     
-    template <typename Pair,
-              typename First  = typename Pair::first_type,
-              typename Second = typename Pair::second_type,
-              typename std::enable_if_t<
-                        py::convertible<First, Second>::value,
-              int> = 0> inline
-    PyObject* convert(Pair&& pair) {
-        return PyTuple_Pack(2,
-             py::convert<First>(std::get<0>(std::forward<Pair>(pair))),
-            py::convert<Second>(std::get<1>(std::forward<Pair>(pair))));
-    }
+    /* >>>>>>>>>>>>>>>>>>> TUPLIZE <<<<<<<<<<<<<<<<<<<< */
     
     PyObject* tuplize();
     
@@ -197,6 +176,8 @@ namespace py {
             sizeof...(Args),
             py::convert(std::forward<Args>(args))...);
     }
+    
+    /* >>>>>>>>>>>>>>>>>>> LISTIFY <<<<<<<<<<<<<<<<<<<< */
     
     PyObject* listify();
     
@@ -267,7 +248,18 @@ namespace py {
         
     }
     
-    template <typename ...Args> inline
+    /* >>>>>>>>>>>>>>>>>>> PAIR AND TUPLE CONVERTERS <<<<<<<<<<<<<<<<<<<< */
+    
+    template <typename First, typename Second>
+    PyObject* convert(std::pair<First, Second> pair) {
+        using Pair = std::pair<First, Second>;
+        using Indices = std::make_index_sequence<2>;
+        return py::impl::apply_impl(py::tuplize<First, Second>,
+                                    std::forward<Pair>(pair),
+                                    Indices());
+    }
+    
+    template <typename ...Args>
     PyObject* convert(std::tuple<Args...> argtuple) {
         using Tuple = std::tuple<Args...>;
         using Indices = std::index_sequence_for<Args...>;
@@ -279,7 +271,7 @@ namespace py {
                                     Indices());
     }
     
-    template <typename ...Args> inline
+    template <typename ...Args>
     PyObject* convert(std::tuple<Args&&...> argtuple) {
         using Tuple = std::tuple<Args&&...>;
         using Indices = std::index_sequence_for<Args...>;
@@ -289,6 +281,36 @@ namespace py {
         return py::impl::apply_impl(py::tuplize<Args...>,
                                     std::forward<Tuple>(argtuple),
                                     Indices());
+    }
+    
+    /* >>>>>>>>>>>>>>>>>>> GENERIC DECONTAINERIZERS <<<<<<<<<<<<<<<<<<<< */
+    
+    template <typename Vector, typename Value>
+    PyObject* convert(Vector const& vector) {
+        Py_ssize_t idx = 0,
+                   max = vector.size();
+        PyObject* tuple = PyTuple_New(max);
+        for (Value const& item : vector) {
+            PyTuple_SET_ITEM(tuple, idx, py::convert(item));
+            idx++;
+        }
+        return tuple;
+    }
+    
+    template <typename Mapping, typename Value,
+              typename std::enable_if_t<
+                       std::is_constructible<std::string,
+                                             typename Mapping::key_type>::value,
+              int>>
+    PyObject* convert(Mapping const& mapping) {
+        PyObject* dict = PyDict_New();
+        for (auto const& item : mapping) {
+            std::string key(item.first);
+            PyObject* pytem = py::convert(item.second);
+            PyDict_SetItemString(dict, key.c_str(), pytem);
+            Py_DECREF(pytem);
+        }
+        return dict;
     }
     
     namespace detail {

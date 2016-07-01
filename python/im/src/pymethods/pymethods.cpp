@@ -38,5 +38,11 @@ namespace py {
             return py::boolean(ArrayBufferModel_Check(evaluee));
         }
         
+        PyObject* batch_check(PyObject* self, PyObject* args) {
+            PyObject* evaluee;
+            if (!PyArg_ParseTuple(args, "O", &evaluee)) { return nullptr; }
+            return py::boolean(BatchModel_Check(evaluee));
+        }
+        
     }
 }

@@ -103,10 +103,8 @@ namespace im {
                 sink(filesystem::path const& ppath);
         };
         
-        
-    }
+    } /* namespace handle */
     
-
-}
+} /* namespace im */
 
 #endif /// LIBIMREAD_FILEHANDLE_HH_

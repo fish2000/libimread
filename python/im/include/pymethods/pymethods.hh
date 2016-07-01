@@ -7,6 +7,7 @@
 #include "typecheck.hh"
 #include "buffermethods.hh"
 #include "imagemethods.hh"
+#include "batchmethods.hh"
 
 namespace py {
     
@@ -17,6 +18,7 @@ namespace py {
         PyObject* imagebuffer_check(PyObject* self, PyObject* args);
         PyObject* array_check(PyObject* self, PyObject* args);
         PyObject* arraybuffer_check(PyObject* self, PyObject* args);
+        PyObject* batch_check(PyObject* self, PyObject* args);
         
     }
     
