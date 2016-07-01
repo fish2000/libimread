@@ -224,10 +224,6 @@ namespace im {
         :file_source_sink(ppath.c_str(), fmode)
         {}
     
-    file_source_sink::~file_source_sink() {
-        fd_source_sink::close();
-    }
-    
     filesystem::path const& file_source_sink::path() const {
         return pth;
     }

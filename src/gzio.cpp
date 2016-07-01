@@ -5,6 +5,7 @@
 #include <sys/types.h>
 // #include <sys/mman.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 #include <cerrno>
 #include <cstring>
@@ -19,6 +20,17 @@ namespace im {
     
     namespace detail {
         using gzhandle_t = gzFile;
+        
+        char const* descriptor_mode(int descriptor) {
+            switch (::fcntl(descriptor, F_GETFL, 0) & O_ACCMODE) {
+                case O_RDONLY:  return "rb";
+                case O_WRONLY:  return "wb";
+                case O_RDWR:    return "rb"; /// gzopen doesn't know "r+"
+                case O_APPEND:  return "ab"; /// this may not actually happen
+                case O_CLOEXEC: return "WHAT THE HELL PEOPLE";
+                default:        return "SERIOUSLY, FUCK FILE OPENMODES";
+            }
+        }
     }
     
     constexpr int gzio_source_sink::READ_FLAGS;
@@ -41,7 +53,8 @@ namespace im {
     
     gzio_source_sink::gzio_source_sink(int fd)
         :descriptor(fd)
-        ,gzhandle{ ::gzdopen(descriptor, "FUCK MODES") }
+        ,gzhandle{ ::gzdopen(descriptor,
+                             detail::descriptor_mode(descriptor)) }
         ,external(true)
         {}
     
@@ -149,6 +162,7 @@ namespace im {
         /// according to the zlib manual (which is for append-only type situations)
         char const* modestring = fmode == filesystem::mode::READ ? "rb" : "wb";
         gzhandle = ::gzdopen(descriptor, modestring);
+        // gzhandle = ::gzopen(cpath, modestring);
         
         if (!gzhandle) {
             imread_raise(CannotReadError, "zlib stream-open failure:",
@@ -163,18 +177,12 @@ namespace im {
     int gzio_source_sink::close() {
         using std::swap;
         int out = -1;
+        // flush();
         if (::gzclose(gzhandle) != Z_OK) {
             if (descriptor > 0) { ::close(descriptor); }
             imread_raise(FileSystemError,
                 FF("error closing gzhandle (with descriptor %i):", descriptor),
                 std::strerror(errno));
-        } else if (descriptor > 0) {
-            if (::close(descriptor) == -1) {
-                imread_raise(FileSystemError,
-                    FF("error closing descriptor %i", descriptor),
-                    std::strerror(errno));
-            }
-            swap(out, descriptor);
         }
         return out;
     }
@@ -204,10 +212,6 @@ namespace im {
     gzfile_source_sink::gzfile_source_sink(filesystem::path const& ppath, filesystem::mode fmode)
         :gzfile_source_sink(ppath.c_str(), fmode)
         {}
-    
-    gzfile_source_sink::~gzfile_source_sink() {
-        gzio_source_sink::close();
-    }
     
     filesystem::path const& gzfile_source_sink::path() const {
         return pth;

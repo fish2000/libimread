@@ -94,8 +94,6 @@ namespace im {
             gzfile_source_sink(filesystem::path const& ppath,
                                filesystem::mode fmode = filesystem::mode::READ);
             
-            virtual ~gzfile_source_sink();
-            
             filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
             filesystem::mode mode(filesystem::mode m);
