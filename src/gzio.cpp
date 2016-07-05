@@ -3,9 +3,7 @@
 
 #include <unistd.h>
 #include <sys/types.h>
-// #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
 #include <cerrno>
 #include <cstring>
@@ -177,7 +175,6 @@ namespace im {
     int gzio_source_sink::close() {
         using std::swap;
         int out = -1;
-        // flush();
         if (::gzclose(gzhandle) != Z_OK) {
             if (descriptor > 0) { ::close(descriptor); }
             imread_raise(FileSystemError,

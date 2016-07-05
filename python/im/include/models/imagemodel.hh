@@ -398,6 +398,7 @@ namespace py {
                 swap(imagebuffer,   other.imagebuffer);
                 swap(readoptDict,   other.readoptDict);
                 swap(writeoptDict,  other.writeoptDict);
+                swap(clean,         other.clean);
             }
             
             void cleanup(bool force = false) {

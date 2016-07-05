@@ -62,6 +62,7 @@ using py::ext::ImageModel;
 using py::ext::ArrayModel;
 using py::ext::ImageBufferModel;
 using py::ext::ArrayBufferModel;
+using py::ext::BatchModel;
 
 PyTypeObject BufferModel_Type = {
     PyObject_HEAD_INIT(nullptr)
@@ -318,6 +319,57 @@ PyTypeObject ArrayBufferModel_Type = {
     0,                                                                      /* tp_version_tag */
 };
 
+PyTypeObject BatchModel_Type = {
+    PyObject_HEAD_INIT(nullptr)
+    0,                                                                  /* ob_size */
+    py::ext::BatchModel::typestring(),                                  /* tp_name */
+    sizeof(BatchModel),                                                 /* tp_basicsize */
+    0,                                                                  /* tp_itemsize */
+    (destructor)py::ext::batch::dealloc,                                /* tp_dealloc */
+    0,                                                                  /* tp_print */
+    0,                                                                  /* tp_getattr */
+    0,                                                                  /* tp_setattr */
+    (cmpfunc)py::ext::batch::compare,                                   /* tp_compare */
+    (reprfunc)py::ext::batch::repr,                                     /* tp_repr */
+    0,                                                                  /* tp_as_number */
+    py::ext::batch::methods::sequence(),                                /* tp_as_sequence */
+    0,                                                                  /* tp_as_mapping */
+    (hashfunc)py::ext::batch::hash,                                     /* tp_hash */
+    0,                                                                  /* tp_call */
+    (reprfunc)py::ext::batch::str,                                      /* tp_str */
+    (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
+    (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
+    0,                                                                  /* tp_as_buffer */
+    py::ext::BatchModel::typeflags(),                                   /* tp_flags */
+    py::ext::BatchModel::typedoc(),                                     /* tp_doc */
+    (traverseproc)py::ext::batch::traverse,                             /* tp_traverse */
+    (inquiry)py::ext::batch::clear,                                     /* tp_clear */
+    0,                                                                  /* tp_richcompare */
+    py::detail::offset(&BatchModel::weakrefs),                          /* tp_weaklistoffset */
+    0,                                                                  /* tp_iter */
+    0,                                                                  /* tp_iternext */
+    py::ext::batch::methods::basic(),                                   /* tp_methods */
+    0,                                                                  /* tp_members */
+    0,                                                                  /* tp_getset */
+    0,                                                                  /* tp_base */
+    0,                                                                  /* tp_dict */
+    0,                                                                  /* tp_descr_get */
+    0,                                                                  /* tp_descr_set */
+    0,                                                                  /* tp_dictoffset */
+    (initproc)py::ext::batch::init,                                     /* tp_init */
+    0,                                                                  /* tp_alloc */
+    py::ext::batch::createnew,                                          /* tp_new */
+    0,                                                                  /* tp_free */
+    0,                                                                  /* tp_is_gc */
+    0,                                                                  /* tp_bases */
+    0,                                                                  /* tp_mro */
+    0,                                                                  /* tp_cache */
+    0,                                                                  /* tp_subclasses */
+    0,                                                                  /* tp_weaklist */
+    0,                                                                  /* tp_del */
+    0,                                                                  /* tp_version_tag */
+};
+
 static PyMethodDef module_functions[] = {
     {
         "detect",
@@ -422,6 +474,7 @@ namespace {
         /// Check readiness of our extension type declarations (?)
         if (PyType_Ready(&HybridImageModel_Type) < 0) { return false; }
         if (PyType_Ready(&BufferModel_Type) < 0)      { return false; }
+        if (PyType_Ready(&BatchModel_Type) < 0)       { return false; }
         if (PyType_Ready(&ImageModel_Type) < 0)       { return false; }
         if (PyType_Ready(&ImageBufferModel_Type) < 0) { return false; }
         if (PyType_Ready(&ArrayModel_Type) < 0)       { return false; }
@@ -452,6 +505,12 @@ namespace {
         PyModule_AddObject(module,
             "Buffer",
             (PyObject*)&BufferModel_Type);
+        
+        /// Add the BatchModel type object to the module
+        Py_INCREF(&BatchModel_Type);
+        PyModule_AddObject(module,
+            "Batch",
+            (PyObject*)&BatchModel_Type);
         
         /// Add the ImageBufferModel type object directly to im.Image.__dict__,
         /// such that ImageBuffer presents as an inner class of im.Image, e.g.

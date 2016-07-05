@@ -4,6 +4,7 @@
 
 #include "hybridimage.hh"
 #include "models/models.hh"
+#include "pymethods/batchmethods.hh"
 #include "pymethods/pymethods.hh"
 #include "detail.hpp"
 #include "hybrid.hh"

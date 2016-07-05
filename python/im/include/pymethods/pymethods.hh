@@ -7,7 +7,7 @@
 #include "typecheck.hh"
 #include "buffermethods.hh"
 #include "imagemethods.hh"
-#include "batchmethods.hh"
+// #include "batchmethods.hh"
 
 namespace py {
     

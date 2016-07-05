@@ -22,10 +22,9 @@
 namespace im {
     
     namespace detail {
-        // typedef struct gzFile_s *gzFile;
         using stat_t = struct stat;
         using gzhandle_t = gzFile;
-        /// -- a camel-cased typename and a typedef that obfuscates a pointer ...
+        /// -- a camel-cased typename, AND a typedef that obfuscates a pointer ...
         /// HOW COULD IT POSSIBLY HAVE LESS AESTHETICALLY PLEASING QUALITIES, I ask you
     }
     
@@ -52,7 +51,6 @@ namespace im {
             virtual std::size_t seek_end(int delta);
             
             virtual std::size_t read(byte* buffer, std::size_t n);
-            // virtual std::vector<byte> full_data();
             virtual std::size_t size() const;
             virtual std::size_t write(const void* buffer, std::size_t n);
             virtual std::size_t write(std::vector<byte> const& bv);
@@ -63,8 +61,6 @@ namespace im {
             
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
-            // virtual filesystem::file fh() const noexcept;
-            // virtual void fh(FILE* fh) noexcept;
             
             virtual bool exists() const noexcept;
             virtual int open(char* cpath, filesystem::mode fmode = filesystem::mode::READ);

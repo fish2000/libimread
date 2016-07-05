@@ -11,7 +11,8 @@ from im import (
     
     Buffer,
     Image,
-    Array)
+    Array,
+    Batch)
 
 from compat.show import show
 from compat.to_PIL import to_PIL

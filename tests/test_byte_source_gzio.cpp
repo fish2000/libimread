@@ -46,8 +46,8 @@ namespace {
             
             {
                 /// nest scope to ensure GZSink gets rightly dumpstered
-                std::unique_ptr<GZSink> gzout(new GZSink(ttp));
-                gzout->write(fulldata);
+                std::unique_ptr<GZSink> gzoutput(new GZSink(ttp));
+                gzoutput->write(fulldata);
             }
             
             REQUIRE(gzpath.is_file());
@@ -55,8 +55,8 @@ namespace {
             {
                 /// nest scope again -- same deal, but like, for GZSource readback
                 /// NB. GZIO's `full_data()` is the pathological base class version
-                std::unique_ptr<GZSource> gzreadback(new GZSource(ttp));
-                readback = gzreadback->full_data();
+                std::unique_ptr<GZSource> gzinput(new GZSource(ttp));
+                readback = gzinput->full_data();
             }
             
             CHECK(readback.size() == fulldata.size());
