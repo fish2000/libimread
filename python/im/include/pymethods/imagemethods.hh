@@ -105,8 +105,8 @@ namespace py {
                         /// before setting the mem. 
                         if (PyLong_Check(py_fill) || PyInt_Check(py_fill)) {
                             Py_ssize_t fillval = PyInt_AsSsize_t(py_fill);
-                            // fill = detail::clamp(fillval, 0L, std::pow(2L, unbits));
-                            fill = detail::clamp(fillval, 0L, 255L);
+                            // fill = py::detail::clamp(fillval, 0L, std::pow(2L, unbits));
+                            fill = py::detail::clamp(fillval, 0L, 255L);
                         }
                     }
                 }

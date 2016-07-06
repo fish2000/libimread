@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 #include <Python.h>
 #include <structmember.h>
 
@@ -42,6 +44,19 @@ namespace std {
 namespace py {
     
     namespace ext {
+        
+        namespace detail {
+            
+            template <typename T>
+            std::string tohex(T i) {
+                std::stringstream stream;
+                stream << "0x" 
+                       << std::setfill('0') << std::setw(sizeof(T) * 2)
+                       << std::hex << i;
+                return stream.str();
+            }
+            
+        }
         
         using im::byte;
         using im::options_map;
@@ -298,9 +313,7 @@ namespace py {
             std::string repr_string() {
                 /// start with the BatchModel typestring:
                 std::string out(BatchModel::typestring());
-                
-                /// affix the memory address:
-                out += "<@" + std::to_string((long)this) + ">(\n";
+                out += "(\n";
                 
                 /// add the string representation of each object:
                 std::for_each(internal.begin(),
@@ -312,8 +325,8 @@ namespace py {
                     
                     /// stringify + concatenate --
                     /// NB: the Python API is soooo not const-correct:
-                    out += "  " + std::string(const_cast<char const*>(
-                                              PyString_AS_STRING(repr)));
+                    out += "    " + std::string(const_cast<char const*>(
+                                                PyString_AS_STRING(repr)));
                     
                     /// conditionally append a comma:
                     out += pyobj == internal.back() ? "\n" : ",\n";
@@ -323,7 +336,10 @@ namespace py {
                 });
                 
                 /// festoon the end with an indication of the vector length:
-                out += ")[" + std::to_string(internal.size()) + "]";
+                out += ")[" + std::to_string(internal.size()) + "] @ <";
+                
+                /// affix the hexadecimal memory address:
+                out += detail::tohex((std::ptrdiff_t)this) + ">";
                 
                 /// ... and return:
                 return out;
