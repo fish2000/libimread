@@ -23,12 +23,21 @@ namespace py {
         namespace batch {
             
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
-                return py::convert(new BatchModel());
+                BatchModel* out = new BatchModel();
+                return py::convert(out);
             }
             
             int init(PyObject* self, PyObject* args, PyObject* kwargs) {
-                // BatchModel* batch = reinterpret_cast<BatchModel*>(self);
-                return 0;
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                bool did_extend = false;
+                switch (PyTuple_GET_SIZE(args)) {
+                    case 0: return 0;
+                    case 1:
+                    default:
+                        did_extend = batch->extend(args);
+                }
+                
+                return did_extend ? 0 : -1;
             }
             
             /// __repr__ implementation
@@ -201,6 +210,26 @@ namespace py {
                 return py::None();
             }
             
+            ///////////////////////////////// GETSETTERS /////////////////////////////////
+            
+            PyObject*    get_width(PyObject* self, void* closure) {
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                Py_ssize_t out = batch->width();
+                if (out != -1) {
+                    return py::convert(out);
+                }
+                return nullptr; /// propagate error
+            }
+            
+            PyObject*    get_height(PyObject* self, void* closure) {
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                Py_ssize_t out = batch->height();
+                if (out != -1) {
+                    return py::convert(out);
+                }
+                return nullptr; /// propagate error
+            }
+            
             namespace methods {
                 
                 PySequenceMethods* sequence() {
@@ -217,24 +246,24 @@ namespace py {
                     return &sequencemethods;
                 }
                 
-                // PyGetSetDef* getset() {
-                //     static PyGetSetDef getsets[] = {
-                //         {
-                //             (char*)"__array_interface__",
-                //                 (getter)py::ext::buffer::get_array_interface<BufferType, PythonBufferType>,
-                //                 nullptr,
-                //                 (char*)"NumPy array interface (Python API) -> dict\n",
-                //                 nullptr },
-                //         {
-                //             (char*)"__array_struct__",
-                //                 (getter)py::ext::buffer::get_array_struct<BufferType, PythonBufferType>,
-                //                 nullptr,
-                //                 (char*)"NumPy array interface (C-level API) -> PyCObject\n",
-                //                 nullptr },
-                //         { nullptr, nullptr, nullptr, nullptr, nullptr }
-                //     };
-                //     return getsets;
-                // }
+                PyGetSetDef* getset() {
+                    static PyGetSetDef getsets[] = {
+                        {
+                            (char*)"width",
+                                (getter)py::ext::batch::get_width,
+                                nullptr,
+                                (char*)"Batch width -> int\n",
+                                nullptr },
+                        {
+                            (char*)"height",
+                                (getter)py::ext::batch::get_height,
+                                nullptr,
+                                (char*)"Batch height -> int\n",
+                                nullptr },
+                        { nullptr, nullptr, nullptr, nullptr, nullptr }
+                    };
+                    return getsets;
+                }
                 
                 PyMethodDef* basic() {
                     static PyMethodDef basics[] = {

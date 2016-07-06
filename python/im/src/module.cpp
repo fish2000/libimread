@@ -350,7 +350,7 @@ PyTypeObject BatchModel_Type = {
     0,                                                                  /* tp_iternext */
     py::ext::batch::methods::basic(),                                   /* tp_methods */
     0,                                                                  /* tp_members */
-    0,                                                                  /* tp_getset */
+    py::ext::batch::methods::getset(),                                  /* tp_getset */
     0,                                                                  /* tp_base */
     0,                                                                  /* tp_dict */
     0,                                                                  /* tp_descr_get */

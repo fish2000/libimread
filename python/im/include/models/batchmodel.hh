@@ -45,6 +45,8 @@ namespace py {
         
         using im::byte;
         using im::options_map;
+        using sizevec_t = std::vector<std::size_t>;
+        using pysizevec_t = std::vector<Py_ssize_t>;
         using objectvec_t = std::vector<PyObject*>;
         using objecthasher_t = hash::rehasher<PyObject*>;
         
@@ -53,18 +55,20 @@ namespace py {
             static PyTypeObject* type_ptr() { return &BatchModel_Type; }
             
             void* operator new(std::size_t newsize) {
-                PyTypeObject* type = type_ptr();
-                return reinterpret_cast<void*>(type->tp_alloc(type, 0));
+                void* out = reinterpret_cast<void*>(PyObject_GC_New(BatchModel, type_ptr()));
+                PyObject_GC_Track(reinterpret_cast<PyObject*>(out));
+                return out;
             }
             
             void operator delete(void* voidself) {
                 BatchModel* self = reinterpret_cast<BatchModel*>(voidself);
                 PyObject* pyself = py::convert(self);
+                PyObject_GC_UnTrack(voidself);
                 if (self->weakrefs != nullptr) {
                     PyObject_ClearWeakRefs(pyself);
                 }
                 self->cleanup();
-                type_ptr()->tp_free(pyself);
+                PyObject_GC_Del(voidself); // type_ptr()->tp_free(pyself);
             }
             
             struct Tag {
@@ -179,12 +183,7 @@ namespace py {
             }
             
             int vacay(visitproc visit, void* arg) {
-                /// NB. this has to clear the internal vector (maybe?!) ...
-                /// and as such the lambda below has to basically, like,
-                /// just reference-capture stuff just like in general, OK:
-                // std::for_each(internal.begin(),
-                //               internal.end(),
-                //           [&](PyObject* pyobj) { Py_VISIT(pyobj); });
+                /// NB. this has to visit the internal vector (maybe?!):
                 for (PyObject* item : internal) {
                     Py_VISIT(item);
                 }
@@ -360,6 +359,78 @@ namespace py {
                 PyObject* out = PyList_AsTuple(list);
                 Py_DECREF(list);
                 return out;
+            }
+            
+            #define NUMBER_FROM_PYOBJECT(obj, attribute)                                            \
+                if (PyObject_HasAttrString(obj, #attribute) == 1) {                                 \
+                    PyObject* pynumber = PyObject_GetAttrString(obj, #attribute);                   \
+                    if (pynumber != nullptr) {                                                      \
+                        Py_ssize_t out = PyInt_AsSsize_t(pynumber);                                 \
+                        Py_DECREF(pynumber);                                                        \
+                        return out;                                                                 \
+                    }                                                                               \
+                }
+            
+            static Py_ssize_t width_of(PyObject* obj) {
+                NUMBER_FROM_PYOBJECT(obj, width);
+                NUMBER_FROM_PYOBJECT(obj, w);
+                NUMBER_FROM_PYOBJECT(obj, Width);
+                NUMBER_FROM_PYOBJECT(obj, W);
+                return 0;
+            }
+            
+            static Py_ssize_t height_of(PyObject* obj) {
+                NUMBER_FROM_PYOBJECT(obj, height);
+                NUMBER_FROM_PYOBJECT(obj, h);
+                NUMBER_FROM_PYOBJECT(obj, Height);
+                NUMBER_FROM_PYOBJECT(obj, H);
+                return 0;
+            }
+            
+            #undef NUMBER_FROM_PYOBJECT
+            
+            Py_ssize_t width() {
+                if (internal.empty()) {
+                    return 0;
+                } else if (internal.size() == 1) {
+                    return BatchModel::width_of(internal.front());
+                }
+                pysizevec_t widths;
+                Py_ssize_t width_front = BatchModel::width_of(internal.front());
+                std::for_each(internal.begin(),
+                              internal.end(),
+                    [&widths](PyObject* pyobj) { widths.push_back(BatchModel::width_of(pyobj)); });
+                bool wat = std::all_of(widths.cbegin(),
+                                       widths.cend(),
+                         [width_front](Py_ssize_t widthval) { return width_front == widthval; });
+                if (!wat) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "width(): mismatch");
+                    return -1;
+                }
+                return width_front;
+            }
+            
+            Py_ssize_t height() {
+                if (internal.empty()) {
+                    return 0;
+                } else if (internal.size() == 1) {
+                    return BatchModel::height_of(internal.front());
+                }
+                pysizevec_t heights;
+                Py_ssize_t height_front = BatchModel::height_of(internal.front());
+                std::for_each(internal.begin(),
+                              internal.end(),
+                   [&heights](PyObject* pyobj) { heights.push_back(BatchModel::height_of(pyobj)); });
+                bool wat = std::all_of(heights.cbegin(),
+                                       heights.cend(),
+                        [height_front](Py_ssize_t heightval) { return height_front == heightval; });
+                if (!wat) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "height(): mismatch");
+                    return -1;
+                }
+                return height_front;
             }
             
             options_map readopts() {
