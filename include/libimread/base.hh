@@ -35,7 +35,7 @@ namespace im {
         #endif
         
         __attribute__((__always_inline__))
-        bool littleendian(void) {
+        inline bool littleendian(void) {
             #if defined(__BIG_ENDIAN__)
                 return false;
             #elif defined(__LITTLE_ENDIAN__)
@@ -49,7 +49,7 @@ namespace im {
         
         /// Return true if the architecture we are running on is big endian
         __attribute__((__always_inline__))
-        bool bigendian(void) {
+        inline bool bigendian(void) {
             return !littleendian();
         }
         
