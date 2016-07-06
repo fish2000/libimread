@@ -334,7 +334,7 @@ PyTypeObject BatchModel_Type = {
     0,                                                                  /* tp_as_number */
     py::ext::batch::methods::sequence(),                                /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
-    0,/*(hashfunc)py::ext::batch::hash,*/                               /* tp_hash */
+    (hashfunc)py::ext::batch::hash,                                     /* tp_hash */
     0,                                                                  /* tp_call */
     (reprfunc)py::ext::batch::str,                                      /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */

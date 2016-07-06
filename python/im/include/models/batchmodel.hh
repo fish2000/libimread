@@ -92,16 +92,13 @@ namespace py {
                 :weakrefs(nullptr)
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
-                {
-                    internal.clear();
-                }
+                {}
             
             BatchModel(BatchModel const& other)
                 :weakrefs(nullptr)
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
-                    internal.clear();
                     std::transform(other.internal.begin(),
                                    other.internal.end(),
                                    std::back_inserter(internal),
@@ -126,7 +123,6 @@ namespace py {
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
-                    internal.clear();
                     std::transform(basis.internal.begin(),
                                    basis.internal.end(),
                                    std::back_inserter(internal),
@@ -144,7 +140,6 @@ namespace py {
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
-                    internal.clear();
                     for (int idx = 0; idx < repeat; ++idx) {
                         std::transform(basis.internal.begin(),
                                        basis.internal.end(),
@@ -199,7 +194,8 @@ namespace py {
             }
             
             long __hash__() {
-                /// Objects held within a Batch must be Python-hashable
+                /// Objects held within a Batch must be Python-hashable;
+                /// Also the GIL must be held to use std::hash<PyObject*>
                 return std::accumulate(internal.begin(),
                                        internal.end(),
                                        internal.size() + (long)this, /// seed
