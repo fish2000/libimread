@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
@@ -30,11 +31,68 @@ namespace py {
             int init(PyObject* self, PyObject* args, PyObject* kwargs) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 bool did_extend = false;
+                
+                /*
+                PyObject* arguments = PyTuple_New(0); /// FAKE
+                PyObject* py_is_blob = nullptr;
+                PyObject* options = nullptr;
+                PyObject* file = nullptr;
+                Py_buffer view;
+                options_map opts;
+                char const* keywords[] = { "source", "file", "is_blob", "options", nullptr };
+                bool is_blob = false;
+                bool did_load = false;
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    arguments, kwargs, "|s*OOO:__init__", const_cast<char**>(keywords),
+                    &view,                      /// "view", buffer with file path or image data
+                    &file,                      /// "file", possible file-like object
+                    &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
+                    &options))                  /// "options", read-options dict
+                {
+                    Py_DECREF(arguments);
+                    return -1;
+                }
+                
+                /// test is necessary, the next line chokes on nullptr:
+                is_blob = py::options::truth(py_is_blob);
+                opts = py::options::parse(options);
+                Py_DECREF(arguments);
+                
+                if (file) {
+                    /// load as file-like Python object
+                    did_load = batch->loadfilelike(file, opts);
+                } else if (is_blob) {
+                    /// load as blob -- pass the buffer along
+                    did_load = batch->loadblob(view, opts);
+                } else {
+                    /// load as file -- pass the buffer along
+                    did_load = batch->load(view, opts);
+                }
+                
+                if (!did_load) {
+                    /// If this is true, PyErr has already been set
+                    PyErr_SetString(PyExc_IOError,
+                        "Image batch binary load failed");
+                        return -1;
+                }
+                
+                /// store the read options dict
+                Py_CLEAR(batch->readoptDict);
+                batch->readoptDict = options ? py::object(options) : PyDict_New();
+                
+                /// ... and now OK, store an empty write options dict
+                Py_CLEAR(batch->writeoptDict);
+                batch->writeoptDict = PyDict_New();
+                */
+                
+                /// extend batch with positional arguments
                 switch (PyTuple_GET_SIZE(args)) {
                     case 0: return 0;
                     case 1:
-                    default:
+                    default: {
                         did_extend = batch->extend(args);
+                    }
                 }
                 
                 return did_extend ? 0 : -1;
@@ -62,8 +120,8 @@ namespace py {
             int compare(PyObject* pylhs, PyObject* pyrhs) {
                 BatchModel* batch0 = reinterpret_cast<BatchModel*>(pylhs);
                 BatchModel* batch1 = reinterpret_cast<BatchModel*>(pyrhs);
-                PyObject* lhs_compare = py::convert(batch0->__len__());
-                PyObject* rhs_compare = py::convert(batch1->__len__());
+                PyObject* lhs_compare = batch0->as_pytuple();
+                PyObject* rhs_compare = batch1->as_pytuple();
                 int out = PyObject_Compare(lhs_compare, rhs_compare);
                 Py_DECREF(lhs_compare);
                 Py_DECREF(rhs_compare);
@@ -110,7 +168,13 @@ namespace py {
             /// DEALLOCATE
             void dealloc(PyObject* self) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                std::cerr << std::endl
+                          << "ABOUT TO DEALLOCATE A BATCH..." << std::endl
+                          << batch->repr() << std::endl
+                          << std::endl;
                 delete batch;
+                std::cerr << std::endl
+                          << "BATCH DEALLOCATED" << std::endl;
             }
             
             /// CLEAR

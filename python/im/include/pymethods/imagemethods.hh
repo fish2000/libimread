@@ -524,7 +524,7 @@ namespace py {
                 if (!use_file) {
                     if (as_blob) {
                         py::gil::release nogil;
-                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"), false); /// boolean cleanup on scope exit
+                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"), false);
                         dststr = std::string(tf.filepath.make_absolute().str());
                     } else {
                         /// save as file -- extract the filename from the buffer

@@ -55,20 +55,24 @@ namespace py {
             static PyTypeObject* type_ptr() { return &BatchModel_Type; }
             
             void* operator new(std::size_t newsize) {
-                void* out = reinterpret_cast<void*>(PyObject_GC_New(BatchModel, type_ptr()));
-                PyObject_GC_Track(reinterpret_cast<PyObject*>(out));
+                void* out = reinterpret_cast<void*>(
+                    PyObject_GC_New(BatchModel, type_ptr()));
+                PyObject_GC_Track(
+                    reinterpret_cast<PyObject*>(out));
                 return out;
+                // PyTypeObject* type = type_ptr();
+                // return reinterpret_cast<void*>(type->tp_alloc(type, 0));
             }
             
             void operator delete(void* voidself) {
                 BatchModel* self = reinterpret_cast<BatchModel*>(voidself);
-                PyObject* pyself = py::convert(self);
                 PyObject_GC_UnTrack(voidself);
                 if (self->weakrefs != nullptr) {
-                    PyObject_ClearWeakRefs(pyself);
+                    PyObject_ClearWeakRefs(py::convert(self));
                 }
                 self->cleanup();
-                PyObject_GC_Del(voidself); // type_ptr()->tp_free(pyself);
+                PyObject_GC_Del(voidself);
+                // type_ptr()->tp_free(py::convert(self));
             }
             
             struct Tag {
@@ -87,8 +91,8 @@ namespace py {
             BatchModel()
                 :weakrefs(nullptr)
                 ,internal{}
-                ,readoptDict(nullptr)
-                ,writeoptDict(nullptr)
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
                 {}
             
             BatchModel(BatchModel const& other)
@@ -196,7 +200,7 @@ namespace py {
                 /// Objects held within a Batch must be Python-hashable
                 return std::accumulate(internal.begin(),
                                        internal.end(),
-                                       internal.size(), /// seed
+                                       internal.size() + (long)this, /// seed
                                        py::ext::objecthasher_t());
             }
             
@@ -220,18 +224,23 @@ namespace py {
                 return py::convert(internal[sidx]);
             }
             
-            PyObject* __repr__() {
-                std::string out = std::string(BatchModel::typestring()) + "(\n";
-                std::for_each(internal.begin(),
-                              internal.end(),
-                       [&out](PyObject* pyobj) {
+            std::string repr() {
+                std::string out = std::string(BatchModel::typestring()) + "<@";
+                out += std::to_string((long)this) + ">(\n";
+                std::for_each(internal.begin(), internal.end(),
+                          [&](PyObject* pyobj) {
                     PyObject* repr = PyObject_Repr(pyobj);
-                    out += "\t" + std::string(const_cast<char const*>(
-                                              PyString_AS_STRING(repr))) + ",\n";
+                    out += "  " + std::string(const_cast<char const*>(
+                                              PyString_AS_STRING(repr)));
+                    out += pyobj == internal.back() ? "\n" : ",\n";
                     Py_DECREF(repr);
                 });
-                out += ")";
-                return py::convert(out);
+                out += ")[" + std::to_string(internal.size()) + "]";
+                return out;
+            }
+            
+            PyObject* __repr__() {
+                return py::convert(repr());
             }
             
             bool append(PyObject* obj) {
@@ -251,30 +260,27 @@ namespace py {
             }
             
             bool extend(PyObject* iterable) {
-                if (!PyIter_Check(iterable)) {
+                if (!PySequence_Check(iterable)) {
                     PyErr_SetString(PyExc_ValueError,
-                        "extend(): iterable required");
+                        "extend(): iterable sequence required");
                     return false;
                 }
-                PyObject* iterator = PyObject_GetIter(iterable);
-                if (iterator == nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "extend(): iteration failed");
-                    return false;
-                }
-                PyObject* item;
-                while ((item = PyIter_Next(iterator))) {
+                PyObject* sequence = PySequence_Fast(iterable,
+                    "extend(): sequence extraction failed");
+                int idx = 0, len = PySequence_Fast_GET_SIZE(sequence);
+                for (; idx < len; idx++) {
+                    /// PySequence_Fast_GET_ITEM() yields a borrowed reference...
+                    PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
                     if (!PyObject_CheckBuffer(item)) {
                         PyErr_SetString(PyExc_ValueError,
                             "extend(): unbuffered item found");
-                        Py_DECREF(item);
-                        Py_DECREF(iterator);
+                        Py_DECREF(sequence);
                         return false;
                     }
                     internal.push_back(item);
-                    // Py_DECREF(item);
+                    Py_INCREF(item); /// ... hence this incref
                 }
-                Py_DECREF(iterator);
+                Py_DECREF(sequence);
                 return !PyErr_Occurred();
             }
             
@@ -440,6 +446,15 @@ namespace py {
             options_map writeopts() {
                 return py::options::parse(writeoptDict);
             }
+            
+            bool load(char const* source, options_map const& opts) { return true; }
+            bool load(Py_buffer const& view, options_map const& opts) { return true; }
+            bool loadfilelike(PyObject* file, options_map const& opts) { return true; }
+            bool loadblob(Py_buffer const& view, options_map const& opts) { return true; }
+            
+            bool save(char const* destination, options_map const& opts) { return true; }
+            bool savefilelike(PyObject* file, options_map const& opts) { return true; }
+            PyObject* saveblob(options_map const& opts) { return py::None(); }
             
             static constexpr Py_ssize_t typeflags() {
                 return Py_TPFLAGS_DEFAULT         |

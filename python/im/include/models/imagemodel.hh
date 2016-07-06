@@ -293,7 +293,8 @@ namespace py {
                 }
             
             /// reinterpret, depointerize, copy-construct
-            explicit ImageModelBase(PyObject* other, typename Tag::FromImage tag = typename Tag::FromImage{})
+            explicit ImageModelBase(PyObject* other,
+                                    typename Tag::FromImage tag = typename Tag::FromImage{})
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(other))
                 {}
             
@@ -309,12 +310,14 @@ namespace py {
                 {}
             
             /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
-            explicit ImageModelBase(PyObject* buffer, typename Tag::FromBuffer)
+            explicit ImageModelBase(PyObject* buffer,
+                                    typename Tag::FromBuffer)
                 :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
                 {}
             
             /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
-            explicit ImageModelBase(PyObject* source, int zidx, typename Tag::FromImagePlane = typename Tag::FromImagePlane{})
+            explicit ImageModelBase(PyObject* source, int zidx,
+                                    typename Tag::FromImagePlane = typename Tag::FromImagePlane{})
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(source), zidx)
                 {}
             
@@ -424,7 +427,7 @@ namespace py {
                 long out;
                 {
                     py::gil::release nogil;
-                    auto bithash = blockhash::blockhash_quick(*image);
+                    auto bithash = blockhash::blockhash(*image);
                     out = static_cast<long>(bithash.to_ulong());
                 }
                 return out;

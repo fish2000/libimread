@@ -37,6 +37,9 @@ class BaseCase(TestCase):
         # store local references to im.Image and im.Array
         self.imagetypes = ImageTypeTuple(im.Image, im.Array)
         
+        # store local reference to im.Batch
+        self.Batch = im.Batch
+        
 
 def main(discover=False):
     import nose2
