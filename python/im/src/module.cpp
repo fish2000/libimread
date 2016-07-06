@@ -63,6 +63,7 @@ using py::ext::ArrayModel;
 using py::ext::ImageBufferModel;
 using py::ext::ArrayBufferModel;
 using py::ext::BatchModel;
+using py::ext::BatchIterator;
 
 PyTypeObject BufferModel_Type = {
     PyObject_HEAD_INIT(nullptr)
@@ -346,7 +347,7 @@ PyTypeObject BatchModel_Type = {
     (inquiry)py::ext::batch::clear,                                     /* tp_clear */
     0,                                                                  /* tp_richcompare */
     py::detail::offset(&BatchModel::weakrefs),                          /* tp_weaklistoffset */
-    0,                                                                  /* tp_iter */
+    (getiterfunc)py::ext::batch::tp_iter,                               /* tp_iter */
     0,                                                                  /* tp_iternext */
     py::ext::batch::methods::basic(),                                   /* tp_methods */
     0,                                                                  /* tp_members */
@@ -359,6 +360,57 @@ PyTypeObject BatchModel_Type = {
     (initproc)py::ext::batch::init,                                     /* tp_init */
     0,                                                                  /* tp_alloc */
     py::ext::batch::createnew,                                          /* tp_new */
+    0,                                                                  /* tp_free */
+    0,                                                                  /* tp_is_gc */
+    0,                                                                  /* tp_bases */
+    0,                                                                  /* tp_mro */
+    0,                                                                  /* tp_cache */
+    0,                                                                  /* tp_subclasses */
+    0,                                                                  /* tp_weaklist */
+    0,                                                                  /* tp_del */
+    0,                                                                  /* tp_version_tag */
+};
+
+PyTypeObject BatchIterator_Type = {
+    PyObject_HEAD_INIT(nullptr)
+    0,                                                                  /* ob_size */
+    py::ext::BatchIterator::typestring(),                               /* tp_name */
+    sizeof(BatchIterator),                                              /* tp_basicsize */
+    0,                                                                  /* tp_itemsize */
+    (destructor)py::ext::batch::iterator::dealloc,                      /* tp_dealloc */
+    0,                                                                  /* tp_print */
+    0,                                                                  /* tp_getattr */
+    0,                                                                  /* tp_setattr */
+    0,                                                                  /* tp_compare */
+    0,                                                                  /* tp_repr */
+    0,                                                                  /* tp_as_number */
+    0,                                                                  /* tp_as_sequence */
+    0,                                                                  /* tp_as_mapping */
+    0,                                                                  /* tp_hash */
+    0,                                                                  /* tp_call */
+    0,                                                                  /* tp_str */
+    (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
+    (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
+    0,                                                                  /* tp_as_buffer */
+    py::ext::BatchIterator::typeflags(),                                /* tp_flags */
+    py::ext::BatchIterator::typedoc(),                                  /* tp_doc */
+    0,                                                                  /* tp_traverse */
+    0,                                                                  /* tp_clear */
+    0,                                                                  /* tp_richcompare */
+    0,                                                                  /* tp_weaklistoffset */
+    (getiterfunc)py::ext::batch::iterator::tp_iter,                     /* tp_iter */
+    (iternextfunc)py::ext::batch::iterator::tp_iternext,                /* tp_iternext */
+    py::ext::batch::iterator::methods::basic(),                         /* tp_methods */
+    0,                                                                  /* tp_members */
+    py::ext::batch::iterator::methods::getset(),                        /* tp_getset */
+    0,                                                                  /* tp_base */
+    0,                                                                  /* tp_dict */
+    0,                                                                  /* tp_descr_get */
+    0,                                                                  /* tp_descr_set */
+    0,                                                                  /* tp_dictoffset */
+    (initproc)py::ext::batch::iterator::init,                           /* tp_init */
+    0,                                                                  /* tp_alloc */
+    py::ext::batch::iterator::createnew,                                /* tp_new */
     0,                                                                  /* tp_free */
     0,                                                                  /* tp_is_gc */
     0,                                                                  /* tp_bases */
@@ -426,6 +478,11 @@ static PyMethodDef module_functions[] = {
             (PyCFunction)py::functions::batch_check,
             METH_VARARGS,
             "Boolean function to test for im.Batch instances" },
+    {
+        "batchiterator_check",
+            (PyCFunction)py::functions::batchiterator_check,
+            METH_VARARGS,
+            "Boolean function to test for im.Batch.Iterator instances" },
     { nullptr, nullptr, 0, nullptr }
 };
 
@@ -461,24 +518,31 @@ namespace {
         if (_import_array() < 0)                      { return false; }
         
         /// Manually amend our declared types, as needed:
-        /// -- Specify that im.ImageBuffer subclasses im.Buffer
+        /// -- Specify that im.Image.Buffer and im.Array.Buffer are
+        /// subclasses of im.Buffer
         ImageBufferModel_Type.tp_base = &BufferModel_Type;
         ArrayBufferModel_Type.tp_base = &BufferModel_Type;
         
-        /// -- Prepare im.Image.__dict__ for our customizations
+        /// -- Prepare the tp_dict of types that have subtype objects:
+        /// im.Image (py::ext::ImageModel)
         ImageModel_Type.tp_dict = PyDict_New();
         if (!ImageModel_Type.tp_dict)                 { return false; }
+        /// im.Array (py::ext::ArrayModel)
         ArrayModel_Type.tp_dict = PyDict_New();
         if (!ArrayModel_Type.tp_dict)                 { return false; }
+        /// im.Batch (py::ext::BatchModel)
+        BatchModel_Type.tp_dict = PyDict_New();
+        if (!BatchModel_Type.tp_dict)                 { return false; }
         
         /// Check readiness of our extension type declarations (?)
         if (PyType_Ready(&HybridImageModel_Type) < 0) { return false; }
         if (PyType_Ready(&BufferModel_Type) < 0)      { return false; }
-        if (PyType_Ready(&BatchModel_Type) < 0)       { return false; }
         if (PyType_Ready(&ImageModel_Type) < 0)       { return false; }
         if (PyType_Ready(&ImageBufferModel_Type) < 0) { return false; }
         if (PyType_Ready(&ArrayModel_Type) < 0)       { return false; }
         if (PyType_Ready(&ArrayBufferModel_Type) < 0) { return false; }
+        if (PyType_Ready(&BatchModel_Type) < 0)       { return false; }
+        if (PyType_Ready(&BatchIterator_Type) < 0)    { return false; }
         
         /// Get the path of the extension module --
         /// via dladdr() on the module init function's address
@@ -505,12 +569,6 @@ namespace {
         PyModule_AddObject(module,
             "Buffer",
             (PyObject*)&BufferModel_Type);
-        
-        /// Add the BatchModel type object to the module
-        Py_INCREF(&BatchModel_Type);
-        PyModule_AddObject(module,
-            "Batch",
-            (PyObject*)&BatchModel_Type);
         
         /// Add the ImageBufferModel type object directly to im.Image.__dict__,
         /// such that ImageBuffer presents as an inner class of im.Image, e.g.
@@ -539,6 +597,18 @@ namespace {
         PyModule_AddObject(module,
             "Array",
             (PyObject*)&ArrayModel_Type);
+        
+        /// Add the BatchIterator type to the BatchModel's tp_dict --
+        Py_INCREF(&BatchIterator_Type);
+        PyDict_SetItemString(BatchModel_Type.tp_dict,
+            "Iterator",
+            (PyObject*)&BatchIterator_Type);
+        
+        /// -- and then add the BatchModel type object to the module.
+        Py_INCREF(&BatchModel_Type);
+        PyModule_AddObject(module,
+            "Batch",
+            (PyObject*)&BatchModel_Type);
         
         /// Get the master list of image format suffixes,
         /// newly formatted as a Python tuple of strings,

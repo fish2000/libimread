@@ -19,6 +19,7 @@ namespace py {
         
         /// probably don't need this next bit:
         using py::ext::BatchModel;
+        using BatchIterator = BatchModel::BatchIterator;
         
     }
     

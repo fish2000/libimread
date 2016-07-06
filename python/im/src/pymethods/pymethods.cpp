@@ -44,5 +44,11 @@ namespace py {
             return py::boolean(BatchModel_Check(evaluee));
         }
         
+        PyObject* batchiterator_check(PyObject* self, PyObject* args) {
+            PyObject* evaluee;
+            if (!PyArg_ParseTuple(args, "O", &evaluee)) { return nullptr; }
+            return py::boolean(BatchIterator_Check(evaluee));
+        }
+        
     }
 }

@@ -19,6 +19,7 @@ namespace py {
         PyObject* array_check(PyObject* self, PyObject* args);
         PyObject* arraybuffer_check(PyObject* self, PyObject* args);
         PyObject* batch_check(PyObject* self, PyObject* args);
+        PyObject* batchiterator_check(PyObject* self, PyObject* args);
         
     }
     

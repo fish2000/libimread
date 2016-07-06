@@ -52,6 +52,74 @@ namespace py {
         
         struct BatchModel : public ModelBase {
             
+            struct BatchIterator : public ModelBase {
+                
+                using iterator_t = typename objectvec_t::iterator;
+                using citerator_t = typename objectvec_t::const_iterator;
+                
+                static PyTypeObject* type_ptr() { return &BatchIterator_Type; }
+                
+                void* operator new(std::size_t newsize) {
+                    PyTypeObject* type = type_ptr();
+                    return reinterpret_cast<void*>(type->tp_alloc(type, 0));
+                }
+                
+                void operator delete(void* voidself) {
+                    BatchIterator* self = reinterpret_cast<BatchIterator*>(voidself);
+                    type_ptr()->tp_free(py::convert(self));
+                }
+                
+                PyObject_HEAD
+                // iterator_t begin;
+                // iterator_t end;
+                citerator_t cbegin;
+                citerator_t cend;
+                
+                BatchIterator() {}
+                
+                BatchIterator(BatchIterator&& other) noexcept
+                    // :begin(std::move(other.begin))
+                    // ,end(std::move(other.end))
+                    :cbegin(std::move(other.cbegin))
+                    ,cend(std::move(other.cend))
+                    {}
+                
+                explicit BatchIterator(BatchModel const& batch) {
+                    // begin = std::begin(batch.internal);
+                    // end = std::end(batch.internal);
+                    cbegin = std::cbegin(batch.internal);
+                    cend = std::cend(batch.internal);
+                }
+                
+                explicit BatchIterator(PyObject* batch)
+                    :BatchIterator(*reinterpret_cast<BatchModel*>(batch))
+                    {}
+                
+                PyObject* next() {
+                    PyObject* out = cbegin != cend ? py::object(*cbegin++) : nullptr;
+                    return out;
+                }
+                
+                Py_ssize_t length() {
+                    return static_cast<Py_ssize_t>(std::abs(cbegin - cend));
+                }
+                
+                Py_ssize_t remaining() {
+                    return static_cast<Py_ssize_t>(cend - cbegin);
+                }
+                
+                static constexpr Py_ssize_t typeflags() {
+                    return Py_TPFLAGS_DEFAULT         |
+                           Py_TPFLAGS_BASETYPE;
+                }
+                
+                static char const* typestring() { return "im.Batch.Iterator"; }
+                static char const* typedoc() { 
+                    return "Iterator class for im.Batch\n";
+                }
+                
+            }; /* BatchIterator */
+            
             static PyTypeObject* type_ptr() { return &BatchModel_Type; }
             
             void* operator new(std::size_t newsize) {
@@ -207,13 +275,23 @@ namespace py {
             }
             
             PyObject* __index__(Py_ssize_t idx) {
+                if (idx >= internal.size() || idx < 0) {
+                    PyErr_SetString(PyExc_IndexError,
+                        "__index__(): out of range");
+                    return nullptr;
+                }
                 return py::convert(internal[static_cast<std::size_t>(idx)]);
             }
             
             PyObject* __index__(Py_ssize_t idx, PyObject* value) {
+                if (idx >= internal.size() || idx < 0) {
+                    PyErr_SetString(PyExc_IndexError,
+                        "__index__(): out of range");
+                    return nullptr;
+                }
                 if (!PyObject_CheckBuffer(value)) {
                     PyErr_SetString(PyExc_ValueError,
-                        "__index__(): can't assign with unbuffered object");
+                        "__index__(): can't assign unbuffered object");
                     return nullptr;
                 }
                 std::size_t sidx = static_cast<std::size_t>(idx);
@@ -272,6 +350,7 @@ namespace py {
             }
             
             int count(PyObject* obj) {
+                py::gil::release nogil;
                 return std::count(internal.begin(),
                                   internal.end(), obj);
             }
@@ -364,6 +443,7 @@ namespace py {
             
             void reverse() {
                 /// in-place reverse
+                py::gil::release nogil;
                 std::reverse(internal.begin(), internal.end());
             }
             

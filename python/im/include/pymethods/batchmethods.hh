@@ -22,6 +22,101 @@ namespace py {
         
         namespace batch {
             
+            namespace iterator {
+                
+                PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
+                    return py::convert(new BatchIterator());
+                }
+                
+                int init(PyObject* self, PyObject* args, PyObject* kwargs) {
+                    // BatchIterator* iterator = reinterpret_cast<BatchIterator*>(self);
+                    return 0;
+                }
+                
+                /// DEALLOCATE
+                void dealloc(PyObject* self) {
+                    BatchIterator* iterator = reinterpret_cast<BatchIterator*>(self);
+                    delete iterator;
+                }
+                
+                PyObject* next(PyObject* self, PyObject*) {
+                    BatchIterator* iterator = reinterpret_cast<BatchIterator*>(self);
+                    return iterator->next();
+                }
+                
+                PyObject* tp_iter(PyObject* self) {
+                    return self;
+                }
+                
+                PyObject* tp_iternext(PyObject* self) {
+                    BatchIterator* iterator = reinterpret_cast<BatchIterator*>(self);
+                    return iterator->next();
+                }
+                
+                ///////////////////////////////// GETSETTERS /////////////////////////////////
+                
+                PyObject*    get_length(PyObject* self, void* closure) {
+                    BatchIterator* iterator = reinterpret_cast<BatchIterator*>(self);
+                    Py_ssize_t out = iterator->length();
+                    return py::convert(out);
+                }
+                
+                PyObject*    get_remaining(PyObject* self, void* closure) {
+                    BatchIterator* iterator = reinterpret_cast<BatchIterator*>(self);
+                    Py_ssize_t out = iterator->remaining();
+                    return py::convert(out);
+                }
+                
+                namespace methods {
+                    
+                    PyGetSetDef* getset() {
+                        static PyGetSetDef getsets[] = {
+                            {
+                                (char*)"length",
+                                    (getter)py::ext::batch::iterator::get_length,
+                                    nullptr,
+                                    (char*)"Iterations -> int\n",
+                                    nullptr },
+                            {
+                                (char*)"remaining",
+                                    (getter)py::ext::batch::iterator::get_remaining,
+                                    nullptr,
+                                    (char*)"Remaining iterations -> int\n",
+                                    nullptr },
+                            { nullptr, nullptr, nullptr, nullptr, nullptr }
+                        };
+                        return getsets;
+                    }
+                    
+                    PyMethodDef* basic() {
+                        static PyMethodDef basics[] = {
+                            {
+                                "check",
+                                    (PyCFunction)py::ext::subtypecheck,
+                                    METH_O | METH_CLASS,
+                                    "Batch.Iterator.check(putative)\n"
+                                    "\t-> Check that an instance is of this type (or a subtype)\n" },
+                            {
+                                "typecheck",
+                                    (PyCFunction)py::ext::typecheck,
+                                    METH_O | METH_CLASS,
+                                    "Batch.Iterator.typecheck(putative)\n"
+                                    "\t-> Check that an instance is strictly an instance of this type\n" },
+                            {
+                                "next",
+                                    (PyCFunction)py::ext::batch::iterator::next,
+                                    METH_NOARGS,
+                                    "iterator.next()\n"
+                                    "\t-> Dereference and advance the iterator \n" },
+                            { nullptr, nullptr, 0, nullptr }
+                        };
+                        return basics;
+                    }
+                
+                }; /* namespace methods */
+                
+            } /* namespace iterator */
+            
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
                 BatchModel* out = new BatchModel();
                 return py::convert(out);
@@ -146,7 +241,7 @@ namespace py {
             /// sq_item
             PyObject* atindex(PyObject* self, Py_ssize_t idx) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
-                return batch->__index__(idx);
+                return py::object(batch->__index__(idx));
             }
             
             /// sq_ass_item
@@ -161,7 +256,7 @@ namespace py {
                 BatchModel* additional = reinterpret_cast<BatchModel*>(rhs);
                 PyObject* list = additional->as_pylist();
                 bool did_extend = batch->extend(list);
-                return did_extend ? py::convert(batch) : nullptr; /// propagate error
+                return did_extend ? py::object(batch) : nullptr; /// propagate error
             }
             
             /// DEALLOCATE
@@ -182,6 +277,10 @@ namespace py {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 batch->vacay(visit, arg);
                 return 0;
+            }
+            
+            PyObject* tp_iter(PyObject* self) {
+                return py::convert(new BatchIterator(self));
             }
             
             PyObject* append(PyObject* self, PyObject* obj) {
