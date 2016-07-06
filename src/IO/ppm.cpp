@@ -18,13 +18,6 @@
 
 namespace im {
     
-    namespace detail {
-        inline bool is_little_endian() {
-            int value = 1;
-            return bool(((char*) &value)[0] == 1);
-        }
-    }
-    
     DECLARE_FORMAT_OPTIONS(PPMFormat);
     
     std::unique_ptr<Image> PPMFormat::read(byte_source* src,
@@ -85,7 +78,7 @@ namespace im {
                 "Could not read PPM 16-bit data\n");
             
             uint16_t* __restrict__ im_data = im->rowp_as<uint16_t>(0);
-            if (detail::is_little_endian()) {
+            if (detail::littleendian()) {
                 for (int y = 0; y < height; y++) {
                     uint16_t* __restrict__ row = static_cast<uint16_t*>(&data[(y*width)*channels]);
                     for (int x = 0; x < width; x++) {
@@ -143,7 +136,7 @@ namespace im {
         } else if (bit_depth == 16) {
             pix::accessor<uint16_t> at = input.access<uint16_t>();
             uint16_t* __restrict__ data = new uint16_t[full_size];
-            if (detail::is_little_endian()) {
+            if (detail::littleendian()) {
                 uint16_t value;
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {

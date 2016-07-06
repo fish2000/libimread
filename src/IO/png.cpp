@@ -25,13 +25,6 @@ namespace im {
             imread_raise(PNGIOError, msg);
         }
         
-        // This checks how 16-bit uints are stored in the current platform.
-        inline bool is_big_endian() {
-            uint16_t v = 0xff00;
-            unsigned char* vp = reinterpret_cast<unsigned char*>(&v);
-            return (*vp == 0xff);
-        }
-        
         class png_holder {
             public:
                 png_holder(int m)
@@ -188,7 +181,7 @@ namespace im {
                 FF("Cannot read this bit depth ( %i ).", bit_depth),
                    "Only bit depths ∈ {1,8,16} are supported.");
         }
-        if (bit_depth == 16 && !is_big_endian()) { png_set_swap(p.png_ptr); }
+        if (bit_depth == 16 && !detail::bigendian()) { png_set_swap(p.png_ptr); }
         
         volatile int d = -1;
         switch (png_get_color_type(p.png_ptr, p.png_info)) {
