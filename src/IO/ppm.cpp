@@ -29,7 +29,7 @@ namespace im {
     
     std::unique_ptr<Image> PPMFormat::read(byte_source* src,
                                            ImageFactory* factory,
-                                           const options_map& opts) {
+                                           options_map const& opts) {
         /// YO DOGG
         std::vector<byte> all = src->full_data();
         memory::buffer membuf = memory::source(&all[0], all.size());
@@ -114,7 +114,7 @@ namespace im {
     }
     
     void PPMFormat::write(Image& input, byte_sink* output,
-                          const options_map& opts) {
+                          options_map const& opts) {
         /// YO DOGG
         const int width = input.dim(0);
         const int height = input.dim(1);
