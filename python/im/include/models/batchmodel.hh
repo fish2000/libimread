@@ -226,23 +226,42 @@ namespace py {
                 return py::convert(internal[sidx]);
             }
             
-            std::string repr() {
-                std::string out = std::string(BatchModel::typestring()) + "<@";
-                out += std::to_string((long)this) + ">(\n";
-                std::for_each(internal.begin(), internal.end(),
+            std::string repr_string() {
+                /// start with the BatchModel typestring:
+                std::string out(BatchModel::typestring());
+                
+                /// affix the memory address:
+                out += "<@" + std::to_string((long)this) + ">(\n";
+                
+                /// add the string representation of each object:
+                std::for_each(internal.begin(),
+                              internal.end(),
                           [&](PyObject* pyobj) {
+                    
+                    /// extract the Python repr object:
                     PyObject* repr = PyObject_Repr(pyobj);
+                    
+                    /// stringify + concatenate --
+                    /// NB: the Python API is soooo not const-correct:
                     out += "  " + std::string(const_cast<char const*>(
                                               PyString_AS_STRING(repr)));
+                    
+                    /// conditionally append a comma:
                     out += pyobj == internal.back() ? "\n" : ",\n";
+                    
+                    /// decref the no-longer-necessary Python repr object:
                     Py_DECREF(repr);
                 });
+                
+                /// festoon the end with an indication of the vector length:
                 out += ")[" + std::to_string(internal.size()) + "]";
+                
+                /// ... and return:
                 return out;
             }
             
             PyObject* __repr__() {
-                return py::convert(repr());
+                return py::convert(repr_string());
             }
             
             bool append(PyObject* obj) {
