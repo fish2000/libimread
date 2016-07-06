@@ -4,7 +4,6 @@
 
 #include <memory>
 #include <string>
-// #include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
@@ -168,13 +167,7 @@ namespace py {
             /// DEALLOCATE
             void dealloc(PyObject* self) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
-                // std::cerr << std::endl
-                //           << "ABOUT TO DEALLOCATE A BATCH..." << std::endl
-                //           << batch->repr() << std::endl
-                //           << std::endl;
                 delete batch;
-                // std::cerr << std::endl
-                //           << "BATCH DEALLOCATED" << std::endl;
             }
             
             /// CLEAR
