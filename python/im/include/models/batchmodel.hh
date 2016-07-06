@@ -71,8 +71,8 @@ namespace py {
                     PyObject_ClearWeakRefs(py::convert(self));
                 }
                 self->cleanup();
-                PyObject_GC_Del(voidself);
-                // type_ptr()->tp_free(py::convert(self));
+                // PyObject_GC_Del(voidself);
+                type_ptr()->tp_free(py::convert(self));
             }
             
             struct Tag {
@@ -90,17 +90,18 @@ namespace py {
             
             BatchModel()
                 :weakrefs(nullptr)
-                ,internal{}
-                ,readoptDict(PyDict_New())
-                ,writeoptDict(PyDict_New())
-                {}
-            
-            BatchModel(BatchModel const& other)
-                :weakrefs(nullptr)
-                ,internal{}
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
+                    internal.clear();
+                }
+            
+            BatchModel(BatchModel const& other)
+                :weakrefs(nullptr)
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
+                {
+                    internal.clear();
                     std::transform(other.internal.begin(),
                                    other.internal.end(),
                                    std::back_inserter(internal),
@@ -122,10 +123,10 @@ namespace py {
             explicit BatchModel(BatchModel const& basis,
                                 BatchModel const& etc)
                 :weakrefs(nullptr)
-                ,internal{}
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
+                    internal.clear();
                     std::transform(basis.internal.begin(),
                                    basis.internal.end(),
                                    std::back_inserter(internal),
@@ -140,10 +141,10 @@ namespace py {
             
             explicit BatchModel(BatchModel const& basis, int repeat)
                 :weakrefs(nullptr)
-                ,internal{}
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
+                    internal.clear();
                     for (int idx = 0; idx < repeat; ++idx) {
                         std::transform(basis.internal.begin(),
                                        basis.internal.end(),
@@ -176,10 +177,11 @@ namespace py {
             }
             
             void cleanup(bool force = false) {
-                if (!clean && force) {
+                if (!clean) {
                     std::for_each(internal.begin(),
                                   internal.end(),
-                               [](PyObject* pyobj) { Py_CLEAR(pyobj); });
+                               [](PyObject* pyobj) { Py_DECREF(pyobj); });
+                    internal.clear();
                     Py_CLEAR(readoptDict);
                     Py_CLEAR(writeoptDict);
                     clean = !force;

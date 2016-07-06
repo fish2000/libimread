@@ -18,7 +18,7 @@ PyTypeObject HybridImageModel_Type = {
     0,                                                                  /* tp_as_number */
     &HybridImage_SequenceMethods,                                       /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
-    0,/*(hashfunc)py::image::hash<HalideNumpyImage>,*/                  /* tp_hash */
+    (hashfunc)py::image::hash<HalideNumpyImage>,                        /* tp_hash */
     0,                                                                  /* tp_call */
     (reprfunc)py::image::str<HalideNumpyImage>,                         /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
@@ -130,7 +130,7 @@ PyTypeObject ImageModel_Type = {
     0,                                                                  /* tp_as_number */
     py::ext::image::methods::sequence<HalideNumpyImage>(),              /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
-    0,/*(hashfunc)py::ext::image::hash<HalideNumpyImage, buffer_t>,*/   /* tp_hash */
+    (hashfunc)py::ext::image::hash<HalideNumpyImage, buffer_t>,         /* tp_hash */
     0,                                                                  /* tp_call */
     (reprfunc)py::ext::image::str<HalideNumpyImage, buffer_t>,          /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
@@ -232,7 +232,7 @@ PyTypeObject ArrayModel_Type = {
     0,                                                                  /* tp_as_number */
     py::ext::image::methods::sequence<ArrayImage>(),                    /* tp_as_sequence */
     0,                                                                  /* tp_as_mapping */
-    0,/*(hashfunc)py::ext::image::hash<ArrayImage, buffer_t>,*/         /* tp_hash */
+    (hashfunc)py::ext::image::hash<ArrayImage, buffer_t>,               /* tp_hash */
     0,                                                                  /* tp_call */
     (reprfunc)py::ext::image::str<ArrayImage, buffer_t>,                /* tp_str */
     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */

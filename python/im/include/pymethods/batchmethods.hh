@@ -4,7 +4,7 @@
 
 #include <memory>
 #include <string>
-#include <iostream>
+// #include <iostream>
 #include <Python.h>
 #include <structmember.h>
 
@@ -168,13 +168,13 @@ namespace py {
             /// DEALLOCATE
             void dealloc(PyObject* self) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
-                std::cerr << std::endl
-                          << "ABOUT TO DEALLOCATE A BATCH..." << std::endl
-                          << batch->repr() << std::endl
-                          << std::endl;
+                // std::cerr << std::endl
+                //           << "ABOUT TO DEALLOCATE A BATCH..." << std::endl
+                //           << batch->repr() << std::endl
+                //           << std::endl;
                 delete batch;
-                std::cerr << std::endl
-                          << "BATCH DEALLOCATED" << std::endl;
+                // std::cerr << std::endl
+                //           << "BATCH DEALLOCATED" << std::endl;
             }
             
             /// CLEAR
@@ -194,7 +194,7 @@ namespace py {
             PyObject* append(PyObject* self, PyObject* obj) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 bool did_append = batch->append(obj);
-                return did_append ? py::convert(batch) : nullptr;
+                return did_append ? py::object(batch) : nullptr;
             }
             
             PyObject* count(PyObject* self, PyObject* obj) {
@@ -205,7 +205,7 @@ namespace py {
             PyObject* extend(PyObject* self, PyObject* obj) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 bool did_extend = batch->extend(obj);
-                return did_extend ? py::convert(batch) : nullptr;
+                return did_extend ? py::object(batch) : nullptr;
             }
             
             PyObject* indexof(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -242,8 +242,8 @@ namespace py {
                     return nullptr;
                 }
                 
-                /// will throw ValueErrror if need be:
-                return py::convert(batch->insert(idx, obj));
+                bool did_insert = batch->insert(idx, obj);
+                return did_insert ? py::object(batch) : nullptr;
             }
             
             PyObject* pop(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -259,13 +259,13 @@ namespace py {
                 }
                 
                 /// will throw ValueErrror if need be:
-                return py::convert(batch->pop(idx));
+                return py::object(batch->pop(idx));
             }
             
             PyObject* removeobj(PyObject* self, PyObject* obj) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 bool did_remove = batch->remove(obj);
-                return did_remove ? py::convert(batch) : nullptr;
+                return did_remove ? py::object(batch) : nullptr;
             }
             
             PyObject* reverse(PyObject* self, PyObject*) {
@@ -279,19 +279,15 @@ namespace py {
             PyObject*    get_width(PyObject* self, void* closure) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 Py_ssize_t out = batch->width();
-                if (out != -1) {
-                    return py::convert(out);
-                }
-                return nullptr; /// propagate error
+                if (out == -1) { return nullptr; } /// propagate error
+                return py::convert(out);
             }
             
             PyObject*    get_height(PyObject* self, void* closure) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 Py_ssize_t out = batch->height();
-                if (out != -1) {
-                    return py::convert(out);
-                }
-                return nullptr; /// propagate error
+                if (out == -1) { return nullptr; } /// propagate error
+                return py::convert(out);
             }
             
             namespace methods {
