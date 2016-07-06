@@ -44,10 +44,12 @@ namespace py {
                     return iterator->next();
                 }
                 
+                /// __iter__ implementation
                 PyObject* tp_iter(PyObject* self) {
                     return self;
                 }
                 
+                /// next() / PyIter_Next() implementation
                 PyObject* tp_iternext(PyObject* self) {
                     BatchIterator* iterator = reinterpret_cast<BatchIterator*>(self);
                     return iterator->next();
@@ -118,67 +120,12 @@ namespace py {
             } /* namespace iterator */
             
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
-                BatchModel* out = new BatchModel();
-                return py::convert(out);
+                return py::convert(new BatchModel());
             }
             
             int init(PyObject* self, PyObject* args, PyObject* kwargs) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
                 bool did_extend = false;
-                
-                /*
-                PyObject* arguments = PyTuple_New(0); /// FAKE
-                PyObject* py_is_blob = nullptr;
-                PyObject* options = nullptr;
-                PyObject* file = nullptr;
-                Py_buffer view;
-                options_map opts;
-                char const* keywords[] = { "source", "file", "is_blob", "options", nullptr };
-                bool is_blob = false;
-                bool did_load = false;
-                
-                if (!PyArg_ParseTupleAndKeywords(
-                    arguments, kwargs, "|s*OOO:__init__", const_cast<char**>(keywords),
-                    &view,                      /// "view", buffer with file path or image data
-                    &file,                      /// "file", possible file-like object
-                    &py_is_blob,                /// "is_blob", Python boolean specifying blobbiness
-                    &options))                  /// "options", read-options dict
-                {
-                    Py_DECREF(arguments);
-                    return -1;
-                }
-                
-                /// test is necessary, the next line chokes on nullptr:
-                is_blob = py::options::truth(py_is_blob);
-                opts = py::options::parse(options);
-                Py_DECREF(arguments);
-                
-                if (file) {
-                    /// load as file-like Python object
-                    did_load = batch->loadfilelike(file, opts);
-                } else if (is_blob) {
-                    /// load as blob -- pass the buffer along
-                    did_load = batch->loadblob(view, opts);
-                } else {
-                    /// load as file -- pass the buffer along
-                    did_load = batch->load(view, opts);
-                }
-                
-                if (!did_load) {
-                    /// If this is true, PyErr has already been set
-                    PyErr_SetString(PyExc_IOError,
-                        "Image batch binary load failed");
-                        return -1;
-                }
-                
-                /// store the read options dict
-                Py_CLEAR(batch->readoptDict);
-                batch->readoptDict = options ? py::object(options) : PyDict_New();
-                
-                /// ... and now OK, store an empty write options dict
-                Py_CLEAR(batch->writeoptDict);
-                batch->writeoptDict = PyDict_New();
-                */
                 
                 /// extend batch with positional arguments
                 switch (PyTuple_GET_SIZE(args)) {
@@ -279,9 +226,13 @@ namespace py {
                 return 0;
             }
             
+            /// __iter__ implementation
             PyObject* tp_iter(PyObject* self) {
-                return py::convert(new BatchIterator(self));
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                return batch->__iter__();
             }
+            
+            ///////////////////////////////// LIST API /////////////////////////////////
             
             PyObject* append(PyObject* self, PyObject* obj) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);

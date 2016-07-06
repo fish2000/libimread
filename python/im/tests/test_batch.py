@@ -8,6 +8,17 @@ from im.compat import imread
 
 class BatchTests(BaseCase):
     
+    def test_batch_iter_jpgs(self):
+        for ImageType in self.imagetypes:
+            batch0 = im.Batch()
+            for image_path in self.jpgs:
+                batch0.append(ImageType(image_path))
+            batch1 = im.Batch()
+            for image in batch0:
+                batch1.append(image)
+            self.assertEqual(len(batch0), len(batch1))
+            # TODO: assertRaises for batch.width / batch.height
+    
     def test_batch_load_jpgs(self):
         for image_path in self.jpgs:
             image0 = self.imagetypes.Image(image_path)

@@ -70,23 +70,17 @@ namespace py {
                 }
                 
                 PyObject_HEAD
-                // iterator_t begin;
-                // iterator_t end;
                 citerator_t cbegin;
                 citerator_t cend;
                 
                 BatchIterator() {}
                 
                 BatchIterator(BatchIterator&& other) noexcept
-                    // :begin(std::move(other.begin))
-                    // ,end(std::move(other.end))
                     :cbegin(std::move(other.cbegin))
                     ,cend(std::move(other.cend))
                     {}
                 
                 explicit BatchIterator(BatchModel const& batch) {
-                    // begin = std::begin(batch.internal);
-                    // end = std::end(batch.internal);
                     cbegin = std::cbegin(batch.internal);
                     cend = std::cend(batch.internal);
                 }
@@ -110,7 +104,8 @@ namespace py {
                 
                 static constexpr Py_ssize_t typeflags() {
                     return Py_TPFLAGS_DEFAULT         |
-                           Py_TPFLAGS_BASETYPE;
+                           Py_TPFLAGS_BASETYPE        |
+                           Py_TPFLAGS_HAVE_ITER;
                 }
                 
                 static char const* typestring() { return "im.Batch.Iterator"; }
@@ -123,13 +118,13 @@ namespace py {
             static PyTypeObject* type_ptr() { return &BatchModel_Type; }
             
             void* operator new(std::size_t newsize) {
+                // PyTypeObject* type = type_ptr();
+                // return reinterpret_cast<void*>(type->tp_alloc(type, 0));
                 void* out = reinterpret_cast<void*>(
                     PyObject_GC_New(BatchModel, type_ptr()));
                 PyObject_GC_Track(
                     reinterpret_cast<PyObject*>(out));
                 return out;
-                // PyTypeObject* type = type_ptr();
-                // return reinterpret_cast<void*>(type->tp_alloc(type, 0));
             }
             
             void operator delete(void* voidself) {
@@ -336,6 +331,10 @@ namespace py {
             
             PyObject* __repr__() {
                 return py::convert(repr_string());
+            }
+            
+            PyObject* __iter__() {
+                return py::convert(new BatchIterator(py::convert(this)));
             }
             
             bool append(PyObject* obj) {
