@@ -69,7 +69,50 @@ namespace im {
             // values 5-127 are reserved
             // values 128-255 are unassigned
         };
-    
+        
+        /// Helper - write, with error detection (no byte swapping!)
+        template <typename T>
+        bool write(T const* buffer, byte_sink*  output,
+                                    std::size_t itemsize = sizeof(T),
+                                    std::size_t nitems = 1) {
+            if (itemsize * nitems == 0) { return true; }
+            std::size_t n = output->write(buffer, itemsize * nitems);
+            if (n != nitems) {
+                /// error ("Write error:
+                ///         wrote %d records of %d", (int)n, (int)nitems);
+                imread_raise(CannotWriteError,
+                    "Proxied write error");
+                // return false;
+            }
+            return true;
+        }
+        
+        /// Helper -- write a 'short' with byte swapping if necessary
+        bool write(uint16_t s, byte_sink* output) {
+            if (detail::bigendian()) {
+                detail::swap_endian(&s);
+            }
+            return write(&s, output, sizeof(s), 1);
+        }
+        
+        bool write(uint32_t i, byte_sink* output) {
+            if (detail::bigendian()) {
+                detail::swap_endian(&i);
+            }
+            return write(&i, output, sizeof(i), 1);
+        }
+        
+        bool pad(byte_sink* output, std::size_t n = 1) {
+            if (n == 0) { return false; }
+            char zeros[n] = {0};
+            return output->write(zeros, n) == n;
+        }
+        
+        bool paddedwrite(std::string const& s, std::size_t len, byte_sink* output) {
+            std::size_t slen = std::min(s.length(), len - 1);
+            return write(s.c_str(), output, slen) && pad(output, len-slen);
+        }
+        
     }  /* namespace detail */
     
     
@@ -133,25 +176,28 @@ namespace im {
         /// "due to struct packing, we may get a corrupt header if we just dump the
         ///  struct to the file; to adress that, write every member individually"
         /// ... here we actually write out the header, member-by-member:
-        if (!output->write(&tga.idlen) ||
-            !output->write(&tga.cmap_type) ||
-            !output->write(&tga.type) ||
-            !output->write(&tga.cmap_first) ||
-            !output->write(&tga.cmap_length) ||
-            !output->write(&tga.cmap_size) ||
-            !output->write(&tga.x_origin) ||
-            !output->write(&tga.y_origin) ||
-            !output->write(&tga.width) ||
-            !output->write(&tga.height) ||
-            !output->write(&tga.bpp) ||
-            !output->write(&tga.attr))
+        if (!detail::write(&tga.idlen,          output) ||
+            !detail::write(&tga.cmap_type,      output) ||
+            !detail::write(&tga.type,           output) ||
+            !detail::write(&tga.cmap_first,     output) ||
+            !detail::write(&tga.cmap_length,    output) ||
+            !detail::write(&tga.cmap_size,      output) ||
+            !detail::write(&tga.x_origin,       output) ||
+            !detail::write(&tga.y_origin,       output) ||
+            !detail::write(&tga.width,          output) ||
+            !detail::write(&tga.height,         output) ||
+            !detail::write(&tga.bpp,            output) ||
+            !detail::write(&tga.attr,           output))
         {
             imread_raise(CannotWriteError,
                 "Failure writing TGA header");
         }
         
         if (targa_idlen) {
-            if (!output->write(targa_id.c_str()))
+            if (!detail::write(targa_id.c_str(), output)) {
+                imread_raise(CannotWriteError,
+                    "Failure writing TGA identifier string");
+            }
         }
     }
     
