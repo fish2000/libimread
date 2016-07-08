@@ -135,7 +135,7 @@ find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
 find_package(LibUnwind REQUIRED)
 
-set(HDF5_USE_STATIC_LIBRARIES false)
+# set(HDF5_USE_STATIC_LIBRARIES false)
 set(HDF5_ROOT /usr/local/opt/hdf5/)
 find_package(HDF5 REQUIRED
     COMPONENTS C CXX HL)
@@ -234,7 +234,8 @@ target_link_libraries(imread_shared
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES}
-    ${HDF5_LIBRARIES})
+    ${HDF5_LIBRARIES}
+    ${HDF5_HL_LIBRARIES})
 
 target_link_libraries(imread_static
     z png guid libbf
@@ -246,7 +247,8 @@ target_link_libraries(imread_static
     ${JPEG_LIBRARIES}
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES}
-    ${HDF5_LIBRARIES})
+    ${HDF5_LIBRARIES}
+    ${HDF5_HL_LIBRARIES})
 
 # Add the apps subdirectory, if we're building apps:
 if(IM_APPS)
@@ -313,7 +315,8 @@ if(IM_TESTS)
         ${JPEG_LIBRARIES}
         ${WEBP_LIBRARIES}
         ${HALIDE_LIBRARIES}
-        ${HDF5_LIBRARIES})
+        ${HDF5_LIBRARIES}
+        ${HDF5_HL_LIBRARIES})
     
     # Set up ctest and cdash:
     enable_testing()
