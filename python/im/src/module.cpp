@@ -398,7 +398,7 @@ PyTypeObject BatchIterator_Type = {
     0,                                                                  /* tp_clear */
     0,                                                                  /* tp_richcompare */
     0,                                                                  /* tp_weaklistoffset */
-    (getiterfunc)py::ext::batch::iterator::tp_iter,                     /* tp_iter */
+    (getiterfunc)PyObject_SelfIter,                                     /* tp_iter */
     (iternextfunc)py::ext::batch::iterator::tp_iternext,                /* tp_iternext */
     py::ext::batch::iterator::methods::basic(),                         /* tp_methods */
     0,                                                                  /* tp_members */

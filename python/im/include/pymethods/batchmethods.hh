@@ -232,6 +232,16 @@ namespace py {
                 return batch->__iter__();
             }
             
+            PyObject* items(PyObject* self, PyObject*) {
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                return batch->as_pylist();
+            }
+            
+            PyObject* iteritems(PyObject* self, PyObject*) {
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                return batch->__iter__();
+            }
+            
             ///////////////////////////////// LIST API /////////////////////////////////
             
             PyObject* append(PyObject* self, PyObject* obj) {
@@ -382,6 +392,18 @@ namespace py {
                                 METH_O | METH_CLASS,
                                 "Batch.typecheck(putative)\n"
                                 "\t-> Check that an instance is strictly an instance of this type\n" },
+                        {
+                            "items",
+                                (PyCFunction)py::ext::batch::items,
+                                METH_NOARGS,
+                                "batch.items()\n"
+                                "\t-> Return a Python list containing the items in the batch \n" },
+                        {
+                            "iteritems",
+                                (PyCFunction)py::ext::batch::iteritems,
+                                METH_NOARGS,
+                                "batch.iteritems()\n"
+                                "\t-> Return a Python iterator over the items in the batch \n" },
                         {
                             "append",
                                 (PyCFunction)py::ext::batch::append,

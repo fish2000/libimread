@@ -17,6 +17,14 @@ class BatchTests(BaseCase):
             for image in batch0:
                 batch1.append(image)
             self.assertEqual(len(batch0), len(batch1))
+            batch2 = im.Batch()
+            for image in batch0.items():
+                batch2.append(image)
+            self.assertEqual(len(batch0), len(batch2))
+            batch3 = im.Batch()
+            for image in batch0.iteritems():
+                batch3.append(image)
+            self.assertEqual(len(batch0), len(batch3))
             # TODO: assertRaises for batch.width / batch.height
     
     def test_batch_load_jpgs(self):
