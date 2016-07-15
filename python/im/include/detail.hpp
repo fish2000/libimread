@@ -41,6 +41,7 @@ namespace py {
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);
     PyObject* object(PyObject* arg);
+    PyObject* object(PyFileObject* arg);
     PyObject* object(PyStringObject* arg);
     PyObject* object(PyTypeObject* arg);
     PyObject* object(PyArray_Descr* arg);
@@ -58,6 +59,7 @@ namespace py {
     }
     
     PyObject* convert(PyObject*);
+    PyObject* convert(PyFileObject*);
     PyObject* convert(PyStringObject*);
     PyObject* convert(PyTypeObject*);
     PyObject* convert(PyArray_Descr*);

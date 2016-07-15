@@ -87,6 +87,9 @@ namespace py {
     PyObject* object(PyObject* arg) {
         return Py_BuildValue("O", arg ? arg : Py_None);
     }
+    PyObject* object(PyFileObject* arg) {
+        return py::object((PyObject*)arg);
+    }
     PyObject* object(PyStringObject* arg) {
         return py::object((PyObject*)arg);
     }
@@ -101,6 +104,7 @@ namespace py {
     }
     
     PyObject* convert(PyObject* operand)            { return operand; }
+    PyObject* convert(PyFileObject* operand)        { return (PyObject*)operand; }
     PyObject* convert(PyStringObject* operand)      { return (PyObject*)operand; }
     PyObject* convert(PyTypeObject* operand)        { return (PyObject*)operand; }
     PyObject* convert(PyArray_Descr* operand)       { return (PyObject*)operand; }
