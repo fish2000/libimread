@@ -353,8 +353,7 @@ namespace py {
                 std::size_t rhs_siz = static_cast<std::size_t>(rhsbuf->__len__());
                 py::ref lhs_compare = py::string((char const*)lhsbuf->internal->host, lhs_siz);
                 py::ref rhs_compare = py::string((char const*)rhsbuf->internal->host, rhs_siz);
-                int out = PyObject_Compare(lhs_compare, rhs_compare);
-                return out;
+                return PyObject_Compare(lhs_compare, rhs_compare);
             }
             
             /// __hash__ implementation

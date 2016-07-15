@@ -110,8 +110,7 @@ namespace py {
             int compare(PyObject* pylhs, PyObject* pyrhs) {
                 py::ref lhs_compare = PyObject_Str(pylhs);
                 py::ref rhs_compare = PyObject_Str(pyrhs);
-                int out = PyObject_Compare(lhs_compare, rhs_compare);
-                return out;
+                return PyObject_Compare(lhs_compare, rhs_compare);
             }
             
             /// __len__ implementaton

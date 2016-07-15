@@ -347,7 +347,7 @@ namespace py {
     ///     py::ref ref2 = "Yo Dogg";                       /// ref2 is a PyString
     ///     std::vector<byte> bv = image.plane<byte>(0);
     ///     Py_buffer* view = PyObject_GetBuffer(image);
-    ///     py::buffer pyview(*view);                       /// ... py::ref can't release a Py_buffer*!
+    ///     py::buffer::source pyview(*view);               /// ... py::ref can't release a Py_buffer*!
     ///     py::ref ref3 = bv;                              /// ref3 is a PyTuple with bytes from an image's zero-plane
     ///     py::ref ref4 = view;                            /// ref4 is a PyMemoryView on the image buffer-back
     ///     py::ref ref5 = py::string(bv);                  /// ref5 is a PyString-ified copy of ref3's planar byte data
@@ -355,13 +355,13 @@ namespace py {
     /// 
     /// ... the above code bits, when evaluated in a scoped context, will clean
     /// themselves up without the need for any additional Python API calls... Hence
-    /// the bit up there with py::buffer -- many users are often confused by how
+    /// the bit up there with py::buffer::source -- many users are often confused by how
     /// PyObject* refcounting is totally separate from the Py_buffer API; relatedly,
     /// a py::ref created from a Py_buffer* doesn't know anything about where
     /// that Py_buffer* came from -- it does not care about what happens to
     /// its referent after the py::convert() call and as such the py::ref will
     /// release its internal temporary PyMemoryView object at scope exit and
-    /// leave the dangling Py_buffer* unreleased. So TL;DR use py::buffer to
+    /// leave the dangling Py_buffer* unreleased. So TL;DR use py::buffer::source to
     /// do separate Py_buffer* scope-sitting alongside py::ref right? You get this.
     
     class ref {

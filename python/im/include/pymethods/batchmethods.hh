@@ -161,12 +161,9 @@ namespace py {
             int compare(PyObject* pylhs, PyObject* pyrhs) {
                 BatchModel* batch0 = reinterpret_cast<BatchModel*>(pylhs);
                 BatchModel* batch1 = reinterpret_cast<BatchModel*>(pyrhs);
-                PyObject* lhs_compare = batch0->as_pytuple();
-                PyObject* rhs_compare = batch1->as_pytuple();
-                int out = PyObject_Compare(lhs_compare, rhs_compare);
-                Py_DECREF(lhs_compare);
-                Py_DECREF(rhs_compare);
-                return out;
+                py::ref lhs_compare = batch0->as_pytuple();
+                py::ref rhs_compare = batch1->as_pytuple();
+                return PyObject_Compare(lhs_compare, rhs_compare);
             }
             
             /// __len__ implementaton
