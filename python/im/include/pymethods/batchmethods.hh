@@ -222,8 +222,7 @@ namespace py {
             /// TRAVERSE
             int traverse(PyObject* self, visitproc visit, void* arg) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
-                batch->vacay(visit, arg);
-                return 0;
+                return batch->vacay(visit, arg);
             }
             
             /// __iter__ implementation

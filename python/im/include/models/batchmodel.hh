@@ -263,11 +263,13 @@ namespace py {
             
             int vacay(visitproc visit, void* arg) {
                 /// NB. this has to visit the internal vector (maybe?!):
-                for (PyObject* item : internal) {
-                    Py_VISIT(item);
+                if (!internal.empty()) {
+                    for (PyObject* item : internal) {
+                        Py_VISIT(item);
+                    }
+                    Py_VISIT(readoptDict);
+                    Py_VISIT(writeoptDict);
                 }
-                Py_VISIT(readoptDict);
-                Py_VISIT(writeoptDict);
                 return 0;
             }
             
