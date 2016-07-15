@@ -108,11 +108,9 @@ namespace py {
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
             int compare(PyObject* pylhs, PyObject* pyrhs) {
-                PyObject* lhs_compare = PyObject_Str(pylhs);
-                PyObject* rhs_compare = PyObject_Str(pyrhs);
+                py::ref lhs_compare = PyObject_Str(pylhs);
+                py::ref rhs_compare = PyObject_Str(pyrhs);
                 int out = PyObject_Compare(lhs_compare, rhs_compare);
-                Py_DECREF(lhs_compare);
-                Py_DECREF(rhs_compare);
                 return out;
             }
             

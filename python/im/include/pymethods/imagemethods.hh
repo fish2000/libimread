@@ -351,11 +351,9 @@ namespace py {
                 imagebuffer_t* rhsbuf = reinterpret_cast<imagebuffer_t*>(rhs->imagebuffer);
                 std::size_t lhs_siz = static_cast<std::size_t>(lhsbuf->__len__());
                 std::size_t rhs_siz = static_cast<std::size_t>(rhsbuf->__len__());
-                PyObject* lhs_compare = py::string((char const*)lhsbuf->internal->host, lhs_siz);
-                PyObject* rhs_compare = py::string((char const*)rhsbuf->internal->host, rhs_siz);
+                py::ref lhs_compare = py::string((char const*)lhsbuf->internal->host, lhs_siz);
+                py::ref rhs_compare = py::string((char const*)rhsbuf->internal->host, rhs_siz);
                 int out = PyObject_Compare(lhs_compare, rhs_compare);
-                Py_DECREF(lhs_compare);
-                Py_DECREF(rhs_compare);
                 return out;
             }
             
@@ -802,15 +800,13 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* options = PyDict_New();
+                py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("png"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    Py_DECREF(options);
                     PyErr_SetString(PyExc_SystemError,
                         "Dictionary update failure");
                     return nullptr;
                 }
-                Py_DECREF(options);
                 return pyim->saveblob(pyim->writeopts());
             }
             
@@ -819,15 +815,13 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_jpeg(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* options = PyDict_New();
+                py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("jpg"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    Py_DECREF(options);
                     PyErr_SetString(PyExc_SystemError,
                         "Dictionary update failure");
                     return nullptr;
                 }
-                Py_DECREF(options);
                 return pyim->saveblob(pyim->writeopts());
             }
             
@@ -836,16 +830,14 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_html(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* options = PyDict_New();
+                py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("jpg"));
                 py::detail::setitemstring(options, "as_html", py::True());
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    Py_DECREF(options);
                     PyErr_SetString(PyExc_SystemError,
                         "Dictionary update failure");
                     return nullptr;
                 }
-                Py_DECREF(options);
                 return pyim->saveblob(pyim->writeopts());
             }
             

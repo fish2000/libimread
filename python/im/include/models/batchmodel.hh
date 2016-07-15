@@ -323,18 +323,15 @@ namespace py {
                           [&](PyObject* pyobj) {
                     
                     /// extract the Python repr object:
-                    PyObject* repr = PyObject_Repr(pyobj);
+                    py::ref repr = PyObject_Repr(pyobj);
                     
                     /// stringify + concatenate --
                     /// NB: the Python API is soooo not const-correct:
                     out += "    " + std::string(const_cast<char const*>(
-                                                PyString_AS_STRING(repr)));
+                                                PyString_AS_STRING(repr.get())));
                     
                     /// conditionally append a comma:
                     out += pyobj == internal.back() ? "\n" : ",\n";
-                    
-                    /// decref the no-longer-necessary Python repr object:
-                    Py_DECREF(repr);
                 });
                 
                 /// festoon the end with an indication of the vector length:

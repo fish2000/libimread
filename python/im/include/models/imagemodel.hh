@@ -571,7 +571,7 @@ namespace py {
                         Histogram histo(image.get(), idx);
                         std::transform(histo.begin(), histo.end(),
                                        std::back_inserter(intvec),
-                                       [](float v) -> int { return int(v); });
+                                    [](float v) -> int { return int(v); });
                     }
                 }
                 return py::convert(intvec);

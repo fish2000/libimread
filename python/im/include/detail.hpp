@@ -41,6 +41,7 @@ namespace py {
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);
     PyObject* object(PyObject* arg);
+    PyObject* object(PyStringObject* arg);
     PyObject* object(PyTypeObject* arg);
     PyObject* object(PyArray_Descr* arg);
     PyObject* object(ModelBase* arg);
@@ -57,6 +58,7 @@ namespace py {
     }
     
     PyObject* convert(PyObject*);
+    PyObject* convert(PyStringObject*);
     PyObject* convert(PyTypeObject*);
     PyObject* convert(PyArray_Descr*);
     PyObject* convert(ModelBase*);
@@ -312,6 +314,136 @@ namespace py {
         }
         return dict;
     }
+    
+    /// The py::ref mini-class is a little bitty tiny wrapper around
+    /// a PyObject*, intended for casual-friday, C++-y, RAII-diculous scope-based
+    /// use in treatment of acute reference-count-induced frontal lobe irritation.
+    /// If you dislike having to stick calls to Py_DECREF() all over everything,
+    /// and want to generally lexically underscore that a given Python object pointer
+    /// -- a PyObject*, as we often say -- is a mere temporary, never to see a lifetime
+    /// beyond the scope of its acquisition... well then, you should use py::ref to
+    /// simplify your Python/C++ programming experience. Like instead of:
+    ///
+    ///     PyObject* pyThing = PyObject_SomeAPICall();
+    ///     /// your pyThing stuff is herein done
+    ///     Py_DECREF(pyThing);
+    ///
+    /// ... you can basically just do:
+    /// 
+    ///     py::ref pyThing = PyObject_SomeAPICall();
+    ///     /// do the same* pyThing stuff ...
+    ///     /// ... but as a chuckling Jobs said c. 1999, THERE IS NO STEP THREE
+    ///
+    /// ... the fine print is that some calls may balk at being passed a py::ref instead of
+    /// a vanilla PyObject*, notably macros e.g. PyString_AS_STRING(); you can deal
+    /// with those by manually sticking in a get() method call e.g. PyString_AS_STRING(ref.get())
+    /// which will inline a return of the wrapped PyObject*. 
+    ///
+    /// There are convenience template constructors for the creation of a py::ref from
+    /// any type that py::convert() can hanlde, e.g.:
+    ///
+    ///     py::ref ref0 = 3;                               /// ref0 is a PyInt/PyLong
+    ///     py::ref ref1 = 3.14159f;                        /// ref1 is a PyFloat
+    ///     py::ref ref2 = "Yo Dogg";                       /// ref2 is a PyString
+    ///     std::vector<byte> bv = image.plane<byte>(0);
+    ///     Py_buffer* view = PyObject_GetBuffer(image);
+    ///     py::buffer pyview(*view);                       /// ... py::ref can't release a Py_buffer*!
+    ///     py::ref ref3 = bv;                              /// ref3 is a PyTuple with bytes from an image's zero-plane
+    ///     py::ref ref4 = view;                            /// ref4 is a PyMemoryView on the image buffer-back
+    ///     py::ref ref5 = py::string(bv);                  /// ref5 is a PyString-ified copy of ref3's planar byte data
+    ///     py::ref ref6 = py::listify(true, 2, "yo dogg"); /// ref6 is a 3-item PyList containing what you think it does
+    /// 
+    /// ... the above code bits, when evaluated in a scoped context, will clean
+    /// themselves up without the need for any additional Python API calls... Hence
+    /// the bit up there with py::buffer -- many users are often confused by how
+    /// PyObject* refcounting is totally separate from the Py_buffer API; relatedly,
+    /// a py::ref created from a Py_buffer* doesn't know anything about where
+    /// that Py_buffer* came from -- it does not care about what happens to
+    /// its referent after the py::convert() call and as such the py::ref will
+    /// release its internal temporary PyMemoryView object at scope exit and
+    /// leave the dangling Py_buffer* unreleased. So TL;DR use py::buffer to
+    /// do separate Py_buffer* scope-sitting alongside py::ref right? You get this.
+    
+    class ref {
+        
+        public:
+            
+            /// A pedantic way to say PyObject*
+            using pyptr_t = std::add_pointer_t<PyObject>;
+            
+            /// py::ref::can_convert<T>::value == true for any (T t) iff
+            /// the expression:
+            ///
+            ///     PyObject* py_t = py::convert(t);
+            ///
+            /// will successfully compile. (but remember at runtime
+            /// who but GvR can know though, I'm just saying doggie)
+            template <typename ...Args>
+            using can_convert = std::is_same<pyptr_t,
+                                             decltype(
+                                             py::convert(std::declval<Args>()...))
+                                            >;
+            
+            /// default constructor, yields a nullptr referent
+            ref();
+            
+            /// py::refs are moveable via construction/assignment
+            /// ... but *not* copyable as you may note
+            ref(ref&& other) noexcept;
+            ref& operator=(ref&& other) noexcept;
+            
+            /// py::refs are constructable/assignable direct from PyObject*
+            ref(pyptr_t obj);
+            ref& operator=(pyptr_t obj);
+            
+            /// conditionally-enabled templates to allow direct construction
+            /// and/or assignment of py::refs from ANY type that can
+            /// be successfully turned into a PyObject* via py::convert()
+            template <typename RawType,
+                      typename std::enable_if_t<
+                              !std::is_same<RawType, pyptr_t>::value &&
+                               py::ref::can_convert<RawType>::value,
+                      int> = 0>
+            ref(RawType&& raw)
+                :referent(py::convert(std::forward<RawType>(raw)))
+                {}
+            
+            template <typename RawType,
+                      typename std::enable_if_t<
+                              !std::is_same<RawType, pyptr_t>::value &&
+                               py::ref::can_convert<RawType>::value,
+                      int> = 0>
+            ref& operator=(RawType&& raw) {
+                referent = py::convert(std::forward<RawType>(raw));
+                return *this;
+            }
+            
+            /// virtual destructor, Py_XDECREFs the referent pointer
+            virtual ~ref();
+            
+            /// implicit and explicit getters for the internal PyObject*
+            operator pyptr_t() const;
+            pyptr_t get() const;
+            
+            /// refcount control methods, mapped to their macro namesakes
+            void inc();
+            void dec();
+            void xinc();
+            void xdec();
+            void clear();
+            
+            /// std::shared_ptr-esque calls, for explicit lifecycle termination
+            pyptr_t release();
+            void reset();
+            void reset(pyptr_t);
+            
+        private:
+            
+            pyptr_t referent = nullptr;         /// the object in question
+            ref(ref const&);                    /// NO COPYING
+            ref& operator=(ref const&);         /// EYES ON YOUR OWN POINTER
+        
+    };
     
     namespace detail {
         

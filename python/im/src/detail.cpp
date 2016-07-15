@@ -87,6 +87,9 @@ namespace py {
     PyObject* object(PyObject* arg) {
         return Py_BuildValue("O", arg ? arg : Py_None);
     }
+    PyObject* object(PyStringObject* arg) {
+        return py::object((PyObject*)arg);
+    }
     PyObject* object(PyTypeObject* arg) {
         return py::object((PyObject*)arg);
     }
@@ -98,6 +101,7 @@ namespace py {
     }
     
     PyObject* convert(PyObject* operand)            { return operand; }
+    PyObject* convert(PyStringObject* operand)      { return (PyObject*)operand; }
     PyObject* convert(PyTypeObject* operand)        { return (PyObject*)operand; }
     PyObject* convert(PyArray_Descr* operand)       { return (PyObject*)operand; }
     PyObject* convert(ModelBase* operand)           { return (PyObject*)operand; }
@@ -153,6 +157,58 @@ namespace py {
     
     PyObject* tuplize()                             { return PyTuple_New(0); }
     PyObject* listify()                             { return PyList_New(0);  }
+    
+    /*
+     * THE IMPLEMENTATIONS: py::ref
+     */
+    ref::ref() {}
+    
+    ref::ref(ref&& other) noexcept
+        :referent(std::move(other.referent))
+        {
+            other.referent = nullptr;
+        }
+    
+    ref& ref::operator=(ref&& other) noexcept {
+        referent = std::move(other.referent);
+        other.referent = nullptr;
+        return *this;
+    }
+    
+    ref::ref(ref::pyptr_t obj)
+        :referent(obj)
+        {}
+    
+    ref& ref::operator=(ref::pyptr_t obj) {
+        referent = obj;
+        return *this;
+    }
+    
+    ref::~ref() { Py_XDECREF(referent); }
+    
+    ref::operator pyptr_t() const { return referent; }
+    ref::pyptr_t ref::get() const { return referent; }
+    
+    void ref::inc() { Py_INCREF(referent); }
+    void ref::dec() { Py_DECREF(referent); }
+    void ref::xinc() { Py_XINCREF(referent); }
+    void ref::xdec() { Py_XDECREF(referent); }
+    void ref::clear() { Py_CLEAR(referent); }
+    
+    ref::pyptr_t ref::release() {
+        ref::pyptr_t out = referent;
+        referent = nullptr;
+        return out;
+    }
+    
+    void ref::reset() {
+        clear();
+    }
+    
+    void ref::reset(ref::pyptr_t reset_to) {
+        xdec();
+        referent = reset_to;
+    }
     
     namespace detail {
         
@@ -242,18 +298,17 @@ namespace py {
             /// which did you know that's even less frequent?) -- so dogg I am actually
             /// totally cool with it
             
-            PyObject* list = PyList_New(max);
+            py::ref list = PyList_New(max);
             
             for (auto it = formats.begin();
                  it != formats.end() && idx < max;
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
-                             PyList_SET_ITEM(list, idx,
+                             PyList_SET_ITEM(list.get(), idx,
                                              py::string(format));
                          } ++idx; }
             
             PyObject* out = PyList_AsTuple(list);
-            Py_DECREF(list);
             return out;
         }
         

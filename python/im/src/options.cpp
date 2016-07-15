@@ -108,16 +108,15 @@ namespace py {
             options_list out;
             if (!list) { return out; }
             if (!PySequence_Check(list)) { return out; }
-            PyObject* sequence = PySequence_Fast(list, "Sequence expected");
+            py::ref sequence = PySequence_Fast(list, "Sequence expected");
             int idx = 0,
-                len = PySequence_Fast_GET_SIZE(sequence);
+                len = PySequence_Fast_GET_SIZE(sequence.get());
             for (; idx < len; idx++) {
-                PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
+                PyObject* item = PySequence_Fast_GET_ITEM(sequence.get(), idx);
                 Json ison(Json::null);
                 ison = py::options::convert(item); /// might PyErr here
                 out.append(ison);
             }
-            Py_DECREF(sequence);
             return out;
         }
         
@@ -125,21 +124,21 @@ namespace py {
             options_list out;
             if (!set) { return out; }
             if (!PyAnySet_Check(set)) { return out; }
-            PyObject* iterator = PyObject_GetIter(set);
-            if (iterator == nullptr) {
+            py::ref iterator = PyObject_GetIter(set);
+            if (iterator.get() == nullptr) {
                 PyErr_SetString(PyExc_ValueError,
                     "Set object not iterable");
                 return options_list::undefined;
             }
-            PyObject* item;
+            py::ref item;
             while ((item = PyIter_Next(iterator))) {
                 /// double-parens silence a warning
                 Json ison(Json::null);
                 ison = py::options::convert(item); /// might PyErr here
                 out.append(ison);
-                Py_DECREF(item);
+                /// item assigned out-of-scope, manually decref it:
+                item.dec();
             }
-            Py_DECREF(iterator);
             if (PyErr_Occurred()) {
                 PyErr_SetString(PyExc_IOError,
                     "Error occurred while iterating set");
