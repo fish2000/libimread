@@ -162,7 +162,7 @@ namespace py {
      * THE IMPLEMENTATIONS: py::ref
      */
     
-    ref::ref() {}
+    ref::ref() noexcept {}
     
     ref::ref(ref&& other) noexcept
         :referent(std::move(other.referent))
@@ -176,19 +176,19 @@ namespace py {
         return *this;
     }
     
-    ref::ref(ref::pyptr_t obj)
+    ref::ref(ref::pyptr_t obj) noexcept
         :referent(obj)
         {}
     
-    ref& ref::operator=(ref::pyptr_t obj) {
+    ref& ref::operator=(ref::pyptr_t obj) noexcept {
         referent = obj;
         return *this;
     }
     
     ref::~ref()                     { Py_XDECREF(referent); }
     
-    ref::operator pyptr_t() const   { return referent; }
-    ref::pyptr_t ref::get() const   { return referent; }
+    ref::operator pyptr_t() const noexcept   { return referent; }
+    ref::pyptr_t ref::get() const noexcept   { return referent; }
     
     ref const& ref::inc() const     { Py_INCREF(referent); return *this; }
     ref const& ref::dec() const     { Py_DECREF(referent); return *this; }
@@ -240,7 +240,7 @@ namespace py {
         }
     }
     
-    ref::pyptr_t ref::release() {
+    ref::pyptr_t ref::release() noexcept {
         ref::pyptr_t out = referent;
         referent = nullptr;
         return out;
@@ -256,8 +256,33 @@ namespace py {
         return *this;
     }
     
-    bool ref::empty() const { return referent == nullptr; }
-    ref::operator bool() const { return !empty(); }
+    void ref::swap(ref& other) noexcept {
+        using std::swap;
+        swap(referent, other.referent);
+    }
+    
+    void swap(ref& lhs, ref& rhs) noexcept {
+        using std::swap;
+        swap(lhs.referent, rhs.referent);
+    }
+    
+    std::size_t ref::hash() const {
+        if (empty()) { return 0; }
+        return std::size_t(PyObject_Hash(referent));
+    }
+    
+    bool ref::empty() const noexcept {
+        return referent == nullptr;
+    }
+    
+    bool ref::truth() const {
+        if (empty()) { return false; }
+        return PyObject_IsTrue(referent) == 1;
+    }
+    
+    ref::operator bool() const noexcept {
+        return !empty();
+    }
     
     namespace detail {
         

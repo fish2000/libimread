@@ -125,7 +125,7 @@ namespace py {
             if (!set) { return out; }
             if (!PyAnySet_Check(set)) { return out; }
             py::ref iterator = PyObject_GetIter(set);
-            if (iterator.get() == nullptr) {
+            if (iterator.empty()) {
                 PyErr_SetString(PyExc_ValueError,
                     "Set object not iterable");
                 return options_list::undefined;

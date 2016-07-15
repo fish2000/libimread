@@ -334,7 +334,7 @@ namespace py {
     ///     /// do the same* pyThing stuff ...
     ///     /// ... but as a chuckling Jobs said c. 1999, THERE IS NO STEP THREE
     ///
-    /// ... the fine print is that some calls may balk at being passed a py::ref instead of
+    /// ... (*) the fine print: some calls may balk at being passed a py::ref instead of
     /// a vanilla PyObject*, notably macros e.g. PyString_AS_STRING(); you can deal
     /// with those by manually sticking in a get() method call e.g. PyString_AS_STRING(ref.get())
     /// which will inline a return of the wrapped PyObject*. 
@@ -385,7 +385,7 @@ namespace py {
                                             >;
             
             /// default constructor, yields a nullptr referent
-            ref();
+            ref() noexcept;
             
             /// py::refs are moveable via construction/assignment
             /// ... but *not* copyable as you may note
@@ -393,8 +393,8 @@ namespace py {
             ref& operator=(ref&& other) noexcept;
             
             /// py::refs are constructable/assignable direct from PyObject*
-            ref(pyptr_t obj);
-            ref& operator=(pyptr_t obj);
+            ref(pyptr_t obj) noexcept;
+            ref& operator=(pyptr_t obj) noexcept;
             
             /// conditionally-enabled templates to allow direct construction
             /// and/or assignment of py::refs from ANY type that can
@@ -422,8 +422,8 @@ namespace py {
             virtual ~ref();
             
             /// implicit and explicit getters for the internal PyObject*
-            operator pyptr_t() const;
-            pyptr_t get() const;
+            operator pyptr_t() const noexcept;
+            pyptr_t get() const noexcept;
             
             /// refcount control methods, mapped to their macro namesakes
             ref const& inc() const;
@@ -438,13 +438,21 @@ namespace py {
             ref const& xdec(std::size_t) const;
             
             /// std::shared_ptr-esque calls, for explicit lifecycle termination
-            pyptr_t release();
+            pyptr_t release() noexcept;
             ref& reset();
             ref& reset(pyptr_t);
             
-            /// boolean-test method and boolean-conversion operator
-            bool empty() const;
-            explicit operator bool() const;
+            /// member swap and friend swap
+            void swap(ref& other) noexcept;
+            friend void swap(ref& lhs, ref& rhs) noexcept;
+            
+            /// member hash method
+            std::size_t hash() const;
+            
+            /// boolean-test methods and boolean-conversion operator
+            bool empty() const noexcept;
+            bool truth() const;
+            explicit operator bool() const noexcept;
             
         private:
             
