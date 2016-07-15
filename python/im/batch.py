@@ -185,7 +185,7 @@ class Batch(ConstrainedBatch):
     constrain(value__entropy__gte=4.5)              # Custom value stipulation (entropy >= 4.5)
     constrain(alpha=True)                           # Require alpha channels (False forbids images with alpha channels)
     
-    
+        
     
 
 
