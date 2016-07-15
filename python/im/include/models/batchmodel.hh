@@ -32,8 +32,7 @@ namespace std {
         
         result_type operator()(argument_type pyobj) const {
             /// Who's holding the GIL? We abdicate responsibility;
-            /// but so I do declare it should be held by someone
-            // py::gil::ensure yesgil;
+            /// but so: I hereby declare someone should hold that shit
             return static_cast<result_type>(PyObject_Hash(pyobj));
         }
         
@@ -375,22 +374,20 @@ namespace py {
                         "extend(): iterable sequence required");
                     return false;
                 }
-                PyObject* sequence = PySequence_Fast(iterable,
+                py::ref sequence = PySequence_Fast(iterable,
                     "extend(): sequence extraction failed");
-                int idx = 0, len = PySequence_Fast_GET_SIZE(sequence);
+                int idx = 0, len = PySequence_Fast_GET_SIZE(sequence.get());
                 for (; idx < len; idx++) {
                     /// PySequence_Fast_GET_ITEM() yields a borrowed reference...
-                    PyObject* item = PySequence_Fast_GET_ITEM(sequence, idx);
+                    PyObject* item = PySequence_Fast_GET_ITEM(sequence.get(), idx);
                     if (!PyObject_CheckBuffer(item)) {
                         PyErr_SetString(PyExc_ValueError,
                             "extend(): unbuffered item found");
-                        Py_DECREF(sequence);
                         return false;
                     }
                     internal.push_back(item);
                     Py_INCREF(item); /// ... hence this incref
                 }
-                Py_DECREF(sequence);
                 return !PyErr_Occurred();
             }
             
@@ -426,20 +423,18 @@ namespace py {
             
             PyObject* pop(Py_ssize_t idx = -1) {
                 if (idx == -1) {
-                    PyObject* out = internal.back();
+                    py::ref out = internal.back();
                     internal.pop_back();
-                    Py_DECREF(out);
-                    return out;
+                    return out.get();
                 }
                 if (idx > internal.size() || idx < -1) {
                     PyErr_SetString(PyExc_IndexError,
                         "pop(): index out of range");
                     return nullptr;
                 }
-                PyObject* out = internal.at(idx);
+                py::ref out = internal.at(idx);
                 internal.erase(internal.begin() + idx);
-                Py_DECREF(out);
-                return out;
+                return out.get();
             }
             
             bool remove(PyObject* obj) {
@@ -472,19 +467,15 @@ namespace py {
             }
             
             PyObject* as_pytuple() {
-                PyObject* list = as_pylist();
-                PyObject* out = PyList_AsTuple(list);
-                Py_DECREF(list);
-                return out;
+                py::ref list = as_pylist();
+                return PyList_AsTuple(list);
             }
             
             #define NUMBER_FROM_PYOBJECT(obj, attribute)                                            \
                 if (PyObject_HasAttrString(obj, #attribute) == 1) {                                 \
-                    PyObject* pynumber = PyObject_GetAttrString(obj, #attribute);                   \
-                    if (pynumber != nullptr) {                                                      \
-                        Py_ssize_t out = PyInt_AsSsize_t(pynumber);                                 \
-                        Py_DECREF(pynumber);                                                        \
-                        return out;                                                                 \
+                    py::ref pynumber = PyObject_GetAttrString(obj, #attribute);                     \
+                    if (pynumber.get() != nullptr) {                                                \
+                        return PyInt_AsSsize_t(pynumber);                                           \
                     }                                                                               \
                 }
             

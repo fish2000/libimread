@@ -176,21 +176,19 @@ namespace py {
                 
                 /// set up fast-sequence iterable
                 PyObject* basis = nullptr;
-                PyObject* sequence = PySequence_Fast(planes, "Sequence expected");
+                py::ref sequence = PySequence_Fast(planes, "Sequence expected");
                 int idx = 0,
-                    len = PySequence_Fast_GET_SIZE(sequence);
+                    len = PySequence_Fast_GET_SIZE(sequence.get());
                 
                 if (len < 1) {
-                    Py_DECREF(sequence);
                     PyErr_SetString(PyExc_ValueError,
                         "Sequence has no items");
                     return nullptr;
                 }
                 
                 /// check the sequences' type (essentially against `type(self)`)
-                PyObject* pynitial = PySequence_Fast_GET_ITEM(sequence, idx);
+                PyObject* pynitial = PySequence_Fast_GET_ITEM(sequence.get(), idx);
                 if (!PyObject_TypeCheck(pynitial, type)) {
-                    Py_DECREF(sequence);
                     PyErr_SetString(PyExc_TypeError,
                         "Wrong sequence item type");
                     return nullptr;
@@ -205,16 +203,14 @@ namespace py {
                 /// and b) that their dimensions match those of the initial item
                 for (idx = 1; idx < len; idx++) {
                     PythonImageType* item = reinterpret_cast<PythonImageType*>(
-                                            PySequence_Fast_GET_ITEM(sequence, idx));
+                                            PySequence_Fast_GET_ITEM(sequence.get(), idx));
                     if (!PyObject_TypeCheck(py::convert(item), type)) {
-                        Py_DECREF(sequence);
                         PyErr_SetString(PyExc_TypeError,
                             "Mismatched image type");
                         return nullptr;
                     }
                     if (item->image->dim(0) != width ||
                         item->image->dim(1) != height) {
-                        Py_DECREF(sequence);
                         PyErr_SetString(PyExc_AttributeError,
                             "Mismatched image dimensions");
                         return nullptr;
@@ -222,18 +218,16 @@ namespace py {
                 }
                 
                 /// actual allocation loop
-                basis = PySequence_Fast_GET_ITEM(sequence, 0);
+                basis = PySequence_Fast_GET_ITEM(sequence.get(), 0);
                 Py_INCREF(basis);
                 if (len > 1) {
                     for (idx = 1; idx < len; idx++) {
                         basis = py::convert(
                                 new PythonImageType(basis,
-                                    PySequence_Fast_GET_ITEM(sequence, idx)));
+                                    PySequence_Fast_GET_ITEM(sequence.get(), idx)));
                     }
                 }
                 
-                /// clean up fast-sequence iterable before returning
-                Py_DECREF(sequence);
                 return basis;
             }
             
@@ -349,10 +343,10 @@ namespace py {
                 PythonImageType* rhs = reinterpret_cast<PythonImageType*>(pyrhs);
                 imagebuffer_t* lhsbuf = reinterpret_cast<imagebuffer_t*>(lhs->imagebuffer);
                 imagebuffer_t* rhsbuf = reinterpret_cast<imagebuffer_t*>(rhs->imagebuffer);
-                std::size_t lhs_siz = static_cast<std::size_t>(lhsbuf->__len__());
-                std::size_t rhs_siz = static_cast<std::size_t>(rhsbuf->__len__());
-                py::ref lhs_compare = py::string((char const*)lhsbuf->internal->host, lhs_siz);
-                py::ref rhs_compare = py::string((char const*)rhsbuf->internal->host, rhs_siz);
+                py::ref lhs_compare = py::string((char const*)lhsbuf->internal->host,
+                                                 static_cast<std::size_t>(lhsbuf->__len__()));
+                py::ref rhs_compare = py::string((char const*)rhsbuf->internal->host,
+                                                 static_cast<std::size_t>(rhsbuf->__len__()));
                 return PyObject_Compare(lhs_compare, rhs_compare);
             }
             
@@ -465,8 +459,7 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int traverse(PyObject* self, visitproc visit, void* arg) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                pyim->vacay(visit, arg);
-                return 0;
+                return pyim->vacay(visit, arg);
             }
             
             template <typename ImageType = HalideNumpyImage,

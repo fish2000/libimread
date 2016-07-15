@@ -236,8 +236,7 @@ namespace py {
                       typename PythonBufferType = BufferModelBase<BufferType>>
             int traverse(PyObject* self, visitproc visit, void* arg) {
                 PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
-                pybuf->vacay(visit, arg);
-                return 0;
+                return pybuf->vacay(visit, arg);
             }
             
             namespace methods {

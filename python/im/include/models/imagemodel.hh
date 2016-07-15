@@ -486,14 +486,11 @@ namespace py {
                     case 4:
                     case 5: {
                         ImageModelBase* basis = new ImageModelBase(py::convert(this), 0);
-                        ImageModelBase* etc;
                         int idx = 1,
                             len = image->planes() - 1;
                         for (Py_INCREF(basis); idx < len; ++idx) {
-                            etc = new ImageModelBase(py::convert(this), idx);
-                            basis = new ImageModelBase(py::convert(basis),
-                                                       py::convert(etc));
-                            Py_DECREF(etc);
+                            py::ref etc = new ImageModelBase(py::convert(this), idx);
+                            basis = new ImageModelBase(py::convert(basis), etc);
                         }
                         return py::convert(basis);
                     }
