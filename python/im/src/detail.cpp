@@ -161,6 +161,7 @@ namespace py {
     /*
      * THE IMPLEMENTATIONS: py::ref
      */
+    
     ref::ref() {}
     
     ref::ref(ref&& other) noexcept
@@ -184,16 +185,60 @@ namespace py {
         return *this;
     }
     
-    ref::~ref() { Py_XDECREF(referent); }
+    ref::~ref()         { Py_XDECREF(referent); }
     
     ref::operator pyptr_t() const { return referent; }
     ref::pyptr_t ref::get() const { return referent; }
     
-    void ref::inc() { Py_INCREF(referent); }
-    void ref::dec() { Py_DECREF(referent); }
-    void ref::xinc() { Py_XINCREF(referent); }
-    void ref::xdec() { Py_XDECREF(referent); }
-    void ref::clear() { Py_CLEAR(referent); }
+    ref const& ref::inc() const     { Py_INCREF(referent); return *this; }
+    ref const& ref::dec() const     { Py_DECREF(referent); return *this; }
+    ref const& ref::xinc() const    { Py_XINCREF(referent); return *this; }
+    ref const& ref::xdec() const    { Py_XDECREF(referent); return *this; }
+    ref&       ref::clear()         { Py_CLEAR(referent); return *this; }
+    
+    ref const& ref::inc(int c) const {
+        switch (c) {
+            case 0: return *this;
+            case 1: return inc();
+            default: {
+                for (int idx = 0; idx < c; ++idx) { Py_INCREF(referent); }
+                return *this;
+            }
+        }
+    }
+    
+    ref const& ref::dec(int c) const {
+        switch (c) {
+            case 0: return *this;
+            case 1: return dec();
+            default: {
+                for (int idx = 0; idx < c; ++idx) { Py_DECREF(referent); }
+                return *this;
+            }
+        }
+    }
+    
+    ref const& ref::xinc(int c) const {
+        switch (c) {
+            case 0: return *this;
+            case 1: return xinc();
+            default: {
+                for (int idx = 0; idx < c; ++idx) { Py_XINCREF(referent); }
+                return *this;
+            }
+        }
+    }
+    
+    ref const& ref::xdec(int c) const {
+        switch (c) {
+            case 0: return *this;
+            case 1: return xdec();
+            default: {
+                for (int idx = 0; idx < c; ++idx) { Py_XDECREF(referent); }
+                return *this;
+            }
+        }
+    }
     
     ref::pyptr_t ref::release() {
         ref::pyptr_t out = referent;
@@ -201,27 +246,24 @@ namespace py {
         return out;
     }
     
-    void ref::reset() {
-        clear();
+    ref& ref::reset() {
+        return clear();
     }
     
-    void ref::reset(ref::pyptr_t reset_to) {
+    ref& ref::reset(ref::pyptr_t reset_to) {
         xdec();
         referent = reset_to;
+        return *this;
     }
     
     namespace detail {
         
-        int setitemstring(PyObject* dict, char const* key, PyObject* value) {
-            int out = PyDict_SetItemString(dict, key, value);
-            Py_DECREF(value);
-            return out;
+        int setitemstring(PyObject* dict, char const* key, py::ref value) {
+            return PyDict_SetItemString(dict, key, value);
         }
         
-        int setitemstring(PyObject* dict, std::string const& key, PyObject* value) {
-            int out = PyDict_SetItemString(dict, key.c_str(), value);
-            Py_DECREF(value);
-            return out;
+        int setitemstring(PyObject* dict, std::string const& key, py::ref value) {
+            return PyDict_SetItemString(dict, key.c_str(), value);
         }
         
         PyObject* structcode_to_dtype(char const* code) {
@@ -308,8 +350,7 @@ namespace py {
                                              py::string(format));
                          } ++idx; }
             
-            PyObject* out = PyList_AsTuple(list);
-            return out;
+            return PyList_AsTuple(list);
         }
         
         PyObject* formats_as_infodict(int idx) {
@@ -328,15 +369,14 @@ namespace py {
                  it != formats.end() && idx < max;
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
-                             PyObject* options;
                              options_map opts;
                              {
                                  py::gil::release nogil;
                                  auto format_ptr = ImageFormat::named(format);
                                  opts = format_ptr->get_options();
                              }
-                             options = py::options::revert(opts);
-                             py::detail::setitemstring(infodict, format, options);
+                             py::detail::setitemstring(infodict, format,
+                                                       py::options::revert(opts));
                          } ++idx; }
             
             return infodict;

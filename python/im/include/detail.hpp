@@ -426,16 +426,21 @@ namespace py {
             pyptr_t get() const;
             
             /// refcount control methods, mapped to their macro namesakes
-            void inc();
-            void dec();
-            void xinc();
-            void xdec();
-            void clear();
+            ref const& inc() const;
+            ref const& dec() const;
+            ref const& xinc() const;
+            ref const& xdec() const;
+            ref&      clear();
+            
+            ref const& inc(int) const;
+            ref const& dec(int) const;
+            ref const& xinc(int) const;
+            ref const& xdec(int) const;
             
             /// std::shared_ptr-esque calls, for explicit lifecycle termination
             pyptr_t release();
-            void reset();
-            void reset(pyptr_t);
+            ref& reset();
+            ref& reset(pyptr_t);
             
         private:
             
@@ -623,8 +628,8 @@ namespace py {
         }
         
         /// Version of PyDict_SetItemString that STEALS REFERENCES:
-        int setitemstring(PyObject* dict, char const* key, PyObject* value);
-        int setitemstring(PyObject* dict, std::string const& key, PyObject* value);
+        int setitemstring(PyObject* dict, char const* key, py::ref value);
+        int setitemstring(PyObject* dict, std::string const& key, py::ref value);
         
         /// A misnomer -- actually returns a dtype-compatible tuple full
         /// of label/format subtuples germane to the description
