@@ -474,7 +474,7 @@ namespace py {
             #define NUMBER_FROM_PYOBJECT(obj, attribute)                                            \
                 if (PyObject_HasAttrString(obj, #attribute) == 1) {                                 \
                     py::ref pynumber = PyObject_GetAttrString(obj, #attribute);                     \
-                    if (pynumber.get() != nullptr) {                                                \
+                    if (!pynumber.empty()) {                                                        \
                         return PyInt_AsSsize_t(pynumber);                                           \
                     }                                                                               \
                 }

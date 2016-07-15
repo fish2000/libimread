@@ -458,15 +458,9 @@ namespace py {
                 switch (image->planes()) {
                     case 1:
                     case 3: {
-                        Py_INCREF(this);
-                        ImageModelBase* alpha = new ImageModelBase(
-                            image->dim(0), image->dim(1),
-                            1, 0xFF,       image->nbits());
-                        ImageModelBase* out = new ImageModelBase(
-                            py::convert(this),
-                            py::convert(alpha));
-                        delete alpha;
-                        return py::convert(out);
+                        py::ref alpha = new ImageModelBase(image->dim(0), image->dim(1),
+                                                           1, 0xFF,       image->nbits());
+                        return py::convert(new ImageModelBase(py::object(this), alpha));
                     }
                     case 2:
                     case 4:
