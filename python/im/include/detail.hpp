@@ -432,10 +432,10 @@ namespace py {
             ref const& xdec() const;
             ref&      clear();
             
-            ref const& inc(int) const;
-            ref const& dec(int) const;
-            ref const& xinc(int) const;
-            ref const& xdec(int) const;
+            ref const& inc(std::size_t) const;
+            ref const& dec(std::size_t) const;
+            ref const& xinc(std::size_t) const;
+            ref const& xdec(std::size_t) const;
             
             /// std::shared_ptr-esque calls, for explicit lifecycle termination
             pyptr_t release();

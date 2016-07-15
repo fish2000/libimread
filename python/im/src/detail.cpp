@@ -196,45 +196,45 @@ namespace py {
     ref const& ref::xdec() const    { Py_XDECREF(referent); return *this; }
     ref&       ref::clear()         { Py_CLEAR(referent); return *this; }
     
-    ref const& ref::inc(int c) const {
+    ref const& ref::inc(std::size_t c) const {
         switch (c) {
             case 0: return *this;
             case 1: return inc();
             default: {
-                for (int idx = 0; idx < c; ++idx) { Py_INCREF(referent); }
+                for (std::size_t idx = 0; idx < c; ++idx) { Py_INCREF(referent); }
                 return *this;
             }
         }
     }
     
-    ref const& ref::dec(int c) const {
+    ref const& ref::dec(std::size_t c) const {
         switch (c) {
             case 0: return *this;
             case 1: return dec();
             default: {
-                for (int idx = 0; idx < c; ++idx) { Py_DECREF(referent); }
+                for (std::size_t idx = 0; idx < c; ++idx) { Py_DECREF(referent); }
                 return *this;
             }
         }
     }
     
-    ref const& ref::xinc(int c) const {
+    ref const& ref::xinc(std::size_t c) const {
         switch (c) {
             case 0: return *this;
             case 1: return xinc();
             default: {
-                for (int idx = 0; idx < c; ++idx) { Py_XINCREF(referent); }
+                for (std::size_t idx = 0; idx < c; ++idx) { Py_XINCREF(referent); }
                 return *this;
             }
         }
     }
     
-    ref const& ref::xdec(int c) const {
+    ref const& ref::xdec(std::size_t c) const {
         switch (c) {
             case 0: return *this;
             case 1: return xdec();
             default: {
-                for (int idx = 0; idx < c; ++idx) { Py_XDECREF(referent); }
+                for (std::size_t idx = 0; idx < c; ++idx) { Py_XDECREF(referent); }
                 return *this;
             }
         }
