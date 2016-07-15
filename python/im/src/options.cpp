@@ -130,14 +130,10 @@ namespace py {
                     "Set object not iterable");
                 return options_list::undefined;
             }
-            py::ref item;
-            while ((item = PyIter_Next(iterator))) {
-                /// double-parens silence a warning
+            while (py::ref item = PyIter_Next(iterator)) {
                 Json ison(Json::null);
                 ison = py::options::convert(item); /// might PyErr here
                 out.append(ison);
-                /// item assigned out-of-scope, manually decref it:
-                item.dec();
             }
             if (PyErr_Occurred()) {
                 PyErr_SetString(PyExc_IOError,

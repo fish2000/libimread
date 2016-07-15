@@ -1738,10 +1738,9 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* options = PyDict_New();
+                py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("png"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    Py_DECREF(options);
                     return nullptr;
                 }
                 return pyim->saveblob(pyim->writeopts());
@@ -1752,10 +1751,9 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_jpeg(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* options = PyDict_New();
+                py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("jpg"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    Py_DECREF(options);
                     return nullptr;
                 }
                 return pyim->saveblob(pyim->writeopts());
@@ -1766,11 +1764,10 @@ namespace py {
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_html(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-                PyObject* options = PyDict_New();
+                py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("jpg"));
                 py::detail::setitemstring(options, "as_html", py::True());
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    Py_DECREF(options);
                     return nullptr;
                 }
                 return pyim->saveblob(pyim->writeopts());

@@ -185,10 +185,10 @@ namespace py {
         return *this;
     }
     
-    ref::~ref()         { Py_XDECREF(referent); }
+    ref::~ref()                     { Py_XDECREF(referent); }
     
-    ref::operator pyptr_t() const { return referent; }
-    ref::pyptr_t ref::get() const { return referent; }
+    ref::operator pyptr_t() const   { return referent; }
+    ref::pyptr_t ref::get() const   { return referent; }
     
     ref const& ref::inc() const     { Py_INCREF(referent); return *this; }
     ref const& ref::dec() const     { Py_DECREF(referent); return *this; }
@@ -255,6 +255,9 @@ namespace py {
         referent = reset_to;
         return *this;
     }
+    
+    bool ref::empty() const { return referent == nullptr; }
+    ref::operator bool() const { return !empty(); }
     
     namespace detail {
         

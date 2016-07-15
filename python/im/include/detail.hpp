@@ -442,6 +442,10 @@ namespace py {
             ref& reset();
             ref& reset(pyptr_t);
             
+            /// boolean-test method and boolean-conversion operator
+            bool empty() const;
+            explicit operator bool() const;
+            
         private:
             
             pyptr_t referent = nullptr;         /// the object in question
