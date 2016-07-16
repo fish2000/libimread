@@ -272,23 +272,23 @@ namespace butteraugli {
         /// Gamma correction, as per butteraugli source:
         /// https://github.com/google/butteraugli/blob/master/src/butteraugli.h#L40-L44
         const int N = in.size();
-        planevec_t out(N);
+        planevec_t out;
+        out.resize(N, 0);
         auto planerator = out.begin();
         int idx = 0;
-        for (auto it = in.begin();
-             it != in.end() && idx < N;
-             ++it) { planerator = out.emplace(planerator,
-                         static_cast<pixel_t>(255.0f * std::pow(*it, EXPONENT)));
-                     ++idx; }
+        for (auto it = in.begin(); it != in.end(); ++it) {
+            planerator = out.emplace(planerator,
+                                     pixel_t(255.0f * std::pow(*it, EXPONENT)));
+        }
         return out;
     }
     
     pixvec_t auglize(pixvec_t const& in) {
-        pixvec_t out(in.size());
-        std::for_each(in.begin(), in.end(),
-                      [&out](planevec_t const& plane) {
-            out.push_back(std::move(auglize(plane)));
-        });
+        pixvec_t out;
+        std::transform(in.begin(),
+                       in.end(),
+                       std::back_inserter(out),
+                    [](planevec_t const& plane) { return auglize(plane); });
         return out;
     }
     
@@ -303,8 +303,8 @@ namespace butteraugli {
             return error_images_incomprable;
         }
         
-        pixvec_t rgb0 = std::move(auglize(lhs.allplanes<double>(2))); /// lastplane=0..2
-        pixvec_t rgb1 = std::move(auglize(rhs.allplanes<double>(2))); /// lastplane=0..2
+        pixvec_t rgb0(auglize(lhs.allplanes<double>(2))); /// lastplane=0..2
+        pixvec_t rgb1(auglize(rhs.allplanes<double>(2))); /// lastplane=0..2
         
         if (rgb0.size() != 3 || rgb1.size() != 3) {
             return error_unexpected_channel_count;
@@ -330,8 +330,8 @@ namespace butteraugli {
             return error_images_incomprable;
         }
         
-        pixvec_t rgb0 = std::move(auglize(lhs->allplanes<double>(2))); /// lastplane=0..2
-        pixvec_t rgb1 = std::move(auglize(rhs->allplanes<double>(2))); /// lastplane=0..2
+        pixvec_t rgb0(auglize(lhs->allplanes<double>(2))); /// lastplane=0..2
+        pixvec_t rgb1(auglize(rhs->allplanes<double>(2))); /// lastplane=0..2
         
         if (rgb0.size() != 3 || rgb1.size() != 3) {
             return error_unexpected_channel_count;

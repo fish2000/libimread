@@ -25,6 +25,7 @@ namespace py {
             Image* rhs = nullptr;
             PyObject* pylhs = nullptr;
             PyObject* pyrhs = nullptr;
+            comparison_t comparison;
             char const* keywords[] = { "lhs", "rhs", nullptr };
             
             if (!PyArg_ParseTupleAndKeywords(
@@ -50,7 +51,10 @@ namespace py {
             lhs = (Image*)PyCapsule_GetPointer(pylhs, nullptr);
             rhs = (Image*)PyCapsule_GetPointer(pyrhs, nullptr);
             
-            comparison_t comparison = butteraugli::compare(lhs, rhs);
+            {
+                py::gil::release nogil;
+                comparison = butteraugli::compare(lhs, rhs);
+            }
             
             if (int(comparison) > 10) { /// VERRRRY HACKY dogg I know
                 if (comparison == comparison_t::error_images_incomprable) {
