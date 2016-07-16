@@ -303,8 +303,8 @@ namespace butteraugli {
             return error_images_incomprable;
         }
         
-        pixvec_t rgb0 = std::move(auglize(lhs.allplanes<double>(3))); /// lastplane=3
-        pixvec_t rgb1 = std::move(auglize(rhs.allplanes<double>(3))); /// lastplane=3
+        pixvec_t rgb0 = std::move(auglize(lhs.allplanes<double>(2))); /// lastplane=0..2
+        pixvec_t rgb1 = std::move(auglize(rhs.allplanes<double>(2))); /// lastplane=0..2
         
         if (rgb0.size() != 3 || rgb1.size() != 3) {
             return error_unexpected_channel_count;
@@ -330,8 +330,8 @@ namespace butteraugli {
             return error_images_incomprable;
         }
         
-        pixvec_t rgb0 = std::move(auglize(lhs->allplanes<double>(3))); /// lastplane=3
-        pixvec_t rgb1 = std::move(auglize(rhs->allplanes<double>(3))); /// lastplane=3
+        pixvec_t rgb0 = std::move(auglize(lhs->allplanes<double>(2))); /// lastplane=0..2
+        pixvec_t rgb1 = std::move(auglize(rhs->allplanes<double>(2))); /// lastplane=0..2
         
         if (rgb0.size() != 3 || rgb1.size() != 3) {
             return error_unexpected_channel_count;
