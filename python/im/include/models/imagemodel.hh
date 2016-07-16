@@ -44,9 +44,6 @@ namespace py {
                     ContextType* context = (ContextType*)PyCapsule_GetContext(capsule);
                     if (context) { delete context; }
                     if (name) { std::free((void*)name); name = nullptr;    }
-                } else {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Invalid PyCapsule");
                 }
             };
         }
@@ -59,9 +56,6 @@ namespace py {
                     PyObject* context = (PyObject*)PyCapsule_GetContext(capsule);
                     if (context) { Py_DECREF(context); }
                     if (name) { std::free((void*)name); name = nullptr;    }
-                } else {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Invalid PyCapsule");
                 }
             };
         }
@@ -72,9 +66,6 @@ namespace py {
                 if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
                     char const* name = PyCapsule_GetName(capsule);
                     if (name) { std::free((void*)name); name = nullptr;    }
-                } else {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Invalid PyCapsule");
                 }
             };
         }

@@ -25,7 +25,7 @@ namespace py {
         /// Default capsule destructor template
         template <typename Pointer, typename Context>
         destructor_t decapsulator = [](PyObject* capsule) {
-            /// PyCapsule_Get* calls are guaranteed for valid capsules ...
+            /// PyCapsule_Get* calls are guaranteed for valid capsules
             if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
                 char const* name = PyCapsule_GetName(capsule);
                 Context* context = (Context*)PyCapsule_GetContext(capsule);
@@ -33,10 +33,6 @@ namespace py {
                 Pointer* pointer = (Pointer*)PyCapsule_GetPointer(capsule, name);
                 if (pointer) { delete pointer;      pointer = nullptr; }
                 if (name) { std::free((void*)name); name = nullptr;    }
-            } else {
-                /// ... otherwise everything returns nullptr anyway:
-                PyErr_SetString(PyExc_ValueError,
-                    "Invalid PyCapsule");
             }
         };
         
