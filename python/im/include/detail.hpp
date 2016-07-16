@@ -348,7 +348,7 @@ namespace py {
     ///     py::ref ref1 = 3.14159f;                        /// ref1 is a PyFloat
     ///     py::ref ref2 = "Yo Dogg";                       /// ref2 is a PyString
     ///     std::vector<byte> bv = image.plane<byte>(0);
-    ///     Py_buffer* view = PyObject_GetBuffer(image);
+    ///     Py_buffer* view = PyObject_GetBuffer(image);    /// (NB. not really this API call's signature)
     ///     py::buffer::source pyview(*view);               /// ... py::ref can't release a Py_buffer*!
     ///     py::ref ref3 = bv;                              /// ref3 is a PyTuple with bytes from an image's zero-plane
     ///     py::ref ref4 = view;                            /// ref4 is a PyMemoryView on the image buffer-back
@@ -455,6 +455,18 @@ namespace py {
             bool empty() const noexcept;
             bool truth() const;
             explicit operator bool() const noexcept;
+            
+            /// wrappers for PyObject_RichCompareBool()
+            bool operator==(ref const&) const;
+            bool operator!=(ref const&) const;
+            bool  operator<(ref const&) const;
+            bool operator<=(ref const&) const;
+            bool  operator>(ref const&) const;
+            bool operator>=(ref const&) const;
+            
+            /// stringification
+            std::string const to_string() const;
+            operator std::string() const;
             
         private:
             

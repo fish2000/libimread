@@ -288,6 +288,54 @@ namespace py {
         return !empty();
     }
     
+    bool ref::operator==(ref const& other) const {
+        if (empty() && other.empty()) { return true; }
+        if (empty() || other.empty()) { return false; }
+        return PyObject_RichCompareBool(referent, other.referent, Py_EQ) == 1;
+    }
+    
+    bool ref::operator!=(ref const& other) const {
+        if (empty() && other.empty()) { return false; }
+        if (empty() || other.empty()) { return true; }
+        return PyObject_RichCompareBool(referent, other.referent, Py_NE) == 1;
+    }
+    
+    bool  ref::operator<(ref const& other) const {
+        if (empty() || other.empty()) { return false; }
+        return PyObject_RichCompareBool(referent, other.referent, Py_LT) == 1;
+    }
+    
+    bool ref::operator<=(ref const& other) const {
+        if (empty() && other.empty()) { return true; }
+        if (empty() || other.empty()) { return false; }
+        return PyObject_RichCompareBool(referent, other.referent, Py_LE) == 1;
+    }
+    
+    bool  ref::operator>(ref const& other) const {
+        if (empty() || other.empty()) { return false; }
+        return PyObject_RichCompareBool(referent, other.referent, Py_GT) == 1;
+    }
+    
+    bool ref::operator>=(ref const& other) const {
+        if (empty() && other.empty()) { return true; }
+        if (empty() || other.empty()) { return false; }
+        return PyObject_RichCompareBool(referent, other.referent, Py_GE) == 1;
+    }
+    
+    std::string const ref::to_string() const {
+        if (empty()) { return "<nullptr>"; }
+        if (PyString_Check(referent)) {
+            return const_cast<char const*>(
+                PyString_AS_STRING(referent));
+        }
+        py::ref stringified = PyObject_Str(referent);
+        return stringified.to_string();
+    }
+    
+    ref::operator std::string() const {
+        return to_string();
+    }
+    
     namespace detail {
         
         int setitemstring(PyObject* dict, char const* key, py::ref value) {

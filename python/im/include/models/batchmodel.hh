@@ -325,9 +325,7 @@ namespace py {
                     py::ref repr = PyObject_Repr(pyobj);
                     
                     /// stringify + concatenate --
-                    /// NB: the Python API is soooo not const-correct:
-                    out += "    " + std::string(const_cast<char const*>(
-                                                PyString_AS_STRING(repr.get())));
+                    out += "    " + repr.to_string();
                     
                     /// conditionally append a comma:
                     out += pyobj == internal.back() ? "\n" : ",\n";
