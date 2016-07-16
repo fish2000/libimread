@@ -273,21 +273,19 @@ namespace butteraugli {
         /// https://github.com/google/butteraugli/blob/master/src/butteraugli.h#L40-L44
         const int N = in.size();
         planevec_t out;
-        out.resize(N, 0);
-        auto planerator = out.begin();
+        out.reserve(N);
         for (auto it = in.begin(); it != in.end(); ++it) {
-            planerator = out.emplace(planerator,
-                                     pixel_t(255.0f * std::pow(*it, EXPONENT)));
+            out.emplace_back(255.0f * std::pow(*it, EXPONENT));
         }
         return out;
     }
     
     pixvec_t auglize(pixvec_t const& in) {
         pixvec_t out;
-        std::transform(in.begin(),
-                       in.end(),
-                       std::back_inserter(out),
-                    [](planevec_t const& plane) { return auglize(plane); });
+        out.reserve(in.size());
+        std::for_each(in.begin(),
+                      in.end(),
+               [&out](planevec_t const& plane) { out.emplace_back(auglize(plane)); });
         return out;
     }
     
