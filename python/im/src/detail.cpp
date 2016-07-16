@@ -5,7 +5,6 @@
 #include "detail.hpp"
 #include "gil.hpp"
 #include "options.hpp"
-#include "pycapsule.hpp"
 #include "structcode.hpp"
 
 #define NO_IMPORT_ARRAY
@@ -15,20 +14,6 @@
 #include <libimread/imageformat.hh>
 
 namespace py {
-    
-    namespace capsule {
-        
-        template <>
-        destructor_t decapsulator<void, void> = [](PyObject* capsule) {
-            if (!PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Invalid PyCapsule");
-            }
-            char const* name = PyCapsule_GetName(capsule);
-            if (name) { std::free((void*)name); name = nullptr;    }
-        };
-        
-    }
     
     PyObject* None()  { return Py_BuildValue("O", Py_None); }
     PyObject* True()  { return Py_BuildValue("O", Py_True); }
@@ -111,7 +96,7 @@ namespace py {
     PyObject* convert(ModelBase* operand)           { return (PyObject*)operand; }
     PyObject* convert(std::nullptr_t operand)       { return Py_BuildValue("O", Py_None); }
     PyObject* convert(void)                         { return Py_BuildValue("O", Py_None); }
-    PyObject* convert(void* operand)                { return py::capsule::encapsulate(operand); }
+    PyObject* convert(void* operand)                { return (PyObject*)operand; }
     PyObject* convert(bool operand)                 { return Py_BuildValue("O", operand ? Py_True : Py_False); }
     PyObject* convert(std::size_t operand)          { return PyInt_FromSize_t(operand); }
     PyObject* convert(Py_ssize_t operand)           { return PyInt_FromSsize_t(operand); }

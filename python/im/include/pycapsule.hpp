@@ -28,9 +28,9 @@ namespace py {
             /// PyCapsule_Get* calls are guaranteed for valid capsules ...
             if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
                 char const* name = PyCapsule_GetName(capsule);
-                Context context = (Context)PyCapsule_GetContext(capsule);
+                Context* context = (Context*)PyCapsule_GetContext(capsule);
                 if (context) { delete context;      context = nullptr; }
-                Pointer pointer = (Pointer)PyCapsule_GetPointer(capsule, name);
+                Pointer* pointer = (Pointer*)PyCapsule_GetPointer(capsule, name);
                 if (pointer) { delete pointer;      pointer = nullptr; }
                 if (name) { std::free((void*)name); name = nullptr;    }
             } else {
@@ -41,8 +41,8 @@ namespace py {
         };
         
         template <typename Pointer, typename Context>
-        PyObject* encapsulate(Pointer pointer,
-                              Context context = nullptr,
+        PyObject* encapsulate(Pointer* pointer,
+                              Context* context = nullptr,
                               char const* name = nullptr,
                               destructor_t destructor = decapsulator<Pointer, Context>) {
             if (!pointer) {

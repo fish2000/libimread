@@ -36,35 +36,48 @@ namespace py {
         
         using im::Image;
         
-        template <>
-        destructor_t decapsulator<Image, std::nullptr_t> = [](PyObject* capsule) {
-            if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
-                char const* name = PyCapsule_GetName(capsule);
-                // Image* pointer = (Image*)PyCapsule_GetPointer(capsule, name);
-                // if (pointer) { delete pointer;      pointer = nullptr; }
-                if (name) { std::free((void*)name); name = nullptr;    }
-            } else {
-                /// ... otherwise everything returns nullptr anyway:
-                PyErr_SetString(PyExc_ValueError,
-                    "Invalid PyCapsule");
-            }
-        };
+        template <typename ContextType> inline
+        py::capsule::destructor_t decapsulaton_f() {
+            return [](PyObject* capsule) {
+                if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+                    char const* name = PyCapsule_GetName(capsule);
+                    ContextType* context = (ContextType*)PyCapsule_GetContext(capsule);
+                    if (context) { delete context; }
+                    if (name) { std::free((void*)name); name = nullptr;    }
+                } else {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Invalid PyCapsule");
+                }
+            };
+        }
         
-        template <>
-        destructor_t decapsulator<Image, PyObject> = [](PyObject* capsule) {
-            if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
-                char const* name = PyCapsule_GetName(capsule);
-                PyObject* context = (PyObject*)PyCapsule_GetContext(capsule);
-                if (context) { Py_DECREF(context); }
-                // Image* pointer = (Image*)PyCapsule_GetPointer(capsule, name);
-                // if (pointer) { delete pointer;      pointer = nullptr; }
-                if (name) { std::free((void*)name); name = nullptr;    }
-            } else {
-                /// ... otherwise everything returns nullptr anyway:
-                PyErr_SetString(PyExc_ValueError,
-                    "Invalid PyCapsule");
-            }
-        };
+        template <> inline
+        py::capsule::destructor_t decapsulaton_f<PyObject>() {
+            return [](PyObject* capsule) {
+                if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+                    char const* name = PyCapsule_GetName(capsule);
+                    PyObject* context = (PyObject*)PyCapsule_GetContext(capsule);
+                    if (context) { Py_DECREF(context); }
+                    if (name) { std::free((void*)name); name = nullptr;    }
+                } else {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Invalid PyCapsule");
+                }
+            };
+        }
+        
+        template <> inline
+        py::capsule::destructor_t decapsulaton_f<std::nullptr_t>() {
+            return [](PyObject* capsule) {
+                if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+                    char const* name = PyCapsule_GetName(capsule);
+                    if (name) { std::free((void*)name); name = nullptr;    }
+                } else {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Invalid PyCapsule");
+                }
+            };
+        }
         
     }
     
@@ -633,8 +646,9 @@ namespace py {
             }
             
             PyObject* encapsulate() {
-                return py::capsule::encapsulate<Image>(image.get(),
-                                                       py::object(this));
+                return py::capsule::encapsulate<ImageType>(image.get(),
+                                                           py::object(this), nullptr,
+                                                           py::capsule::decapsulaton_f<PyObject>());
             }
             
             options_map readopts() {

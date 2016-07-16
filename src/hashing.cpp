@@ -299,7 +299,7 @@ namespace butteraugli {
         const int w = lhs.dim(0),
                   h = lhs.dim(1);
         
-        if (w != rhs.dim(0) || h != rhs.dim(0)) {
+        if (w != rhs.dim(0) || h != rhs.dim(1)) {
             return error_images_incomprable;
         }
         
@@ -326,7 +326,7 @@ namespace butteraugli {
         const int w = lhs->dim(0),
                   h = lhs->dim(1);
         
-        if (w != rhs->dim(0) || h != rhs->dim(0)) {
+        if (w != rhs->dim(0) || h != rhs->dim(1)) {
             return error_images_incomprable;
         }
         
