@@ -60,18 +60,9 @@ namespace py {
                 /// context can be nullptr w/o invalidating capsule
                 PyErr_SetString(PyExc_ValueError,
                     "Failure assigning PyCapsule context");
-                // PyObject_Del(capsule);
-                // capsule = nullptr;
             } 
             return capsule;
         }
-        
-        // template <typename Pointer, typename Context = void>
-        // PyObject* make_capsule(Pointer* pointer,
-        //                        Context* context = nullptr,
-        //                        char const* name = nullptr,
-        //                        destructor_t destructor = default_destructor<Pointer, Context>) {
-        // }
         
     }; /* namespace capsule */
     
