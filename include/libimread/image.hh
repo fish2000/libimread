@@ -97,10 +97,10 @@ namespace im {
                 access_t accessor = access<T>();
                 
                 /// fill plane vector
-                planevec_t out(siz);
-                out.resize(siz);
-                for (int x = 0; x < w; x++) {
-                    for (int y = 0; y < h; y++) {
+                planevec_t out;
+                out.resize(siz, 0);
+                for (int x = 0; x < w; ++x) {
+                    for (int y = 0; y < h; ++y) {
                         pix::convert(static_cast<U>(
                             accessor(x, y, idx)[0]),
                                      out[y * w + x]);
@@ -114,8 +114,8 @@ namespace im {
                 using planevec_t = std::vector<T>;
                 using pixvec_t = std::vector<planevec_t>;
                 const int planecount = std::min(planes(), lastplane);
-                pixvec_t out(planecount);
-                for (int idx = 0; idx < planecount; idx++) {
+                pixvec_t out;
+                for (int idx = 0; idx < planecount; ++idx) {
                     out.push_back(std::move(plane<T, U>(idx)));
                 }
                 return out;
