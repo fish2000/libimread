@@ -250,7 +250,7 @@ namespace std {
 namespace butteraugli {
     
     using im::Image;
-    using pixel_t = double;
+    using pixel_t = float;
     using planevec_t = std::vector<pixel_t>;
     using pixvec_t = std::vector<planevec_t>;
     
