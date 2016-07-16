@@ -88,11 +88,13 @@ namespace py {
                 {}
             
             /// tag dispatch, reinterpret, depointerize, copy-construct
-            explicit BufferModelBase(PyObject* other, typename Tag::FromBuffer tag = typename Tag::FromBuffer{})
+            explicit BufferModelBase(PyObject* other,
+                                     typename Tag::FromBuffer tag = typename Tag::FromBuffer{})
                 :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other))
                 {}
             
-            explicit BufferModelBase(PyObject* bufferhost, typename Tag::FromPyBuffer) {
+            explicit BufferModelBase(PyObject* bufferhost,
+                                     typename Tag::FromPyBuffer) {
                 Py_buffer view{ 0 };
                 if (PyObject_GetBuffer(bufferhost, &view, PyBUF_ND | PyBUF_STRIDES) != -1) {
                     internal = unique_buffer_t(im::buffer::heapcopy(&view));

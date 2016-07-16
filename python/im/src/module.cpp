@@ -424,6 +424,16 @@ PyTypeObject BatchIterator_Type = {
 
 static PyMethodDef module_functions[] = {
     {
+        "butteraugli",
+            (PyCFunction)py::functions::butteraugli,
+            METH_VARARGS | METH_KEYWORDS,
+            "detect(lhs=image0, rhs=image1) -> int\n"
+            "\t-> Compare two images using the ButterAugli algorithm, \n"
+            "\t   with return values: \n"
+            "\t - 0, images are the same; \n"
+            "\t - 1, images display extremely subtle differences; \n"
+            "\t - 2, images are markedly different.\n" },
+    {
         "detect",
             (PyCFunction)py::functions::detect,
             METH_VARARGS | METH_KEYWORDS,

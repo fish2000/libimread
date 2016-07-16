@@ -319,4 +319,31 @@ namespace butteraugli {
         
     }
     
+    comparison_t compare(Image* lhs, Image* rhs) {
+        double diffvalue;
+        planevec_t diffmap; /// not currently used
+        bool augli_buttered = false;
+        const int w = lhs->dim(0),
+                  h = lhs->dim(1);
+        
+        if (w != rhs->dim(0) || h != rhs->dim(0)) {
+            return error_images_incomprable;
+        }
+        
+        pixvec_t rgb0 = std::move(auglize(lhs->allplanes<double>(3))); /// lastplane=3
+        pixvec_t rgb1 = std::move(auglize(rhs->allplanes<double>(3))); /// lastplane=3
+        
+        if (rgb0.size() != 3 || rgb1.size() != 3) {
+            return error_unexpected_channel_count;
+        }
+        
+        augli_buttered = ButteraugliInterface(w, h, rgb0, rgb1,
+                                              diffmap, diffvalue);
+        
+        if (!augli_buttered) { return error_augli_not_buttered; }
+        return diffvalue < kButteraugliGood ? same : 
+               diffvalue < kButteraugliBad  ? subtle : different;
+        
+    }
+    
 } /* namespace butteraugli */

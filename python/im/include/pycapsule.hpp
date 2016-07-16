@@ -26,22 +26,23 @@ namespace py {
         template <typename Pointer, typename Context>
         destructor_t decapsulator = [](PyObject* capsule) {
             /// PyCapsule_Get* calls are guaranteed for valid capsules ...
-            if (!PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+            if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+                char const* name = PyCapsule_GetName(capsule);
+                Context context = (Context)PyCapsule_GetContext(capsule);
+                if (context) { delete context;      context = nullptr; }
+                Pointer pointer = (Pointer)PyCapsule_GetPointer(capsule, name);
+                if (pointer) { delete pointer;      pointer = nullptr; }
+                if (name) { std::free((void*)name); name = nullptr;    }
+            } else {
+                /// ... otherwise everything returns nullptr anyway:
                 PyErr_SetString(PyExc_ValueError,
                     "Invalid PyCapsule");
             }
-            /// ... otherwise everything returns nullptr anyway:
-            char const* name = PyCapsule_GetName(capsule);
-            Context* context = (Context*)PyCapsule_GetContext(capsule);
-            if (context) { delete context;      context = nullptr; }
-            Pointer* pointer = (Pointer*)PyCapsule_GetPointer(capsule, name);
-            if (pointer) { delete pointer;      pointer = nullptr; }
-            if (name) { std::free((void*)name); name = nullptr;    }
         };
         
-        template <typename Pointer, typename Context = void>
-        PyObject* encapsulate(Pointer* pointer,
-                              Context* context = nullptr,
+        template <typename Pointer, typename Context>
+        PyObject* encapsulate(Pointer pointer,
+                              Context context = nullptr,
                               char const* name = nullptr,
                               destructor_t destructor = decapsulator<Pointer, Context>) {
             if (!pointer) {

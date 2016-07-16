@@ -113,6 +113,7 @@ extensions = {
         "im/src/detail.cpp",
         "im/src/gil.cpp",
         "im/src/gil-io.cpp",
+        "im/src/pymethods/butteraugli.cpp",
         "im/src/pymethods/detect.cpp",
         "im/src/pymethods/structcode_parse.cpp",
         "im/src/pymethods/typecheck.cpp",

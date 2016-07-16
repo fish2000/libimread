@@ -1007,6 +1007,15 @@ namespace py {
                 return pyim->remove_alpha();
             }
             
+            /// ImageType.encapsulate() method
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject*    encapsulate(PyObject* self, PyObject*) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                return pyim->encapsulate();
+            }
+            
             namespace methods {
                 
                 template <typename ImageType,
@@ -1280,7 +1289,7 @@ namespace py {
                                 METH_NOARGS,
                                 "image.histogram()\n"
                                 "\t-> Return histogram data for all planes in the image\n"
-                                "\t   (q.v. PIL.Image.Image.histogram() sub.) \n"},
+                                "\t   (q.v. PIL.Image.Image.histogram() sub.) \n" },
                         {
                             "entropy",
                                 (PyCFunction)py::ext::image::entropy<ImageType, BufferType>,
@@ -1299,14 +1308,22 @@ namespace py {
                                 METH_NOARGS,
                                 "image.add_alpha()\n"
                                 "\t-> Add an alpha channel (if appropriate) to a copy of the image,\n"
-                                "\t   and return the copy. \n"},
+                                "\t   and return the copy. \n" },
                         {
                             "remove_alpha",
                                 (PyCFunction)py::ext::image::remove_alpha<ImageType, BufferType>,
                                 METH_NOARGS,
                                 "image.remove_alpha()\n"
                                 "\t-> Remove the alpha channel (if appropriate) from a copy of the image,\n"
-                                "\t   and return the copy. \n"},
+                                "\t   and return the copy. \n" },
+                        {
+                            "encapsulate",
+                                (PyCFunction)py::ext::image::encapsulate<ImageType, BufferType>,
+                                METH_NOARGS,
+                                "image.encapsulate()\n"
+                                "\t-> Return the internal image pointer suspended within a Python capsule\n"
+                                "\t - chances are, this method will not help you, and in fact may fuck with you. \n"
+                                "\t - dogg I am just sayin, OK? \n" },
                         {
                             "format_read_opts",
                                 (PyCFunction)py::ext::image::format_read_opts<ImageType, BufferType>,

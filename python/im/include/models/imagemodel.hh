@@ -32,6 +32,42 @@
 
 namespace py {
     
+    namespace capsule {
+        
+        using im::Image;
+        
+        template <>
+        destructor_t decapsulator<Image, std::nullptr_t> = [](PyObject* capsule) {
+            if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+                char const* name = PyCapsule_GetName(capsule);
+                // Image* pointer = (Image*)PyCapsule_GetPointer(capsule, name);
+                // if (pointer) { delete pointer;      pointer = nullptr; }
+                if (name) { std::free((void*)name); name = nullptr;    }
+            } else {
+                /// ... otherwise everything returns nullptr anyway:
+                PyErr_SetString(PyExc_ValueError,
+                    "Invalid PyCapsule");
+            }
+        };
+        
+        template <>
+        destructor_t decapsulator<Image, PyObject> = [](PyObject* capsule) {
+            if (PyCapsule_IsValid(capsule, PyCapsule_GetName(capsule))) {
+                char const* name = PyCapsule_GetName(capsule);
+                PyObject* context = (PyObject*)PyCapsule_GetContext(capsule);
+                if (context) { Py_DECREF(context); }
+                // Image* pointer = (Image*)PyCapsule_GetPointer(capsule, name);
+                // if (pointer) { delete pointer;      pointer = nullptr; }
+                if (name) { std::free((void*)name); name = nullptr;    }
+            } else {
+                /// ... otherwise everything returns nullptr anyway:
+                PyErr_SetString(PyExc_ValueError,
+                    "Invalid PyCapsule");
+            }
+        };
+        
+    }
+    
     namespace ext {
         
         using im::byte;
@@ -594,6 +630,11 @@ namespace py {
                     }
                 }
                 return py::convert(intvec);
+            }
+            
+            PyObject* encapsulate() {
+                return py::capsule::encapsulate<Image>(image.get(),
+                                                       py::object(this));
             }
             
             options_map readopts() {

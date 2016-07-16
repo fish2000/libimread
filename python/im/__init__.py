@@ -14,6 +14,7 @@ from im import (
     Array,
     Batch)
 
+from im import butteraugli as _small_butter_eye
 from compat.show import show
 from compat.to_PIL import to_PIL
 
@@ -21,3 +22,10 @@ def mimetype(suffix):
     if not suffix in format_info:
         return None
     return format_info[suffix].get('mimetype')
+
+def butteraugli(lhs, rhs):
+    lhs_capsule = lhs.encapsulate()
+    rhs_capsule = rhs.encapsulate()
+    return _small_butter_eye(lhs_capsule, rhs_capsule)
+
+butteraugli.__doc__ = _small_butter_eye.__doc__

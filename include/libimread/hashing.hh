@@ -266,6 +266,7 @@ namespace butteraugli {
     planevec_t auglize(planevec_t const& in);
     pixvec_t auglize(pixvec_t const& in);
     comparison_t compare(Image& lhs, Image& rhs);
+    comparison_t compare(Image* lhs, Image* rhs);
     
 } /* namespace butteraugli */
 
