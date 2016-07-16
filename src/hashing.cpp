@@ -275,7 +275,6 @@ namespace butteraugli {
         planevec_t out;
         out.resize(N, 0);
         auto planerator = out.begin();
-        int idx = 0;
         for (auto it = in.begin(); it != in.end(); ++it) {
             planerator = out.emplace(planerator,
                                      pixel_t(255.0f * std::pow(*it, EXPONENT)));
