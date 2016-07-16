@@ -10,14 +10,6 @@
 
 namespace py {
     
-    namespace detail {
-        
-        template <typename T>
-        bool null_or_void = std::is_void<T>::value ||
-                            std::is_null_pointer<T>::value;
-        
-    };
-    
     namespace capsule {
         
         using destructor_t = PyCapsule_Destructor;

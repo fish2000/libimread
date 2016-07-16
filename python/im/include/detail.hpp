@@ -490,6 +490,10 @@ namespace py {
             void operator()(std::add_pointer_t<B> ptr) { /*NOP*/ }
         };
         
+        template <typename T>
+        bool null_or_void = std::is_void<T>::value ||
+                            std::is_null_pointer<T>::value;
+        
         /// pollyfills for C++17 std::clamp()
         /// q.v. http://ideone.com/IpcDt9, http://en.cppreference.com/w/cpp/algorithm/clamp
         template <class T, class Compare>
