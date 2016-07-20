@@ -286,7 +286,7 @@ if(IM_TESTS)
     
     # Link the `imread_tests` executable
     target_link_libraries(imread_tests
-        imread_shared sszip
+        imread_shared
         imagecompression
         # libbf interpol
         guid png z
