@@ -4,7 +4,6 @@
 #include <libimread/libimread.hpp>
 #include <libimread/ext/errors/terminator.hh>
 #include <libimread/errors.hh>
-#include <libimread/objc-rt/objc-rt.hh> /// This is not OK in the long run
 
 /// set up the terminator
 #ifdef IM_TERMINATOR

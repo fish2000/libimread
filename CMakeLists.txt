@@ -97,17 +97,13 @@ SET(IOD_DIR "${DEPS_DIR}/iod")
 SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(CROSSGUID_DIR "${DEPS_DIR}/crossguid")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
-SET(INTERPOL_DIR "${DEPS_DIR}/interpol")
+# SET(INTERPOL_DIR "${DEPS_DIR}/interpol")
 SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
-SET(AFNETWORKING_DIR "${DEPS_DIR}/AFNetworking")
-SET(LIBBF_DIR "${DEPS_DIR}/libbf/src")
-SET(MABLOCKCLOSURE_DIR "${DEPS_DIR}/MABlockClosure")
+# SET(LIBBF_DIR "${DEPS_DIR}/libbf/src")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
-SET(SSZIP_DIR "${DEPS_DIR}/SSZipArchive")
 
 # Set variables for directories for the individual apps:
 SET(LIBIMREAD_CONFIG_DIR "${APPS_DIR}/libimread-config")
-SET(IMPASTE_DIR "${APPS_DIR}/impaste")
 
 # Add DEPS_DIR as a subdirectory ...
 add_subdirectory(${DEPS_DIR})
@@ -149,13 +145,10 @@ include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${CROSSGUID_DIR}")
 include_directories("${DOCOPT_DIR}")
 include_directories("${IMAGECOMPRESSION_DIR}")
-include_directories("${INTERPOL_DIR}")
-include_directories("${AFNETWORKING_DIR}")
-include_directories("${LIBBF_DIR}")
-include_directories("${MABLOCKCLOSURE_DIR}")
+# include_directories("${INTERPOL_DIR}")
+# include_directories("${LIBBF_DIR}")
 include_directories("${IOD_DIR}")
 include_directories("${SG14_DIR}")
-include_directories("${SSZIP_DIR}")
 
 # Ugh
 link_directories(/usr/lib)
@@ -180,15 +173,11 @@ include(CMakeProjectFiles.cmake)
 add_library(imread OBJECT ${srcs} ${hdrs})
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
-set_target_properties(imread
-    PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
 add_dependencies(imread "project_header")
 add_dependencies(imread "guid")
 add_dependencies(imread "imagecompression")
-add_dependencies(imread "interpol")
-add_dependencies(imread "AFNetworking")
-add_dependencies(imread "libbf")
-add_dependencies(imread "MABlockClosure")
+# add_dependencies(imread "interpol")
+# add_dependencies(imread "libbf")
 add_dependencies(imread "iod_symbolize")
 
 # ... and build shared and static target libraries,
@@ -225,10 +214,9 @@ set_source_files_properties(
 # ... these two target_link_libraries() calls set up the actual
 # for-reals building up in all this:
 target_link_libraries(imread_shared
-    z png guid libbf
-    MABlockClosure
+    z png guid
+    # libbf interpol
     imagecompression
-    interpol
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -238,10 +226,9 @@ target_link_libraries(imread_shared
     ${HDF5_HL_LIBRARIES})
 
 target_link_libraries(imread_static
-    z png guid libbf
-    MABlockClosure
+    z png guid
+    # libbf interpol
     imagecompression
-    interpol
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -286,30 +273,23 @@ if(IM_TESTS)
     # Set up the `imread_tests` dependencies
     set(imread_tests "test_${PROJECT_NAME}")
     add_executable(imread_tests ${TEST_SOURCES})
-    set_target_properties(imread_tests
-        PROPERTIES LINK_FLAGS ${COMMON_LINK_FLAGS})
     add_dependencies("test_data_header" imread)
     add_dependencies(imread_tests "project_header")
     add_dependencies(imread_tests "test_data_header")
     add_dependencies(imread_tests "iod_symbolize")
     add_dependencies(imread_tests "guid")
     add_dependencies(imread_tests "imagecompression")
-    add_dependencies(imread_tests "interpol")
-    add_dependencies(imread_tests "libbf")
-    add_dependencies(imread_tests "MABlockClosure")
-    add_dependencies(imread_tests "AFNetworking")
-    add_dependencies(imread_tests "sszip")
+    # add_dependencies(imread_tests "interpol")
+    # add_dependencies(imread_tests "libbf")
     add_dependencies(imread_tests "imread")
     link_directories(${CMAKE_BINARY_DIR})
     
     # Link the `imread_tests` executable
     target_link_libraries(imread_tests
         imread_shared sszip
-        AFNetworking
-        MABlockClosure
         imagecompression
-        interpol
-        libbf guid png z
+        # libbf interpol
+        guid png z
         ${EXTRA_LIBS}
         ${TIFF_LIBRARIES}
         ${JPEG_LIBRARIES}
@@ -324,8 +304,6 @@ if(IM_TESTS)
     
     # Set up individual test suites --
     # … the add_imread_test() macro is defined in tests/CMakeLists.txt:
-    add_imread_test("appkit-copy-paste")
-    add_imread_test("apple-io")
     add_imread_test("blockhash")
     add_imread_test("byte-source-gzio")
     add_imread_test("byte-source-iterators")
@@ -335,14 +313,9 @@ if(IM_TESTS)
     add_imread_test("hdf5-io")
     add_imread_test("imageformat-options")
     add_imread_test("imageview")
-    add_imread_test("json-block-traverse")
-    add_imread_test("libguid")
-    add_imread_test("nsdictionary-options-map")
-    add_imread_test("nsurl-image-types")
-    add_imread_test("objc-rt")
+    # add_imread_test("libguid")
     # add_imread_test("refcount")
     add_imread_test("sfinae")
-    add_imread_test("libsszip")
     add_imread_test("terminator")
     add_imread_test("interleaved-io")
     

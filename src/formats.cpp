@@ -6,7 +6,6 @@
 #include <libimread/errors.hh>
 #include <libimread/formats.hh>
 
-#include <libimread/IO/apple.hh>
 #include <libimread/IO/bmp.hh>
 #include <libimread/IO/gif.hh>
 #include <libimread/IO/hdf5.hh>
@@ -17,7 +16,6 @@
 #include <libimread/IO/pvrtc.hh>
 #include <libimread/IO/tiff.hh>
 #include <libimread/IO/webp.hh>
-//#include <libimread/IO/xcassets.hh>
 
 namespace im {
     
@@ -50,14 +48,6 @@ namespace im {
         if (detail::ext(format, "lsm"))         { return format_ptr(new format::LSM);  }
         if (detail::ext(format, "stk"))         { return format_ptr(new format::STK);  }
         if (detail::ext(format, "gif"))         { return format_ptr(new format::GIF);  }
-        
-        /// save JPEG2000 files with apple I/O
-        if (detail::ext(format, "jp2")  ||
-            detail::ext(format, "jpe2") ||
-            detail::ext(format, "jpg2"))        { return format_ptr(new format::NS);   }
-        
-        if (detail::ext(format, "objc") ||
-            detail::ext(format, "ns"))          { return format_ptr(new format::NS);   }
         
         imread_raise(FormatNotFound,
             "Format Error:",
