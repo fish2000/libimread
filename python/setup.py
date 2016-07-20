@@ -92,9 +92,6 @@ include_dirs = [
     # libimread.dependency('iod'),
     # libimread.dependency('libdocopt'),
     # libimread.dependency('libguid'),
-    # libimread.dependency('libsszip'),
-    # libimread.dependency('libMABlockClosure'),
-    # libimread.dependency('libAFNetworking'),
     numpy.get_include(),
     get_python_inc(plat_specific=1),
     os.path.join(os.path.dirname(__file__), 'im', 'include')]
