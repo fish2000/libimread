@@ -4,6 +4,47 @@ from distutils.spawn import find_executable as which
 from distutils.sysconfig import get_python_inc
 import os
 
+# get_terminal_size(): does what you think it does
+# adapted from this: http://stackoverflow.com/a/566752/298171
+def get_terminal_size(default_LINES=25, default_COLUMNS=80):
+    import os
+    env = os.environ
+    def ioctl_GWINSZ(fd):
+        try:
+            import fcntl, termios, struct, os
+            cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
+        except:
+            return
+        return cr
+    cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+    if not cr:
+        try:
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            cr = ioctl_GWINSZ(fd)
+            os.close(fd)
+        except:
+            pass
+    if not cr:
+        cr = (env.get('LINES',   default_LINES),
+              env.get('COLUMNS', default_COLUMNS))
+        ### Use get(key[, default]) instead of a try/catch
+        #try:
+        #    cr = (env['LINES'], env['COLUMNS'])
+        #except:
+        #    cr = (25, 80)
+    return int(cr[1]), int(cr[0])
+
+terminal_width, terminal_height = get_terminal_size()
+
+def terminal_print(message, asterisk='*'):
+    from clint.textui.colored import red
+    message = " %s " % message.strip()
+    asterisks = (terminal_width / 2) - (len(message) / 2)
+    print(red("""%(aa)s%(message)s%(ab)s""" % dict(
+        aa=asterisk * asterisks,
+        ab=asterisk * (asterisks - (len(message) % 2) + 1),
+        message=message)))
+
 # GOSUB: basicaly `backticks` (cribbed from plotdevice)
 def gosub(cmd, on_err=True):
     """ Run a shell command and return the output """

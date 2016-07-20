@@ -3,7 +3,7 @@ from __future__ import division, print_function
 
 import sys, os
 from pprint import pformat
-from clint.textui.colored import red, cyan
+from clint.textui.colored import cyan
 
 # SETUPTOOLS
 try:
@@ -22,7 +22,7 @@ else:
 # PYTHON & NUMPY INCLUDES
 from utils import Install
 # from utils import HomebrewInstall
-from utils import get_python_inc
+from utils import get_python_inc, terminal_print
 from setuptools import setup, Extension, find_packages
 
 try:
@@ -83,7 +83,7 @@ if DEBUG:
 
 print('')
 print('')
-print(red(""" %(s)s DEBUGGG LEVEL: %(lv)s %(s)s """ % dict(s='*' * 65, lv=DEBUG)))
+terminal_print("DEBUGGG LEVEL: %s" % DEBUG)
 
 include_dirs = [
     libimread.include(),
@@ -102,19 +102,20 @@ library_dirs = [
     # libllvm.lib(),
 ]
 
-other_flags = ['-Qunused-arguments']
+# other_flags = ['-Qunused-arguments']
+other_flags = []
 
 extensions = {
     'im': [
-        "im/src/buffer.cpp",
-        "im/src/detail.cpp",
-        "im/src/gil.cpp",
-        "im/src/gil-io.cpp",
         "im/src/pymethods/butteraugli.cpp",
         "im/src/pymethods/detect.cpp",
         "im/src/pymethods/structcode_parse.cpp",
         "im/src/pymethods/typecheck.cpp",
         "im/src/pymethods/pymethods.cpp",
+        "im/src/buffer.cpp",
+        "im/src/detail.cpp",
+        "im/src/gil.cpp",
+        "im/src/gil-io.cpp",
         "im/src/hybrid.cpp",
         "im/src/hybridimage.cpp",
         "im/src/options.cpp",
@@ -129,7 +130,7 @@ libraries = ['imread']
 
 print('')
 
-print(red(""" %(s)s BUILD CONFIGGG: %(s)s """ % dict(s='*' * 65)))
+terminal_print("BUILD CONFIGGG:")
 print('')
 print(cyan(" EXTENSION MODULES: %i" % len(extensions)))
 print(cyan(pformat(extensions)))
@@ -144,7 +145,7 @@ print(cyan(" LINKED LIBRARIES: %i" % len(libraries)))
 print(cyan(" " + ", ".join(libraries)))
 print('')
 
-print(red(""" %(s)s BUILD COMMENCING: %(s)s """ % dict(s='*' * 65)))
+terminal_print("BUILD COMMENCING:")
 print('')
 
 ext_modules = []
