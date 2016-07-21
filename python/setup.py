@@ -5,24 +5,27 @@ import sys, os
 from pprint import pformat
 from clint.textui.colored import cyan
 
-# SETUPTOOLS
-try:
-    import setuptools
-except:
-    print('''
-setuptools not found.
-
-On linux, the package is often called python-setuptools''')
-    sys.exit(1)
-else:
-    print('''
-%s found.
-    ''' % setuptools.__name__)
-
 # PYTHON & NUMPY INCLUDES
 from utils import Install
 # from utils import HomebrewInstall
 from utils import get_python_inc, terminal_print
+
+# SETUPTOOLS
+print('')
+try:
+    import setuptools
+except:
+    terminal_print("SETUPTOOLS NOT FOUND", color='red')
+    print('''
+import: module setuptools not found.
+
+On linux, the package is often called python-setuptools.''')
+    terminal_print("SETUPTOOLS NOT FOUND", color='red')
+    sys.exit(1)
+else:
+    terminal_print("import: module %s found" % setuptools.__name__,
+                   color='yellow', asterisk='=')
+
 from setuptools import setup, Extension, find_packages
 
 try:
@@ -32,6 +35,11 @@ except ImportError:
         def get_include(self):
             return "."
     numpy = FakeNumpy()
+    terminal_print("NUMPY NOT FOUND (using shim)", color='red')
+else:
+    terminal_print("import: module %s found" % numpy.__name__,
+                   color='yellow', asterisk='=')
+    
 
 # VERSION & METADATA
 __version__ = "<undefined>"
@@ -41,6 +49,9 @@ exec(compile(
         '__version__.py')).read(),
         '__version__.py', 'exec'))
 
+print('')
+terminal_print("version: %s" % __version__)
+
 long_description = """ Python bindings for libimread, dogg. """
 
 libimread = Install()
@@ -49,6 +60,8 @@ libimread = Install()
 
 # COMPILATION
 DEBUG = os.environ.get('DEBUG', '1')
+VERBOSE = os.environ.get('VERBOSE', '1')
+COLOR_TRACE = os.environ.get('COLOR_TRACE', '1')
 
 undef_macros = []
 auxilliary_macros = []
@@ -65,25 +78,26 @@ if DEBUG:
         define_macros.append(
             ('IM_DEBUG', DEBUG))
         define_macros.append(
-            ('_GLIBCXX_DEBUG', '1'))
+            ('_GLIBCXX_DEBUG', DEBUG))
         define_macros.append(
-            ('IM_VERBOSE', '1'))
+            ('IM_VERBOSE', VERBOSE))
         define_macros.append(
-            ('IM_COLOR_TRACE', '1'))
+            ('IM_COLOR_TRACE', COLOR_TRACE))
         auxilliary_macros.append(
             ('IM_DEBUG', DEBUG))
         auxilliary_macros.append(
-            ('_GLIBCXX_DEBUG', '1'))
+            ('_GLIBCXX_DEBUG', DEBUG))
         auxilliary_macros.append(
-            ('IM_VERBOSE', '1'))
+            ('IM_VERBOSE', VERBOSE))
         auxilliary_macros.append(
-            ('IM_COLOR_TRACE', '1'))
+            ('IM_COLOR_TRACE', COLOR_TRACE))
 
 # undef_macros = ['IM_VERBOSE', 'IM_COLOR_TRACE']
 
-print('')
-print('')
-terminal_print("DEBUGGG LEVEL: %s" % DEBUG)
+# print('')
+terminal_print("debug level: %s" % DEBUG)
+terminal_print("verbosity: %s" % VERBOSE)
+terminal_print("color trace: %s" % COLOR_TRACE)
 
 include_dirs = [
     libimread.include(),
@@ -129,8 +143,7 @@ extensions = {
 libraries = ['imread']
 
 print('')
-
-terminal_print("BUILD CONFIGGG:")
+terminal_print("SETUPTOOLS BUILD CONFIGGG", asterisk='=')
 print('')
 print(cyan(" EXTENSION MODULES: %i" % len(extensions)))
 print(cyan(pformat(extensions)))
@@ -145,7 +158,7 @@ print(cyan(" LINKED LIBRARIES: %i" % len(libraries)))
 print(cyan(" " + ", ".join(libraries)))
 print('')
 
-terminal_print("BUILD COMMENCING:")
+terminal_print("SETUPTOOLS BUILD NOW COMMENCING", asterisk='=')
 print('')
 
 ext_modules = []

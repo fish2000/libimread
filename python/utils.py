@@ -31,14 +31,16 @@ def get_terminal_size(default_LINES=25, default_COLUMNS=80):
 
 terminal_width, terminal_height = get_terminal_size()
 
-def terminal_print(message, asterisk='*'):
+def terminal_print(message, color='red', asterisk='*'):
     """ Print a string to the terminal, centered and bookended with asterisks """
     from clint.textui.colored import red
+    from clint.textui import colored
+    colorizer = getattr(colored, color.lower(), red)
     message = " %s " % message.strip()
     asterisks = (terminal_width / 2) - (len(message) / 2)
-    print(red("""%(aa)s%(message)s%(ab)s""" % dict(
-        aa=asterisk * asterisks,
-        ab=asterisk * (asterisks - (len(message) % 2)),
+    print(colorizer("""%(aa)s%(message)s%(ab)s""" % dict(
+        aa=asterisk[0] * asterisks,
+        ab=asterisk[0] * (asterisks - (len(message) % 2)),
         message=message)))
 
 # GOSUB: basicaly `backticks` (cribbed from plotdevice)
