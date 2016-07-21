@@ -8,6 +8,19 @@ from im.compat import imread
 
 class BatchTests(BaseCase):
     
+    def test_batch_sort(self):
+        for ImageType in self.imagetypes:
+            batch = im.Batch()
+            for image_path in self.jpgs:
+                batch.append(ImageType(image_path))
+            batch.sort(key=lambda image: image.width)
+            # biggest = batch.pop()
+            # self.assertTrue(batch[0].width  < biggest.width)
+            # self.assertTrue(batch[0].height < biggest.height)
+            self.assertTrue(batch[0].width  < batch[4].width)
+            batch.sort(key=lambda image: image.height)
+            self.assertTrue(batch[0].height < batch[4].height)
+    
     def test_batch_iter_jpgs(self):
         for ImageType in self.imagetypes:
             batch0 = im.Batch()

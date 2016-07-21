@@ -9,6 +9,8 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <unordered_map>
+
 #include <Python.h>
 #include <structmember.h>
 
@@ -20,25 +22,6 @@
 #include "base.hh"
 
 #include <libimread/rehash.hh>
-
-
-namespace std {
-    
-    template <>
-    struct hash<PyObject*> {
-        
-        typedef PyObject* argument_type;
-        typedef std::size_t result_type;
-        
-        result_type operator()(argument_type pyobj) const {
-            /// Who's holding the GIL? We abdicate responsibility;
-            /// but so: I hereby declare someone should hold that shit
-            return static_cast<result_type>(PyObject_Hash(pyobj));
-        }
-        
-    };
-    
-} /* namespace std */
 
 namespace py {
     
@@ -493,6 +476,7 @@ namespace py {
             
             using pyptr_t = std::add_pointer_t<PyObject>;
             using comparison_f = std::function<bool(pyptr_t, pyptr_t)>;
+            using keymap_t = std::unordered_map<pyptr_t, pyptr_t>;
             
             bool sort() {
                 /// in-place stable sort
@@ -534,11 +518,33 @@ namespace py {
                 /// lambda thing: numpy.average(thing.entropy()) # or what have you
                 /// ... as in, called with every PyObject* in internal
                 if (PyCallable_Check(key)) {
-                    return sort([&key](pyptr_t x, pyptr_t y) -> bool {
-                        py::ref lhs = PyObject_CallFunctionObjArgs(key, x, nullptr);
-                        py::ref rhs = PyObject_CallFunctionObjArgs(key, y, nullptr);
-                        return PyObject_RichCompareBool(lhs, rhs, Py_LT) == 1;
+                    /// make unique-ifed copy of internal vector:
+                    objectvec_t uniques(internal);
+                    std::sort(uniques.begin(), uniques.end());
+                    auto last = std::unique(uniques.begin(), uniques.end());
+                    uniques.erase(last, uniques.end());
+                    
+                    /// fill keymap, calling key function exactly once per object:
+                    keymap_t keymap;
+                    std::transform(uniques.begin(), uniques.end(),
+                                   std::inserter(keymap, keymap.begin()),
+                            [&key](PyObject* obj) -> keymap_t::value_type {
+                        PyObject* value = PyObject_CallFunctionObjArgs(key, obj, nullptr);
+                        return std::make_pair(obj, value);
                     });
+                    
+                    /// do the sort:
+                    bool out = sort([&keymap](pyptr_t x, pyptr_t y) -> bool {
+                        return PyObject_RichCompareBool(keymap[x], keymap[y], Py_LT) == 1;
+                    });
+                    
+                    /// clean up the mapped values:
+                    for (auto const& objpair : keymap) {
+                        Py_XDECREF(objpair.second);
+                    }
+                    
+                    /// return boolean:
+                    return out;
                 } else {
                     return false;
                 }
