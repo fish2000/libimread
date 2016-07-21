@@ -3,23 +3,34 @@ from __future__ import print_function
 from basecase import BaseCase
 
 import im
-# import numpy
 from im.compat import imread
 
 class BatchTests(BaseCase):
     
-    def test_batch_sort(self):
+    def test_batch_sort_key(self):
         for ImageType in self.imagetypes:
             batch = im.Batch()
             for image_path in self.jpgs:
                 batch.append(ImageType(image_path))
             batch.sort(key=lambda image: image.width)
-            # biggest = batch.pop()
-            # self.assertTrue(batch[0].width  < biggest.width)
-            # self.assertTrue(batch[0].height < biggest.height)
-            self.assertTrue(batch[0].width  < batch[4].width)
+            widest = batch.pop()
+            self.assertTrue(batch[0].width  < widest.width)
             batch.sort(key=lambda image: image.height)
-            self.assertTrue(batch[0].height < batch[4].height)
+            highest = batch.pop()
+            self.assertTrue(batch[0].height < highest.height)
+    
+    def test_batch_sort_cmp(self):
+        for ImageType in self.imagetypes:
+            batch = im.Batch()
+            for image_path in self.pngs:
+                batch.append(ImageType(image_path))
+            def size(image):
+                return reduce(lambda x, y: x * y, image.size, 1)
+            def cmpfunc(im0, im1):
+                return size(im0) - size(im1)
+            batch.sort(cmp=cmpfunc)
+            biggest = batch.pop()
+            self.assertTrue(size(batch[0])  < size(biggest))
     
     def test_batch_iter_jpgs(self):
         for ImageType in self.imagetypes:

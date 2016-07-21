@@ -319,7 +319,7 @@ namespace py {
                 }
                 
                 /// will throw ValueErrror if need be:
-                return py::object(batch->pop(idx));
+                return batch->pop(idx);
             }
             
             PyObject* removeobj(PyObject* self, PyObject* obj) {

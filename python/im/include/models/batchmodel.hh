@@ -440,19 +440,23 @@ namespace py {
             }
             
             PyObject* pop(Py_ssize_t idx = -1) {
+                /// NOTE: NO DECREFS! OR INCREFS!!
+                /// ... objects are passed on straight from
+                /// the internal vector out to the interpreter!
+                /// ... IT WORKS!!!!!!!!!!!!!!!
                 if (idx == -1) {
-                    py::ref out = internal.back();
+                    PyObject* out = internal.back();
                     internal.pop_back();
-                    return out.get();
+                    return out;
                 }
                 if (idx > internal.size() || idx < -1) {
                     PyErr_SetString(PyExc_IndexError,
                         "pop(): index out of range");
                     return nullptr;
                 }
-                py::ref out = internal.at(idx);
+                PyObject* out = internal.at(idx);
                 internal.erase(internal.begin() + idx);
-                return out.get();
+                return out;
             }
             
             bool remove(PyObject* obj) {
