@@ -74,7 +74,7 @@ namespace im {
         unique_t pop();
         void reset();
         void reset(vector_t&& vector);
-        ~ImageList();
+        virtual ~ImageList();
         
         /// After calling release(), ownership of the content image ponters
         /// is transferred to the caller, who must figure out how to delete them.

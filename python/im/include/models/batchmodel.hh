@@ -19,9 +19,12 @@
 #include "../gil.hpp"
 #include "../detail.hpp"
 #include "../options.hpp"
+#include "../hybrid.hh"
 #include "base.hh"
 
 #include <libimread/rehash.hh>
+#include <libimread/image.hh>
+#include <libimread/imagelist.hh>
 
 namespace py {
     
@@ -42,6 +45,10 @@ namespace py {
         
         using im::byte;
         using im::options_map;
+        using im::Image;
+        using im::ImageList;
+        using im::ArrayImage;
+        
         using sizevec_t = std::vector<std::size_t>;
         using pysizevec_t = std::vector<Py_ssize_t>;
         using objectvec_t = std::vector<PyObject*>;
@@ -647,6 +654,32 @@ namespace py {
                     return -1;
                 }
                 return height_front;
+            }
+            
+            ImageList as_imagelist() {
+                /// double-check bufferage
+                bool buffered = std::all_of(internal.begin(),
+                                            internal.end(),
+                                         [](PyObject* obj) { return bool(PyObject_CheckBuffer(obj)); });
+                
+                if (!buffered) {
+                    /// FREAK OUT!!!
+                }
+                
+                ImageList out;
+                Py_buffer view{ 0 };
+                std::for_each(internal.begin(),
+                              internal.end(),
+                          [&](PyObject* obj) {
+                    if (PyObject_GetBuffer(obj, &view, PyBUF_ND | PyBUF_STRIDES) != -1) {
+                        buffer_t* bt = im::buffer::heapcopy(&view);
+                        out.push_back(new ArrayImage(NPY_UINT8, bt));
+                        im::buffer::heapdestroy(bt);
+                        PyBuffer_Release(&view);
+                    }
+                });
+                
+                return out;
             }
             
             options_map readopts() {

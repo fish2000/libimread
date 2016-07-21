@@ -147,7 +147,7 @@ namespace im {
             using HalBase::raw_buffer;
             
             HalideNumpyImage();
-            HalideNumpyImage(NPY_TYPES d, const buffer_t* b,            std::string const& name = "");
+            HalideNumpyImage(NPY_TYPES d, buffer_t const* b,            std::string const& name = "");
             HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w,   std::string const& name = "");
             HalideNumpyImage(NPY_TYPES d, int x, int y, int z,          std::string const& name = "");
             HalideNumpyImage(NPY_TYPES d, int x, int y,                 std::string const& name = "");
@@ -235,7 +235,7 @@ namespace im {
             using factory_t = ArrayFactory;
             
             ArrayImage();
-            ArrayImage(NPY_TYPES d, const buffer_t* b,            std::string const& name = "");
+            ArrayImage(NPY_TYPES d, buffer_t const* b,            std::string const& name = "");
             ArrayImage(NPY_TYPES d, int x, int y, int z, int w,   std::string const& name = "");
             ArrayImage(NPY_TYPES d, int x, int y, int z,          std::string const& name = "");
             ArrayImage(NPY_TYPES d, int x, int y,                 std::string const& name = "");
