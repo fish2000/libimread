@@ -156,6 +156,7 @@ namespace py {
                 struct FromBatch    {};
                 struct Concatenate  {};
                 struct Repeat       {};
+                struct Slice        {};
             };
             
             PyObject_HEAD
@@ -226,6 +227,25 @@ namespace py {
                     }
                 }
             
+            explicit BatchModel(BatchModel const& basis, int start, int end)
+                :weakrefs(nullptr)
+                ,readoptDict(PyDict_New())
+                ,writeoptDict(PyDict_New())
+                {
+                    using std::swap;
+                    std::size_t size = basis.internal.size();
+                    if (start < 0)   { start = size - std::abs(start); }
+                    if (end < 0)     { end   = size - std::abs(end); }
+                    if (end < start) { swap(end, start); }
+                    if (start < end && start < size && end < size) {
+                        std::transform(basis.internal.begin() + start,
+                                       basis.internal.begin() + end,
+                                       std::back_inserter(internal),
+                                    [](PyObject* pyobj) { Py_INCREF(pyobj);
+                                                             return pyobj; });
+                    }
+                }
+            
             explicit BatchModel(PyObject* basis, PyObject* etc,
                                 typename Tag::Concatenate = typename Tag::Concatenate{})
                 :BatchModel(*reinterpret_cast<BatchModel*>(basis),
@@ -238,6 +258,12 @@ namespace py {
                              static_cast<int>(repeat))
                 {}
             
+            explicit BatchModel(PyObject* basis, Py_ssize_t start, Py_ssize_t end,
+                                typename Tag::Slice = typename Tag::Slice{})
+                :BatchModel(*reinterpret_cast<BatchModel*>(basis),
+                             static_cast<int>(start),
+                             static_cast<int>(end))
+                {}
             
             void swap(BatchModel& other) noexcept {
                 using std::swap;
@@ -306,9 +332,10 @@ namespace py {
                     return nullptr;
                 }
                 std::size_t sidx = static_cast<std::size_t>(idx);
+                py::ref old = internal.at(sidx);
                 internal[sidx] = value;
-                Py_INCREF(value);
-                return py::convert(internal[sidx]);
+                Py_INCREF(internal[sidx]);
+                return value;
             }
             
             std::string repr_string() {
@@ -401,6 +428,14 @@ namespace py {
                     return -1;
                 }
                 return static_cast<Py_ssize_t>(internal.begin() - result);
+            }
+            
+            bool contains(PyObject* obj) {
+                py::gil::release nogil;
+                if (obj == nullptr) { return false; }
+                auto result = std::find(internal.begin(),
+                                        internal.end(), obj);
+                return result != internal.end();
             }
             
             bool insert(Py_ssize_t idx, PyObject* obj) {

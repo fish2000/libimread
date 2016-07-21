@@ -188,10 +188,21 @@ namespace py {
                 return py::object(batch->__index__(idx));
             }
             
+            /// sq_slice
+            PyObject* atslice(PyObject* basis, Py_ssize_t start, Py_ssize_t end) {
+                return py::convert(new BatchModel(basis, start, end));
+            }
+            
             /// sq_ass_item
             int valueatindex(PyObject* self, Py_ssize_t idx, PyObject* value) {
                 BatchModel* batch = reinterpret_cast<BatchModel*>(self);
-                return batch->__index__(idx, value) == nullptr ? -1 : 1;
+                return batch->__index__(idx, value) == nullptr ? -1 : 0;
+            }
+            
+            /// sq_contains
+            int contains(PyObject* self, PyObject* value) {
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                return batch->contains(value); /// boolean upcast
             }
             
             /// sq_inplace_concat
@@ -347,12 +358,12 @@ namespace py {
                         (binaryfunc)py::ext::batch::concat,
                         (ssizeargfunc)py::ext::batch::repeat,
                         (ssizeargfunc)py::ext::batch::atindex,
-                        0, /* WHY THE FUCK IS THIS EXTRA THING HERE */
-                        (ssizeobjargproc)py::ext::batch::valueatindex, 
-                        0,
-                        0,
+                        (ssizessizeargfunc)py::ext::batch::atslice, /* ssizessizeargfunc sq_slice */
+                        (ssizeobjargproc)py::ext::batch::valueatindex,
+                        0, /* ssizessizeobjargproc sq_ass_slice */
+                        (objobjproc)py::ext::batch::contains, /* sq_contains */
                         (binaryfunc)py::ext::batch::inplace_concat,
-                        0
+                        0 /* sq_inplace_repeat */
                     };
                     return &sequencemethods;
                 }
