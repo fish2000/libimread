@@ -334,6 +334,58 @@ namespace py {
                 return py::None();
             }
             
+            PyObject* sort(PyObject* self, PyObject* args, PyObject* kwargs) {
+                using key_tag_t = BatchModel::Tag::KeyCallable;
+                using comparison_tag_t = BatchModel::Tag::ComparisonCallable;
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                PyObject* cmp = nullptr;
+                PyObject* key = nullptr;
+                PyObject* py_reverse = nullptr;
+                char const* keywords[] = { "cmp", "key", "reverse", nullptr };
+                bool reverse = false;
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    args, kwargs, "|OOO:sort", const_cast<char**>(keywords),
+                    &cmp,               /// "cmp", callable PyObject*
+                    &key,               /// "key", callable PyObject*
+                    &py_reverse))       /// "reverse", boolean PyObject*
+                {
+                    return nullptr;
+                }
+                
+                reverse = py::options::truth(py_reverse);
+                
+                if (key != nullptr) {
+                    if (cmp == nullptr) {
+                        if (reverse) { batch->reverse(); }
+                        if (!batch->sort(key, key_tag_t{})) {
+                            PyErr_SetString(PyExc_ValueError,
+                                "sort(): key sort failed");
+                            return nullptr;
+                        }
+                    } else {
+                        PyErr_SetString(PyExc_ValueError,
+                            "sort(): use either a key or cmp function (not both)");
+                        return nullptr;
+                    }
+                } else {
+                    if (cmp == nullptr) {
+                        PyErr_SetString(PyExc_ValueError,
+                            "sort(): use either a key or cmp function");
+                        return nullptr;
+                    } else {
+                        if (reverse) { batch->reverse(); }
+                        if (!batch->sort(cmp, comparison_tag_t{})) {
+                            PyErr_SetString(PyExc_ValueError,
+                                "sort(): cmp sort failed");
+                            return nullptr;
+                        }
+                    }
+                }
+                
+                return py::None();
+            }
+            
             ///////////////////////////////// GETSETTERS /////////////////////////////////
             
             PyObject*    get_width(PyObject* self, void* closure) {
@@ -464,6 +516,14 @@ namespace py {
                                 METH_NOARGS,
                                 "batch.reverse()\n"
                                 "\t-> Reverse the batch ***IN PLACE*** \n" },
+                        {
+                            "sort",
+                                (PyCFunction)py::ext::batch::sort,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "batch.sort(cmp=None, key=None, reverse=False)\n"
+                                "\t-> Stable sort *IN PLACE* of the batch contents;\n"
+                                "\t   cmp(x, y) -> -1, 0, 1\n"
+                                "\t   key(item) -> rich-comparable value\n" },
                         { nullptr, nullptr, 0, nullptr }
                     };
                     return basics;

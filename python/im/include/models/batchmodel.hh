@@ -153,10 +153,12 @@ namespace py {
             }
             
             struct Tag {
-                struct FromBatch    {};
-                struct Concatenate  {};
-                struct Repeat       {};
-                struct Slice        {};
+                struct FromBatch            {};
+                struct Concatenate          {};
+                struct Repeat               {};
+                struct Slice                {};
+                struct KeyCallable          {};
+                struct ComparisonCallable   {};
             };
             
             PyObject_HEAD
@@ -487,6 +489,52 @@ namespace py {
                 /// in-place reverse
                 py::gil::release nogil;
                 std::reverse(internal.begin(), internal.end());
+            }
+            
+            using pyptr_t = std::add_pointer_t<PyObject>;
+            using comparison_f = std::function<bool(pyptr_t, pyptr_t)>;
+            
+            bool sort(comparison_f&& comparison) {
+                /// in-place stable sort
+                py::gil::ensure yesgil;
+                std::stable_sort(internal.begin(),
+                                 internal.end(),
+                                 std::forward<comparison_f>(comparison));
+                return true;
+            }
+            
+            bool sort(PyObject* cmp, typename Tag::ComparisonCallable) {
+                /// 'cmp' must be a callable like:
+                /// def compare(x, y):
+                ///     if x == y:
+                ///         return 0
+                ///     elif x < y:
+                ///         return -1
+                ///     else: # x > y
+                ///         return 1
+                if (PyCallable_Check(cmp)) {
+                    return sort([&cmp](pyptr_t x, pyptr_t y) -> bool {
+                        py::ref result = PyObject_CallFunctionObjArgs(cmp, x, y, nullptr);
+                        return PyInt_AsLong(result) < 0L;
+                    });
+                } else {
+                    return false;
+                }
+            }
+            
+            bool sort(PyObject* key, typename Tag::KeyCallable = typename Tag::KeyCallable{}) {
+                /// 'key' must be a callable like:
+                /// lambda thing: numpy.average(thing.entropy()) # or what have you
+                /// ... as in, called with every PyObject* in internal
+                if (PyCallable_Check(key)) {
+                    return sort([&key](pyptr_t x, pyptr_t y) -> bool {
+                        py::ref lhs = PyObject_CallFunctionObjArgs(key, x, nullptr);
+                        py::ref rhs = PyObject_CallFunctionObjArgs(key, y, nullptr);
+                        return PyObject_RichCompareBool(lhs, rhs, Py_LT) == 1;
+                    });
+                } else {
+                    return false;
+                }
             }
             
             PyObject* as_pylist() {
