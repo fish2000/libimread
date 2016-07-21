@@ -321,6 +321,14 @@ namespace py {
         return to_string();
     }
     
+    std::ostream& operator<<(std::ostream& os, ref const& r) {
+        return os << r.to_string();
+    }
+    
+    Json ref::to_json() const {
+        return py::options::convert(empty() ? Py_BuildValue("") : referent);
+    }
+    
     namespace detail {
         
         int setitemstring(PyObject* dict, char const* key, py::ref value) {

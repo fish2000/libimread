@@ -31,6 +31,12 @@ namespace im {
                 :Json(is, full)
                 {}
             
+            template <typename ConvertibleType,
+                      typename = decltype(&ConvertibleType::to_json)>
+            options_map(ConvertibleType const& convertible)
+                :Json(convertible.to_json())
+                {}
+            
             static options_map parse(std::string const&);
             static options_map parse(char const* json) { return parse(std::string(json)); }
             
@@ -51,6 +57,12 @@ namespace im {
                 {}
             options_list(Json&& other) noexcept
                 :Json(other)
+                {}
+            
+            template <typename ConvertibleType,
+                      typename = decltype(&ConvertibleType::to_json)>
+            options_list(ConvertibleType const& convertible)
+                :Json(convertible.to_json())
                 {}
     };
     

@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sstream>
 #include <utility>
 #include <exception>
 #include <functional>
@@ -14,6 +15,7 @@
 #include <initializer_list>
 #include <Python.h>
 #include <libimread/libimread.hpp>
+#include <libimread/ext/JSON/json11.h>
 #include "models/base.hh"
 
 /// forward-declare PyArray_Descr from numpy
@@ -467,6 +469,10 @@ namespace py {
             /// stringification
             std::string const to_string() const;
             operator std::string() const;
+            friend std::ostream& operator<<(std::ostream&, ref const&);
+            
+            /// JSONification
+            Json to_json() const;
             
         private:
             
@@ -678,5 +684,21 @@ namespace py {
     }
     
 }
+
+namespace std {
+    
+    template <>
+    struct hash<py::ref> {
+        
+        typedef py::ref argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& ref) const {
+            return static_cast<result_type>(ref.hash());
+        }
+        
+    };
+    
+} /* namespace std */
 
 #endif /// LIBIMREAD_PYTHON_IM_INCLUDE_DETAIL_HPP_

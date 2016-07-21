@@ -134,7 +134,6 @@ namespace im {
             return py::tuplize();
         }
         
-        
     } /* namespace buffer */
     
 } /* namespace im */

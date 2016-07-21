@@ -74,15 +74,7 @@ namespace py {
         template <typename ImageType = HalideNumpyImage,
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
-            PythonImageType* self = reinterpret_cast<PythonImageType*>(type->tp_alloc(type, 0));
-            /// initialize everything to empty values
-            if (self != NULL) {
-                self->image = std::unique_ptr<ImageType>(nullptr);
-                self->dtype = nullptr;
-                self->readoptDict = nullptr;
-                self->writeoptDict = nullptr;
-            }
-            return reinterpret_cast<PyObject*>(self); /// all is well, return self
+            return type->tp_alloc(type, 0);
         }
         
         template <typename ImageType = HalideNumpyImage>
@@ -191,10 +183,10 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         int init(PyObject* self, PyObject* args, PyObject* kwargs) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            PyObject* py_is_blob = NULL;
-            PyObject* options = NULL;
+            PyObject* py_is_blob = nullptr;
+            PyObject* options = nullptr;
             Py_buffer view;
-            char const* keywords[] = { "source", "is_blob", "options", NULL };
+            char const* keywords[] = { "source", "is_blob", "options", nullptr };
             bool is_blob = false;
             
             if (!PyArg_ParseTupleAndKeywords(
@@ -241,17 +233,17 @@ namespace py {
             /// create and set a dtype based on the loaded image data's type
             Py_CLEAR(pyim->dtype);
             pyim->dtype = PyArray_DescrFromType(pyim->image->dtype());
-            Py_INCREF(pyim->dtype);
+            // Py_INCREF(pyim->dtype);
             
             /// store the read options dict
             Py_CLEAR(pyim->readoptDict);
             pyim->readoptDict = options ? options : PyDict_New();
-            Py_INCREF(pyim->readoptDict);
+            // Py_INCREF(pyim->readoptDict);
             
             /// ... and now OK, store an empty write options dict
             Py_CLEAR(pyim->writeoptDict);
             pyim->writeoptDict = PyDict_New();
-            Py_INCREF(pyim->writeoptDict);
+            // Py_INCREF(pyim->writeoptDict);
             
             /// ALL IS WELL:
             return 0;
@@ -326,42 +318,42 @@ namespace py {
             if (siz <= idx || idx < 0) {
                 PyErr_SetString(PyExc_IndexError,
                     "index out of range");
-                return NULL;
+                return nullptr;
             }
             int tc = static_cast<int>(pyim->dtype->type_num);
             std::size_t nidx = static_cast<std::size_t>(idx);
             switch (tc) {
                 case NPY_FLOAT: {
                     float op = pyim->image->template rowp_as<float>(0)[nidx];
-                    return Py_BuildValue("f", op);
+                    return py::convert(op);
                 }
                 break;
                 case NPY_DOUBLE:
                 case NPY_LONGDOUBLE: {
                     double op = pyim->image->template rowp_as<double>(0)[nidx];
-                    return Py_BuildValue("d", op);
+                    return py::convert(op);
                 }
                 break;
                 case NPY_USHORT:
                 case NPY_UBYTE: {
                     byte op = pyim->image->template rowp_as<byte>(0)[nidx];
-                    return Py_BuildValue("B", op);
+                    return py::convert(op);
                 }
                 break;
                 case NPY_UINT: {
                     uint32_t op = pyim->image->template rowp_as<uint32_t>(0)[nidx];
-                    return Py_BuildValue("I", op);
+                    return py::convert(op);
                 }
                 break;
                 case NPY_ULONG:
                 case NPY_ULONGLONG: {
                     uint64_t op = pyim->image->template rowp_as<uint64_t>(0)[nidx];
-                    return Py_BuildValue("Q", op);
+                    return py::convert(op);
                 }
                 break;
             }
             uint32_t op = pyim->image->template rowp_as<uint32_t>(0)[nidx];
-            return Py_BuildValue("I", op);
+            return py::convert(op);
         }
         
         template <typename ImageType = HalideNumpyImage,
@@ -453,10 +445,10 @@ namespace py {
                   typename PythonImageType = PythonImageBase<ImageType>>
         PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
             PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
-            PyObject* py_as_blob = NULL;
-            PyObject* options = NULL;
+            PyObject* py_as_blob = nullptr;
+            PyObject* options = nullptr;
             Py_buffer view;
-            char const* keywords[] = { "destination", "as_blob", "options", NULL };
+            char const* keywords[] = { "destination", "as_blob", "options", nullptr };
             std::string dststr;
             bool as_blob = false;
             bool did_save = false;
@@ -467,16 +459,16 @@ namespace py {
                 &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
                 &options))                  /// "options", read-options dict
             {
-                return NULL;
+                return nullptr;
             }
             
             /// tests are necessary, the next lines choke on NULL:
             as_blob = py::options::truth(py_as_blob);
-            if (options == NULL) { options = PyDict_New(); }
+            if (options == nullptr) { options = PyDict_New(); }
             
             if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                 /// some exception was raised somewhere
-                return NULL;
+                return nullptr;
             }
             
             try {
@@ -487,7 +479,7 @@ namespace py {
                     if (!opts.has("format")) {
                         PyErr_SetString(PyExc_AttributeError,
                             "Output format unspecified in options dict");
-                        return NULL;
+                        return nullptr;
                     }
                     {
                         py::gil::release nogil;
@@ -504,36 +496,34 @@ namespace py {
                 did_save = py::image::save<ImageType>(*pyim->image.get(), dststr.c_str(), opts);
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
-                return NULL;
+                return nullptr;
             } catch (im::NotImplementedError& exc) {
                 /// this shouldn't happen -- a generic ImageFormat pointer
                 /// was returned when determining the blob image type
                 PyErr_SetString(PyExc_AttributeError, exc.what());
-                return NULL;
+                return nullptr;
             }
             
             if (!did_save) {
                 /// If this is false, PyErr has already been set
                 /// ... presumably by problems loading an ImageFormat
                 /// or opening the file at the specified image path
-                return NULL;
+                return nullptr;
             }
             
             if (!dststr.size()) {
                 if (as_blob) {
                     PyErr_SetString(PyExc_ValueError,
                         "Blob output unexpectedly returned zero-length bytestring");
-                    return NULL;
                 } else {
                     PyErr_SetString(PyExc_ValueError,
                         "File output destination path is unexpectedly zero-length");
-                    return NULL;
                 }
+                return nullptr;
             }
             
             if (as_blob) {
                 std::vector<byte> data;
-                PyObject* out = NULL;
                 bool removed = false;
                 {
                     py::gil::release nogil;
@@ -548,14 +538,9 @@ namespace py {
                     PyErr_Format(PyExc_ValueError,
                         "Failed to remove temporary file %s",
                         dststr.c_str());
-                    return NULL;
+                    return nullptr;
                 }
-                out = py::string(data);
-                if (out == NULL) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Failed converting output to Python string");
-                }
-                return out;
+                return py::string(data);
             }
             /// "else":
             return py::string(dststr);
@@ -684,7 +669,7 @@ namespace py {
                 opts = pyim->readopts();
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
-                return NULL;
+                return nullptr;
             }
             
             {
@@ -705,7 +690,7 @@ namespace py {
                 opts = pyim->readopts();
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
-                return NULL;
+                return nullptr;
             }
             return py::options::dump(self, args, kwargs, opts);
         }
@@ -722,7 +707,7 @@ namespace py {
                 opts = pyim->writeopts();
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
-                return NULL;
+                return nullptr;
             }
             
             {
@@ -743,7 +728,7 @@ namespace py {
                 opts = pyim->writeopts();
             } catch (im::OptionsError& exc) {
                 PyErr_SetString(PyExc_AttributeError, exc.what());
-                return NULL;
+                return nullptr;
             }
             return py::options::dump(self, args, kwargs, opts);
         }
