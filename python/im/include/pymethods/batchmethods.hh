@@ -285,7 +285,8 @@ namespace py {
                 }
                 
                 /// will throw ValueErrror if need be:
-                return py::convert(batch->index(value, start, stop));
+                Py_ssize_t idx = batch->index(value, start, stop);
+                return idx == -1 ? nullptr : py::convert(idx);
             }
             
             PyObject* insert(PyObject* self, PyObject* args, PyObject* kwargs) {

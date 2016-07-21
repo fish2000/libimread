@@ -404,15 +404,25 @@ namespace py {
             Py_ssize_t index(PyObject* obj, Py_ssize_t begin = 0,
                                             Py_ssize_t end = -1) {
                 /// -1 means "end"
-                if (end == -1) { end = internal.size(); }
-                auto result = std::find(internal.begin() + begin,
-                                        internal.begin() + end, obj);
-                if (result == internal.end()) {
+                using std::swap;
+                std::size_t size = internal.size();
+                if (begin < 0)   { begin = size - std::abs(begin); }
+                if (end < 0)     { end   = size - std::abs(end); }
+                if (end < begin) { swap(end, begin); }
+                if (begin < end && begin < size && end < size) {
+                    auto result = std::find(internal.begin() + begin,
+                                            internal.begin() + end, obj);
+                    if (result == internal.end()) {
+                        PyErr_SetString(PyExc_ValueError,
+                            "index(): not found");
+                        return -1;
+                    }
+                    return std::abs(static_cast<Py_ssize_t>(internal.begin() - result));
+                } else {
                     PyErr_SetString(PyExc_ValueError,
-                        "index(): not found");
+                        "index(): bad indices");
                     return -1;
                 }
-                return static_cast<Py_ssize_t>(internal.begin() - result);
             }
             
             bool contains(PyObject* obj) {
@@ -467,7 +477,7 @@ namespace py {
                         "remove(): not found");
                     return false;
                 }
-                Py_DECREF(internal.at(internal.begin() - result));
+                Py_DECREF(*result);
                 internal.erase(result);
                 return true;
             }
