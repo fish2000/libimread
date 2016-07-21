@@ -347,9 +347,11 @@ namespace py {
                         (binaryfunc)py::ext::batch::concat,
                         (ssizeargfunc)py::ext::batch::repeat,
                         (ssizeargfunc)py::ext::batch::atindex,
-                        0, /*(ssizeobjargproc)py::ext::batch::valueatindex,*/
-                        0, 
-                        0, /*(binaryfunc)py::ext::batch::inplace_concat,*/
+                        0, /* WHY THE FUCK IS THIS EXTRA THING HERE */
+                        (ssizeobjargproc)py::ext::batch::valueatindex, 
+                        0,
+                        0,
+                        (binaryfunc)py::ext::batch::inplace_concat,
                         0
                     };
                     return &sequencemethods;
