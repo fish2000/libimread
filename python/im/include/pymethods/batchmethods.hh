@@ -370,9 +370,12 @@ namespace py {
                     }
                 } else {
                     if (cmp == nullptr) {
-                        PyErr_SetString(PyExc_ValueError,
-                            "sort(): use either a key or cmp function");
-                        return nullptr;
+                        if (reverse) { batch->reverse(); }
+                        if (!batch->sort()) {
+                            PyErr_SetString(PyExc_ValueError,
+                                "sort(): default sort failed");
+                            return nullptr;
+                        }
                     } else {
                         if (reverse) { batch->reverse(); }
                         if (!batch->sort(cmp, comparison_tag_t{})) {

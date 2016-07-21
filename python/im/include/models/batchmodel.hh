@@ -494,6 +494,13 @@ namespace py {
             using pyptr_t = std::add_pointer_t<PyObject>;
             using comparison_f = std::function<bool(pyptr_t, pyptr_t)>;
             
+            bool sort() {
+                /// in-place stable sort
+                std::stable_sort(internal.begin(),
+                                 internal.end());
+                return true;
+            }
+            
             bool sort(comparison_f&& comparison) {
                 /// in-place stable sort
                 py::gil::ensure yesgil;
