@@ -427,7 +427,7 @@ static PyMethodDef module_functions[] = {
         "butteraugli",
             (PyCFunction)py::functions::butteraugli,
             METH_VARARGS | METH_KEYWORDS,
-            "detect(lhs=image0, rhs=image1) -> int\n"
+            "butteraugli(lhs=image0, rhs=image1) -> int\n"
             "\t-> Compare two images using the ButterAugli algorithm, \n"
             "\t   with return values: \n"
             "\t - 0, images are the same; \n"

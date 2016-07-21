@@ -2,6 +2,8 @@
 # Copyright (C) 2012-2016, Alexander Böhn <fish2000@gmail.com>
 # License: MIT (see COPYING.MIT file)
 
+from functools import update_wrapper
+
 from im import (
     _byteorder, _byteordermark,
     formats, format_info,
@@ -28,4 +30,13 @@ def butteraugli(lhs, rhs):
     rhs_capsule = rhs.encapsulate()
     return _small_butter_eye(lhs_capsule, rhs_capsule)
 
-butteraugli.__doc__ = _small_butter_eye.__doc__
+update_wrapper(butteraugli, _small_butter_eye)
+
+__all__ = [
+    _byteorder, _byteordermark,
+    formats, format_info,
+    detect, structcode_parse,
+    show, to_PIL,
+    mimetype, butteraugli,
+    Buffer, Image, Array, Batch
+]
