@@ -2,16 +2,16 @@
 from __future__ import print_function
 from distutils.spawn import find_executable as which
 from distutils.sysconfig import get_python_inc
-import os
 
 # get_terminal_size(): does what you think it does
 # adapted from this: http://stackoverflow.com/a/566752/298171
 def get_terminal_size(default_LINES=25, default_COLUMNS=80):
+    """ Get the width and height of the terminal window in characters """
     import os
     env = os.environ
     def ioctl_GWINSZ(fd):
         try:
-            import fcntl, termios, struct, os
+            import fcntl, termios, struct
             cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
         except:
             return
@@ -27,22 +27,18 @@ def get_terminal_size(default_LINES=25, default_COLUMNS=80):
     if not cr:
         cr = (env.get('LINES',   default_LINES),
               env.get('COLUMNS', default_COLUMNS))
-        ### Use get(key[, default]) instead of a try/catch
-        #try:
-        #    cr = (env['LINES'], env['COLUMNS'])
-        #except:
-        #    cr = (25, 80)
     return int(cr[1]), int(cr[0])
 
 terminal_width, terminal_height = get_terminal_size()
 
 def terminal_print(message, asterisk='*'):
+    """ Print a string to the terminal, centered and bookended with asterisks """
     from clint.textui.colored import red
     message = " %s " % message.strip()
     asterisks = (terminal_width / 2) - (len(message) / 2)
     print(red("""%(aa)s%(message)s%(ab)s""" % dict(
         aa=asterisk * asterisks,
-        ab=asterisk * (asterisks - (len(message) % 2) + 1),
+        ab=asterisk * (asterisks - (len(message) % 2)),
         message=message)))
 
 # GOSUB: basicaly `backticks` (cribbed from plotdevice)
@@ -62,6 +58,7 @@ def gosub(cmd, on_err=True):
 
 def parse_config_flags(config, config_flags=None):
     """ Get compiler/linker flags from pkg-config and similar CLI tools """
+    import os
     if config_flags is None: # need something in there
         config_flags = ['']
     for config_flag in config_flags:
@@ -107,12 +104,16 @@ class Install(object):
             raise IOError("command `%s` failed" % cmd)
     
     def bin(self):
+        import os
         return os.path.join(self.prefix, "bin")
     def include(self):
+        import os
         return os.path.join(self.prefix, "include")
     def lib(self):
+        import os
         return os.path.join(self.prefix, "lib")
     def dependency(self, name):
+        import os
         return os.path.join(self.prefix, "include", name)
 
 class HomebrewInstall(Install):
