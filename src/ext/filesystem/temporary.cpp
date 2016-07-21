@@ -105,7 +105,12 @@ namespace filesystem {
         
         /// remove emptied directories per saved list
         if (!directorylist.empty()) {
-            std::for_each(directorylist.begin(), directorylist.end(),
+            /// reverse directorylist --
+            std::reverse(directorylist.begin(),
+                         directorylist.end());
+            /// -- removing uppermost directories top-down:
+            std::for_each(directorylist.begin(),
+                          directorylist.end(),
                    [&out](filesystem::path const& p) { out &= p.remove(); });
         }
         
