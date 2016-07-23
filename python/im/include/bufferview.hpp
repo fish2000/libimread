@@ -5,20 +5,17 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_BUFFERVIEW_HPP_
 
 #include <memory>
-// #include "private/buffer_t.h"
-// #include <Python.h>
-// #include <Halide.h>
 #include <libimread/image.hh>
 
 /// forward-declare buffer_t and Py_buffer:
 extern "C" {
     struct buffer_t;
-    struct Py_buffer;
+    typedef struct bufferinfo Py_buffer;
 }
 
 /// forward-declare Halide::Type:
 namespace Halide {
-    class Type;
+    struct Type;
 }
 
 namespace im {
@@ -32,8 +29,7 @@ namespace im {
             
             public:
                 
-                using shared_t = std::shared_ptr<buffer_t,
-                                        buffer::deleter_t>;
+                using shared_t = std::shared_ptr<buffer_t>;
                 
                 View();
                 View(View const& other);

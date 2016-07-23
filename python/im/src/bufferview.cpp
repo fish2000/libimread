@@ -14,24 +14,24 @@ namespace im {
         
         View::View(View const& other)
             :shared(other.shared)
-            ,htype(Halide::UInt(8))
+            ,htype(Halide::UInt(shared->elem_size * 8))
             {}
         
         View::View(View&& other) noexcept
             :shared(std::move(other.shared))
-            ,htype(Halide::UInt(8))
+            ,htype(Halide::UInt(shared->elem_size * 8))
             {}
         
         View::View(buffer_t const* bt)
             :shared(buffer::heapcopy(bt),
-                    buffer::deleter_t())
-            ,htype(Halide::UInt(8))
+                    buffer::deleter_t<buffer_t>{})
+            ,htype(Halide::UInt(shared->elem_size * 8))
             {}
         
         View::View(Py_buffer const* pybt)
             :shared(buffer::heapcopy(pybt),
-                    buffer::deleter_t())
-            ,htype(Halide::UInt(8))
+                    buffer::deleter_t<buffer_t>{})
+            ,htype(Halide::UInt(shared->elem_size * 8))
             {}
         
         View::~View() {}
