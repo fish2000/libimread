@@ -22,9 +22,9 @@ namespace im {
         void heapdestroy(buffer_t* buffer);
         
         template <typename BufferType>
-        struct deleter {
-            constexpr deleter() noexcept = default;
-            template <typename U> deleter(deleter<U> const&) noexcept {}
+        struct deleter_t {
+            constexpr deleter_t() noexcept = default;
+            template <typename U> deleter_t(deleter_t<U> const&) noexcept {}
             void operator()(std::add_pointer_t<BufferType> ptr) {
                 im::buffer::heapdestroy(ptr);
             }

@@ -127,6 +127,7 @@ extensions = {
         "im/src/pymethods/typecheck.cpp",
         "im/src/pymethods/pymethods.cpp",
         "im/src/buffer.cpp",
+        "im/src/bufferview.cpp",
         "im/src/detail.cpp",
         "im/src/gil.cpp",
         "im/src/gil-io.cpp",

@@ -34,6 +34,12 @@ namespace im {
         #  endif
         #endif
         
+        template <typename T, typename U> inline
+        T reconsider_cast(U uvula)  { return *((T*)&uvula); }
+        
+        template <typename T, typename U> inline
+        T reconsider_cast(U* uvula) { return reconsider_cast<T, U>(*uvula); }
+        
         __attribute__((__always_inline__))
         inline bool littleendian(void) {
             #if defined(__BIG_ENDIAN__)
@@ -43,7 +49,8 @@ namespace im {
             #else
                 /// Otherwise, do something quick to compute it:
                 int i = 1;
-                return *((char*)&i);
+                // return *((char*)&i);
+                return reconsider_cast<char>(i);
             #endif
         }
         
@@ -58,19 +65,33 @@ namespace im {
         /// or 8 bytes.  This should work for any of short, unsigned short, int,
         /// unsigned int, float, long long, pointers.
         template <typename T> inline
-        void swap_endian(T* f, int len = 1) {
+        void swap_endian(T* f, int length = 1) {
             using std::swap;
-            for (char* c = (char*)f; len--; c += sizeof(T)) {
-                if (sizeof(T) == 2) {
-                    swap(c[0], c[1]);
-                } else if (sizeof(T) == 4) {
-                    swap(c[0], c[3]);
-                    swap(c[1], c[2]);
-                } else if (sizeof(T) == 8) {
-                    swap(c[0], c[7]);
-                    swap(c[1], c[6]);
-                    swap(c[2], c[5]);
-                    swap(c[3], c[4]);
+            for (char* c = (char*)f; length--; c += sizeof(T)) {
+                switch (sizeof(T)) {
+                    case 2:
+                        swap(c[0], c[1]);
+                        break;
+                    case 4:
+                        swap(c[0], c[3]);
+                        swap(c[1], c[2]);
+                        break;
+                    case 8:
+                        swap(c[0], c[7]);
+                        swap(c[1], c[6]);
+                        swap(c[2], c[5]);
+                        swap(c[3], c[4]);
+                        break;
+                    case 16:
+                    case 32:
+                    case 64:
+                        /// at these sizes, the loop overhead is worth it:
+                        int half = sizeof(T) / 2,
+                            almosthalf = sizeof(T) / 2 - 1;
+                        for (int idx = 0; idx < half; ++idx) {
+                            swap(c[idx], c[almosthalf - idx]);
+                        }
+                        break;
                 }
             }
         }

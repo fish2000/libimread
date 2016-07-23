@@ -104,7 +104,7 @@ namespace im {
         
         bool pad(byte_sink* output, std::size_t n = 1) {
             if (n == 0) { return false; }
-            char zeros[n] = {0};
+            char zeros[n] = { 0 };
             return output->write(zeros, n) == n;
         }
         

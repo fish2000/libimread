@@ -19,7 +19,7 @@
 #include "../gil.hpp"
 #include "../detail.hpp"
 #include "../options.hpp"
-#include "../hybrid.hh"
+#include "../bufferview.hpp"
 #include "base.hh"
 
 #include <libimread/rehash.hh>
@@ -47,7 +47,7 @@ namespace py {
         using im::options_map;
         using im::Image;
         using im::ImageList;
-        using im::ArrayImage;
+        using ImageBufferView = im::buffer::View;
         
         using sizevec_t = std::vector<std::size_t>;
         using pysizevec_t = std::vector<Py_ssize_t>;
@@ -657,24 +657,27 @@ namespace py {
             }
             
             ImageList as_imagelist() {
+                static const int flags = PyBUF_ND | PyBUF_STRIDES;
+                ImageList out;
+                
                 /// double-check bufferage
                 bool buffered = std::all_of(internal.begin(),
                                             internal.end(),
-                                         [](PyObject* obj) { return bool(PyObject_CheckBuffer(obj)); });
+                                         [](PyObject* obj) {
+                    return bool(PyObject_CheckBuffer(obj));
+                });
                 
                 if (!buffered) {
                     /// FREAK OUT!!!
+                    return out;
                 }
                 
-                ImageList out;
                 Py_buffer view{ 0 };
                 std::for_each(internal.begin(),
                               internal.end(),
                           [&](PyObject* obj) {
-                    if (PyObject_GetBuffer(obj, &view, PyBUF_ND | PyBUF_STRIDES) != -1) {
-                        buffer_t* bt = im::buffer::heapcopy(&view);
-                        out.push_back(new ArrayImage(NPY_UINT8, bt));
-                        im::buffer::heapdestroy(bt);
+                    if (PyObject_GetBuffer(obj, &view, flags) != -1) {
+                        out.push_back(new ImageBufferView(&view));
                         PyBuffer_Release(&view);
                     }
                 });
@@ -695,9 +698,204 @@ namespace py {
             bool loadfilelike(PyObject* file, options_map const& opts) { return true; }
             bool loadblob(Py_buffer const& view, options_map const& opts) { return true; }
             
-            bool save(char const* destination, options_map const& opts) { return true; }
-            bool savefilelike(PyObject* file, options_map const& opts) { return true; }
-            PyObject* saveblob(options_map const& opts) { return py::None(); }
+            bool save(char const* destination, options_map const& opts) {
+                std::unique_ptr<ImageFormat> format;
+                options_map default_opts;
+                bool exists = false,
+                     can_write = false,
+                     overwrite = true;
+                
+                try {
+                    py::gil::release nogil;
+                    format = im::for_filename(destination);
+                    can_write = format->format_can_write_multi();
+                    exists = path::exists(destination);
+                    overwrite = opts.cast<bool>("overwrite", overwrite);
+                    if (can_write && exists && overwrite) {
+                        path::remove(destination);
+                    }
+                } catch (im::FormatNotFound& exc) {
+                    PyErr_Format(PyExc_ValueError,
+                        "Can't find I/O format for file: %s",
+                        destination);
+                    return false;
+                }
+                
+                if (!can_write) {
+                    std::string mime = format->get_mimetype();
+                    PyErr_Format(PyExc_IOError,
+                        "Unimplemented write_multi() in I/O format %s",
+                        mime.c_str());
+                    return false;
+                }
+                
+                if (exists && !overwrite) {
+                    PyErr_Format(PyExc_IOError,
+                        "File exists (opts['overwrite'] == False): %s",
+                        destination);
+                    return false;
+                }
+                
+                ImageList input = as_imagelist();
+                
+                if (input.size() != internal.size()) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Error converting batch contents to ImageList");
+                    return false;
+                }
+                
+                {
+                    py::gil::release nogil;
+                    std::unique_ptr<FileSink> output(new FileSink(destination));
+                    default_opts = format->add_options(opts);
+                    format->write_multi(input, output.get(), default_opts);
+                }
+                
+                return true;
+            }
+            
+            bool savefilelike(PyObject* file, options_map const& opts) {
+                std::unique_ptr<ImageFormat> format;
+                typename py::gil::with::sink_t output;
+                std::string ext;
+                options_map default_opts;
+                bool can_write = false;
+                
+                if (!opts.has("format")) {
+                    PyErr_SetString(PyExc_AttributeError,
+                        "Output format unspecified");
+                    return false;
+                }
+                
+                ImageList input = as_imagelist();
+                
+                if (input.size() != internal.size()) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Error converting batch contents to ImageList");
+                    return false;
+                }
+                
+                try {
+                    py::gil::with iohandle(file);
+                    output = iohandle.sink();
+                    ext = opts.cast<std::string>("format");
+                    format = im::get_format(ext.c_str());
+                    can_write = format->format_can_write_multi();
+                    if (can_write) {
+                        default_opts = format->add_options(opts);
+                        format->write_multi(input, output.get(), default_opts);
+                        return true;
+                    }
+                } catch (im::FormatNotFound& exc) {
+                    PyErr_Format(PyExc_ValueError,
+                        "Can't find I/O format: %s",
+                        ext.c_str());
+                    return false;
+                }
+                
+                if (!can_write) {
+                    std::string mime = format->get_mimetype();
+                    PyErr_Format(PyExc_IOError,
+                        "Unimplemented write_multi() in I/O format %s",
+                        mime.c_str());
+                }
+                return false;
+            }
+            
+            PyObject* saveblob(options_map const& opts) {
+                std::unique_ptr<ImageFormat> format;
+                std::vector<byte> data;
+                std::string ext, pth;
+                options_map default_opts;
+                bool can_write = false,
+                     exists = false,
+                     removed = false,
+                     as_url = false,
+                     as_html = false;
+                
+                if (!opts.has("format")) {
+                    PyErr_SetString(PyExc_AttributeError,
+                        "Output format unspecified");
+                    return nullptr;
+                }
+                
+                try {
+                    py::gil::release nogil;
+                    ext = opts.cast<std::string>("format");
+                    format = im::get_format(ext.c_str());
+                    can_write = format->format_can_write_multi();
+                } catch (im::FormatNotFound& exc) {
+                    PyErr_Format(PyExc_ValueError,
+                        "Can't find I/O format: %s",
+                        ext.c_str());
+                    return nullptr;
+                }
+                
+                if (!can_write) {
+                    std::string mime = format->get_mimetype();
+                    PyErr_Format(PyExc_IOError,
+                        "Unimplemented write() in I/O format %s",
+                        mime.c_str());
+                    return nullptr;
+                }
+                
+                ImageList input = as_imagelist();
+                
+                if (input.size() != internal.size()) {
+                    PyErr_SetString(PyExc_ValueError,
+                        "Error converting batch contents to ImageList");
+                    return nullptr;
+                }
+                
+                NamedTemporaryFile tf(format->get_suffix(true), false);
+                
+                {
+                    py::gil::release nogil;
+                    pth = std::string(tf.filepath.make_absolute().str());
+                    tf.filepath.remove();
+                    auto output = std::make_unique<FileSink>(pth.c_str());
+                    default_opts = format->add_options(opts);
+                    format->write_multi(input, output.get(), default_opts);
+                    exists = path::exists(pth);
+                }
+                
+                if (!exists) {
+                    PyErr_SetString(PyExc_IOError,
+                        "Temporary file is AWOL");
+                    return nullptr;
+                }
+                
+                {
+                    py::gil::release nogil;
+                    auto readback = std::make_unique<FileSource>(pth.c_str());
+                    data = readback->full_data();
+                    tf.close();
+                    removed = tf.remove();
+                }
+                
+                if (!removed) {
+                    PyErr_SetString(PyExc_IOError,
+                        "Failed to remove temporary file");
+                    return nullptr;
+                }
+                
+                as_html = opts.cast<bool>("as_html", as_html);
+                as_url = opts.cast<bool>("as_url", as_html);
+                if (!as_url) { return py::string(data); }
+                
+                std::string out("data:");
+                {
+                    py::gil::release nogil;
+                    if (as_url) {
+                        out += format->get_mimetype() + ";base64,";
+                        out += im::base64::encode(&data[0], data.size());
+                        if (as_html) {
+                            out = std::string("<img src='") + out + "'>";
+                        }
+                    }
+                }
+                return py::string(out);
+            }
             
             static constexpr Py_ssize_t typeflags() {
                 return Py_TPFLAGS_DEFAULT         |
