@@ -10,9 +10,30 @@ namespace im {
     
     namespace buffer {
         
-        View::View() {}
+        View::View() noexcept {}
         
-        View::View(View const& other)
+        View::View(halotype_t const& halotype,
+                   int width, int height, int planes)
+            :htype(halotype)
+            ,allocation(new uint8_t[width * height * planes * htype.bytes()])
+            {
+                shared = shared_t(new buffer_t{
+                    0, allocation.get(),
+                    { static_cast<int32_t>(width),
+                      static_cast<int32_t>(height),
+                      static_cast<int32_t>(planes),
+                      0 },
+                    { static_cast<int32_t>(1),
+                      static_cast<int32_t>(width),
+                      static_cast<int32_t>(width*height),
+                      0 },
+                    { 0, 0, 0, 0 },
+                    static_cast<int32_t>(htype.bytes()),
+                    false, false
+                });
+            }
+        
+        View::View(View const& other) noexcept
             :shared(other.shared)
             ,htype(Halide::UInt(shared->elem_size * 8))
             {}
@@ -20,7 +41,10 @@ namespace im {
         View::View(View&& other) noexcept
             :shared(std::move(other.shared))
             ,htype(Halide::UInt(shared->elem_size * 8))
-            {}
+            ,allocation(std::move(other.allocation))
+            {
+                shared->host = allocation.get();
+            }
         
         View::View(buffer_t const* bt)
             :shared(buffer::heapcopy(bt),
@@ -36,7 +60,7 @@ namespace im {
         
         View::~View() {}
         
-        uint8_t* View::data() const {
+        uint8_t* View::data() const noexcept {
             return shared->host;
         };
         
@@ -44,7 +68,7 @@ namespace im {
             return shared->host + std::ptrdiff_t(s);
         };
         
-        Halide::Type View::type() const {
+        View::halotype_t View::type() const {
             return htype;
         };
         
@@ -52,7 +76,7 @@ namespace im {
             return shared.get();
         };
         
-        int View::nbits() const {
+        int View::nbits() const noexcept {
             return htype.bits();
         };
         
@@ -65,27 +89,27 @@ namespace im {
             return buffer::ndims(*shared.get());
         };
         
-        int View::dim(int d) const {
+        int View::dim(int d) const noexcept {
             return shared->extent[d];
         };
         
-        int View::stride(int s) const {
+        int View::stride(int s) const noexcept {
             return shared->stride[s];
         };
         
-        int View::min(int s) const {
+        int View::min(int s) const noexcept {
             return shared->min[s];
         }
         
-        bool View::is_signed() const {
+        bool View::is_signed() const noexcept {
             return !htype.is_uint();
         };
         
-        bool View::is_floating_point() const {
+        bool View::is_floating_point() const noexcept {
             return htype.is_float();
         };
         
-        off_t View::rowp_stride() const {
+        off_t View::rowp_stride() const noexcept {
             return shared->extent[2] ? shared->extent[2] : 0;
         }
         
@@ -94,7 +118,38 @@ namespace im {
             host += off_t(r * rowp_stride());
             return static_cast<void*>(host);
         };
-    
+        
+        ViewFactory::ViewFactory() noexcept
+            :fname("")
+            {}
+        
+        ViewFactory::ViewFactory(std::string const& nm) noexcept
+            :fname(nm)
+            {}
+        
+        ViewFactory::~ViewFactory() {}
+        
+        std::string const& ViewFactory::name() noexcept                      { return fname; }
+        std::string const& ViewFactory::name(std::string const& nm) noexcept { fname = nm;
+                                                                               return name(); }
+        
+#define xWIDTH d1
+#define xHEIGHT d0
+#define xDEPTH d2
+        
+        ViewFactory::unique_t ViewFactory::create(int nbits,
+                                                  int xHEIGHT, int xWIDTH, int xDEPTH,
+                                                  int d3, int d4) {
+            Halide::Type htype = Halide::UInt(nbits);
+            ViewFactory::image_t out(htype, xWIDTH, xHEIGHT, xDEPTH);
+            return ViewFactory::unique_t(
+                new ViewFactory::image_t(std::move(out)));
+        }
+        
+#undef xWIDTH
+#undef xHEIGHT
+#undef xDEPTH
+        
     }
 }
 
