@@ -157,6 +157,7 @@ function(halide_add_generator_dependency)
                             FOLDER "generator")
       add_dependencies(${exec_generator_target_postprocess}
                        ${exec_generator_target})
+      add_library(${FILTER_DYN} SHARED IMPORTED GLOBAL)
 
       if (NOT ${args_OUTPUT_SHARED_LIB_VAR} STREQUAL "")
         set(${args_OUTPUT_SHARED_LIB_VAR} "${SCRATCH_DIR}/${FILTER_DYN}" PARENT_SCOPE)
