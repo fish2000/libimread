@@ -18,6 +18,14 @@ namespace py {
             active = false;
         }
         
+        /// rock the GIL / or else I'm gonna
+        ///         stab a knife through your eye 
+        ///    -- S. Combs (licensed and paraphrased):
+        ///          DIDDYS KIDS REMEMBER TO GIL UP ON THIS FUNC,
+        ///          SAFE INTERPRETER REENTRANCY IS NO ACCIDENT !!!
+        ///          REMEMBER TO TELL A GROWNUP IF YOUR GIL CODE HURTS YOU
+        ///          REPORT UNCAUGHT EXCEPTIONS THROWN BY STRANGERS
+        
         ensure::ensure()
             :state(PyGILState_Ensure()), active(true)
             {}
