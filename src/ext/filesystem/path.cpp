@@ -217,7 +217,7 @@ namespace filesystem {
         char temp[PATH_MAX];
         if (::realpath(c_str(), temp) == NULL) {
             imread_raise(FileSystemError,
-                "In reference to path value:", c_str(),
+                "In reference to path value:", str(),
                 "FATAL internal error raised during path::make_absolute() call to ::realpath():",
                 std::strerror(errno));
         }
@@ -455,23 +455,20 @@ namespace filesystem {
         if (!exists()) { return false; }
         if (newpath.exists()) {
             path newabspath = newpath.make_absolute();
-            if (newabspath.is_directory()) {
-                if (newabspath != parent().make_absolute()) {
-                    path newnewpath = newabspath/basename();
-                    if (!newnewpath.exists()) {
-                        return rename(newnewpath);
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            if (!newabspath.is_directory()) { return false; }
+            if (newabspath == this->parent().make_absolute()) { return false; }
+            path newnewpath = newabspath.join(path(make_absolute().basename()));
+            return newnewpath.exists() ? false : this->rename(newnewpath);
         }
-        bool status = ::rename(c_str(), newpath.c_str()) != -1;
-        if (status) { set(newpath.make_absolute().str()); }
+        bool status = ::rename(str().c_str(), newpath.c_str()) == 0;
+        if (status) {
+            set(newpath.make_absolute().str());
+        } else {
+            imread_raise(FileSystemError,
+                "In reference to path value:", str(), this->basename(),
+                "internal error raised during path::rename() call to ::rename():",
+                std::strerror(errno));
+        }
         return status;
     }
     bool path::rename(char const* newpath)        { return rename(path(newpath)); }
@@ -481,22 +478,12 @@ namespace filesystem {
         if (!exists()) { return path(); }
         if (newpath.exists()) {
             path newabspath = newpath.make_absolute();
-            if (newabspath.is_directory()) {
-                if (newabspath != parent().make_absolute()) {
-                    path newnewpath = newabspath/basename();
-                    if (!newnewpath.exists()) {
-                        return duplicate(newnewpath);
-                    } else {
-                        return path();
-                    }
-                } else {
-                    return path();
-                }
-            } else {
-                return path();
-            }
+            if (!newabspath.is_directory()) { return path(); }
+            if (newabspath == this->parent().make_absolute()) { return path(); }
+            path newnewpath = newabspath.join(path(make_absolute().basename()));
+            return newnewpath.exists() ? path() : this->duplicate(newnewpath);
         }
-        bool status = detail::copyfile(c_str(), newpath.c_str()) != -1;
+        bool status = detail::copyfile(str().c_str(), newpath.c_str()) != -1;
         return status ? newpath.make_absolute() : path();
     }
     path path::duplicate(char const* newpath) const        { return duplicate(path(newpath)); }

@@ -18,6 +18,22 @@ namespace {
     using filesystem::path;
     using U8Image = im::HybridImage<uint8_t>;
     
+    // static const bool collect_temporaries = true;
+    #define COLLECT_TEMPORARIES 0
+    #define CHECK_DIRECTORY "/Users/fish/Dropbox/libimread/check/"
+    
+    template <typename P>
+    bool COLLECT(P&& p) {
+        #if COLLECT_TEMPORARIES == 1
+            if (!path::exists(CHECK_DIRECTORY)) {
+                path::makedir(CHECK_DIRECTORY);
+            }
+            return path(std::forward<P>(p)).rename(CHECK_DIRECTORY);
+        #else
+            return path::remove(std::forward<P>(p));
+        #endif
+    }
+    
     TEST_CASE("[halide-io] Read PNG files",
               "[halide-read-png]")
     {
@@ -85,6 +101,7 @@ namespace {
         std::for_each(tifs.begin(), tifs.end(), [&basedir](path const& p) {
             auto tif = im::halide::read(basedir/p);
             auto pngpath = im::halide::tmpwrite<PNG>(tif);
+            // CHECK(COLLECT(pngpath));
             CHECK(path::remove(pngpath));
         });
         
@@ -97,19 +114,19 @@ namespace {
         
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         auto tf = im::halide::tmpwrite<TIFF>(halim);
-        CHECK(path::remove(tf));
+        CHECK(COLLECT(tf));
         
         U8Image halim2 = im::halide::read(D("IMG_4332.jpg"));
         auto tf2 = im::halide::tmpwrite<TIFF>(halim2);
-        CHECK(path::remove(tf2));
+        CHECK(COLLECT(tf2));
         
         U8Image halim3 = im::halide::read(D("IMG_7333.jpeg"));
         auto tf3 = im::halide::tmpwrite<TIFF>(halim3);
-        CHECK(path::remove(tf3));
+        CHECK(COLLECT(tf3));
         
         U8Image halim4 = im::halide::read(D("10954288_342637995941364_1354507656_n.jpg"));
         auto tf4 = im::halide::tmpwrite<TIFF>(halim4);
-        CHECK(path::remove(tf4));
+        CHECK(COLLECT(tf4));
     }
     
     TEST_CASE("[halide-io] Read a TIFF, rewrite it as another TIFF using tmpwrite()",
@@ -119,7 +136,7 @@ namespace {
         
         U8Image halim = im::halide::read(D("ptlobos.tif"));
         auto tf = im::halide::tmpwrite<TIFF>(halim);
-        CHECK(path::remove(tf));
+        CHECK(COLLECT(tf));
     }
     
     TEST_CASE("[halide-io] Write multiple formats as PPM",

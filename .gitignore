@@ -1,4 +1,5 @@
 /build/
+/check/
 /dist/
 /deps/*/build/
 /python/build/

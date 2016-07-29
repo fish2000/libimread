@@ -297,13 +297,17 @@ namespace im {
         std::string tmpwrite(HybridImage<T>& input,
                              options_map const& opts = halide_default_opts) {
             using filesystem::NamedTemporaryFile;
-            NamedTemporaryFile tf(Format::suffix(true), false); /// cleanup on scope exit
-            tf.remove();
+            std::string out;
+            {
+                NamedTemporaryFile tf(Format::suffix(true), false); /// cleanup on scope exit
+                tf.remove();
+                out = std::string(tf.str());
+            }
             std::unique_ptr<ImageFormat> format(new Format);
-            std::unique_ptr<FileSink> output(new FileSink(tf.str()));
+            std::unique_ptr<FileSink> output(new FileSink(out));
             format->write(dynamic_cast<Image&>(input), output.get(),
                           format->add_options(opts));
-            return tf.str();
+            return out;
         }
         
     }
