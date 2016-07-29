@@ -438,34 +438,6 @@ namespace im {
                 opts.cast<int>("tiff:orientation", ORIENTATION_TOPLEFT));
         }
         
-        // for (int x = 0; x < w; x++) {
-        //     for (int c = 0; c < depth; c++) {
-        //         pix::convert(*ptr++, dstPtr[c*c_stride]);
-        //     }
-        //     dstPtr++;
-        // }
-        
-        /// pre-interlace buffer:
-        // int cs1 = input.stride(2);
-        // int cs2 = cs1 + cs1;
-        // for (int r = 0; r < h; ++r) {
-        //     R = bufp[r];
-        //     G = bufp[r + cs1];
-        //     B = bufp[r + cs2];
-        //     srcp = input.rowp_as<byte>(r);
-        //     for (int x = 0; x < w; ++x) {
-        //         pix::convert(*srcp++, *R++);
-        //     }
-        //     srcp = input.rowp_as<byte>(r) + cs1;
-        //     for (int x = 0; x < w; ++x) {
-        //         pix::convert(*srcp++, *G++);
-        //     }
-        //     srcp = input.rowp_as<byte>(r) + cs2;
-        //     for (int x = 0; x < w; ++x) {
-        //         pix::convert(*srcp++, *B++);
-        //     }
-        // }
-        
         if (copy_data) {
             bufdata.resize(siz * nbytes);
             bufp = &bufdata[0];
