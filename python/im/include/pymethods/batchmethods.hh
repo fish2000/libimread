@@ -9,6 +9,7 @@
 
 #include "../check.hh"
 #include "../detail.hpp"
+#include "../exceptions.hpp"
 
 #include "typecheck.hh"
 #include "../models/batchmodel.hh"
@@ -360,29 +361,21 @@ namespace py {
                     if (cmp == nullptr) {
                         if (reverse) { batch->reverse(); }
                         if (!batch->sort(key, key_tag_t{})) {
-                            PyErr_SetString(PyExc_ValueError,
-                                "sort(): key sort failed");
-                            return nullptr;
+                            return py::ValueError("sort(): key sort failed");
                         }
                     } else {
-                        PyErr_SetString(PyExc_ValueError,
-                            "sort(): use either a key or cmp function (not both)");
-                        return nullptr;
+                        return py::ValueError("sort(): use either a key or cmp function (not both)");
                     }
                 } else {
                     if (cmp == nullptr) {
                         if (reverse) { batch->reverse(); }
                         if (!batch->sort()) {
-                            PyErr_SetString(PyExc_ValueError,
-                                "sort(): default sort failed");
-                            return nullptr;
+                            return py::ValueError("sort(): default sort failed");
                         }
                     } else {
                         if (reverse) { batch->reverse(); }
                         if (!batch->sort(cmp, comparison_tag_t{})) {
-                            PyErr_SetString(PyExc_ValueError,
-                                "sort(): cmp sort failed");
-                            return nullptr;
+                            return py::ValueError("sort(): cmp sort failed");
                         }
                     }
                 }
@@ -420,9 +413,7 @@ namespace py {
                 
                 if (PyDict_Update(batch->writeoptDict, options) == -1) {
                     Py_DECREF(options);
-                    PyErr_SetString(PyExc_SystemError,
-                        "Dictionary update failure");
-                    return nullptr;
+                    return py::SystemError("Dictionary update failure");
                 }
                 
                 options_map opts = batch->writeopts();
@@ -430,9 +421,7 @@ namespace py {
                 
                 if (as_blob || use_file) {
                     if (!opts.has("format")) {
-                        PyErr_SetString(PyExc_AttributeError,
-                            "Output format unspecified");
-                        return nullptr;
+                        return py::AttributeError("Output format unspecified");
                     }
                 }
                 
@@ -448,14 +437,13 @@ namespace py {
                         dststr = std::string(dest.str());
                     }
                     if (!dststr.size()) {
+                        std::string error_message;
                         if (as_blob) {
-                            PyErr_SetString(PyExc_ValueError,
-                                "Blob output unexpectedly returned zero-length bytestring");
+                            error_message = "Blob output unexpectedly returned zero-length bytestring";
                         } else {
-                            PyErr_SetString(PyExc_ValueError,
-                                "File output destination path is unexpectedly zero-length");
+                            error_message = "File output destination path is unexpectedly zero-length";
                         }
-                        return nullptr;
+                        return py::ValueError(error_message);
                     }
                     did_save = batch->save(dststr.c_str(), opts);
                 } else {
@@ -483,10 +471,7 @@ namespace py {
                             removed = path::remove(dststr);
                         }
                         if (!removed) {
-                            PyErr_Format(PyExc_IOError,
-                                "Failed to remove temporary file %s",
-                                dststr.c_str());
-                            return nullptr;
+                            return py::IOError("Failed to remove temporary file " + dststr);
                         }
                     }
                     return py::string(data);

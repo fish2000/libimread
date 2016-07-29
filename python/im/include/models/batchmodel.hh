@@ -18,6 +18,7 @@
 #include "../check.hh"
 #include "../gil.hpp"
 #include "../detail.hpp"
+#include "../exceptions.hpp"
 #include "../options.hpp"
 #include "../bufferview.hpp"
 #include "base.hh"
@@ -305,23 +306,17 @@ namespace py {
             
             PyObject* __index__(Py_ssize_t idx) {
                 if (idx >= internal.size() || idx < 0) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "__index__(): out of range");
-                    return nullptr;
+                    return py::IndexError("__index__(): out of range");
                 }
                 return py::convert(internal[static_cast<std::size_t>(idx)]);
             }
             
             PyObject* __index__(Py_ssize_t idx, PyObject* value) {
                 if (idx >= internal.size() || idx < 0) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "__index__(): out of range");
-                    return nullptr;
+                    return py::IndexError("__index__(): out of range");
                 }
                 if (!PyObject_CheckBuffer(value)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "__index__(): can't assign unbuffered object");
-                    return nullptr;
+                    return py::ValueError("__index__(): can't assign unbuffered object");
                 }
                 std::size_t sidx = static_cast<std::size_t>(idx);
                 py::ref old = internal.at(sidx);
@@ -370,9 +365,7 @@ namespace py {
             
             bool append(PyObject* obj) {
                 if (!PyObject_CheckBuffer(obj)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "append(): can't append unbuffered object");
-                    return false;
+                    return py::ValueError("append(): can't append unbuffered object", false);
                 }
                 internal.push_back(obj);
                 Py_INCREF(obj);
@@ -387,20 +380,15 @@ namespace py {
             
             bool extend(PyObject* iterable) {
                 if (!PySequence_Check(iterable)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "extend(): iterable sequence required");
-                    return false;
+                    return py::ValueError("extend(): iterable sequence required", false);
                 }
-                py::ref sequence = PySequence_Fast(iterable,
-                    "extend(): sequence extraction failed");
+                py::ref sequence = PySequence_Fast(iterable, "extend(): sequence extraction failed");
                 int idx = 0, len = PySequence_Fast_GET_SIZE(sequence.get());
                 for (; idx < len; idx++) {
                     /// PySequence_Fast_GET_ITEM() yields a borrowed reference...
                     PyObject* item = PySequence_Fast_GET_ITEM(sequence.get(), idx);
                     if (!PyObject_CheckBuffer(item)) {
-                        PyErr_SetString(PyExc_ValueError,
-                            "extend(): unbuffered item found");
-                        return false;
+                        return py::ValueError("extend(): unbuffered item found", false);
                     }
                     internal.push_back(item);
                     Py_INCREF(item); /// ... hence this incref
@@ -420,15 +408,11 @@ namespace py {
                     auto result = std::find(internal.begin() + begin,
                                             internal.begin() + end, obj);
                     if (result == internal.end()) {
-                        PyErr_SetString(PyExc_ValueError,
-                            "index(): not found");
-                        return -1;
+                        return py::ValueError("index(): not found", -1);
                     }
                     return std::abs(static_cast<Py_ssize_t>(internal.begin() - result));
                 } else {
-                    PyErr_SetString(PyExc_ValueError,
-                        "index(): bad indices");
-                    return -1;
+                    return py::ValueError("index(): bad indices", -1);
                 }
             }
             
@@ -442,14 +426,10 @@ namespace py {
             
             bool insert(Py_ssize_t idx, PyObject* obj) {
                 if (!PyObject_CheckBuffer(obj)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "insert(): can't insert unbuffered object");
-                    return false;
+                    return py::ValueError("insert(): can't insert unbuffered object", false);
                 }
                 if (idx > internal.size() || idx < 0) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "insert(): index out of range");
-                    return false;
+                    return py::IndexError("insert(): index out of range", false);
                 }
                 internal.insert(internal.begin() + idx, obj);
                 Py_INCREF(obj);
@@ -467,9 +447,7 @@ namespace py {
                     return out;
                 }
                 if (idx > internal.size() || idx < -1) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "pop(): index out of range");
-                    return nullptr;
+                    return py::IndexError("pop(): index out of range");
                 }
                 PyObject* out = internal.at(idx);
                 internal.erase(internal.begin() + idx);
@@ -480,9 +458,7 @@ namespace py {
                 auto result = std::find(internal.begin(),
                                         internal.end(), obj);
                 if (result == internal.end()) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "remove(): not found");
-                    return false;
+                    return py::ValueError("remove(): not found", false);
                 }
                 Py_DECREF(*result);
                 internal.erase(result);
@@ -627,9 +603,7 @@ namespace py {
                                        widths.cend(),
                          [width_front](Py_ssize_t widthval) { return width_front == widthval; });
                 if (!wat) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "width(): mismatch");
-                    return -1;
+                    return py::ValueError("width(): mismatch", -1);
                 }
                 return width_front;
             }
@@ -649,9 +623,7 @@ namespace py {
                                        heights.cend(),
                         [height_front](Py_ssize_t heightval) { return height_front == heightval; });
                 if (!wat) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "height(): mismatch");
-                    return -1;
+                    return py::ValueError("height(): mismatch", -1);
                 }
                 return height_front;
             }
@@ -715,33 +687,22 @@ namespace py {
                         path::remove(destination);
                     }
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format for file: %s",
-                        destination);
-                    return false;
+                    return py::ValueError(std::string("Can't find I/O format for file: ") + destination, false);
                 }
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented write_multi() in I/O format %s",
-                        mime.c_str());
-                    return false;
+                    return py::IOError("Unimplemented write_multi() in I/O format: " + mime, false);
                 }
                 
                 if (exists && !overwrite) {
-                    PyErr_Format(PyExc_IOError,
-                        "File exists (opts['overwrite'] == False): %s",
-                        destination);
-                    return false;
+                    return py::ValueError(std::string("File exists (opts['overwrite'] == False): ") + destination, false);
                 }
                 
                 ImageList input = as_imagelist();
                 
                 if (input.size() != internal.size()) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Error converting batch contents to ImageList");
-                    return false;
+                    return py::ValueError("Error converting batch contents to ImageList", false);
                 }
                 
                 {
@@ -762,17 +723,13 @@ namespace py {
                 bool can_write = false;
                 
                 if (!opts.has("format")) {
-                    PyErr_SetString(PyExc_AttributeError,
-                        "Output format unspecified");
-                    return false;
+                    return py::AttributeError("Output format unspecified", false);
                 }
                 
                 ImageList input = as_imagelist();
                 
                 if (input.size() != internal.size()) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Error converting batch contents to ImageList");
-                    return false;
+                    return py::ValueError("Error converting batch contents to ImageList", false);
                 }
                 
                 try {
@@ -787,17 +744,12 @@ namespace py {
                         return true;
                     }
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format: %s",
-                        ext.c_str());
-                    return false;
+                    return py::ValueError("Can't find I/O format: " + ext, false);
                 }
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented write_multi() in I/O format %s",
-                        mime.c_str());
+                    return py::IOError("Unimplemented write_multi() in I/O format: " + mime, false);
                 }
                 return false;
             }
@@ -814,9 +766,7 @@ namespace py {
                      as_html = false;
                 
                 if (!opts.has("format")) {
-                    PyErr_SetString(PyExc_AttributeError,
-                        "Output format unspecified");
-                    return nullptr;
+                    return py::AttributeError("Output format unspecified");
                 }
                 
                 try {
@@ -825,26 +775,18 @@ namespace py {
                     format = im::get_format(ext.c_str());
                     can_write = format->format_can_write_multi();
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format: %s",
-                        ext.c_str());
-                    return nullptr;
+                    return py::ValueError("Can't find I/O format: " + ext);
                 }
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented write() in I/O format %s",
-                        mime.c_str());
-                    return nullptr;
+                    return py::IOError("Unimplemented write_multi() in I/O format: " + mime);
                 }
                 
                 ImageList input = as_imagelist();
                 
                 if (input.size() != internal.size()) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Error converting batch contents to ImageList");
-                    return nullptr;
+                    return py::ValueError("Error converting batch contents to ImageList");
                 }
                 
                 NamedTemporaryFile tf(format->get_suffix(true), false);
@@ -860,9 +802,7 @@ namespace py {
                 }
                 
                 if (!exists) {
-                    PyErr_SetString(PyExc_IOError,
-                        "Temporary file is AWOL");
-                    return nullptr;
+                    return py::IOError("Temporary file is AWOL");
                 }
                 
                 {
@@ -874,9 +814,7 @@ namespace py {
                 }
                 
                 if (!removed) {
-                    PyErr_SetString(PyExc_IOError,
-                        "Failed to remove temporary file");
-                    return nullptr;
+                    return py::IOError("Failed to remove temporary file");
                 }
                 
                 as_html = opts.cast<bool>("as_html", as_html);

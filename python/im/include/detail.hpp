@@ -18,9 +18,11 @@
 #include <libimread/ext/JSON/json11.h>
 #include "models/base.hh"
 
-/// forward-declare PyArray_Descr from numpy
+/// forward-declare PyArrayObject and PyArray_Descr from numpy:
 struct _PyArray_Descr;
+struct tagPyArrayObject;
 typedef _PyArray_Descr PyArray_Descr;
+typedef tagPyArrayObject PyArrayObject;
 
 namespace py {
     
@@ -46,6 +48,7 @@ namespace py {
     PyObject* object(PyFileObject* arg);
     PyObject* object(PyStringObject* arg);
     PyObject* object(PyTypeObject* arg);
+    PyObject* object(PyArrayObject* arg);
     PyObject* object(PyArray_Descr* arg);
     PyObject* object(ModelBase* arg);
     
@@ -64,6 +67,7 @@ namespace py {
     PyObject* convert(PyFileObject*);
     PyObject* convert(PyStringObject*);
     PyObject* convert(PyTypeObject*);
+    PyObject* convert(PyArrayObject*);
     PyObject* convert(PyArray_Descr*);
     PyObject* convert(ModelBase*);
     PyObject* convert(std::nullptr_t);
