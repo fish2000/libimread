@@ -36,7 +36,6 @@ namespace im {
                 using allocation_t = std::unique_ptr<uint8_t[]>;
                 using halotype_t = Halide::Type;
                 
-                View() noexcept;
                 View(halotype_t const&, int, int, int);
                 View(View const&) noexcept;
                 View(View&&) noexcept;
@@ -61,6 +60,7 @@ namespace im {
                 virtual void* rowp(int) const override;
                 
             private:
+                View() noexcept;
                 shared_t shared;
                 halotype_t htype;
                 allocation_t allocation;

@@ -10,7 +10,9 @@ namespace im {
     
     namespace buffer {
         
-        View::View() noexcept {}
+        View::View() noexcept
+            :htype(Halide::UInt(8))
+            {}
         
         View::View(halotype_t const& halotype,
                    int width, int height, int planes)

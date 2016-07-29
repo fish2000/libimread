@@ -390,6 +390,112 @@ namespace py {
                 return py::None();
             }
             
+            PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
+                using iosource_t = typename py::gil::with::source_t;
+                BatchModel* batch = reinterpret_cast<BatchModel*>(self);
+                PyObject* py_as_blob = nullptr;
+                PyObject* options = nullptr;
+                PyObject* file = nullptr;
+                Py_buffer view;
+                char const* keywords[] = { "destination", "file", "as_blob", "options", nullptr };
+                std::string dststr;
+                bool as_blob = false,
+                     use_file = false,
+                     did_save = false;
+                
+                if (!PyArg_ParseTupleAndKeywords(
+                    args, kwargs, "|s*OOO:write", const_cast<char**>(keywords),
+                    &view,                      /// "destination", buffer with file path
+                    &file,                      /// "file", PyFileObject*-castable I/O handle
+                    &py_as_blob,                /// "as_blob", Python boolean specifying blobbiness
+                    &options))                  /// "options", read-options dict
+                {
+                    return nullptr;
+                }
+                
+                /// tests are necessary, the next lines choke on nullptr:
+                as_blob = py::options::truth(py_as_blob);
+                if (file) { use_file = PyFile_Check(file); }
+                if (options == nullptr) { options = PyDict_New(); }
+                
+                if (PyDict_Update(batch->writeoptDict, options) == -1) {
+                    Py_DECREF(options);
+                    PyErr_SetString(PyExc_SystemError,
+                        "Dictionary update failure");
+                    return nullptr;
+                }
+                
+                options_map opts = batch->writeopts();
+                Py_DECREF(options);
+                
+                if (as_blob || use_file) {
+                    if (!opts.has("format")) {
+                        PyErr_SetString(PyExc_AttributeError,
+                            "Output format unspecified");
+                        return nullptr;
+                    }
+                }
+                
+                if (!use_file) {
+                    if (as_blob) {
+                        py::gil::release nogil;
+                        NamedTemporaryFile tf("." + opts.cast<std::string>("format"), false);
+                        dststr = std::string(tf.filepath.make_absolute().str());
+                    } else {
+                        /// save as file -- extract the filename from the buffer
+                        py::gil::release nogil;
+                        py::buffer::source dest(view);
+                        dststr = std::string(dest.str());
+                    }
+                    if (!dststr.size()) {
+                        if (as_blob) {
+                            PyErr_SetString(PyExc_ValueError,
+                                "Blob output unexpectedly returned zero-length bytestring");
+                        } else {
+                            PyErr_SetString(PyExc_ValueError,
+                                "File output destination path is unexpectedly zero-length");
+                        }
+                        return nullptr;
+                    }
+                    did_save = batch->save(dststr.c_str(), opts);
+                } else {
+                    did_save = batch->savefilelike(file, opts);
+                }
+                
+                if (!did_save) {
+                    return nullptr; /// If this is false, PyErr has been set
+                }
+                
+                if (as_blob) {
+                    std::vector<byte> data;
+                    if (use_file) {
+                        py::gil::with iohandle(file);
+                        iosource_t readback = iohandle.source();
+                        data = readback->full_data();
+                    } else {
+                        bool removed = false;
+                        {
+                            py::gil::release nogil;
+                            std::unique_ptr<FileSource> readback(
+                                new FileSource(dststr.c_str()));
+                            data = readback->full_data();
+                            readback->close();
+                            removed = path::remove(dststr);
+                        }
+                        if (!removed) {
+                            PyErr_Format(PyExc_IOError,
+                                "Failed to remove temporary file %s",
+                                dststr.c_str());
+                            return nullptr;
+                        }
+                    }
+                    return py::string(data);
+                }
+                /// "else":
+                if (use_file) { return py::None(); }
+                return py::string(dststr);
+            }
+            
             ///////////////////////////////// GETSETTERS /////////////////////////////////
             
             PyObject*    get_width(PyObject* self, void* closure) {
@@ -528,6 +634,21 @@ namespace py {
                                 "\t-> Stable sort *IN PLACE* of the batch contents;\n"
                                 "\t   cmp(x, y) -> -1, 0, 1\n"
                                 "\t   key(item) -> rich-comparable value\n" },
+                                {
+                            "write",
+                                (PyCFunction)py::ext::batch::write,
+                                METH_VARARGS | METH_KEYWORDS,
+                                "batch.write(destination=\"\", file=None, as_blob=False, options={})\n"
+                                "\t-> Format and write image data to file or blob\n"
+                                "\t   specifying one of: \n"
+                                "\t - a destination file path (destination)\n"
+                                "\t - a filehandle opened for writing (file)\n"
+                                "\t - a boolean flag requiring data to be returned as bytes (as_blob)\n"
+                                "\t   optionally specifying: \n"
+                                "\t - format-specific write options (options) \n"
+                                "\t   NOTE: \n"
+                                "\t - options must contain a 'format' entry, specifying the output format \n"
+                                "\t   when write() is called without a destination path. \n" },
                         { nullptr, nullptr, 0, nullptr }
                     };
                     return basics;
