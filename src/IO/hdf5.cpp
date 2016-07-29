@@ -134,7 +134,7 @@ namespace im {
         //     WTF("H5Fopen() failed, trying H5Fcreate() with:", tf.str());
         //     file_id = H5Fcreate(tf.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         // }
-        hid_t file_id = H5Fcreate(tf.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        hid_t file_id = H5Fcreate(tf.str().c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if (file_id < 0) {
             imread_raise(CannotWriteError,
                 "Error opening temporary HDF5 file for writing");

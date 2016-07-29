@@ -19,7 +19,7 @@ namespace {
     using U8Image = im::HybridImage<uint8_t>;
     
     // static const bool collect_temporaries = true;
-    #define COLLECT_TEMPORARIES 0
+    #define COLLECT_TEMPORARIES 1
     #define CHECK_DIRECTORY "/Users/fish/Dropbox/libimread/check/"
     
     template <typename P>
@@ -101,8 +101,8 @@ namespace {
         std::for_each(tifs.begin(), tifs.end(), [&basedir](path const& p) {
             auto tif = im::halide::read(basedir/p);
             auto pngpath = im::halide::tmpwrite<PNG>(tif);
-            // CHECK(COLLECT(pngpath));
-            CHECK(path::remove(pngpath));
+            CHECK(COLLECT(pngpath));
+            // CHECK(path::remove(pngpath));
         });
         
     }
