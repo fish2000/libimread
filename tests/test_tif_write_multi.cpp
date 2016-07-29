@@ -62,7 +62,7 @@ namespace {
             outlist.push_back(halim);
         });
         
-        /// call write_multi()
+        /// call TIFFFormat::write_multi() via halide::write_multi_handle()
         im::halide::write_multi_handle(outlist, composite.str());
         CHECK(composite.filepath.is_file());
         
