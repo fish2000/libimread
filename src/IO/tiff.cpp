@@ -398,7 +398,7 @@ namespace im {
         TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL,    static_cast<uint16_t>(input.dim_or(2, 1)));
         
         TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
-        TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
+        TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_SEPARATE);
         
         if (opts.cast<bool>("tiff:compress", true)) {
             TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
@@ -502,7 +502,7 @@ namespace im {
             TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL,    static_cast<uint16_t>(im->dim_or(2, 1)));
             
             TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
-            TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
+            TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_SEPARATE);
             
             if (opts.cast<bool>("tiff:compress", true)) {
                 TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
