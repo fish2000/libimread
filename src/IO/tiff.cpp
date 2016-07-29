@@ -385,7 +385,7 @@ namespace im {
         
         std::vector<byte> bufdata;
         byte* __restrict__ bufp = 0;
-        bool copy_data = opts.cast<bool>("tiff:copy-data", false);
+        bool copy_data = opts.cast<bool>("tiff:copy-data", true);
         const uint32_t w = input.dim(0);
         const uint32_t h = input.dim(1);
         const uint32_t ch = input.dim(2);
@@ -526,7 +526,7 @@ namespace im {
         for (unsigned i = 0; i != n_pages; ++i) {
             Image* im = input.at(i);
             byte* __restrict__ bufp = 0;
-            bool copy_data = opts.cast<bool>("tiff:copy-data", false);
+            bool copy_data = opts.cast<bool>("tiff:copy-data", true);
             const uint32_t w = im->dim(0);
             const uint32_t h = im->dim(1);
             const uint32_t ch = im->dim(2);
