@@ -46,4 +46,29 @@ namespace {
         CHECK(readback.size() == outlist.size());
     }
     
+    TEST_CASE("[tif-write-multi] Read PNG files and write as a single multi-image TIF file (with a filehandle)",
+              "[tif-write-multi-filehandle]")
+    {
+        NamedTemporaryFile composite(".tif");
+        ImageList outlist;
+        path basedir(im::test::basedir);
+        const std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
+        
+        /// build an ImageList
+        CHECK(composite.remove());
+        std::for_each(sequence.begin(), sequence.end(),
+                  [&](path const& p) {
+            U8Image* halim = new U8Image(im::halide::read((basedir/p).str()));
+            outlist.push_back(halim);
+        });
+        
+        /// call write_multi()
+        im::halide::write_multi_handle(outlist, composite.str());
+        CHECK(composite.filepath.is_file());
+        
+        /// try readback
+        ImageList readback = im::halide::read_multi(composite.str());
+        CHECK(readback.size() == sequence.size());
+        CHECK(readback.size() == outlist.size());
+    }
 }
