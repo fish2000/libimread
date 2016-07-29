@@ -45,6 +45,7 @@ namespace {
         CHECK(readback.size() == sequence.size());
         CHECK(readback.size() == outlist.size());
         
+        /// double-check image sizes
         int max = readback.size();
         for (int idx = 0; idx < max; ++idx) {
             CHECK(outlist.at(idx)->width()  == readback.at(idx)->width());
@@ -78,6 +79,7 @@ namespace {
         CHECK(readback.size() == sequence.size());
         CHECK(readback.size() == outlist.size());
         
+        /// double-check image sizes
         int max = readback.size();
         for (int idx = 0; idx < max; ++idx) {
             CHECK(outlist.at(idx)->width()  == readback.at(idx)->width());
