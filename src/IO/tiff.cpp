@@ -384,14 +384,12 @@ namespace im {
         std::vector<byte> bufdata;
         byte* __restrict__ bufp = 0;
         bool copy_data = opts.cast<bool>("tiff:copy-data", false);
-        const uint32_t h = input.dim(0);
-        const uint32_t w = input.dim(1);
+        const uint32_t w = input.dim(0);
+        const uint32_t h = input.dim(1);
         const uint32_t ch = input.dim(2);
         const uint32_t siz = input.size();
         const uint32_t nbytes = input.nbytes();
-        const uint16_t photometric = ((input.ndims() == 3 && ch) ?
-                                                        PHOTOMETRIC_RGB :
-                                                        PHOTOMETRIC_MINISBLACK);
+        const uint16_t photometric = ((input.ndims() == 3 && ch) ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);
         
         TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH,        static_cast<uint32_t>(h));
         TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH,         static_cast<uint32_t>(w));
@@ -488,17 +486,23 @@ namespace im {
         
         for (unsigned i = 0; i != n_pages; ++i) {
             Image* im = input.at(i);
-            void* bufp = 0;
-            bool copy_data = false;
-            const uint32_t h = im->dim(0);
-            const uint16_t photometric = ((im->ndims() == 3 && im->dim(2)) ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);
+            byte* __restrict__ bufp = 0;
+            bool copy_data = opts.cast<bool>("tiff:copy-data", false);
+            const uint32_t w = im->dim(0);
+            const uint32_t h = im->dim(1);
+            const uint32_t ch = im->dim(2);
+            const uint32_t siz = im->size();
+            const uint32_t nbytes = im->nbytes();
+            const uint16_t photometric = ((im->ndims() == 3 && ch) ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);
             
-            TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH, uint32_t(h));
-            TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH, uint32_t(im->dim(1)));
-            TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE, uint16_t(im->nbits()));
-            TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL, uint16_t(im->dim_or(2, 1)));
-            TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC, uint16_t(photometric));
-            TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+            TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH,        static_cast<uint32_t>(h));
+            TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH,         static_cast<uint32_t>(w));
+            
+            TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE,      static_cast<uint16_t>(im->nbits()));
+            TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL,    static_cast<uint16_t>(im->dim_or(2, 1)));
+            
+            TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
+            TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
             
             if (opts.cast<bool>("tiff:compress", true)) {
                 TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
@@ -541,17 +545,20 @@ namespace im {
                 TIFFSetField(t.tif, TIFFTAG_PAGENUMBER, i, n_pages);
             }
             
+            if (copy_data) {
+                bufdata.resize(siz * nbytes);
+                bufp = &bufdata[0];
+                std::memcpy(bufp, im->rowp(0), siz * nbytes);
+            }
+            
             for (uint32_t r = 0; r != h; ++r) {
-                void* rowp = im->rowp(r);
-                if (copy_data) {
-                    std::memcpy(bufp, rowp, im->dim(1) * im->nbytes());
-                    rowp = bufp;
-                }
+                void* __restrict__ rowp = copy_data ? bufp + (r * h * nbytes) : im->rowp(r);
                 if (TIFFWriteScanline(t.tif, rowp, r) == -1) {
                     imread_raise(TIFFIOError,
-                        "imread.imsave._tiff: Error writing TIFF file");
+                        "Error writing scanline");
                 }
             }
+            
             if (is_multi) {
                 if (!TIFFWriteDirectory(t.tif)) {
                     imread_raise(TIFFIOError,

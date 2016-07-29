@@ -44,6 +44,13 @@ namespace {
         ImageList readback = im::halide::read_multi(composite.str());
         CHECK(readback.size() == sequence.size());
         CHECK(readback.size() == outlist.size());
+        
+        int max = readback.size();
+        for (int idx = 0; idx < max; ++idx) {
+            CHECK(outlist.at(idx)->width()  == readback.at(idx)->width());
+            CHECK(outlist.at(idx)->height() == readback.at(idx)->height());
+            CHECK(outlist.at(idx)->planes() == readback.at(idx)->planes());
+        }
     }
     
     TEST_CASE("[tif-write-multi] Read PNG files and write as a single multi-image TIF file (with a filehandle)",
@@ -70,5 +77,12 @@ namespace {
         ImageList readback = im::halide::read_multi(composite.str());
         CHECK(readback.size() == sequence.size());
         CHECK(readback.size() == outlist.size());
+        
+        int max = readback.size();
+        for (int idx = 0; idx < max; ++idx) {
+            CHECK(outlist.at(idx)->width()  == readback.at(idx)->width());
+            CHECK(outlist.at(idx)->height() == readback.at(idx)->height());
+            CHECK(outlist.at(idx)->planes() == readback.at(idx)->planes());
+        }
     }
 }
