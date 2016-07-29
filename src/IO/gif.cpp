@@ -52,7 +52,7 @@ namespace im {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
-        const int channels = input.dim(2);
+        const int channels = input.dim(2); /// should be 3
         const int bit_depth = input.nbits();
         const int full_size = width * height * 3;
         
@@ -66,40 +66,23 @@ namespace im {
                  FF("im::GIFFormat::write() got:    `bit_depth` = (int){ %d }", bit_depth),
                     "im::GIFFormat::write() needs:  `bit_depth` = (int){ 8 }");
         }
-        // if (channels != 3) {
-        //     imread_raise(CannotWriteError,
-        //             "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE COLOR MODE\"",
-        //          FF("im::GIFFormat::write() got:    `channels` = (int){ %d }", channels),
-        //             "im::GIFFormat::write() needs:  `channels` = (int){ 3 }");
-        // }
+        if (channels != 3) {
+            imread_raise(CannotWriteError,
+                    "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE COLOR MODE\"",
+                 FF("im::GIFFormat::write() got:    `channels` = (int){ %d }", channels),
+                    "im::GIFFormat::write() needs:  `channels` = (int){ 3 }");
+        }
         
         /// Do the pixel loop to interleave RGB data
         byte* __restrict__ data = gbuf.data();
         pix::accessor<byte> at = input.access();
         
-        byte* __restrict__ rgb;
-        int x = 0,
-            y = 0;
-        
-        // for (int c = 0; c < channels; c++) {
-        //     pix::convert(at(x, y, c)[0], rgb[c]);
-        // }
-        
-        if (channels == 3 || channels == 4) {
-            for (; y < height; ++y) {
-                for (; x < width; ++x) {
-                    rgb = data + 3 * (width * y + x);
-                    pix::convert(at(x, y, 0)[0], rgb[0]);
-                    pix::convert(at(x, y, 1)[0], rgb[1]);
-                    pix::convert(at(x, y, 2)[0], rgb[2]);
-                }
-            }
-        } else if (channels == 1 || channels == 2) {
-            for (; y < height; ++y) {
-                for (; x < width; ++x) {
-                    rgb = data + 3 * (width * y + x);
-                    pix::convert(at(x, y, 0)[0], rgb[0]);
-                    rgb[1] = rgb[2] = rgb[0];
+        unsigned char* __restrict__ rgb;
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                rgb = data + 3 * (width * y + x);
+                for (int c = 0; c < channels; ++c) {
+                    pix::convert(at(x, y, c)[0], rgb[c]);
                 }
             }
         }

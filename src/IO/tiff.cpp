@@ -483,6 +483,7 @@ namespace im {
         }
         
         for (uint32_t rr = 0; rr != h; ++rr) {
+            // void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : input.rowp(rr);
             void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : input.rowp(rr);
             if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
                 imread_raise(TIFFIOError, "Error writing scanline");
@@ -628,6 +629,7 @@ namespace im {
             }
             
             for (uint32_t rr = 0; rr != h; ++rr) {
+                // void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : im->rowp(rr);
                 void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : im->rowp(rr);
                 if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
                     imread_raise(TIFFIOError, "Error writing scanline");
