@@ -31,7 +31,9 @@ namespace im {
     }
     
     class STKFormat : public ImageFormatBase<STKFormat> {
+        
         public:
+            
             using can_read = std::true_type;
             using can_read_multi = std::true_type;
             
@@ -54,12 +56,13 @@ namespace im {
             }
             
             virtual ImageList read_multi(byte_source* src,
-                                        ImageFactory* factory,
-                                        options_map const& opts) override {
+                                         ImageFactory* factory,
+                                         options_map const& opts) override {
                 return this->do_read(src, factory, true, opts);
             }
             
         private:
+            
             ImageList do_read(byte_source* src,
                               ImageFactory* factory,
                               bool is_multi,
@@ -68,11 +71,15 @@ namespace im {
     };
     
     class TIFFFormat : public ImageFormatBase<TIFFFormat> {
+        
         public:
+            
             using can_read = std::true_type;
             using can_read_multi = std::true_type;
             using can_read_metadata = std::true_type;
             using can_write = std::true_type;
+            using can_write_multi = std::true_type;
+            using can_write_metadata = std::true_type;
             
             DECLARE_OPTIONS(
                 _signatures = {
@@ -113,9 +120,19 @@ namespace im {
                                byte_sink* output,
                                options_map const& opts) override;
             
+            virtual void write_multi(ImageList& input,
+                                     byte_sink* output,
+                                     options_map const& opts) override;
+            
         private:
+            
             ImageList do_read(byte_source* src,
                               ImageFactory* factory,
+                              bool is_multi,
+                              options_map const& opts);
+            
+            void     do_write(ImageList& input,
+                              byte_sink* output,
                               bool is_multi,
                               options_map const& opts);
     };

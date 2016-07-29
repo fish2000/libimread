@@ -21,6 +21,7 @@
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 #include <libimread/image.hh>
+#include <libimread/imagelist.hh>
 #include <libimread/formats.hh>
 
 namespace im {
@@ -258,6 +259,16 @@ namespace im {
         }
         
         template <typename T = byte> inline
+        ImageList read_multi(std::string const& filename,
+                             options_map const& opts = halide_default_opts) {
+            HalideFactory<T> factory(filename);
+            std::unique_ptr<ImageFormat> format(for_filename(filename));
+            std::unique_ptr<FileSource> input(new FileSource(filename));
+            return format->read_multi(input.get(), &factory,
+                                      format->add_options(opts));
+        }
+        
+        template <typename T = byte> inline
         void write(HybridImage<T>& input, std::string const& filename,
                                           options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
@@ -269,7 +280,8 @@ namespace im {
         inline void write_multi(ImageList& input, std::string const& filename,
                                                   options_map const& opts = halide_default_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
-            std::unique_ptr<handle::sink> output(new handle::sink(filename));
+            // std::unique_ptr<handle::sink> output(new handle::sink(filename));
+            std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write_multi(input, output.get(),
                                 format->add_options(opts));
         }

@@ -43,6 +43,16 @@ namespace im {
             return s->read(static_cast<byte*>(data), n);
         }
         
+        tsize_t tiff_read_from_writer(thandle_t handle, void* data, tsize_t n) {
+            byte_sink* s = static_cast<byte_sink*>(handle);
+            byte_source* src = dynamic_cast<byte_source*>(s);
+            if (!src) {
+                imread_raise(ProgrammingError,
+                    "Could not dynamic_cast<> to byte_source");
+            }
+            return src->read(static_cast<byte*>(data), n);
+        }
+        
         tsize_t tiff_write(thandle_t handle, void* data, tsize_t n) {
             byte_sink* s = static_cast<byte_sink*>(handle);
             return s->write(static_cast<byte*>(data), n);
@@ -226,7 +236,7 @@ namespace im {
     
     
     ImageList STKFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
-                                 options_map const& opts)  {
+                                 options_map const& opts) {
         
         stk_extend ext;
         tiff_warn_error twe;
@@ -286,7 +296,7 @@ namespace im {
     }
     
     ImageList TIFFFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
-                                  options_map const& opts)  {
+                                  options_map const& opts) {
         tiff_warn_error twe;
         tif_holder t = read_client(src);
         ImageList images;
@@ -357,7 +367,7 @@ namespace im {
         return images;
     }
     
-    void TIFFFormat::write(Image& input, byte_sink* output, options_map const& opts)  {
+    void TIFFFormat::write(Image& input, byte_sink* output, options_map const& opts) {
         tiff_warn_error twe;
         tif_holder t = TIFFClientOpen(
                         "internal",
@@ -441,8 +451,116 @@ namespace im {
                     "Error writing scanline");
             }
         }
+        
         TIFFFlush(t.tif);
         TIFFClose(t.tif);
     }
     
+    void TIFFFormat::write_multi(ImageList& input, byte_sink* output, options_map const& opts) {
+        do_write(input, output, true, opts);
+    }
+    
+    void TIFFFormat::do_write(ImageList& input, byte_sink* output, bool is_multi, options_map const& opts) {
+        tiff_warn_error twe;
+        tsize_t (*read_function)(thandle_t, void*, tsize_t) =
+             (dynamic_cast<byte_source*>(output) ?
+                                tiff_read_from_writer :
+                                tiff_no_read);
+        
+        tif_holder t = TIFFClientOpen(
+                        "internal",
+                        "w",
+                        output,
+                        read_function, /// read_function
+                        tiff_write,
+                        tiff_seek<byte_sink>,
+                        tiff_close,
+                        tiff_size<byte_sink>,
+                        nullptr,
+                        nullptr);
+        
+        std::vector<byte> bufdata;
+        const unsigned n_pages = input.size();
+        
+        if (is_multi) {
+            TIFFCreateDirectory(t.tif);
+        }
+        
+        for (unsigned i = 0; i != n_pages; ++i) {
+            Image* im = input.at(i);
+            void* bufp = 0;
+            bool copy_data = false;
+            const uint32_t h = im->dim(0);
+            const uint16_t photometric = ((im->ndims() == 3 && im->dim(2)) ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);
+            
+            TIFFSetField(t.tif, TIFFTAG_IMAGELENGTH, uint32_t(h));
+            TIFFSetField(t.tif, TIFFTAG_IMAGEWIDTH, uint32_t(im->dim(1)));
+            TIFFSetField(t.tif, TIFFTAG_BITSPERSAMPLE, uint16_t(im->nbits()));
+            TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL, uint16_t(im->dim_or(2, 1)));
+            TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC, uint16_t(photometric));
+            TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+            
+            if (opts.cast<bool>("tiff:compress", true)) {
+                TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+                // For 8 bit images, prediction defaults to false; for 16 bit images,
+                // it defaults to true. This is because compression of raw 16 bit
+                // images is often counter-productive without this flag. See the
+                // discusssion at http://www.asmail.be/msg0055176395.html
+                const bool prediction_default = im->nbits() != 8;
+                if (opts.cast<bool>("tiff:horizontal-predictor", prediction_default)) {
+                    TIFFSetField(t.tif, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+                    if (!copy_data) { copy_data = true; }
+                }
+            }
+            
+            /// NB. Get this from Image object ImageWithMetadata ancestor -- or else
+            /// why the fuck are we even using that shit?
+            if (opts.cast<bool>("tiff:metadata", false)) {
+                std::string meta = opts.cast<std::string>(
+                    "metadata",
+                    "<TIFF METADATA STRING>");
+                std::string ssig = opts.cast<std::string>(
+                    "tiff:software-signature",
+                    "libimread (OST-MLOBJ/747)");
+                    
+                TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta.c_str());
+                TIFFSetField(t.tif, TIFFTAG_SOFTWARE, ssig.c_str());
+                
+                TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,
+                    opts.cast<int>("tiff:x-resolution", 72));
+                TIFFSetField(t.tif, TIFFTAG_YRESOLUTION,
+                    opts.cast<int>("tiff:y-resolution", 72));
+                TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT,
+                    opts.cast<int>("tiff:resolution-unit", RESUNIT_INCH));
+                TIFFSetField(t.tif, TIFFTAG_ORIENTATION,
+                    opts.cast<int>("tiff:orientation", ORIENTATION_TOPLEFT));
+            }
+            
+            if (is_multi) {
+                TIFFSetField(t.tif, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
+                TIFFSetField(t.tif, TIFFTAG_PAGENUMBER, i, n_pages);
+            }
+            
+            for (uint32_t r = 0; r != h; ++r) {
+                void* rowp = im->rowp(r);
+                if (copy_data) {
+                    std::memcpy(bufp, rowp, im->dim(1) * im->nbytes());
+                    rowp = bufp;
+                }
+                if (TIFFWriteScanline(t.tif, rowp, r) == -1) {
+                    imread_raise(TIFFIOError,
+                        "imread.imsave._tiff: Error writing TIFF file");
+                }
+            }
+            if (is_multi) {
+                if (!TIFFWriteDirectory(t.tif)) {
+                    imread_raise(TIFFIOError,
+                        "TIFFWriteDirectory failed");
+                }
+            }
+        }
+        
+        TIFFFlush(t.tif);
+        TIFFClose(t.tif);
+    }
 }

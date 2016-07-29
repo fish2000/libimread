@@ -124,7 +124,7 @@ namespace im {
     }
     
     
-    void PPMFormat::write(Image& input, byte_sink* output,
+    void TGAFormat::write(Image& input, byte_sink* output,
                           options_map const& opts) {
         /// DO IT DOUG
         bool dither = opts.cast<bool>("tga:dither", false);

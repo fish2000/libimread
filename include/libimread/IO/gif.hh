@@ -18,7 +18,7 @@ namespace im {
         struct gifdisposer {
             constexpr gifdisposer() noexcept = default;
             template <typename U> gifdisposer(gifdisposer<U> const&) noexcept {};
-            void operator()(G* gp) { gif::dispose(gp); gp = NULL; }
+            void operator()(G* gp) { gif::dispose(gp); gp = nullptr; }
         };
         
         using gifholder = std::shared_ptr<gif::GIF>;
@@ -40,11 +40,11 @@ namespace im {
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               const options_map& opts) override;
+                               options_map const& opts) override;
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     const options_map& opts) override;
+                                     options_map const& opts) override;
         
         private:
             void write_impl(Image& input, detail::gifholder g);

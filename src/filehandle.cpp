@@ -154,11 +154,11 @@ namespace im {
     }
     
     FILE* handle_source_sink::open(char* cpath, filesystem::mode fmode) {
-        handle = std::fopen(cpath, fmode == filesystem::mode::READ ? "r+" : "w");
+        handle = std::fopen(cpath, fmode == filesystem::mode::READ ? "r+" : "w+");
         if (!handle) {
             imread_raise(CannotReadError, "filehandle open failure:",
                 FF("\tstd::fopen(\"%s\", \"%s\")", cpath,
-                        fmode == filesystem::mode::READ ? "r+" : "w"),
+                        fmode == filesystem::mode::READ ? "r+" : "w+"),
                     "\treturned nullptr value",
                     "\tERROR MESSAGE IS: ", std::strerror(errno));
         }
