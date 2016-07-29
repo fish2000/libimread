@@ -326,8 +326,9 @@ namespace im {
                     if (TIFFReadScanline(t.tif, ptr, r) == -1) {
                         imread_raise(TIFFIOError, "Error reading scanline");
                     }
-                    for (int x = 0; x < w; x++) {
-                        for (int c = 0; c < depth; c++) {
+                    /// this pixel loop de-interleaves the destination buffer in-place
+                    for (int x = 0; x < w; ++x) {
+                        for (int c = 0; c < depth; ++c) {
                             pix::convert(*ptr++, dstPtr[c*c_stride]);
                         }
                         dstPtr++;
@@ -347,8 +348,9 @@ namespace im {
                         std::free(ptr16);
                         imread_raise(TIFFIOError, "Error reading scanline");
                     }
-                    for (int x = 0; x < w; x++) {
-                        for (int c = 0; c < depth; c++) {
+                    /// this pixel loop de-interleaves the destination buffer in-place
+                    for (int x = 0; x < w; ++x) {
+                        for (int c = 0; c < depth; ++c) {
                             uint16_t hi = (*ptr16++) << 8;
                             uint16_t lo = hi | (*ptr16++);
                             pix::convert(lo, dstPtr[c*c_stride]);
@@ -398,7 +400,7 @@ namespace im {
         TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL,    static_cast<uint16_t>(input.dim_or(2, 1)));
         
         TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
-        TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_SEPARATE);
+        TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
         
         if (opts.cast<bool>("tiff:compress", true)) {
             TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
@@ -436,17 +438,82 @@ namespace im {
                 opts.cast<int>("tiff:orientation", ORIENTATION_TOPLEFT));
         }
         
+        // for (int x = 0; x < w; x++) {
+        //     for (int c = 0; c < depth; c++) {
+        //         pix::convert(*ptr++, dstPtr[c*c_stride]);
+        //     }
+        //     dstPtr++;
+        // }
+        
+        /// pre-interlace buffer:
+        // int cs1 = input.stride(2);
+        // int cs2 = cs1 + cs1;
+        // for (int r = 0; r < h; ++r) {
+        //     R = bufp[r];
+        //     G = bufp[r + cs1];
+        //     B = bufp[r + cs2];
+        //     srcp = input.rowp_as<byte>(r);
+        //     for (int x = 0; x < w; ++x) {
+        //         pix::convert(*srcp++, *R++);
+        //     }
+        //     srcp = input.rowp_as<byte>(r) + cs1;
+        //     for (int x = 0; x < w; ++x) {
+        //         pix::convert(*srcp++, *G++);
+        //     }
+        //     srcp = input.rowp_as<byte>(r) + cs2;
+        //     for (int x = 0; x < w; ++x) {
+        //         pix::convert(*srcp++, *B++);
+        //     }
+        // }
+        
         if (copy_data) {
             bufdata.resize(siz * nbytes);
             bufp = &bufdata[0];
-            std::memcpy(bufp, input.rowp(0), siz * nbytes);
+            
+            if (ch == 1) {
+                std::memcpy(bufp, input.rowp(0), siz * nbytes);
+            } else if (ch == 3) {
+                byte* __restrict__ srcp;
+                byte* __restrict__ pixel;
+                byte* __restrict__ R;
+                byte* __restrict__ G;
+                byte* __restrict__ B;
+                int r = 0,
+                    x = 0;
+                
+                /// pre-interlace buffer:
+                int cs1 = input.stride(2);
+                int cs2 = cs1 + cs1;
+                for (r = 0; r < h; ++r) {
+                    pixel = &bufp[r * h * nbytes];
+                    R = pixel++;
+                    G = pixel++;
+                    B = pixel;
+                    srcp = input.rowp_as<byte>(r);
+                    for (x = 0; x < w; ++x) {
+                        pix::convert(*srcp++, *R);
+                        R += ch;
+                    }
+                    srcp = input.rowp_as<byte>(r) + cs1;
+                    for (x = 0; x < w; ++x) {
+                        pix::convert(*srcp++, *G);
+                        G += ch;
+                    }
+                    srcp = input.rowp_as<byte>(r) + cs2;
+                    for (x = 0; x < w; ++x) {
+                        pix::convert(*srcp++, *B);
+                        B += ch;
+                    }
+                }
+                
+            }
+            
         }
         
-        for (uint32_t r = 0; r != h; ++r) {
-            void* __restrict__ rowp = copy_data ? bufp + (r * h * nbytes) : input.rowp(r);
-            if (TIFFWriteScanline(t.tif, rowp, r) == -1) {
-                imread_raise(TIFFIOError,
-                    "Error writing scanline");
+        for (uint32_t rr = 0; rr != h; ++rr) {
+            void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : input.rowp(rr);
+            if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
+                imread_raise(TIFFIOError, "Error writing scanline");
             }
         }
         
@@ -502,7 +569,7 @@ namespace im {
             TIFFSetField(t.tif, TIFFTAG_SAMPLESPERPIXEL,    static_cast<uint16_t>(im->dim_or(2, 1)));
             
             TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
-            TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_SEPARATE);
+            TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
             
             if (opts.cast<bool>("tiff:compress", true)) {
                 TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
@@ -548,21 +615,56 @@ namespace im {
             if (copy_data) {
                 bufdata.resize(siz * nbytes);
                 bufp = &bufdata[0];
-                std::memcpy(bufp, im->rowp(0), siz * nbytes);
+                
+                if (ch == 1) {
+                    std::memcpy(bufp, im->rowp(0), siz * nbytes);
+                } else if (ch == 3) {
+                    byte* __restrict__ srcp;
+                    byte* __restrict__ pixel;
+                    byte* __restrict__ R;
+                    byte* __restrict__ G;
+                    byte* __restrict__ B;
+                    int r = 0,
+                        x = 0;
+                    
+                    /// pre-interlace buffer:
+                    int cs1 = im->stride(2);
+                    int cs2 = cs1 + cs1;
+                    for (r = 0; r < h; ++r) {
+                        pixel = &bufp[r * h * nbytes];
+                        R = pixel++;
+                        G = pixel++;
+                        B = pixel;
+                        srcp = im->rowp_as<byte>(r);
+                        for (x = 0; x < w; ++x) {
+                            pix::convert(*srcp++, *R);
+                            R += ch;
+                        }
+                        srcp = im->rowp_as<byte>(r) + cs1;
+                        for (x = 0; x < w; ++x) {
+                            pix::convert(*srcp++, *G);
+                            G += ch;
+                        }
+                        srcp = im->rowp_as<byte>(r) + cs2;
+                        for (x = 0; x < w; ++x) {
+                            pix::convert(*srcp++, *B);
+                            B += ch;
+                        }
+                    }
+                
+                }
             }
             
-            for (uint32_t r = 0; r != h; ++r) {
-                void* __restrict__ rowp = copy_data ? bufp + (r * h * nbytes) : im->rowp(r);
-                if (TIFFWriteScanline(t.tif, rowp, r) == -1) {
-                    imread_raise(TIFFIOError,
-                        "Error writing scanline");
+            for (uint32_t rr = 0; rr != h; ++rr) {
+                void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : im->rowp(rr);
+                if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
+                    imread_raise(TIFFIOError, "Error writing scanline");
                 }
             }
             
             if (is_multi) {
                 if (!TIFFWriteDirectory(t.tif)) {
-                    imread_raise(TIFFIOError,
-                        "TIFFWriteDirectory failed");
+                    imread_raise(TIFFIOError, "TIFFWriteDirectory failed");
                 }
             }
         }
