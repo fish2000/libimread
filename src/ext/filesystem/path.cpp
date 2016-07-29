@@ -452,7 +452,24 @@ namespace filesystem {
     }
     
     bool path::rename(path const& newpath) {
-        if (!exists() || newpath.exists()) { return false; }
+        if (!exists()) { return false; }
+        if (newpath.exists()) {
+            path newabspath = newpath.make_absolute();
+            if (newabspath.is_directory()) {
+                if (newabspath != parent().make_absolute()) {
+                    path newnewpath = newabspath/basename();
+                    if (!newnewpath.exists()) {
+                        return rename(newnewpath);
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
         bool status = ::rename(c_str(), newpath.c_str()) != -1;
         if (status) { set(newpath.make_absolute().str()); }
         return status;
@@ -461,7 +478,24 @@ namespace filesystem {
     bool path::rename(std::string const& newpath) { return rename(path(newpath)); }
     
     path path::duplicate(path const& newpath) const {
-        if (!exists() || newpath.exists()) { return path(); }
+        if (!exists()) { return path(); }
+        if (newpath.exists()) {
+            path newabspath = newpath.make_absolute();
+            if (newabspath.is_directory()) {
+                if (newabspath != parent().make_absolute()) {
+                    path newnewpath = newabspath/basename();
+                    if (!newnewpath.exists()) {
+                        return duplicate(newnewpath);
+                    } else {
+                        return path();
+                    }
+                } else {
+                    return path();
+                }
+            } else {
+                return path();
+            }
+        }
         bool status = detail::copyfile(c_str(), newpath.c_str()) != -1;
         return status ? newpath.make_absolute() : path();
     }
