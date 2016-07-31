@@ -1,0 +1,14 @@
+
+addons:
+  apt:
+    packages:
+    - cmake
+    - time
+    - jpeglib
+    - libtiff
+    - hdf5
+    - zlib
+    - halide
+
+install: make cmake get-deps
+compiler: clang
