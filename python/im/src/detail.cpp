@@ -1,4 +1,5 @@
 
+#include <cstdarg>
 #include <vector>
 #include <algorithm>
 
@@ -45,6 +46,14 @@ namespace py {
     PyObject* string(char s) {
         return PyString_FromFormat("%c", s);
     }
+    PyObject* format(char const* format, ...) {
+        va_list arguments;
+        return PyString_FromFormatV(format, arguments);
+    }
+    PyObject* format(std::string const& format, ...) {
+        va_list arguments;
+        return PyString_FromFormatV(format.c_str(), arguments);
+    }
     #elif PY_MAJOR_VERSION >= 3
     PyObject* string(std::string const& s) {
         return PyBytes_FromStringAndSize(s.c_str(), s.size());
@@ -66,6 +75,14 @@ namespace py {
     }
     PyObject* string(char s) {
         return PyBytes_FromFormat("%c", s);
+    }
+    PyObject* format(char const* format, ...) {
+        va_list arguments;
+        return PyBytes_FromFormatV(format, arguments);
+    }
+    PyObject* format(std::string const& format, ...) {
+        va_list arguments;
+        return PyBytes_FromFormatV(format.c_str(), arguments);
     }
     #endif
     
@@ -128,6 +145,10 @@ namespace py {
                       std::size_t length)           { return PyString_FromStringAndSize(operand, length); }
     PyObject* convert(std::string const& operand,
                       std::size_t length)           { return PyString_FromStringAndSize(operand.c_str(), length); }
+    PyObject* convert(char const* operand,
+                      va_list arguments)            { return PyString_FromFormatV(operand, arguments); }
+    PyObject* convert(std::string const& operand,
+                      va_list arguments)            { return PyString_FromFormatV(operand.c_str(), arguments); }
     #elif PY_MAJOR_VERSION >= 3
     PyObject* convert(char* operand)                { return PyBytes_FromString(operand); }
     PyObject* convert(char const* operand)          { return PyBytes_FromString(operand); }
@@ -138,6 +159,10 @@ namespace py {
                       std::size_t length)           { return PyBytes_FromStringAndSize(operand, length); }
     PyObject* convert(std::string const& operand,
                       std::size_t length)           { return PyBytes_FromStringAndSize(operand.c_str(), length); }
+    PyObject* convert(char const* operand,
+                      va_list arguments)            { return PyBytes_FromFormatV(operand, arguments); }
+    PyObject* convert(std::string const& operand,
+                      va_list arguments)            { return PyBytes_FromFormatV(operand.c_str(), arguments); }
     #endif
     
     PyObject* convert(std::wstring const& operand)  { return PyUnicode_FromWideChar(operand.data(), operand.size()); }
@@ -148,6 +173,15 @@ namespace py {
                                                                                        const_cast<char*>(exc.what()),
                                                                                        nullptr, nullptr); }
     
+    namespace impl {
+        
+        va_list&& argcompand(...) {
+            va_list arguments;
+            return std::move(arguments);
+        }
+        
+    }
+    
     PyObject* tuplize()                             { return PyTuple_New(0); }
     PyObject* listify()                             { return PyList_New(0);  }
     
@@ -157,6 +191,10 @@ namespace py {
     
     ref::ref() noexcept {}
     
+    ref::ref(bool destruct) noexcept
+        :destroy(destruct)
+        {}
+    
     ref::ref(ref&& other) noexcept
         :referent(std::move(other.referent))
         {
@@ -164,8 +202,11 @@ namespace py {
         }
     
     ref& ref::operator=(ref&& other) noexcept {
-        referent = std::move(other.referent);
-        other.referent = nullptr;
+        if (referent != other.referent) {
+            Py_XDECREF(referent);
+            referent = std::move(other.referent);
+            other.referent = nullptr;
+        }
         return *this;
     }
     
@@ -174,14 +215,23 @@ namespace py {
         {}
     
     ref& ref::operator=(ref::pyptr_t obj) noexcept {
-        referent = obj;
+        if (referent != obj) {
+            Py_XDECREF(referent);
+            referent = obj;
+        }
         return *this;
     }
     
-    ref::~ref()                     { Py_XDECREF(referent); }
+    ref::~ref() {
+        if (referent && destroy) {
+            Py_DECREF(referent);
+        }
+    }
     
-    ref::operator pyptr_t() const noexcept   { return referent; }
-    ref::pyptr_t ref::get() const noexcept   { return referent; }
+    ref::operator pyptr_t() const noexcept        { return referent; }
+    ref::pyptr_t* ref::operator&() const noexcept { return &referent; }
+    ref::pyptr_t ref::operator->() const noexcept { return referent; }
+    ref::pyptr_t ref::get() const noexcept        { return referent; }
     
     ref const& ref::inc() const     { Py_INCREF(referent); return *this; }
     ref const& ref::dec() const     { Py_DECREF(referent); return *this; }
@@ -273,6 +323,11 @@ namespace py {
         return PyObject_IsTrue(referent) == 1;
     }
     
+    bool ref::none() const {
+        if (empty()) { return false; }
+        return referent == Py_None;
+    }
+    
     ref::operator bool() const noexcept {
         return !empty();
     }
@@ -334,6 +389,18 @@ namespace py {
     }
     
     namespace detail {
+        
+        int setitem(PyObject* dict, PyObject* key, py::ref value) {
+            return PyDict_SetItem(dict, key, value);
+        }
+        
+        // int setitem(PyObject* dict, char const* key, py::ref value) {
+        //     return PyDict_SetItemString(dict, key, value);
+        // }
+        
+        // int setitem(PyObject* dict, std::string const& key, py::ref value) {
+        //     return PyDict_SetItemString(dict, key.c_str(), value);
+        // }
         
         int setitemstring(PyObject* dict, char const* key, py::ref value) {
             return PyDict_SetItemString(dict, key, value);

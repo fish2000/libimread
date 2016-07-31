@@ -130,6 +130,7 @@ extensions = {
         "im/src/bufferview.cpp",
         "im/src/detail.cpp",
         "im/src/exceptions.cpp",
+        "im/src/flattery.cpp",
         "im/src/gil.cpp",
         "im/src/gil-io.cpp",
         "im/src/hybrid.cpp",

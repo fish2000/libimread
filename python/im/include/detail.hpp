@@ -44,6 +44,8 @@ namespace py {
     PyObject* string(char const*);
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);
+    PyObject* format(char const*, ...);
+    PyObject* format(std::string const&, ...);
     PyObject* object(PyObject* arg);
     PyObject* object(PyFileObject* arg);
     PyObject* object(PyStringObject* arg);
@@ -95,6 +97,8 @@ namespace py {
     PyObject* convert(std::string const&, std::size_t);
     PyObject* convert(std::wstring const&);
     PyObject* convert(std::wstring const&, std::size_t);
+    PyObject* convert(char const*, va_list);
+    PyObject* convert(std::string const&, va_list);
     PyObject* convert(Py_buffer*);
     PyObject* convert(std::exception const&);
     
@@ -147,6 +151,33 @@ namespace py {
     
     template <typename ...Args>
     bool convertible_v = py::convertible<Args...>::value;
+    
+    /* >>>>>>>>>>>>>>>>>>> PRINTF-ISH FORMAT STYLE <<<<<<<<<<<<<<<<<<<< */
+    
+    namespace impl {
+        
+        __attribute__((format(printf, 1, 2)))
+        void argcheck(const char *format, ...);
+        va_list&& argcompand(...);
+        
+        #define static_argcheck(disambiguate, ...) \
+            if (false) { py::impl::argcheck(__VA_ARGS__); }
+        
+    }
+    
+    template <typename ...Args>
+    __attribute__((nonnull(1)))
+    PyObject* convert(char const* formatstring, bool disambiguate, Args&&... args) {
+        /// trigger compile-time type checks for printf-style variadics
+        /// -- this is a no-op at runtime:
+        static_argcheck(disambiguate,
+                        formatstring,
+                        std::forward<Args>(args)...);
+        
+        /// dispatch using argument pack companded as a va_list:
+        return py::convert(formatstring,
+               py::impl::argcompand(std::forward<Args>(args)...));
+    }
     
     /* >>>>>>>>>>>>>>>>>>> TUPLIZE <<<<<<<<<<<<<<<<<<<< */
     
@@ -395,6 +426,9 @@ namespace py {
             /// default constructor, yields a nullptr referent
             ref() noexcept;
             
+            /// explicit boolean constructor, for disabling destructor logic
+            explicit ref(bool) noexcept;
+            
             /// py::refs are moveable via construction/assignment
             /// ... but *not* copyable as you may note
             ref(ref&& other) noexcept;
@@ -422,6 +456,7 @@ namespace py {
                                py::ref::can_convert<RawType>::value,
                       int> = 0>
             ref& operator=(RawType&& raw) {
+                Py_XDECREF(referent);
                 referent = py::convert(std::forward<RawType>(raw));
                 return *this;
             }
@@ -431,6 +466,8 @@ namespace py {
             
             /// implicit and explicit getters for the internal PyObject*
             operator pyptr_t() const noexcept;
+            pyptr_t* operator&() const noexcept;
+            pyptr_t operator->() const noexcept;
             pyptr_t get() const noexcept;
             
             /// refcount control methods, mapped to their macro namesakes
@@ -460,6 +497,7 @@ namespace py {
             /// boolean-test methods and boolean-conversion operator
             bool empty() const noexcept;
             bool truth() const;
+            bool none() const;
             explicit operator bool() const noexcept;
             
             /// wrappers for PyObject_RichCompareBool()
@@ -480,7 +518,8 @@ namespace py {
             
         private:
             
-            pyptr_t referent = nullptr;         /// the object in question
+            mutable pyptr_t referent = nullptr; /// the object in question
+            bool destroy = true;
             ref(ref const&);                    /// NO COPYING
             ref& operator=(ref const&);         /// EYES ON YOUR OWN POINTER
         
@@ -667,7 +706,10 @@ namespace py {
             }
         }
         
-        /// Version of PyDict_SetItemString that STEALS REFERENCES:
+        /// Versions of PyDict_SetItem and PyDict_SetItemString that STEAL REFERENCES:
+        int setitem(PyObject* dict, PyObject* key, py::ref value);
+        // int setitem(PyObject* dict, char const* key, py::ref value);
+        // int setitem(PyObject* dict, std::string const& key, py::ref value);
         int setitemstring(PyObject* dict, char const* key, py::ref value);
         int setitemstring(PyObject* dict, std::string const& key, py::ref value);
         
