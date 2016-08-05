@@ -486,12 +486,6 @@ namespace filesystem {
         }
         
         return true;
-        
-        // if (parent().exists()) {
-        //     return makedir();
-        // } else {
-        //     return parent().makedir_p();
-        // }
     }
     
     std::string path::basename() const {
