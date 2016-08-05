@@ -44,6 +44,11 @@ namespace filesystem {
         using rehasher_t = hash::rehasher<std::string>;
         // using inode_t = std::make_signed_t<::ino_t>;
         using dlinfo_t = ::Dl_info;
+        using scandir_f = std::add_pointer_t<int(detail::dirent_t*)>;
+        
+        // scandir_f scandir_select = [](detail::dirent_t* dirent) -> int {
+        //     return bool(std::regex_search(dirent->d_name, pattern));
+        // };
         
         char const* tmpdir() noexcept {
             /// cribbed/tweaked from boost
@@ -693,7 +698,7 @@ namespace filesystem {
                                m_absolute ? sepstring : nulstring,
                            [&](std::string const& lhs,
                                std::string const& rhs) {
-            return lhs + rhs + (rhs == m_path.back() ? nulstring : sepstring);
+            return lhs + rhs + (rhs.c_str() == m_path.back().c_str() ? nulstring : sepstring);
         });
     }
     

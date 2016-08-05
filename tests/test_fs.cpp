@@ -263,7 +263,7 @@ namespace {
     TEST_CASE("[filesystem] Test path::extension(), path::extensions(), path::strip_extension(), and path::strip_extensions()",
               "[fs-test-path-extension-path-extensions-path-strip_extension-path-strip_extensions]") {
         path basedir(im::test::basedir);
-        const std::vector<path> v = basedir.list("*.jpg");
+        const std::vector<path> v = basedir.list(std::string("*.jpg"));
         REQUIRE(v.size() == im::test::num_jpg);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             CHECK((basedir/p).is_file());
