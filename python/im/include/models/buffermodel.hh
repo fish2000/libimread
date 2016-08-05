@@ -5,6 +5,7 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <array>
 #include <Python.h>
 #include <structmember.h>
 
@@ -31,6 +32,7 @@ namespace py {
             using pixel_t = byte;
             using unique_buffer_t = std::unique_ptr<BufferType>;
             using accessor_t = im::pix::accessor<pixel_t>;
+            using allocation_t = std::unique_ptr<pixel_t[]>;
             
             static PyTypeObject* type_ptr() { return &BufferModel_Type; }
             
@@ -52,6 +54,7 @@ namespace py {
             struct Tag {
                 struct FromBuffer {};
                 struct FromPyBuffer {};
+                struct ScaledFromBuffer {};
             };
             
             PyObject_HEAD
@@ -59,12 +62,14 @@ namespace py {
             bool clean = false;
             unique_buffer_t internal;
             accessor_t accessor;
+            allocation_t allocation;
             
             BufferModelBase()
                 :internal(std::make_unique<BufferType>())
                 ,accessor{}
                 {}
             
+            /// takes “ownership” -- see cleanup():
             explicit BufferModelBase(BufferType* buffer)
                 :clean(true)
                 ,internal(unique_buffer_t(buffer))
@@ -87,10 +92,62 @@ namespace py {
                                           internal->extent[2] ? internal->stride[2] : 0)
                 {}
             
+            explicit BufferModelBase(int width, int height,
+                                     int planes = 1,
+                                     int value = 0x00,
+                                     int nbits = 8, bool is_signed = false)
+                :allocation{ new pixel_t[width * height * planes * (nbits / 8)] }
+                {
+                    /// calculate stride values:
+                    std::array<int32_t, 3> stridings{{ 1, width, width*height }};
+                    
+                    /// NB. this stuff really won't work for BufferType != buffer_t:
+                    internal = unique_buffer_t(new BufferType{
+                        0, allocation.get(),
+                        { width,        height,       planes,       0 },
+                        { stridings[0], stridings[1], stridings[2], 0 },
+                        { 0,            0,            0,            0 },
+                        static_cast<int32_t>(nbits / 8),
+                        false, false
+                    });
+                    
+                    /// initialize accessor:
+                    accessor = accessor_t(internal->host, stridings[0],
+                                                          stridings[1],
+                                                          stridings[2]);
+                    
+                    /// blanket-set the whole allocation:
+                    std::memset(internal->host, value,
+                                im::buffer::length(internal));
+                }
+            
+            explicit BufferModelBase(BufferModelBase const& other,
+                                     float scale,
+                                     int value = 0x00)
+                :internal(im::buffer::heapcopy(other.internal, scale))
+                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
+                                          internal->extent[1] ? internal->stride[1] : 0,
+                                          internal->extent[2] ? internal->stride[2] : 0)
+                ,allocation{ new pixel_t[im::buffer::length(internal)] }
+                {
+                    /// reset buffer host pointer to new allocation:
+                    internal->host = allocation.get();
+                    
+                    /// blanket-set the whole allocation:
+                    std::memset(internal->host, value,
+                                im::buffer::length(internal));
+                }
+            
             /// tag dispatch, reinterpret, depointerize, copy-construct
             explicit BufferModelBase(PyObject* other,
                                      typename Tag::FromBuffer tag = typename Tag::FromBuffer{})
                 :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other))
+                {}
+            
+            explicit BufferModelBase(PyObject* other,
+                                     float scale = 1.0f, int value = 0x00,
+                                     typename Tag::ScaledFromBuffer = typename Tag::ScaledFromBuffer{})
+                :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other), scale, value)
                 {}
             
             explicit BufferModelBase(PyObject* bufferhost,
@@ -113,6 +170,7 @@ namespace py {
                     internal.release();
                 } else {
                     internal.reset(nullptr);
+                    allocation.reset(nullptr);
                     clean = !force;
                 }
             }

@@ -22,6 +22,31 @@ namespace im {
             return out;
         }
         
+        buffer_t* heapcopy(buffer_t const* buffer, float scale) {
+            /// assumes planar arrangement, ignores mins:
+            buffer_t* out = new buffer_t{
+                buffer->dev,
+                buffer->host,
+                {
+                    static_cast<int32_t>(buffer->extent[0] * scale),
+                    static_cast<int32_t>(buffer->extent[1] * scale),
+                    static_cast<int32_t>(buffer->extent[2] * scale),
+                    static_cast<int32_t>(buffer->extent[3] * scale)
+                },
+                {
+                    1,
+                    static_cast<int32_t>(buffer->extent[0] * scale),
+                    static_cast<int32_t>(buffer->extent[0] * buffer->extent[1] * scale * scale),
+                    0
+                },
+                { 0, 0, 0, 0 },
+                buffer->elem_size,
+                buffer->host_dirty,
+                buffer->dev_dirty
+            };
+            return out;
+        }
+        
         buffer_t* heapcopy(Py_buffer const* pybuffer) {
             buffer_t* out = new buffer_t{
                 0,
