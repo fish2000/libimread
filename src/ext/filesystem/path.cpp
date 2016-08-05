@@ -707,7 +707,7 @@ namespace filesystem {
     }
     
     bool path::operator<(path const& rhs) const noexcept {
-        return str() < rhs.str();
+        return status_timestamp() < rhs.status_timestamp();
     }
     
     void path::set(std::string const& str) {
