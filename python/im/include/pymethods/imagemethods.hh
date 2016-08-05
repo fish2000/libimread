@@ -92,7 +92,7 @@ namespace py {
                 
                 if (py_fill) {
                     if (PyCallable_Check(py_fill)) {
-                        /// DO ALL SORTS OF SHIT HERE WITH PyObject_CallObject
+                        /// DO ALL SORTS OF SHIT HERE WITH PyObject_CallFunctionObjArgs
                         return py::NotImplementedError("callable filling not implemented");
                     } else {
                         /// We can't use the commented-out line below,
