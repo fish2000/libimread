@@ -95,7 +95,7 @@ namespace {
             
             /// RUNTIME PARAMS
             ImageParam input{ UInt(8), 3, "input"                               };
-            Param<float> scaling_factor{  "scale_factor", 1.0f, 0.05f, 16.0f    };
+            Param<float> scaling_factor{  "scale_factor", 1.0f, 0.01f, 16.0f    };
             
             Var x, y, c, k;
             
