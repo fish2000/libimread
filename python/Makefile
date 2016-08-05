@@ -1,7 +1,7 @@
 
 clean: clean-pyc clean-so
 
-distclean: clean-all-pyc clean-pycache clean-so clean-build-artifacts
+distclean: clean-all-pyc clean-pycache clean-so clean-build-artifacts clean-generators
 
 ext: buildext test
 
@@ -20,6 +20,9 @@ clean-pycache:
 
 clean-so:
 	rm -f im/*.so
+
+clean-generators:
+	rm -f im/resources/generators/*.a im/resources/generators/*.h
 
 clean-build-artifacts:
 	rm -rf build dist imread.egg-info
