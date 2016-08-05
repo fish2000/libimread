@@ -43,6 +43,38 @@ def terminal_print(message, color='red', asterisk='*'):
         ab=asterisk[0] * (asterisks + 1 - (len(message) % 2)),
         message=message)))
 
+def collect_generators(build_dir, target_dir):
+    import os, shutil
+    libs = hdrs = []
+    if not os.path.isdir(build_dir):
+        raise ValueError("collect_generators(): invalid build_dir")
+    if not os.path.isdir(target_dir):
+        raise ValueError("collect_generators(): invalid target_dir")
+    for dirpath, dirnames, filenames in os.walk(build_dir):
+        if os.path.basename(dirpath).lower().startswith("scratch_"):
+            for filename in filenames:
+                if filename.lower().endswith('.a'):
+                    libs.append(os.path.join(dirpath, filename))
+                if filename.lower().endswith('.h'):
+                    hdrs.append(os.path.join(dirpath, filename))
+    for lib in libs:
+        destination = os.path.basename(lib)
+        shutil.copy2(lib, os.path.join(target_dir, destination))
+    for hdr in hdrs:
+        destination = os.path.basename(hdr)
+        shutil.copy2(lib, os.path.join(target_dir, destination))
+    return len(libs)
+
+def list_generator_libraries(target_dir):
+    import os
+    if not os.path.isdir(target_dir):
+        raise ValueError("list_generator_libraries(): invalid target_dir")
+    out = []
+    for target_file in os.listdir(target_dir):
+        if target_file.lower().endswith('.a'):
+            out.append(os.path.join(target_dir, target_file))
+    return out
+
 # GOSUB: basicaly `backticks` (cribbed from plotdevice)
 def gosub(cmd, on_err=True):
     """ Run a shell command and return the output """

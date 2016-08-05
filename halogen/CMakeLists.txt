@@ -26,7 +26,7 @@ foreach(halogen_src ${HALOGENS})
                                     GENERATOR_TARGET "${halogen_name}"
                                     GENERATOR_NAME "${halogen_name}"
                                     GENERATED_FUNCTION "${halogen_name}"
-                                    GENERATOR_ARGS "target=host"
+                                    GENERATOR_ARGS "target=x86-64-osx-sse41-avx,x86-64-osx-sse41,x86-64-osx"
                                     GENERATOR_POSTPROCESS TRUE)
 
 endforeach()

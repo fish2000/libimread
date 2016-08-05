@@ -8,7 +8,11 @@ from clint.textui.colored import cyan
 # PYTHON & NUMPY INCLUDES
 from utils import Install
 # from utils import HomebrewInstall
-from utils import get_python_inc, terminal_print
+from utils import (
+    get_python_inc,
+    terminal_print,
+    collect_generators,
+    list_generator_libraries)
 
 # SETUPTOOLS
 print('')
@@ -39,7 +43,6 @@ except ImportError:
 else:
     terminal_print("import: module %s found" % numpy.__name__,
                    color='yellow', asterisk='=')
-    
 
 # VERSION & METADATA
 __version__ = "<undefined>"
@@ -51,6 +54,31 @@ exec(compile(
 
 print('')
 terminal_print("version: %s" % __version__)
+
+# GENERATORS
+generator_build_dir =  os.path.join(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+    'build')
+generator_target_dir = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'im', 'resources', 'generators')
+
+if not os.path.isdir(generator_build_dir):
+    terminal_print("Generator build directory %s NOT FOUND" % generator_build_dir, color='red')
+    sys.exit(1)
+
+if not os.path.isdir(generator_target_dir):
+    terminal_print("Generator target directory %s NOT FOUND" % generator_target_dir, color='red')
+    sys.exit(1)
+
+for old_generator_file in os.listdir(generator_target_dir):
+    os.unlink(os.path.join(generator_target_dir, old_generator_file))
+
+terminal_print("collecting %s generators" % collect_generators(
+               generator_build_dir, generator_target_dir),
+               color='yellow', asterisk='*')
+
+generator_libs = [os.path.relpath(pth) for pth in list_generator_libraries(generator_target_dir)]
 
 long_description = """ Python bindings for libimread, dogg. """
 
@@ -160,10 +188,16 @@ print('')
 print(cyan(" LINKED LIBRARIES: %i" % len(libraries)))
 print(cyan(" " + ", ".join(libraries)))
 print('')
+print(cyan(" GENERATOR LIBRARIES: %i" % len(generator_libs)))
+print(cyan(" " + ", ".join(generator_libs)))
+print('')
 
 terminal_print("SETUPTOOLS BUILD NOW COMMENCING", asterisk='=')
 print('')
 
+# extra_link_args = ['-Wl,--allow-multiple-definition']
+extra_link_args = []
+extra_link_args += generator_libs
 ext_modules = []
 for key, sources in extensions.iteritems():
     ext_modules.append(Extension("im.%s" % key,
@@ -175,6 +209,7 @@ for key, sources in extensions.iteritems():
         undef_macros=undef_macros,
         define_macros=define_macros,
         sources=sources,
+        extra_link_args=extra_link_args,
         extra_compile_args=[
             '-O3',
             '-funroll-loops',

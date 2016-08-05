@@ -178,7 +178,7 @@ function(halide_add_generator_dependency)
     get_target_property(target_type "${args_TARGET}" TYPE)
     if (NOT (${target_type} MATCHES "UTILITY"))
 
-      target_link_libraries("${args_TARGET}" "${SCRATCH_DIR}/${FILTER_LIB}")
+      target_link_libraries("${args_TARGET}" "${SCRATCH_DIR}/${FILTER_LIB}" dl pthread)
 
       # Add the scratch directory to the include path for ${args_TARGET}. The generated
       # header may be included via #include "${args_GENERATOR_NAME}.h"

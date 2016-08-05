@@ -3,6 +3,7 @@
 /dist/
 /deps/*/build/
 /python/build/
+/python/im/resources/generators/
 /python/imread.egg-info/
 /Testing/
 *.dylib
