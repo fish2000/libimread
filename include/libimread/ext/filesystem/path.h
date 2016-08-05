@@ -353,7 +353,7 @@ namespace filesystem {
             /// ... for aesthetic purposes (versus the operator overloads), etc
             template <typename P, typename Q> inline
             static path join(P&& one, Q&& theother) {
-                return path(std::forward<P>(one)) / path(std::forward<Q>(theother));
+                return path(std::forward<P>(one)) / std::forward<Q>(theother);
             }
             
             /// Simple string-append for the trailing path segment

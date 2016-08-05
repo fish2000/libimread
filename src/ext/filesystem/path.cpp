@@ -407,7 +407,7 @@ namespace filesystem {
     }
     
     bool path::exists() const {
-        return ::access(c_str(), R_OK) != -1;
+        return ::access(c_str(), F_OK) != -1;
     }
     
     bool path::is_file() const {
@@ -619,7 +619,6 @@ namespace filesystem {
     }
     
     void path::set(std::string const& str) {
-        m_type = native_path;
         m_path = tokenize(str, sep);
         m_absolute = !str.empty() && str[0] == sep;
     }
@@ -634,7 +633,6 @@ namespace filesystem {
     }
     path& path::operator=(path&& p) noexcept {
         if (!compare(p, *this)) {
-            // m_type = native_path;
             m_path = std::move(p.m_path);
             m_absolute = p.m_absolute;
         }
