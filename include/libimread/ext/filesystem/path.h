@@ -78,17 +78,19 @@ namespace filesystem {
             };
             
             path();
-            path(path const& p);
-            path(path&& p) noexcept;
+            explicit path(bool);
             
-            path(char* st);
-            path(char const* st);
-            path(std::string const& st);
+            path(path const&);
+            path(path&&) noexcept;
+            
+            path(char*);
+            path(char const*);
+            path(std::string const&);
             
             explicit path(int descriptor);
             explicit path(const void* address);
             explicit path(detail::stringvec_t const& vec, bool absolute = false);
-            explicit path(detail::stringlist_t list);
+            explicit path(detail::stringlist_t);
             
             std::size_t size() const;
             bool is_absolute() const;
@@ -455,10 +457,11 @@ namespace filesystem {
             void set(std::string const& str);
             
             /// ... and here, we have the requisite assign operators
-            path& operator=(std::string const& str);
-            path& operator=(char const* str);
-            path& operator=(path const& p);
-            path& operator=(path&& p) noexcept;
+            path& operator=(std::string const&);
+            path& operator=(char const*);
+            path& operator=(path const&);
+            path& operator=(path&&) noexcept;
+            path& operator=(detail::stringlist_t);
             
             /// Stringify the path to an ostream
             friend std::ostream& operator<<(std::ostream& os, path const& p);
@@ -482,9 +485,9 @@ namespace filesystem {
             static detail::stringvec_t tokenize(std::string const& source,
                                                 character_type const delim);
             
-            path_type m_type;
+            path_type m_type = native_path;
             detail::stringvec_t m_path;
-            bool m_absolute;
+            bool m_absolute = false;
     
     }; /* class path */
     

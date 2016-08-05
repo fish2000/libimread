@@ -130,20 +130,18 @@ namespace filesystem {
     constexpr path::character_type path::sep;
     constexpr path::character_type path::extsep;
     
-    path::path()
-        :m_type(native_path)
-        ,m_absolute(false)
+    path::path() {}
+    path::path(bool abs)
+        :m_absolute(abs)
         {}
     
     path::path(path const& p)
-        :m_type(native_path)
-        ,m_path(p.m_path)
+        :m_path(p.m_path)
         ,m_absolute(p.m_absolute)
         {}
     
     path::path(path&& p) noexcept
-        :m_type(native_path)
-        ,m_path(std::move(p.m_path))
+        :m_path(std::move(p.m_path))
         ,m_absolute(p.m_absolute)
         {}
     
@@ -175,13 +173,12 @@ namespace filesystem {
     }
     
     path::path(detail::stringvec_t const& vec, bool absolute)
-        :m_absolute(absolute), m_type(native_path)
+        :m_absolute(absolute)
         ,m_path(vec)
         {}
     
     path::path(detail::stringlist_t list)
-        :m_absolute(false), m_type(native_path)
-        ,m_path(list)
+        :m_path(list)
         {}
     
     std::size_t path::size() const { return static_cast<std::size_t>(m_path.size()); }
@@ -744,11 +741,17 @@ namespace filesystem {
         }
         return *this;
     }
+    
     path& path::operator=(path&& p) noexcept {
         if (!compare(p, *this)) {
             m_path = std::move(p.m_path);
             m_absolute = p.m_absolute;
         }
+        return *this;
+    }
+    
+    path& path::operator=(detail::stringlist_t list) {
+        m_path = detail::stringvec_t(list);
         return *this;
     }
     
