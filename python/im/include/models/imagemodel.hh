@@ -15,6 +15,7 @@
 #include "../gil.hpp"
 #include "../gil-io.hpp"
 #include "../detail.hpp"
+#include "../exceptions.hpp"
 #include "../numpy.hpp"
 #include "../options.hpp"
 #include "../pybuffer.hpp"
@@ -158,9 +159,7 @@ namespace py {
                         nidx = static_cast<std::size_t>(idx);
                     }
                     if (siz <= idx || idx < 0) {
-                        PyErr_SetString(PyExc_IndexError,
-                            "index out of range");
-                        return nullptr;
+                        return py::IndexError("index out of range");
                     }
                     return py::detail::image_typed_idx(strong.get(), tc, nidx);
                 }
@@ -505,9 +504,7 @@ namespace py {
                     case 2:
                     case 4:
                     default: {
-                        PyErr_SetString(PyExc_AttributeError,
-                            "Can't add alpha to mode LA/RGBA/WAT image");
-                        return nullptr;
+                        return py::AttributeError("Can't add alpha to mode LA/RGBA/WAT image");
                     }
                 }
             }
@@ -531,27 +528,21 @@ namespace py {
                     case 1:
                     case 3:
                     default: {
-                        PyErr_SetString(PyExc_AttributeError,
-                            "Can't remove alpha from mode L/RGB/WAT image");
-                        return nullptr;
+                        return py::AttributeError("Can't remove alpha from mode L/RGB/WAT image");
                     }
                 }
             }
             
             PyObject* plane_at(int zidx) {
                 if (zidx >= image->planes() || zidx < 0) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "plane_at(): index out of range");
-                    return nullptr;
+                    return py::IndexError("plane_at(): index out of range");
                 }
                 return py::convert(new ImageModelBase(py::convert(this), zidx));
             }
             
             PyObject* histogram_at(int zidx) {
                 if (zidx >= image->planes() || zidx < 0) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "histogram_at(): index out of range");
-                    return nullptr;
+                    return py::IndexError("histogram_at(): index out of range");
                 }
                 std::valarray<int> inthisto;
                 {
@@ -564,9 +555,7 @@ namespace py {
             
             PyObject* entropy_at(int zidx) {
                 if (zidx >= image->planes() || zidx < 0) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "entropy_at(): index out of range");
-                    return nullptr;
+                    return py::IndexError("entropy_at(): index out of range");
                 }
                 float entropy = 0.0;
                 {
@@ -579,9 +568,7 @@ namespace py {
             
             PyObject* otsu_at(int zidx) {
                 if (zidx >= image->planes() || zidx < 0) {
-                    PyErr_SetString(PyExc_IndexError,
-                        "otsu_at(): index out of range");
-                    return nullptr;
+                    return py::IndexError("otsu_at(): index out of range");
                 }
                 int otsu = 0;
                 {
@@ -674,23 +661,22 @@ namespace py {
                         }
                     }
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format for file: %s",
-                        source);
-                    return false;
+                    return py::ValueError(
+                        std::string("Can't find I/O format for file: ") + source,
+                        false);
                 }
                 
                 if (!can_read) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented read() in I/O format %s",
-                        mime.c_str());
+                    return py::IOError(
+                        std::string("Unimplemented read() in I/O format ") + mime,
+                        false);
                 } else if (!exists) {
-                    PyErr_Format(PyExc_IOError,
-                        "Can't find image file: %s",
-                        source);
+                    return py::IOError(
+                        std::string("Can't find image file: ") + source,
+                        false);
                 }
-                return false;
+                return py::SystemError("Shouldn't have arrived here", false);
             }
             
             bool load(Py_buffer const& view, options_map const& opts) {
@@ -718,21 +704,16 @@ namespace py {
                         return true;
                     }
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Can't match blob data to a suitable I/O format");
-                    return false;
+                    return py::ValueError("Can't match blob data to a suitable I/O format", false);
                 }
                 
                 if (format.get()) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented read() in I/O format %s",
-                        mime.c_str());
-                } else {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Bad I/O format pointer returned for blob data");
+                    return py::IOError(
+                        std::string("Unimplemented read() in I/O format ") + mime,
+                        false);
                 }
-                return false;
+                return py::ValueError("Bad I/O format pointer returned for blob data", false);
             }
             
             bool loadblob(Py_buffer const& view, options_map const& opts) {
@@ -755,21 +736,16 @@ namespace py {
                         return true;
                     }
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Can't match blob data to a suitable I/O format");
-                    return false;
+                    return py::ValueError("Can't match blob data to a suitable I/O format", false);
                 }
                 
                 if (format.get()) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented read() in I/O format %s",
-                        mime.c_str());
-                } else {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Bad I/O format pointer returned for blob data");
+                    return py::IOError(
+                        std::string("Unimplemented read() in I/O format ") + mime,
+                        false);
                 }
-                return false;
+                return py::ValueError("Bad I/O format pointer returned for blob data", false);
             }
             
             bool save(char const* destination, options_map const& opts) {
@@ -789,25 +765,22 @@ namespace py {
                         path::remove(destination);
                     }
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format for file: %s",
-                        destination);
-                    return false;
+                    return py::ValueError(
+                        std::string("Can't find I/O format for file: ") + destination,
+                        false);
                 }
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented write() in I/O format %s",
-                        mime.c_str());
-                    return false;
+                    return py::IOError(
+                        std::string("Unimplemented write() in I/O format ") + mime,
+                        false);
                 }
                 
                 if (exists && !overwrite) {
-                    PyErr_Format(PyExc_IOError,
-                        "File exists (opts['overwrite'] == False): %s",
-                        destination);
-                    return false;
+                    return py::IOError(
+                        std::string("File exists (opts['overwrite'] == False): ") + destination,
+                        false);
                 }
                 
                 {
@@ -829,9 +802,7 @@ namespace py {
                 bool can_write = false;
                 
                 if (!opts.has("format")) {
-                    PyErr_SetString(PyExc_AttributeError,
-                        "Output format unspecified");
-                    return false;
+                    return py::AttributeError("Output format unspecified", false);
                 }
                 
                 try {
@@ -847,19 +818,19 @@ namespace py {
                         return true;
                     }
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format: %s",
-                        ext.c_str());
-                    return false;
+                    return py::IOError(
+                        std::string("Can't find I/O format: ") + ext,
+                        false);
                 }
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented write() in I/O format %s",
-                        mime.c_str());
+                    return py::IOError(
+                        std::string("Unimplemented write() in I/O format ") + mime,
+                        false);
                 }
-                return false;
+                
+                return py::SystemError("Shouldn't have arrived here", false);
             }
             
             PyObject* saveblob(options_map const& opts) {
@@ -874,9 +845,7 @@ namespace py {
                      as_html = false;
                 
                 if (!opts.has("format")) {
-                    PyErr_SetString(PyExc_AttributeError,
-                        "Output format unspecified");
-                    return nullptr;
+                    return py::AttributeError("Output format unspecified");
                 }
                 
                 try {
@@ -885,18 +854,12 @@ namespace py {
                     format = im::get_format(ext.c_str());
                     can_write = format->format_can_write();
                 } catch (im::FormatNotFound& exc) {
-                    PyErr_Format(PyExc_ValueError,
-                        "Can't find I/O format: %s",
-                        ext.c_str());
-                    return nullptr;
+                    return py::IOError(std::string("Can't find I/O format: ") + ext);
                 }
                 
                 if (!can_write) {
                     std::string mime = format->get_mimetype();
-                    PyErr_Format(PyExc_IOError,
-                        "Unimplemented write() in I/O format %s",
-                        mime.c_str());
-                    return nullptr;
+                    return py::IOError(std::string("Unimplemented write() in I/O format ") + mime);
                 }
                 
                 NamedTemporaryFile tf(format->get_suffix(true), false);
@@ -913,9 +876,7 @@ namespace py {
                 }
                 
                 if (!exists) {
-                    PyErr_SetString(PyExc_IOError,
-                        "Temporary file is AWOL");
-                    return nullptr;
+                    return py::IOError("Temporary file is AWOL");
                 }
                 
                 {
@@ -927,9 +888,7 @@ namespace py {
                 }
                 
                 if (!removed) {
-                    PyErr_SetString(PyExc_IOError,
-                        "Failed to remove temporary file");
-                    return nullptr;
+                    return py::IOError("Failed to remove temporary file");
                 }
                 
                 as_html = opts.cast<bool>("as_html", as_html);

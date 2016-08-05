@@ -11,6 +11,7 @@
 #include "../check.hh"
 #include "../gil.hpp"
 #include "../detail.hpp"
+#include "../exceptions.hpp"
 
 #include <libimread/ext/errors/demangle.hh>
 #include <libimread/pixels.hh>
@@ -39,14 +40,10 @@ namespace py {
             PyObject* newfrompybuffer(PyObject* _nothing_, PyObject* bufferhost) {
                 using tag_t = typename PythonBufferType::Tag::FromPyBuffer;
                 if (!bufferhost) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "missing Py_buffer host argument");
-                    return nullptr;
+                    return py::ValueError("missing Py_buffer host argument");
                 }
                 if (!PyObject_CheckBuffer(bufferhost)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "invalid Py_buffer host");
-                    return nullptr;
+                    return py::ValueError("invalid Py_buffer host");
                 }
                 return py::convert(new PythonBufferType(bufferhost, tag_t{}));
             }
@@ -57,16 +54,12 @@ namespace py {
             PyObject* newfrombuffer(PyObject* _nothing_, PyObject* buffer) {
                 using tag_t = typename PythonBufferType::Tag::FromBuffer;
                 if (!buffer) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "missing im.Buffer argument");
-                    return nullptr;
+                    return py::ValueError("missing im.Buffer argument");
                 }
                 if (!BufferModel_Check(buffer) &&
                     !ImageBufferModel_Check(buffer) &&
                     !ArrayBufferModel_Check(buffer)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "invalid im.Buffer instance");
-                    return nullptr;
+                    return py::ValueError("invalid im.Buffer instance");
                 }
                 return py::convert(new PythonBufferType(buffer, tag_t{}));
             }

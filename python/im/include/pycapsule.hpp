@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <cstdlib>
 #include <Python.h>
+#include "exceptions.hpp"
 
 namespace py {
     
@@ -42,12 +43,10 @@ namespace py {
                                               name ? ::strdup(name) : name,
                                               destructor);
             if (!capsule) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Failure creating PyCapsule");
+                return py::ValueError("Failure creating PyCapsule", capsule);
             } else if (PyCapsule_SetContext(capsule, (void*)context) != 0) {
                 /// context can be nullptr w/o invalidating capsule
-                PyErr_SetString(PyExc_ValueError,
-                    "Failure assigning PyCapsule context");
+                return py::ValueError("Failure assigning PyCapsule context", capsule);
             } 
             return capsule;
         }
@@ -79,14 +78,12 @@ namespace py {
                             Destructor destructor = default_single<Pointer, std::nullptr_t>) {
             PyObject* cob = nullptr;
             if (!pointer) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Can't objectify(nullptr)");
+                return py::ValueError("Can't objectify(nullptr)", cob);
             } else {
                 cob = PyCObject_FromVoidPtr((void*)pointer, destructor);
             }
             if (!cob) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Failure creating PyCObject");
+                return py::ValueError("Failure creating PyCObject", cob);
             }
             return cob;
         }
@@ -99,14 +96,12 @@ namespace py {
                             Destructor destructor = default_double<Pointer, Context>) {
             PyObject* cob = nullptr;
             if (!pointer) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Can't objectify(nullptr, ...)");
+                return py::ValueError("Can't objectify(nullptr, ...)", cob);
             } else {
                 cob = PyCObject_FromVoidPtrAndDesc((void*)pointer, (void*)context, destructor);
             }
             if (!cob) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Failure creating PyCObject with context");
+                return py::ValueError("Failure creating PyCObject with context", cob);
             }
             return cob;
         }

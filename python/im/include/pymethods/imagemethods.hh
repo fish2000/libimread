@@ -13,6 +13,7 @@
 #include "../gil.hpp"
 #include "../gil-io.hpp"
 #include "../detail.hpp"
+#include "../exceptions.hpp"
 #include "../options.hpp"
 #include "../pybuffer.hpp"
 
@@ -84,18 +85,15 @@ namespace py {
                         nbits = static_cast<int>(unbits);
                         break;
                     default:
-                        PyErr_Format(PyExc_ValueError,
-                            "bad nbits value: %u (must be 1, 8, 16, 32, or 64)",
-                            unbits);
-                        return nullptr;
+                        return py::ValueError(std::string("bad nbits value: ") +
+                                                        std::to_string(unbits) +
+                                             " (must be 1, 8, 16, 32, or 64)");
                 }
                 
                 if (py_fill) {
                     if (PyCallable_Check(py_fill)) {
                         /// DO ALL SORTS OF SHIT HERE WITH PyObject_CallObject
-                        PyErr_SetString(PyExc_NotImplementedError,
-                            "callable filling not implemented");
-                        return nullptr;
+                        return py::NotImplementedError("callable filling not implemented");
                     } else {
                         /// We can't use the commented-out line below,
                         /// because 'fill' is currently implemented with
@@ -128,16 +126,12 @@ namespace py {
             PyObject* newfrombuffer(PyObject* _nothing_, PyObject* buffer) {
                 using tag_t = typename PythonImageType::Tag::FromBuffer;
                 if (!buffer) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "missing im.Buffer argument");
-                    return nullptr;
+                    return py::ValueError("missing im.Buffer argument");
                 }
                 if (!BufferModel_Check(buffer) &&
                     !ImageBufferModel_Check(buffer) &&
                     !ArrayBufferModel_Check(buffer)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "invalid im.Buffer instance");
-                    return nullptr;
+                    return py::ValueError("invalid im.Buffer instance");
                 }
                 return py::convert(new PythonImageType(buffer, tag_t{}));
             }
@@ -149,15 +143,11 @@ namespace py {
             PyObject* newfromimage(PyObject* _nothing_, PyObject* other) {
                 using tag_t = typename PythonImageType::Tag::FromImage;
                 if (!other) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "missing ImageType argument");
-                    return nullptr;
+                    return py::ValueError("missing ImageType argument");
                 }
                 if (!ImageModel_Check(other) &&
                     !ArrayModel_Check(other)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "invalid ImageType instance");
-                    return nullptr;
+                    return py::ValueError("invalid ImageType instance");
                 }
                 return py::convert(new PythonImageType(other, tag_t{}));
             }
@@ -169,9 +159,7 @@ namespace py {
             PyObject* newfrommerge(PyTypeObject* type, PyObject* planes) {
                 /// check our argument
                 if (!PySequence_Check(planes)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "invalid ImageType sequence");
-                    return nullptr;
+                    return py::ValueError("invalid ImageType sequence");
                 }
                 
                 /// set up fast-sequence iterable
@@ -181,17 +169,13 @@ namespace py {
                     len = PySequence_Fast_GET_SIZE(sequence.get());
                 
                 if (len < 1) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "Sequence has no items");
-                    return nullptr;
+                    return py::ValueError("Sequence has no items");
                 }
                 
                 /// check the sequences' type (essentially against `type(self)`)
                 PyObject* pynitial = PySequence_Fast_GET_ITEM(sequence.get(), idx);
                 if (!PyObject_TypeCheck(pynitial, type)) {
-                    PyErr_SetString(PyExc_TypeError,
-                        "Wrong sequence item type");
-                    return nullptr;
+                    return py::TypeError("Wrong sequence item type");
                 }
                 
                 /// store the initial sequence items' dimensions
@@ -205,15 +189,11 @@ namespace py {
                     PythonImageType* item = reinterpret_cast<PythonImageType*>(
                                             PySequence_Fast_GET_ITEM(sequence.get(), idx));
                     if (!PyObject_TypeCheck(py::convert(item), type)) {
-                        PyErr_SetString(PyExc_TypeError,
-                            "Mismatched image type");
-                        return nullptr;
+                        return py::TypeError("Mismatched image type");
                     }
                     if (item->image->dim(0) != width ||
                         item->image->dim(1) != height) {
-                        PyErr_SetString(PyExc_AttributeError,
-                            "Mismatched image dimensions");
-                        return nullptr;
+                        return py::AttributeError("Mismatched image dimensions");
                     }
                 }
                 
@@ -274,9 +254,7 @@ namespace py {
                 
                 if (!did_load) {
                     /// If this is true, PyErr has already been set
-                    PyErr_SetString(PyExc_IOError,
-                        "Image binary load failed");
-                        return -1;
+                    return py::IOError("Image binary load failed", -1);
                 }
                 
                 /// create and set a dtype based on the loaded image data's type
@@ -385,9 +363,7 @@ namespace py {
             PyObject* repeat(PyObject* basis, Py_ssize_t count) {
                 switch (count) {
                     case 0: {
-                        PyErr_SetString(PyExc_ValueError,
-                            "OH SHI---");
-                        return nullptr;
+                        return py::ValueError("OH SHI---");
                     }
                     case 1: {
                         return basis;
@@ -495,9 +471,7 @@ namespace py {
                 
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
                     Py_DECREF(options);
-                    PyErr_SetString(PyExc_SystemError,
-                        "Dictionary update failure");
-                    return nullptr;
+                    return py::SystemError("Dictionary update failure");
                 }
                 
                 options_map opts = pyim->writeopts();
@@ -505,9 +479,7 @@ namespace py {
                 
                 if (as_blob || use_file) {
                     if (!opts.has("format")) {
-                        PyErr_SetString(PyExc_AttributeError,
-                            "Output format unspecified");
-                        return nullptr;
+                        return py::AttributeError("Output format unspecified");
                     }
                 }
                 
@@ -524,13 +496,10 @@ namespace py {
                     }
                     if (!dststr.size()) {
                         if (as_blob) {
-                            PyErr_SetString(PyExc_ValueError,
-                                "Blob output unexpectedly returned zero-length bytestring");
+                            return py::ValueError("Blob output unexpectedly returned zero-length bytestring");
                         } else {
-                            PyErr_SetString(PyExc_ValueError,
-                                "File output destination path is unexpectedly zero-length");
+                            return py::ValueError("File output destination path is unexpectedly zero-length");
                         }
-                        return nullptr;
                     }
                     did_save = pyim->save(dststr.c_str(), opts);
                 } else {
@@ -558,10 +527,8 @@ namespace py {
                             removed = path::remove(dststr);
                         }
                         if (!removed) {
-                            PyErr_Format(PyExc_IOError,
-                                "Failed to remove temporary file %s",
-                                dststr.c_str());
-                            return nullptr;
+                            return py::IOError(
+                                std::string("Failed to remove temporary file ") + dststr);
                         }
                     }
                     return py::string(data);
@@ -606,13 +573,9 @@ namespace py {
                 }
                 
                 if (idx == -1 && planeptr == nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "index (unsigned int) or plane (string) required");
-                    return nullptr;
+                    return py::ValueError("index (unsigned int) or plane (string) required");
                 } else if (idx > 0 && planeptr != nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "specify index (unsigned int) or plane (string) but not both");
-                    return nullptr;
+                    return py::ValueError("specify index (unsigned int) or plane (string) but not both");
                 }
                 
                 if (planeptr) {
@@ -620,10 +583,10 @@ namespace py {
                     midx = mode.find(planeptr[0]);
                     if (midx == std::string::npos) {
                         /// not found
-                        PyErr_Format(PyExc_ValueError,
-                            "plane '%c' not found in mode '%s'",
-                            planeptr[0], mode.c_str());
-                        return nullptr;
+                        return py::ValueError(
+                            std::string("plane '") +
+                            std::to_string(planeptr[0]) +
+                            "' not found in mode '" + mode + "'");
                     }
                     idx = static_cast<int>(midx);
                 }
@@ -650,13 +613,9 @@ namespace py {
                 }
                 
                 if (idx == -1 && planeptr == nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "index (unsigned int) or plane (string) required");
-                    return nullptr;
+                    return py::ValueError("index (unsigned int) or plane (string) required");
                 } else if (idx > 0 && planeptr != nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "specify index (unsigned int) or plane (string) but not both");
-                    return nullptr;
+                    return py::ValueError("specify index (unsigned int) or plane (string) but not both");
                 }
                 
                 if (planeptr) {
@@ -664,10 +623,10 @@ namespace py {
                     midx = mode.find(planeptr[0]);
                     if (midx == std::string::npos) {
                         /// not found
-                        PyErr_Format(PyExc_ValueError,
-                            "plane '%c' not found in mode '%s'",
-                            planeptr[0], mode.c_str());
-                        return nullptr;
+                        return py::ValueError(
+                            std::string("plane '") +
+                            std::to_string(planeptr[0]) +
+                            "' not found in mode '" + mode + "'");
                     }
                     idx = static_cast<int>(midx);
                 }
@@ -694,13 +653,9 @@ namespace py {
                 }
                 
                 if (idx == -1 && planeptr == nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "index (unsigned int) or plane (string) required");
-                    return nullptr;
+                    return py::ValueError("index (unsigned int) or plane (string) required");
                 } else if (idx > 0 && planeptr != nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "specify index (unsigned int) or plane (string) but not both");
-                    return nullptr;
+                    return py::ValueError("specify index (unsigned int) or plane (string) but not both");
                 }
                 
                 if (planeptr) {
@@ -708,10 +663,10 @@ namespace py {
                     midx = mode.find(planeptr[0]);
                     if (midx == std::string::npos) {
                         /// not found
-                        PyErr_Format(PyExc_ValueError,
-                            "plane '%c' not found in mode '%s'",
-                            planeptr[0], mode.c_str());
-                        return nullptr;
+                        return py::ValueError(
+                            std::string("plane '") +
+                            std::to_string(planeptr[0]) +
+                            "' not found in mode '" + mode + "'");
                     }
                     idx = static_cast<int>(midx);
                 }
@@ -738,13 +693,9 @@ namespace py {
                 }
                 
                 if (idx == -1 && planeptr == nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "index (unsigned int) or plane (string) required");
-                    return nullptr;
+                    return py::ValueError("index (unsigned int) or plane (string) required");
                 } else if (idx > 0 && planeptr != nullptr) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "specify index (unsigned int) or plane (string) but not both");
-                    return nullptr;
+                    return py::ValueError("specify index (unsigned int) or plane (string) but not both");
                 }
                 
                 if (planeptr) {
@@ -752,10 +703,10 @@ namespace py {
                     midx = mode.find(planeptr[0]);
                     if (midx == std::string::npos) {
                         /// not found
-                        PyErr_Format(PyExc_ValueError,
-                            "plane '%c' not found in mode '%s'",
-                            planeptr[0], mode.c_str());
-                        return nullptr;
+                        return py::ValueError(
+                            std::string("plane '") +
+                            std::to_string(planeptr[0]) +
+                            "' not found in mode '" + mode + "'");
                     }
                     idx = static_cast<int>(midx);
                 }
@@ -795,9 +746,7 @@ namespace py {
                 py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("png"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    PyErr_SetString(PyExc_SystemError,
-                        "Dictionary update failure");
-                    return nullptr;
+                    return py::SystemError("Dictionary update failure");
                 }
                 return pyim->saveblob(pyim->writeopts());
             }
@@ -810,9 +759,7 @@ namespace py {
                 py::ref options = PyDict_New();
                 py::detail::setitemstring(options, "format", py::string("jpg"));
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    PyErr_SetString(PyExc_SystemError,
-                        "Dictionary update failure");
-                    return nullptr;
+                    return py::SystemError("Dictionary update failure");
                 }
                 return pyim->saveblob(pyim->writeopts());
             }
@@ -826,9 +773,7 @@ namespace py {
                 py::detail::setitemstring(options, "format", py::string("jpg"));
                 py::detail::setitemstring(options, "as_html", py::True());
                 if (PyDict_Update(pyim->writeoptDict, options) == -1) {
-                    PyErr_SetString(PyExc_SystemError,
-                        "Dictionary update failure");
-                    return nullptr;
+                    return py::SystemError("Dictionary update failure");
                 }
                 return pyim->saveblob(pyim->writeopts());
             }
@@ -927,9 +872,7 @@ namespace py {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 if (!value) { return 0; }
                 if (!PyMapping_Check(value)) {
-                    PyErr_SetString(PyExc_AttributeError,
-                        "opts value must be dict-ish");
-                    return -1;
+                    return py::AttributeError("opts value must be dict-ish", -1);
                 }
                 /// dispatch on closure tag
                 if (CHECK_CLOSURE(READ)) {

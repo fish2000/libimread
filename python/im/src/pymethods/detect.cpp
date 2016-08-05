@@ -7,6 +7,7 @@
 #include "gil.hpp"
 #include "gil-io.hpp"
 #include "detail.hpp"
+#include "exceptions.hpp"
 #include "options.hpp"
 #include "pybuffer.hpp"
 
@@ -96,9 +97,7 @@ namespace py {
             if (file) {
                 /// file - check before passing:
                 if (!PyFile_Check(file)) {
-                    PyErr_SetString(PyExc_ValueError,
-                        "File object isn't file-ish enough");
-                    return nullptr;
+                    return py::ValueError("File object isn't file-ish enough");
                 }
                 return py::string(detail::detect(file));
             } else if (is_blob) {

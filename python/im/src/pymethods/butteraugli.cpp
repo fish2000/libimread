@@ -7,6 +7,7 @@
 
 #include "gil.hpp"
 #include "detail.hpp"
+#include "exceptions.hpp"
 #include "pycapsule.hpp"
 
 #include <libimread/libimread.hpp>
@@ -37,15 +38,11 @@ namespace py {
             }
             
             if (!PyCapsule_IsValid(pylhs, nullptr)) {
-                PyErr_SetString(PyExc_ValueError,
-                    "butteraugli: invalid LHS capsule");
-                return nullptr;
+                return py::ValueError("butteraugli: invalid LHS capsule");
             }
             
             if (!PyCapsule_IsValid(pyrhs, nullptr)) {
-                PyErr_SetString(PyExc_ValueError,
-                    "butteraugli: invalid RHS capsule");
-                return nullptr;
+                return py::ValueError("butteraugli: invalid RHS capsule");
             }
             
             lhs = (Image*)PyCapsule_GetPointer(pylhs, nullptr);
@@ -57,17 +54,15 @@ namespace py {
             }
             
             if (int(comparison) > 10) { /// VERRRRY HACKY dogg I know
+                std::string message;
                 if (comparison == comparison_t::error_images_incomprable) {
-                    PyErr_SetString(PyExc_IOError,
-                        "butteraugli: images incomparable");
+                    message = "butteraugli: images incomparable";
                 } else if (comparison == comparison_t::error_unexpected_channel_count) {
-                    PyErr_SetString(PyExc_IOError,
-                        "butteraugli: wrong channel count encountered");
+                    message = "butteraugli: wrong channel count encountered";
                 } else if (comparison == comparison_t::error_augli_not_buttered) {
-                    PyErr_SetString(PyExc_IOError,
-                        "butteraugli: internal library error");
+                    message = "butteraugli: internal library error";
                 }
-                return nullptr;
+                return py::IOError(message);
             }
             
             return py::convert(int(comparison));

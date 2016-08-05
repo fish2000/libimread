@@ -4,6 +4,7 @@
 #include "options.hpp"
 #include "check.hh"
 #include "detail.hpp"
+#include "exceptions.hpp"
 #include "gil.hpp"
 #include "gil-io.hpp"
 #include "pybuffer.hpp"
@@ -82,9 +83,9 @@ namespace py {
                        BufferModel_Check(value)         ||
                        ImageModel_Check(value)          ||
                        ImageBufferModel_Check(value)) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Illegal data found");
-                return options_map::undefined;
+                return py::ValueError(
+                    "Illegal data found",
+                    options_map::undefined);
             } else if (PyObject_CheckBuffer(value)) {
                 Py_buffer view;
                 PyObject_GetBuffer(value, &view, PyBUF_SIMPLE);
@@ -97,9 +98,9 @@ namespace py {
             /// "else":
             char const* c = py::options::get_cstring(value);
             if (!c) {
-                PyErr_SetString(PyExc_KeyError,
-                    "Misparsed map value");
-                return options_map::undefined;
+                return py::KeyError(
+                    "Misparsed map value",
+                    options_map::undefined);
             }
             return c;
         }
@@ -126,9 +127,9 @@ namespace py {
             if (!PyAnySet_Check(set)) { return out; }
             py::ref iterator = PyObject_GetIter(set);
             if (iterator.empty()) {
-                PyErr_SetString(PyExc_ValueError,
-                    "Set object not iterable");
-                return options_list::undefined;
+                return py::ValueError(
+                    "Set object not iterable",
+                    options_list::undefined);
             }
             while (py::ref item = PyIter_Next(iterator)) {
                 Json ison(Json::null);
@@ -136,9 +137,9 @@ namespace py {
                 out.append(ison);
             }
             if (PyErr_Occurred()) {
-                PyErr_SetString(PyExc_IOError,
-                    "Error occurred while iterating set");
-                return options_list::undefined;
+                return py::IOError(
+                    "Error occurred while iterating set",
+                    options_list::undefined);
             }
             return out;
         }
@@ -221,9 +222,7 @@ namespace py {
                     { return nullptr; }
             
             if (!py_tempfile && !destination) {
-                PyErr_SetString(PyExc_AttributeError,
-                    "Must specify either destination path or tempfile=True");
-                return nullptr;
+                return py::AttributeError("Must specify either destination path or tempfile=True");
             }
             overwrite = py::options::truth(py_overwrite);
             tempfile  = py::options::truth(py_tempfile);
@@ -237,8 +236,7 @@ namespace py {
                     opts.dump(destination, overwrite);
                 }
             } catch (im::JSONIOError& exc) {
-                PyErr_SetString(PyExc_IOError, exc.what());
-                return nullptr;
+                return py::IOError(exc.what());
             }
             
             return py::string(destination);
