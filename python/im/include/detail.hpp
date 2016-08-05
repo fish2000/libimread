@@ -535,11 +535,12 @@ namespace py {
                       typename std::enable_if_t<
                                 py::ref::can_convert<Args...>::value,
                       int> = 0>
-            py::ref operator()(Args ...args) {
+            py::ref operator()(Args&& ...args) {
                 if (!referent)                      { return py::None(); }
                 if (!PyCallable_Check(referent))    { return py::None(); }
                 return PyObject_CallFunctionObjArgs(referent,
-                                        py::convert(args)..., nullptr);
+                                        py::convert(std::forward<Args>(args))...,
+                                                    nullptr);
             }
         
     };
