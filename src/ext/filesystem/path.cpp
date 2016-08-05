@@ -410,6 +410,26 @@ namespace filesystem {
         return ::access(c_str(), F_OK) != -1;
     }
     
+    bool path::is_readable() const {
+        return ::access(c_str(), R_OK) != -1;
+    }
+    
+    bool path::is_writable() const {
+        return ::access(c_str(), W_OK) != -1;
+    }
+    
+    bool path::is_executable() const {
+        return ::access(c_str(), X_OK) != -1;
+    }
+    
+    bool path::is_readwritable() const {
+        return ::access(c_str(), R_OK | W_OK) != -1;
+    }
+    
+    bool path::is_runnable() const {
+        return ::access(c_str(), R_OK | X_OK) != -1;
+    }
+    
     bool path::is_file() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return false; }

@@ -128,6 +128,11 @@ namespace filesystem {
             
             /// self-explanatory interrogatives
             bool exists() const;
+            bool is_readable() const;
+            bool is_writable() const;
+            bool is_executable() const;
+            bool is_readwritable() const;
+            bool is_runnable() const;
             bool is_file() const;
             bool is_link() const;
             bool is_directory() const;
@@ -137,6 +142,26 @@ namespace filesystem {
             template <typename P> inline
             static bool exists(P&& p) {
                 return path(std::forward<P>(p)).exists();
+            }
+            template <typename P> inline
+            static bool is_readable(P&& p) {
+                return path(std::forward<P>(p)).is_readable();
+            }
+            template <typename P> inline
+            static bool is_writable(P&& p) {
+                return path(std::forward<P>(p)).is_writable();
+            }
+            template <typename P> inline
+            static bool is_executable(P&& p) {
+                return path(std::forward<P>(p)).is_executable();
+            }
+            template <typename P> inline
+            static bool is_readwritable(P&& p) {
+                return path(std::forward<P>(p)).is_readwritable();
+            }
+            template <typename P> inline
+            static bool is_runnable(P&& p) {
+                return path(std::forward<P>(p)).is_runnable();
             }
             template <typename P> inline
             static bool is_file(P&& p) {
