@@ -289,4 +289,20 @@ namespace {
         });
     }
     
+    TEST_CASE("[filesystem] Test the path::makedir_p() method",
+              "[fs-test-path-makedir_p]")
+    {
+        TemporaryDirectory td("test-td");
+        
+        (td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories").makedir_p();
+        CHECK((td.dirpath/"yo").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg"/"i-heard").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories").is_directory());
+        
+        (td.dirpath/"yo_dogg_i_heard_you_like_directories").makedir_p();
+        CHECK((td.dirpath/"yo_dogg_i_heard_you_like_directories").is_directory());
+    }
+    
 }

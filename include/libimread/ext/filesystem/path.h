@@ -237,7 +237,7 @@ namespace filesystem {
             /// Walk a path, a la os.walk() / os.path.walk() from Python
             /// ... pass a function like so:
             ///     path p = "/yo/dogg";
-            ///     p.walk([](const path& p,
+            ///     p.walk([](path const& p,
             ///               detail::stringvec_t& directories,
             ///               detail::stringvec_t& files) {
             ///         std::for_each(directories.begin(), directories.end(), [&p](std::string& d) {
@@ -270,11 +270,17 @@ namespace filesystem {
             /// attempt to create a directory at this path. same USE-WITH-CAUTION caveats
             /// apply as per `path::remove()` (q.v. note supra).
             bool makedir() const;
+            bool makedir_p() const;
             
-            /// Static forwarder for path::makedir<P>(p) -- again, USE WITH CAUTION people
+            /// Static forwarder for path::makedir<P>(p) and path::makedir_p<P>(p) --
+            /// ... again, USE WITH CAUTION people
             template <typename P> inline
             static bool makedir(P&& p) {
                 return path(std::forward<P>(p)).makedir();
+            }
+            template <typename P> inline
+            static bool makedir_p(P&& p) {
+                return path(std::forward<P>(p)).makedir_p();
             }
             
             /// get the basename -- i.e. for path /yo/dogg/iheardyoulike/basenames.jpg

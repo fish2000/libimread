@@ -465,6 +465,35 @@ namespace filesystem {
         return bool(::mkdir(c_str(), detail::mkdir_flags) != -1);
     }
     
+    bool path::makedir_p() const {
+        if (empty() || exists()) { return false; }
+        bool out = true;
+        
+        int idx = size();
+        for (path p(*this); !p.exists(); p = p.parent()) { --idx; }
+        
+        path result(detail::stringvec_t{}, m_absolute);
+        std::copy(m_path.begin(),
+                  m_path.begin() + idx,
+                  std::back_inserter(result.m_path));
+        
+        out &= result.exists();
+        
+        int max = size();
+        for (int i = idx; i < max; ++i) {
+            result = result.join(m_path[i]);
+            if (!result.is_directory()) { out &= result.makedir(); }
+        }
+        
+        return true;
+        
+        // if (parent().exists()) {
+        //     return makedir();
+        // } else {
+        //     return parent().makedir_p();
+        // }
+    }
+    
     std::string path::basename() const {
         if (empty()) { return ""; }
         return m_path.back();
