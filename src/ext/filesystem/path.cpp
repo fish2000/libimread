@@ -466,26 +466,35 @@ namespace filesystem {
     }
     
     bool path::makedir_p() const {
+        /// sanity-check for empty or existant paths:
         if (empty() || exists()) { return false; }
+        
+        /// boolean to hold logical sum of operations:
         bool out = true;
         
+        /// backtrack through path parents to find an existant base:
         int idx = size();
         for (path p(*this); !p.exists(); p = p.parent()) { --idx; }
         
+        /// copy the existant base segments to a new path instance:
         path result(detail::stringvec_t{}, m_absolute);
         std::copy(m_path.begin(),
                   m_path.begin() + idx,
                   std::back_inserter(result.m_path));
         
+        /// ensure the existant base exists:
         out &= result.exists();
         
+        /// iterate through nonexistant path segments,
+        /// using path::makedir() to make each nonexistant directory:
         int max = size();
         for (int i = idx; i < max; ++i) {
             result = result.join(m_path[i]);
             if (!result.is_directory()) { out &= result.makedir(); }
         }
         
-        return true;
+        /// return per the logical sum of operations:
+        return out;
     }
     
     std::string path::basename() const {
