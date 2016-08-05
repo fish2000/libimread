@@ -53,7 +53,7 @@ namespace filesystem {
         
         explicit switchdir(path const& nd)
             :olddir(path::cwd().str())
-            ,newdir(nd.str())
+            ,newdir(nd.make_absolute().str())
             {
                 mute.lock();
                 ::chdir(newdir.c_str());
