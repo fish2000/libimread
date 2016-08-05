@@ -71,7 +71,7 @@ namespace filesystem {
             tplpath = path::join(filesystem::path::gettmp(), filesystem::path(tpl));
         }
         char const* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
-        if (dtemp == NULL) { return false; }
+        if (dtemp == nullptr) { return false; }
         dirpath = filesystem::path(dtemp);
         return true;
     }

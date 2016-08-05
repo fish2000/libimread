@@ -47,16 +47,16 @@ namespace filesystem {
             /// cribbed/tweaked from boost
             char const* dirname;
             dirname = std::getenv("TMPDIR");
-            if (NULL == dirname) { dirname = std::getenv("TMP"); }
-            if (NULL == dirname) { dirname = std::getenv("TEMP"); }
-            if (NULL == dirname) { dirname = "/tmp"; }
+            if (nullptr == dirname) { dirname = std::getenv("TMP"); }
+            if (nullptr == dirname) { dirname = std::getenv("TEMP"); }
+            if (nullptr == dirname) { dirname = "/tmp"; }
             return dirname;
         }
         
         char const* userdir() noexcept {
             char const* dirname;
             dirname = std::getenv("HOME");
-            if (NULL == dirname) {
+            if (nullptr == dirname) {
                 passwd_t* pw = ::getpwuid(::geteuid());
                 std::string dn(pw->pw_dir);
                 dirname = dn.c_str();
@@ -67,7 +67,7 @@ namespace filesystem {
         char const* syspaths() noexcept {
             char const* syspaths;
             syspaths = std::getenv("PATH");
-            if (NULL == syspaths) { syspaths = "/bin:/usr/bin"; }
+            if (nullptr == syspaths) { syspaths = "/bin:/usr/bin"; }
             return syspaths;
         }
         
@@ -215,7 +215,7 @@ namespace filesystem {
     path path::make_absolute() const {
         if (m_absolute) { return path(*this); }
         char temp[PATH_MAX];
-        if (::realpath(c_str(), temp) == NULL) {
+        if (::realpath(c_str(), temp) == nullptr) {
             imread_raise(FileSystemError,
                 "In reference to path value:", str(),
                 "FATAL internal error raised during path::make_absolute() call to ::realpath():",
@@ -234,14 +234,14 @@ namespace filesystem {
     bool path::compare_debug(path const& other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
-        if (::realpath(c_str(), raw_self)  == NULL) {
+        if (::realpath(c_str(), raw_self) == nullptr) {
             imread_raise(FileSystemError,
                 "FATAL internal error raised during path::compare_debug() call to ::realpath():",
              FF("\t%s (%d)", std::strerror(errno), errno),
                 "In reference to SELF path value:",
                 str());
         }
-        if (::realpath(other.c_str(), raw_other) == NULL) {
+        if (::realpath(other.c_str(), raw_other) == nullptr) {
             imread_raise(FileSystemError,
                 "FATAL internal error raised during path::compare_debug() call to ::realpath():",
              FF("\t%s (%d)", std::strerror(errno), errno),
@@ -258,8 +258,8 @@ namespace filesystem {
     bool path::compare_lexical(path const& other) const {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
-        if (::realpath(c_str(),       raw_self)  == NULL) { return false; }
-        if (::realpath(other.c_str(), raw_other) == NULL) { return false; }
+        if (::realpath(c_str(),       raw_self)  == nullptr) { return false; }
+        if (::realpath(other.c_str(), raw_other) == nullptr) { return false; }
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
@@ -283,7 +283,7 @@ namespace filesystem {
                     "For path:", str());
             }
             detail::dirent_t* entp;
-            while ((entp = ::readdir(d.get())) != NULL) {
+            while ((entp = ::readdir(d.get())) != nullptr) {
                 /// ... it's either a directory, a regular file, or a symbolic link
                 switch (entp->d_type) {
                     case DT_DIR:
@@ -311,7 +311,7 @@ namespace filesystem {
                     "For path:", str());
             }
             detail::dirent_t* entp;
-            while ((entp = ::readdir(d.get())) != NULL) {
+            while ((entp = ::readdir(d.get())) != nullptr) {
                 /// ... it's either a directory, a regular file, or a symbolic link
                 switch (entp->d_type) {
                     case DT_DIR:
@@ -595,7 +595,7 @@ namespace filesystem {
     
     path path::getcwd() {
         char temp[PATH_MAX];
-        if (::getcwd(temp, PATH_MAX) == NULL) {
+        if (::getcwd(temp, PATH_MAX) == nullptr) {
             imread_raise(FileSystemError,
                 "Internal error in getcwd():",
                 std::strerror(errno));
