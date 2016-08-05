@@ -51,7 +51,7 @@ namespace {
     {
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
-        std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
+        std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             auto png = im::interleaved::read(basedir/p);
             REQUIRE(png.width() > 0);
             REQUIRE(png.height() > 0);
@@ -74,7 +74,7 @@ namespace {
     {
         path basedir(im::test::basedir);
         const std::vector<path> jpgs = basedir.list("*.jpg");
-        std::for_each(jpgs.begin(), jpgs.end(), [&basedir](const path &p) {
+        std::for_each(jpgs.begin(), jpgs.end(), [&basedir](path const& p) {
             auto jpg = im::interleaved::read(basedir/p);
             CHECK(jpg.width() > 0);
             CHECK(jpg.height() > 0);

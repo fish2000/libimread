@@ -38,12 +38,6 @@ namespace filesystem {
             static void close(ptr_t handle) { std::fclose(handle); }
         };
         
-        // template <>
-        // struct handle_helper<int> {
-        //     using ptr_t = int; /// for descriptors
-        //     static void close(ptr_t handle) { ::close(handle); }
-        // };
-        
         template <typename HandleType>
         using handle_t = typename handle_helper<HandleType>::ptr_t;
         
@@ -68,7 +62,6 @@ namespace filesystem {
     /// ... YOURE WELCOME.
     using directory  = detail::handle_ptr<DIR>;
     using file       = detail::handle_ptr<FILE>;
-    // using descriptor = detail::handle_ptr<int>;
     
     namespace detail {
         using dirent_t = struct dirent;
@@ -82,11 +75,10 @@ namespace filesystem {
         ///     ::some_posix_func_that_wants_a_dirhandle(dir.get());
         ///     
         /// ... see? see what I am getting at with all this? NO DIR!! haha. anyway.
-        filesystem::directory ddopen(char const* c);
-        filesystem::directory ddopen(std::string const& s);
-        filesystem::directory ddopen(path const& p);
-        filesystem::file ffopen(std::string const& s, mode m = mode::READ);
-        // filesystem::descriptor fdopen(std::string const& s, mode m = mode::READ);
+        directory ddopen(char const* c);
+        directory ddopen(std::string const& s);
+        directory ddopen(path const& p);
+        file ffopen(std::string const& s, mode m = mode::READ);
     }
 
 } /* namespace filesystem */

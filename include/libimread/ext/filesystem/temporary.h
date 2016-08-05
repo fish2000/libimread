@@ -29,13 +29,12 @@ namespace filesystem {
         bool deallocate;
         char* suffix;
         char* prefix;
-        filesystem::mode filemode;
-        filesystem::path filepath;
+        mode filemode;
+        path filepath;
         std::fstream stream;
         
         explicit NamedTemporaryFile(char const* s = tfs, bool c = true, char const* p = tfp,
-                                    filesystem::mode m = filesystem::mode::WRITE,
-                                    filesystem::path const& td = filesystem::path::tmp())
+                                    mode m = mode::WRITE, path const& td = path::tmp())
                                         :cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s)), prefix(::strdup(p))
                                         ,filemode(m)
@@ -46,8 +45,7 @@ namespace filesystem {
                                         }
         
         explicit NamedTemporaryFile(std::string const& s, bool c = true, std::string const& p = tfp,
-                                    filesystem::mode m = filesystem::mode::WRITE,
-                                    filesystem::path const& td = filesystem::path::tmp())
+                                    mode m = mode::WRITE, path const& td = path::tmp())
                                         :cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
                                         ,filemode(m)
@@ -84,7 +82,7 @@ namespace filesystem {
         operator char const*() const noexcept      { return c_str(); }
         
         inline openmode mode() const noexcept {
-            return filemode == filesystem::mode::WRITE ? std::ios::out : std::ios::in;
+            return filemode == mode::WRITE ? std::ios::out : std::ios::in;
         }
         inline openmode mode(openmode additionally) const noexcept {
             return this->mode() | additionally;
@@ -114,8 +112,8 @@ namespace filesystem {
         char* tpl;
         bool cleanup;
         bool deallocate;
-        filesystem::path tplpath;
-        filesystem::path dirpath;
+        path tplpath;
+        path dirpath;
         
         explicit TemporaryDirectory(char const* t = tdp, bool c = true)
             :tpl(::strdup(t)), cleanup(c), deallocate(true)

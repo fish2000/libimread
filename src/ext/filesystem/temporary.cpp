@@ -47,7 +47,7 @@ namespace filesystem {
     bool NamedTemporaryFile::create() {
         descriptor = ::mkstemps(const_cast<char*>(filepath.c_str()), std::strlen(suffix));
         if (descriptor == -1) { return false; }
-        filepath = filesystem::path(descriptor);
+        filepath = path(descriptor);
         if (::close(descriptor) == -1) {
             imread_raise(FileSystemError,
                 "NamedTemporaryFile::create(): error while closing descriptor:",
@@ -66,13 +66,13 @@ namespace filesystem {
     
     bool TemporaryDirectory::create() {
         if (!pystring::endswith(tpl, "XXX")) {
-            tplpath = path::join(filesystem::path::gettmp(), filesystem::path(tpl)).append("-XXXXXX");
+            tplpath = path::join(path::gettmp(), tpl).append("-XXXXXX");
         } else {
-            tplpath = path::join(filesystem::path::gettmp(), filesystem::path(tpl));
+            tplpath = path::join(path::gettmp(), tpl);
         }
         char const* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
         if (dtemp == nullptr) { return false; }
-        dirpath = filesystem::path(dtemp);
+        dirpath = path(dtemp);
         return true;
     }
     
@@ -80,12 +80,12 @@ namespace filesystem {
         if (!dirpath.exists()) { return false; }
         bool out = true;
         detail::pathvec_t directorylist;
-        filesystem::path abspath = dirpath.make_absolute();
+        path abspath = dirpath.make_absolute();
         
         /// walk_visitor_t recursively removes files while saving directories
         /// as full paths in the `directorylist` vector
         detail::walk_visitor_t walk_visitor = [&out, &directorylist](
-                                    filesystem::path const& p,
+                                    path const& p,
                                     detail::stringvec_t& directories,
                                     detail::stringvec_t& files) {
             if (!directories.empty()) {
@@ -111,7 +111,7 @@ namespace filesystem {
             /// -- removing uppermost directories top-down:
             std::for_each(directorylist.begin(),
                           directorylist.end(),
-                   [&out](filesystem::path const& p) { out &= p.remove(); });
+                   [&out](path const& p) { out &= p.remove(); });
         }
         
         /// return as per logical sum of `remove()` call successes

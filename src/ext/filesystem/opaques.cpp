@@ -8,29 +8,30 @@ namespace filesystem {
     
     namespace detail {
         
-        filesystem::directory ddopen(char const* c) {
-            return filesystem::directory(::opendir(path::absolute(c).c_str()));
+        directory ddopen(char const* c) {
+            return directory(::opendir(path::absolute(c).c_str()));
         }
         
-        filesystem::directory ddopen(std::string const& s) {
-            return filesystem::directory(::opendir(path::absolute(s).c_str()));
+        directory ddopen(std::string const& s) {
+            return directory(::opendir(path::absolute(s).c_str()));
         }
         
-        filesystem::directory ddopen(path const& p) {
-            return filesystem::directory(::opendir(p.make_absolute().c_str()));
+        directory ddopen(path const& p) {
+            return directory(::opendir(p.make_absolute().c_str()));
         }
         
-        inline char const* fm(mode m) noexcept { return m == mode::READ ? "r+b" : "w+x"; }
-        inline int dm(mode m) noexcept { return m == mode::READ ? O_RDONLY | O_NONBLOCK :
-                                                                  O_WRONLY | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC; }
-        
-        filesystem::file ffopen(std::string const& s, mode m) {
-            return filesystem::file(std::fopen(s.c_str(), fm(m)));
+        inline char const* fm(mode m) noexcept {
+            return m == mode::READ ? "r+b" : "w+x";
         }
         
-        // filesystem::descriptor fdopen(std::string const& s, mode m) {
-        //     return filesystem::descriptor(::open(s.c_str(), dm(m)));
-        // }
+        inline int dm(mode m) noexcept {
+            return m == mode::READ ? O_RDWR | O_NONBLOCK :
+                                     O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
+        }
+        
+        file ffopen(std::string const& s, mode m) {
+            return file(std::fopen(s.c_str(), fm(m)));
+        }
         
     } /* namespace detail */
 

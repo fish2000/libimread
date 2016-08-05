@@ -34,7 +34,7 @@ namespace {
     {
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
-        std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
+        std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash_quick(png);
             unsigned long long longhash = bithash.to_ullong();
@@ -50,7 +50,7 @@ namespace {
     {
         path basedir(im::test::basedir);
         const std::vector<path> pngs = basedir.list("*.png");
-        std::for_each(pngs.begin(), pngs.end(), [&basedir](const path &p) {
+        std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash(png);
             unsigned long long longhash = bithash.to_ullong();
