@@ -147,7 +147,9 @@ namespace py {
     
     template <typename ...Args>
     using convertible = std::is_same<std::add_pointer_t<PyObject>,
-                                     decltype(py::convert(std::declval<Args>()...))>;
+                                     std::common_type_t<
+                                         decltype(
+                                      py::convert(std::declval<Args>()))...>>;
     
     template <typename ...Args>
     bool convertible_v = py::convertible<Args...>::value;
@@ -418,10 +420,8 @@ namespace py {
             /// will successfully compile. (but remember at runtime
             /// who but GvR can know though, I'm just saying doggie)
             template <typename ...Args>
-            using can_convert = std::is_same<pyptr_t,
-                                             decltype(
-                                             py::convert(std::declval<Args>()...))
-                                            >;
+            using can_convert = std::is_same<pyptr_t, std::common_type_t<decltype(
+                                                       py::convert(std::declval<Args>()))...>>;
             
             /// default constructor, yields a nullptr referent
             ref() noexcept;
@@ -518,12 +518,32 @@ namespace py {
             
         private:
             
-            mutable pyptr_t referent = nullptr; /// the object in question
-            bool destroy = true;
             ref(ref const&);                    /// NO COPYING
             ref& operator=(ref const&);         /// EYES ON YOUR OWN POINTER
         
+        protected:
+            
+            mutable pyptr_t referent = nullptr; /// the object in question
+            bool destroy = true;
     };
+    
+    class callable : public ref {
+        
+        public:
+            
+            template <typename ...Args,
+                      typename std::enable_if_t<
+                                py::ref::can_convert<Args...>::value,
+                      int> = 0>
+            py::ref operator()(Args ...args) {
+                if (!referent)                      { return py::None(); }
+                if (!PyCallable_Check(referent))    { return py::None(); }
+                return PyObject_CallFunctionObjArgs(referent,
+                                        py::convert(args)..., nullptr);
+            }
+        
+    };
+    
     
     namespace detail {
         
