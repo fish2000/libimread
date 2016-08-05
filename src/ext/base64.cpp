@@ -29,7 +29,7 @@ namespace im {
         
         void encode(std::string& out, std::string const& buf) {
             if (buf.empty()) {
-                encode(out, NULL, 0);
+                encode(out, nullptr, 0);
             } else {
                 encode(out, reinterpret_cast<byte const*>(&buf[0]), buf.size());
             }
@@ -37,7 +37,7 @@ namespace im {
         
         void encode(std::string& out, bytevec_t const& buf) {
             if (buf.empty()) {
-                encode(out, NULL, 0);
+                encode(out, nullptr, 0);
             } else {
                 encode(out, &buf[0], buf.size());
             }

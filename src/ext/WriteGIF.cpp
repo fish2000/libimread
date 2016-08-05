@@ -190,7 +190,7 @@ namespace {
         int length, index;
         TableEntry* after[256];
         TableEntry() {
-            for (int i = 0; i < 256; i++) { after[i] = NULL; }
+            for (int i = 0; i < 256; i++) { after[i] = nullptr; }
         }
         
         void deleteChildren() {
@@ -198,7 +198,7 @@ namespace {
                 if (after[i]) {
                     after[i]->deleteChildren();
                     delete after[i];
-                    after[i] = NULL;
+                    after[i] = nullptr;
                 }
             }
         }
@@ -311,10 +311,10 @@ namespace gif {
     GIF* newGIF(int delay) {
         GIF* gif = new GIF;
         gif->width = 0, gif->height = 0;
-        gif->frames = NULL;
-        gif->lastFrame = NULL;
+        gif->frames = nullptr;
+        gif->lastFrame = nullptr;
         gif->frameDelay = delay;
-        gif->palette = NULL;
+        gif->palette = nullptr;
         gif->paletteSize = 0;
         return gif;
     }
@@ -338,7 +338,7 @@ namespace gif {
         {
             idx = 0;
             std::memset(colorBitSet, 0, 256*256*256/8);
-            for (Frame *frame = gif->frames; frame != NULL; frame = frame->next) {
+            for (Frame *frame = gif->frames; frame != nullptr; frame = frame->next) {
                 idx++;
                 unsigned char* end = frame->rgbImage + gif->width * gif->height * 3;
                 for (unsigned char* rgb = frame->rgbImage; rgb < end; rgb += 3) {
@@ -365,7 +365,7 @@ namespace gif {
             std::memset(colorBitSet, 0, 256*256*256/8);
             unsigned char* afterLastUnique = uniqueColorArray + uniqueColorCount * 3;
             unsigned char* u = uniqueColorArray;
-            for (Frame* frame = gif->frames; frame != NULL; frame = frame->next) {
+            for (Frame* frame = gif->frames; frame != nullptr; frame = frame->next) {
                 idx++;
                 if (u >= afterLastUnique) { break; }
                 unsigned char* end = frame->rgbImage + gif->width * gif->height * 3;
@@ -395,7 +395,7 @@ namespace gif {
             int colorCount;
             unsigned char* colors;
             
-            bool isLeaf() { return child[0] == NULL && child[1] == NULL; }
+            bool isLeaf() { return child[0] == nullptr && child[1] == nullptr; }
             
             void calcDim() {
                 int minDim[3] = { 255, 255, 255 }, maxDim[3] = { 0, 0, 0 };
@@ -440,14 +440,14 @@ namespace gif {
                 idx++;
                 int maxDimAxis = 0;
                 int maxDim = 0;
-                ColorBox* maxDimBox = NULL;
+                ColorBox* maxDimBox = nullptr;
                 for (int i = 0; i < colorBoxCount; i++) {
                     ColorBox* box = colorBoxArray + i;
                     if (!box->isLeaf()) { continue; }
                     if (box->colorCount < 2) { continue; }
                     
                     for (int axis = 0; axis < 3; axis++) {
-                        if (box->dim[axis] > maxDim || maxDimBox == NULL) {
+                        if (box->dim[axis] > maxDim || maxDimBox == nullptr) {
                             maxDim = box->dim[axis];
                             maxDimAxis = axis;
                             maxDimBox = box;
@@ -498,7 +498,7 @@ namespace gif {
                     }
                 }
                 idx = 0;
-                for (Frame* frame = gif->frames; frame != NULL; frame = frame->next) {
+                for (Frame* frame = gif->frames; frame != nullptr; frame = frame->next) {
                     idx++;
                     frame->indexImage = new unsigned char[gif->width * gif->height];
                     indexizeImageFromPaletteFuzzy(
@@ -521,11 +521,11 @@ namespace gif {
     void addFrame(GIF* gif, int W, int H, unsigned char* rgbImage, int delay) {
         Frame* f = new Frame;
         f->delay = (delay < 0) ? gif->frameDelay : delay;
-        f->indexImage = NULL;
+        f->indexImage = nullptr;
         f->rgbImage = new unsigned char[W*H*3];
         std::memcpy(f->rgbImage, rgbImage, W*H*3);
         
-        f->next = NULL;
+        f->next = nullptr;
         if (gif->lastFrame) {
             gif->lastFrame->next = f;
         } else {
@@ -559,8 +559,8 @@ namespace gif {
         
         /// count frames
         int framecount = 0;
-        for (Frame *frame = gif->frames, *prevFrame = NULL;
-             frame != NULL;
+        for (Frame *frame = gif->frames, *prevFrame = nullptr;
+             frame != nullptr;
              prevFrame = frame, frame = frame->next, ++framecount) {}
         
         /// allocate way-too-large buffer vector (which we resize before returning)
@@ -624,8 +624,8 @@ namespace gif {
         }
         
         int frameNumber = 0;
-        for (Frame *frame = gif->frames, *prevFrame = NULL;
-             frame != NULL;
+        for (Frame *frame = gif->frames, *prevFrame = nullptr;
+             frame != nullptr;
              prevFrame = frame, frame = frame->next, ++frameNumber) {
             MAYBE(FF("frame %d", frameNumber));
             {

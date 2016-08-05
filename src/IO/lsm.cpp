@@ -742,7 +742,7 @@ namespace im {
         int LSMReader::AnalyzeTag(byte_source* s, unsigned long startPos) {
             int value, dataSize;
             char tempValue[4], tempValue2[4];
-            char* actualValue = NULL;
+            char* actualValue = nullptr;
             const unsigned short tag = ReadUnsignedShort(s, &startPos);
             const unsigned short type = ReadUnsignedShort(s, &startPos);
             const unsigned short length = ReadUnsignedInt(s, &startPos);

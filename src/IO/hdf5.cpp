@@ -84,7 +84,7 @@ namespace im {
         constexpr std::size_t NDIMS = 3;
         hid_t space_id = H5Dget_space(dataset_id);
         hsize_t dims[NDIMS];
-        H5Sget_simple_extent_dims(space_id, dims, NULL);
+        H5Sget_simple_extent_dims(space_id, dims, nullptr);
         
         /// Allocate a new unique-pointer-wrapped image instance:
         std::unique_ptr<Image> output = factory->create(8,  dims[0],
@@ -122,9 +122,9 @@ namespace im {
                                         std::string("imread-data"));
         
         #if H5Eset_auto_vers == 2
-            H5Eset_auto( H5E_DEFAULT, NULL, NULL );
+            H5Eset_auto( H5E_DEFAULT, nullptr, nullptr );
         #else
-            H5Eset_auto( NULL, NULL );
+            H5Eset_auto( nullptr, nullptr );
         #endif
         
         NamedTemporaryFile tf(".hdf5");
@@ -149,8 +149,8 @@ namespace im {
         hsize_t mdims[1] = { static_cast<hsize_t>(input.dim(0) *
                                                   input.dim(1) *
                                                   input.dim(2)) };
-        hid_t space_id      = H5Screate_simple(NDIMS, dims, NULL); /// first arg here is rank (aka NDIMS)
-        hid_t memspace_id   = H5Screate_simple(1, mdims, NULL);
+        hid_t space_id      = H5Screate_simple(NDIMS, dims, nullptr); /// first arg here is rank (aka NDIMS)
+        hid_t memspace_id   = H5Screate_simple(1, mdims, nullptr);
         
         /// try creating a new dataset --
         hid_t dataset_id;

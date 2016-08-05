@@ -358,7 +358,7 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
         default: {
             // printf("pvr.cpp: unknown PVR type %i!\n", ptype);
             std::free(this->data);
-            this->data = NULL;
+            this->data = nullptr;
             return PVR_LOAD_UNKNOWN_TYPE;
         }
     }

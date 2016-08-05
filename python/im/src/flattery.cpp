@@ -11,12 +11,12 @@ namespace py {
     namespace flattery {
         
         PyObject *unflatten(PyObject *ignore, PyObject *args) {
-            PyObject *src = NULL;
-            PyObject *dst = NULL;
-            PyObject *nonelist = NULL;
-            PyObject *slot = NULL;
-            PyObject *slotvalue = NULL;
-            PyObject *part = NULL;
+            PyObject *src = nullptr;
+            PyObject *dst = nullptr;
+            PyObject *nonelist = nullptr;
+            PyObject *slot = nullptr;
+            PyObject *slotvalue = nullptr;
+            PyObject *part = nullptr;
             Py_ssize_t pos = 0;
             
             if (!PyArg_ParseTuple(args, "O!:unflatten", &PyDict_Type, &src)) {
@@ -107,7 +107,7 @@ namespace py {
                         /* Don't clobber an existing entry.
                            Caveat: PyList_SetItem() steals a reference to slotvalue. */
                         
-                        PyObject *extant = NULL;
+                        PyObject *extant = nullptr;
                         
                         if ((extant = PyList_GetItem(slot, index)) == Py_None) {
                             PyList_SetItem(slot, index, slotvalue);
@@ -127,7 +127,7 @@ namespace py {
                         
                         /* Don't clobber an existing entry. */
                         
-                        PyObject *extant = NULL;
+                        PyObject *extant = nullptr;
                         
                         if (!(extant = PyDict_GetItem(slot, part))) {
                             PyDict_SetItem(slot, part, slotvalue);
@@ -142,15 +142,15 @@ namespace py {
                     
                     Py_DECREF(slot);
                     slot = slotvalue;
-                    slotvalue = NULL;
+                    slotvalue = nullptr;
                     
                     Py_DECREF(part);
-                    part = NULL;
+                    part = nullptr;
                     
                 } while (*p);
                 
                 Py_DECREF(slot);
-                slot = NULL;
+                slot = nullptr;
             }
             
             Py_DECREF(nonelist);
@@ -163,7 +163,7 @@ namespace py {
                 Py_XDECREF(slotvalue);
                 Py_XDECREF(part);
             
-            return NULL;
+            return nullptr;
         }
         
         PyObject* flatten(PyObject* input) {

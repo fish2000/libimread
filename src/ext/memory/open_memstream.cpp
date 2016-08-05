@@ -13,7 +13,7 @@ namespace memory {
         
         if (newsize > *ms->lenp) {
             buf = (char *)::realloc(*ms->cp, newsize + 1);
-            if (buf != NULL) {
+            if (buf != nullptr) {
                 std::memset(buf + *ms->lenp + 1, 0, newsize - *ms->lenp);
                 *ms->cp = buf;
                 *ms->lenp = newsize;
@@ -79,7 +79,7 @@ FILE* open_memstream(char** cp, std::size_t* lenp) {
     memory::mstream* ms;
     int save_errno;
     FILE* fp;
-    *cp = NULL;
+    *cp = nullptr;
     *lenp = 0;
     ms = (memory::mstream*)::malloc(sizeof(*ms));
     ms->cp = cp;
@@ -88,7 +88,7 @@ FILE* open_memstream(char** cp, std::size_t* lenp) {
     fp = ::funopen(ms,
         memory::memstream_read, memory::memstream_write,
         memory::memstream_seek, memory::memstream_close);
-    if (fp == NULL) {
+    if (fp == nullptr) {
         save_errno = errno;
         ::free(ms);
         errno = save_errno;
