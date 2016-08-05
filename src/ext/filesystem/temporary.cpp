@@ -34,8 +34,7 @@ namespace filesystem {
     }
     
     bool NamedTemporaryFile::reopen(openmode additionally) {
-        close();
-        return open(additionally);
+        return this->close() && this->open(additionally);
     }
     
     bool NamedTemporaryFile::close() {
@@ -46,7 +45,11 @@ namespace filesystem {
     
     bool NamedTemporaryFile::create() {
         descriptor = ::mkstemps(const_cast<char*>(filepath.c_str()), std::strlen(suffix));
-        if (descriptor == -1) { return false; }
+        if (descriptor == -1) {
+            imread_raise(FileSystemError,
+                "NamedTemporaryFile::create(): error returned from ::mkstemps():",
+                std::strerror(errno));
+        }
         filepath = path(descriptor);
         if (::close(descriptor) == -1) {
             imread_raise(FileSystemError,
@@ -71,7 +74,11 @@ namespace filesystem {
             tplpath = path::join(path::gettmp(), tpl);
         }
         char const* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
-        if (dtemp == nullptr) { return false; }
+        if (dtemp == nullptr) {
+            imread_raise(FileSystemError,
+                "TemporaryDirectory::create(): error returned from ::mkdtemp():",
+                std::strerror(errno));
+        }
         dirpath = path(dtemp);
         return true;
     }

@@ -1020,12 +1020,21 @@ Json const& Json::dump(std::string const& dest, bool overwrite) const {
         throw;
     }
     
-    if (path::exists(destination) && !overwrite) {
-        imread_raise(JSONIOError,
-            "Json::dump(destination, overwrite=false) has existant destination",
-         FF("\tdest        == %s", dest.c_str()),
-         FF("\tdestination == %s", destination.c_str()),
-            "\t(Requires overwrite=true or a unique destination)");
+    if (path::exists(destination)) {
+        if (!overwrite) {
+            imread_raise(JSONIOError,
+                "Json::dump(destination, overwrite=false): existant destination",
+             FF("\tdest        == %s", dest.c_str()),
+             FF("\tdestination == %s", destination.c_str()),
+                "\t(Requires overwrite=true or a unique destination)");
+        } else if (path::is_directory(destination)) {
+            imread_raise(JSONIOError,
+                "Json::dump(destination): directory as existant destination",
+             FF("\toverwrite   == %s", overwrite ? "true" : "false"),
+             FF("\tdest        == %s", dest.c_str()),
+             FF("\tdestination == %s", destination.c_str()),
+                "\t(Requires overwrite=true with a non-directory destination)");
+        }
     }
     
     NamedTemporaryFile tf(".json");
@@ -1040,7 +1049,8 @@ Json const& Json::dump(std::string const& dest, bool overwrite) const {
     path finalfile = tf.filepath.duplicate(destination);
     if (!finalfile.is_file()) {
         imread_raise(JSONIOError,
-            "Json::dump(destination, ...) failed writing to destination",
+            "Json::dump(destination, ...): failed writing to destination",
+         FF("\toverwrite   == %s", overwrite ? "true" : "false"),
          FF("\tdest        == %s", dest.c_str()),
          FF("\tdestination == %s", destination.c_str()),
          FF("\tfinalfile   == %s", finalfile.c_str()));
@@ -1056,15 +1066,20 @@ std::string Json::dumptmp() const {
     tf.open();
     tf.stream << *this;
     tf.close();
-    return tf.filepath.str();
+    return std::string(tf.filepath.str());
 }
 
 Json Json::load(std::string const& source) {
     using filesystem::path;
     
+    if (!path::exists(source)) {
+        imread_raise(JSONIOError,
+            "Json::load(source): nonexistant source file",
+         FF("\tsource == %s", source.c_str()));
+    }
     if (!path::is_file_or_link(source)) {
         imread_raise(JSONIOError,
-            "Json::load(source) has non-file-or-link source",
+            "Json::load(source): non-file-or-link source file",
          FF("\tsource == %s", source.c_str()));
     }
     
@@ -1072,7 +1087,7 @@ Json Json::load(std::string const& source) {
     stream.open(source, std::ios::in);
     if (!stream.is_open()) {
         imread_raise(JSONIOError,
-            "Json::load(source) couldn't open a stream to read source",
+            "Json::load(source): couldn't open a stream to read source file",
          FF("\tsource == %s", source.c_str()));
     }
     
