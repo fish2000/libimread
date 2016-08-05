@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <pwd.h>
 #include <glob.h>
 #include <fcntl.h>
@@ -452,6 +453,45 @@ namespace filesystem {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return false; }
         return bool(S_ISREG(sb.st_mode)) || bool(S_ISLNK(sb.st_mode));
+    }
+    
+    long path::max_file_name_length() const {
+        if (!is_directory()) { return -1L; }
+        return ::pathconf(c_str(), _PC_NAME_MAX);
+    }
+    
+    long path::max_relative_path_length() const {
+        if (!is_directory()) { return -1L; }
+        return ::pathconf(c_str(), _PC_PATH_MAX);
+    }
+    
+    detail::time_triple_t path::timestamps() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return detail::time_triple_t{ 0, 0, 0 }; }
+        return std::make_tuple(sb.st_atime, sb.st_mtime, sb.st_ctime);
+    }
+    
+    std::time_t path::access_timestamp() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return 0; }
+        return sb.st_atime;
+    }
+    
+    std::time_t path::modify_timestamp() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return 0; }
+        return sb.st_mtime;
+    }
+    
+    std::time_t path::status_timestamp() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return 0; }
+        return sb.st_ctime;
+    }
+    
+    bool path::update_timestamps() {
+        if (!exists()) return false;
+        return ::utimes(c_str(), nullptr) != -1;
     }
     
     bool path::remove() const {

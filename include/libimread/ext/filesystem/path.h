@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <tuple>
 #include <utility>
 #include <sstream>
 #include <functional>
@@ -36,6 +37,7 @@ namespace filesystem {
         using stringvec_t = std::vector<std::string>;
         using stringlist_t = std::initializer_list<std::string>;
         using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
+        using time_triple_t = std::tuple<std::time_t, std::time_t, std::time_t>;
         using inode_t = uint64_t;
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
@@ -179,6 +181,21 @@ namespace filesystem {
             static bool is_file_or_link(P&& p) {
                 return path(std::forward<P>(p)).is_file_or_link();
             }
+            
+            /// max_file_name_length() and max_relative_path_length()
+            /// return the respective values for _PC_NAME_MAX and _PC_PATH_MAX
+            /// using ::pathconf() ... -1 is returned for non-directories
+            long max_file_name_length() const;
+            long max_relative_path_length() const;
+            
+            /// get individual timestamps from detail::stat_t structure
+            detail::time_triple_t timestamps() const;
+            std::time_t access_timestamp() const;
+            std::time_t modify_timestamp() const;
+            std::time_t status_timestamp() const;
+            
+            /// update the access and modification timestamps for the path
+            bool update_timestamps();
             
             /// Convenience funcs for running a std::regex against the path in question:
             /// match(), search() and replace() hand respectively straight off to std::regex_match,
