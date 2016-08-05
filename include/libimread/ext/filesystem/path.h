@@ -5,6 +5,7 @@
 #ifndef LIBIMREAD_EXT_FILESYSTEM_PATH_H_
 #define LIBIMREAD_EXT_FILESYSTEM_PATH_H_
 
+#include <chrono>
 #include <string>
 #include <vector>
 #include <regex>
@@ -37,7 +38,8 @@ namespace filesystem {
         using stringvec_t = std::vector<std::string>;
         using stringlist_t = std::initializer_list<std::string>;
         using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
-        using time_triple_t = std::tuple<std::time_t, std::time_t, std::time_t>;
+        using timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
+        using time_triple_t = std::tuple<timepoint_t, timepoint_t, timepoint_t>;
         using inode_t = uint64_t;
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
@@ -190,9 +192,9 @@ namespace filesystem {
             
             /// get individual timestamps from detail::stat_t structure
             detail::time_triple_t timestamps() const;
-            std::time_t access_time() const;
-            std::time_t modify_time() const;
-            std::time_t status_time() const;
+            detail::timepoint_t access_time() const;
+            detail::timepoint_t modify_time() const;
+            detail::timepoint_t status_time() const;
             
             /// update the access and modification timestamps for the path
             bool update_timestamps();

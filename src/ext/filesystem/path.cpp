@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <pwd.h>
 #include <glob.h>
+#include <wordexp.h>
 #include <fcntl.h>
 #include <dlfcn.h>
 
@@ -336,10 +337,6 @@ namespace filesystem {
     
     detail::pathvec_t path::list(char const* pattern, bool full_paths) const {
         /// list files with glob
-        // if (!pattern) {
-        //     imread_raise(FileSystemError,
-        //         "Called path::list() with false-y pattern pointer on path:", str());
-        // }
         if (!is_directory()) {
             imread_raise(FileSystemError,
                 "Bad call to path::list() from a non-directory:", str());
@@ -359,7 +356,23 @@ namespace filesystem {
     }
     
     detail::pathvec_t path::list(std::string const& pattern, bool full_paths) const {
-        return list(pattern.c_str(), full_paths);
+        /// list files with wordexp
+        if (!is_directory()) {
+            imread_raise(FileSystemError,
+                "Bad call to path::list() from a non-directory:", str());
+        }
+        path abspath = make_absolute();
+        ::wordexp_t word = { 0 };
+        {
+            filesystem::switchdir s(abspath);
+            ::wordexp(pattern.c_str(), &word, 0);
+        }
+        detail::pathvec_t out;
+        for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
+            out.push_back(full_paths ? abspath/word.we_wordv[idx] : path(word.we_wordv[idx]));
+        }
+        ::wordfree(&word);
+        return out;
     }
     
     detail::pathvec_t path::list(std::regex const& pattern, bool case_sensitive, bool full_paths) const {
@@ -467,26 +480,29 @@ namespace filesystem {
     
     detail::time_triple_t path::timestamps() const {
         detail::stat_t sb;
-        if (::lstat(c_str(), &sb)) { return detail::time_triple_t{ 0, 0, 0 }; }
-        return std::make_tuple(sb.st_atime, sb.st_mtime, sb.st_ctime);
+        if (::lstat(c_str(), &sb)) { return detail::time_triple_t{}; }
+        return std::make_tuple(
+            std::chrono::system_clock::from_time_t(sb.st_atime),
+            std::chrono::system_clock::from_time_t(sb.st_mtime),
+            std::chrono::system_clock::from_time_t(sb.st_ctime));
     }
     
-    std::time_t path::access_time() const {
+    detail::timepoint_t path::access_time() const {
         detail::stat_t sb;
-        if (::lstat(c_str(), &sb)) { return 0; }
-        return sb.st_atime;
+        if (::lstat(c_str(), &sb)) { return detail::timepoint_t{}; }
+        return std::chrono::system_clock::from_time_t(sb.st_atime);
     }
     
-    std::time_t path::modify_time() const {
+    detail::timepoint_t path::modify_time() const {
         detail::stat_t sb;
-        if (::lstat(c_str(), &sb)) { return 0; }
-        return sb.st_mtime;
+        if (::lstat(c_str(), &sb)) { return detail::timepoint_t{}; }
+        return std::chrono::system_clock::from_time_t(sb.st_mtime);
     }
     
-    std::time_t path::status_time() const {
+    detail::timepoint_t path::status_time() const {
         detail::stat_t sb;
-        if (::lstat(c_str(), &sb)) { return 0; }
-        return sb.st_ctime;
+        if (::lstat(c_str(), &sb)) { return detail::timepoint_t{}; }
+        return std::chrono::system_clock::from_time_t(sb.st_ctime);
     }
     
     bool path::update_timestamps() {
@@ -707,7 +723,7 @@ namespace filesystem {
     }
     
     bool path::operator<(path const& rhs) const noexcept {
-        return status_timestamp() < rhs.status_timestamp();
+        return status_time() < rhs.status_time();
     }
     
     void path::set(std::string const& str) {
