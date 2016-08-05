@@ -25,10 +25,10 @@ namespace filesystem {
     
     namespace detail {
         /// returns a C-style string containing the temporary directory,
-        // using std::getenv() and some guesswork -- originally cribbed from boost
-        char const* tmpdir() noexcept;
-        char const* userdir() noexcept;
-        char const* syspaths() noexcept;
+        /// using std::getenv() and some guesswork -- originally cribbed from boost
+        std::string tmpdir() noexcept;
+        std::string userdir() noexcept;
+        std::string syspaths() noexcept;
         std::string execpath() noexcept;
         ssize_t copyfile(char const*, char const*);
         

@@ -50,7 +50,7 @@ namespace filesystem {
         //     return bool(std::regex_search(dirent->d_name, pattern));
         // };
         
-        char const* tmpdir() noexcept {
+        std::string tmpdir() noexcept {
             /// cribbed/tweaked from boost
             char const* dirname;
             dirname = std::getenv("TMPDIR");
@@ -60,22 +60,22 @@ namespace filesystem {
             return dirname;
         }
         
-        char const* userdir() noexcept {
+        std::string userdir() noexcept {
             char const* dirname;
             dirname = std::getenv("HOME");
             if (nullptr == dirname) {
                 passwd_t* pw = ::getpwuid(::geteuid());
                 std::string dn(pw->pw_dir);
-                dirname = dn.c_str();
+                return dn;
             }
             return dirname;
         }
         
-        char const* syspaths() noexcept {
-            char const* syspaths;
-            syspaths = std::getenv("PATH");
-            if (nullptr == syspaths) { syspaths = "/bin:/usr/bin"; }
-            return syspaths;
+        std::string syspaths() noexcept {
+            char const* paths;
+            paths = std::getenv("PATH");
+            if (nullptr == paths) { paths = "/bin:/usr/bin"; }
+            return paths;
         }
         
         std::string execpath() noexcept {
@@ -234,7 +234,7 @@ namespace filesystem {
     path path::expand_user() const {
         const std::regex re("^~", detail::regex_flags);
         if (m_path.empty()) { return path(); }
-        if (m_path[0].substr(0, 1) != "~") { return path(*this); }
+        if (m_path.front().substr(0, 1) != "~") { return path(*this); }
         return replace(re, detail::userdir());
     }
     
