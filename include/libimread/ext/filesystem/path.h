@@ -190,9 +190,9 @@ namespace filesystem {
             
             /// get individual timestamps from detail::stat_t structure
             detail::time_triple_t timestamps() const;
-            std::time_t access_timestamp() const;
-            std::time_t modify_timestamp() const;
-            std::time_t status_timestamp() const;
+            std::time_t access_time() const;
+            std::time_t modify_time() const;
+            std::time_t status_time() const;
             
             /// update the access and modification timestamps for the path
             bool update_timestamps();

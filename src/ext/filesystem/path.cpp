@@ -471,19 +471,19 @@ namespace filesystem {
         return std::make_tuple(sb.st_atime, sb.st_mtime, sb.st_ctime);
     }
     
-    std::time_t path::access_timestamp() const {
+    std::time_t path::access_time() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return 0; }
         return sb.st_atime;
     }
     
-    std::time_t path::modify_timestamp() const {
+    std::time_t path::modify_time() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return 0; }
         return sb.st_mtime;
     }
     
-    std::time_t path::status_timestamp() const {
+    std::time_t path::status_time() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return 0; }
         return sb.st_ctime;
