@@ -407,8 +407,7 @@ namespace filesystem {
     }
     
     bool path::exists() const {
-        detail::stat_t sb;
-        return ::lstat(c_str(), &sb) == 0;
+        return ::access(c_str(), R_OK) != -1;
     }
     
     bool path::is_file() const {
