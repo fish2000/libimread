@@ -250,6 +250,11 @@ namespace py {
                                               array_destructor<PyArrayInterface>());
                 }
                 
+                // int vacay(visitproc visit, void* arg) {
+                //     Py_VISIT(beholden.get());
+                //     return base_t::vacay(visit, arg);
+                // }
+                
                 void cleanup(bool force = false) {
                     base_t::cleanup(force);
                     beholden.clear();
