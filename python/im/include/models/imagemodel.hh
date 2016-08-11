@@ -629,6 +629,13 @@ namespace py {
                                                            py::capsule::decapsulaton_f<PyObject>());
             }
             
+            PyObject* scale(float scale) {
+                // using imagebuffer_t = BufferModel
+                BufferModelBase<BufferType> buffer(imagebuffer, scale);
+                ImageModelBase* scaled = new ImageModelBase(buffer);
+                return py::convert(scaled);
+            }
+            
             options_map readopts() {
                 return py::options::parse(readoptDict);
             }

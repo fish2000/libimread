@@ -741,6 +741,15 @@ namespace py {
             template <typename ImageType = HalideNumpyImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
+            PyObject* scale(PyObject* self, PyObject* scale_factor) {
+                PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
+                float factor = (float)PyFloat_AsDouble(scale_factor);
+                return pyim->scale(factor);
+            }
+            
+            template <typename ImageType = HalideNumpyImage,
+                      typename BufferType = buffer_t,
+                      typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
                 PythonImageType* pyim = reinterpret_cast<PythonImageType*>(self);
                 py::ref options = PyDict_New();
@@ -1245,6 +1254,12 @@ namespace py {
                                 METH_NOARGS,
                                 "image.otsu()\n"
                                 "\t-> Return entupled Otsu threshold values for each plane in the image\n" },
+                        {
+                            "scale",
+                                (PyCFunction)py::ext::image::scale<ImageType, BufferType>,
+                                METH_O,
+                                "image.scale(factor)\n"
+                                "\t-> Return a rescaled copy of the image\n" },
                         {
                             "add_alpha",
                                 (PyCFunction)py::ext::image::add_alpha<ImageType, BufferType>,

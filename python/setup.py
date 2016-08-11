@@ -12,6 +12,7 @@ from utils import (
     get_python_inc,
     terminal_print,
     collect_generators,
+    list_generator_archives,
     list_generator_libraries)
 
 # SETUPTOOLS
@@ -79,6 +80,7 @@ terminal_print("collecting %s generators" % collect_generators(
                color='yellow', asterisk='*')
 
 generator_libs = [os.path.relpath(pth) for pth in list_generator_libraries(generator_target_dir)]
+generator_ars = [os.path.relpath(pth) for pth in list_generator_archives(generator_target_dir)]
 
 long_description = """ Python bindings for libimread, dogg. """
 
@@ -127,6 +129,8 @@ terminal_print("debug level: %s" % DEBUG)
 terminal_print("verbosity: %s" % VERBOSE)
 terminal_print("color trace: %s" % COLOR_TRACE)
 
+relative_target_dir = os.path.relpath(generator_target_dir)
+
 include_dirs = [
     libimread.include(),
     # libhalide.include(),
@@ -136,13 +140,14 @@ include_dirs = [
     # libimread.dependency('libguid'),
     numpy.get_include(),
     get_python_inc(plat_specific=1),
-    os.path.join(os.path.dirname(__file__), 'im', 'include')]
+    os.path.join(os.path.dirname(__file__), 'im', 'include'),
+    relative_target_dir]
 
 library_dirs = [
     libimread.lib(),
     # libhalide.lib(),
     # libllvm.lib(),
-]
+    relative_target_dir]
 
 other_flags = []
 
@@ -190,17 +195,21 @@ print('')
 print(cyan(" GENERATOR LIBRARIES: %i" % len(generator_libs)))
 print(cyan(" " + ", ".join(generator_libs)))
 print('')
+print(cyan(" GENERATOR ARCHIVES: %i" % len(generator_ars)))
+print(cyan(" " + ", ".join(generator_ars)))
+print('')
 
 terminal_print("SETUPTOOLS BUILD NOW COMMENCING", asterisk='=')
 print('')
 
-relative_target_dir = os.path.relpath(generator_target_dir)
-library_dirs.append(relative_target_dir)
-
 # extra_link_args = ['-Wl,--allow-multiple-definition']
-extra_link_args = ['-Wl,-rpath,%s' % relative_target_dir]
-extra_link_args += ['-Wl,-dylib_file,%s:@rpath/%s' % (lib, lib) for lib in generator_libs]
-extra_link_args += generator_libs
+# extra_link_args = ['-Wl,-rpath,%s' % relative_target_dir]
+# extra_link_args += ['-Wl,-dylib_file,%s:@rpath/%s' % (lib, lib) for lib in generator_libs]
+# extra_link_args += generator_libs
+
+extra_link_args = []
+extra_link_args += generator_ars
+
 ext_modules = []
 
 for key, sources in extensions.iteritems():

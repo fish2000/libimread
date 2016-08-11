@@ -17,6 +17,11 @@
 #include "../numpy.hpp"
 #include "base.hh"
 
+/// generator headers:
+// namespace generator {
+#include "resize.h"
+// }
+
 #include <libimread/pixels.hh>
 
 namespace py {
@@ -118,24 +123,27 @@ namespace py {
                     
                     /// blanket-set the whole allocation:
                     std::memset(internal->host, value,
-                                im::buffer::length(internal));
+                                im::buffer::length(*internal.get()));
                 }
             
             explicit BufferModelBase(BufferModelBase const& other,
                                      float scale,
                                      int value = 0x00)
-                :internal(im::buffer::heapcopy(other.internal, scale))
+                :internal(im::buffer::heapcopy(other.internal.get(), scale))
                 ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
                                           internal->extent[1] ? internal->stride[1] : 0,
                                           internal->extent[2] ? internal->stride[2] : 0)
-                ,allocation{ new pixel_t[im::buffer::length(internal)] }
+                ,allocation{ new pixel_t[im::buffer::length(*internal.get())] }
                 {
                     /// reset buffer host pointer to new allocation:
                     internal->host = allocation.get();
                     
                     /// blanket-set the whole allocation:
-                    std::memset(internal->host, value,
-                                im::buffer::length(internal));
+                    // std::memset(internal->host, value,
+                    //             im::buffer::length(*internal.get()));
+                    
+                    /// EXECUTE!!!!!!!!
+                    resize(other.internal.get(), scale, internal.get());
                 }
             
             /// tag dispatch, reinterpret, depointerize, copy-construct

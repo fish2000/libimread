@@ -56,8 +56,6 @@ def gosub(cmd, on_err=True):
         assert ret==0, msg + (err or out)
     return out, err, ret
 
-# library_dirs = libraries = define_macros = include_dirs = other_flags = []
-
 def back_tick(cmd, ret_err=False, as_str=True, raise_err=None):
     """ Run command `cmd`, return stdout, or stdout, stderr if `ret_err`
     Roughly equivalent to ``check_output`` in Python 2.7
@@ -210,6 +208,13 @@ def set_install_id(filename, install_id):
         raise InstallNameError('{0} has no install id'.format(filename))
     gosub(['install_name_tool', '-id', install_id, filename])
 
+@ensure_writable
+def ranlib(filename):
+    import os
+    if not os.path.basename(filename).endswith('.a'):
+        raise InstallNameError('{0} is not a proper archive'.format(filename))
+    gosub(['ranlib', filename])
+
 def collect_generators(build_dir, target_dir):
     import os, shutil
     libs = []
@@ -239,6 +244,11 @@ def collect_generators(build_dir, target_dir):
             destination = os.path.basename(item)
             shutil.copy2(item, os.path.join(target_dir, destination))
     
+    # run `ranlib` on the static libraries
+    for lib in libs:
+        libpth = os.path.join(target_dir, os.path.basename(lib))
+        ranlib(libpth)
+    
     # add the target directory as a relative rpath to our new dylibs
     for dylib in dylibs:
         dylibpth = os.path.join(target_dir, os.path.basename(dylib))
@@ -258,6 +268,18 @@ def list_generator_libraries(target_dir):
         if target_file.endswith('.dylib'):
             out.append(os.path.join(target_dir, target_file))
     return out
+
+def list_generator_archives(target_dir):
+    import os
+    if not os.path.isdir(target_dir):
+        raise ValueError("list_generator_archives(): invalid target_dir")
+    out = []
+    for target_file in os.listdir(target_dir):
+        if target_file.endswith('.a'):
+            out.append(os.path.join(target_dir, target_file))
+    return out
+
+library_dirs = libraries = define_macros = include_dirs = other_flags = []
 
 def parse_config_flags(config, config_flags=None):
     """ Get compiler/linker flags from pkg-config and similar CLI tools """
