@@ -249,7 +249,12 @@ namespace py {
                                               newstruct,
                                               array_destructor<PyArrayInterface>());
                 }
-            
+                
+                void cleanup(bool force = false) {
+                    base_t::cleanup(force);
+                    beholden.clear();
+                }
+                
                 static char const* typestring() {
                     static FactoryType factory;
                     static std::string name = "im." + factory.name() + ".Buffer";
@@ -442,37 +447,6 @@ namespace py {
                     }
                 }
             
-            ImageModelBase& operator=(ImageModelBase const& other) {
-                if (&other != this) {
-                    ImageModelBase(other).swap(*this);
-                }
-                return *this;
-            }
-            ImageModelBase& operator=(ImageModelBase&& other) noexcept {
-                if (&other != this) {
-                    weakrefs = other.weakrefs;
-                    image = std::move(other.image);
-                    dtype = other.dtype;
-                    imagebuffer = other.imagebuffer;
-                    readoptDict = other.readoptDict;
-                    writeoptDict = other.writeoptDict;
-                    other.weakrefs = nullptr;
-                    other.image.reset(nullptr);
-                    other.dtype = nullptr;
-                    other.imagebuffer = nullptr;
-                    other.readoptDict = nullptr;
-                    other.writeoptDict = nullptr;
-                    other.clean = true;
-                }
-                return *this;
-            }
-            ImageModelBase& operator=(PyObject* other) {
-                if (other != this) {
-                    ImageModelBase(*reinterpret_cast<ImageModelBase*>(other)).swap(*this);
-                }
-                return *this;
-            }
-            
             void swap(ImageModelBase& other) noexcept {
                 using std::swap;
                 swap(weakrefs,      other.weakrefs);
@@ -498,6 +472,7 @@ namespace py {
             /// by the Py_VISIT(), w/r/t both types and names
             int vacay(visitproc visit, void* arg) {
                 Py_VISIT(dtype);
+                Py_VISIT(imagebuffer);
                 Py_VISIT(readoptDict);
                 Py_VISIT(writeoptDict);
                 return 0;

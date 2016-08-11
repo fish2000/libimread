@@ -139,10 +139,6 @@ namespace py {
                     /// reset buffer host pointer to new allocation:
                     internal->host = allocation.get();
                     
-                    /// blanket-set the whole allocation:
-                    // std::memset(internal->host, value,
-                    //             im::buffer::length(*internal.get()));
-                    
                     /// EXECUTE!!!!!!!!
                     resize(other.internal.get(), scale, internal.get());
                 }
