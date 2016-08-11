@@ -101,6 +101,7 @@ namespace py {
             struct BufferModel : public BufferModelBase<BufferType> {
                 
                 using base_t = BufferModelBase<BufferType>;
+                using Tag = typename BufferModelBase<BufferType>::Tag;
                 
                 void* operator new(std::size_t newsize) {
                     PyTypeObject* type = FactoryType::buffer_type();
@@ -118,6 +119,7 @@ namespace py {
                 }
                 
                 weak_image_t image;
+                py::ref beholden;
                 
                 BufferModel()
                     :base_t()
@@ -133,17 +135,46 @@ namespace py {
                     ,image(other.image)
                     {}
                 
-                /// tag dispatch, reinterpret, depointerize, copy-construct
-                explicit BufferModel(PyObject* other)
-                    :BufferModel(*reinterpret_cast<BufferModel*>(other))
+                explicit BufferModel(ImageModelBase const& imodel)
+                    :BufferModel(imodel.image)
                     {}
+                
+                /// reinterpret, depointerize, copy-construct
+                explicit BufferModel(PyObject* other,
+                                     typename Tag::FromBuffer)
+                    :BufferModel(*reinterpret_cast<BufferModel*>(other))
+                    {
+                        beholden.set(other);
+                    }
+                
+                /// tag dispatch, reinterpret, depointerize, explicit construct
+                explicit BufferModel(PyObject* imodel,
+                                     typename Tag::FromImage = typename Tag::FromImage{})
+                    :BufferModel(*reinterpret_cast<ImageModelBase*>(imodel))
+                    {
+                        beholden.set(imodel);
+                    }
+                
+                /// scale constructor only initializes base class -- as such,
+                /// it results in a BufferModel instance primarily fit for
+                /// reinterpret_cast<BufferModelBase<buffer_t>>-ing:
+                explicit BufferModel(PyObject* other,
+                                     float scale, int value = 0x00,
+                                     typename Tag::ScaledFromBuffer = typename Tag::ScaledFromBuffer{})
+                    :base_t(*reinterpret_cast<base_t*>(other), scale, value)
+                    {
+                        beholden.set(other);
+                    }
                 
                 Py_ssize_t  __len__() {
                     Py_ssize_t out;
                     {
                         py::gil::release nogil;
-                        shared_image_t strong = image.lock();
-                        out = strong->size();
+                        if (shared_image_t strong = image.lock()) {
+                            out = strong->size();
+                        } else {
+                            out = base_t::__len__();
+                        }
                     }
                     return out;
                 }
@@ -276,7 +307,9 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(other.image)
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(
+                             new typename ImageModelBase::BufferModel(
+                                          py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {
@@ -291,7 +324,9 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(*other.image.get(), zidx))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(
+                             new typename ImageModelBase::BufferModel(
+                                          py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {}
@@ -305,7 +340,9 @@ namespace py {
                 ,image(std::make_shared<ImageType>(*basis.image.get(),
                                                      *etc.image.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(
+                             new typename ImageModelBase::BufferModel(
+                                          py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {}
@@ -342,7 +379,9 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi.internal.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(
+                             new typename ImageModelBase::BufferModel(
+                                          py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 ,clean(false)
@@ -389,7 +428,9 @@ namespace py {
                                              width, height,
                                              planes > 0 ? planes : 1))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::convert(new typename ImageModelBase::BufferModel(image)))
+                ,imagebuffer(py::convert(
+                             new typename ImageModelBase::BufferModel(
+                                          py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 ,clean(false)

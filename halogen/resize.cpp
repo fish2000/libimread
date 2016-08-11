@@ -3,11 +3,12 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <libimread/libimread.hpp>
 #include "Halide.h"
 
 using namespace Halide;
 
-namespace {
+namespace im {
     
     enum Interpolation {
         BOX,
@@ -86,7 +87,7 @@ namespace {
             
             /// COMPILE-TIME GENERATOR PARAMS
             GeneratorParam<Halide::Type>     input_type{  "input_type",   UInt(8) };
-            GeneratorParam<Halide::Type>    output_type{ "output_type",   UInt(8) };
+            // GeneratorParam<Halide::Type>    output_type{ "output_type",   UInt(8) };
             GeneratorParam<Interpolation> interpolation{ "interpolation", Interpolation::CUBIC,
                                                                 {{ "box", Interpolation::BOX },
                                                               { "linear", Interpolation::LINEAR },
@@ -144,19 +145,26 @@ namespace {
                 resized_x(x, y, c) = sum(kernelx(x, domx) * Halide::cast<float>(clamped(domx + beginx, y, c)));
                 resized_y(x, y, c) = sum(kernely(y, domy) * resized_x(x, domy + beginy, c));
                 penultimate(x, y, c) = clamp(resized_y(x, y, c), 0.0f, 1.0f);
-                output(x, y, c) = cast(output_type, penultimate(x, y, c));
+                // output(x, y, c) = cast(output_type, penultimate(x, y, c));
+                output(x, y, c) = Halide::cast<byte>(penultimate(x, y, c));
                 
                 /// Scheduling
                 // bool parallelize = (schedule >= 2);
                 // bool vectorize = (schedule == 1 || schedule == 3);
                 bool parallelize = true,
                      vectorize = true;
+                
                 kernelx.compute_root();
                 kernely.compute_at(output, y);
+                
                 if (vectorize) {
-                    resized_x.vectorize(x, natural_vector_size(output_type)); /// originally 4
-                    output.vectorize(x, natural_vector_size(output_type)); /// originally 4
+                    // resized_x.vectorize(x, natural_vector_size(output_type)); /// originally 4
+                    // output.vectorize(x, natural_vector_size(output_type)); /// originally 4
+                    auto free_range = natural_vector_size(Halide::UInt(8));
+                    resized_x.vectorize(x, free_range);
+                    output.vectorize(x, free_range);
                 }
+                
                 if (parallelize) {
                     Var yo, yi;
                     output.split(y, yo, y, 32).parallel(yo);
@@ -173,4 +181,4 @@ namespace {
     /// Generator registration
     Halide::RegisterGenerator<Resize> register_resize{ "resize" };
     
-} /* namespace (anon.) */
+} /* namespace im */

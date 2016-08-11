@@ -207,6 +207,14 @@ namespace py {
                 return py::string((char const*)pybuf->internal->host, string_size);
             }
             
+            template <typename BufferType = buffer_t,
+                      typename PythonBufferType = BufferModelBase<BufferType>>
+            PyObject* scale(PyObject* self, PyObject* scale_factor) {
+                // PythonBufferType* pybuf = reinterpret_cast<PythonBufferType*>(self);
+                float factor = (float)PyFloat_AsDouble(scale_factor);
+                return py::convert(new PythonBufferType(self, factor));
+            }
+            
             /// DEALLOCATE
             template <typename BufferType = buffer_t,
                       typename PythonBufferType = BufferModelBase<BufferType>>
@@ -300,6 +308,12 @@ namespace py {
                                 METH_NOARGS,
                                 "buffer.tostring()\n"
                                 "\t-> Get bytes from image buffer (buffer.tobytes() alias)\n" },
+                        {
+                            "scale",
+                                (PyCFunction)py::ext::buffer::scale<BufferType, PythonBufferType>,
+                                METH_O,
+                                "buffer.scale(factor)\n"
+                                "\t-> Return a scaled copy of the buffer\n" },
                         { nullptr, nullptr, 0, nullptr }
                     };
                     return basics;
@@ -410,6 +424,12 @@ static PyMethodDef Buffer_methods[] = {
             "\t   SEE ALSO:\n"
             "\t - buffer.T (property)\n"
             "\t - numpy.array.transpose() and numpy.array.T\n" },
+    {
+        "scale",
+            (PyCFunction)py::ext::buffer::scale<buffer_t>,
+            METH_O,
+            "buffer.scale(factor)\n"
+            "\t-> Return a scaled copy of the buffer\n" },
     { nullptr, nullptr, 0, nullptr }
 };
 

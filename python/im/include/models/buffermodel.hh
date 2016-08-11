@@ -57,6 +57,7 @@ namespace py {
             }
             
             struct Tag {
+                struct FromImage {};
                 struct FromBuffer {};
                 struct FromPyBuffer {};
                 struct ScaledFromBuffer {};

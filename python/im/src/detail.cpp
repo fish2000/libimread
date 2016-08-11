@@ -228,6 +228,35 @@ namespace py {
         }
     }
     
+    ref const& ref::set(pyptr_t new_referent) {
+        if (new_referent == referent) {
+            return *this;
+        }
+        if (referent && destroy) {
+            Py_DECREF(referent);
+        }
+        referent = new_referent;
+        if (referent) {
+            Py_INCREF(referent);
+        }
+        return *this;
+    }
+    
+    ref const& ref::set(pyptr_t new_referent, bool new_destroy_value) {
+        if (new_referent == referent) {
+            return *this;
+        }
+        if (referent && destroy) {
+            Py_DECREF(referent);
+        }
+        referent = new_referent;
+        destroy = new_destroy_value;
+        if (referent) {
+            Py_INCREF(referent);
+        }
+        return *this;
+    }
+    
     ref::operator pyptr_t() const noexcept        { return referent; }
     ref::pyptr_t* ref::operator&() const noexcept { return &referent; }
     ref::pyptr_t ref::operator->() const noexcept { return referent; }

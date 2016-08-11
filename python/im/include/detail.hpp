@@ -464,6 +464,12 @@ namespace py {
             /// virtual destructor, Py_XDECREFs the referent pointer
             virtual ~ref();
             
+            /// explicitly set and Py_INCREF a new referent --
+            /// -- and optionally a new boolean value for 'destroy' --
+            /// ... self-returning, for chainability
+            ref const& set(pyptr_t);
+            ref const& set(pyptr_t, bool);
+            
             /// implicit and explicit getters for the internal PyObject*
             operator pyptr_t() const noexcept;
             pyptr_t* operator&() const noexcept;

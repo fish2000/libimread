@@ -36,7 +36,7 @@ namespace im {
                 {
                     1,
                     static_cast<int32_t>(buffer->extent[0] * scale),
-                    static_cast<int32_t>(buffer->extent[0] * buffer->extent[1] * scale * scale),
+                    static_cast<int32_t>(buffer->extent[0] * buffer->extent[1] * scale),
                     0
                 },
                 { 0, 0, 0, 0 },
