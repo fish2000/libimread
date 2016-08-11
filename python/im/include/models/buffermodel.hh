@@ -180,7 +180,9 @@ namespace py {
                 }
             }
             
-            int vacay(visitproc visit, void* arg) { return 0; }
+            int vacay(visitproc visit, void* arg) {
+                return 0;
+            }
             
             Py_ssize_t __len__() {
                 return (internal->extent[0] ? internal->extent[0] : 1) *
