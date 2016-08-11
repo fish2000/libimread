@@ -1,4 +1,5 @@
 wheel
+#delocate
 #nose
 #nose-rednose
 #nose2

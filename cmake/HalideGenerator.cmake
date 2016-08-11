@@ -87,13 +87,15 @@ function(halide_add_generator_dependency)
   else()
     set(generator_postprocess TRUE)
   endif()
-
-  if(NOT ${args_GENERATOR_POSTPROCESS_COMMAND})
-    set(generator_postprocess_command "${CMAKE_CXX_COMPILER} -shared -o ${FILTER_DYN} ${FILTER_LIB} -L.")
-  else()
-    set(generator_postprocess_command "${args_GENERATOR_POSTPROCESS_COMMAND}")
-  endif()
-
+  
+  # if(NOT ${args_GENERATOR_POSTPROCESS_COMMAND})
+  #   set(generator_postprocess_command "${CMAKE_CXX_COMPILER} -shared -o ${FILTER_DYN} ${FILTER_LIB} -L.")
+  # else()
+  #   set(generator_postprocess_command "${args_GENERATOR_POSTPROCESS_COMMAND}")
+  # endif()
+  set(generator_postprocess_command "${CMAKE_CXX_COMPILER}")
+  set(generator_postprocess_command_args "-shared" "-o" "${FILTER_DYN}" "${FILTER_LIB}" "-L.")
+  
   set(generator_exec_args 
       "-g" "${args_GENERATOR_NAME}" 
       "-f" "${args_GENERATED_FUNCTION_NAMESPACE}${args_GENERATED_FUNCTION}" 
@@ -139,34 +141,34 @@ function(halide_add_generator_dependency)
   if (NOT ${args_OUTPUT_TARGET_VAR} STREQUAL "")
     set(${args_OUTPUT_TARGET_VAR} ${exec_generator_target} PARENT_SCOPE)
   endif()
-
-  # Post-process library, if called for
-  if(${generator_postprocess})
-    add_custom_command(
-      OUTPUT "${SCRATCH_DIR}/${FILTER_DYN}"
-      DEPENDS "${args_GENERATOR_TARGET}"
-      COMMAND "${generator_postprocess_command}"
-      WORKING_DIRECTORY "${SCRATCH_DIR}")
-
-      set(exec_generator_target_postprocess
-          "exec_generator_${unique_generator_target}_${args_GENERATED_FUNCTION}_postprocess")
-
-      add_custom_target(${exec_generator_target_postprocess}
-                        DEPENDS "${SCRATCH_DIR}/${FILTER_DYN}")
-      set_target_properties(${exec_generator_target_postprocess} PROPERTIES
-                            FOLDER "generator")
-      add_dependencies(${exec_generator_target_postprocess}
-                       ${exec_generator_target})
-      add_library(${FILTER_DYN} SHARED IMPORTED GLOBAL)
-
-      if (NOT ${args_OUTPUT_SHARED_LIB_VAR} STREQUAL "")
-        set(${args_OUTPUT_SHARED_LIB_VAR} "${SCRATCH_DIR}/${FILTER_DYN}" PARENT_SCOPE)
-      endif()
-  endif()
   
   # Associate the generator invocation target with the main app target
   if (TARGET "${args_TARGET}")
-
+    
+    # Post-process library, if called for
+    if(${generator_postprocess})
+        add_custom_command(
+            OUTPUT "${SCRATCH_DIR}/${FILTER_DYN}"
+            DEPENDS "${args_GENERATOR_TARGET}"
+            COMMAND "${generator_postprocess_command}" ${generator_postprocess_command_args}
+            WORKING_DIRECTORY "${SCRATCH_DIR}")
+        
+        set(exec_generator_target_postprocess
+            "exec_generator_${unique_generator_target}_${args_GENERATED_FUNCTION}_postprocess")
+        
+        add_custom_target(${exec_generator_target_postprocess}
+                          DEPENDS "${SCRATCH_DIR}/${FILTER_DYN}")
+        set_target_properties(${exec_generator_target_postprocess} PROPERTIES
+                              FOLDER "generator")
+        add_dependencies(${exec_generator_target_postprocess}
+                         ${exec_generator_target})
+        add_library(${FILTER_DYN} SHARED IMPORTED GLOBAL)
+        set_source_files_properties(${FILTER_DYN} PROPERTIES GENERATED TRUE)
+        if (NOT ${args_OUTPUT_SHARED_LIB_VAR} STREQUAL "")
+            set(${args_OUTPUT_SHARED_LIB_VAR} "${SCRATCH_DIR}/${FILTER_DYN}" PARENT_SCOPE)
+        endif()
+    endif()
+    
     # Make the generator invocation target run before the app target is built
     if(${generator_postprocess})
       add_dependencies("${args_TARGET}" ${exec_generator_target_postprocess})

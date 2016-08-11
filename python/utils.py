@@ -43,38 +43,6 @@ def terminal_print(message, color='red', asterisk='*'):
         ab=asterisk[0] * (asterisks + 1 - (len(message) % 2)),
         message=message)))
 
-def collect_generators(build_dir, target_dir):
-    import os, shutil
-    libs = hdrs = []
-    if not os.path.isdir(build_dir):
-        raise ValueError("collect_generators(): invalid build_dir")
-    if not os.path.isdir(target_dir):
-        raise ValueError("collect_generators(): invalid target_dir")
-    for dirpath, dirnames, filenames in os.walk(build_dir):
-        if os.path.basename(dirpath).lower().startswith("scratch_"):
-            for filename in filenames:
-                if filename.lower().endswith('.a'):
-                    libs.append(os.path.join(dirpath, filename))
-                if filename.lower().endswith('.h'):
-                    hdrs.append(os.path.join(dirpath, filename))
-    for lib in libs:
-        destination = os.path.basename(lib)
-        shutil.copy2(lib, os.path.join(target_dir, destination))
-    for hdr in hdrs:
-        destination = os.path.basename(hdr)
-        shutil.copy2(lib, os.path.join(target_dir, destination))
-    return len(libs)
-
-def list_generator_libraries(target_dir):
-    import os
-    if not os.path.isdir(target_dir):
-        raise ValueError("list_generator_libraries(): invalid target_dir")
-    out = []
-    for target_file in os.listdir(target_dir):
-        if target_file.lower().endswith('.a'):
-            out.append(os.path.join(target_dir, target_file))
-    return out
-
 # GOSUB: basicaly `backticks` (cribbed from plotdevice)
 def gosub(cmd, on_err=True):
     """ Run a shell command and return the output """
@@ -89,6 +57,207 @@ def gosub(cmd, on_err=True):
     return out, err, ret
 
 # library_dirs = libraries = define_macros = include_dirs = other_flags = []
+
+def back_tick(cmd, ret_err=False, as_str=True, raise_err=None):
+    """ Run command `cmd`, return stdout, or stdout, stderr if `ret_err`
+    Roughly equivalent to ``check_output`` in Python 2.7
+    Parameters
+    ----------
+    cmd : sequence
+        command to execute
+    ret_err : bool, optional
+        If True, return stderr in addition to stdout.  If False, just return
+        stdout
+    as_str : bool, optional
+        Whether to decode outputs to unicode string on exit.
+    raise_err : None or bool, optional
+        If True, raise RuntimeError for non-zero return code. If None, set to
+        True when `ret_err` is False, False if `ret_err` is True
+    Returns
+    -------
+    out : str or tuple
+        If `ret_err` is False, return stripped string containing stdout from
+        `cmd`.  If `ret_err` is True, return tuple of (stdout, stderr) where
+        ``stdout`` is the stripped stdout, and ``stderr`` is the stripped
+        stderr.
+    Raises
+    ------
+    Raises RuntimeError if command returns non-zero exit code and `raise_err`
+    is True
+    """
+    from subprocess import Popen, PIPE
+    if raise_err is None:
+        raise_err = False if ret_err else True
+    cmd_is_seq = isinstance(cmd, (list, tuple))
+    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=not cmd_is_seq)
+    out, err = proc.communicate()
+    retcode = proc.returncode
+    cmd_str = ' '.join(cmd) if cmd_is_seq else cmd
+    if retcode is None:
+        proc.terminate()
+        raise RuntimeError(cmd_str + ' process did not terminate')
+    if raise_err and retcode != 0:
+        raise RuntimeError('{0} returned code {1} with error {2}'.format(
+                           cmd_str, retcode, err.decode('latin-1')))
+    out = out.strip()
+    if as_str:
+        out = out.decode('latin-1')
+    if not ret_err:
+        return out
+    err = err.strip()
+    if as_str:
+        err = err.decode('latin-1')
+    return out, err
+
+class InstallNameError(Exception):
+    """ courtesy of delocate:
+        https://github.com/matthew-brett/delocate/blob/master/delocate/tools.py#L276
+    """
+    pass
+
+def ensure_writable(f):
+    """ courtesy of delocate:
+        https://github.com/matthew-brett/delocate/blob/master/delocate/tools.py#L90
+        decorator to ensure a filename is writable before modifying it
+        If changed, original permissions are restored after the decorated modification.
+    """
+    def modify(filename, *args, **kwargs):
+        import os, stat
+        m = os.stat(filename).st_mode
+        if not m & stat.S_IWUSR:
+            os.chmod(filename, m | stat.S_IWUSR)
+        try:
+            return f(filename, *args, **kwargs)
+        finally:
+            # restore original permissions
+            if not m & stat.S_IWUSR:
+                os.chmod(filename, m)
+
+    return modify
+
+@ensure_writable
+def add_rpath(filepath, newpath):
+    """ courtesy of delocate:
+        https://github.com/matthew-brett/delocate/blob/master/delocate/tools.py#L276
+        Add rpath `newpath` to library `filename`
+    Parameters
+    ----------
+    filepath : str
+        filename of library
+    newpath : str
+        rpath to add
+    """
+    gosub(['install_name_tool', '-add_rpath', newpath, filepath])
+
+def _line0_says_object(line0, filename):
+    """ courtesy of delocate:
+        https://github.com/matthew-brett/delocate/blob/master/delocate/tools.py#L276
+    """
+    line0 = line0.strip()
+    if line0.startswith('Archive :'):
+        # nothing to do for static libs
+        return False
+    if not line0.startswith(filename + ':'):
+        raise InstallNameError('Unexpected first line: ' + line0)
+    further_report = line0[len(filename) + 1:]
+    if further_report == '':
+        return True
+    if further_report == ' is not an object file':
+        return False
+    raise InstallNameError(
+        'Too ignorant to know what "{0}" means'.format(further_report))
+
+def get_install_id(filename):
+    """ courtesy of delocate:
+        https://github.com/matthew-brett/delocate/blob/master/delocate/tools.py#L276
+    Return install id from library named in `filename`
+    Returns None if no install id, or if this is not an object file.
+    Parameters
+    ----------
+    filename : str
+        filename of library
+    Returns
+    -------
+    install_id : str
+        install id of library `filename`, or None if no install id
+    """
+    out = back_tick(['otool', '-D', filename])
+    lines = out.split('\n')
+    if not _line0_says_object(lines[0], filename):
+        return None
+    if len(lines) == 1:
+        return None
+    if len(lines) != 2:
+        raise InstallNameError('Unexpected otool output ' + out)
+    return lines[1].strip()
+
+@ensure_writable
+def set_install_id(filename, install_id):
+    """ courtesy of delocate:
+        https://github.com/matthew-brett/delocate/blob/master/delocate/tools.py#L276
+    Set install id for library named in `filename`
+    Parameters
+    ----------
+    filename : str
+        filename of library
+    install_id : str
+        install id for library `filename`
+    Raises
+    ------
+    RuntimeError if `filename` has not install id
+    """
+    if get_install_id(filename) is None:
+        raise InstallNameError('{0} has no install id'.format(filename))
+    gosub(['install_name_tool', '-id', install_id, filename])
+
+def collect_generators(build_dir, target_dir):
+    import os, shutil
+    libs = []
+    hdrs = []
+    dylibs = []
+    
+    # sanity-check our directory arguments
+    if not os.path.isdir(build_dir):
+        raise ValueError("collect_generators(): invalid build_dir")
+    if not os.path.isdir(target_dir):
+        raise ValueError("collect_generators(): invalid target_dir")
+    
+    # walk the build directory to find generator output
+    for dirpath, dirnames, filenames in os.walk(build_dir):
+        if os.path.basename(dirpath).startswith("scratch_"):
+            for filename in filenames:
+                if filename.endswith('.a'):
+                    libs.append(os.path.join(dirpath, filename))
+                elif filename.endswith('.h'):
+                    hdrs.append(os.path.join(dirpath, filename))
+                elif filename.endswith('.dylib'):
+                    dylibs.append(os.path.join(dirpath, filename))
+    
+    # copy files by type to our target directory
+    for group in (libs, dylibs, hdrs):
+        for item in group:
+            destination = os.path.basename(item)
+            shutil.copy2(item, os.path.join(target_dir, destination))
+    
+    # add the target directory as a relative rpath to our new dylibs
+    for dylib in dylibs:
+        dylibpth = os.path.join(target_dir, os.path.basename(dylib))
+        install_id = get_install_id(dylibpth)
+        add_rpath(dylibpth, target_dir)
+        set_install_id(dylibpth, "@rpath/%s" % install_id)
+    
+    # return the number of generators we successfully collected
+    return len(dylibs)
+
+def list_generator_libraries(target_dir):
+    import os
+    if not os.path.isdir(target_dir):
+        raise ValueError("list_generator_libraries(): invalid target_dir")
+    out = []
+    for target_file in os.listdir(target_dir):
+        if target_file.endswith('.dylib'):
+            out.append(os.path.join(target_dir, target_file))
+    return out
 
 def parse_config_flags(config, config_flags=None):
     """ Get compiler/linker flags from pkg-config and similar CLI tools """

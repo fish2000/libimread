@@ -22,7 +22,7 @@ clean-so:
 	rm -f im/*.so
 
 clean-generators:
-	rm -f im/resources/generators/*.a im/resources/generators/*.h
+	rm -f im/resources/generators/*.a im/resources/generators/*.h im/resources/generators/*.dylib
 
 clean-build-artifacts:
 	rm -rf build dist imread.egg-info

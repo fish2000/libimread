@@ -144,7 +144,6 @@ library_dirs = [
     # libllvm.lib(),
 ]
 
-# other_flags = ['-Qunused-arguments']
 other_flags = []
 
 extensions = {
@@ -195,10 +194,15 @@ print('')
 terminal_print("SETUPTOOLS BUILD NOW COMMENCING", asterisk='=')
 print('')
 
+relative_target_dir = os.path.relpath(generator_target_dir)
+library_dirs.append(relative_target_dir)
+
 # extra_link_args = ['-Wl,--allow-multiple-definition']
-extra_link_args = []
+extra_link_args = ['-Wl,-rpath,%s' % relative_target_dir]
+extra_link_args += ['-Wl,-dylib_file,%s:@rpath/%s' % (lib, lib) for lib in generator_libs]
 extra_link_args += generator_libs
 ext_modules = []
+
 for key, sources in extensions.iteritems():
     ext_modules.append(Extension("im.%s" % key,
         libraries=map(
