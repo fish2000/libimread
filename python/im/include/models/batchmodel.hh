@@ -287,9 +287,9 @@ namespace py {
                     for (PyObject* item : internal) {
                         Py_VISIT(item);
                     }
-                    Py_VISIT(readoptDict);
-                    Py_VISIT(writeoptDict);
                 }
+                Py_VISIT(readoptDict);
+                Py_VISIT(writeoptDict);
                 return 0;
             }
             
