@@ -83,9 +83,7 @@ namespace py {
                     pytypename = terminator::nameof(pybuf);
                     named = true;
                 }
-                return PyString_FromFormat(
-                    "< %s @ %p >",
-                    pytypename, pybuf);
+                return py::format("< %s @ %p >", pytypename, pybuf);
             }
             
             /// __str__ implementaton -- return bytes from buffer

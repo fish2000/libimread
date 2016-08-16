@@ -290,9 +290,7 @@ namespace py {
                     pytypename = terminator::nameof(pyim);
                     named = true;
                 }
-                return PyString_FromFormat(
-                    "< %s @ %p >",
-                    pytypename, pyim);
+                return py::format("< %s @ %p >", pytypename, pyim);
             }
             
             /// __str__ implementaton -- return bytes of image
