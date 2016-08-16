@@ -395,7 +395,7 @@ namespace py {
                     internal.push_back(item);
                     Py_INCREF(item); /// ... hence this incref
                 }
-                return !PyErr_Occurred();
+                return !py::ErrorOccurred();
             }
             
             Py_ssize_t index(PyObject* obj, Py_ssize_t begin = 0,
