@@ -132,6 +132,11 @@ namespace py {
     /// py::ErrorOccurred() just wraps PyErr_Occurred()
     /// such that it returns reliable and sensible booleans:
     bool ErrorOccurred(void);
+    std::string ErrorName(void);
+    std::string ErrorMessage(void);
+    
+    /// clear the last error:
+    void ClearError(void);
     
     /// py::LastError() returns the last error that occurred,
     /// as a borrowed-reference PyObject*, without all the fuss/muss

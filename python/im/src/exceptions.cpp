@@ -72,6 +72,29 @@ namespace py {
         return !!PyErr_Occurred();
     }
     
+    std::string ErrorName(void) {
+        if (!py::ErrorOccurred()) { return "<undefined>"; }
+        py::ref name = PyObject_GetAttrString(PyErr_Occurred(), "__name__");
+        return name.to_string();
+    }
+    
+    std::string ErrorMessage(void) {
+        if (!py::ErrorOccurred()) { return "<undefined>"; }
+        PyObject* type;
+        PyObject* value;
+        PyObject* traceback;
+        PyErr_Fetch(&type, &value, &traceback);
+        PyErr_NormalizeException(&type, &value, &traceback);
+        py::ref message = PyObject_GetAttrString(value, "message");
+        std::string out = message.to_string();
+        PyErr_Restore(type, value, traceback);
+        return out;
+    }
+    
+    void ClearError(void) {
+        PyErr_Clear();
+    }
+    
     /// ... in retrospect, I may have named too many methods `get()`:
     PyObject* LastError(void) {
         if (!py::ErrorOccurred()) { return nullptr; }

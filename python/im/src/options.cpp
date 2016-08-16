@@ -82,7 +82,9 @@ namespace py {
             } else if (HybridImage_Check(value)         ||
                        BufferModel_Check(value)         ||
                        ImageModel_Check(value)          ||
-                       ImageBufferModel_Check(value)) {
+                       ImageBufferModel_Check(value)    ||
+                       BatchModel_Check(value)          ||
+                       BatchIterator_Check(value)) {
                 return py::ValueError(
                     "Illegal data found",
                     options_map::undefined);
@@ -118,6 +120,12 @@ namespace py {
                 ison = py::options::convert(item); /// might PyErr here
                 out.append(ison);
             }
+            if (py::ErrorOccurred()) {
+                return py::IOError(
+                    py::ErrorName() +
+                        " occurred while iterating list: " + py::ErrorMessage(),
+                    options_list::undefined);
+            }
             return out;
         }
         
@@ -136,9 +144,10 @@ namespace py {
                 ison = py::options::convert(item); /// might PyErr here
                 out.append(ison);
             }
-            if (PyErr_Occurred()) {
+            if (py::ErrorOccurred()) {
                 return py::IOError(
-                    "Error occurred while iterating set",
+                    py::ErrorName() +
+                        " occurred while iterating set: " + py::ErrorMessage(),
                     options_list::undefined);
             }
             return out;
@@ -147,7 +156,7 @@ namespace py {
         options_map parse(PyObject* dict) {
             options_map out;
             if (!dict) { return out; }
-            if (!PyDict_Check(dict)) { return out; }
+            if (!PyMapping_Check(dict)) { return out; }
             PyObject* key;
             PyObject* value;
             Py_ssize_t pos = 0;
@@ -156,6 +165,12 @@ namespace py {
                 Json v(Json::null);
                 v = py::options::convert(value); /// might PyErr here
                 out.set(k, v);
+            }
+            if (py::ErrorOccurred()) {
+                return py::IOError(
+                    py::ErrorName() +
+                        " occurred while parsing dictionary: " + py::ErrorMessage(),
+                    options_map::undefined);
             }
             return out;
         }
@@ -172,9 +187,10 @@ namespace py {
                 case Type::STRING:
                     return py::string((std::string)value);
                 case Type::ARRAY: {
-                    int max = value.size();
+                    int idx = 0,
+                        max = value.size();
                     PyObject* list = PyList_New(max);
-                    for (int idx = 0; idx < max; ++idx) {
+                    for (; idx < max; ++idx) {
                         Json subvalue(value[idx]);
                         PyList_SET_ITEM(list, idx,
                             py::options::revert(subvalue));
