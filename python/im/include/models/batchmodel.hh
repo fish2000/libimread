@@ -269,10 +269,12 @@ namespace py {
             
             void cleanup(bool force = false) {
                 if (!clean) {
-                    std::for_each(internal.begin(),
-                                  internal.end(),
-                               [](PyObject* pyobj) { Py_DECREF(pyobj); });
-                    internal.clear();
+                    if (!internal.empty()) {
+                        std::for_each(internal.begin(),
+                                      internal.end(),
+                                   [](PyObject* pyobj) { Py_DECREF(pyobj); });
+                        internal.clear();
+                    }
                     Py_CLEAR(readoptDict);
                     Py_CLEAR(writeoptDict);
                     clean = !force;
