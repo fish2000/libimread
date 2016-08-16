@@ -264,7 +264,6 @@ namespace py {
                 /// allocate a new image buffer
                 Py_CLEAR(pyim->imagebuffer);
                 pyim->imagebuffer = py::convert(new imagebuffer_t(self));
-                // pyim->imagebuffer = py::convert(new imagebuffer_t(pyim->image));
                 
                 /// store the read options dict
                 Py_CLEAR(pyim->readoptDict);

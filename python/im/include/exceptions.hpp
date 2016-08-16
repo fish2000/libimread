@@ -3,22 +3,34 @@
 #define LIBIMREAD_PYTHON_IM_INCLUDE_EXCEPTIONS_HPP_
 
 #include <string>
+#include <vector>
 #include <type_traits>
 #include <Python.h>
 
 namespace py {
     
+    /// forward-declare py::ref
+    class ref;
+    
     namespace ex {
+        
+        /// vector of exception pointer wrappers:
+        using objectvec_t = std::vector<py::ref>;
+        
+        /// static-storage containment unit,
+        /// for an exception pointer vector:
+        struct idx {
+            explicit idx(PyObject*);
+            static objectvec_t& get();
+        };
         
         /// This list is adapted unabashedly right from the docs:
         /// https://docs.python.org/2/c-api/exceptions.html#standard-exceptions
         
-        // PyObject* BaseException = PyExc_BaseException;
-        // PyObject* Exception = PyExc_Exception;
         extern PyObject* BaseException;
         extern PyObject* Exception;
         
-        #define REDECLARE_PYTHON_ERROR(name) \
+        #define REDECLARE_PYTHON_ERROR(name)                                            \
             extern PyObject* name;
         
         REDECLARE_PYTHON_ERROR(Standard);
@@ -34,7 +46,6 @@ namespace py {
         REDECLARE_PYTHON_ERROR(Index);
         REDECLARE_PYTHON_ERROR(Key);
         
-        // PyObject* KeyboardInterrupt = PyExc_KeyboardInterrupt;
         extern PyObject* KeyboardInterrupt;
         
         REDECLARE_PYTHON_ERROR(Memory);
@@ -47,7 +58,6 @@ namespace py {
         REDECLARE_PYTHON_ERROR(Syntax);
         REDECLARE_PYTHON_ERROR(System);
         
-        // PyObject* SystemExit = PyExc_SystemExit;
         extern PyObject* SystemExit;
         
         REDECLARE_PYTHON_ERROR(Type);
@@ -96,7 +106,7 @@ namespace py {
     /// }
     
     DECLARE_ERROR_SHORTCUT(Lookup);
-    // DECLARE_ERROR_SHORTCUT(Assertion);
+    DECLARE_ERROR_SHORTCUT(Assertion);
     DECLARE_ERROR_SHORTCUT(Attribute);
     // DECLARE_ERROR_SHORTCUT(EOF);
     DECLARE_ERROR_SHORTCUT(Environment);
@@ -110,7 +120,7 @@ namespace py {
     DECLARE_ERROR_SHORTCUT(NotImplemented);
     DECLARE_ERROR_SHORTCUT(OS);
     DECLARE_ERROR_SHORTCUT(Overflow);
-    // DECLARE_ERROR_SHORTCUT(Reference);
+    DECLARE_ERROR_SHORTCUT(Reference);
     DECLARE_ERROR_SHORTCUT(Runtime);
     DECLARE_ERROR_SHORTCUT(System);
     DECLARE_ERROR_SHORTCUT(Type);
@@ -118,6 +128,23 @@ namespace py {
     DECLARE_ERROR_SHORTCUT(ZeroDivision);
     
     #undef DECLARE_ERROR_SHORTCUT
+    
+    /// py::ErrorOccurred() just wraps PyErr_Occurred()
+    /// such that it returns reliable and sensible booleans:
+    bool ErrorOccurred(void);
+    
+    /// py::LastError() returns the last error that occurred,
+    /// as a borrowed-reference PyObject*, without all the fuss/muss
+    /// of the PyErr_{Fetch,NormalizeException,Restore}() API
+    PyObject* LastError(void);
+    
+    template <typename CleanType = pyptr_t,
+              typename ErrorType = pyptr_t,
+              typename FinalType = typename std::common_type<CleanType, ErrorType>::type>
+    FinalType for_error_state(CleanType clean_value,
+                              ErrorType error_value = (pyptr_t)nullptr) {
+        return py::ErrorOccurred() ? clean_value : error_value;
+    }
 }
 
 #endif /// LIBIMREAD_PYTHON_IM_INCLUDE_EXCEPTIONS_HPP_
