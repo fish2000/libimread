@@ -379,22 +379,21 @@ namespace py {
                 :ImageModelBase(*reinterpret_cast<ImageModelBase*>(other))
                 {}
             
+            /// Take ownership of bmoi pointer --
             /// bmoi = Buffer Model Object Instance
-            explicit ImageModelBase(BufferModelBase<BufferType> const& bmoi)
+            explicit ImageModelBase(BufferModelBase<BufferType>* bmoi)
                 :weakrefs(nullptr)
-                ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi.internal.get()))
+                ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi->internal.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::convert(
-                             new typename ImageModelBase::BufferModel(
-                                          py::convert(this))))
+                ,imagebuffer(py::convert(bmoi))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {}
             
-            /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
+            /// tag dispatch, reinterpret, explicit-init-style construct
             explicit ImageModelBase(PyObject* buffer,
                                     typename Tag::FromBuffer)
-                :ImageModelBase(*reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
+                :ImageModelBase(reinterpret_cast<BufferModelBase<BufferType>*>(buffer))
                 {}
             
             /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
@@ -645,7 +644,7 @@ namespace py {
             
             PyObject* scale(float scale) {
                 using imagebuffer_t = BufferModelBase<BufferType>;
-                imagebuffer_t scaled_buffer(imagebuffer, scale);
+                imagebuffer_t* scaled_buffer = new imagebuffer_t(imagebuffer, scale);
                 ImageModelBase* scaled = new ImageModelBase(scaled_buffer);
                 return py::convert(scaled);
             }

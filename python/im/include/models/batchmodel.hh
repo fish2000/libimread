@@ -268,7 +268,7 @@ namespace py {
             }
             
             void cleanup(bool force = false) {
-                if (!clean) {
+                if (!clean || force) {
                     if (!internal.empty()) {
                         std::for_each(internal.begin(),
                                       internal.end(),
