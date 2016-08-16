@@ -42,7 +42,6 @@ namespace py {
         REDEFINE_PYTHON_ERROR(Key);
         
         PyObject* KeyboardInterrupt = PyExc_KeyboardInterrupt;
-        // idx initialize_KeyboardInterrupt(KeyboardInterrupt);
         DEFINE_PYTHON_ERROR(KeyboardInterrupt);
         
         REDEFINE_PYTHON_ERROR(Memory);
@@ -56,7 +55,6 @@ namespace py {
         REDEFINE_PYTHON_ERROR(System);
         
         PyObject* SystemExit = PyExc_SystemExit;
-        // idx initialize_SystemExit(SystemExit);
         DEFINE_PYTHON_ERROR(SystemExit);
         
         REDEFINE_PYTHON_ERROR(Type);
@@ -65,8 +63,6 @@ namespace py {
         REDEFINE_PYTHON_ERROR(ZeroDivision);
         
         /// stow these last:
-        // idx initialize_BaseException(BaseException);
-        // idx initialize_Exception(Exception);
         DEFINE_PYTHON_ERROR(BaseException);
         DEFINE_PYTHON_ERROR(Exception);
         

@@ -138,6 +138,8 @@ namespace py {
     /// of the PyErr_{Fetch,NormalizeException,Restore}() API
     PyObject* LastError(void);
     
+    /// Convenience templated-terniary-operator function,
+    /// for juggling two typed values that
     template <typename CleanType = pyptr_t,
               typename ErrorType = pyptr_t,
               typename FinalType = typename std::common_type<CleanType, ErrorType>::type>
