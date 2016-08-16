@@ -429,6 +429,10 @@ namespace py {
         return py::options::convert(empty() ? Py_BuildValue("") : referent);
     }
     
+    ref::operator Json() const {
+        return to_json();
+    }
+    
     py::ref&& asref(PyObject* referent) {
         py::ref out;
         out.set(referent);

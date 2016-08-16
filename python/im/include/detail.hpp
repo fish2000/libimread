@@ -522,6 +522,7 @@ namespace py {
             
             /// JSONification
             Json to_json() const;
+            operator Json() const;
             
         private:
             

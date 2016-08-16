@@ -112,13 +112,12 @@ namespace py {
             if (!list) { return out; }
             if (!PySequence_Check(list)) { return out; }
             py::ref sequence = PySequence_Fast(list, "Sequence expected");
+            py::ref item(false);
             int idx = 0,
                 len = PySequence_Fast_GET_SIZE(sequence.get());
-            for (; idx < len; idx++) {
-                PyObject* item = PySequence_Fast_GET_ITEM(sequence.get(), idx);
-                Json ison(Json::null);
-                ison = py::options::convert(item); /// might PyErr here
-                out.append(ison);
+            for (; idx < len; ++idx) {
+                item.set(PySequence_Fast_GET_ITEM(sequence.get(), idx));
+                out.append(item.to_json());
             }
             if (py::ErrorOccurred()) {
                 return py::IOError(
@@ -140,9 +139,7 @@ namespace py {
                     options_list::undefined);
             }
             while (py::ref item = PyIter_Next(iterator)) {
-                Json ison(Json::null);
-                ison = py::options::convert(item); /// might PyErr here
-                out.append(ison);
+                out.append(item.to_json());
             }
             if (py::ErrorOccurred()) {
                 return py::IOError(
@@ -157,14 +154,11 @@ namespace py {
             options_map out;
             if (!dict) { return out; }
             if (!PyMapping_Check(dict)) { return out; }
-            PyObject* key;
-            PyObject* value;
+            py::ref key(false);
+            py::ref value(false);
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value)) {
-                std::string k = py::options::get_cstring(key);
-                Json v(Json::null);
-                v = py::options::convert(value); /// might PyErr here
-                out.set(k, v);
+                out.set(key.to_string(), value.to_json());
             }
             if (py::ErrorOccurred()) {
                 return py::IOError(
