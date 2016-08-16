@@ -217,8 +217,8 @@ namespace py {
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject* kwargs,
                        options_map const& opts) {
-            PyObject* py_overwrite = nullptr;
-            PyObject* py_tempfile = nullptr;
+            py::ref py_overwrite(false);
+            py::ref py_tempfile(false);
             char const* keywords[] = { "destination", "overwrite", "tempfile", nullptr };
             char const* destination = nullptr;
             bool overwrite = false;
@@ -231,11 +231,11 @@ namespace py {
                 &py_tempfile))
                     { return nullptr; }
             
-            if (!py_tempfile && !destination) {
+            if (py_tempfile.empty() && !destination) {
                 return py::AttributeError("Must specify either destination path or tempfile=True");
             }
-            overwrite = py::options::truth(py_overwrite);
-            tempfile  = py::options::truth(py_tempfile);
+            overwrite = py_overwrite.truth();
+            tempfile  = py_tempfile.truth();
             
             try {
                 py::gil::release nogil;
