@@ -515,6 +515,7 @@ namespace py {
             bool operator>=(ref const&) const;
             
             /// stringification
+            std::string const repr() const;
             std::string const to_string() const;
             operator std::string() const;
             friend std::ostream& operator<<(std::ostream&, ref const&);
@@ -551,6 +552,9 @@ namespace py {
         
     };
     
+    /// get a py::ref for a PyObject* after incrementing its refcount --
+    /// useful for temporary and scope-based py::refs:
+    py::ref&& asref(PyObject*);
     
     namespace detail {
         

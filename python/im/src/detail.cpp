@@ -197,6 +197,7 @@ namespace py {
     
     ref::ref(ref&& other) noexcept
         :referent(std::move(other.referent))
+        ,destroy(other.destroy)
         {
             other.referent = nullptr;
         }
@@ -205,6 +206,7 @@ namespace py {
         if (referent != other.referent) {
             Py_XDECREF(referent);
             referent = std::move(other.referent);
+            destroy = other.destroy;
             other.referent = nullptr;
         }
         return *this;
@@ -395,6 +397,16 @@ namespace py {
         return PyObject_RichCompareBool(referent, other.referent, Py_GE) == 1;
     }
     
+    std::string const ref::repr() const {
+        if (empty()) { return "<nullptr>"; }
+        if (PyString_Check(referent)) {
+            return const_cast<char const*>(
+                PyString_AS_STRING(referent));
+        }
+        py::ref representation = PyObject_Repr(referent);
+        return representation.repr();
+    }
+    
     std::string const ref::to_string() const {
         if (empty()) { return "<nullptr>"; }
         if (PyString_Check(referent)) {
@@ -415,6 +427,12 @@ namespace py {
     
     Json ref::to_json() const {
         return py::options::convert(empty() ? Py_BuildValue("") : referent);
+    }
+    
+    py::ref&& asref(PyObject* referent) {
+        py::ref out;
+        out.set(referent);
+        return std::move(out);
     }
     
     namespace detail {
