@@ -330,7 +330,7 @@ namespace py {
             std::string repr_string() {
                 /// start with the BatchModel typestring:
                 std::string out(BatchModel::typestring());
-                out += "(\n";
+                out += internal.empty() ? "(" : "(\n";
                 
                 /// add the string representation of each object:
                 std::for_each(internal.begin(),
