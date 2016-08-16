@@ -389,7 +389,6 @@ namespace py {
                                           py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
-                ,clean(false)
                 {}
             
             /// tag dispatch, reinterpret, depointerize, explicit-init-style construct
@@ -438,7 +437,6 @@ namespace py {
                                           py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
-                ,clean(false)
                 {
                     if (value > -1) {
                         py::gil::release nogil;
@@ -459,7 +457,7 @@ namespace py {
             }
             
             void cleanup(bool force = false) {
-                if (!clean && force) {
+                if (!clean || force) {
                     Py_CLEAR(dtype);
                     Py_CLEAR(imagebuffer);
                     Py_CLEAR(readoptDict);
@@ -646,9 +644,9 @@ namespace py {
             }
             
             PyObject* scale(float scale) {
-                // using imagebuffer_t = BufferModel
-                BufferModelBase<BufferType> buffer(imagebuffer, scale);
-                ImageModelBase* scaled = new ImageModelBase(buffer);
+                using imagebuffer_t = BufferModelBase<BufferType>;
+                imagebuffer_t scaled_buffer(imagebuffer, scale);
+                ImageModelBase* scaled = new ImageModelBase(scaled_buffer);
                 return py::convert(scaled);
             }
             

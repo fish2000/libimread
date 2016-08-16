@@ -150,7 +150,7 @@ namespace py {
                 {}
             
             explicit BufferModelBase(PyObject* other,
-                                     float scale = 1.0f, int value = 0x00,
+                                     float scale, int value = 0x00,
                                      typename Tag::ScaledFromBuffer = typename Tag::ScaledFromBuffer{})
                 :BufferModelBase(*reinterpret_cast<BufferModelBase*>(other), scale, value)
                 {}
