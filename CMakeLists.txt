@@ -130,6 +130,7 @@ find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
 find_package(LibUnwind REQUIRED)
+find_package(CapnProto REQUIRED)
 
 # set(HDF5_USE_STATIC_LIBRARIES false)
 set(HDF5_ROOT /usr/local/opt/hdf5/)
