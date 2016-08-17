@@ -385,7 +385,7 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi->internal.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::convert(bmoi))
+                ,imagebuffer(py::object(bmoi))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {}
@@ -643,9 +643,10 @@ namespace py {
             }
             
             PyObject* scale(float scale) {
+                using tag_t = typename Tag::FromBuffer;
                 using imagebuffer_t = BufferModelBase<BufferType>;
-                imagebuffer_t* scaled_buffer = new imagebuffer_t(imagebuffer, scale);
-                ImageModelBase* scaled = new ImageModelBase(scaled_buffer);
+                py::ref scaledbuffer = new imagebuffer_t(imagebuffer, scale);
+                ImageModelBase* scaled = new ImageModelBase(scaledbuffer, tag_t{});
                 return py::convert(scaled);
             }
             

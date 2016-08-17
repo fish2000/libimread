@@ -35,8 +35,8 @@ namespace im {
             
             std::array<int32_t, 4> extents{{ static_cast<int32_t>(buffer->extent[0] * scale),
                                              static_cast<int32_t>(buffer->extent[1] * scale),
-                                             static_cast<int32_t>(buffer->extent[2] * scale),
-                                             static_cast<int32_t>(buffer->extent[3] * scale) }};
+                                             static_cast<int32_t>(buffer->extent[2]),
+                                             static_cast<int32_t>(buffer->extent[3]) }};
             
             std::array<int32_t, 4> stridings{{ 1, extents[0],
                                                   extents[0]*extents[1],
