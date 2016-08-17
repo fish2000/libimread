@@ -224,7 +224,8 @@ target_link_libraries(imread_shared
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${HDF5_HL_LIBRARIES})
+    ${HDF5_HL_LIBRARIES}
+    ${CAPNP_LIBRARIES_LITE})
 
 target_link_libraries(imread_static
     z png guid
@@ -236,7 +237,8 @@ target_link_libraries(imread_static
     ${WEBP_LIBRARIES}
     ${HALIDE_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${HDF5_HL_LIBRARIES})
+    ${HDF5_HL_LIBRARIES}
+    ${CAPNP_LIBRARIES_LITE})
 
 # Add the apps subdirectory, if we're building apps:
 if(IM_APPS)
@@ -297,7 +299,8 @@ if(IM_TESTS)
         ${WEBP_LIBRARIES}
         ${HALIDE_LIBRARIES}
         ${HDF5_LIBRARIES}
-        ${HDF5_HL_LIBRARIES})
+        ${HDF5_HL_LIBRARIES}
+        ${CAPNP_LIBRARIES_LITE})
     
     # Set up ctest and cdash:
     enable_testing()

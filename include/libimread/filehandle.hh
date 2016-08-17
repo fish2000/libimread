@@ -9,6 +9,8 @@
 #include <memory>
 #include <functional>
 #include <utility>
+#include <capnp/serialize-packed.h>
+
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
@@ -39,6 +41,7 @@ namespace im {
             virtual std::size_t size() const;
             virtual std::size_t write(const void* buffer, std::size_t n);
             virtual std::size_t write(std::vector<byte> const& bv);
+            virtual std::size_t write(capnp::MessageBuilder& builder);
             virtual detail::stat_t stat() const;
             virtual void flush();
             

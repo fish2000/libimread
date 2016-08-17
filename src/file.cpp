@@ -68,6 +68,12 @@ namespace im {
             bv.size());
     }
     
+    std::size_t fd_source_sink::write(capnp::MessageBuilder& builder) {
+        capnp::writePackedMessageToFd(descriptor, builder);
+        // return capnp::computeUnpackedSizeInWords(builder.getSegmentsForOutput());
+        return capnp::computeSerializedSizeInWords(builder);
+    }
+    
     detail::stat_t fd_source_sink::stat() const {
         detail::stat_t info;
         if (::fstat(descriptor, &info) == -1) {
