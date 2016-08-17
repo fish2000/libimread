@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <capnp/serialize-packed.h>
 
 #include <cerrno>
 #include <cstring>

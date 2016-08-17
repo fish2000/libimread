@@ -10,13 +10,16 @@
 #include <memory>
 #include <functional>
 #include <utility>
-#include <capnp/serialize-packed.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/seekable.hh>
+
+namespace capnp {
+    class MessageBuilder;
+}
 
 namespace im {
     
