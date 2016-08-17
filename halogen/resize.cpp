@@ -2,13 +2,13 @@
 #include <array>
 #include <algorithm>
 #include <type_traits>
-
-#include <libimread/libimread.hpp>
 #include "Halide.h"
 
 using namespace Halide;
 
 namespace im {
+    
+    using byte = uint8_t;
     
     enum Interpolation {
         BOX,
