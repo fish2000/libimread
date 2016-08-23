@@ -44,6 +44,8 @@ SEPARATE_ARGUMENTS(IO_EXTRA_OPTIONS)
 
 # Project header files
 set(hdrs
+    ${CAPN_DIR}/halide.capnp.h
+    ${CAPN_DIR}/numpy.capnp.h
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
@@ -68,7 +70,7 @@ set(hdrs
     ${hdrs_dir}/ext/pystring.hh
     ${hdrs_dir}/ext/valarray.hh
     ${hdrs_dir}/ext/WriteGIF.hh
-    
+
     ${hdrs_dir}/IO/ansi.hh
     ${hdrs_dir}/IO/bmp.hh
     ${hdrs_dir}/IO/gif.hh
@@ -80,17 +82,17 @@ set(hdrs
     ${hdrs_dir}/IO/pvrtc.hh
     ${hdrs_dir}/IO/tiff.hh
     ${hdrs_dir}/IO/webp.hh
-    
+
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
     # ${hdrs_dir}/private/singleton.hh
     ${hdrs_dir}/private/static_image.h
     # ${hdrs_dir}/private/vpp_symbols.hh
-    
+
     # ${hdrs_dir}/process/jitresize.hh
     ${hdrs_dir}/process/neuquant.hh
     ${hdrs_dir}/process/neuquant.inl
-    
+
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
     ${hdrs_dir}/color.hh
@@ -133,6 +135,8 @@ endif(APPLE)
 
 # Project source files
 set(srcs
+    ${CAPN_DIR}/halide.capnp.c++
+    ${CAPN_DIR}/numpy.capnp.c++
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/opaques.cpp
@@ -152,7 +156,7 @@ set(srcs
     ${srcs_dir}/ext/pvrtc.cpp
     ${srcs_dir}/ext/pystring.cpp
     ${srcs_dir}/ext/WriteGIF.cpp
-    
+
     # ${srcs_dir}/IO/ansi.cpp
     ${srcs_dir}/IO/bmp.cpp
     ${srcs_dir}/IO/gif.cpp
@@ -164,10 +168,10 @@ set(srcs
     ${srcs_dir}/IO/pvrtc.cpp
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp
-    
+
     # ${srcs_dir}/process/jitresize.cpp
     # ${srcs_dir}/process/neuquant.cpp
-    
+
     # ${srcs_dir}/ansicolor.cpp
     # ${srcs_dir}/base.cpp
     # ${srcs_dir}/color.cpp

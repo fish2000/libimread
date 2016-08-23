@@ -88,8 +88,9 @@ IOD_SYMBOLIZE(
     ${IOD_SYMBOLIZE_DIR2})
 
 # Set variables for the deps and apps directories:
-SET(DEPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 SET(APPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/apps")
+SET(CAPN_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/capn")
+SET(DEPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 SET(HALOGEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/halogen")
 
 # Set variables for the individual deps directories:
@@ -247,11 +248,11 @@ endif(IM_APPS)
 
 # Build the tests, if we're building tests:
 if(IM_TESTS)
-    
+
     # Bring in the tests subdirectory --
     # ... this defines add_imread_test(), see below:
     add_subdirectory(${TEST_SOURCE_DIR})
-    
+
     # add_custom_command(
     #     OUTPUT ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist
     #     COMMAND ${TEST_SCRIPT_DIR}/generate-test-filemap.py > ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
@@ -262,7 +263,7 @@ if(IM_TESTS)
     # set_target_properties("test_data_plist"
     #     PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
     # add_dependencies("test_data_plist" imread)
-    
+
     # Generate the test data header, if necessary:
     add_custom_command(
         OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
@@ -272,7 +273,7 @@ if(IM_TESTS)
     set_source_files_properties(
         ${TEST_INCLUDE_DIR}/test_data.hpp
         PROPERTIES GENERATED TRUE)
-    
+
     # Set up the `imread_tests` dependencies
     set(imread_tests "test_${PROJECT_NAME}")
     add_executable(imread_tests ${TEST_SOURCES})
@@ -286,7 +287,7 @@ if(IM_TESTS)
     # add_dependencies(imread_tests "libbf")
     add_dependencies(imread_tests "imread")
     link_directories(${CMAKE_BINARY_DIR})
-    
+
     # Link the `imread_tests` executable
     target_link_libraries(imread_tests
         imread_shared
@@ -301,11 +302,11 @@ if(IM_TESTS)
         ${HDF5_LIBRARIES}
         ${HDF5_HL_LIBRARIES}
         ${CAPNP_LIBRARIES_LITE})
-    
+
     # Set up ctest and cdash:
     enable_testing()
     include(CTest)
-    
+
     # Set up individual test suites --
     # … the add_imread_test() macro is defined in tests/CMakeLists.txt:
     add_imread_test("blockhash")
@@ -323,7 +324,7 @@ if(IM_TESTS)
     add_imread_test("terminator")
     add_imread_test("tif-write-multi")
     add_imread_test("interleaved-io")
-    
+
 endif(IM_TESTS)
 
 # Install the built libraries and header files, as appropriate:
