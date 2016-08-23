@@ -23,6 +23,8 @@ namespace im {
         virtual std::size_t seek_end(int);
     };
     
+    using bytevec_t = std::vector<byte>;
+    
     class byte_source : virtual public seekable {
         
         public:
@@ -41,7 +43,7 @@ namespace im {
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
             
             virtual ~byte_source();
-            virtual std::size_t read(byte* buffer, std::size_t) warn_unused = 0;
+            virtual std::size_t read(byte*, std::size_t) warn_unused = 0;
             virtual void* readmap(std::size_t pageoffset = 0) const = 0;
             
             // void read_check(byte* buffer, std::size_t n) {
@@ -51,7 +53,7 @@ namespace im {
             //     }
             // }
             
-            virtual std::vector<byte> full_data();
+            virtual bytevec_t full_data();
             virtual std::size_t size() const;
             bool empty() const;
             byte* data() const;
@@ -76,7 +78,8 @@ namespace im {
             using const_reference = std::add_const_t<reference>;
             
             virtual ~byte_sink();
-            virtual std::size_t write(const void* buffer, std::size_t n) = 0;
+            virtual std::size_t write(const void*, std::size_t) = 0;
+            virtual std::size_t write(bytevec_t const&);
             
             // void write_check(const byte* buffer, std::size_t n) {
             //     std::size_t out = this->write(buffer, n);

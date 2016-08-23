@@ -53,7 +53,7 @@ namespace im {
             virtual std::size_t read(byte* buffer, std::size_t n);
             virtual std::size_t size() const;
             virtual std::size_t write(const void* buffer, std::size_t n);
-            virtual std::size_t write(std::vector<byte> const& bv);
+            virtual std::size_t write(std::vector<byte> const&);
             virtual detail::stat_t stat() const;
             virtual void flush();
             

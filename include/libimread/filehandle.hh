@@ -43,7 +43,7 @@ namespace im {
             virtual std::vector<byte> full_data();
             virtual std::size_t size() const;
             virtual std::size_t write(const void* buffer, std::size_t n);
-            virtual std::size_t write(std::vector<byte> const& bv);
+            virtual std::size_t write(std::vector<byte> const&);
             virtual std::size_t write(capnp::MessageBuilder& builder);
             virtual detail::stat_t stat() const;
             virtual void flush();

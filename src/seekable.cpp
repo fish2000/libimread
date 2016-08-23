@@ -25,8 +25,8 @@ namespace im {
     
     byte_source::~byte_source() {}
     
-    std::vector<byte> byte_source::full_data() {
-        std::vector<byte> result;
+    bytevec_t byte_source::full_data() {
+        bytevec_t result;
         std::size_t n;
         byte buffer[4096];
         while ((n = this->read(buffer, sizeof(buffer)))) {
@@ -38,7 +38,7 @@ namespace im {
     std::size_t byte_source::size() const {
         /// super-naive implementation...
         /// OVERRIDE THIS HORRIDNESS, DOGG
-        std::vector<byte> all_of_it;
+        bytevec_t all_of_it;
         std::size_t n;
         byte buffer[4096];
         byte_source* mutablethis = const_cast<byte_source*>(this);
@@ -89,6 +89,10 @@ namespace im {
     }
     
     byte_sink::~byte_sink() {}
+    
+    std::size_t byte_sink::write(bytevec_t const& bytevec) {
+        return write(static_cast<const void*>(&bytevec[0]), bytevec.size());
+    }
     
     void byte_sink::flush() {}
 

@@ -77,11 +77,11 @@ namespace im {
         return std::fwrite(buffer, sizeof(byte), n, membuf.get());
     }
     
-    std::size_t memory_sink::write(std::vector<byte> const& bv) {
-        return this->write(
-            static_cast<const void*>(&bv[0]),
-            bv.size());
-    }
+    // std::size_t memory_sink::write(std::vector<byte> const& bv) {
+    //     return this->write(
+    //         static_cast<const void*>(&bv[0]),
+    //         bv.size());
+    // }
     
     void memory_sink::flush() { std::fflush(membuf.get()); }
     
