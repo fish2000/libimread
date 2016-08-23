@@ -83,7 +83,7 @@ struct TypedBuffer {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(ca45c17d4410c859, 1, 1)
+    CAPNP_DECLARE_STRUCT_HEADER(ca45c17d4410c859, 1, 2)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -254,7 +254,8 @@ public:
   inline bool hasBuffer() const;
   inline  ::halide::Buffer::Reader getBuffer() const;
 
-  inline  ::halide::TypeCode getType() const;
+  inline bool hasType() const;
+  inline  ::halide::Type::Reader getType() const;
 
   inline  ::uint8_t getNdims() const;
 
@@ -293,8 +294,12 @@ public:
   inline void adoptBuffer(::capnp::Orphan< ::halide::Buffer>&& value);
   inline ::capnp::Orphan< ::halide::Buffer> disownBuffer();
 
-  inline  ::halide::TypeCode getType();
-  inline void setType( ::halide::TypeCode value);
+  inline bool hasType();
+  inline  ::halide::Type::Builder getType();
+  inline void setType( ::halide::Type::Reader value);
+  inline  ::halide::Type::Builder initType();
+  inline void adoptType(::capnp::Orphan< ::halide::Type>&& value);
+  inline ::capnp::Orphan< ::halide::Type> disownType();
 
   inline  ::uint8_t getNdims();
   inline void setNdims( ::uint8_t value);
@@ -318,6 +323,7 @@ public:
       : _typeless(kj::mv(typeless)) {}
 
   inline  ::halide::Buffer::Pipeline getBuffer();
+  inline  ::halide::Type::Pipeline getType();
 private:
   ::capnp::AnyPointer::Pipeline _typeless;
   friend class ::capnp::PipelineHook;
@@ -1302,32 +1308,57 @@ inline ::capnp::Orphan< ::halide::Buffer> TypedBuffer::Builder::disownBuffer() {
       _builder.getPointerField(0 * ::capnp::POINTERS));
 }
 
-inline  ::halide::TypeCode TypedBuffer::Reader::getType() const {
-  return _reader.getDataField< ::halide::TypeCode>(
-      0 * ::capnp::ELEMENTS, 1u);
+inline bool TypedBuffer::Reader::hasType() const {
+  return !_reader.getPointerField(1 * ::capnp::POINTERS).isNull();
 }
-
-inline  ::halide::TypeCode TypedBuffer::Builder::getType() {
-  return _builder.getDataField< ::halide::TypeCode>(
-      0 * ::capnp::ELEMENTS, 1u);
+inline bool TypedBuffer::Builder::hasType() {
+  return !_builder.getPointerField(1 * ::capnp::POINTERS).isNull();
 }
-inline void TypedBuffer::Builder::setType( ::halide::TypeCode value) {
-  _builder.setDataField< ::halide::TypeCode>(
-      0 * ::capnp::ELEMENTS, value, 1u);
+inline  ::halide::Type::Reader TypedBuffer::Reader::getType() const {
+  return ::capnp::_::PointerHelpers< ::halide::Type>::get(
+      _reader.getPointerField(1 * ::capnp::POINTERS),
+        ::capnp::schemas::bp_ca45c17d4410c859 + 58);
+}
+inline  ::halide::Type::Builder TypedBuffer::Builder::getType() {
+  return ::capnp::_::PointerHelpers< ::halide::Type>::get(
+      _builder.getPointerField(1 * ::capnp::POINTERS),
+        ::capnp::schemas::bp_ca45c17d4410c859 + 58);
+}
+#if !CAPNP_LITE
+inline  ::halide::Type::Pipeline TypedBuffer::Pipeline::getType() {
+  return  ::halide::Type::Pipeline(_typeless.getPointerField(1));
+}
+#endif  // !CAPNP_LITE
+inline void TypedBuffer::Builder::setType( ::halide::Type::Reader value) {
+  ::capnp::_::PointerHelpers< ::halide::Type>::set(
+      _builder.getPointerField(1 * ::capnp::POINTERS), value);
+}
+inline  ::halide::Type::Builder TypedBuffer::Builder::initType() {
+  return ::capnp::_::PointerHelpers< ::halide::Type>::init(
+      _builder.getPointerField(1 * ::capnp::POINTERS));
+}
+inline void TypedBuffer::Builder::adoptType(
+    ::capnp::Orphan< ::halide::Type>&& value) {
+  ::capnp::_::PointerHelpers< ::halide::Type>::adopt(
+      _builder.getPointerField(1 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::halide::Type> TypedBuffer::Builder::disownType() {
+  return ::capnp::_::PointerHelpers< ::halide::Type>::disown(
+      _builder.getPointerField(1 * ::capnp::POINTERS));
 }
 
 inline  ::uint8_t TypedBuffer::Reader::getNdims() const {
   return _reader.getDataField< ::uint8_t>(
-      2 * ::capnp::ELEMENTS, 3u);
+      0 * ::capnp::ELEMENTS, 3u);
 }
 
 inline  ::uint8_t TypedBuffer::Builder::getNdims() {
   return _builder.getDataField< ::uint8_t>(
-      2 * ::capnp::ELEMENTS, 3u);
+      0 * ::capnp::ELEMENTS, 3u);
 }
 inline void TypedBuffer::Builder::setNdims( ::uint8_t value) {
   _builder.setDataField< ::uint8_t>(
-      2 * ::capnp::ELEMENTS, value, 3u);
+      0 * ::capnp::ELEMENTS, value, 3u);
 }
 
 inline  ::uint64_t BufferT::Reader::getDev() const {
@@ -1542,13 +1573,11 @@ inline bool Buffer::Builder::hasHost() {
 }
 inline  ::capnp::Data::Reader Buffer::Reader::getHost() const {
   return ::capnp::_::PointerHelpers< ::capnp::Data>::get(
-      _reader.getPointerField(0 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 85, 1);
+      _reader.getPointerField(0 * ::capnp::POINTERS));
 }
 inline  ::capnp::Data::Builder Buffer::Builder::getHost() {
   return ::capnp::_::PointerHelpers< ::capnp::Data>::get(
-      _builder.getPointerField(0 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 85, 1);
+      _builder.getPointerField(0 * ::capnp::POINTERS));
 }
 inline void Buffer::Builder::setHost( ::capnp::Data::Reader value) {
   ::capnp::_::PointerHelpers< ::capnp::Data>::set(
@@ -1591,12 +1620,12 @@ inline bool Buffer::Builder::hasExtent() {
 inline  ::halide::DimList::Reader Buffer::Reader::getExtent() const {
   return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
       _reader.getPointerField(1 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 101);
+        ::capnp::schemas::bp_ce4cc358c34c34f8 + 100);
 }
 inline  ::halide::DimList::Builder Buffer::Builder::getExtent() {
   return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
       _builder.getPointerField(1 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 101);
+        ::capnp::schemas::bp_ce4cc358c34c34f8 + 100);
 }
 #if !CAPNP_LITE
 inline  ::halide::DimList::Pipeline Buffer::Pipeline::getExtent() {
@@ -1630,12 +1659,12 @@ inline bool Buffer::Builder::hasStride() {
 inline  ::halide::DimList::Reader Buffer::Reader::getStride() const {
   return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
       _reader.getPointerField(2 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 111);
+        ::capnp::schemas::bp_ce4cc358c34c34f8 + 110);
 }
 inline  ::halide::DimList::Builder Buffer::Builder::getStride() {
   return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
       _builder.getPointerField(2 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 111);
+        ::capnp::schemas::bp_ce4cc358c34c34f8 + 110);
 }
 #if !CAPNP_LITE
 inline  ::halide::DimList::Pipeline Buffer::Pipeline::getStride() {
@@ -1669,12 +1698,12 @@ inline bool Buffer::Builder::hasMin() {
 inline  ::halide::DimList::Reader Buffer::Reader::getMin() const {
   return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
       _reader.getPointerField(3 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 121);
+        ::capnp::schemas::bp_ce4cc358c34c34f8 + 120);
 }
 inline  ::halide::DimList::Builder Buffer::Builder::getMin() {
   return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
       _builder.getPointerField(3 * ::capnp::POINTERS),
-        ::capnp::schemas::bp_ce4cc358c34c34f8 + 121);
+        ::capnp::schemas::bp_ce4cc358c34c34f8 + 120);
 }
 #if !CAPNP_LITE
 inline  ::halide::DimList::Pipeline Buffer::Pipeline::getMin() {

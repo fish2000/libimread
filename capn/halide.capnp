@@ -6,7 +6,7 @@ $Cxx.namespace("halide");
 
 struct TypedBuffer {
     buffer      @0 :Buffer;
-    type        @1 :TypeCode        = uint;
+    type        @1 :Type            = (code = uint, bits = 8);
     ndims       @2 :UInt8           = 3;
 }
 
@@ -26,7 +26,7 @@ struct BufferT {
 
 # Rearranged/simplified/syntax-sugared the buffer_t data fields
 struct Buffer {
-    host        @0 :Data            = 0x"00";
+    host        @0 :Data;
     extent      @2 :DimList         = (x = 0, y = 0, p = 0);
     stride      @3 :DimList         = (x = 0, y = 0, p = 0);
     min         @4 :DimList         = (x = 0, y = 0, p = 0);
