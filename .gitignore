@@ -16,8 +16,8 @@
 *.pyc
 *.pyo
 *.xcuserstate
-*.capnp.c++
-*.capnp.h
+# *.capnp.c++
+# *.capnp.h
 .tm_properties
 .cache/
 .prof/
