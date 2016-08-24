@@ -73,6 +73,7 @@ CAPNP_DECLARE_SCHEMA(82be6ce3dc6dcccc);
 }  // namespace schemas
 }  // namespace capnp
 
+namespace im {
 namespace halide {
 
 struct TypedBuffer {
@@ -252,10 +253,10 @@ public:
 #endif  // !CAPNP_LITE
 
   inline bool hasBuffer() const;
-  inline  ::halide::Buffer::Reader getBuffer() const;
+  inline  ::im::halide::Buffer::Reader getBuffer() const;
 
   inline bool hasType() const;
-  inline  ::halide::Type::Reader getType() const;
+  inline  ::im::halide::Type::Reader getType() const;
 
   inline  ::uint8_t getNdims() const;
 
@@ -288,18 +289,18 @@ public:
 #endif  // !CAPNP_LITE
 
   inline bool hasBuffer();
-  inline  ::halide::Buffer::Builder getBuffer();
-  inline void setBuffer( ::halide::Buffer::Reader value);
-  inline  ::halide::Buffer::Builder initBuffer();
-  inline void adoptBuffer(::capnp::Orphan< ::halide::Buffer>&& value);
-  inline ::capnp::Orphan< ::halide::Buffer> disownBuffer();
+  inline  ::im::halide::Buffer::Builder getBuffer();
+  inline void setBuffer( ::im::halide::Buffer::Reader value);
+  inline  ::im::halide::Buffer::Builder initBuffer();
+  inline void adoptBuffer(::capnp::Orphan< ::im::halide::Buffer>&& value);
+  inline ::capnp::Orphan< ::im::halide::Buffer> disownBuffer();
 
   inline bool hasType();
-  inline  ::halide::Type::Builder getType();
-  inline void setType( ::halide::Type::Reader value);
-  inline  ::halide::Type::Builder initType();
-  inline void adoptType(::capnp::Orphan< ::halide::Type>&& value);
-  inline ::capnp::Orphan< ::halide::Type> disownType();
+  inline  ::im::halide::Type::Builder getType();
+  inline void setType( ::im::halide::Type::Reader value);
+  inline  ::im::halide::Type::Builder initType();
+  inline void adoptType(::capnp::Orphan< ::im::halide::Type>&& value);
+  inline ::capnp::Orphan< ::im::halide::Type> disownType();
 
   inline  ::uint8_t getNdims();
   inline void setNdims( ::uint8_t value);
@@ -322,8 +323,8 @@ public:
   inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
       : _typeless(kj::mv(typeless)) {}
 
-  inline  ::halide::Buffer::Pipeline getBuffer();
-  inline  ::halide::Type::Pipeline getType();
+  inline  ::im::halide::Buffer::Pipeline getBuffer();
+  inline  ::im::halide::Type::Pipeline getType();
 private:
   ::capnp::AnyPointer::Pipeline _typeless;
   friend class ::capnp::PipelineHook;
@@ -489,13 +490,13 @@ public:
   inline  ::uint64_t getDev() const;
 
   inline bool hasExtent() const;
-  inline  ::halide::DimList::Reader getExtent() const;
+  inline  ::im::halide::DimList::Reader getExtent() const;
 
   inline bool hasStride() const;
-  inline  ::halide::DimList::Reader getStride() const;
+  inline  ::im::halide::DimList::Reader getStride() const;
 
   inline bool hasMin() const;
-  inline  ::halide::DimList::Reader getMin() const;
+  inline  ::im::halide::DimList::Reader getMin() const;
 
   inline  ::int32_t getElemSize() const;
 
@@ -542,25 +543,25 @@ public:
   inline void setDev( ::uint64_t value);
 
   inline bool hasExtent();
-  inline  ::halide::DimList::Builder getExtent();
-  inline void setExtent( ::halide::DimList::Reader value);
-  inline  ::halide::DimList::Builder initExtent();
-  inline void adoptExtent(::capnp::Orphan< ::halide::DimList>&& value);
-  inline ::capnp::Orphan< ::halide::DimList> disownExtent();
+  inline  ::im::halide::DimList::Builder getExtent();
+  inline void setExtent( ::im::halide::DimList::Reader value);
+  inline  ::im::halide::DimList::Builder initExtent();
+  inline void adoptExtent(::capnp::Orphan< ::im::halide::DimList>&& value);
+  inline ::capnp::Orphan< ::im::halide::DimList> disownExtent();
 
   inline bool hasStride();
-  inline  ::halide::DimList::Builder getStride();
-  inline void setStride( ::halide::DimList::Reader value);
-  inline  ::halide::DimList::Builder initStride();
-  inline void adoptStride(::capnp::Orphan< ::halide::DimList>&& value);
-  inline ::capnp::Orphan< ::halide::DimList> disownStride();
+  inline  ::im::halide::DimList::Builder getStride();
+  inline void setStride( ::im::halide::DimList::Reader value);
+  inline  ::im::halide::DimList::Builder initStride();
+  inline void adoptStride(::capnp::Orphan< ::im::halide::DimList>&& value);
+  inline ::capnp::Orphan< ::im::halide::DimList> disownStride();
 
   inline bool hasMin();
-  inline  ::halide::DimList::Builder getMin();
-  inline void setMin( ::halide::DimList::Reader value);
-  inline  ::halide::DimList::Builder initMin();
-  inline void adoptMin(::capnp::Orphan< ::halide::DimList>&& value);
-  inline ::capnp::Orphan< ::halide::DimList> disownMin();
+  inline  ::im::halide::DimList::Builder getMin();
+  inline void setMin( ::im::halide::DimList::Reader value);
+  inline  ::im::halide::DimList::Builder initMin();
+  inline void adoptMin(::capnp::Orphan< ::im::halide::DimList>&& value);
+  inline ::capnp::Orphan< ::im::halide::DimList> disownMin();
 
   inline  ::int32_t getElemSize();
   inline void setElemSize( ::int32_t value);
@@ -589,9 +590,9 @@ public:
   inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
       : _typeless(kj::mv(typeless)) {}
 
-  inline  ::halide::DimList::Pipeline getExtent();
-  inline  ::halide::DimList::Pipeline getStride();
-  inline  ::halide::DimList::Pipeline getMin();
+  inline  ::im::halide::DimList::Pipeline getExtent();
+  inline  ::im::halide::DimList::Pipeline getStride();
+  inline  ::im::halide::DimList::Pipeline getMin();
 private:
   ::capnp::AnyPointer::Pipeline _typeless;
   friend class ::capnp::PipelineHook;
@@ -708,7 +709,7 @@ public:
   }
 #endif  // !CAPNP_LITE
 
-  inline  ::halide::TypeCode getCode() const;
+  inline  ::im::halide::TypeCode getCode() const;
 
   inline  ::uint8_t getBits() const;
 
@@ -742,8 +743,8 @@ public:
   inline ::kj::StringTree toString() const { return asReader().toString(); }
 #endif  // !CAPNP_LITE
 
-  inline  ::halide::TypeCode getCode();
-  inline void setCode( ::halide::TypeCode value);
+  inline  ::im::halide::TypeCode getCode();
+  inline void setCode( ::im::halide::TypeCode value);
 
   inline  ::uint8_t getBits();
   inline void setBits( ::uint8_t value);
@@ -1043,21 +1044,21 @@ public:
   inline bool hasName() const;
   inline  ::capnp::Text::Reader getName() const;
 
-  inline  ::halide::ArgumentKind getKind() const;
+  inline  ::im::halide::ArgumentKind getKind() const;
 
   inline  ::int32_t getDimensions() const;
 
   inline bool hasType() const;
-  inline  ::halide::Type::Reader getType() const;
+  inline  ::im::halide::Type::Reader getType() const;
 
   inline bool hasDef() const;
-  inline  ::halide::Scalar::Reader getDef() const;
+  inline  ::im::halide::Scalar::Reader getDef() const;
 
   inline bool hasMin() const;
-  inline  ::halide::Scalar::Reader getMin() const;
+  inline  ::im::halide::Scalar::Reader getMin() const;
 
   inline bool hasMax() const;
-  inline  ::halide::Scalar::Reader getMax() const;
+  inline  ::im::halide::Scalar::Reader getMax() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -1094,39 +1095,39 @@ public:
   inline void adoptName(::capnp::Orphan< ::capnp::Text>&& value);
   inline ::capnp::Orphan< ::capnp::Text> disownName();
 
-  inline  ::halide::ArgumentKind getKind();
-  inline void setKind( ::halide::ArgumentKind value);
+  inline  ::im::halide::ArgumentKind getKind();
+  inline void setKind( ::im::halide::ArgumentKind value);
 
   inline  ::int32_t getDimensions();
   inline void setDimensions( ::int32_t value);
 
   inline bool hasType();
-  inline  ::halide::Type::Builder getType();
-  inline void setType( ::halide::Type::Reader value);
-  inline  ::halide::Type::Builder initType();
-  inline void adoptType(::capnp::Orphan< ::halide::Type>&& value);
-  inline ::capnp::Orphan< ::halide::Type> disownType();
+  inline  ::im::halide::Type::Builder getType();
+  inline void setType( ::im::halide::Type::Reader value);
+  inline  ::im::halide::Type::Builder initType();
+  inline void adoptType(::capnp::Orphan< ::im::halide::Type>&& value);
+  inline ::capnp::Orphan< ::im::halide::Type> disownType();
 
   inline bool hasDef();
-  inline  ::halide::Scalar::Builder getDef();
-  inline void setDef( ::halide::Scalar::Reader value);
-  inline  ::halide::Scalar::Builder initDef();
-  inline void adoptDef(::capnp::Orphan< ::halide::Scalar>&& value);
-  inline ::capnp::Orphan< ::halide::Scalar> disownDef();
+  inline  ::im::halide::Scalar::Builder getDef();
+  inline void setDef( ::im::halide::Scalar::Reader value);
+  inline  ::im::halide::Scalar::Builder initDef();
+  inline void adoptDef(::capnp::Orphan< ::im::halide::Scalar>&& value);
+  inline ::capnp::Orphan< ::im::halide::Scalar> disownDef();
 
   inline bool hasMin();
-  inline  ::halide::Scalar::Builder getMin();
-  inline void setMin( ::halide::Scalar::Reader value);
-  inline  ::halide::Scalar::Builder initMin();
-  inline void adoptMin(::capnp::Orphan< ::halide::Scalar>&& value);
-  inline ::capnp::Orphan< ::halide::Scalar> disownMin();
+  inline  ::im::halide::Scalar::Builder getMin();
+  inline void setMin( ::im::halide::Scalar::Reader value);
+  inline  ::im::halide::Scalar::Builder initMin();
+  inline void adoptMin(::capnp::Orphan< ::im::halide::Scalar>&& value);
+  inline ::capnp::Orphan< ::im::halide::Scalar> disownMin();
 
   inline bool hasMax();
-  inline  ::halide::Scalar::Builder getMax();
-  inline void setMax( ::halide::Scalar::Reader value);
-  inline  ::halide::Scalar::Builder initMax();
-  inline void adoptMax(::capnp::Orphan< ::halide::Scalar>&& value);
-  inline ::capnp::Orphan< ::halide::Scalar> disownMax();
+  inline  ::im::halide::Scalar::Builder getMax();
+  inline void setMax( ::im::halide::Scalar::Reader value);
+  inline  ::im::halide::Scalar::Builder initMax();
+  inline void adoptMax(::capnp::Orphan< ::im::halide::Scalar>&& value);
+  inline ::capnp::Orphan< ::im::halide::Scalar> disownMax();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -1146,10 +1147,10 @@ public:
   inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
       : _typeless(kj::mv(typeless)) {}
 
-  inline  ::halide::Type::Pipeline getType();
-  inline  ::halide::Scalar::Pipeline getDef();
-  inline  ::halide::Scalar::Pipeline getMin();
-  inline  ::halide::Scalar::Pipeline getMax();
+  inline  ::im::halide::Type::Pipeline getType();
+  inline  ::im::halide::Scalar::Pipeline getDef();
+  inline  ::im::halide::Scalar::Pipeline getMin();
+  inline  ::im::halide::Scalar::Pipeline getMax();
 private:
   ::capnp::AnyPointer::Pipeline _typeless;
   friend class ::capnp::PipelineHook;
@@ -1180,7 +1181,7 @@ public:
   inline  ::int32_t getNumArguments() const;
 
   inline bool hasArguments() const;
-  inline  ::capnp::List< ::halide::FilterArgument>::Reader getArguments() const;
+  inline  ::capnp::List< ::im::halide::FilterArgument>::Reader getArguments() const;
 
   inline bool hasTarget() const;
   inline  ::capnp::Text::Reader getTarget() const;
@@ -1223,11 +1224,11 @@ public:
   inline void setNumArguments( ::int32_t value);
 
   inline bool hasArguments();
-  inline  ::capnp::List< ::halide::FilterArgument>::Builder getArguments();
-  inline void setArguments( ::capnp::List< ::halide::FilterArgument>::Reader value);
-  inline  ::capnp::List< ::halide::FilterArgument>::Builder initArguments(unsigned int size);
-  inline void adoptArguments(::capnp::Orphan< ::capnp::List< ::halide::FilterArgument>>&& value);
-  inline ::capnp::Orphan< ::capnp::List< ::halide::FilterArgument>> disownArguments();
+  inline  ::capnp::List< ::im::halide::FilterArgument>::Builder getArguments();
+  inline void setArguments( ::capnp::List< ::im::halide::FilterArgument>::Reader value);
+  inline  ::capnp::List< ::im::halide::FilterArgument>::Builder initArguments(unsigned int size);
+  inline void adoptArguments(::capnp::Orphan< ::capnp::List< ::im::halide::FilterArgument>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::im::halide::FilterArgument>> disownArguments();
 
   inline bool hasTarget();
   inline  ::capnp::Text::Builder getTarget();
@@ -1277,34 +1278,34 @@ inline bool TypedBuffer::Reader::hasBuffer() const {
 inline bool TypedBuffer::Builder::hasBuffer() {
   return !_builder.getPointerField(0 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::Buffer::Reader TypedBuffer::Reader::getBuffer() const {
-  return ::capnp::_::PointerHelpers< ::halide::Buffer>::get(
+inline  ::im::halide::Buffer::Reader TypedBuffer::Reader::getBuffer() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::Buffer>::get(
       _reader.getPointerField(0 * ::capnp::POINTERS));
 }
-inline  ::halide::Buffer::Builder TypedBuffer::Builder::getBuffer() {
-  return ::capnp::_::PointerHelpers< ::halide::Buffer>::get(
+inline  ::im::halide::Buffer::Builder TypedBuffer::Builder::getBuffer() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Buffer>::get(
       _builder.getPointerField(0 * ::capnp::POINTERS));
 }
 #if !CAPNP_LITE
-inline  ::halide::Buffer::Pipeline TypedBuffer::Pipeline::getBuffer() {
-  return  ::halide::Buffer::Pipeline(_typeless.getPointerField(0));
+inline  ::im::halide::Buffer::Pipeline TypedBuffer::Pipeline::getBuffer() {
+  return  ::im::halide::Buffer::Pipeline(_typeless.getPointerField(0));
 }
 #endif  // !CAPNP_LITE
-inline void TypedBuffer::Builder::setBuffer( ::halide::Buffer::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::Buffer>::set(
+inline void TypedBuffer::Builder::setBuffer( ::im::halide::Buffer::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Buffer>::set(
       _builder.getPointerField(0 * ::capnp::POINTERS), value);
 }
-inline  ::halide::Buffer::Builder TypedBuffer::Builder::initBuffer() {
-  return ::capnp::_::PointerHelpers< ::halide::Buffer>::init(
+inline  ::im::halide::Buffer::Builder TypedBuffer::Builder::initBuffer() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Buffer>::init(
       _builder.getPointerField(0 * ::capnp::POINTERS));
 }
 inline void TypedBuffer::Builder::adoptBuffer(
-    ::capnp::Orphan< ::halide::Buffer>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::Buffer>::adopt(
+    ::capnp::Orphan< ::im::halide::Buffer>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Buffer>::adopt(
       _builder.getPointerField(0 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::Buffer> TypedBuffer::Builder::disownBuffer() {
-  return ::capnp::_::PointerHelpers< ::halide::Buffer>::disown(
+inline ::capnp::Orphan< ::im::halide::Buffer> TypedBuffer::Builder::disownBuffer() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Buffer>::disown(
       _builder.getPointerField(0 * ::capnp::POINTERS));
 }
 
@@ -1314,36 +1315,36 @@ inline bool TypedBuffer::Reader::hasType() const {
 inline bool TypedBuffer::Builder::hasType() {
   return !_builder.getPointerField(1 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::Type::Reader TypedBuffer::Reader::getType() const {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::get(
+inline  ::im::halide::Type::Reader TypedBuffer::Reader::getType() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::get(
       _reader.getPointerField(1 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ca45c17d4410c859 + 58);
 }
-inline  ::halide::Type::Builder TypedBuffer::Builder::getType() {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::get(
+inline  ::im::halide::Type::Builder TypedBuffer::Builder::getType() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::get(
       _builder.getPointerField(1 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ca45c17d4410c859 + 58);
 }
 #if !CAPNP_LITE
-inline  ::halide::Type::Pipeline TypedBuffer::Pipeline::getType() {
-  return  ::halide::Type::Pipeline(_typeless.getPointerField(1));
+inline  ::im::halide::Type::Pipeline TypedBuffer::Pipeline::getType() {
+  return  ::im::halide::Type::Pipeline(_typeless.getPointerField(1));
 }
 #endif  // !CAPNP_LITE
-inline void TypedBuffer::Builder::setType( ::halide::Type::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::Type>::set(
+inline void TypedBuffer::Builder::setType( ::im::halide::Type::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Type>::set(
       _builder.getPointerField(1 * ::capnp::POINTERS), value);
 }
-inline  ::halide::Type::Builder TypedBuffer::Builder::initType() {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::init(
+inline  ::im::halide::Type::Builder TypedBuffer::Builder::initType() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::init(
       _builder.getPointerField(1 * ::capnp::POINTERS));
 }
 inline void TypedBuffer::Builder::adoptType(
-    ::capnp::Orphan< ::halide::Type>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::Type>::adopt(
+    ::capnp::Orphan< ::im::halide::Type>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Type>::adopt(
       _builder.getPointerField(1 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::Type> TypedBuffer::Builder::disownType() {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::disown(
+inline ::capnp::Orphan< ::im::halide::Type> TypedBuffer::Builder::disownType() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::disown(
       _builder.getPointerField(1 * ::capnp::POINTERS));
 }
 
@@ -1617,36 +1618,36 @@ inline bool Buffer::Reader::hasExtent() const {
 inline bool Buffer::Builder::hasExtent() {
   return !_builder.getPointerField(1 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::DimList::Reader Buffer::Reader::getExtent() const {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
+inline  ::im::halide::DimList::Reader Buffer::Reader::getExtent() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::get(
       _reader.getPointerField(1 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ce4cc358c34c34f8 + 100);
 }
-inline  ::halide::DimList::Builder Buffer::Builder::getExtent() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
+inline  ::im::halide::DimList::Builder Buffer::Builder::getExtent() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::get(
       _builder.getPointerField(1 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ce4cc358c34c34f8 + 100);
 }
 #if !CAPNP_LITE
-inline  ::halide::DimList::Pipeline Buffer::Pipeline::getExtent() {
-  return  ::halide::DimList::Pipeline(_typeless.getPointerField(1));
+inline  ::im::halide::DimList::Pipeline Buffer::Pipeline::getExtent() {
+  return  ::im::halide::DimList::Pipeline(_typeless.getPointerField(1));
 }
 #endif  // !CAPNP_LITE
-inline void Buffer::Builder::setExtent( ::halide::DimList::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::DimList>::set(
+inline void Buffer::Builder::setExtent( ::im::halide::DimList::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::DimList>::set(
       _builder.getPointerField(1 * ::capnp::POINTERS), value);
 }
-inline  ::halide::DimList::Builder Buffer::Builder::initExtent() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::init(
+inline  ::im::halide::DimList::Builder Buffer::Builder::initExtent() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::init(
       _builder.getPointerField(1 * ::capnp::POINTERS));
 }
 inline void Buffer::Builder::adoptExtent(
-    ::capnp::Orphan< ::halide::DimList>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::DimList>::adopt(
+    ::capnp::Orphan< ::im::halide::DimList>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::DimList>::adopt(
       _builder.getPointerField(1 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::DimList> Buffer::Builder::disownExtent() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::disown(
+inline ::capnp::Orphan< ::im::halide::DimList> Buffer::Builder::disownExtent() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::disown(
       _builder.getPointerField(1 * ::capnp::POINTERS));
 }
 
@@ -1656,36 +1657,36 @@ inline bool Buffer::Reader::hasStride() const {
 inline bool Buffer::Builder::hasStride() {
   return !_builder.getPointerField(2 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::DimList::Reader Buffer::Reader::getStride() const {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
+inline  ::im::halide::DimList::Reader Buffer::Reader::getStride() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::get(
       _reader.getPointerField(2 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ce4cc358c34c34f8 + 110);
 }
-inline  ::halide::DimList::Builder Buffer::Builder::getStride() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
+inline  ::im::halide::DimList::Builder Buffer::Builder::getStride() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::get(
       _builder.getPointerField(2 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ce4cc358c34c34f8 + 110);
 }
 #if !CAPNP_LITE
-inline  ::halide::DimList::Pipeline Buffer::Pipeline::getStride() {
-  return  ::halide::DimList::Pipeline(_typeless.getPointerField(2));
+inline  ::im::halide::DimList::Pipeline Buffer::Pipeline::getStride() {
+  return  ::im::halide::DimList::Pipeline(_typeless.getPointerField(2));
 }
 #endif  // !CAPNP_LITE
-inline void Buffer::Builder::setStride( ::halide::DimList::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::DimList>::set(
+inline void Buffer::Builder::setStride( ::im::halide::DimList::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::DimList>::set(
       _builder.getPointerField(2 * ::capnp::POINTERS), value);
 }
-inline  ::halide::DimList::Builder Buffer::Builder::initStride() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::init(
+inline  ::im::halide::DimList::Builder Buffer::Builder::initStride() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::init(
       _builder.getPointerField(2 * ::capnp::POINTERS));
 }
 inline void Buffer::Builder::adoptStride(
-    ::capnp::Orphan< ::halide::DimList>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::DimList>::adopt(
+    ::capnp::Orphan< ::im::halide::DimList>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::DimList>::adopt(
       _builder.getPointerField(2 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::DimList> Buffer::Builder::disownStride() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::disown(
+inline ::capnp::Orphan< ::im::halide::DimList> Buffer::Builder::disownStride() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::disown(
       _builder.getPointerField(2 * ::capnp::POINTERS));
 }
 
@@ -1695,36 +1696,36 @@ inline bool Buffer::Reader::hasMin() const {
 inline bool Buffer::Builder::hasMin() {
   return !_builder.getPointerField(3 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::DimList::Reader Buffer::Reader::getMin() const {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
+inline  ::im::halide::DimList::Reader Buffer::Reader::getMin() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::get(
       _reader.getPointerField(3 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ce4cc358c34c34f8 + 120);
 }
-inline  ::halide::DimList::Builder Buffer::Builder::getMin() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::get(
+inline  ::im::halide::DimList::Builder Buffer::Builder::getMin() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::get(
       _builder.getPointerField(3 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ce4cc358c34c34f8 + 120);
 }
 #if !CAPNP_LITE
-inline  ::halide::DimList::Pipeline Buffer::Pipeline::getMin() {
-  return  ::halide::DimList::Pipeline(_typeless.getPointerField(3));
+inline  ::im::halide::DimList::Pipeline Buffer::Pipeline::getMin() {
+  return  ::im::halide::DimList::Pipeline(_typeless.getPointerField(3));
 }
 #endif  // !CAPNP_LITE
-inline void Buffer::Builder::setMin( ::halide::DimList::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::DimList>::set(
+inline void Buffer::Builder::setMin( ::im::halide::DimList::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::DimList>::set(
       _builder.getPointerField(3 * ::capnp::POINTERS), value);
 }
-inline  ::halide::DimList::Builder Buffer::Builder::initMin() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::init(
+inline  ::im::halide::DimList::Builder Buffer::Builder::initMin() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::init(
       _builder.getPointerField(3 * ::capnp::POINTERS));
 }
 inline void Buffer::Builder::adoptMin(
-    ::capnp::Orphan< ::halide::DimList>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::DimList>::adopt(
+    ::capnp::Orphan< ::im::halide::DimList>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::DimList>::adopt(
       _builder.getPointerField(3 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::DimList> Buffer::Builder::disownMin() {
-  return ::capnp::_::PointerHelpers< ::halide::DimList>::disown(
+inline ::capnp::Orphan< ::im::halide::DimList> Buffer::Builder::disownMin() {
+  return ::capnp::_::PointerHelpers< ::im::halide::DimList>::disown(
       _builder.getPointerField(3 * ::capnp::POINTERS));
 }
 
@@ -1826,17 +1827,17 @@ inline void DimList::Builder::setV( ::int32_t value) {
       3 * ::capnp::ELEMENTS, value);
 }
 
-inline  ::halide::TypeCode Type::Reader::getCode() const {
-  return _reader.getDataField< ::halide::TypeCode>(
+inline  ::im::halide::TypeCode Type::Reader::getCode() const {
+  return _reader.getDataField< ::im::halide::TypeCode>(
       0 * ::capnp::ELEMENTS, 1u);
 }
 
-inline  ::halide::TypeCode Type::Builder::getCode() {
-  return _builder.getDataField< ::halide::TypeCode>(
+inline  ::im::halide::TypeCode Type::Builder::getCode() {
+  return _builder.getDataField< ::im::halide::TypeCode>(
       0 * ::capnp::ELEMENTS, 1u);
 }
-inline void Type::Builder::setCode( ::halide::TypeCode value) {
-  _builder.setDataField< ::halide::TypeCode>(
+inline void Type::Builder::setCode( ::im::halide::TypeCode value) {
+  _builder.setDataField< ::im::halide::TypeCode>(
       0 * ::capnp::ELEMENTS, value, 1u);
 }
 
@@ -1887,10 +1888,10 @@ inline Scalar::Value::Builder Scalar::Builder::initValue() {
   _builder.getPointerField(0 * ::capnp::POINTERS).clear();
   return Scalar::Value::Builder(_builder);
 }
-inline  ::halide::Scalar::Value::Which Scalar::Value::Reader::which() const {
+inline  ::im::halide::Scalar::Value::Which Scalar::Value::Reader::which() const {
   return _reader.getDataField<Which>(1 * ::capnp::ELEMENTS);
 }
-inline  ::halide::Scalar::Value::Which Scalar::Value::Builder::which() {
+inline  ::im::halide::Scalar::Value::Which Scalar::Value::Builder::which() {
   return _builder.getDataField<Which>(1 * ::capnp::ELEMENTS);
 }
 
@@ -2290,17 +2291,17 @@ inline ::capnp::Orphan< ::capnp::Text> FilterArgument::Builder::disownName() {
       _builder.getPointerField(0 * ::capnp::POINTERS));
 }
 
-inline  ::halide::ArgumentKind FilterArgument::Reader::getKind() const {
-  return _reader.getDataField< ::halide::ArgumentKind>(
+inline  ::im::halide::ArgumentKind FilterArgument::Reader::getKind() const {
+  return _reader.getDataField< ::im::halide::ArgumentKind>(
       0 * ::capnp::ELEMENTS);
 }
 
-inline  ::halide::ArgumentKind FilterArgument::Builder::getKind() {
-  return _builder.getDataField< ::halide::ArgumentKind>(
+inline  ::im::halide::ArgumentKind FilterArgument::Builder::getKind() {
+  return _builder.getDataField< ::im::halide::ArgumentKind>(
       0 * ::capnp::ELEMENTS);
 }
-inline void FilterArgument::Builder::setKind( ::halide::ArgumentKind value) {
-  _builder.setDataField< ::halide::ArgumentKind>(
+inline void FilterArgument::Builder::setKind( ::im::halide::ArgumentKind value) {
+  _builder.setDataField< ::im::halide::ArgumentKind>(
       0 * ::capnp::ELEMENTS, value);
 }
 
@@ -2324,36 +2325,36 @@ inline bool FilterArgument::Reader::hasType() const {
 inline bool FilterArgument::Builder::hasType() {
   return !_builder.getPointerField(1 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::Type::Reader FilterArgument::Reader::getType() const {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::get(
+inline  ::im::halide::Type::Reader FilterArgument::Reader::getType() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::get(
       _reader.getPointerField(1 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 103);
 }
-inline  ::halide::Type::Builder FilterArgument::Builder::getType() {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::get(
+inline  ::im::halide::Type::Builder FilterArgument::Builder::getType() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::get(
       _builder.getPointerField(1 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 103);
 }
 #if !CAPNP_LITE
-inline  ::halide::Type::Pipeline FilterArgument::Pipeline::getType() {
-  return  ::halide::Type::Pipeline(_typeless.getPointerField(1));
+inline  ::im::halide::Type::Pipeline FilterArgument::Pipeline::getType() {
+  return  ::im::halide::Type::Pipeline(_typeless.getPointerField(1));
 }
 #endif  // !CAPNP_LITE
-inline void FilterArgument::Builder::setType( ::halide::Type::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::Type>::set(
+inline void FilterArgument::Builder::setType( ::im::halide::Type::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Type>::set(
       _builder.getPointerField(1 * ::capnp::POINTERS), value);
 }
-inline  ::halide::Type::Builder FilterArgument::Builder::initType() {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::init(
+inline  ::im::halide::Type::Builder FilterArgument::Builder::initType() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::init(
       _builder.getPointerField(1 * ::capnp::POINTERS));
 }
 inline void FilterArgument::Builder::adoptType(
-    ::capnp::Orphan< ::halide::Type>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::Type>::adopt(
+    ::capnp::Orphan< ::im::halide::Type>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Type>::adopt(
       _builder.getPointerField(1 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::Type> FilterArgument::Builder::disownType() {
-  return ::capnp::_::PointerHelpers< ::halide::Type>::disown(
+inline ::capnp::Orphan< ::im::halide::Type> FilterArgument::Builder::disownType() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Type>::disown(
       _builder.getPointerField(1 * ::capnp::POINTERS));
 }
 
@@ -2363,36 +2364,36 @@ inline bool FilterArgument::Reader::hasDef() const {
 inline bool FilterArgument::Builder::hasDef() {
   return !_builder.getPointerField(2 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::Scalar::Reader FilterArgument::Reader::getDef() const {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::get(
+inline  ::im::halide::Scalar::Reader FilterArgument::Reader::getDef() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::get(
       _reader.getPointerField(2 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 112);
 }
-inline  ::halide::Scalar::Builder FilterArgument::Builder::getDef() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::get(
+inline  ::im::halide::Scalar::Builder FilterArgument::Builder::getDef() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::get(
       _builder.getPointerField(2 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 112);
 }
 #if !CAPNP_LITE
-inline  ::halide::Scalar::Pipeline FilterArgument::Pipeline::getDef() {
-  return  ::halide::Scalar::Pipeline(_typeless.getPointerField(2));
+inline  ::im::halide::Scalar::Pipeline FilterArgument::Pipeline::getDef() {
+  return  ::im::halide::Scalar::Pipeline(_typeless.getPointerField(2));
 }
 #endif  // !CAPNP_LITE
-inline void FilterArgument::Builder::setDef( ::halide::Scalar::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::Scalar>::set(
+inline void FilterArgument::Builder::setDef( ::im::halide::Scalar::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Scalar>::set(
       _builder.getPointerField(2 * ::capnp::POINTERS), value);
 }
-inline  ::halide::Scalar::Builder FilterArgument::Builder::initDef() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::init(
+inline  ::im::halide::Scalar::Builder FilterArgument::Builder::initDef() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::init(
       _builder.getPointerField(2 * ::capnp::POINTERS));
 }
 inline void FilterArgument::Builder::adoptDef(
-    ::capnp::Orphan< ::halide::Scalar>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::Scalar>::adopt(
+    ::capnp::Orphan< ::im::halide::Scalar>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Scalar>::adopt(
       _builder.getPointerField(2 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::Scalar> FilterArgument::Builder::disownDef() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::disown(
+inline ::capnp::Orphan< ::im::halide::Scalar> FilterArgument::Builder::disownDef() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::disown(
       _builder.getPointerField(2 * ::capnp::POINTERS));
 }
 
@@ -2402,36 +2403,36 @@ inline bool FilterArgument::Reader::hasMin() const {
 inline bool FilterArgument::Builder::hasMin() {
   return !_builder.getPointerField(3 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::Scalar::Reader FilterArgument::Reader::getMin() const {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::get(
+inline  ::im::halide::Scalar::Reader FilterArgument::Reader::getMin() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::get(
       _reader.getPointerField(3 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 123);
 }
-inline  ::halide::Scalar::Builder FilterArgument::Builder::getMin() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::get(
+inline  ::im::halide::Scalar::Builder FilterArgument::Builder::getMin() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::get(
       _builder.getPointerField(3 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 123);
 }
 #if !CAPNP_LITE
-inline  ::halide::Scalar::Pipeline FilterArgument::Pipeline::getMin() {
-  return  ::halide::Scalar::Pipeline(_typeless.getPointerField(3));
+inline  ::im::halide::Scalar::Pipeline FilterArgument::Pipeline::getMin() {
+  return  ::im::halide::Scalar::Pipeline(_typeless.getPointerField(3));
 }
 #endif  // !CAPNP_LITE
-inline void FilterArgument::Builder::setMin( ::halide::Scalar::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::Scalar>::set(
+inline void FilterArgument::Builder::setMin( ::im::halide::Scalar::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Scalar>::set(
       _builder.getPointerField(3 * ::capnp::POINTERS), value);
 }
-inline  ::halide::Scalar::Builder FilterArgument::Builder::initMin() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::init(
+inline  ::im::halide::Scalar::Builder FilterArgument::Builder::initMin() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::init(
       _builder.getPointerField(3 * ::capnp::POINTERS));
 }
 inline void FilterArgument::Builder::adoptMin(
-    ::capnp::Orphan< ::halide::Scalar>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::Scalar>::adopt(
+    ::capnp::Orphan< ::im::halide::Scalar>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Scalar>::adopt(
       _builder.getPointerField(3 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::Scalar> FilterArgument::Builder::disownMin() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::disown(
+inline ::capnp::Orphan< ::im::halide::Scalar> FilterArgument::Builder::disownMin() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::disown(
       _builder.getPointerField(3 * ::capnp::POINTERS));
 }
 
@@ -2441,36 +2442,36 @@ inline bool FilterArgument::Reader::hasMax() const {
 inline bool FilterArgument::Builder::hasMax() {
   return !_builder.getPointerField(4 * ::capnp::POINTERS).isNull();
 }
-inline  ::halide::Scalar::Reader FilterArgument::Reader::getMax() const {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::get(
+inline  ::im::halide::Scalar::Reader FilterArgument::Reader::getMax() const {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::get(
       _reader.getPointerField(4 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 134);
 }
-inline  ::halide::Scalar::Builder FilterArgument::Builder::getMax() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::get(
+inline  ::im::halide::Scalar::Builder FilterArgument::Builder::getMax() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::get(
       _builder.getPointerField(4 * ::capnp::POINTERS),
         ::capnp::schemas::bp_ac79a592730b89d1 + 134);
 }
 #if !CAPNP_LITE
-inline  ::halide::Scalar::Pipeline FilterArgument::Pipeline::getMax() {
-  return  ::halide::Scalar::Pipeline(_typeless.getPointerField(4));
+inline  ::im::halide::Scalar::Pipeline FilterArgument::Pipeline::getMax() {
+  return  ::im::halide::Scalar::Pipeline(_typeless.getPointerField(4));
 }
 #endif  // !CAPNP_LITE
-inline void FilterArgument::Builder::setMax( ::halide::Scalar::Reader value) {
-  ::capnp::_::PointerHelpers< ::halide::Scalar>::set(
+inline void FilterArgument::Builder::setMax( ::im::halide::Scalar::Reader value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Scalar>::set(
       _builder.getPointerField(4 * ::capnp::POINTERS), value);
 }
-inline  ::halide::Scalar::Builder FilterArgument::Builder::initMax() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::init(
+inline  ::im::halide::Scalar::Builder FilterArgument::Builder::initMax() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::init(
       _builder.getPointerField(4 * ::capnp::POINTERS));
 }
 inline void FilterArgument::Builder::adoptMax(
-    ::capnp::Orphan< ::halide::Scalar>&& value) {
-  ::capnp::_::PointerHelpers< ::halide::Scalar>::adopt(
+    ::capnp::Orphan< ::im::halide::Scalar>&& value) {
+  ::capnp::_::PointerHelpers< ::im::halide::Scalar>::adopt(
       _builder.getPointerField(4 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::halide::Scalar> FilterArgument::Builder::disownMax() {
-  return ::capnp::_::PointerHelpers< ::halide::Scalar>::disown(
+inline ::capnp::Orphan< ::im::halide::Scalar> FilterArgument::Builder::disownMax() {
+  return ::capnp::_::PointerHelpers< ::im::halide::Scalar>::disown(
       _builder.getPointerField(4 * ::capnp::POINTERS));
 }
 
@@ -2508,29 +2509,29 @@ inline bool FilterMetadata::Reader::hasArguments() const {
 inline bool FilterMetadata::Builder::hasArguments() {
   return !_builder.getPointerField(0 * ::capnp::POINTERS).isNull();
 }
-inline  ::capnp::List< ::halide::FilterArgument>::Reader FilterMetadata::Reader::getArguments() const {
-  return ::capnp::_::PointerHelpers< ::capnp::List< ::halide::FilterArgument>>::get(
+inline  ::capnp::List< ::im::halide::FilterArgument>::Reader FilterMetadata::Reader::getArguments() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::im::halide::FilterArgument>>::get(
       _reader.getPointerField(0 * ::capnp::POINTERS));
 }
-inline  ::capnp::List< ::halide::FilterArgument>::Builder FilterMetadata::Builder::getArguments() {
-  return ::capnp::_::PointerHelpers< ::capnp::List< ::halide::FilterArgument>>::get(
+inline  ::capnp::List< ::im::halide::FilterArgument>::Builder FilterMetadata::Builder::getArguments() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::im::halide::FilterArgument>>::get(
       _builder.getPointerField(0 * ::capnp::POINTERS));
 }
-inline void FilterMetadata::Builder::setArguments( ::capnp::List< ::halide::FilterArgument>::Reader value) {
-  ::capnp::_::PointerHelpers< ::capnp::List< ::halide::FilterArgument>>::set(
+inline void FilterMetadata::Builder::setArguments( ::capnp::List< ::im::halide::FilterArgument>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::im::halide::FilterArgument>>::set(
       _builder.getPointerField(0 * ::capnp::POINTERS), value);
 }
-inline  ::capnp::List< ::halide::FilterArgument>::Builder FilterMetadata::Builder::initArguments(unsigned int size) {
-  return ::capnp::_::PointerHelpers< ::capnp::List< ::halide::FilterArgument>>::init(
+inline  ::capnp::List< ::im::halide::FilterArgument>::Builder FilterMetadata::Builder::initArguments(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::im::halide::FilterArgument>>::init(
       _builder.getPointerField(0 * ::capnp::POINTERS), size);
 }
 inline void FilterMetadata::Builder::adoptArguments(
-    ::capnp::Orphan< ::capnp::List< ::halide::FilterArgument>>&& value) {
-  ::capnp::_::PointerHelpers< ::capnp::List< ::halide::FilterArgument>>::adopt(
+    ::capnp::Orphan< ::capnp::List< ::im::halide::FilterArgument>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::im::halide::FilterArgument>>::adopt(
       _builder.getPointerField(0 * ::capnp::POINTERS), kj::mv(value));
 }
-inline ::capnp::Orphan< ::capnp::List< ::halide::FilterArgument>> FilterMetadata::Builder::disownArguments() {
-  return ::capnp::_::PointerHelpers< ::capnp::List< ::halide::FilterArgument>>::disown(
+inline ::capnp::Orphan< ::capnp::List< ::im::halide::FilterArgument>> FilterMetadata::Builder::disownArguments() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::im::halide::FilterArgument>>::disown(
       _builder.getPointerField(0 * ::capnp::POINTERS));
 }
 
@@ -2598,6 +2599,7 @@ inline ::capnp::Orphan< ::capnp::Text> FilterMetadata::Builder::disownName() {
       _builder.getPointerField(2 * ::capnp::POINTERS));
 }
 
+}  // namespace
 }  // namespace
 
 #endif  // CAPNP_INCLUDED_b6c5a11aca2271f3_

@@ -2,7 +2,7 @@
 @0xb6c5a11aca2271f3;
 
 using Cxx = import "/capnp/c++.capnp";
-$Cxx.namespace("halide");
+$Cxx.namespace("im::halide");
 
 struct TypedBuffer {
     buffer      @0 :Buffer;

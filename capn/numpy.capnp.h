@@ -51,6 +51,8 @@ CAPNP_DECLARE_ENUM(NumpyTypes, 9d4a7b0059734d02);
 }  // namespace schemas
 }  // namespace capnp
 
+namespace im {
+namespace numpy {
 
 typedef ::capnp::schemas::NumpyTypes_9d4a7b0059734d02 NumpyTypes;
 
@@ -58,5 +60,7 @@ typedef ::capnp::schemas::NumpyTypes_9d4a7b0059734d02 NumpyTypes;
 
 // =======================================================================================
 
+}  // namespace
+}  // namespace
 
 #endif  // CAPNP_INCLUDED_a4ff3451b6f64e62_

@@ -1431,6 +1431,7 @@ const ::capnp::_::RawSchema s_82be6ce3dc6dcccc = {
 
 // =======================================================================================
 
+namespace im {
 namespace halide {
 
 // TypedBuffer
@@ -1533,5 +1534,6 @@ constexpr ::capnp::_::RawBrandedSchema const* FilterMetadata::_capnpPrivate::bra
 #endif  // !CAPNP_LITE
 
 
+}  // namespace
 }  // namespace
 

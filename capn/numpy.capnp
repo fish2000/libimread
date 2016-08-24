@@ -1,6 +1,9 @@
 
 @0xa4ff3451b6f64e62;
 
+using Cxx = import "/capnp/c++.capnp";
+$Cxx.namespace("im::numpy");
+
 # enum NPY_TYPES {    NPY_BOOL=0,
 #                     NPY_BYTE, NPY_UBYTE,
 #                     NPY_SHORT, NPY_USHORT,
