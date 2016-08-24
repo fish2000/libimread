@@ -9,8 +9,6 @@
 #include <stack>
 #include <unistd.h>
 
-#include <libimread/libimread.hpp>
-
 namespace filesystem {
     
     /// forward declaration for these next few prototypes/templates

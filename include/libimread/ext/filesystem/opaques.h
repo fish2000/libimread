@@ -13,7 +13,6 @@
 #include <memory>
 #include <type_traits>
 
-#include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
 
 namespace filesystem {

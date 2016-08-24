@@ -15,9 +15,6 @@
 #include <functional>
 #include <initializer_list>
 
-#include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
-
 namespace filesystem {
     
     /// forward declaration for these next few prototypes/templates

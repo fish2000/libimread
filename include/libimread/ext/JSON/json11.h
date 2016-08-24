@@ -17,11 +17,12 @@
 #include <set>
 #include <string>
 #include <ostream>
+#include <exception>
 #include <type_traits>
 #include <initializer_list>
 
-#include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
+// #include <libimread/libimread.hpp>
+// #include <libimread/errors.hh>
 
 using Base = std::integral_constant<uint8_t, 1>;
 using BaseType = Base::value_type;
@@ -533,14 +534,14 @@ class Json {
         std::string dumptmp() const;
         static Json load(std::string const& source);
         
-        struct parse_error : im::JSONParseError {
+        struct parse_error : std::runtime_error {
             unsigned line = 0, col = 0;
             parse_error(std::string const& msg, std::istream& in);
         };
         
-        struct use_error : im::JSONUseError {
+        struct use_error : std::exception {
             use_error(std::string const& msg)
-                :im::JSONUseError(msg)
+                :std::exception()
                 {}
         };
         

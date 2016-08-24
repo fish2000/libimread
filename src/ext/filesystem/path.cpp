@@ -27,10 +27,12 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/pystring.hh>
+#include <libimread/errors.hh>
 #include <libimread/rehash.hh>
 
 using im::byte;

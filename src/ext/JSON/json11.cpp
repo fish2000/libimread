@@ -19,6 +19,7 @@
 #include <libimread/ext/JSON/json11.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/rehash.hh>
 
@@ -111,7 +112,7 @@ namespace detail {
 }
 
 Json::parse_error::parse_error(std::string const& msg, std::istream& in)
-    :im::JSONParseError(msg)
+    :std::runtime_error(msg)
     {
         line = detail::currpos(in, &col);
     }

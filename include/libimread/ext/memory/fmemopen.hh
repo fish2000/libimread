@@ -21,7 +21,6 @@
 #include <cstdio>
 #include <memory>
 #include <type_traits>
-#include <libimread/libimread.hpp>
 
 /**
  * A BSD port of the fmemopen Linux method using funopen.
