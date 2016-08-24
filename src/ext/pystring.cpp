@@ -31,7 +31,6 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <libimread/libimread.hpp>
 #include <libimread/ext/pystring.hh>
 
 #include <algorithm>
