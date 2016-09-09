@@ -45,7 +45,7 @@ namespace py {
     PyObject* string(char const*, std::size_t);
     PyObject* string(char);
     PyObject* format(char const*, ...);
-    PyObject* format(std::string const&, ...);
+    // PyObject* format(std::string const&, ...);
     PyObject* object(PyObject* arg);
     PyObject* object(PyFileObject* arg);
     PyObject* object(PyStringObject* arg);
@@ -160,7 +160,7 @@ namespace py {
         
         __attribute__((format(printf, 1, 2)))
         void argcheck(const char *format, ...);
-        va_list&& argcompand(...);
+        va_list&& argcompand(std::nullptr_t, ...);
         
         #define static_argcheck(disambiguate, ...) \
             if (false) { py::impl::argcheck(__VA_ARGS__); }
@@ -178,7 +178,7 @@ namespace py {
         
         /// dispatch using argument pack companded as a va_list:
         return py::convert(formatstring,
-               py::impl::argcompand(std::forward<Args>(args)...));
+               py::impl::argcompand(nullptr, std::forward<Args>(args)...));
     }
     
     /* >>>>>>>>>>>>>>>>>>> TUPLIZE <<<<<<<<<<<<<<<<<<<< */

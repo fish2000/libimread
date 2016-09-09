@@ -1,8 +1,10 @@
 
-TESTS = batch compat jupyter_repr planar_ops read readwrite structcode
+# TESTS = batch compat jupyter_repr planar_ops read readwrite structcode
+# TESTS = batch compat planar_ops read readwrite structcode
+TESTS = structcode readwrite read planar_ops compat batch
 
 TESTDIR = im/tests
-PYTESTARGS = --color=yes --verbose -r a --showlocals --durations=20 --tb=long
+PYTESTARGS = --color=yes --verbose -r a --showlocals --durations=10 --tb=long
 PYTESTS = $(TESTS:%=$(TESTDIR)/test_%.py)
 
 .PHONY: clean distclean dist buildext upload test testall alltests im/tests/test_%.py
@@ -51,10 +53,7 @@ testall:
 	py.test -k 'not hybridimage and not singular and not jupyter' $(PYTESTARGS)
 
 test:
-	@$(foreach pytest, $(PYTESTS), py.test $(pytest) $(PYTESTARGS);)
-
-profile:
-	py.test --color=yes --verbose -r a --profile-svg
+	@$(foreach pytest, $(PYTESTS), echo "py.test $(pytest) $(PYTESTARGS)" && py.test $(pytest) $(PYTESTARGS);)
 
 upload:
 	python setup.py sdist upload

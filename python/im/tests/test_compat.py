@@ -84,7 +84,7 @@ class CompatibilityTests(BaseCase):
         self.assertTrue(imread.supports_format('webp'))
         self.assertTrue(imread.supports_format('hdf5'))
     
-    def _test_imread_imread_imsave(self):
+    def test_imread_imread_imsave(self):
         """ Load JPG files by filename, with both versions of imread:
             compat.imread (ours) and luispedro imread (the orig);
             compare the returned arrays with numpy.all();
@@ -156,8 +156,8 @@ class CompatibilityTests(BaseCase):
                 pil_image = im.to_PIL(image, mode="RGB")
                 self.assertIsNotNone(pil_image)
                 ''' BUGGGG: TIFs are still fucking transposed '''
-                # self.assertEqual(pil_image.width,  image.width)
-                # self.assertEqual(pil_image.height, image.height)
+                self.assertEqual(pil_image.width,  image.width)
+                self.assertEqual(pil_image.height, image.height)
     
     def test_pvr_convert_to_PIL(self):
         ''' Load some PVR files,

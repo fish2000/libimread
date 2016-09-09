@@ -285,7 +285,9 @@ namespace py {
                 /// NB. this has to visit the internal vector (maybe?!):
                 if (!internal.empty()) {
                     for (PyObject* item : internal) {
-                        Py_VISIT(item);
+                        if (item) {
+                            Py_VISIT(item);
+                        }
                     }
                 }
                 Py_VISIT(readoptDict);

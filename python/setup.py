@@ -104,27 +104,43 @@ define_macros.append(
     ('PY_ARRAY_UNIQUE_SYMBOL', 'YO_DOGG'))
 
 if DEBUG:
-    if int(DEBUG) > 2:
+    if int(DEBUG) > 1:
         define_macros.append(
-            ('IM_DEBUG', DEBUG))
+            ('DEBUG', 1))
         define_macros.append(
             ('_GLIBCXX_DEBUG', DEBUG))
+        define_macros.append(
+            ('IM_DEBUG', DEBUG))
         define_macros.append(
             ('IM_VERBOSE', VERBOSE))
         define_macros.append(
             ('IM_COLOR_TRACE', COLOR_TRACE))
         auxilliary_macros.append(
-            ('IM_DEBUG', DEBUG))
+            ('DEBUG', 1))
         auxilliary_macros.append(
             ('_GLIBCXX_DEBUG', DEBUG))
+        auxilliary_macros.append(
+            ('IM_DEBUG', DEBUG))
         auxilliary_macros.append(
             ('IM_VERBOSE', VERBOSE))
         auxilliary_macros.append(
             ('IM_COLOR_TRACE', COLOR_TRACE))
+    elif int(DEBUG) == 1:
+        define_macros.append(
+            ('IM_DEBUG', DEBUG))
+        define_macros.append(
+            ('IM_VERBOSE', VERBOSE))
+        define_macros.append(
+            ('IM_COLOR_TRACE', COLOR_TRACE))
+else:
+    define_macros.append(
+        ('NDEBUG', 1))
+    undef_macros.extend(
+        ['IM_DEBUG', 'IM_VERBOSE', 'IM_COLOR_TRACE', '_GLIBCXX_DEBUG'])
 
 # undef_macros = ['IM_VERBOSE', 'IM_COLOR_TRACE']
-
 # print('')
+
 terminal_print("debug level: %s" % DEBUG)
 terminal_print("verbosity: %s" % VERBOSE)
 terminal_print("color trace: %s" % COLOR_TRACE)
@@ -162,7 +178,7 @@ extensions = {
         "im/src/bufferview.cpp",
         "im/src/detail.cpp",
         "im/src/exceptions.cpp",
-        "im/src/flattery.cpp",
+        # "im/src/flattery.cpp",
         "im/src/gil.cpp",
         "im/src/gil-io.cpp",
         "im/src/hybrid.cpp",
@@ -175,7 +191,7 @@ extensions = {
     ],
 }
 
-libraries = ['imread']
+link_libraries = ['imread']
 
 print('')
 terminal_print("SETUPTOOLS BUILD CONFIGGG", asterisk='=')
@@ -189,8 +205,8 @@ print('')
 print(cyan(" INCLUDE DIRECTORIES: %i" % len(include_dirs)))
 print(cyan(pformat(include_dirs)))
 print('')
-print(cyan(" LINKED LIBRARIES: %i" % len(libraries)))
-print(cyan(" " + ", ".join(libraries)))
+print(cyan(" LINKED LIBRARIES: %i" % len(link_libraries)))
+print(cyan(" " + ", ".join(link_libraries)))
 print('')
 print(cyan(" GENERATOR LIBRARIES: %i" % len(generator_libs)))
 print(cyan(" " + ", ".join(generator_libs)))
@@ -216,7 +232,7 @@ for key, sources in extensions.iteritems():
     ext_modules.append(Extension("im.%s" % key,
         libraries=map(
             lambda lib: lib.endswith('.dylib') and lib.split('.')[0] or lib,
-                libraries),
+                link_libraries),
         library_dirs=library_dirs,
         include_dirs=include_dirs,
         undef_macros=undef_macros,

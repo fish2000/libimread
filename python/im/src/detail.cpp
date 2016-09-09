@@ -48,12 +48,18 @@ namespace py {
     }
     PyObject* format(char const* format, ...) {
         va_list arguments;
-        return PyString_FromFormatV(format, arguments);
+        va_start(arguments, format);
+        PyObject* out = PyString_FromFormatV(format, arguments);
+        va_end(arguments);
+        return out;
     }
-    PyObject* format(std::string const& format, ...) {
-        va_list arguments;
-        return PyString_FromFormatV(format.c_str(), arguments);
-    }
+    // PyObject* format(std::string const& format, ...) {
+    //     va_list arguments;
+    //     va_start(arguments, format);
+    //     PyObject* out = PyString_FromFormatV(format.c_str(), arguments);
+    //     va_end(arguments);
+    //     return out;
+    // }
     #elif PY_MAJOR_VERSION >= 3
     PyObject* string(std::string const& s) {
         return PyBytes_FromStringAndSize(s.c_str(), s.size());
@@ -78,12 +84,18 @@ namespace py {
     }
     PyObject* format(char const* format, ...) {
         va_list arguments;
-        return PyBytes_FromFormatV(format, arguments);
+        va_start(arguments, format);
+        PyObject* out = PyString_FromFormatV(format, arguments);
+        va_end(arguments);
+        return out;
     }
-    PyObject* format(std::string const& format, ...) {
-        va_list arguments;
-        return PyBytes_FromFormatV(format.c_str(), arguments);
-    }
+    // PyObject* format(std::string const& format, ...) {
+    //     va_list arguments;
+    //     va_start(arguments, format);
+    //     PyObject* out = PyString_FromFormatV(format.c_str(), arguments);
+    //     va_end(arguments);
+    //     return out;
+    // }
     #endif
     
     PyObject* object(PyObject* arg) {
@@ -175,9 +187,12 @@ namespace py {
     
     namespace impl {
         
-        va_list&& argcompand(...) {
+        va_list&& argcompand(std::nullptr_t nothing, ...) {
             va_list arguments;
-            return std::move(arguments);
+            va_start(arguments, nothing);
+            va_list&& out = std::move(arguments);
+            va_end(arguments);
+            return std::move(out);
         }
         
     }
