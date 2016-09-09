@@ -1,3 +1,9 @@
+cmake_minimum_required(VERSION 3.3)
+project(vdb-client LANGUAGES C CXX)
+
+set(vdb_client_VERSION_MAJOR "0")
+set(vdb_client_VERSION_MINOR "1")
+set(vdb_client_VERSION_PATCH "0")
 
 set(LIB_NAME vdb-client)
 

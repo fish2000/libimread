@@ -1,11 +1,11 @@
 # Author: Alexander Böhn (with Félix C. Morency)
 # © 2011.10 -- GPL, Motherfuckers
 cmake_minimum_required(VERSION 3.3)
-project(imagecompression LANGUAGES C CXX)
+project(vdb LANGUAGES C CXX)
 
-set(imagecompression_VERSION_MAJOR "0")
-set(imagecompression_VERSION_MINOR "1")
-set(imagecompression_VERSION_PATCH "0")
+set(vdb_VERSION_MAJOR "0")
+set(vdb_VERSION_MINOR "1")
+set(vdb_VERSION_PATCH "0")
 
 find_package(FLTK REQUIRED)
 find_package(zlib REQUIRED)
@@ -15,17 +15,17 @@ if(APPLE)
     find_library(COCOA_FMWK Cocoa)
     find_library(AGL_FMWK AGL)
     find_library(OPENGL_FMWK OpenGL)
-    find_library(APPLICATIONSERVICES_FMWK ApplicationServices)
+    find_library(APPSERVICES_FMWK ApplicationServices)
     mark_as_advanced(CARBON_FMWK
                      COCOA_FMWK
                      AGL_FMWK
                      OPENGL_FMWK
-                     APPLICATIONSERVICES_FMWK)
+                     APPSERVICES_FMWK)
     set(FMWKS ${CARBON_FMWK}
               ${COCOA_FMWK}
               ${AGL_FMWK}
               ${OPENGL_FMWK}
-              ${APPLICATIONSERVICES_FMWK})
+              ${APPSERVICES_FMWK})
     set(FLTK_CXX_FLAGS)
     set(FLTK_LD_FLAGS)
 else(APPLE)

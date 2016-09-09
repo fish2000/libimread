@@ -55,14 +55,6 @@ if(APPLE)
     check_include_file(objc/message.h                   HAVE_OBJC_MESSAGE_H)
     check_include_file(objc/runtime.h                   HAVE_OBJC_RUNTIME_H)
     
-    if(HAVE_OBJC_RUNTIME_H)
-        # set(CMAKE_REQUIRED_INCLUDES "objc/message.h")
-        # check_function_exists(objc_msgSend              HAVE_OBJC_MSGSEND_F)
-        # check_function_exists(objc_msgSend_fpret        HAVE_OBJC_MSGSEND_FPRET_F)
-        # check_function_exists(objc_msgSend_stret        HAVE_OBJC_MSGSEND_STRET_F)
-        # set(CMAKE_REQUIRED_INCLUDES)
-    endif(HAVE_OBJC_RUNTIME_H)
-    
     message(STATUS "Checking for /dev/autofs_nowait")
     if(EXISTS "/dev/autofs_nowait")
         message(STATUS "Checking for /dev/autofs_nowait - found")
@@ -96,10 +88,6 @@ else(APPLE)
         CACHE BOOL
         "<objc/runtime.h> presence"
         FORCE)
-    # set(HAVE_SYS_MMAN_H NO
-    #     CACHE BOOL
-    #     "<sys/mman.h> presence"
-    #     FORCE)
     set(HAVE_AUTOFS_NOWAIT NO
         CACHE BOOL
         "/dev/autofs_nowait presence"
