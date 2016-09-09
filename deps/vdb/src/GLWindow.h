@@ -33,8 +33,8 @@ struct ClientState {
             colors[i].r = colors[i].g = colors[i].b = 0.5f;
         }
     }
-    std::vector<char *> commands;
-    std::map<int,int> client_key_to_string;
+    std::vector<char*> commands;
+    std::map<int, int> client_key_to_string;
     Color colors[N_COLOR_GROUPS];
     int group;
 };
@@ -46,10 +46,10 @@ enum ColorBy {
 };
 
 struct GLWindow : public Fl_Gl_Window {
-    double point_size;                       
-    double filter_value;                     
+    double point_size;
+    double filter_value;
     void draw();
-    void resize(int X,int Y,int W,int H);
+    void resize(int X, int Y, int W, int H);
     
     void interactive_clear();
     int handle(int event);
@@ -66,26 +66,26 @@ struct GLWindow : public Fl_Gl_Window {
     void mouseDragged(int x, int y);
     void scrollWheel(int x, int y, int delta_x, int delta_y);
     void prepareOpenGL(int width, int height);
-    void draw_command(ClientState & state, const char * line);
-    void command(int client_id, const char * line);
+    void draw_command(ClientState & state, const char* line);
+    void command(int client_id, const char* line);
     void set_color_by(unsigned int idx);
     void refresh_legend();
-    GLWindow(int X,int Y,int W,int H);
+    GLWindow(int X, int Y, int W, int H);
     
     recCamera camera;
-    GLfloat worldRotation [4];
-    GLfloat objectRotation [4];
+    GLfloat worldRotation[4];
+    GLfloat objectRotation[4];
     GLfloat shapeSize;
     int scroll_delta[2];
     BBox current_bounds;
     bool refresh_posted;
     bool clear_posted;
-    Frame * frame;
+    Frame* frame;
     StringTable string_table;
     ColorBy color_by;
-    std::map< int, ClientState> client_state;
+    std::map<int, ClientState> client_state;
     LabelTable label_table;
-    Fl_Browser * legend;
+    Fl_Browser* legend;
     ColorBy legend_color_by;
 };
 

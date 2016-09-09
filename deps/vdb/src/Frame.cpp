@@ -56,49 +56,57 @@ static void Frame_init_gl() {
 #else
 static void Frame_init_gl() {}
 #endif
-void BBox_empty(BBox * b) {
+
+void BBox_empty(BBox* b) {
     for(int i = 0; i < 3; i++)
         b->data[i] = FLT_MAX;
     for(int i = 0; i < 3; i++)
         b->data[i+3] = FLT_MIN;
 }
-void BBox_all(BBox * b) {
+
+void BBox_all(BBox* b) {
     for(int i = 0; i < 3; i++)
         b->data[i] = FLT_MIN;
     for(int i = 0; i < 3; i++)
         b->data[i+3] = FLT_MAX;
 }
-void BBox_add(BBox * b, float * point, BBox * r) {
+
+void BBox_add(BBox* b, float* point, BBox* r) {
     for(int i = 0; i < 3; i++)
-        r->data[i] = std::min(b->data[i],point[i]);
+        r->data[i] = std::min(b->data[i], point[i]);
     for(int i = 0; i < 3; i++)
-        r->data[i+3] = std::max(b->data[i+3],point[i]);
+        r->data[i+3] = std::max(b->data[i+3], point[i]);
 }
-void BBox_union(BBox * a, BBox * b, BBox * r) {
+
+void BBox_union(BBox* a, BBox* b, BBox* r) {
     for(int i = 0; i < 3; i++)
-        r->data[i] = std::min(a->data[i],b->data[i]);
+        r->data[i] = std::min(a->data[i], b->data[i]);
     for(int i = 0; i < 3; i++)
-        r->data[i+3] = std::max(a->data[i+3],b->data[i+3]);
+        r->data[i+3] = std::max(a->data[i+3], b->data[i+3]);
 }
-void BBox_intersect(BBox * a, BBox * b, BBox * r) {
+
+void BBox_intersect(BBox* a, BBox* b, BBox* r) {
     for(int i = 0; i < 3; i++)
-        r->data[i] = std::max(a->data[i],b->data[i]);
+        r->data[i] = std::max(a->data[i], b->data[i]);
     for(int i = 0; i < 3; i++)
-        r->data[i+3] = std::min(a->data[i+3],b->data[i+3]);
+        r->data[i+3] = std::min(a->data[i+3], b->data[i+3]);
 }
-bool BBox_equal(BBox * a, BBox * b) {
+
+bool BBox_equal(BBox* a, BBox* b) {
     for(int i = 0; i < 6; i++)
         if(b->data[i] != b->data[i])
             return false;
     return true;
 }
-float BBox_diagonal_length(BBox * b) {
+
+float BBox_diagonal_length(BBox* b) {
     float dx = std::max(0.f,b->x1 - b->x0);
     float dy = std::max(0.f,b->y1 - b->y0);
     float dz = std::max(0.f,b->z1 - b->z0);
     return sqrtf(dx * dx + dy * dy + dz * dz);
 }
-bool BBox_center(BBox * b, float * r) {
+
+bool BBox_center(BBox* b, float* r) {
     r[0] = (b->x0 + b->x1) / 2.f;
     r[1] = (b->y0 + b->y1) / 2.f;
     r[2] = (b->z0 + b->z1) / 2.f;
@@ -120,6 +128,7 @@ struct DisplayBuffer {
     bool has_buffers;
     GLuint vbo;
     GLuint ibo;
+    
     void init() {
         dirty = true;
         has_buffers = false;
@@ -127,18 +136,18 @@ struct DisplayBuffer {
     }
     
     void refresh() {
-        if(dirty) {
-            if(has_buffers) {
-                glDeleteBuffers(1,&vbo);
-                glDeleteBuffers(1,&ibo);
+        if (dirty) {
+            if (has_buffers) {
+                glDeleteBuffers(1, &vbo);
+                glDeleteBuffers(1, &ibo);
             }
             has_buffers = true;
-            glGenBuffers(1,&vbo);
-            glGenBuffers(1,&ibo);
+            glGenBuffers(1, &vbo);
+            glGenBuffers(1, &ibo);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
             
-            if(pts.size() > 0) {
+            if (pts.size() > 0) {
                 glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * pts.size(), &pts[0], GL_STATIC_DRAW);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * idx.size(), &idx[0], GL_STATIC_DRAW);
             }
@@ -146,9 +155,10 @@ struct DisplayBuffer {
             dirty = false;
         }
     }
+    
     void draw(GLenum mode, int color_group, size_t begin, size_t end_) {
         size_t end = std::min(end_,n_elements_in_draw_list);
-        if(begin < end) {
+        if (begin < end) {
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
             glEnableClientState(GL_VERTEX_ARRAY);
@@ -158,11 +168,13 @@ struct DisplayBuffer {
             glDrawElements(mode, end - begin, GL_UNSIGNED_INT, NULL);
         }
     }
+    
     void clear() {
         dirty = true;
         pts.clear();
         idx.clear();
     }
+    
     void addIndex() {
         dirty = true;
         idx.push_back(idx.size());
@@ -171,15 +183,18 @@ struct DisplayBuffer {
         dirty = true;
         idx.push_back(i);
     }
-    void addPoint(Point * p) {
+    
+    void addPoint(Point* p) {
         dirty = true;
         pts.push_back(*p);
     }
+    
     void destroy() {
-        glDeleteBuffers(1,&vbo);
-        glDeleteBuffers(1,&ibo);
+        glDeleteBuffers(1, &vbo);
+        glDeleteBuffers(1, &ibo);
     }
 };
+
 struct Normal {
     size_t line_idx; //index into lines list where the first point describing this normal lives
     size_t point_idx; //index into poitns list where point for normal is
@@ -195,7 +210,7 @@ struct Frame {
     DisplayBuffer tris;
     DisplayBuffer lines;
     DisplayBuffer points;
-    Color * colors;
+    Color* colors;
     BBox bounds;
     float last_diag;
     bool normals_dirty;
@@ -204,28 +219,32 @@ struct Frame {
     size_t low,high;
     float line_size,point_size;
 };
-static void Frame_initPoint(Frame * f, float * data, Point * p) {
+
+static void Frame_initPoint(Frame* f, float* data, Point * p) {
     p->x = data[0];
     p->y = data[1];
     p->z = data[2];
     assert(f->colors);
-    memcpy(&p->colors[0],f->colors, sizeof(Color) * N_COLOR_GROUPS);
+    memcpy(&p->colors[0], f->colors, sizeof(Color) * N_COLOR_GROUPS);
 }
-static void Frame_addPoints(Frame * f, DisplayBuffer * buffer, int n, float * ps) {
-    for(int i = 0; i < n; i++) {
+
+static void Frame_addPoints(Frame* f, DisplayBuffer* buffer, int n, float* ps) {
+    for (int i = 0; i < n; i++) {
         Point p;
         Frame_initPoint(f, ps + i * 3, &p);
         buffer->addPoint(&p);
         buffer->addIndex();
-        BBox_add(&f->bounds,ps + i * 3,&f->bounds);
+        BBox_add(&f->bounds, ps + i * 3, &f->bounds);
     }
 }
-static void Frame_mark(Frame * f) {
+
+static void Frame_mark(Frame* f) {
     Sizes s = { f->tris.idx.size(), f->lines.idx.size(), f->points.idx.size() };
     f->history.push_back(s);
 }
-Frame * Frame_init() {
-    Frame * f = new Frame;
+
+Frame* Frame_init() {
+    Frame* f = new Frame;
     f->point_size = 5.0;
     f->line_size = 1.0;
     
@@ -239,13 +258,13 @@ Frame * Frame_init() {
     return f;
 }
 
-void Frame_refresh(Frame * f, BBox * draw_box) {
+void Frame_refresh(Frame* f, BBox* draw_box) {
     float diag = BBox_diagonal_length(draw_box);
-    if(f->last_diag != diag || f->normals_dirty) {
+    if (f->last_diag != diag || f->normals_dirty) {
         
-        for(size_t i = 0; i < f->normals.size(); i++) {
-            Normal & n = f->normals[i];
-            Point * p = &f->lines.pts[n.line_idx];
+        for (size_t i = 0; i < f->normals.size(); i++) {
+            Normal& n = f->normals[i];
+            Point* p = &f->lines.pts[n.line_idx];
             float dx = p[1].x - p[0].x;
             float dy = p[1].y - p[0].y;
             float dz = p[1].z - p[0].z;
@@ -255,7 +274,7 @@ void Frame_refresh(Frame * f, BBox * draw_box) {
             p[1].x = p[0].x + s * dx;
             p[1].y = p[0].y + s * dy;
             p[1].z = p[0].z + s * dz;
-            memcpy(&f->points.pts[n.point_idx].x, &p[1].x,sizeof(float) * 3);
+            memcpy(&f->points.pts[n.point_idx].x, &p[1].x, sizeof(float) * 3);
             f->lines.dirty = true;
             f->points.dirty = true;
         }
@@ -265,7 +284,8 @@ void Frame_refresh(Frame * f, BBox * draw_box) {
     f->lines.refresh();
     f->points.refresh();
 }
-void Frame_clear(Frame * f,bool reset_bounds) {
+
+void Frame_clear(Frame* f,bool reset_bounds) {
     f->normals_dirty = false;
     f->normals.clear();
     f->tris.clear();
@@ -275,17 +295,19 @@ void Frame_clear(Frame * f,bool reset_bounds) {
     f->low = 0;
     f->high = INT_MAX;
     Frame_mark(f);
-    if(reset_bounds)
+    if (reset_bounds) {
         BBox_empty(&f->bounds);
+    }
 }
-void Frame_draw(Frame * f, BBox * draw_box, float point_size, int color_group) {
+
+void Frame_draw(Frame* f, BBox* draw_box, float point_size, int color_group) {
     Frame_init_gl();
     Frame_refresh(f, draw_box);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     
-    Sizes & l = f->history[std::min(f->low,f->history.size() - 1)];
-    Sizes & h = f->history[std::min(f->high,f->history.size() - 1)];
+    Sizes& l = f->history[std::min(f->low,  f->history.size() - 1)];
+    Sizes& h = f->history[std::min(f->high, f->history.size() - 1)];
     
     glPointSize(point_size);
     f->tris.draw(GL_TRIANGLES,color_group,l.n_tri,h.n_tri);
@@ -294,31 +316,41 @@ void Frame_draw(Frame * f, BBox * draw_box, float point_size, int color_group) {
     
     glPopMatrix();
 }
-void Frame_setColor(Frame * f, Color * colors) {
+
+void Frame_setColor(Frame* f, Color * colors) {
     f->colors = colors;
 }
-size_t Frame_nObjects(Frame * f) {
+
+size_t Frame_nObjects(Frame* f) {
     return f->history.size();
 }
-void Frame_setVisibleRange(Frame * f, size_t l, size_t h) {
+
+void Frame_setVisibleRange(Frame* f, size_t l, size_t h) {
     f->low = l;
     f->high = h;
 }
-void Frame_addTriangle(Frame * f, float * data){  // (x,y,z) x 3
-    Frame_addPoints(f,&f->tris,3,data);
+
+void Frame_addTriangle(Frame* f, float* data){  // (x,y,z) x 3
+    Frame_addPoints(f, &f->tris, 3, data);
     Frame_mark(f);
 }
-void Frame_addLine(Frame * f, float * data) { // (x,y,z) x 2
-    Frame_addPoints(f,&f->lines,2,data);
+
+void Frame_addLine(Frame* f, float* data) { // (x,y,z) x 2
+    Frame_addPoints(f, &f->lines, 2, data);
     Frame_mark(f);
 }
-void Frame_addPoint(Frame * f, float * data) { //(x,y,z) x 1
-    Frame_addPoints(f,&f->points,1,data);
+
+void Frame_addPoint(Frame* f, float* data) { //(x,y,z) x 1
+    Frame_addPoints(f, &f->points, 1, data);
     Frame_mark(f);
 }
-void Frame_addNormal(Frame * f, float * data) { //ray of (x,y,z) (dx,dy,dz)
+
+void Frame_addNormal(Frame* f, float* data) { //ray of (x,y,z) (dx,dy,dz)
     f->normals_dirty = true;
-    float p[6] = {data[0],data[1],data[2], data[0] + data[3],data[1] + data[4],data[2] + data[5]};
+    float p[6] = { data[0], data[1], data[2],
+                   data[0] + data[3],
+                   data[1] + data[4],
+                   data[2] + data[5] };
     Normal n;
     n.line_idx = f->lines.pts.size();
     n.point_idx = f->points.pts.size();
@@ -327,12 +359,14 @@ void Frame_addNormal(Frame * f, float * data) { //ray of (x,y,z) (dx,dy,dz)
     Frame_addLine(f, p);
     Frame_mark(f);
 }
-void Frame_free(Frame * f) {
+
+void Frame_free(Frame* f) {
     f->tris.destroy();
     f->lines.destroy();
     f->points.destroy();
     delete f;
 }
-void Frame_getBBox(Frame * f, BBox * b) {
-    memcpy(b,&f->bounds,sizeof(BBox));
+
+void Frame_getBBox(Frame* f, BBox* b) {
+    memcpy(b, &f->bounds, sizeof(BBox));
 }

@@ -1,13 +1,16 @@
-#ifndef __VDB_H
-#define __VDB_H
+#ifndef __VDB_IMPL_H
+#define __VDB_IMPL_H
 
 #define VDB_CALL static inline
 
 VDB_CALL int vdb_point(float x, float y, float z);
-VDB_CALL int vdb_line(float x0, float y0, float z0, 
+
+VDB_CALL int vdb_line(float x0, float y0, float z0,
                       float x1, float y1, float z1);
+
 VDB_CALL int vdb_normal(float x, float y, float z, 
                         float dx, float dy, float dz);
+
 VDB_CALL int vdb_triangle(float x0, float y0, float z0, 
                           float x1, float y1, float z1,
                           float x2, float y2, float z2);
@@ -30,16 +33,14 @@ VDB_CALL int vdb_frame();
 
 //versions that take direct pointers to floating point data
 //this works well if you have a Point or Line struct
-VDB_CALL int vdb_point_v(void * p);
-VDB_CALL int vdb_line_v(void * p);
-VDB_CALL int vdb_normal_v(void * p);
-VDB_CALL int vdb_triangle_v(void * p);                 
-VDB_CALL int vdb_color_v(void * c);
-
-
+VDB_CALL int vdb_point_v(void* p);
+VDB_CALL int vdb_line_v(void* p);
+VDB_CALL int vdb_normal_v(void* p);
+VDB_CALL int vdb_triangle_v(void* p);
+VDB_CALL int vdb_color_v(void* c);
 
 VDB_CALL int vdb_sample(float p);
-VDB_CALL int vdb_label(const char * lbl); 
+VDB_CALL int vdb_label(const char* lbl);
 VDB_CALL int vdb_label(int i); 
 
 //for simplicity all the implementation to interface with vdb is in this header, just include it in your project
@@ -103,12 +104,12 @@ VDB_CALL void vdb_exit() {
     }
 }
 VDB_CALL int vdb_init() {
-    if(!__vdb.is_initialized) {
+    if (!__vdb.is_initialized) {
         __vdb.is_initialized = 1;
         __vdb.sample_enabled = 1;
         vdb_os_init();
         __vdb.fd = socket(AF_INET, SOCK_STREAM, 0);
-        if(__vdb.fd == -1) {
+        if (__vdb.fd == -1) {
             vdb_report_error();
             __vdb.init_error = 1;
         } else {
@@ -123,7 +124,7 @@ VDB_CALL int vdb_init() {
             atexit(vdb_exit);
         }
     }
-    if(__vdb.is_initialized == 2) { 
+    if (__vdb.is_initialized == 2) { 
         //this never runs, but it tricks compilers into including these functions as debug symbols 
         //even though they may never be used
         //useful if you want to call them from the debugger directly
@@ -148,7 +149,7 @@ VDB_CALL int vdb_init() {
 VDB_CALL int vdb_flush() {
     VDB_INIT;
     unsigned int s = send(__vdb.fd,__vdb.buffer,__vdb.n_bytes,0);
-    if(s != __vdb.n_bytes) {
+    if (s != __vdb.n_bytes) {
         vdb_report_error();
         __vdb.init_error = 1;
     }
@@ -160,7 +161,7 @@ VDB_CALL void vdb_raw_print(const char * fmt, ...) {
     va_start(argp,fmt);
     __vdb.n_bytes += vsnprintf(__vdb.buffer + __vdb.n_bytes, VDB_BUFFER_SIZE - __vdb.n_bytes,fmt,argp);
     va_end(argp);
-    if(__vdb.buffer[__vdb.n_bytes-1] == '\n' &&
+    if (__vdb.buffer[__vdb.n_bytes-1] == '\n' &&
        VDB_BUFFER_SIZE - __vdb.n_bytes < VDB_REDZONE_SIZE) {
         vdb_flush();
     }
@@ -175,19 +176,19 @@ VDB_CALL int vdb_refresh() {
 
 VDB_CALL int vdb_print(char cmd, int N, int stride, int nelems, void * p) {
     VDB_INIT;
-    if(!__vdb.sample_enabled)
+    if (!__vdb.sample_enabled)
         return 0;
     unsigned char * b = (unsigned char *) p;
-    for(int i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         float * f = (float*)b;
-        vdb_raw_print("%c ",cmd);
+        vdb_raw_print("%c ", cmd);
         for(int j = 0; j < nelems; j++) {
-            vdb_raw_print("%f ",f[j]);
+            vdb_raw_print("%f ", f[j]);
         }
         vdb_raw_print("\n");
         b += stride;
     }
-    if(__vdb.in_group == 0)
+    if (__vdb.in_group == 0)
         vdb_refresh(); //statements not between calls to vdb_begin() and vdb_end() are flushed immediately
     return 0;   
 }
@@ -198,9 +199,9 @@ VDB_CALL int vdb_begin() {
     return 0;
 }
 VDB_CALL int vdb_end() {
-    if(__vdb.in_group > 0)
+    if (__vdb.in_group > 0)
         __vdb.in_group--;
-    if(__vdb.in_group == 0)
+    if (__vdb.in_group == 0)
         vdb_refresh();
     return 0;
 }
@@ -276,7 +277,7 @@ VDB_CALL int vdb_color(float r, float g, float b) {
 //TODO: check and remove or quote newlines from lbl
 //TODO: limit max size
 VDB_CALL int vdb_intern(const char * lbl) {
-    if(__vdb.string_table.count(lbl) == 0) {
+    if (__vdb.string_table.count(lbl) == 0) {
         int key = __vdb.string_table.size();
         __vdb.string_table[lbl] = key;
         vdb_raw_print("s %d %s\n",key,lbl);
@@ -409,4 +410,4 @@ VDB_CALL int vdb_triangle_fn(float x0, float y0, float z0, float x1, float y1, f
 #undef VDB_CALL
 #undef VDB_BUFFER_SIZE
 #undef VDB_REDZONE_SIZE
-#endif
+#endif /// __VDB_IMPL_H

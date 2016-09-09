@@ -13,8 +13,7 @@ float gEndPtTrackball[3];
 long gXCenterTrackball = 0, gYCenterTrackball = 0;
 
 // mouse positon and view size as inputs
-void startTrackball (long x, long y, long originX, long originY, long width, long height)
-{
+void startTrackball(long x, long y, long originX, long originY, long width, long height) {
     float xxyy;
     float nx, ny;
     
@@ -55,24 +54,24 @@ void startTrackball (long x, long y, long originX, long originY, long width, lon
 }
 
 // update to new mouse position, output rotation angle
-void rollToTrackball (long x, long y, float rot [4]) // rot is output rotation angle
-{
+void rollToTrackball (long x, long y, float rot [4]) {
+    // rot is output rotation angle
     float xxyy;
     float cosAng, sinAng;
     float ls, le, lr;
     
     gEndPtTrackball[0] = x - gXCenterTrackball;
     gEndPtTrackball[1] = y - gYCenterTrackball;
-    if (fabs (gEndPtTrackball [0] - gStartPtTrackball [0]) < kTol && fabs (gEndPtTrackball [1] - gStartPtTrackball [1]) < kTol)
+    if (fabs(gEndPtTrackball [0] - gStartPtTrackball [0]) < kTol && fabs(gEndPtTrackball [1] - gStartPtTrackball [1]) < kTol)
         return; // Not enough change in the vectors to have an action.
-
+    
     // Compute the ending vector from the surface of the ball to its center.
     xxyy = gEndPtTrackball [0] * gEndPtTrackball [0] + gEndPtTrackball [1] * gEndPtTrackball [1];
     if (xxyy > gRadiusTrackball * gRadiusTrackball) {
         // Outside the sphere.
         gEndPtTrackball [2] = 0.;
     } else
-        gEndPtTrackball[ 2] = sqrt (gRadiusTrackball * gRadiusTrackball - xxyy);
+        gEndPtTrackball[ 2] = sqrt(gRadiusTrackball * gRadiusTrackball - xxyy);
         
     // Take the cross product of the two vectors. r = s X e
     rot[1] =  gStartPtTrackball[1] * gEndPtTrackball[2] - gStartPtTrackball[2] * gEndPtTrackball[1];
@@ -95,7 +94,7 @@ void rollToTrackball (long x, long y, float rot [4]) // rot is output rotation a
     sinAng = lr = sqrt(rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3]); // ||(s X e)||;
                                 // keep this length in lr for normalizing the rotation vector later.
     sinAng = sinAng * ls * le;
-    rot[0] = (float) atan2 (sinAng, cosAng) * kRad2Deg; // GL rotations are in degrees.
+    rot[0] = (float) atan2(sinAng, cosAng) * kRad2Deg; // GL rotations are in degrees.
     
     // Normalize the rotation axis.
     lr = 1. / lr;
@@ -104,8 +103,7 @@ void rollToTrackball (long x, long y, float rot [4]) // rot is output rotation a
     // returns rotate
 }
 
-static void rotation2Quat (float *A, float *q)
-{
+static void rotation2Quat (float* A, float* q) {
     float ang2;  // The half-angle
     float sinAng2; // sin(half-angle)
     
@@ -119,8 +117,7 @@ static void rotation2Quat (float *A, float *q)
     q[3] = cos(ang2);
 }
 
-void addToRotationTrackball (float * dA, float * A)
-{
+void addToRotationTrackball(float* dA, float* A) {
     float q0[4], q1[4], q2[4];
     float theta2, sinTheta2;
     
@@ -157,8 +154,8 @@ void addToRotationTrackball (float * dA, float * A)
     // non-0.  So we can safely divide by sin(theta2).
     
     // Turn the quaternion back into an {angle, {axis}} rotation.
-    theta2 = (float) acos (q2[3]);
-    sinTheta2 = (float)  (1.0 /  sin ((double) theta2));
+    theta2 = (float)acos(q2[3]);
+    sinTheta2 = (float)(1.0 /  sin((double) theta2));
     A[0] = theta2 * 2.0f * kRad2Deg;
     A[1] = q2[0] * sinTheta2;
     A[2] = q2[1] * sinTheta2;

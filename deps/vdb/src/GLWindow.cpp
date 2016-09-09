@@ -1,3 +1,4 @@
+
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Slider.H>
@@ -10,40 +11,41 @@
 #include "SocketManager.h"
 #include <math.h>
 
-
 // single set of interaction flags and states
-static GLint gDollyPanStartPoint[2] = {0, 0};
-static GLfloat gTrackBallRotation [4] = {0.0f, 0.0f, 0.0f, 0.0f};
+static GLint gDollyPanStartPoint[2] = { 0, 0 };
+static GLfloat gTrackBallRotation[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 static GLboolean gDolly = GL_FALSE;
 static GLboolean gPan = GL_FALSE;
 static GLboolean gTrackball = GL_FALSE;
 static GLboolean gTrackingView = GL_FALSE;
-static recVec gOrigin = {0.0, 0.0, 0.0};
+static recVec gOrigin = { 0.0, 0.0, 0.0 };
 
-static void line_callback(int client_id, const char * line,void *data) {
+static void line_callback(int client_id, const char* line, void* data) {
     ((GLWindow*)data)->command(client_id,line);
 }
 
-GLWindow::GLWindow(int X,int Y,int W,int H) : Fl_Gl_Window(X,Y,W,H,NULL) {
-    color_by = CB_COLOR;
-    legend_color_by = CB_COLOR;
-    resetCamera();
-    shapeSize = 7.0f; // max radius of of objects
-    
-    point_size = 5.0;
-    filter_value = 1.0;
-    
-    frame = Frame_init();
-    SocketManager_init(line_callback,this);
-    end();
-}
+GLWindow::GLWindow(int X, int Y, int W, int H)
+    :Fl_Gl_Window(X,Y,W,H,NULL)
+    {
+        color_by = CB_COLOR;
+        legend_color_by = CB_COLOR;
+        resetCamera();
+        shapeSize = 7.0f; // max radius of of objects
+        
+        point_size = 5.0;
+        filter_value = 1.0;
+        
+        frame = Frame_init();
+        SocketManager_init(line_callback,this);
+        end();
+    }
 
-static int readFloats(int n, const char * buf, float * data) {
-    for(int i = 0; i < n; i++) {
-        char * next;
+static int readFloats(int n, const char* buf, float* data) {
+    for (int i = 0; i < n; ++i) {
+        char* next;
         data[i] = strtod(buf, &next);
-        if(next == buf) {
-            printf("warning invalid float input: %s, setting to 0\n",buf);
+        if (next == buf) {
+            printf("warning invalid float input: %s, setting to 0\n", buf);
             return 0;
         }
         buf = next;
@@ -54,16 +56,17 @@ static int readFloats(int n, const char * buf, float * data) {
 void GLWindow::updateProjection() {
     GLdouble ratio, radians, wd2;
     GLdouble left, right, top, bottom, near_, far_;
-
     
     // set projection
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
     //near = -camera.viewPos.z - shapeSize * 0.5;
     near_ = 0.001;
     far_ = 100; //-camera.viewPos.z + shapeSize * 0.5;
-    if (far_ < 1.0)
+    if (far_ < 1.0) {
         far_ = 1.0;
+    }
     
     radians = 0.0174532925 * camera.aperture / 2; // half aperture degrees to radians 
     wd2 = near_ * tan(radians);
@@ -72,34 +75,41 @@ void GLWindow::updateProjection() {
         left  = -ratio * wd2;
         right = ratio * wd2;
         top = wd2;
-        bottom = -wd2;  
+        bottom = -wd2;
     } else {
         left  = -wd2;
         right = wd2;
         top = wd2 / ratio;
-        bottom = -wd2 / ratio;  
+        bottom = -wd2 / ratio;
     }
-    glFrustum (left, right, bottom, top, near_, far_);
+    
+    glFrustum(left, right, bottom, top, near_, far_);
 }
 
 void GLWindow::updateModelView() {
     
     // move view
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity ();
-    gluLookAt (camera.viewPos.x, camera.viewPos.y, camera.viewPos.z,
-               camera.viewPos.x + camera.viewDir.x,
-               camera.viewPos.y + camera.viewDir.y,
-               camera.viewPos.z + camera.viewDir.z,
-               camera.viewUp.x, camera.viewUp.y ,camera.viewUp.z);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(camera.viewPos.x, camera.viewPos.y, camera.viewPos.z,
+              camera.viewPos.x + camera.viewDir.x,
+              camera.viewPos.y + camera.viewDir.y,
+              camera.viewPos.z + camera.viewDir.z,
+              camera.viewUp.x, camera.viewUp.y ,camera.viewUp.z);
             
     // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
-    if (gTrackingView && gTrackBallRotation[0] != 0.0f) 
-        glRotatef (gTrackBallRotation[0], gTrackBallRotation[1], gTrackBallRotation[2], gTrackBallRotation[3]);
-    else {
+    if (gTrackingView && gTrackBallRotation[0] != 0.0f) {
+        glRotatef(gTrackBallRotation[0],
+                  gTrackBallRotation[1],
+                  gTrackBallRotation[2],
+                  gTrackBallRotation[3]);
     }
+    
     // accumlated world rotation via trackball
-    glRotatef (worldRotation[0], worldRotation[1], worldRotation[2], worldRotation[3]);
+    glRotatef(worldRotation[0],
+              worldRotation[1],
+              worldRotation[2],
+              worldRotation[3]);
 }
 
 void GLWindow::check_resize(int width, int height) {
@@ -108,8 +118,7 @@ void GLWindow::check_resize(int width, int height) {
         (camera.viewWidth != width)) {
         camera.viewHeight = height;
         camera.viewWidth = width;
-        
-        glViewport (0, 0, camera.viewWidth, camera.viewHeight);
+        glViewport(0, 0, camera.viewWidth, camera.viewHeight);
         updateProjection();
     }
 }
@@ -121,8 +130,10 @@ void GLWindow::resize(int X,int Y,int W,int H) {
 void GLWindow::mouseDolly(int x, int y) {
     GLfloat dolly = (gDollyPanStartPoint[1] - y) * -camera.viewPos.z / 300.0f;
     camera.viewPos.z += dolly;
-    if (camera.viewPos.z == 0.0) // do not let z = 0.0
+    if (camera.viewPos.z == 0.0) {
+        // do not let z = 0.0
         camera.viewPos.z = 0.0001;
+    }
     gDollyPanStartPoint[0] = x;
     gDollyPanStartPoint[1] = y;
 }
@@ -137,23 +148,23 @@ void GLWindow::mousePan(int x, int y) {
 }
 
 void GLWindow::resetCamera() {
-   camera.aperture = 40;
-   camera.rotPoint = gOrigin;
-
-   camera.viewPos.x = 0.0;
-   camera.viewPos.y = 0.0;
-   camera.viewPos.z = -10.0;
-   camera.viewDir.x = 0; 
-   camera.viewDir.y = 0; 
-   camera.viewDir.z = 1;
-
-   camera.viewUp.x = 0;  
-   camera.viewUp.y = 1; 
-   camera.viewUp.z = 0;
-   
-   memset(worldRotation,0,sizeof(GLfloat) * 4);
-   memset(objectRotation,0,sizeof(GLfloat) * 4);
-   scroll_delta[0] = scroll_delta[1] = 0;
+    camera.aperture = 40;
+    camera.rotPoint = gOrigin;
+    
+    camera.viewPos.x = 0.0;
+    camera.viewPos.y = 0.0;
+    camera.viewPos.z = -10.0;
+    camera.viewDir.x = 0;
+    camera.viewDir.y = 0;
+    camera.viewDir.z = 1;
+    
+    camera.viewUp.x = 0;
+    camera.viewUp.y = 1;
+    camera.viewUp.z = 0;
+    
+    std::memset(worldRotation, 0, sizeof(GLfloat) * 4);
+    std::memset(objectRotation, 0, sizeof(GLfloat) * 4);
+    scroll_delta[0] = scroll_delta[1] = 0;
 }
 
 void GLWindow::interactive_clear() {
@@ -167,16 +178,17 @@ void GLWindow::mouseDown(int x, int y) {
     gDolly = GL_FALSE; // no dolly
     gPan = GL_FALSE; // no pan
     gTrackball = GL_TRUE;
-    startTrackball (x, y, 0, 0, camera.viewWidth, camera.viewHeight);
+    startTrackball(x, y, 0, 0, camera.viewWidth, camera.viewHeight);
     gTrackingView = GL_TRUE;
     scroll_delta[0] = scroll_delta[1] = 0;
 }
 
 void GLWindow::rightMouseDown(int x, int y) {
     if (gTrackball) { // if we are currently tracking, end trackball
-        if (gTrackBallRotation[0] != 0.0)
-            addToRotationTrackball (gTrackBallRotation, worldRotation);
-        gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
+        if (gTrackBallRotation[0] != 0.0) {
+            addToRotationTrackball(gTrackBallRotation, worldRotation);
+        }
+        gTrackBallRotation[0] = gTrackBallRotation[1] = gTrackBallRotation[2] = gTrackBallRotation[3] = 0.0f;
     }
     gDolly = GL_FALSE; // no dolly
     gPan = GL_TRUE; 
@@ -189,9 +201,10 @@ void GLWindow::rightMouseDown(int x, int y) {
 
 void GLWindow::otherMouseDown(int x, int y) {
     if (gTrackball) { // if we are currently tracking, end trackball
-        if (gTrackBallRotation[0] != 0.0)
-            addToRotationTrackball (gTrackBallRotation, worldRotation);
-        gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
+        if (gTrackBallRotation[0] != 0.0) {
+            addToRotationTrackball(gTrackBallRotation, worldRotation);
+        }
+        gTrackBallRotation[0] = gTrackBallRotation[1] = gTrackBallRotation[2] = gTrackBallRotation[3] = 0.0f;
     }
     gDolly = GL_TRUE;
     gPan = GL_FALSE; // no pan
@@ -203,22 +216,26 @@ void GLWindow::otherMouseDown(int x, int y) {
 }
 
 void GLWindow::mouseUp(int x, int y) {
-    if (gDolly) { // end dolly
+    if (gDolly) {
+        // end dolly
         gDolly = GL_FALSE;
-    } else if (gPan) { // end pan
+    } else if (gPan) {
+        // end pan
         gPan = GL_FALSE;
-    } else if (gTrackball) { // end trackball
+    } else if (gTrackball) {
+        // end trackball
         gTrackball = GL_FALSE;
-        if (gTrackBallRotation[0] != 0.0)
-            addToRotationTrackball (gTrackBallRotation, worldRotation);
-        gTrackBallRotation [0] = gTrackBallRotation [1] = gTrackBallRotation [2] = gTrackBallRotation [3] = 0.0f;
+        if (gTrackBallRotation[0] != 0.0) {
+            addToRotationTrackball(gTrackBallRotation, worldRotation);
+        }
+        gTrackBallRotation[0] = gTrackBallRotation[1] = gTrackBallRotation[2] = gTrackBallRotation[3] = 0.0f;
     } 
     gTrackingView = GL_FALSE;
 }
 
 void GLWindow::mouseDragged(int x, int y) {
     if (gTrackball) {
-        rollToTrackball (x, y, gTrackBallRotation);
+        rollToTrackball(x, y, gTrackBallRotation);
         redraw();
     } else if (gDolly) {
         mouseDolly(x,y);

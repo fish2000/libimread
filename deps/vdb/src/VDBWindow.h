@@ -12,10 +12,10 @@
 
 struct VDBWindow : public Fl_Window {
     GLWindow *gl;
-    Fl_Slider * point_size;
-    Fl_Slider * filter_value;
-    Fl_Button * clear_button;
-    Fl_Choice * color_by;
+    Fl_Slider* point_size;
+    Fl_Slider* filter_value;
+    Fl_Button* clear_button;
+    Fl_Choice* color_by;
     void slider_changed();
     VDBWindow();
 };

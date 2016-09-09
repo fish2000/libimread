@@ -3,12 +3,12 @@
 #define __trackball_h__
 
 // called with the start position and the window origin + size
-void startTrackball (long x, long y, long originX, long originY, long width, long height);
+void startTrackball(long x, long y, long originX, long originY, long width, long height);
 
 // calculated rotation based on current mouse position
-void rollToTrackball (long x, long y, float rot [4]); // rot is output rotation angle
+void rollToTrackball(long x, long y, float rot[4]); // rot is output rotation angle
 
 // add a GL rotation (dA) to an existing GL rotation (A)
-void addToRotationTrackball (float * dA, float * A);
+void addToRotationTrackball(float* dA, float* A);
 
 #endif
