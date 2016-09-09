@@ -94,7 +94,7 @@ else(APPLE)
 
 endif(APPLE)
 
-install(TARGETS vdb DESTINATION lib)
+install(TARGETS vdb DESTINATION bin)
 # install(DIRECTORY ./base/ DESTINATION include/imagecompression/base
 #     FILES_MATCHING PATTERN "*.h")
 # install(DIRECTORY ./image_compression/internal/ DESTINATION include/imagecompression/internal
