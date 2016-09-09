@@ -30,6 +30,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/directory.h>
+#include <libimread/ext/filesystem/nowait.h>
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/pystring.hh>
 #include <libimread/errors.hh>
@@ -282,6 +283,7 @@ namespace filesystem {
         path abspath = make_absolute();
         detail::pathvec_t out;
         {
+            detail::nowait_t nowait;
             directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
@@ -302,7 +304,7 @@ namespace filesystem {
                         continue;
                 }
             }
-        } /// scope exit for d
+        } /// scope exit for d and nowait
         return out;
     }
     
@@ -310,6 +312,7 @@ namespace filesystem {
         detail::stringvec_t directories;
         detail::stringvec_t files;
         {
+            detail::nowait_t nowait;
             directory d = detail::ddopen(make_absolute().str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
@@ -333,7 +336,7 @@ namespace filesystem {
                         continue;
                 }
             }
-        } /// scope exit for d
+        } /// scope exit for d and nowait
         return std::make_pair(
             std::move(directories),
             std::move(files));
@@ -348,6 +351,7 @@ namespace filesystem {
         path abspath = make_absolute();
         ::glob_t g = { 0 };
         {
+            detail::nowait_t nowait;
             filesystem::switchdir s(abspath);
             ::glob(pattern, detail::glob_pattern_flags, nullptr, &g);
         }
@@ -368,6 +372,7 @@ namespace filesystem {
         path abspath = make_absolute();
         ::wordexp_t word = { 0 };
         {
+            detail::nowait_t nowait;
             filesystem::switchdir s(abspath);
             ::wordexp(pattern.c_str(), &word, 0);
         }
@@ -515,17 +520,28 @@ namespace filesystem {
     }
     
     bool path::remove() const {
-        if (is_file_or_link()) { return bool(::unlink(make_absolute().c_str()) != -1); }
-        if (is_directory())    { return bool(::rmdir(make_absolute().c_str()) != -1); }
+        {
+            detail::nowait_t nowait;
+            if (is_file_or_link()) { return bool(::unlink(make_absolute().c_str()) != -1); }
+            if (is_directory())    { return bool(::rmdir(make_absolute().c_str()) != -1); }
+        }
         return false;
     }
     
     bool path::makedir() const {
-        if (empty() || exists()) { return false; }
-        return bool(::mkdir(c_str(), detail::mkdir_flags) != -1);
+        bool out = false;
+        {
+            detail::nowait_t nowait;
+            if (empty() || exists()) { return out; }
+            out = bool(::mkdir(c_str(), detail::mkdir_flags) != -1);
+        }
+        return out;
     }
     
     bool path::makedir_p() const {
+        /// DO NOT WAIT:
+        detail::nowait_t nowait;
+        
         /// sanity-check for empty or existant paths:
         if (empty() || exists()) { return false; }
         

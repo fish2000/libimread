@@ -133,10 +133,16 @@ find_package(Halide REQUIRED)
 find_package(LibUnwind REQUIRED)
 find_package(CapnProto REQUIRED)
 
-# set(HDF5_USE_STATIC_LIBRARIES false)
+set(HDF5_USE_STATIC_LIBRARIES false)
 set(HDF5_ROOT /usr/local/opt/hdf5/)
-find_package(HDF5 REQUIRED
-    COMPONENTS C CXX HL)
+message(STATUS "find_package(): looking for HDF5 within HDF5_ROOT = ${HDF5_ROOT}")
+find_package(HDF5 COMPONENTS C CXX HL NO_MODULE)
+if(NOT HDF5_FOUND)
+    message(STATUS "find_package(): couldn't find HDF5 cmake module configuration in ${HDF5_ROOT}")
+    message(STATUS "find_package(): falling back to cmake/FindHDF5.cmake")
+    include(FindHDF5)
+    find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
+endif()
 
 # Include the project-specific `include` directories:
 include_directories(${${PROJECT_NAME}_include_dir})
@@ -194,11 +200,46 @@ set_target_properties(imread_shared
 set_target_properties(imread_static
     PROPERTIES ARCHIVE_OUTPUT_NAME "imread")
 
+# Actually build the library II: electric boogaloo
+# ... these two target_link_libraries() calls set up the actual
+# for-reals building up in all this:
+target_link_libraries(imread_shared
+    z png guid
+    # libbf interpol
+    imagecompression
+    ${EXTRA_LIBS}
+    ${TIFF_LIBRARIES}
+    ${JPEG_LIBRARIES}
+    ${WEBP_LIBRARIES}
+    ${HALIDE_LIBRARIES}
+    ${HDF5_C_LIBRARIES}
+    ${HDF5_CXX_LIBRARIES}
+    ${HDF5_HL_LIBRARIES}
+    ${CAPNP_LIBRARIES_LITE})
+
+target_link_libraries(imread_static
+    z png guid
+    # libbf interpol
+    imagecompression
+    ${EXTRA_LIBS}
+    ${TIFF_LIBRARIES}
+    ${JPEG_LIBRARIES}
+    ${WEBP_LIBRARIES}
+    ${HALIDE_LIBRARIES}
+    ${HDF5_C_LIBRARIES}
+    ${HDF5_CXX_LIBRARIES}
+    ${HDF5_HL_LIBRARIES}
+    ${CAPNP_LIBRARIES_LITE})
+
+
 # Set and pass on compile-time config variable values:
 get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
 get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
-get_target_property(IM_LINK_LIBRARIES imread LINK_LIBRARIES)
-get_target_property(IM_LINK_FLAGS imread LINK_FLAGS)
+get_target_property(IM_LINK_LIBRARIES imread_shared LINK_LIBRARIES)
+get_target_property(IM_LINK_FLAGS imread_shared LINK_FLAGS)
+set(IM_HAVE_STRINGVIEW_HH ${HAVE_STRINGVIEW_HH})
+set(IM_HAVE_SYS_SENDFILE_H ${HAVE_SYS_SENDFILE_H})
+set(IM_HAVE_AUTOFS_NOWAIT ${HAVE_AUTOFS_NOWAIT})
 
 # Configure and generate the compile-time project header file:
 set(PROJECT_HEADER
@@ -212,35 +253,6 @@ set_source_files_properties(
     ${PROJECT_HEADER}
     PROPERTIES GENERATED TRUE)
 
-# Actually build the library II: electric boogaloo
-# ... these two target_link_libraries() calls set up the actual
-# for-reals building up in all this:
-target_link_libraries(imread_shared
-    z png guid
-    # libbf interpol
-    imagecompression
-    ${EXTRA_LIBS}
-    ${TIFF_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${HDF5_HL_LIBRARIES}
-    ${CAPNP_LIBRARIES_LITE})
-
-target_link_libraries(imread_static
-    z png guid
-    # libbf interpol
-    imagecompression
-    ${EXTRA_LIBS}
-    ${TIFF_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${WEBP_LIBRARIES}
-    ${HALIDE_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${HDF5_HL_LIBRARIES}
-    ${CAPNP_LIBRARIES_LITE})
-
 # Add the apps subdirectory, if we're building apps:
 if(IM_APPS)
     add_subdirectory(${APPS_DIR})
@@ -252,7 +264,7 @@ if(IM_TESTS)
     # Bring in the tests subdirectory --
     # ... this defines add_imread_test(), see below:
     add_subdirectory(${TEST_SOURCE_DIR})
-
+    
     # add_custom_command(
     #     OUTPUT ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist
     #     COMMAND ${TEST_SCRIPT_DIR}/generate-test-filemap.py > ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
@@ -263,7 +275,7 @@ if(IM_TESTS)
     # set_target_properties("test_data_plist"
     #     PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
     # add_dependencies("test_data_plist" imread)
-
+    
     # Generate the test data header, if necessary:
     add_custom_command(
         OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
@@ -273,7 +285,7 @@ if(IM_TESTS)
     set_source_files_properties(
         ${TEST_INCLUDE_DIR}/test_data.hpp
         PROPERTIES GENERATED TRUE)
-
+    
     # Set up the `imread_tests` dependencies
     set(imread_tests "test_${PROJECT_NAME}")
     add_executable(imread_tests ${TEST_SOURCES})
@@ -287,7 +299,7 @@ if(IM_TESTS)
     # add_dependencies(imread_tests "libbf")
     add_dependencies(imread_tests "imread")
     link_directories(${CMAKE_BINARY_DIR})
-
+    
     # Link the `imread_tests` executable
     target_link_libraries(imread_tests
         imread_shared
@@ -299,14 +311,15 @@ if(IM_TESTS)
         ${JPEG_LIBRARIES}
         ${WEBP_LIBRARIES}
         ${HALIDE_LIBRARIES}
-        ${HDF5_LIBRARIES}
+        ${HDF5_C_LIBRARIES}
+        ${HDF5_CXX_LIBRARIES}
         ${HDF5_HL_LIBRARIES}
         ${CAPNP_LIBRARIES_LITE})
-
+    
     # Set up ctest and cdash:
     enable_testing()
     include(CTest)
-
+    
     # Set up individual test suites --
     # … the add_imread_test() macro is defined in tests/CMakeLists.txt:
     add_imread_test("blockhash")

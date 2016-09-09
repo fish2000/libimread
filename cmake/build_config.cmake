@@ -34,7 +34,7 @@ check_include_file(fcntl.h                              HAVE_FCNTL_H)
 check_include_file(dirent.h                             HAVE_DIRENT_H)
 check_include_file(unistd.h                             HAVE_UNISTD_H)
 check_include_file(dlfcn.h                              HAVE_DLFCN_H)
-# check_include_file(pthread.h                          HAVE_PTHREAD_H)
+check_include_file(pthread.h                            HAVE_PTHREAD_H)
 check_include_file(pwd.h                                HAVE_PWD_H)
 check_include_file(glob.h                               HAVE_GLOB_H)
 check_include_file(wordexp.h                            HAVE_WORDEXP_H)
@@ -42,18 +42,18 @@ check_include_file_cxx(cxxabi.h                         HAVE_CXXABI_HH)
 check_include_file_cxx(string_view                      HAVE_STRINGVIEW_HH)
 check_include_file_cxx(experimental/array               HAVE_EXPERIMENTAL_ARRAY_HH)
 
-# check_include_file(sys/ioctl.h                        HAVE_SYS_IOCTL_H)
+check_include_file(sys/ioctl.h                          HAVE_SYS_IOCTL_H)
 check_include_file(sys/types.h                          HAVE_SYS_TYPES_H)
 check_include_file(sys/stat.h                           HAVE_SYS_STAT_H)
 check_include_file(sys/time.h                           HAVE_SYS_TIME_H)
 check_include_file(sys/sendfile.h                       HAVE_SYS_SENDFILE_H)
+check_include_file(sys/mman.h                           HAVE_SYS_MMAN_H)
 
 if(APPLE)
     check_include_file(copyfile.h                       HAVE_COPYFILE_H)
     check_include_file(mach-o/dyld.h                    HAVE_MACHO_DYLD_H)
     check_include_file(objc/message.h                   HAVE_OBJC_MESSAGE_H)
     check_include_file(objc/runtime.h                   HAVE_OBJC_RUNTIME_H)
-    check_include_file(sys/mman.h                       HAVE_SYS_MMAN_H)
     
     if(HAVE_OBJC_RUNTIME_H)
         # set(CMAKE_REQUIRED_INCLUDES "objc/message.h")
@@ -62,6 +62,48 @@ if(APPLE)
         # check_function_exists(objc_msgSend_stret        HAVE_OBJC_MSGSEND_STRET_F)
         # set(CMAKE_REQUIRED_INCLUDES)
     endif(HAVE_OBJC_RUNTIME_H)
+    
+    message(STATUS "Checking for /dev/autofs_nowait")
+    if(EXISTS "/dev/autofs_nowait")
+        message(STATUS "Checking for /dev/autofs_nowait - found")
+        set(HAVE_AUTOFS_NOWAIT YES
+            CACHE BOOL
+            "/dev/autofs_nowait presence"
+            FORCE)
+    else()
+        message(STATUS "Checking for /dev/autofs_nowait - not found")
+        set(HAVE_AUTOFS_NOWAIT NO
+            CACHE BOOL
+            "/dev/autofs_nowait presence"
+            FORCE)
+    endif()
+    
+else(APPLE)
+    
+    set(HAVE_COPYFILE_H NO
+        CACHE BOOL
+        "<copyfile.h> presence"
+        FORCE)
+    set(HAVE_MACHO_DYLD_H NO
+        CACHE BOOL
+        "<mach-o/dyld.h> presence"
+        FORCE)
+    set(HAVE_OBJC_MESSAGE_H NO
+        CACHE BOOL
+        "<objc/message.h> presence"
+        FORCE)
+    set(HAVE_OBJC_RUNTIME_H NO
+        CACHE BOOL
+        "<objc/runtime.h> presence"
+        FORCE)
+    # set(HAVE_SYS_MMAN_H NO
+    #     CACHE BOOL
+    #     "<sys/mman.h> presence"
+    #     FORCE)
+    set(HAVE_AUTOFS_NOWAIT NO
+        CACHE BOOL
+        "/dev/autofs_nowait presence"
+        FORCE)
     
 endif(APPLE)
 
