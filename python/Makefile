@@ -1,5 +1,13 @@
 
-clean: clean-pyc clean-so
+TESTS = batch compat jupyter_repr planar_ops read readwrite structcode
+
+TESTDIR = im/tests
+PYTESTARGS = --color=yes --verbose -r a --showlocals --durations=20 --tb=long
+PYTESTS = $(TESTS:%=$(TESTDIR)/test_%.py)
+
+.PHONY: clean distclean dist buildext upload test testall alltests im/tests/test_%.py
+
+clean: clean-pyc clean-pycache clean-so
 
 distclean: clean-all-pyc clean-pycache clean-so clean-build-artifacts clean-generators
 
@@ -39,8 +47,11 @@ nosetests:
 alltests:
 	py.test --color=yes --verbose -r a --durations=20 --tb=long
 
+testall:
+	py.test -k 'not hybridimage and not singular and not jupyter' $(PYTESTARGS)
+
 test:
-	py.test -k 'not hybridimage and not singular and not jupyter' --color=yes --verbose -r a --showlocals --durations=20 --tb=long
+	@$(foreach pytest, $(PYTESTS), py.test $(pytest) $(PYTESTARGS);)
 
 profile:
 	py.test --color=yes --verbose -r a --profile-svg
@@ -48,4 +59,3 @@ profile:
 upload:
 	python setup.py sdist upload
 
-.PHONY: clean distclean dist buildext upload

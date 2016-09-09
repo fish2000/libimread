@@ -13,6 +13,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/errors.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/formats.hh>
 #include <libimread/file.hh>

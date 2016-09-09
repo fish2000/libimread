@@ -19,7 +19,7 @@
 
 /// generator headers:
 // namespace generator {
-#include "resize.h"
+// #include "resize.h"
 // }
 
 #include <libimread/pixels.hh>
@@ -140,7 +140,7 @@ namespace py {
                     internal->host = allocation.get();
                     
                     /// EXECUTE!!!!!!!!
-                    resize(other.internal.get(), scale, internal.get());
+                    // resize(other.internal.get(), scale, internal.get());
                 }
             
             /// tag dispatch, reinterpret, depointerize, copy-construct
