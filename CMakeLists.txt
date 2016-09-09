@@ -117,7 +117,7 @@ set_property(DIRECTORY ${IOD_TEST_DIR}
              PROPERTY TEST)
 
 # Add HALOGEN_DIR -- set up Halide generators:
-add_subdirectory(${HALOGEN_DIR})
+# add_subdirectory(${HALOGEN_DIR})
 
 # Load the project configuration file. CMake will search in the directory setted
 # above for a module file named libimreadConfig.cmake. The configuration
@@ -234,7 +234,6 @@ target_link_libraries(imread_static
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
     ${CAPNP_LIBRARIES_LITE})
-
 
 # Set and pass on compile-time config variable values:
 get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
