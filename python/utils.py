@@ -2,6 +2,7 @@
 from __future__ import print_function
 from distutils.spawn import find_executable as which
 from distutils.sysconfig import get_python_inc
+from functools import wraps
 
 # get_terminal_size(): does what you think it does
 # adapted from this: http://stackoverflow.com/a/566752/298171
@@ -119,6 +120,7 @@ def ensure_writable(f):
         decorator to ensure a filename is writable before modifying it
         If changed, original permissions are restored after the decorated modification.
     """
+    @wraps(f)
     def modify(filename, *args, **kwargs):
         import os, stat
         m = os.stat(filename).st_mode
@@ -130,7 +132,6 @@ def ensure_writable(f):
             # restore original permissions
             if not m & stat.S_IWUSR:
                 os.chmod(filename, m)
-
     return modify
 
 @ensure_writable
@@ -331,12 +332,15 @@ class Install(object):
     def bin(self):
         import os
         return os.path.join(self.prefix, "bin")
+    
     def include(self):
         import os
         return os.path.join(self.prefix, "include")
+    
     def lib(self):
         import os
         return os.path.join(self.prefix, "lib")
+    
     def dependency(self, name):
         import os
         return os.path.join(self.prefix, "include", name)
