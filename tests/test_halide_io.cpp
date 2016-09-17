@@ -19,7 +19,7 @@ namespace {
     using U8Image = im::HybridImage<uint8_t>;
     
     // static const bool collect_temporaries = true;
-    #define COLLECT_TEMPORARIES 1
+    #define COLLECT_TEMPORARIES 0
     #define CHECK_DIRECTORY "/Users/fish/Dropbox/libimread/check/"
     
     template <typename P>
