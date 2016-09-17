@@ -47,15 +47,15 @@ namespace {
         
         U8Image halim = im::halide::read(D("roses_512_rrt_srgb.png"));
         auto tf = im::halide::tmpwrite<JPG>(halim);
-        CHECK(path::remove(tf));
+        CHECK(COLLECT(tf));
         
         U8Image halim2 = im::halide::read(D("marci_512_srgb.png"));
         auto tf2 = im::halide::tmpwrite<JPG>(halim2);
-        CHECK(path::remove(tf2));
+        CHECK(COLLECT(tf2));
         
         U8Image halim3 = im::halide::read(D("marci_512_srgb8.png"));
         auto tf3 = im::halide::tmpwrite<JPG>(halim3);
-        CHECK(path::remove(tf3));
+        CHECK(COLLECT(tf3));
     }
     
     TEST_CASE("[halide-io] Read JPEG files",
@@ -73,19 +73,19 @@ namespace {
         
         U8Image halim = im::halide::read(D("tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg"));
         auto tf = im::halide::tmpwrite<PNG>(halim);
-        CHECK(path::remove(tf));
+        CHECK(COLLECT(tf));
         
         U8Image halim2 = im::halide::read(D("IMG_4332.jpg"));
         auto tf2 = im::halide::tmpwrite<PNG>(halim2);
-        CHECK(path::remove(tf2));
+        CHECK(COLLECT(tf2));
         
         U8Image halim3 = im::halide::read(D("IMG_7333.jpeg"));
         auto tf3 = im::halide::tmpwrite<PNG>(halim3);
-        CHECK(path::remove(tf3));
+        CHECK(COLLECT(tf3));
         
         U8Image halim4 = im::halide::read(D("10954288_342637995941364_1354507656_n.jpg"));
         auto tf4 = im::halide::tmpwrite<PNG>(halim4);
-        CHECK(path::remove(tf4));
+        CHECK(COLLECT(tf4));
     }
     
     TEST_CASE("[halide-io] Read TIFF files, rewrite each as a PNG using tmpwrite()",
@@ -100,7 +100,6 @@ namespace {
             auto tif = im::halide::read(basedir/p);
             auto pngpath = im::halide::tmpwrite<PNG>(tif);
             CHECK(COLLECT(pngpath));
-            // CHECK(path::remove(pngpath));
         });
         
     }
