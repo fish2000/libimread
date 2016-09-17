@@ -25,9 +25,7 @@ namespace {
     template <typename P>
     bool COLLECT(P&& p) {
         #if COLLECT_TEMPORARIES == 1
-            if (!path::exists(CHECK_DIRECTORY)) {
-                path::makedir(CHECK_DIRECTORY);
-            }
+            path::makedir(CHECK_DIRECTORY);
             return path(std::forward<P>(p)).rename(CHECK_DIRECTORY);
         #else
             return path::remove(std::forward<P>(p));
