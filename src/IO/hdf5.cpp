@@ -48,7 +48,7 @@ namespace im {
     
     std::unique_ptr<Image> HDF5Format::read(byte_source* src,
                                             ImageFactory* factory,
-                                            const options_map& opts) {
+                                            options_map const& opts) {
         
         /// load the raw sources' full data, and set some options:
         std::vector<byte> data = src->full_data();
@@ -114,7 +114,7 @@ namespace im {
     
     void HDF5Format::write(Image& input,
                            byte_sink* output,
-                           const options_map& opts) {
+                           options_map const& opts) {
         
         path h5imagepath = opts.cast<path>("hdf5:path",
                                         path("/image/raster"));

@@ -163,7 +163,7 @@ namespace im {
         
     } /* namespace (anon.) */
     
-    std::unique_ptr<Image> PNGFormat::read(byte_source* src, ImageFactory* factory, const options_map& opts) {
+    std::unique_ptr<Image> PNGFormat::read(byte_source* src, ImageFactory* factory, options_map const& opts) {
         png_holder p(png_holder::read_mode);
         png_set_read_fn(p.png_ptr, src, read_from_source);
         p.create_info();
@@ -184,6 +184,12 @@ namespace im {
         if (bit_depth == 16 && !detail::bigendian()) { png_set_swap(p.png_ptr); }
         
         volatile int d = -1;
+        const bool strip_alpha = opts.cast<bool>("png:strip_alpha", false);
+        
+        if (strip_alpha) {
+            png_set_strip_alpha(p.png_ptr);
+        }
+        
         switch (png_get_color_type(p.png_ptr, p.png_info)) {
             case PNG_COLOR_TYPE_PALETTE:
                 png_set_palette_to_rgb(p.png_ptr); /// ??
@@ -199,6 +205,12 @@ namespace im {
                 if (bit_depth < 8) {
                     png_set_expand_gray_1_2_4_to_8(p.png_ptr);
                 }
+                break;
+            case PNG_COLOR_TYPE_GRAY_ALPHA:
+                d = 1;
+                imread_raise(CannotReadError,
+                    "Color type ( 4: grayscale with alpha channel ) cannot be handled\n"
+                    "without opts[\"png:strip_alpha\"] = true");
                 break;
             default: {
                 imread_raise(CannotReadError,
@@ -286,7 +298,7 @@ namespace im {
         return output;
     }
     
-    void PNGFormat::write(Image& input, byte_sink* output, const options_map& opts) {
+    void PNGFormat::write(Image& input, byte_sink* output, options_map const& opts) {
         png_holder p(png_holder::write_mode);
         p.create_info();
         png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
@@ -368,7 +380,7 @@ namespace im {
     
     
     /// ADAPTED FROM PINCRUSH - FREAKY REFORMATTED PNG FOR IOS
-    void PNGFormat::write_ios(Image& input, byte_sink* output, const options_map& opts) {
+    void PNGFormat::write_ios(Image& input, byte_sink* output, options_map const& opts) {
         /// immediately write the header, 
         /// before initializing the holder
         output->write(base64::decode(options.signatures[0].bytes).get(),

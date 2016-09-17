@@ -26,7 +26,7 @@ namespace im {
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                const options_map& opts) override;
+                                                options_map const& opts) override;
     };
     
     namespace format {

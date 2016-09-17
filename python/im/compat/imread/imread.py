@@ -25,13 +25,13 @@ def _as_grey(im, as_grey):
     transform = np.array([0.30,  0.59,  0.11])
     return np.dot(im, transform)
 
-def imread(filename, as_grey=False, formatstr=None, return_metadata=False):
+def imread(filename, as_grey=False, formatstr=None, return_metadata=False, opts=None):
     '''
     im = imread(filename, as_grey=False, formatstr={filename extension}, return_metadata=False)
     im,meta = imread(filename, as_grey=False, formatstr={filename extension}, return_metadata=True)
-
+    
     Read an image into a ndarray from a file.
-
+    
     Parameters
     ----------
     filename : str
@@ -44,7 +44,12 @@ def imread(filename, as_grey=False, formatstr=None, return_metadata=False):
         does not correspond to the format, you can pass it explicitly.
     return_metadata : bool, optional
         Whether to return metadata (default: False)
-
+    opts : dict, optional
+        Other options. Support will depend on the backend. Currently used:
+        
+            png:strip_alpha: bool
+                Whether to strip the alpha channel during PNG input.
+    
     Returns
     -------
     im : ndarray
@@ -59,10 +64,12 @@ def imread(filename, as_grey=False, formatstr=None, return_metadata=False):
     imread_from_blob : function
         Read from a in-memory string
     '''
+    if opts is None:
+        opts = {}
     formatstr = _parse_formatstr(filename, formatstr, 'imread')
     reader = special.special.get(formatstr, _imread.imread)
-    flags = ('m' if return_metadata else '')
-    imdata,meta = reader(filename, formatstr, flags)
+    # flags = ('m' if return_metadata else '')
+    imdata,meta = reader(filename, formatstr, opts)
     imdata = _as_grey(imdata, as_grey)
     if return_metadata:
         return imdata, meta
@@ -71,16 +78,16 @@ def imread(filename, as_grey=False, formatstr=None, return_metadata=False):
 imload = imread
 
 
-def imread_from_blob(blob, formatstr=None, as_grey=False, return_metadata=False):
+def imread_from_blob(blob, formatstr=None, as_grey=False, return_metadata=False, opts=None):
     '''
     imdata = imread_from_blob(blob, formatstr=None, as_grey=False, return_metadata={True})
     imdata,metadata = imread_from_blob(blob, formatstr=None, as_grey={False}, return_metadata=True)
-
+    
     Read an image into a ndarray from an in-memory blob.
-
+    
     Note that the parameter order is changed wrt. ``imread`` because
     **formatstr** is a mandatory parameter to this function!
-
+    
     Parameters
     ----------
     blob : str (bytes in Py3)
@@ -93,7 +100,12 @@ def imread_from_blob(blob, formatstr=None, as_grey=False, return_metadata=False)
         Whether to convert to grey scale image (default: no)
     return_metadata : bool, optional
         Whether to return metadata (default: False)
-
+    opts : dict, optional
+        Other options. Support will depend on the backend. Currently used:
+        
+            png:strip_alpha: bool
+                Whether to strip the alpha channel during PNG input.
+    
     Returns
     -------
     im : ndarray
@@ -102,17 +114,19 @@ def imread_from_blob(blob, formatstr=None, as_grey=False, return_metadata=False)
         point image.
     meta: str
         Metadata. The metadata in the file Only returned if ``return_metadata``.
-
+    
     See Also
     --------
     imread : function
         Read from a file on disk
     '''
+    if opts is None:
+        opts = {}
     reader = _imread.imread_from_blob
     if formatstr is None:
         formatstr = detect_format(blob, is_blob=True)
-    flags = ('m' if return_metadata else '')
-    imdata,meta = reader(blob, formatstr, flags)
+    # flags = ('m' if return_metadata else '')
+    imdata,meta = reader(blob, formatstr, opts)
     imdata = _as_grey(imdata, as_grey)
     if return_metadata:
         return imdata,meta
@@ -120,26 +134,28 @@ def imread_from_blob(blob, formatstr=None, as_grey=False, return_metadata=False)
 
 imload_from_blob = imread_from_blob
 
-def imread_multi(filename, formatstr=None):
+def imread_multi(filename, formatstr=None, opts=None):
     '''
     images = imread_multi(filename, formatstr={from filename})
-
+    
     The file type is guessed from `filename`.
-
+    
     Parameters
     ----------
     filename : str
         filename
-
+    
     formatstr : str, optional
         file format. If ``None``, then it is derived from the filename.
-
+    
     Returns
     -------
     images : list
     '''
+    if opts is None:
+        opts = {}
     formatstr = _parse_formatstr(filename, formatstr, 'imread')
-    return _imread.imread_multi(filename, formatstr, '')
+    return _imread.imread_multi(filename, formatstr, opts)
 
 imload_multi = imread_multi
 
@@ -147,9 +163,9 @@ imload_multi = imread_multi
 def imsave(filename, array, formatstr=None, metadata=None, opts=None):
     '''
     imsave(filename, array, formatstr={auto-detect}, metadata={None}, opts={})
-
+    
     Writes `array` into file `filename`
-
+    
     Parameters
     ----------
     filename : str
@@ -163,26 +179,25 @@ def imsave(filename, array, formatstr=None, metadata=None, opts=None):
     opts: dict, optional
         This is a dictionary of options. Any non-applicable option is typically
         silently ignored. Currently, the following options are accepted:
-
+        
         jpeg:quality
             An integer 1-100 determining the quality used by JPEG backend
             (default is libjpeg default: 75).
-
+        
         tiff:compress
             Whether to use compression when saving TIFF (default: True)
-
+        
         tiff:horizontal-predictor
             Whether to use horizontal prediction in TIFF. This defaults to True
             for 16 bit images, and to False for 8 bit images. This is because
             compressing 16 bit images without horizontal prediction is often
             counter-productive (see http://www.asmail.be/msg0055176395.html)
-
-
+        
         png:compression_level
             Compression level to use, from 0 (no compression) to 9. Setting
             this parameter to 0 is discouraged as setting it to 1 already
             provides a modicum of compression at no extra computational cost.
-
+    
     '''
     if opts is None:
         opts = {}
@@ -199,11 +214,12 @@ def imsave(filename, array, formatstr=None, metadata=None, opts=None):
     _imread.imsave(filename, formatstr, array, opts)
 
 def imsave_multi(filename, arrays, formatstr=None, opts=None):
-    '''Saves multiple arrays into a single file
-
+    '''
+    Saves multiple arrays into a single file
+    
     Only certain formats (in the current version of imread, only TIFF) support
     writing multiple outputs.
-
+    
     Parameters
     ----------
     filename : str
@@ -217,21 +233,20 @@ def imsave_multi(filename, arrays, formatstr=None, opts=None):
     opts: dict, optional
         This is a dictionary of options. Any non-applicable option is typically
         silently ignored. Currently, the following options are accepted:
-
+        
         jpeg:quality
             An integer 1-100 determining the quality used by JPEG backend
             (default is libjpeg default: 75).
-
+        
         tiff:compress
             Whether to use compression when saving TIFF (default: True)
-
+        
         tiff:horizontal-predictor
             Whether to use horizontal prediction in TIFF. This defaults to True
             for 16 bit images, and to False for 8 bit images. This is because
             compressing 16 bit images without horizontal prediction is often
             counter-productive (see http://www.asmail.be/msg0055176395.html)
-
-
+        
         png:compression_level
             Compression level to use, from 0 (no compression) to 9. Setting
             this parameter to 0 is discouraged as setting it to 1 already
@@ -257,16 +272,16 @@ imwrite_multi = imsave_multi
 def detect_format(filename_or_blob, is_blob=False):
     '''
     Detect format using magic numbers
-
+    
     Note that this function does not perform any checks that the data is OK,
     just checks magic numbers. Not all formats can be autodetected.
-
+    
     Parameters
     ----------
     filename_or_blob : bytes (str in Python 2)
     is_blob : boolean, optional
         If true, then filename_or_blob is interpreted as a blob; otherwise,
-
+    
     Returns
     -------
     format : str or None
@@ -277,13 +292,14 @@ def detect_format(filename_or_blob, is_blob=False):
 
 
 def supports_format(formatstr):
-    '''Query whether the format is supported by imread
-
+    '''
+    Query whether the format is supported by imread
+    
     Parameters
     ----------
     formatstr : str
         format string (for example, 'png')
-
+    
     Returns
     -------
     is_supported : bool

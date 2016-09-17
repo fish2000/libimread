@@ -23,13 +23,13 @@ all_suffixes = set()
 for format_name, format_opts in im.format_info.iteritems():
     all_suffixes |= set(format_opts.get('suffixes'))
 
-def imread(filename, formatstr, flags=''):
-    return (numpy.array(im.Array(filename)).transpose(1, 0, 2), '')
+def imread(filename, formatstr, opts):
+    return (numpy.array(im.Array(filename, options=opts)).transpose(1, 0, 2), '')
 
-def imread_from_blob(blob, formatstr, flags=''):
-    return (numpy.array(im.Array(blob, is_blob=True)).transpose(1, 0, 2), '')
+def imread_from_blob(blob, formatstr, opts):
+    return (numpy.array(im.Array(blob, is_blob=True, options=opts)).transpose(1, 0, 2), '')
 
-def imread_multi(filename, formatstr, flags=''):
+def imread_multi(filename, formatstr, opts):
     raise NotImplementedError(
         "_imread.imread_multi is as-of-yet unsupported")
 

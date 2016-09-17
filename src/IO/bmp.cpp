@@ -69,7 +69,7 @@ namespace im {
     
     std::unique_ptr<Image> BMPFormat::read(byte_source* src,
                                            ImageFactory* factory,
-                                           const options_map& opts)  {
+                                           options_map const& opts)  {
         char magic[2];
         
         if (src->read(reinterpret_cast<byte*>(magic), 2) != 2) {
