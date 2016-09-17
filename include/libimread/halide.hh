@@ -67,12 +67,6 @@ namespace im {
     using HalImage = Halide::Image<std::decay_t<T>>;
     using MetaImage = ImageWithMetadata;
     
-    // using Halide::Expr;
-    // using Halide::Buffer;
-    // using Halide::Realization;
-    // using Halide::Argument;
-    // using Halide::ExternFuncArgument;
-    
     template <typename pT>
     class HybridImage : public HalImage<pT>, public Image, public MetaImage {
         public:
@@ -99,20 +93,11 @@ namespace im {
                 :halide_image_t(x), Image(), MetaImage(name)
                 {}
             
-            // HybridImage(Buffer const& buf)
-            //     :halide_image_t(buf), Image(), MetaImage()
-            //     {}
-            
-            // HybridImage(Realization const& r)
-            //     :halide_image_t(r), Image(), MetaImage()
-            //     {}
-            
             HybridImage(buffer_t const* b, std::string const& name="")
                 :halide_image_t(b, name), Image(), MetaImage(name)
                 {}
             
             using halide_image_t::operator();
-            // using halide_image_t::defined;
             using halide_image_t::dimensions;
             using halide_image_t::extent;
             using halide_image_t::stride;
@@ -121,20 +106,6 @@ namespace im {
             using halide_image_t::type;
             
             virtual ~HybridImage() {}
-            
-            // operator Buffer() const { return halide_image_t::buffer; }
-            
-            // operator Argument() const {
-            //     return Argument(halide_image_t::buffer);
-            // }
-            
-            // operator ExternFuncArgument() const {
-            //     return ExternFuncArgument(halide_image_t::buffer);
-            // }
-            
-            // operator Expr() const {
-            //     return (*this)(Halide::_);
-            // }
             
             Halide::Type type() const {
                 return halide_image_t::type();
