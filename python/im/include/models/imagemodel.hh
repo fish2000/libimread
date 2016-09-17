@@ -385,7 +385,7 @@ namespace py {
                 :weakrefs(nullptr)
                 ,image(std::make_shared<ImageType>(NPY_UINT8, bmoi->internal.get()))
                 ,dtype(PyArray_DescrFromType(image->dtype()))
-                ,imagebuffer(py::object(bmoi))
+                ,imagebuffer(py::convert(bmoi))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
                 {}
