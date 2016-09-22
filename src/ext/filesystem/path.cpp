@@ -170,7 +170,7 @@ namespace filesystem {
             set(dlinfo.dli_fname);
         } else {
             imread_raise(FileSystemError,
-                "Internal error in ::dlfcn(address, &dlinfo)",
+                "Internal error in ::dladdr(address, &dlinfo)",
                 "where address = ", (long)address, std::strerror(errno));
         }
     }
@@ -225,17 +225,18 @@ namespace filesystem {
         if (::realpath(c_str(), temp) == nullptr) {
             imread_raise(FileSystemError,
                 "In reference to path value:", str(),
-                "FATAL internal error raised during path::make_absolute() call to ::realpath():",
+                "FATAL internal error in path::make_absolute() call to ::realpath():",
                 std::strerror(errno));
         }
         return path(temp);
     }
     
+    static const std::regex user_directory_re("^~", detail::regex_flags);
+    
     path path::expand_user() const {
-        const std::regex re("^~", detail::regex_flags);
         if (m_path.empty()) { return path(); }
         if (m_path.front().substr(0, 1) != "~") { return path(*this); }
-        return replace(re, detail::userdir());
+        return replace(user_directory_re, detail::userdir());
     }
     
     bool path::compare_debug(path const& other) const {
@@ -243,22 +244,22 @@ namespace filesystem {
              raw_other[PATH_MAX];
         if (::realpath(c_str(), raw_self) == nullptr) {
             imread_raise(FileSystemError,
-                "FATAL internal error raised during path::compare_debug() call to ::realpath():",
+                "FATAL internal error in path::compare_debug() call to ::realpath():",
              FF("\t%s (%d)", std::strerror(errno), errno),
                 "In reference to SELF path value:",
                 str());
         }
         if (::realpath(other.c_str(), raw_other) == nullptr) {
             imread_raise(FileSystemError,
-                "FATAL internal error raised during path::compare_debug() call to ::realpath():",
+                "FATAL internal error in path::compare_debug() call to ::realpath():",
              FF("\t%s (%d)", std::strerror(errno), errno),
                 "In reference to OTHER path value:",
                 other.str());
         }
-        WTF("COMPARING PATHS:",
-            str(), other.str(),
-            "AS RAW STRINGS:",
-            raw_self, raw_other);
+        // WTF("COMPARING PATHS:",
+        //     str(), other.str(),
+        //     "AS RAW STRINGS:",
+        //     raw_self, raw_other);
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
@@ -549,7 +550,8 @@ namespace filesystem {
         bool out = true;
         
         /// backtrack through path parents to find an existant base:
-        int idx = size();
+        int idx, max;
+        idx = max = size();
         for (path p(*this); !p.exists(); p = p.parent()) { --idx; }
         
         /// copy the existant base segments to a new path instance:
@@ -563,10 +565,10 @@ namespace filesystem {
         
         /// iterate through nonexistant path segments,
         /// using path::makedir() to make each nonexistant directory:
-        int max = size();
+        // int max = size();
         for (int i = idx; i < max; ++i) {
             result = result.join(m_path[i]);
-            if (!result.is_directory()) { out &= result.makedir(); }
+            out &= result.makedir();
         }
         
         /// return per the logical sum of operations:
@@ -574,8 +576,7 @@ namespace filesystem {
     }
     
     std::string path::basename() const {
-        if (empty()) { return ""; }
-        return m_path.back();
+        return empty() ? "" : m_path.back();
     }
     
     bool path::rename(path const& newpath) {
