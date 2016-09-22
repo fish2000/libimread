@@ -28,6 +28,7 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 include(CheckTypeSize)
 include(CheckFunctionExists)
+include(CheckDevEntry)
 
 # Check required headers
 check_include_file(fcntl.h                              HAVE_FCNTL_H)
@@ -50,47 +51,41 @@ check_include_file(sys/sendfile.h                       HAVE_SYS_SENDFILE_H)
 check_include_file(sys/mman.h                           HAVE_SYS_MMAN_H)
 
 if(APPLE)
+    
     check_include_file(copyfile.h                       HAVE_COPYFILE_H)
     check_include_file(mach-o/dyld.h                    HAVE_MACHO_DYLD_H)
     check_include_file(objc/message.h                   HAVE_OBJC_MESSAGE_H)
     check_include_file(objc/runtime.h                   HAVE_OBJC_RUNTIME_H)
-    
-    message(STATUS "Checking for /dev/autofs_nowait")
-    if(EXISTS "/dev/autofs_nowait")
-        message(STATUS "Checking for /dev/autofs_nowait - found")
-        set(HAVE_AUTOFS_NOWAIT YES
-            CACHE BOOL
-            "/dev/autofs_nowait presence"
-            FORCE)
-    else()
-        message(STATUS "Checking for /dev/autofs_nowait - not found")
-        set(HAVE_AUTOFS_NOWAIT NO
-            CACHE BOOL
-            "/dev/autofs_nowait presence"
-            FORCE)
-    endif()
+    check_dev_entry("autofs_nowait"                     HAVE_AUTOFS_NOWAIT)
+    check_dev_entry("autofs_notrigger"                  HAVE_AUTOFS_NOTRIGGER)
     
 else(APPLE)
     
     set(HAVE_COPYFILE_H NO
-        CACHE BOOL
+        CACHE INTERNAL
         "<copyfile.h> presence"
         FORCE)
     set(HAVE_MACHO_DYLD_H NO
-        CACHE BOOL
+        CACHE INTERNAL
         "<mach-o/dyld.h> presence"
         FORCE)
     set(HAVE_OBJC_MESSAGE_H NO
-        CACHE BOOL
+        CACHE INTERNAL
         "<objc/message.h> presence"
         FORCE)
     set(HAVE_OBJC_RUNTIME_H NO
-        CACHE BOOL
+        CACHE INTERNAL
         "<objc/runtime.h> presence"
         FORCE)
+    
     set(HAVE_AUTOFS_NOWAIT NO
-        CACHE BOOL
+        CACHE INTERNAL
         "/dev/autofs_nowait presence"
+        FORCE)
+    
+    set(HAVE_AUTOFS_NOTRIGGER NO
+        CACHE INTERNAL
+        "/dev/autofs_notrigger presence"
         FORCE)
     
 endif(APPLE)

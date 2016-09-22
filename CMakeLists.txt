@@ -16,6 +16,9 @@ option(IM_COLOR_TRACE       "Use ANSI color in debug and error trace output"    
 option(IM_VERBOSE           "Print (highly nerd-oriented) verbose debug output" ON)
 option(IM_TERMINATOR        "Use a libunwind-based termination handler"         ON)
 
+unset(HAVE_AUTOFS_NOWAIT CACHE)
+unset(HAVE_AUTOFS_NOTRIGGER CACHE)
+
 if(IM_USE_GCC)
     # hardcode homebrew path for now
     set(CMAKE_C_COMPILER    "/usr/local/opt/gcc/bin/gcc-5")
@@ -242,9 +245,12 @@ get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
 get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
 get_target_property(IM_LINK_LIBRARIES imread_shared LINK_LIBRARIES)
 get_target_property(IM_LINK_FLAGS imread_shared LINK_FLAGS)
-set(IM_HAVE_STRINGVIEW_HH ${HAVE_STRINGVIEW_HH})
-set(IM_HAVE_SYS_SENDFILE_H ${HAVE_SYS_SENDFILE_H})
-set(IM_HAVE_AUTOFS_NOWAIT ${HAVE_AUTOFS_NOWAIT})
+
+# set stuff from cache
+set(IM_HAVE_STRINGVIEW_HH       ${HAVE_STRINGVIEW_HH})
+set(IM_HAVE_SYS_SENDFILE_H      ${HAVE_SYS_SENDFILE_H})
+set(IM_HAVE_AUTOFS_NOWAIT       ${HAVE_AUTOFS_NOWAIT})
+set(IM_HAVE_AUTOFS_NOTRIGGER    ${HAVE_AUTOFS_NOTRIGGER})
 
 # Configure and generate the compile-time project header file:
 set(PROJECT_HEADER
