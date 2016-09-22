@@ -731,12 +731,13 @@ namespace filesystem {
         return path(temp);
     }
     
-    path path::cwd()                { return path::getcwd(); }
-    path path::gettmp()             { return path(detail::tmpdir()); }
-    path path::tmp()                { return path(detail::tmpdir()); }
-    path path::home()               { return path(detail::userdir()); }
-    path path::user()               { return path(detail::userdir()); }
-    path path::executable()         { return path(detail::execpath()); }
+    path path::cwd()                    { return path::getcwd(); }
+    path path::gettmp()                 { return path(detail::tmpdir()); }
+    path path::tmp()                    { return path(detail::tmpdir()); }
+    path path::home()                   { return path(detail::userdir()); }
+    path path::user()                   { return path(detail::userdir()); }
+    path path::executable()             { return path(detail::execpath()); }
+    std::string path::currentprogram()  { return path::basename(detail::execpath()); }
     
     detail::stringvec_t path::system() {
         return tokenize(detail::syspaths(), detail::posix_pathvar_separator);

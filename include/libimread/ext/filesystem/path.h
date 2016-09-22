@@ -431,7 +431,8 @@ namespace filesystem {
             /// Convenience function to get a C-style string, a la std::string's API
             char const* c_str() const;
             
-            /// Static functions for getting both the current, system temp, and user/home directories
+            /// Static functions to retrieve the current directory, the system temporary directory,
+            /// user/home directories, and the current running executable/program name and full path.
             static path getcwd();
             static path cwd();
             static path gettmp();
@@ -439,6 +440,7 @@ namespace filesystem {
             static path home();
             static path user();
             static path executable();
+            static std::string currentprogram();
             
             static detail::stringvec_t system();
             

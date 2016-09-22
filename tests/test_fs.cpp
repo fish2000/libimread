@@ -238,6 +238,7 @@ namespace {
         path executable = path::executable();
         resolver dres(executable.parent());
         REQUIRE(dres.contains(executable.basename()));
+        REQUIRE(dres.contains(path::currentprogram()));
     }
     
     TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct",
