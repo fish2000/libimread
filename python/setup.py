@@ -184,7 +184,6 @@ extensions = {
         "im/src/gil-gc.cpp",
         "im/src/gil-io.cpp",
         "im/src/hybrid.cpp",
-        # "im/src/hybridimage.cpp",
         "im/src/options.cpp",
         "im/src/pybuffer.cpp",
         "im/src/structcode.cpp",
