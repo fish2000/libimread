@@ -5,7 +5,7 @@
 #include <Python.h>
 
 /// forward type declarations
-extern PyTypeObject HybridImageModel_Type;
+// extern PyTypeObject HybridImageModel_Type;
 extern PyTypeObject ImageModel_Type;
 extern PyTypeObject BufferModel_Type;
 extern PyTypeObject ImageBufferModel_Type;
@@ -14,7 +14,7 @@ extern PyTypeObject ArrayBufferModel_Type;
 extern PyTypeObject BatchModel_Type;
 extern PyTypeObject BatchIterator_Type;
 
-#define HybridImage_Check(op)       (Py_TYPE(op) == &HybridImageModel_Type)
+// #define HybridImage_Check(op)       (Py_TYPE(op) == &HybridImageModel_Type)
 #define BufferModel_Check(op)       (Py_TYPE(op) == &BufferModel_Type)
 #define ImageModel_Check(op)        (Py_TYPE(op) == &ImageModel_Type)
 #define ImageBufferModel_Check(op)  (Py_TYPE(op) == &ImageBufferModel_Type)

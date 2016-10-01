@@ -2,6 +2,11 @@
 #ifndef LIBIMREAD_PYTHON_IM_INCLUDE_MODELS_MODELS_HH_
 #define LIBIMREAD_PYTHON_IM_INCLUDE_MODELS_MODELS_HH_
 
+#include <libimread/imageformat.hh>
+#include <libimread/formats.hh>
+#include <libimread/file.hh>
+#include <libimread/filehandle.hh>
+
 #include "buffermodel.hh"
 #include "imagemodel.hh"
 #include "batchmodel.hh"

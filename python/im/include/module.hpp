@@ -2,7 +2,7 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-#include "hybridimage.hh"
+// #include "hybridimage.hh"
 #include "models/models.hh"
 #include "pymethods/batchmethods.hh"
 #include "pymethods/pymethods.hh"

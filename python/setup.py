@@ -132,6 +132,7 @@ if DEBUG:
             ('IM_VERBOSE', VERBOSE))
         define_macros.append(
             ('IM_COLOR_TRACE', COLOR_TRACE))
+    undef_macros.append('NDEBUG')
 else:
     define_macros.append(
         ('NDEBUG', 1))
@@ -180,9 +181,10 @@ extensions = {
         "im/src/exceptions.cpp",
         # "im/src/flattery.cpp",
         "im/src/gil.cpp",
+        "im/src/gil-gc.cpp",
         "im/src/gil-io.cpp",
         "im/src/hybrid.cpp",
-        "im/src/hybridimage.cpp",
+        # "im/src/hybridimage.cpp",
         "im/src/options.cpp",
         "im/src/pybuffer.cpp",
         "im/src/structcode.cpp",

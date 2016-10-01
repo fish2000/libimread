@@ -135,32 +135,32 @@ namespace im {
         {}
     
     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
-        :HalBase(detail::for_dtype(d), b, name), PythonBufferImage(), MetaImage(name)
+        :HalBase(detail::for_dtype(d), *b), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, y, z, w, name), PythonBufferImage(), MetaImage(name)
+        :HalBase(detail::for_dtype(d), x, y, z, w), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, y, z, 0, name), PythonBufferImage(), MetaImage(name)
+        :HalBase(detail::for_dtype(d), x, y, z, 0), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, y, 0, 0, name), PythonBufferImage(), MetaImage(name)
+        :HalBase(detail::for_dtype(d), x, y, 0, 0), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, 0, 0, 0, name), PythonBufferImage(), MetaImage(name)
+        :HalBase(detail::for_dtype(d), x, 0, 0, 0), PythonBufferImage(), MetaImage(name)
         ,dtype_(d)
         {}
     
     HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& other, int const zidx, std::string const& name)
-        :HalBase(other.type(), other.dim(0), other.dim(1), 1, 0, name)
+        :HalBase(other.type(), other.dim(0), other.dim(1), 1, 0)
         ,PythonBufferImage(), MetaImage(name)
         ,dtype_(other.dtype())
         {
@@ -178,7 +178,7 @@ namespace im {
         }
     
     HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& basis, HalideNumpyImage const& etc, std::string const& name)
-        :HalBase(basis.type(), basis.dim(0), basis.dim(1), basis.dim(2) + etc.dim(2), 0, name)
+        :HalBase(basis.type(), basis.dim(0), basis.dim(1), basis.dim(2) + etc.dim(2), 0)
         ,PythonBufferImage(), MetaImage(name)
         ,dtype_(basis.dtype())
         {
@@ -212,11 +212,11 @@ namespace im {
     
     /// This returns the same type of data as buffer_t.host
     uint8_t* HalideNumpyImage::data() const {
-        return (uint8_t*)HalBase::buffer.host_ptr();
+        return (uint8_t*)HalBase::host_ptr();
     }
     
     uint8_t* HalideNumpyImage::data(int s) const {
-        return (uint8_t*)HalBase::buffer.host_ptr() + std::ptrdiff_t(s);
+        return (uint8_t*)HalBase::host_ptr() + std::ptrdiff_t(s);
     }
     
     std::string_view HalideNumpyImage::view() const {
@@ -226,19 +226,19 @@ namespace im {
     }
     
     Halide::Type HalideNumpyImage::type() const {
-        return HalBase::buffer.type();
+        return HalBase::type();
     }
     
     buffer_t* HalideNumpyImage::buffer_ptr() const {
-        return HalBase::raw_buffer();
+        return const_cast<buffer_t*>(HalBase::raw_buffer());
     }
     
     int HalideNumpyImage::nbits() const {
-        return HalBase::buffer.type().bits();
+        return HalBase::type().bits;
     }
     
     int HalideNumpyImage::nbytes() const {
-        const int bits = HalBase::buffer.type().bits();
+        const int bits = HalBase::type().bits;
         return (bits / 8) + bool(bits % 8);
     }
     
@@ -261,11 +261,11 @@ namespace im {
     bool HalideNumpyImage::is_signed() const {
         /// If it's not UInt, it's signed --
         /// it's either Float, Int, or someshit.
-        return !HalBase::buffer.type().is_uint();
+        return HalBase::type().code != halide_type_code_t::halide_type_uint;
     }
     
     bool HalideNumpyImage::is_floating_point() const {
-        return HalBase::buffer.type().is_float();
+        return HalBase::type().code == halide_type_code_t::halide_type_float;
     }
     
     off_t HalideNumpyImage::rowp_stride() const {

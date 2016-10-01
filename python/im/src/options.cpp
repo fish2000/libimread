@@ -79,8 +79,7 @@ namespace py {
                     auto fulldata = iohandle.source()->full_data();
                     return std::string((const char*)&fulldata[0], fulldata.size());
                 }
-            } else if (HybridImage_Check(value)         ||
-                       BufferModel_Check(value)         ||
+            } else if (BufferModel_Check(value)         ||
                        ImageModel_Check(value)          ||
                        ImageBufferModel_Check(value)    ||
                        BatchModel_Check(value)          ||
