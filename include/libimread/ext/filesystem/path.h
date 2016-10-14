@@ -35,7 +35,8 @@ namespace filesystem {
         using stringvec_t = std::vector<std::string>;
         using stringlist_t = std::initializer_list<std::string>;
         using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
-        using timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
+        using clock_t = std::chrono::system_clock;
+        using timepoint_t = std::chrono::time_point<clock_t>;
         using time_triple_t = std::tuple<timepoint_t, timepoint_t, timepoint_t>;
         using inode_t = uint64_t;
         
@@ -87,13 +88,14 @@ namespace filesystem {
             explicit path(int descriptor);
             explicit path(const void* address);
             explicit path(detail::stringvec_t const& vec, bool absolute = false);
+            explicit path(detail::stringvec_t&& vec, bool absolute = false) noexcept;
             explicit path(detail::stringlist_t);
             
-            std::size_t size() const;
+            size_type size() const;
             bool is_absolute() const;
             bool empty() const;
             detail::inode_t inode() const;
-            std::size_t filesize() const;
+            size_type filesize() const;
             
             /// return a new and fully-absolute path wrapper,
             /// based on the path in question
@@ -460,17 +462,19 @@ namespace filesystem {
             path& operator=(char const*);
             path& operator=(path const&);
             path& operator=(path&&) noexcept;
+            path& operator=(detail::stringvec_t const&);
+            path& operator=(detail::stringvec_t&&) noexcept;
             path& operator=(detail::stringlist_t);
             
             /// Stringify the path to an ostream
             friend std::ostream& operator<<(std::ostream& os, path const& p);
             
             /// calculate the hash value for the path
-            std::size_t hash() const noexcept;
+            size_type hash() const noexcept;
             
             /// Static forwarder for the hash function
             template <typename P> inline
-            static std::size_t hash(P&& p) {
+            static path::size_type hash(P&& p) {
                 return path(std::forward<P>(p)).hash();
             }
             

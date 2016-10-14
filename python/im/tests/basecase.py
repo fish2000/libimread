@@ -7,7 +7,8 @@ from os import listdir
 from os.path import join, abspath, expanduser, dirname, basename
 from collections import namedtuple
 
-ImageTypeTuple = namedtuple('ImageTypes', ['Image', 'Array'])
+# ImageTypeTuple = namedtuple('ImageTypes', ['Image', 'Array'])
+ImageTypeTuple = namedtuple('ImageTypes', ['Array'])
 
 class BaseCase(TestCase):
     
@@ -35,7 +36,8 @@ class BaseCase(TestCase):
         # print(pformat(self.tifs, indent=4))
         
         # store local references to im.Image and im.Array
-        self.imagetypes = ImageTypeTuple(im.Image, im.Array)
+        # self.imagetypes = ImageTypeTuple(im.Image, im.Array)
+        self.imagetypes = ImageTypeTuple(im.Array)
         
         # store local reference to im.Batch
         self.Batch = im.Batch

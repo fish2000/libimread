@@ -171,7 +171,7 @@ namespace filesystem {
         } else {
             imread_raise(FileSystemError,
                 "Internal error in ::dladdr(address, &dlinfo)",
-                "where address = ", (long)address, std::strerror(errno));
+                "where address = ", reinterpret_cast<long>(address), std::strerror(errno));
         }
     }
     
@@ -180,11 +180,16 @@ namespace filesystem {
         ,m_path(vec)
         {}
     
+    path::path(detail::stringvec_t&& vec, bool absolute) noexcept
+        :m_absolute(absolute)
+        ,m_path(std::move(vec))
+        {}
+    
     path::path(detail::stringlist_t list)
         :m_path(list)
         {}
     
-    std::size_t path::size() const { return static_cast<std::size_t>(m_path.size()); }
+    path::size_type path::size() const { return static_cast<path::size_type>(m_path.size()); }
     bool path::is_absolute() const { return m_absolute; }
     bool path::empty() const       { return m_path.empty(); }
     
@@ -194,7 +199,7 @@ namespace filesystem {
         return static_cast<detail::inode_t>(sb.st_ino);
     }
     
-    std::size_t path::filesize() const {
+    path::size_type path::filesize() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return 0; }
         return sb.st_size * sizeof(byte);
@@ -492,27 +497,27 @@ namespace filesystem {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return detail::time_triple_t{}; }
         return std::make_tuple(
-            std::chrono::system_clock::from_time_t(sb.st_atime),
-            std::chrono::system_clock::from_time_t(sb.st_mtime),
-            std::chrono::system_clock::from_time_t(sb.st_ctime));
+            detail::clock_t::from_time_t(sb.st_atime),
+            detail::clock_t::from_time_t(sb.st_mtime),
+            detail::clock_t::from_time_t(sb.st_ctime));
     }
     
     detail::timepoint_t path::access_time() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return detail::timepoint_t{}; }
-        return std::chrono::system_clock::from_time_t(sb.st_atime);
+        return detail::clock_t::from_time_t(sb.st_atime);
     }
     
     detail::timepoint_t path::modify_time() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return detail::timepoint_t{}; }
-        return std::chrono::system_clock::from_time_t(sb.st_mtime);
+        return detail::clock_t::from_time_t(sb.st_mtime);
     }
     
     detail::timepoint_t path::status_time() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return detail::timepoint_t{}; }
-        return std::chrono::system_clock::from_time_t(sb.st_ctime);
+        return detail::clock_t::from_time_t(sb.st_ctime);
     }
     
     bool path::update_timestamps() {
@@ -661,16 +666,15 @@ namespace filesystem {
     
     path path::parent() const {
         path result;
-        result.m_absolute = m_absolute;
-        
         if (m_path.empty()) {
-            if (!m_absolute) {
-                result.m_path.push_back("..");
-            } else {
+            if (m_absolute) {
                 imread_raise(FileSystemError,
-                    "path::parent() can't get the parent of an empty absolute path");
+                    "path::parent() makes no sense for empty absolute paths");
+            } else {
+                result = detail::stringvec_t{ ".." };
             }
         } else {
+            result.m_absolute = m_absolute;
             std::copy(m_path.begin(),
                       m_path.end() - 1,
                       std::back_inserter(result.m_path));
@@ -770,8 +774,23 @@ namespace filesystem {
         return *this;
     }
     
-    path& path::operator=(detail::stringlist_t list) {
-        m_path = detail::stringvec_t(list);
+    path& path::operator=(detail::stringvec_t const& stringvec) {
+        m_path = detail::stringvec_t{};
+        if (!stringvec.empty()) {
+            std::copy(stringvec.begin(),
+                      stringvec.end(),
+                      std::back_inserter(m_path));
+        }
+        return *this;
+    }
+    
+    path& path::operator=(detail::stringvec_t&& stringvec) noexcept {
+        m_path = std::move(stringvec);
+        return *this;
+    }
+    
+    path& path::operator=(detail::stringlist_t stringlist) {
+        m_path = detail::stringvec_t(stringlist);
         return *this;
     }
     
@@ -780,10 +799,10 @@ namespace filesystem {
     }
     
     /// calculate the hash value for the path
-    std::size_t path::hash() const noexcept {
+    path::size_type path::hash() const noexcept {
         return std::accumulate(m_path.begin(),
                                m_path.end(),
-                               static_cast<std::size_t>(m_absolute),
+                               static_cast<path::size_type>(m_absolute),
                                detail::rehasher_t());
     }
     
