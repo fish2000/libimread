@@ -132,6 +132,7 @@ namespace filesystem {
     
     constexpr path::character_type path::sep;
     constexpr path::character_type path::extsep;
+    constexpr path::character_type path::pathsep;
     
     path::path() {}
     path::path(bool abs)
@@ -160,7 +161,8 @@ namespace filesystem {
         } else {
             imread_raise(FileSystemError,
                 "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath)",
-                "where fdpath = ", fdpath, std::strerror(errno));
+                "where fdpath = ", fdpath,
+                std::strerror(errno));
         }
     }
     
@@ -171,7 +173,8 @@ namespace filesystem {
         } else {
             imread_raise(FileSystemError,
                 "Internal error in ::dladdr(address, &dlinfo)",
-                "where address = ", reinterpret_cast<long>(address), std::strerror(errno));
+                "where address = ", reinterpret_cast<long>(address),
+                std::strerror(errno));
         }
     }
     
@@ -205,7 +208,7 @@ namespace filesystem {
         return sb.st_size * sizeof(byte);
     }
     
-    #define REGEX_FLAGS case_sensitive ? detail::regex_flags_icase : detail::regex_flags
+    // #define REGEX_FLAGS case_sensitive ? detail::regex_flags_icase : detail::regex_flags
     
     bool path::match(std::regex const& pattern, bool case_sensitive) const {
         return std::regex_match(str(), pattern);
@@ -222,7 +225,7 @@ namespace filesystem {
         return path(std::regex_replace(str(), pattern, replacement));
     }
     
-    #undef REGEX_FLAGS
+    // #undef REGEX_FLAGS
     
     path path::make_absolute() const {
         if (m_absolute) { return path(*this); }
@@ -261,10 +264,6 @@ namespace filesystem {
                 "In reference to OTHER path value:",
                 other.str());
         }
-        // WTF("COMPARING PATHS:",
-        //     str(), other.str(),
-        //     "AS RAW STRINGS:",
-        //     raw_self, raw_other);
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
     
@@ -284,7 +283,7 @@ namespace filesystem {
         /// list all files
         if (!is_directory()) {
             imread_raise(FileSystemError,
-                "Can't list files from a non-directory:", str());
+                "Can't list files of a non-directory:", str());
         }
         path abspath = make_absolute();
         detail::pathvec_t out;
@@ -352,7 +351,7 @@ namespace filesystem {
         /// list files with glob
         if (!is_directory()) {
             imread_raise(FileSystemError,
-                "Bad call to path::list() from a non-directory:", str());
+                "Call to path::list(char const*) on a non-directory:", str());
         }
         path abspath = make_absolute();
         ::glob_t g = { 0 };
@@ -373,7 +372,7 @@ namespace filesystem {
         /// list files with wordexp
         if (!is_directory()) {
             imread_raise(FileSystemError,
-                "Bad call to path::list() from a non-directory:", str());
+                "Call to path::list(std::string const&) on a non-directory:", str());
         }
         path abspath = make_absolute();
         ::wordexp_t word = { 0 };
@@ -625,7 +624,7 @@ namespace filesystem {
     std::string path::extension() const {
         if (empty()) { return ""; }
         std::string const& last = m_path.back();
-        size_type pos = last.find_last_of(extsep);
+        size_type pos = last.find_last_of(path::extsep);
         if (pos == std::string::npos) { return ""; }
         return last.substr(pos+1);
     }
@@ -633,7 +632,7 @@ namespace filesystem {
     std::string path::extensions() const {
         if (empty()) { return ""; }
         std::string const& last = m_path.back();
-        size_type pos = last.find_first_of(extsep);
+        size_type pos = last.find_first_of(path::extsep);
         if (pos == std::string::npos) { return ""; }
         return last.substr(pos+1);
     }
@@ -745,7 +744,7 @@ namespace filesystem {
     std::string path::currentprogram()  { return path::basename(detail::execpath()); }
     
     detail::stringvec_t path::system() {
-        return tokenize(detail::syspaths(), detail::posix_pathvar_separator);
+        return tokenize(detail::syspaths(), path::pathsep);
     }
     
     bool path::operator<(path const& rhs) const noexcept {
@@ -753,8 +752,8 @@ namespace filesystem {
     }
     
     void path::set(std::string const& str) {
-        m_path = tokenize(str, sep);
-        m_absolute = !str.empty() && str[0] == sep;
+        m_path = tokenize(str, path::sep);
+        m_absolute = !str.empty() && str[0] == path::sep;
     }
     
     path& path::operator=(std::string const& str) { set(str); return *this; }

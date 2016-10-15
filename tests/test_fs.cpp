@@ -7,6 +7,7 @@
 #include <regex>
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/directory.h>
@@ -224,21 +225,25 @@ namespace {
               "[fs-system-path-resolver]") {
         resolver syspaths = resolver::system();
         
-        REQUIRE(syspaths.resolve("ls") != path());
-        REQUIRE(syspaths.resolve("clang") != path());
-        REQUIRE(syspaths.resolve("YoDogg") == path());
+        CHECK(syspaths.resolve("ls") != path());
+        CHECK(syspaths.resolve("clang") != path());
+        CHECK(syspaths.resolve("YoDogg") == path());
         
-        REQUIRE(syspaths.contains("ls"));
-        REQUIRE(syspaths.contains("clang"));
-        REQUIRE(!syspaths.contains("YoDogg"));
+        CHECK(syspaths.contains("ls"));
+        CHECK(syspaths.contains("clang"));
+        CHECK(!syspaths.contains("YoDogg"));
+        
+        WTF("SYSTEM PATHS: ",
+            "", syspaths.to_string("\n\t"),
+            "", FF("RESOLVER SIZE: %i", syspaths.size()));
     }
     
     TEST_CASE("[filesystem] Test the default resolver with path::executable()",
               "[fs-default-resolver-with-path-executable]") {
         path executable = path::executable();
         resolver dres(executable.parent());
-        REQUIRE(dres.contains(executable.basename()));
-        REQUIRE(dres.contains(path::currentprogram()));
+        CHECK(dres.contains(executable.basename()));
+        CHECK(dres.contains(path::currentprogram()));
     }
     
     TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct",

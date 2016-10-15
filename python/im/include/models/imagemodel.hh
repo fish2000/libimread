@@ -7,21 +7,22 @@
 #include <memory>
 #include <vector>
 #include <valarray>
-#include <Python.h>
-#include <structmember.h>
+// #include <Python.h>
+// #include <structmember.h>
 
+#include "base.hh"
 #include "../buffer.hpp"
 #include "../check.hh"
 #include "../gil.hpp"
 #include "../gil-io.hpp"
-#include "../detail.hpp"
+// #include "../detail.hpp"
 #include "../exceptions.hpp"
 #include "../numpy.hpp"
 #include "../options.hpp"
 #include "../pybuffer.hpp"
 #include "../pycapsule.hpp"
 #include "../hybrid.hh"
-#include "base.hh"
+// #include "base.hh"
 #include "buffermodel.hh"
 
 #include <libimread/ext/filesystem/path.h>
@@ -93,7 +94,7 @@ namespace py {
         template <typename ImageType,
                   typename BufferType = buffer_t,
                   typename FactoryType = typename ImageType::factory_t>
-        struct ImageModelBase : public ModelBase {
+        struct ImageModelBase : public ModelBase<ImageModelBase> {
             
             using shared_image_t = std::shared_ptr<ImageType>;
             using weak_image_t = std::weak_ptr<ImageType>;
@@ -103,20 +104,22 @@ namespace py {
                 using base_t = BufferModelBase<BufferType>;
                 using Tag = typename BufferModelBase<BufferType>::Tag;
                 
-                void* operator new(std::size_t newsize) {
-                    PyTypeObject* type = FactoryType::buffer_type();
-                    return reinterpret_cast<void*>(type->tp_alloc(type, 0));
-                }
+                static PyTypeObject* type_ptr() { return FactoryType::buffer_type(); }
                 
-                void operator delete(void* voidself) {
-                    BufferModel* self = reinterpret_cast<BufferModel*>(voidself);
-                    PyObject* pyself = py::convert(self);
-                    if (self->weakrefs != nullptr) {
-                        PyObject_ClearWeakRefs(pyself);
-                    }
-                    self->cleanup();
-                    FactoryType::buffer_type()->tp_free(pyself);
-                }
+                // void* operator new(std::size_t newsize) {
+                //     PyTypeObject* type = FactoryType::buffer_type();
+                //     return reinterpret_cast<void*>(type->tp_alloc(type, 0));
+                // }
+                //
+                // void operator delete(void* voidself) {
+                //     BufferModel* self = reinterpret_cast<BufferModel*>(voidself);
+                //     PyObject* pyself = py::convert(self);
+                //     if (self->weakrefs != nullptr) {
+                //         PyObject_ClearWeakRefs(pyself);
+                //     }
+                //     self->cleanup();
+                //     FactoryType::buffer_type()->tp_free(pyself);
+                // }
                 
                 weak_image_t image;
                 py::ref beholden;
@@ -267,20 +270,22 @@ namespace py {
                 
             }; /* BufferModel */
             
-            void* operator new(std::size_t newsize) {
-                PyTypeObject* type = FactoryType::image_type();
-                return reinterpret_cast<void*>(type->tp_alloc(type, 0));
-            }
+            static PyTypeObject* type_ptr() { return FactoryType::image_type(); }
             
-            void operator delete(void* voidself) {
-                ImageModelBase* self = reinterpret_cast<ImageModelBase*>(voidself);
-                PyObject* pyself = py::convert(self);
-                if (self->weakrefs != nullptr) {
-                    PyObject_ClearWeakRefs(pyself);
-                }
-                self->cleanup();
-                FactoryType::image_type()->tp_free(pyself);
-            }
+            // void* operator new(std::size_t newsize) {
+            //     PyTypeObject* type = FactoryType::image_type();
+            //     return reinterpret_cast<void*>(type->tp_alloc(type, 0));
+            // }
+            //
+            // void operator delete(void* voidself) {
+            //     ImageModelBase* self = reinterpret_cast<ImageModelBase*>(voidself);
+            //     PyObject* pyself = py::convert(self);
+            //     if (self->weakrefs != nullptr) {
+            //         PyObject_ClearWeakRefs(pyself);
+            //     }
+            //     self->cleanup();
+            //     FactoryType::image_type()->tp_free(pyself);
+            // }
             
             struct Tag {
                 struct FromImage            {};

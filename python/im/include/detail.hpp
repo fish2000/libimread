@@ -27,7 +27,7 @@ typedef tagPyArrayObject PyArrayObject;
 namespace py {
     
     using im::byte;
-    using py::ext::ModelBase;
+    using py::ext::Model;
     using bytevec_t = std::vector<byte>;
     using charvec_t = std::vector<char>;
     using stringvec_t = std::vector<std::string>;
@@ -52,7 +52,7 @@ namespace py {
     PyObject* object(PyTypeObject* arg);
     PyObject* object(PyArrayObject* arg);
     PyObject* object(PyArray_Descr* arg);
-    PyObject* object(ModelBase* arg);
+    PyObject* object(Model* arg);
     
     template <typename ...Args> inline
     PyObject* tuple(Args&& ...args) {
@@ -71,7 +71,7 @@ namespace py {
     PyObject* convert(PyTypeObject*);
     PyObject* convert(PyArrayObject*);
     PyObject* convert(PyArray_Descr*);
-    PyObject* convert(ModelBase*);
+    PyObject* convert(Model*);
     PyObject* convert(std::nullptr_t);
     PyObject* convert(void);
     PyObject* convert(void*);

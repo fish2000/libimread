@@ -6,16 +6,17 @@
 #include <memory>
 #include <string>
 #include <array>
-#include <Python.h>
-#include <structmember.h>
+// #include <Python.h>
+// #include <structmember.h>
 
+#include "base.hh"
 #include "../buffer.hpp"
 #include "../check.hh"
 #include "../gil.hpp"
-#include "../detail.hpp"
+// #include "../detail.hpp"
 #include "../options.hpp"
 #include "../numpy.hpp"
-#include "base.hh"
+// #include "base.hh"
 
 /// generator headers:
 // namespace generator {
@@ -32,7 +33,7 @@ namespace py {
         using im::options_map;
         
         template <typename BufferType = buffer_t>
-        struct BufferModelBase : public ModelBase {
+        struct BufferModelBase : public ModelBase<BufferModelBase> {
             
             using pixel_t = byte;
             using unique_buffer_t = std::unique_ptr<BufferType>;
@@ -41,20 +42,20 @@ namespace py {
             
             static PyTypeObject* type_ptr() { return &BufferModel_Type; }
             
-            void* operator new(std::size_t newsize) {
-                PyTypeObject* type = type_ptr();
-                return reinterpret_cast<void*>(type->tp_alloc(type, 0));
-            }
-            
-            void operator delete(void* voidself) {
-                BufferModelBase* self = reinterpret_cast<BufferModelBase*>(voidself);
-                PyObject* pyself = py::convert(self);
-                if (self->weakrefs != nullptr) {
-                    PyObject_ClearWeakRefs(pyself);
-                }
-                self->cleanup();
-                type_ptr()->tp_free(pyself);
-            }
+            // void* operator new(std::size_t newsize) {
+            //     PyTypeObject* type = type_ptr();
+            //     return reinterpret_cast<void*>(type->tp_alloc(type, 0));
+            // }
+            //
+            // void operator delete(void* voidself) {
+            //     BufferModelBase* self = reinterpret_cast<BufferModelBase*>(voidself);
+            //     PyObject* pyself = py::convert(self);
+            //     if (self->weakrefs != nullptr) {
+            //         PyObject_ClearWeakRefs(pyself);
+            //     }
+            //     self->cleanup();
+            //     type_ptr()->tp_free(pyself);
+            // }
             
             struct Tag {
                 struct FromImage {};

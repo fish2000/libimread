@@ -69,6 +69,7 @@ namespace filesystem {
             using character_type = std::string::value_type;
             static constexpr character_type sep = detail::posix_path_separator;
             static constexpr character_type extsep = detail::posix_extension_separator;
+            static constexpr character_type pathsep = detail::posix_pathvar_separator;
             
             enum path_type {
                 windows_path = 0, posix_path = 1,

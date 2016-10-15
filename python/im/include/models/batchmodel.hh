@@ -10,18 +10,18 @@
 #include <sstream>
 #include <iomanip>
 #include <unordered_map>
+// #include <Python.h>
+// #include <structmember.h>
 
-#include <Python.h>
-#include <structmember.h>
-
+#include "base.hh"
 #include "../buffer.hpp"
 #include "../check.hh"
 #include "../gil.hpp"
-#include "../detail.hpp"
+// #include "../detail.hpp"
 #include "../exceptions.hpp"
 #include "../options.hpp"
 #include "../bufferview.hpp"
-#include "base.hh"
+// #include "base.hh"
 
 #include <libimread/rehash.hh>
 #include <libimread/image.hh>
@@ -55,24 +55,24 @@ namespace py {
         using objectvec_t = std::vector<PyObject*>;
         using objecthasher_t = hash::rehasher<PyObject*>;
         
-        struct BatchModel : public ModelBase {
+        struct BatchModel : public ModelBase<BatchModel, true> {
             
-            struct BatchIterator : public ModelBase {
+            struct BatchIterator : public ModelBase<BatchModel> {
                 
                 using iterator_t = typename objectvec_t::iterator;
                 using citerator_t = typename objectvec_t::const_iterator;
                 
                 static PyTypeObject* type_ptr() { return &BatchIterator_Type; }
                 
-                void* operator new(std::size_t newsize) {
-                    PyTypeObject* type = type_ptr();
-                    return reinterpret_cast<void*>(type->tp_alloc(type, 0));
-                }
-                
-                void operator delete(void* voidself) {
-                    BatchIterator* self = reinterpret_cast<BatchIterator*>(voidself);
-                    type_ptr()->tp_free(py::convert(self));
-                }
+                // void* operator new(std::size_t newsize) {
+                //     PyTypeObject* type = type_ptr();
+                //     return reinterpret_cast<void*>(type->tp_alloc(type, 0));
+                // }
+                //
+                // void operator delete(void* voidself) {
+                //     BatchIterator* self = reinterpret_cast<BatchIterator*>(voidself);
+                //     type_ptr()->tp_free(py::convert(self));
+                // }
                 
                 PyObject_HEAD
                 citerator_t cbegin;
@@ -122,26 +122,26 @@ namespace py {
             
             static PyTypeObject* type_ptr() { return &BatchModel_Type; }
             
-            void* operator new(std::size_t newsize) {
-                // PyTypeObject* type = type_ptr();
-                // return reinterpret_cast<void*>(type->tp_alloc(type, 0));
-                void* out = reinterpret_cast<void*>(
-                    PyObject_GC_New(BatchModel, type_ptr()));
-                PyObject_GC_Track(
-                    reinterpret_cast<PyObject*>(out));
-                return out;
-            }
-            
-            void operator delete(void* voidself) {
-                BatchModel* self = reinterpret_cast<BatchModel*>(voidself);
-                PyObject_GC_UnTrack(voidself);
-                if (self->weakrefs != nullptr) {
-                    PyObject_ClearWeakRefs(py::convert(self));
-                }
-                self->cleanup();
-                // PyObject_GC_Del(voidself);
-                type_ptr()->tp_free(py::convert(self));
-            }
+            // void* operator new(std::size_t newsize) {
+            //     // PyTypeObject* type = type_ptr();
+            //     // return reinterpret_cast<void*>(type->tp_alloc(type, 0));
+            //     void* out = reinterpret_cast<void*>(
+            //         PyObject_GC_New(BatchModel, type_ptr()));
+            //     PyObject_GC_Track(
+            //         reinterpret_cast<PyObject*>(out));
+            //     return out;
+            // }
+            //
+            // void operator delete(void* voidself) {
+            //     BatchModel* self = reinterpret_cast<BatchModel*>(voidself);
+            //     PyObject_GC_UnTrack(voidself);
+            //     if (self->weakrefs != nullptr) {
+            //         PyObject_ClearWeakRefs(py::convert(self));
+            //     }
+            //     self->cleanup();
+            //     // PyObject_GC_Del(voidself);
+            //     type_ptr()->tp_free(py::convert(self));
+            // }
             
             struct Tag {
                 struct FromBatch            {};

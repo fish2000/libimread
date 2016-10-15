@@ -6,6 +6,7 @@
 #define LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_
 
 #include <libimread/ext/filesystem/path.h>
+#include <numeric>
 
 namespace filesystem {
     
@@ -102,13 +103,17 @@ namespace filesystem {
                 return resolve_all_impl(path(std::forward<P>(p)));
             }
             
-            friend std::ostream& operator<<(std::ostream& out, resolver const& paths) {
-                if (paths.m_paths.empty()) { return out; }
-                std::for_each(paths.begin(), paths.end(),
-                       [&out](path const& p) {
-                    out << p.str() << ":";
+            std::string to_string(std::string const& separator = ":",
+                                  std::string const& initial = "") const {
+                return std::accumulate(m_paths.begin(), m_paths.end(), initial,
+                                   [&](path const& lhs,
+                                       path const& rhs) {
+                    return lhs.str() + rhs.str() + (rhs == m_paths.back() ? "" : separator);
                 });
-                return out;
+            }
+            
+            friend std::ostream& operator<<(std::ostream& out, resolver const& paths) {
+                return out << paths.to_string();
             }
             
         private:
