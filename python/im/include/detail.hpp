@@ -13,10 +13,11 @@
 #include <functional>
 #include <type_traits>
 #include <initializer_list>
+
 #include <Python.h>
 #include <libimread/libimread.hpp>
 #include <libimread/ext/JSON/json11.h>
-#include "models/base.hh"
+// #include "models/base.hh"
 
 /// forward-declare PyArrayObject and PyArray_Descr from numpy:
 struct _PyArray_Descr;
@@ -25,6 +26,10 @@ typedef _PyArray_Descr PyArray_Descr;
 typedef tagPyArrayObject PyArrayObject;
 
 namespace py {
+    
+    namespace ext {
+        struct Model;
+    }
     
     using im::byte;
     using py::ext::Model;

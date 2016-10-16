@@ -94,7 +94,7 @@ namespace py {
         template <typename ImageType,
                   typename BufferType = buffer_t,
                   typename FactoryType = typename ImageType::factory_t>
-        struct ImageModelBase : public ModelBase<ImageModelBase> {
+        struct ImageModelBase : public ModelBase<ImageModelBase<ImageType, BufferType, FactoryType>> {
             
             using shared_image_t = std::shared_ptr<ImageType>;
             using weak_image_t = std::weak_ptr<ImageType>;

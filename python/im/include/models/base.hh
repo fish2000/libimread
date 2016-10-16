@@ -18,37 +18,53 @@ namespace py {
             template <typename T>
             using void_t = std::conditional_t<true, void, T>;
             
+            template <typename T>
+            using truth_t = std::conditional_t<true, std::true_type, T>;
+            
+            template <bool B, typename T = void>
+            bool enable_if_v = std::enable_if<B, T>::value;
+            
             template <bool B, typename T = void>
             using disable_if = std::enable_if<!B, T>;
             
             template <bool B, typename T = void>
-            using disable_if_t = std::enable_if_t<!B, T>;
+            using disable_if_t = typename std::enable_if_t<!B, T>;
+            
+            template <bool B, typename T = void>
+            bool disable_if_v = std::enable_if<!B, T>::value;
             
             template <typename T>
-            using is_python_model_t = std::is_base_of<py::ext::Model, T>::type;
+            using is_python_model_t = typename std::is_base_of<py::ext::Model, T>::type;
             
-            template <class, class = void>
+            // template <class, class = void>
+            // struct has_weakrefs : std::false_type {};
+            // template <class T>
+            // struct has_weakrefs<T, void_t<typename T::weakrefs>> : is_python_model_t<T> {};
+            
+            template <typename T, typename V = bool>
             struct has_weakrefs : std::false_type {};
-            template <class T>
-            struct has_weakrefs<T, void_t<typename T::weakrefs>> : is_python_model_t<T> {};
+            template <typename T>
+            struct has_weakrefs<T,
+                typename std::enable_if_t<
+                     detail::void_t<typename T::weakrefs>::value,
+                     bool>> : detail::is_python_model_t<T> {};
+            
             
             template <typename T>
-            bool is_python_model_v = std::is_base_of<py::ext::Model, T>::value;
+            constexpr bool is_python_model_v = std::is_base_of<py::ext::Model, T>::value;
             
-            template <class X, class Y = void>
-            bool has_weakrefs_v = has_weakrefs<X, Y>::value;
             template <class X>
-            bool has_weakrefs_v = has_weakrefs<X>::value;
+            constexpr bool has_weakrefs_v = has_weakrefs<X>::value;
             
         }
         
         struct Model {
             
-            static PyObject* new(PyTypeObject* type, std::size_t newsize = 0) {
+            static PyObject* typed_new(PyTypeObject* type, std::size_t newsize = 0) {
                 return type->tp_alloc(type, newsize);
             }
             
-            static void delete(PyTypeObject* type, PyObject* pyobject) {
+            static void typed_delete(PyTypeObject* type, PyObject* pyobject) {
                 type->tp_free(pyobject);
             }
             
@@ -60,13 +76,7 @@ namespace py {
             
             static void gc_delete(PyTypeObject* type, PyObject* pyobject) {
                 PyObject_GC_UnTrack(reinterpret_cast<void*>(pyobject));
-                Model::delete(type, pyobject);
-            }
-            
-            static void clear_weak_refs(PyObject* pyobject) {
-                if (pyobject->weakrefs != nullptr) {
-                    PyObject_ClearWeakRefs(pyobject);
-                }
+                Model::typed_delete(type, pyobject);
             }
             
         };
@@ -95,35 +105,43 @@ namespace py {
                 return true;
             }
             
+            static void clear_weak_refs(ModelType* object) {
+                if (object->weakrefs != nullptr) {
+                    PyObject_ClearWeakRefs(py::convert(object));
+                }
+            }
+            
             void* operator new(std::size_t newsize) {
                 if (CollectGarbage) {
                     return reinterpret_cast<void*>(Model::gc_new(
                                                    ModelType::type_ptr()));
                 } else {
-                    return reinterpret_cast<void*>(Model::new(
+                    return reinterpret_cast<void*>(Model::typed_new(
                                                    ModelType::type_ptr()));
                 }
             }
             
-            template <typename detail::disable_if_t<
-                               detail::has_weakrefs_v<ModelType>,
-                      int> = 0>
-            static void delete_impl(ModelType* object) {}
-            
-            template <typename std::enable_if_t<
-                               detail::has_weakrefs_v<ModelType>,
-                      int> = 0>
-            static void delete_impl(ModelType* object) {
-                Model::clear_weak_refs(py::convert(object));
-            }
+            // template <typename detail::disable_if_t<
+            //                    detail::has_weakrefs_v<ModelType>,
+            //           int> = 0>
+            // static void delete_impl(ModelType* object) {}
+            //
+            // template <typename std::enable_if_t<
+            //                    detail::has_weakrefs_v<ModelType>,
+            //           int> = 0>
+            // static void delete_impl(ModelType* object) {
+            //     ModelType::clear_weak_refs(object);
+            // }
             
             void operator delete(void* voidpointer) {
                 ModelType* object = ModelType::typed(voidpointer);
-                ModelType::delete_impl(object);
+                if (detail::has_weakrefs_v<ModelType>) {
+                    ModelType::clear_weak_refs(object);
+                }
                 object->cleanup();
                 if (CollectGarbage) {
-                    Model::delete(ModelType::type_ptr(),
-                                  py::convert(object));
+                    Model::typed_delete(ModelType::type_ptr(),
+                                        py::convert(object));
                 } else {
                     Model::gc_delete(ModelType::type_ptr(),
                                      py::convert(object));
