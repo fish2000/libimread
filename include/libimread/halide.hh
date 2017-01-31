@@ -64,7 +64,7 @@ namespace im {
     } /* namespace detail */
     
     template <typename T>
-    using HalImage = Halide::Image<std::decay_t<T>>;
+    using HalImage = Halide::Buffer<std::decay_t<T>>;
     using MetaImage = ImageWithMetadata;
     
     template <typename pT>

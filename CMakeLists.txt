@@ -105,7 +105,7 @@ SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
 SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
 # SET(LIBBF_DIR "${DEPS_DIR}/libbf/src")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
-SET(VDB_DIR "${DEPS_DIR}/vdb")
+# SET(VDB_DIR "${DEPS_DIR}/vdb")
 
 # Set variables for directories for the individual apps:
 SET(LIBIMREAD_CONFIG_DIR "${APPS_DIR}/libimread-config")
@@ -163,7 +163,7 @@ include_directories("${IMAGECOMPRESSION_DIR}")
 # include_directories("${LIBBF_DIR}")
 include_directories("${IOD_DIR}")
 include_directories("${SG14_DIR}")
-include_directories("${VDB_DIR}/lib")
+# include_directories("${VDB_DIR}/lib")
 
 # Ugh
 link_directories(/usr/lib)
@@ -193,8 +193,8 @@ add_dependencies(imread "guid")
 add_dependencies(imread "imagecompression")
 # add_dependencies(imread "interpol")
 # add_dependencies(imread "libbf")
-add_dependencies(imread "vdb")
-add_dependencies(imread "vdb-client-shared")
+# add_dependencies(imread "vdb")
+# add_dependencies(imread "vdb-client-shared")
 add_dependencies(imread "iod_symbolize")
 
 # ... and build shared and static target libraries,
@@ -309,7 +309,7 @@ if(IM_TESTS)
     # add_dependencies(imread_tests "interpol")
     # add_dependencies(imread_tests "libbf")
     # add_dependencies(imread_tests "vdb")
-    add_dependencies(imread_tests "vdb-client-shared")
+    # add_dependencies(imread_tests "vdb-client-shared")
     add_dependencies(imread_tests "imread")
     link_directories(${CMAKE_BINARY_DIR})
     
@@ -318,7 +318,7 @@ if(IM_TESTS)
         imread_shared
         imagecompression
         # libbf interpol
-        vdb-client
+        # vdb-client
         guid png z
         ${EXTRA_LIBS}
         ${TIFF_LIBRARIES}
