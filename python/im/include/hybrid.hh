@@ -128,7 +128,7 @@ namespace im {
     /// We use Halide::ImageBase instead of Halide::Image here,
     /// so that we don't have to muck around with templates when
     /// working with arbitrary NumPy dtype values.
-    using HalBase = Halide::Image<>;
+    using HalBase = Halide::Buffer<>;
     using MetaImage = ImageWithMetadata;
     
     /// forward-declare factory class

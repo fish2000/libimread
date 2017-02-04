@@ -41,7 +41,7 @@ def terminal_print(message, color='red', asterisk='*'):
     asterisks = (terminal_width / 2) - (len(message) / 2)
     print(colorizer("""%(aa)s%(message)s%(ab)s""" % dict(
         aa=asterisk[0] * asterisks,
-        ab=asterisk[0] * (asterisks + 1 - (len(message) % 2)),
+        ab=asterisk[0] * (asterisks + 0 - (len(message) % 2)),
         message=message)))
 
 # GOSUB: basicaly `backticks` (cribbed from plotdevice)

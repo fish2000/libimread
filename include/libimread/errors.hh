@@ -56,12 +56,13 @@ namespace im {
     template <typename S, typename ...Args> inline
     typename std::enable_if_t<std::is_constructible<std::string, S>::value && (sizeof...(Args) != 0),
         const std::string>
-        stringify(S const& s, Args ...args) {
+        stringify(S const& s, Args&& ...args) {
             /// adapted from http://stackoverflow.com/a/26197300/298171
-            char b; const char *fmt(s);
-            unsigned required = std::snprintf(&b, 0, fmt, args...) + 1;
+            char b; const char* fmt(s);
+            unsigned required = std::snprintf(&b, 0, fmt, std::forward<Args>(args)...) + 1;
             char bytes[required];
-            std::snprintf(bytes, required, fmt, args...);
+            std::snprintf(bytes, required, fmt,
+						  std::forward<Args>(args)...);
             return std::string(bytes);
         }
     
@@ -81,7 +82,7 @@ namespace im {
         stringify(S const& s) { return im::apply(im::stringifier(), s); }
     
     template <typename ...Args> inline
-    std::string stringmerge(const Args& ...args) {
+    std::string stringmerge(Args const& ...args) {
         /// adapted from http://stackoverflow.com/a/21806609/298171
         std::string out;
         unpack {
