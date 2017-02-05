@@ -12,21 +12,21 @@ using namespace im;
 
 namespace {
     
-    TEST_CASE("[terminator] Display an exception with imread_raise_default()",
-              "[terminator-imread-raise-default]")
-    {
-        CHECK_THROWS_AS(
-            imread_raise_default(ProgrammingError),
-            ProgrammingError);
-    }
+    // TEST_CASE("[terminator] Display an exception with imread_raise_default()",
+    //           "[terminator-imread-raise-default]")
+    // {
+    //     CHECK_THROWS_AS(
+    //         imread_raise_default(ProgrammingError),
+    //         ProgrammingError);
+    // }
     
-    TEST_CASE("[terminator] Display an exception with imread_raise()",
-              "[terminator-imread-raise]")
-    {
-        CHECK_THROWS_AS(
-            imread_raise(ProgrammingError, "This is a programming error,", "... dogg"),
-            ProgrammingError);
-    }
+    // TEST_CASE("[terminator] Display an exception with imread_raise()",
+    //           "[terminator-imread-raise]")
+    // {
+    //     CHECK_THROWS_AS(
+    //         imread_raise(ProgrammingError, "This is a programming error,", "... dogg"),
+    //         ProgrammingError);
+    // }
     
     #define TYPE_ID(thingy) typeid(thingy).name()
     
