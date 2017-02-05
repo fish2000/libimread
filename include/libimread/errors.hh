@@ -301,4 +301,4 @@ DECLARE_IMREAD_ERROR_TYPE(TIFFIOError,              "Error in TIFF/libtiff I/O")
 
 }
 
-#endif // LIBIMREAD_ERRORS_HH_
+#endif /// LIBIMREAD_ERRORS_HH_

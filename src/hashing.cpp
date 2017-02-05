@@ -24,10 +24,10 @@ namespace blockhash {
         }
         
         float median(int* data, int n) {
-            int *sorted;
+            int* sorted;
             float result;
             
-            sorted = (int *)malloc(n * sizeof(int));
+            sorted = (int*)std::malloc(n * sizeof(int));
             std::memcpy(sorted, data, n * sizeof(int));
             std::qsort(sorted, n, sizeof(int), cmpint);
             
@@ -36,15 +36,15 @@ namespace blockhash {
             } else {
                 result = static_cast<float>(sorted[n / 2]);
             }
-            free(sorted);
+            std::free(sorted);
             return result;
         }
         
         float medianf(float* data, int n) {
-            float *sorted;
+            float* sorted;
             float result;
             
-            sorted = (float *)malloc(n * sizeof(float));
+            sorted = (float*)std::malloc(n * sizeof(float));
             std::memcpy(sorted, data, n * sizeof(float));
             std::qsort(sorted, n, sizeof(float), cmpfloat);
             
@@ -53,7 +53,7 @@ namespace blockhash {
             } else {
                 result = sorted[n / 2];
             }
-            free(sorted);
+            std::free(sorted);
             return result;
         }
         
@@ -66,13 +66,13 @@ namespace blockhash {
             int    i, j, b;
             int    len;
             int    tmp;
-            char  *hex;
-            char  *stmp;
+            char*  hex;
+            char*  stmp;
             
             len = nbits / 4;
             
-            hex = (char *)malloc(len + 1);
-            stmp = (char *)malloc(2);
+            hex = (char*)std::malloc(len + 1);
+            stmp = (char*)std::malloc(2);
             hex[len] = '\0';
             
             for (i = 0; i < len; i++) {
@@ -84,7 +84,7 @@ namespace blockhash {
                 std::sprintf(stmp, "%1x", tmp);
                 hex[i] = stmp[0];
             }
-            free(stmp);
+            std::free(stmp);
             return hex;
         }
         
@@ -107,13 +107,13 @@ namespace blockhash {
             int    ii, alpha, value;
             int    block_width;
             int    block_height;
-            int   *blocks;
+            int*   blocks;
             float  m[4];
             
             block_width = width / bits;
             block_height = height / bits;
             
-            blocks = (int *)calloc(bits * bits, sizeof(int));
+            blocks = (int*)std::calloc(bits * bits, sizeof(int));
             for (y = 0; y < bits; y++) {
                 for (x = 0; x < bits; x++) {
                     value = 0;
@@ -179,19 +179,19 @@ namespace blockhash {
             int     block_top, block_bottom, block_left, block_right;
             int     i, x, y, ii, alpha;
             float   value;
-            float  *blocks;
-            int    *result;
+            float*  blocks;
+            int*    result;
             float   m[4];
             
             if (width % bits == 0 && height % bits == 0) {
                 return blockhash_quick(bits, data, width, height, hash);
             }
             
-            block_width = (float) width / (float) bits;
-            block_height = (float) height / (float) bits;
+            block_width = (float)width / (float)bits;
+            block_height = (float)height / (float)bits;
             
-            blocks = (float *)calloc(bits * bits, sizeof(float));
-            result = (int *)malloc(bits * bits * sizeof(int));
+            blocks = (float*)std::calloc(bits * bits, sizeof(float));
+            result = (int*)std::malloc(bits * bits * sizeof(int));
             
             for (y = 0; y < height; y++) {
                 y_mod = std::fmod(y + 1, block_height);
@@ -257,7 +257,7 @@ namespace blockhash {
             }
             
             *hash = result;
-            free(blocks);
+            std::free(blocks);
         }
     
     }; /* namespace orig */

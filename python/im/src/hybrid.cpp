@@ -12,16 +12,20 @@
 
 namespace im {
     
-    inline Endian endianness() {
-        unsigned long number = 1;
-        char* s;
-        Endian value = Endian::Unspecified;
-        s = (char*)&number;
-        if (s[0] == 0) {
-            value = Endian::Big;
-        } else {
-            value = Endian::Little;
-        }
+    Endian endianness() {
+        static Endian value = Endian::Unspecified;
+		static bool assigned = false;
+		if (!assigned) {
+	        unsigned long number = 1;
+	        char* s;
+	        s = (char*)&number;
+	        if (s[0] == 0) {
+	            value = Endian::Big;
+	        } else {
+	            value = Endian::Little;
+	        }
+			assigned = true;
+		}
         return value;
     }
     
@@ -125,6 +129,10 @@ namespace im {
             if (view->format)   { std::free(view->format);  view->format  = nullptr; }
             if (view->shape)    { delete[] view->shape;     view->shape   = nullptr; }
             if (view->strides)  { delete[] view->strides;   view->strides = nullptr; }
+            if (view->buf)      { 							view->buf = nullptr; 	 }
+			view->ndim =
+				view->itemsize =
+				view->len = view->readonly = 0;
             view->internal = nullptr;
         }
     }

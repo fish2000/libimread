@@ -30,8 +30,7 @@ namespace std {
 
 namespace im {
     
-    enum class Endian : char
-    {
+    enum class Endian : char {
         Unspecified = '|',
         Little      = '<',
         Big         = '>'

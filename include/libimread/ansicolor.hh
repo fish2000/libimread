@@ -57,8 +57,7 @@ namespace ansi {
                 :code(c)
                 {}
             
-            friend std::ostream&
-            operator<<(std::ostream& os, const ANSI& ansi) {
+            friend std::ostream& operator<<(std::ostream& os, ANSI const& ansi) {
                 #if IM_COLOR_TRACE == 1
                     return os << "\033[" << ansi.code << "m";
                 #else
@@ -74,7 +73,7 @@ namespace ansi {
                 #endif
             }
             
-            const char *c_str() const {
+            const char* c_str() const {
                 #if IM_COLOR_TRACE == 1
                     return str().c_str();
                 #else
