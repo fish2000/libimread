@@ -8,51 +8,52 @@
 
 namespace memory {
     
-    void memstream_grow(mstream* ms, std::size_t newsize) {
-        char* buf;
-        
-        if (newsize > *ms->lenp) {
-            buf = (char *)::realloc(*ms->cp, newsize + 1);
-            if (buf != nullptr) {
-                std::memset(buf + *ms->lenp + 1, 0, newsize - *ms->lenp);
-                *ms->cp = buf;
-                *ms->lenp = newsize;
+    namespace detail {
+    
+        void grow(mstream* ms, std::size_t newsize) {
+            char* buf;
+            if (newsize > *ms->lenp) {
+                buf = (char*)std::realloc(*ms->cp, newsize + 1);
+                if (buf != nullptr) {
+                    std::memset(buf + *ms->lenp + 1, 0, newsize - *ms->lenp);
+                    *ms->cp = buf;
+                    *ms->lenp = newsize;
+                }
             }
         }
-    }
+        
+    } /// namespace detail
     
-    int memstream_read(void* cookie, char* buf, int len) {
+    int read(void* cookie, char* buf, int len) {
         mstream* ms;
         int tocopy;
         
-        ms = (mstream*)cookie;
-        memstream_grow(ms, ms->offset + len);
+        ms = reinterpret_cast<mstream*>(cookie);
+        detail::grow(ms, ms->offset + len);
         tocopy = *ms->lenp - ms->offset;
         if (len < tocopy) { tocopy = len; }
         
         std::memcpy(buf, *ms->cp + ms->offset, tocopy);
         ms->offset += tocopy;
-        
         return tocopy;
     }
     
-    int memstream_write(void* cookie, const char* buf, int len) {
+    int write(void* cookie, const char* buf, int len) {
         mstream* ms;
         int tocopy;
         
-        ms = (mstream*)cookie;
-        memstream_grow(ms, ms->offset + len);
+        ms = reinterpret_cast<mstream*>(cookie);
+        detail::grow(ms, ms->offset + len);
         tocopy = *ms->lenp - ms->offset;
         if (len < tocopy) { tocopy = len; }
         
         std::memcpy(*ms->cp + ms->offset, buf, tocopy);
         ms->offset += tocopy;
-        
         return tocopy;
     }
     
-    fpos_t memstream_seek(void* cookie, fpos_t pos, int whence) {
-        mstream* ms = (mstream*)cookie;
+    fpos_t seek(void* cookie, fpos_t pos, int whence) {
+        mstream* ms = reinterpret_cast<mstream*>(cookie);
         switch (whence) {
             case SEEK_SET:
                 ms->offset = pos;
@@ -67,8 +68,8 @@ namespace memory {
         return ms->offset;
     }
     
-    int memstream_close(void* cookie) {
-        ::free(cookie);
+    int close(void* cookie) {
+        std::free(cookie);
         return 0;
     }
     
@@ -77,21 +78,25 @@ namespace memory {
 
 FILE* open_memstream(char** cp, std::size_t* lenp) {
     memory::mstream* ms;
-    int save_errno;
-    FILE* fp;
+    FILE* filepointer;
+    
     *cp = nullptr;
     *lenp = 0;
-    ms = (memory::mstream*)::malloc(sizeof(*ms));
+    
+    ms = reinterpret_cast<memory::mstream*>(std::malloc(sizeof(*ms)));
     ms->cp = cp;
     ms->lenp = lenp;
     ms->offset = 0;
-    fp = ::funopen(ms,
-        memory::memstream_read, memory::memstream_write,
-        memory::memstream_seek, memory::memstream_close);
-    if (fp == nullptr) {
-        save_errno = errno;
-        ::free(ms);
-        errno = save_errno;
+    
+    filepointer = ::funopen(ms,
+        memory::read, memory::write,
+        memory::seek, memory::close);
+    
+    if (filepointer == nullptr) {
+        int saved_errno = errno;
+        std::free(ms);
+        errno = saved_errno;
     }
-    return fp;
+    
+    return filepointer;
 }
