@@ -5,6 +5,8 @@ set -x
 : ${PRAXONS:="${THISDIR}/praxons"}
 : ${PROJECT:=$(dirname $THISDIR)}
 
+: ${PROCESSORS:=$(py 'multiprocessing.cpu_count()')}
+
 source "${PRAXONS}/download.sh"
 source "${PRAXONS}/urlcache.sh"
 
@@ -34,7 +36,7 @@ pushd $deps
     pushd $iod_dst
         mkdir "build" && pushd "build"
             cmake .. -Wno-dev -DCMAKE_INSTALL_PREFIX=/tmp
-            make -j8
+            make -j$PROCESSORS
         popd # build
         
     popd # iod_dst
