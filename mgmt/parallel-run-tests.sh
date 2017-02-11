@@ -25,8 +25,8 @@ pushd $PROJECT_PATH
             -DIM_VERBOSE=$VERBOSE \
             -DIM_TERMINATOR=$TERMINATOR \
             -Wno-dev && \
-        make -j4 install && \
-        ctest -j4 -D Experimental --output-on-failure
+        make -j8 install && \
+        ctest -j8 -D Experimental --output-on-failure
 
 popd
 rm -rf ./Testing
