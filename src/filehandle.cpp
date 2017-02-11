@@ -76,15 +76,24 @@ namespace im {
     void handle_source_sink::flush() { std::fflush(handle); }
     
     std::vector<byte> handle_source_sink::full_data() {
-        /// grab stat struct and store initial seek position
+        /// grab stat struct and store initial seek position:
         detail::stat_t info = this->stat();
         std::size_t fsize = info.st_size * sizeof(byte);
         std::size_t orig = std::ftell(handle);
         
-        /// allocate output vector per size of file
+        /// allocate output vector per size of file:
         std::vector<byte> result(fsize);
         
-        /// start as you mean to go on
+        /// if necessary, set optimal buffer size with std::setvbuf():
+        if (BUFSIZ != info.st_blksize) {
+            if (std::setvbuf(handle, nullptr, _IOFBF, info.st_blksize) != 0) {
+                imread_raise(CannotReadError,
+                    "handle_source_sink::full_data():",
+                    "std::setvbuf() returned -1", std::strerror(errno));
+            };
+        }
+        
+        /// start as you mean to go on:
         std::rewind(handle);
         
         /// read directly from filehandle:
@@ -94,7 +103,7 @@ namespace im {
                 "std::fread() returned -1", std::strerror(errno));
         }
         
-        /// reseek to the streams' original position
+        /// reseek to the streams' original position:
         std::fseek(handle, orig, SEEK_SET);
         return result;
     }
