@@ -13,6 +13,7 @@ PROJECT_PATH="/Users/fish/Dropbox/libimread"
 : ${COLOR_TRACE:="ON"}
 : ${VERBOSE:="ON"}
 : ${TERMINATOR:="ON"}
+: ${PROCESSORS:=$(py 'multiprocessing.cpu_count()')}
 
 pushd $PROJECT_PATH
     rm -rf ./build ./dist
@@ -25,8 +26,8 @@ pushd $PROJECT_PATH
             -DIM_VERBOSE=$VERBOSE \
             -DIM_TERMINATOR=$TERMINATOR \
             -Wno-dev && \
-        make -j8 install && \
-        ctest -j8 -D Experimental --output-on-failure
+        make -j$PROCESSORS install && \
+        ctest -j$PROCESSORS -D Experimental --output-on-failure
 
 popd
 rm -rf ./Testing
