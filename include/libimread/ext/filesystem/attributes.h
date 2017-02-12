@@ -56,6 +56,10 @@ namespace filesystem {
                                  attribute::flags options = ENUM_DEFAULT(attribute::flags),
                                  attribute::ns domain = ENUM_DEFAULT(attribute::ns));
         
+        int count(std::string const& pth,
+                  attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                  attribute::ns domain = ENUM_DEFAULT(attribute::ns));
+        
         class accessor_t {
             
             public:

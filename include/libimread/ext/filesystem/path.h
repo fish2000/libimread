@@ -437,6 +437,7 @@ namespace filesystem {
             /// Filesystem extended attribute (“xattr”) access
             std::string xattr(std::string const&) const;
             std::string xattr(std::string const&, std::string const&) const;
+            int xattrcount() const;
             detail::stringvec_t xattrs() const;
             
             /// Path rank value per extension

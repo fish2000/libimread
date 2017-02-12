@@ -347,6 +347,90 @@ namespace filesystem {
         }
         
         
+        int count(std::string const& pth,
+                  attribute::flags options,
+                  attribute::ns domain) {
+            int status = -1;
+            detail::attrbuf_t attrbuffer;
+            
+            #if defined(__FreeBSD__)
+                if (options & attribute::flags::nofollow) {
+                    status = ::extattr_list_link(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
+                } else {
+                    status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
+                }
+                if (status < 0) { return -1; }
+                
+                /// NEEDED on FreeBSD (no ending null):
+                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer.get()[status] = 0;
+                
+                if (options & attribute::flags::nofollow) {
+                    status = ::extattr_list_link(pth.c_str(), EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
+                } else {
+                    status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
+                }
+            
+            #elif defined(PXALINUX)
+                if (options & attribute::flags::nofollow) {
+                    status = ::llistxattr(pth.c_str(), 0, 0);
+                } else {
+                    status = ::listxattr(pth.c_str(), 0, 0);
+                }
+                if (status < 0) { return -1; }
+                
+                /// Don't want to deal with possible status = 0:
+                attrbuffer = detail::attrbuf(status + 1);
+                
+                if (options & attribute::flags::nofollow) {
+                    status = ::llistxattr(pth.c_str(), attrbuffer.get(), status);
+                } else {
+                    status = ::listxattr(pth.c_str(), attrbuffer.get(), status);
+                }
+            
+            #elif defined(__APPLE__)
+                if (options & attribute::flags::nofollow) {
+                    status = ::listxattr(pth.c_str(), 0, 0, XATTR_NOFOLLOW);
+                } else {
+                    status = ::listxattr(pth.c_str(), 0, 0, 0);
+                }
+                if (status < 0) { return -1; }
+                
+                /// Don't want to deal with possible status = 0:
+                attrbuffer = detail::attrbuf(status + 1);
+                
+                if (options & attribute::flags::nofollow) {
+                    status = ::listxattr(pth.c_str(), attrbuffer.get(), status, XATTR_NOFOLLOW);
+                } else {
+                    status = ::listxattr(pth.c_str(), attrbuffer.get(), status, 0);
+                }
+                
+            #endif
+            
+            if (!attrbuffer.get()) { return -1; }
+            char* buffer_start = attrbuffer.get();
+            
+            #if defined(__FreeBSD__)
+                char* buffer_pos = attrbuffer.get();
+                char* cp = attrbuffer.get();
+                std::size_t len;
+                while (cp < buffer_pos + status + 1) {
+                    len = *cp;
+                    *cp = 0;
+                    cp += len + 1;
+                }
+                buffer_start = buffer_pos + 1;
+                *cp = 0; // don't forget, we allocated one more
+            #endif
+            
+            if (status > 0) {
+                std::string stringbuffer(attrbuffer.get(), status);
+                return std::count(std::begin(stringbuffer),
+                                  std::end(stringbuffer), 0);
+            }
+            return -1;
+        }
+        
         accessor_t::accessvec_t accessor_t::list(filesystem::path const& pth,
                                                  attribute::flags options,
                                                  attribute::ns domain) {

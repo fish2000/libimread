@@ -758,10 +758,13 @@ namespace filesystem {
     }
     
     std::string path::xattr(std::string const& name, std::string const& value) const {
-        // using namespace filesystem;
         attribute::accessor_t accessor(str(), name);
         value == filesystem::attribute::detail::nullstring ? accessor.del() : accessor.set(value);
         return accessor.get();
+    }
+    
+    int path::xattrcount() const {
+        return attribute::count(str());
     }
     
     detail::stringvec_t path::xattrs() const {

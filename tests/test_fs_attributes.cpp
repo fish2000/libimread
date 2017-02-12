@@ -38,32 +38,51 @@ namespace {
         basedir.walk([](path const& p,
                         stringvec_t& directories,
                         stringvec_t& files) {
-            std::for_each(directories.begin(), directories.end(), [&](std::string const& d) {
-                std::cout << "Directory: " << p/d << std::endl;
-                REQUIRE((p/d).is_directory());
-                stringvec_t exes((p/d).xattrs());
+            
+            std::for_each(directories.begin(),
+                          directories.end(),
+                     [&p](std::string const& directory) {
+                path ourdir = p/directory;
+                std::cout << "Directory: " << ourdir << std::endl;
+                REQUIRE(ourdir.is_directory());
+                stringvec_t exes(ourdir.xattrs());
                 if (exes.empty()) {
-                    std::cout << "> No xattrs found" << std::endl;
+                    std::cout << "> No xattrs found" << std::endl << std::endl;
                 } else {
-                    std::cout << "> Found " << exes.size() << " xattrs:" << std::endl;
-                    std::for_each(exes.begin(), exes.end(), [&](std::string const& x) {
-                        std::cout << "> " << x << " : " << (p/d).xattr(x) << std::endl;
+                    std::cout << "> Found " << exes.size()
+                              << " xattrs:" << std::endl;
+                    std::for_each(exes.begin(),
+                                  exes.end(),
+                        [&ourdir](std::string const& x) {
+                        std::cout << "> " << x << " : "
+                                          << ourdir.xattr(x) << std::endl;
                     });
+                    std::cout << std::endl;
                 }
             });
-            std::for_each(files.begin(), files.end(), [&](std::string const& f) {
-                std::cout << "File: " << p/f << std::endl;
-                REQUIRE((p/f).is_file());
-                stringvec_t exes((p/f).xattrs());
+            
+            std::for_each(files.begin(),
+                          files.end(),
+                     [&p](std::string const& file) {
+                path ourf = p/file;
+                std::cout << "File: " << ourf << std::endl;
+                REQUIRE(ourf.is_file());
+                stringvec_t exes(ourf.xattrs());
                 if (exes.empty()) {
-                    std::cout << "> No xattrs found" << std::endl;
+                    std::cout << "> No xattrs found" << std::endl << std::endl;
                 } else {
-                    std::cout << "> Found " << exes.size() << " xattrs:" << std::endl;
-                    std::for_each(exes.begin(), exes.end(), [&](std::string const& x) {
-                        std::cout << "> " << x << " : " << (p/f).xattr(x) << std::endl;
+                    std::cout << "> Found " << exes.size()
+                              << " xattrs:" << std::endl;
+                    std::for_each(exes.begin(),
+                                  exes.end(),
+                          [&ourf](std::string const& x) {
+                        std::cout << "> " << x << " : "
+                                          << ourf.xattr(x) << std::endl;
                     });
+                    std::cout << std::endl;
                 }
             });
+        
         });
     
     }
@@ -73,9 +92,24 @@ namespace {
         TemporaryDirectory td("test-td");
         td.dirpath.xattr("yo-dogg", "I heard you like xattr writes");
         td.dirpath.xattr("dogg-yo", "So we put some strings in your strings");
+        
         CHECK(td.dirpath.xattr("yo-dogg") == "I heard you like xattr writes");
         CHECK(td.dirpath.xattr("dogg-yo") == "So we put some strings in your strings");
         CHECK(td.dirpath.xattr("dogg-NO") == nullstring);
+        
+        CHECK(td.dirpath.xattrcount() == 2);
+        stringvec_t exes(td.dirpath.xattrs());
+        CHECK(!exes.empty());
+        std::cout << "> Found " << exes.size()
+                  << " xattrs:" << std::endl;
+        std::for_each(exes.begin(),
+                      exes.end(),
+                  [&](std::string const& x) {
+            std::cout << "> " << x << " : "
+                              << td.dirpath.xattr(x) << std::endl;
+        });
+        std::cout << std::endl;
+        
     }
     
 } /// namespace (anon.)
