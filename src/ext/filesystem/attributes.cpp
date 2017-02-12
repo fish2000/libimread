@@ -355,10 +355,8 @@ namespace filesystem {
                     pos += n.length() + 1;
                 }
             }
-            
             return out;
         }
-        
         
         int count(std::string const& pth,
                   attribute::flags options,
@@ -448,7 +446,7 @@ namespace filesystem {
         accessor_t::accessvec_t accessor_t::list(filesystem::path const& pth,
                                                  attribute::flags options,
                                                  attribute::ns domain) {
-            std::string pthstr = pth.str();
+            std::string pthstr(pth.str());
             detail::stringvec_t strings = attribute::list(pthstr, options, domain);
             accessor_t::accessvec_t out{};
             if (!strings.empty()) {
