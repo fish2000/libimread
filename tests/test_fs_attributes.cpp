@@ -30,6 +30,7 @@ namespace {
     
     using filesystem::detail::stringvec_t;
     using filesystem::attribute::accessor_t;
+    using filesystem::attribute::detail::nullstring;
     
     TEST_CASE("[attributes] xattr read with `path::xattr()` via `path::walk()`",
               "[xattr-read-path-walk-on-basedir]") {
@@ -74,6 +75,7 @@ namespace {
         td.dirpath.xattr("dogg-yo", "So we put some strings in your strings");
         CHECK(td.dirpath.xattr("yo-dogg") == "I heard you like xattr writes");
         CHECK(td.dirpath.xattr("dogg-yo") == "So we put some strings in your strings");
+        CHECK(td.dirpath.xattr("dogg-NO") == nullstring);
     }
     
 } /// namespace (anon.)
