@@ -31,7 +31,7 @@ namespace {
     using filesystem::detail::stringvec_t;
     using filesystem::attribute::accessor_t;
     
-    TEST_CASE("[attributes] Test xattribute reading with `path::xattr()` via `path::walk()`",
+    TEST_CASE("[attributes] xattr read with `path::xattr()` via `path::walk()`",
               "[xattr-read-path-walk-on-basedir]") {
         path basedir(im::test::basedir);
         basedir.walk([](path const& p,
@@ -65,6 +65,15 @@ namespace {
             });
         });
     
+    }
+    
+    TEST_CASE("[attributes] xattr read/write with `path::xattr()` via `TemporaryDirectory` and `NamedTemporaryFile`",
+              "[xattr-read-write-temporarydirectory-namedtemporaryfile]") {
+        TemporaryDirectory td("test-td");
+        td.dirpath.xattr("yo-dogg", "I heard you like xattr writes");
+        td.dirpath.xattr("dogg-yo", "So we put some strings in your strings");
+        CHECK(td.dirpath.xattr("yo-dogg") == "I heard you like xattr writes");
+        CHECK(td.dirpath.xattr("dogg-yo") == "So we put some strings in your strings");
     }
     
 } /// namespace (anon.)
