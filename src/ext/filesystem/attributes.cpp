@@ -35,11 +35,23 @@ namespace filesystem {
     namespace attribute {
         
         bool operator&(ns lhs, ns rhs) {
-            return (std::size_t)lhs & (std::size_t)rhs;
+            return static_cast<std::size_t>(lhs) &
+                   static_cast<std::size_t>(rhs);
+        }
+        
+        bool operator|(ns lhs, ns rhs) {
+            return static_cast<std::size_t>(lhs) |
+                   static_cast<std::size_t>(rhs);
         }
         
         bool operator&(flags lhs, flags rhs) {
-            return (std::size_t)lhs & (std::size_t)rhs;
+            return static_cast<std::size_t>(lhs) &
+                   static_cast<std::size_t>(rhs);
+        }
+        
+        bool operator|(flags lhs, flags rhs) {
+            return static_cast<std::size_t>(lhs) |
+                   static_cast<std::size_t>(rhs);
         }
         
         enum struct ns : std::size_t {
@@ -328,7 +340,8 @@ namespace filesystem {
                     cp += len + 1;
                 }
                 buffer_start = buffer_pos + 1;
-                *cp = 0; // don't forget, we allocated one more
+                /// don't forget, we allocated one more
+                *cp = 0;
             #endif
             
             if (status > 0) {
@@ -420,7 +433,8 @@ namespace filesystem {
                     cp += len + 1;
                 }
                 buffer_start = buffer_pos + 1;
-                *cp = 0; // don't forget, we allocated one more
+                /// don't forget, we allocated one more
+                *cp = 0;
             #endif
             
             if (status > 0) {
@@ -428,7 +442,7 @@ namespace filesystem {
                 return std::count(std::begin(stringbuffer),
                                   std::end(stringbuffer), 0);
             }
-            return -1;
+            return status;
         }
         
         accessor_t::accessvec_t accessor_t::list(filesystem::path const& pth,
