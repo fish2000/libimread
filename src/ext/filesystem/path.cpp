@@ -327,12 +327,12 @@ namespace filesystem {
         detail::stringvec_t directories;
         detail::stringvec_t files;
         {
-            detail::nowait_t nowait;
+            // detail::nowait_t nowait;
             directory d = detail::ddopen(make_absolute().str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
                     "Internal error in opendir():", strerror(errno),
-                    "For path:", str());
+                    "For path:", FF("***%s***", c_str()));
             }
             detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != nullptr) {
@@ -722,12 +722,13 @@ namespace filesystem {
     static const std::string nulstring("");
     
     std::string path::str() const {
+        // bool well_is_it = !this->is_directory();
         return std::accumulate(m_path.begin(),
                                m_path.end(),
                                m_absolute ? sepstring : nulstring,
                            [&](std::string const& lhs,
                                std::string const& rhs) {
-            return lhs + rhs + (rhs.c_str() == m_path.back().c_str() ? nulstring : sepstring);
+            return lhs + rhs + ((rhs.c_str() == m_path.back().c_str()) ? nulstring : sepstring);
         });
     }
     

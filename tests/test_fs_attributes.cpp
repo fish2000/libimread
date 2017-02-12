@@ -11,9 +11,10 @@
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/attributes.h>
-// #include <libimread/ext/filesystem/directory.h>
+#include <libimread/ext/filesystem/directory.h>
 // #include <libimread/ext/filesystem/resolver.h>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/ext/filesystem/nowait.h>
 // #include <libimread/file.hh>
 // #include <libimread/filehandle.hh>
 
@@ -23,18 +24,29 @@
 namespace {
     
     using filesystem::path;
-    // using filesystem::switchdir;
+    using filesystem::switchdir;
     // using filesystem::resolver;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     
+    using filesystem::detail::nowait_t;
     using filesystem::detail::stringvec_t;
     using filesystem::attribute::accessor_t;
     using filesystem::attribute::detail::nullstring;
     
     TEST_CASE("[attributes] xattr read with `path::xattr()` via `path::walk()`",
               "[xattr-read-path-walk-on-basedir]") {
-        path basedir(im::test::basedir);
+        // nowait_t nowait;
+        
+        path basedir = path(im::test::basedir).parent();
+        // path basedir = path::home() / "Downloads";
+        // path basedir = path::home();
+        
+        REQUIRE(basedir.exists());
+        REQUIRE(basedir.is_directory());
+        REQUIRE(basedir.is_readable());
+        // switchdir s(basedir);
+        
         basedir.walk([](path const& p,
                         stringvec_t& directories,
                         stringvec_t& files) {
@@ -43,12 +55,14 @@ namespace {
                           directories.end(),
                      [&p](std::string const& directory) {
                 path ourdir = p/directory;
-                std::cout << "Directory: " << ourdir << std::endl;
-                REQUIRE(ourdir.is_directory());
+                
+                // REQUIRE(ourdir.is_directory());
                 stringvec_t exes(ourdir.xattrs());
+                
                 if (exes.empty()) {
-                    std::cout << "> No xattrs found" << std::endl << std::endl;
+                    // std::cout << "> No xattrs found" << std::endl << std::endl;
                 } else {
+                    std::cout << "Directory: " << ourdir << std::endl;
                     std::cout << "> Found " << exes.size()
                               << " xattrs:" << std::endl;
                     std::for_each(exes.begin(),
@@ -65,12 +79,14 @@ namespace {
                           files.end(),
                      [&p](std::string const& file) {
                 path ourf = p/file;
-                std::cout << "File: " << ourf << std::endl;
-                REQUIRE(ourf.is_file());
+                
+                // REQUIRE(ourf.is_file());
                 stringvec_t exes(ourf.xattrs());
+                
                 if (exes.empty()) {
-                    std::cout << "> No xattrs found" << std::endl << std::endl;
+                    // std::cout << "> No xattrs found" << std::endl << std::endl;
                 } else {
+                    std::cout << "File: " << ourf << std::endl;
                     std::cout << "> Found " << exes.size()
                               << " xattrs:" << std::endl;
                     std::for_each(exes.begin(),
