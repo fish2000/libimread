@@ -12,7 +12,6 @@
 #include <algorithm>
 
 #include <libimread/libimread.hpp>
-//#include <libimread/errors.hh>
 #include <libimread/ext/pystring.hh>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/filesystem/opaques.h>
@@ -46,16 +45,10 @@ namespace filesystem {
     bool NamedTemporaryFile::create() {
         descriptor = ::mkstemps(const_cast<char*>(filepath.c_str()), std::strlen(suffix));
         if (descriptor < 0) {
-            //imread_raise(FileSystemError,
-            //    "NamedTemporaryFile::create(): error returned from ::mkstemps():",
-            //    std::strerror(errno));
             return false;
         }
         filepath = path(descriptor);
         if (::close(descriptor) == -1) {
-            //imread_raise(FileSystemError,
-            //    "NamedTemporaryFile::create(): error while closing descriptor:",
-            //    std::strerror(errno));
             return false;
         }
         return true;
@@ -77,9 +70,6 @@ namespace filesystem {
         }
         char const* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
         if (dtemp == nullptr) {
-            //imread_raise(FileSystemError,
-            //    "TemporaryDirectory::create(): error returned from ::mkdtemp():",
-            //    std::strerror(errno));
             return false;
         }
         dirpath = path(dtemp);

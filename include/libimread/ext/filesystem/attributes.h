@@ -8,52 +8,53 @@
 #include <string>
 #include <vector>
 
+#define ENUM_DEFAULT(enumclass) (enumclass)0
+
 namespace filesystem {
     
     class path;
     
     namespace attribute {
         
-        enum struct ns : std::size_t {
-            user        = 0
-        };
-        
-        enum struct flags : std::size_t {
-            none        = 0,
-            nofollow    = 1,
-            create      = 2,
-            replace     = 4
-        };
+        enum struct ns : std::size_t;
+        enum struct flags : std::size_t;
         
         namespace detail {
             
             using stringvec_t = std::vector<std::string>;
             using attrbuf_t = std::unique_ptr<char[]>;
             
-            std::string sysname(std::string const&, attribute::ns domain = attribute::ns::user);
-            std::string pxaname(std::string const&, attribute::ns domain = attribute::ns::user);
+            #if defined(PXALINUX) || defined(COMPAT1)
+            static const std::string userstring("user.");
+            #else
+            static const std::string userstring("");
+            #endif
+            static const std::string nullstring("\uFFFF");
+            
+            std::string sysname(std::string const&, attribute::ns domain = ENUM_DEFAULT(attribute::ns));
+            std::string pxaname(std::string const&, attribute::ns domain = ENUM_DEFAULT(attribute::ns));
             
         }
         
         std::string get(std::string const& pth,
                         std::string const& name,
-                        attribute::flags options,
-                        attribute::ns domain = attribute::ns::user);
+                        attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                        attribute::ns domain = ENUM_DEFAULT(attribute::ns));
         
         bool set(std::string const& pth,
                  std::string const& name,
                  std::string const& value,
-                 attribute::flags options,
-                 attribute::ns domain = attribute::ns::user);
+                 attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                 attribute::ns domain = ENUM_DEFAULT(attribute::ns));
         
         bool del(std::string const& pth,
                  std::string const& name,
-                 attribute::flags options,
-                 attribute::ns domain = attribute::ns::user);
+                 attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                 attribute::ns domain = ENUM_DEFAULT(attribute::ns));
         
         detail::stringvec_t list(std::string const& pth,
-                                 attribute::flags options,
-                                 attribute::ns domain = attribute::ns::user);
+                                 attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                                 attribute::ns domain = ENUM_DEFAULT(attribute::ns));
         
         class accessor_t {
             
@@ -62,34 +63,34 @@ namespace filesystem {
                 
                 static accessvec_t list(filesystem::path const& pth,
                                         attribute::flags options,
-                                        attribute::ns domain = attribute::ns::user);
+                                        attribute::ns domain = ENUM_DEFAULT(attribute::ns));
                 
                 static accessvec_t list(std::string const& pth,
                                         attribute::flags options,
-                                        attribute::ns domain = attribute::ns::user);
+                                        attribute::ns domain = ENUM_DEFAULT(attribute::ns));
                 
                 accessor_t(filesystem::path const& pth,
                            std::string const& name,
-                           attribute::ns domain = attribute::ns::user);
+                           attribute::ns domain = ENUM_DEFAULT(attribute::ns));
                 
                 accessor_t(std::string const& pth,
                            std::string const& name,
-                           attribute::ns domain = attribute::ns::user);
+                           attribute::ns domain = ENUM_DEFAULT(attribute::ns));
                 
                 accessor_t(accessor_t const& other);
                 accessor_t(accessor_t&& other);
                 
                 virtual ~accessor_t();
                 
-                std::string get(attribute::flags options = attribute::flags::none,
-                                attribute::ns domain = attribute::ns::user) const;
+                std::string get(attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                                attribute::ns domain = ENUM_DEFAULT(attribute::ns)) const;
                 
                 bool        set(std::string const& value,
-                                attribute::flags options = attribute::flags::none,
-                                attribute::ns domain = attribute::ns::user) const;
+                                attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                                attribute::ns domain = ENUM_DEFAULT(attribute::ns)) const;
                 
-                bool        del(attribute::flags options = attribute::flags::none,
-                                attribute::ns domain = attribute::ns::user) const;
+                bool        del(attribute::flags options = ENUM_DEFAULT(attribute::flags),
+                                attribute::ns domain = ENUM_DEFAULT(attribute::ns)) const;
                 
                 std::string pathstring() const;
                 std::string pathstring(std::string const&);
@@ -105,22 +106,15 @@ namespace filesystem {
             private:
                 mutable std::string m_pathstring;
                 mutable std::string m_name;
-                attribute::flags m_options = attribute::flags::none;
-                attribute::ns m_domain = attribute::ns::user;
+                attribute::flags m_options = ENUM_DEFAULT(attribute::flags);
+                attribute::ns m_domain = ENUM_DEFAULT(attribute::ns);
             
         };
-        
-        bool operator&(ns lhs, ns rhs) {
-            return (std::size_t)lhs & (std::size_t)rhs;
-        }
-        
-        bool operator&(flags lhs, flags rhs) {
-            return (std::size_t)lhs & (std::size_t)rhs;
-        }
-        
         
     } /// namespace attribute
     
 } /// namespace filesystem
+
+#undef ENUM_DEFAULT
 
 #endif /// LIBIMREAD_EXT_FILESYSTEM_ATTRIBUTES_H_

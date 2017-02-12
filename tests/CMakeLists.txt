@@ -9,6 +9,7 @@ set(TEST_SOURCES ${TEST_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/test_byte_source_gzio.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_byte_source_iterators.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_fs.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/test_fs_attributes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_gif_write.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_halide_io.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_hdf5_io.cpp

@@ -28,6 +28,7 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/filesystem/attributes.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/nowait.h>
@@ -749,6 +750,22 @@ namespace filesystem {
                 }
             }
             return 0;
+    }
+    
+    std::string path::xattr(std::string const& name) const {
+        attribute::accessor_t accessor(str(), name);
+        return accessor.get();
+    }
+    
+    std::string path::xattr(std::string const& name, std::string const& value) const {
+        // using namespace filesystem;
+        attribute::accessor_t accessor(str(), name);
+        value == filesystem::attribute::detail::nullstring ? accessor.del() : accessor.set(value);
+        return accessor.get();
+    }
+    
+    detail::stringvec_t path::xattrs() const {
+        return attribute::list(str());
     }
     
     path path::getcwd() {

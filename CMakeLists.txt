@@ -340,6 +340,7 @@ if(IM_TESTS)
     add_imread_test("byte-source-gzio")
     add_imread_test("byte-source-iterators")
     add_imread_test("filesystem")
+    add_imread_test("attributes") # filesystem-attributes
     add_imread_test("gif-write")
     add_imread_test("halide-io")
     add_imread_test("hdf5-io")

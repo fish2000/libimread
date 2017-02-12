@@ -34,16 +34,26 @@ namespace filesystem {
     
     namespace attribute {
         
-        using namespace filesystem;
+        bool operator&(ns lhs, ns rhs) {
+            return (std::size_t)lhs & (std::size_t)rhs;
+        }
+        
+        bool operator&(flags lhs, flags rhs) {
+            return (std::size_t)lhs & (std::size_t)rhs;
+        }
+        
+        enum struct ns : std::size_t {
+            user        = 0
+        };
+        
+        enum struct flags : std::size_t {
+            none        = 0,
+            nofollow    = 1,
+            create      = 2,
+            replace     = 4
+        };
         
         namespace detail {
-            
-            #if defined(PXALINUX) || defined(COMPAT1)
-            static const std::string userstring("user.");
-            #else
-            static const std::string userstring("");
-            #endif
-            static const std::string nullstring("\uFFFF");
             
             inline attrbuf_t attrbuf(std::size_t size) {
                 return std::make_unique<char[]>(size);

@@ -434,6 +434,11 @@ namespace filesystem {
             /// Convenience function to get a C-style string, a la std::string's API
             char const* c_str() const;
             
+            /// Filesystem extended attribute (“xattr”) access
+            std::string xattr(std::string const&) const;
+            std::string xattr(std::string const&, std::string const&) const;
+            detail::stringvec_t xattrs() const;
+            
             /// Path rank value per extension
             size_type rank(std::string const&) const;
             
