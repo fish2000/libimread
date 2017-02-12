@@ -94,7 +94,7 @@ namespace py {
         template <typename ImageType,
                   typename BufferType = buffer_t,
                   typename FactoryType = typename ImageType::factory_t>
-        struct ImageModelBase : public ModelBase<ImageModelBase<ImageType, BufferType, FactoryType>> {
+        struct ImageModelBase : public ModelBase<ImageModelBase<ImageType, BufferType, FactoryType>, true> {
             
             using shared_image_t = std::shared_ptr<ImageType>;
             using weak_image_t = std::weak_ptr<ImageType>;
@@ -683,9 +683,9 @@ namespace py {
                             default_opts = format->add_options(opts);
                             output = format->read(input.get(), &factory, default_opts);
                             image.reset(dynamic_cast<ImageType*>(output.release()));
-                            return true;
                         }
                     }
+                    return true;
                 } catch (im::FormatNotFound& exc) {
                     return py::ValueError(
                         std::string("Can't find I/O format for file: ") + source,
@@ -727,8 +727,8 @@ namespace py {
                         default_opts = format->add_options(opts);
                         output = format->read(input.get(), &factory, default_opts);
                         image.reset(dynamic_cast<ImageType*>(output.release()));
-                        return true;
                     }
+                    return true;
                 } catch (im::FormatNotFound& exc) {
                     return py::ValueError("Can't match blob data to a suitable I/O format", false);
                 }

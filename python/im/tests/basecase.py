@@ -37,7 +37,8 @@ class BaseCase(TestCase):
         
         # store local references to im.Image and im.Array
         # self.imagetypes = ImageTypeTuple(im.Image, im.Array)
-        self.imagetypes = ImageTypeTuple(im.Array)
+        # self.imagetypes = ImageTypeTuple(im.Array)
+        self.imagetypes = ImageTypeTuple(im.Image)
         
         # store local reference to im.Batch
         self.Batch = im.Batch

@@ -33,7 +33,7 @@ namespace py {
         using im::options_map;
         
         template <typename BufferType = buffer_t>
-        struct BufferModelBase : public ModelBase<BufferModelBase<BufferType>> {
+        struct BufferModelBase : public ModelBase<BufferModelBase<BufferType>, true> {
             
             using pixel_t = byte;
             using unique_buffer_t = std::unique_ptr<BufferType>;

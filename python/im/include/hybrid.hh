@@ -41,7 +41,7 @@ namespace im {
     namespace detail {
         
         char const* structcode(NPY_TYPES dtype);
-        Halide::Type for_dtype(NPY_TYPES dtype);
+        halide_type_t for_dtype(NPY_TYPES dtype);
         NPY_TYPES for_nbits(int nbits, bool signed_type = false);
         
         template <typename PixelType>
@@ -127,7 +127,7 @@ namespace im {
     /// We use Halide::ImageBase instead of Halide::Image here,
     /// so that we don't have to muck around with templates when
     /// working with arbitrary NumPy dtype values.
-    using HalBase = Halide::Buffer<>;
+    using HalBase = Halide::Runtime::Buffer<>;
     using MetaImage = ImageWithMetadata;
     
     /// forward-declare factory class
@@ -142,7 +142,6 @@ namespace im {
             using HalBase::extent;
             using HalBase::stride;
             using HalBase::channels;
-            // using HalBase::buffer;
             using HalBase::raw_buffer;
             
             HalideNumpyImage();
@@ -164,7 +163,7 @@ namespace im {
             virtual uint8_t* data(int s) const;
             virtual std::string_view view() const;
             
-            Halide::Type type() const;
+            halide_type_t type() const;
             buffer_t* buffer_ptr() const;
             virtual int nbits() const override;
             virtual int nbytes() const override;
@@ -255,7 +254,7 @@ namespace im {
             virtual uint8_t* data(int s) const;
             virtual std::string_view view() const;
             
-            Halide::Type type() const;
+            halide_type_t type() const;
             buffer_t* buffer_ptr() const;
             virtual int nbits() const override;
             virtual int nbytes() const override;

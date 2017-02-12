@@ -14,18 +14,18 @@ namespace im {
     
     Endian endianness() {
         static Endian value = Endian::Unspecified;
-		static bool assigned = false;
-		if (!assigned) {
-	        unsigned long number = 1;
-	        char* s;
-	        s = (char*)&number;
-	        if (s[0] == 0) {
-	            value = Endian::Big;
-	        } else {
-	            value = Endian::Little;
-	        }
-			assigned = true;
-		}
+        static bool assigned = false;
+        if (!assigned) {
+            unsigned long number = 1;
+            char* s;
+            s = (char*)&number;
+            if (s[0] == 0) {
+                value = Endian::Big;
+            } else {
+                value = Endian::Little;
+            }
+            assigned = true;
+        }
         return value;
     }
     
@@ -54,7 +54,7 @@ namespace im {
             return "B";
         }
         
-        Halide::Type for_dtype(NPY_TYPES dtype) {
+        halide_type_t for_dtype(NPY_TYPES dtype) {
             switch (dtype) {
                 case NPY_BOOL:          return Halide::Bool();
                 case NPY_UINT8:         return Halide::UInt(8);
@@ -129,10 +129,10 @@ namespace im {
             if (view->format)   { std::free(view->format);  view->format  = nullptr; }
             if (view->shape)    { delete[] view->shape;     view->shape   = nullptr; }
             if (view->strides)  { delete[] view->strides;   view->strides = nullptr; }
-            if (view->buf)      { 							view->buf = nullptr; 	 }
-			view->ndim =
-				view->itemsize =
-				view->len = view->readonly = 0;
+            if (view->buf)      {                           view->buf = nullptr;     }
+            view->ndim =
+                view->itemsize =
+                view->len = view->readonly = 0;
             view->internal = nullptr;
         }
     }
@@ -220,11 +220,11 @@ namespace im {
     
     /// This returns the same type of data as buffer_t.host
     uint8_t* HalideNumpyImage::data() const {
-        return (uint8_t*)HalBase::host_ptr();
+        return (uint8_t*)HalBase::raw_buffer();
     }
     
     uint8_t* HalideNumpyImage::data(int s) const {
-        return (uint8_t*)HalBase::host_ptr() + std::ptrdiff_t(s);
+        return (uint8_t*)HalBase::raw_buffer() + std::ptrdiff_t(s);
     }
     
     std::string_view HalideNumpyImage::view() const {
@@ -233,7 +233,7 @@ namespace im {
                                 static_cast<std::size_t>(size()));
     }
     
-    Halide::Type HalideNumpyImage::type() const {
+    halide_type_t HalideNumpyImage::type() const {
         return HalBase::type();
     }
     
@@ -714,7 +714,7 @@ namespace im {
                                 static_cast<std::size_t>(size()));
     }
     
-    Halide::Type ArrayImage::type() const {
+    halide_type_t ArrayImage::type() const {
         return detail::for_dtype(
             static_cast<NPY_TYPES>(PyArray_TYPE(array)));
     }
@@ -724,11 +724,11 @@ namespace im {
     }
     
     int ArrayImage::nbits() const {
-        return type().bits();
+        return type().bits;
     }
     
     int ArrayImage::nbytes() const {
-        const int bits = type().bits();
+        const int bits = type().bits;
         return (bits / 8) + bool(bits % 8);
     }
     
@@ -749,11 +749,13 @@ namespace im {
     }
     
     bool ArrayImage::is_signed() const {
-        return !type().is_uint();
+        // return !type().is_uint();
+        return false;
     }
     
     bool ArrayImage::is_floating_point() const {
-        return type().is_float();
+        // return type().is_float();
+        return false;
     }
     
     void* ArrayImage::rowp(int r) const {
