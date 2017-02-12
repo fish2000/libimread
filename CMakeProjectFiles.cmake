@@ -50,6 +50,7 @@ set(hdrs
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
+    ${hdrs_dir}/ext/filesystem/attributes.h
     ${hdrs_dir}/ext/filesystem/directory.h
     ${hdrs_dir}/ext/filesystem/mode.h
     ${hdrs_dir}/ext/filesystem/nowait.h
@@ -140,6 +141,7 @@ set(srcs
     ${CAPN_DIR}/numpy.capnp.c++
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
+    ${srcs_dir}/ext/filesystem/attributes.cpp
     ${srcs_dir}/ext/filesystem/nowait.cpp
     ${srcs_dir}/ext/filesystem/opaques.cpp
     ${srcs_dir}/ext/filesystem/path.cpp

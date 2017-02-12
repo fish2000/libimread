@@ -51,7 +51,8 @@ namespace {
     }
     
     void sortColorsByAxis(unsigned char* array,
-                                     int count, int axis) {
+                          int count,
+                          int axis) {
         if (count < 2) { return; }
         unsigned char pivot = (array + (count/2)*3)[axis];
         unsigned char* left = array, *right = array + (count-1)*3;
@@ -71,7 +72,8 @@ namespace {
     }
     
     int nearestIndexInPalette(unsigned char* palette,
-                                     int paletteSize, unsigned char* rgb) {
+                              int paletteSize,
+                              unsigned char* rgb) {
         int bestIndex = 0, bestDist = 0;
         for (int i = 0; i < paletteSize; i++) {
             unsigned char* p = palette + i * 3;
@@ -86,18 +88,22 @@ namespace {
         return bestIndex;
     }
     
-    void indexizeImageFromPaletteFuzzy(
-        int Width, int Height, unsigned char* rgbImage, unsigned char* indexImage, 
-        unsigned char* palette, int paletteSize) {
+    void indexizeImageFromPaletteFuzzy(int Width, int Height,
+                                       unsigned char* rgbImage,
+                                       unsigned char* indexImage,
+                                       unsigned char* palette,
+                                       int paletteSize) {
         for (int i = 0; i < Width * Height; i++) {
             unsigned char* rgb = rgbImage + 3 * i;
             indexImage[i] = nearestIndexInPalette(palette, paletteSize, rgb);
         }
     }
     
-    void writeTransparentPixelsWhereNotDifferent(
-        unsigned char* prevImage, unsigned char* thisImage, unsigned char* outImage,
-        int ImageWidth, int ImageHeight, int TranspValue) {
+    void writeTransparentPixelsWhereNotDifferent(unsigned char* prevImage,
+                                                 unsigned char* thisImage,
+                                                 unsigned char* outImage,
+                                                 int ImageWidth, int ImageHeight,
+                                                 int TranspValue) {
         int count = 0;
         for (int i = 0; i < ImageWidth * ImageHeight; i++) {
             if (thisImage[i] == prevImage[i]) {
@@ -188,6 +194,7 @@ namespace {
     struct TableEntry {
         int length, index;
         TableEntry* after[256];
+        
         TableEntry() {
             for (int i = 0; i < 256; i++) { after[i] = nullptr; }
         }
@@ -235,8 +242,10 @@ namespace {
     
     };
     
-    void encode(BlockWriter& output, unsigned char* input, int inputSize,
-                const int InitCodeSize, const int MaxCodeSize) {
+    void encode(BlockWriter& output, unsigned char* input,
+                                     int inputSize,
+                                     const int InitCodeSize,
+                                     const int MaxCodeSize) {
         const int ClearCode = (1 << InitCodeSize);
         const int EndOfInformation = ClearCode + 1;
         int codeSize = InitCodeSize;

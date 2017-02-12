@@ -154,15 +154,24 @@ namespace filesystem {
     path::path(std::string const& st) { set(st); }
     
     path::path(int descriptor) {
-        char fdpath[PATH_MAX];
-        int return_value = ::fcntl(descriptor, F_GETPATH, fdpath);
-        if (return_value != -1) {
-            set(fdpath);
-        } else {
-            imread_raise(FileSystemError,
-                "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath)",
-                "where fdpath = ", fdpath,
-                std::strerror(errno));
+        /// q.v. https://github.com/textmate/textmate/blob/master/Frameworks/io/src/path.cc#L587
+        ///      ... w/r/t why we do ::fcntl() twice:
+        for (std::size_t idx = 0; idx < 100; ++idx) {
+            char fdpath[PATH_MAX];
+            bool result = (::fcntl(descriptor, F_GETPATH, fdpath) == 0);
+            #ifdef __APPLE__
+            result &=     (::fcntl(descriptor, F_GETPATH, fdpath) == 0);
+            #endif
+            result &=     (::access(fdpath, F_OK) == 0);
+            if (result) {
+                set(fdpath);
+                return;
+            }
+            ::usleep(10);
+            // imread_raise(FileSystemError,
+            //     "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath)",
+            //     "where fdpath = ", fdpath,
+            //     std::strerror(errno));
         }
     }
     
@@ -447,7 +456,7 @@ namespace filesystem {
     }
     
     bool path::is_executable() const {
-        return ::access(c_str(), X_OK) != -1;
+        return ::access(c_str(), X_OK) != -1 && !is_directory();
     }
     
     bool path::is_readwritable() const {
@@ -723,6 +732,23 @@ namespace filesystem {
     
     char const* path::c_str() const {
         return str().c_str();
+    }
+    
+    path::size_type path::rank(std::string const& ext) const {
+        std::string thispath = str();
+        if (thispath.size() >= ext.size() &&
+            thispath.compare(thispath.size() - ext.size(), ext.size(), ext) == 0) {
+                if (thispath.size() == ext.size()) {
+                    return ext.size();
+                }
+                char ch = thispath[thispath.size() - ext.size() - 1];
+                if (ch == '.' || ch == '_') {
+                    return ext.size() + 1;
+                } else if(ch == '/') {
+                    return ext.size();
+                }
+            }
+            return 0;
     }
     
     path path::getcwd() {

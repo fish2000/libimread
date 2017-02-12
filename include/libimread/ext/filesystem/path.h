@@ -434,6 +434,9 @@ namespace filesystem {
             /// Convenience function to get a C-style string, a la std::string's API
             char const* c_str() const;
             
+            /// Path rank value per extension
+            size_type rank(std::string const&) const;
+            
             /// Static functions to retrieve the current directory, the system temporary directory,
             /// user/home directories, and the current running executable/program name and full path.
             static path getcwd();
