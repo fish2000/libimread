@@ -29,12 +29,13 @@ namespace im {
     bool match_magic(byte_source*, std::string const&);
     
     #define DECLARE_BASE_OPTIONS(...)                                                       \
-        static ImageFormat::unique_t create();                                              \
         using options_t = decltype(D(__VA_ARGS__));                                         \
+        static ImageFormat::unique_t create();                                              \
         static const options_t OPTS() {                                                     \
             const options_t O = D(__VA_ARGS__);                                             \
             return O;                                                                       \
         }                                                                                   \
+        static const std::string classname;                                                 \
         static const options_t options;                                                     \
         static const capacity_t capacity;
     
@@ -54,6 +55,7 @@ namespace im {
         ImageFormat::unique_t format::create() {                                            \
             return std::make_unique<format>();                                              \
         }                                                                                   \
+        const std::string format::classname = #format;                                      \
         const format::options_t format::options = format::OPTS();                           \
         const format::capacity_t format::capacity = format::CAPACITY();                     \
         options_map format::get_options() const {                                           \
@@ -62,7 +64,8 @@ namespace im {
             return opts;                                                                    \
         }                                                                                   \
         namespace {                                                                         \
-            ImageFormat::Registrar<format> format##Registrar(format::options.suffixes[0]);  \
+            ImageFormat::Registrar<format> format##Registrar(                               \
+                                           format::options.suffixes[0]);                    \
         };
     
     /// ... those macros also set your format up to register its class (see below).
@@ -79,7 +82,7 @@ namespace im {
             
             using format_t      = ImageFormat;
             using unique_t      = std::unique_ptr<format_t>;
-            using create_f      = unique_t();
+            using create_f      = unique_t(void);
             using create_t      = std::add_pointer_t<create_f>;
             using registry_t    = std::unordered_map<std::string, create_t>;
             
@@ -102,7 +105,7 @@ namespace im {
             
             DECLARE_BASE_OPTIONS(
                 _signatures = { SIGNATURE("xxxxxxxx", 8) },
-                _suffixes = { "imr" },
+                _suffixes = { "imr", "imread" },
                 _mimetype = "application/octet-stream"
             );
             
