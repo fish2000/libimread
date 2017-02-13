@@ -1,3 +1,7 @@
+/// Copyright 2017 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
+/// Inspired By / Modeled After: `pxattr` by @edenzik
+///     ... q.v. https://github.com/edenzik/pxattr sub.
 
 #if defined(__gnu_linux__) || \
    (defined(__FreeBSD_kernel__) && defined(__GLIBC__) && !defined(__FreeBSD__)) || \

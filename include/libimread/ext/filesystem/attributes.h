@@ -1,5 +1,7 @@
-/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2017 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
+/// Inspired By / Modeled After: `pxattr` by @edenzik
+///     ... q.v. https://github.com/edenzik/pxattr sub.
 
 #ifndef LIBIMREAD_EXT_FILESYSTEM_ATTRIBUTES_H_
 #define LIBIMREAD_EXT_FILESYSTEM_ATTRIBUTES_H_
