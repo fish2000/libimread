@@ -127,6 +127,7 @@ namespace filesystem {
         static constexpr std::regex::flag_type regex_flags          = std::regex::extended;
         static constexpr std::regex::flag_type regex_flags_icase    = std::regex::extended | std::regex::icase;
         static constexpr int glob_pattern_flags                     = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
+        static constexpr int wordexp_pattern_flags                  = WRDE_NOCMD | WRDE_DOOFFS;
         static constexpr mode_t mkdir_flags                         = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
         
     } /* namespace detail */
@@ -416,7 +417,7 @@ namespace filesystem {
         {
             detail::nowait_t nowait;
             filesystem::switchdir s(abspath);
-            ::wordexp(pattern.c_str(), &word, 0);
+            ::wordexp(pattern.c_str(), &word, detail::wordexp_pattern_flags);
         }
         detail::pathvec_t out;
         if (full_paths) {
