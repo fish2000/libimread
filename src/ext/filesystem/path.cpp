@@ -429,9 +429,10 @@ namespace filesystem {
         detail::pathvec_t unfiltered = list(full_paths);
         detail::pathvec_t out;
         if (unfiltered.size() == 0) { return out; }
-        std::copy_if(unfiltered.begin(), unfiltered.end(),
+        std::copy_if(unfiltered.begin(),
+                     unfiltered.end(),
                      std::back_inserter(out),
-                     [&](path const& p) {
+                 [&](path const& p) {
             /// keep those paths that match the pattern
             return p.search(pattern, case_sensitive);
         });
@@ -459,8 +460,9 @@ namespace filesystem {
         
         /// recursively walk into subdirs
         if (directories.empty()) { return; }
-        std::for_each(directories.begin(), directories.end(),
-                      [&](std::string const& subdir) {
+        std::for_each(directories.begin(),
+                      directories.end(),
+                  [&](std::string const& subdir) {
             abspath.join(subdir).walk(
                 std::forward<detail::walk_visitor_t>(walk_visitor));
         });
@@ -601,7 +603,6 @@ namespace filesystem {
         
         /// iterate through nonexistant path segments,
         /// using path::makedir() to make each nonexistant directory:
-        // int max = size();
         for (int i = idx; i < max; ++i) {
             result = result.join(m_path[i]);
             out &= result.makedir();
@@ -744,7 +745,6 @@ namespace filesystem {
     static const std::string nulstring("");
     
     std::string path::str() const {
-        // bool well_is_it = !this->is_directory();
         return std::accumulate(m_path.begin(),
                                m_path.end(),
                                m_absolute ? sepstring : nulstring,
@@ -762,17 +762,17 @@ namespace filesystem {
         std::string thispath = str();
         if (thispath.size() >= ext.size() &&
             thispath.compare(thispath.size() - ext.size(), ext.size(), ext) == 0) {
-                if (thispath.size() == ext.size()) {
-                    return ext.size();
-                }
-                char ch = thispath[thispath.size() - ext.size() - 1];
-                if (ch == '.' || ch == '_') {
-                    return ext.size() + 1;
-                } else if(ch == '/') {
-                    return ext.size();
-                }
+            if (thispath.size() == ext.size()) {
+                return ext.size();
             }
-            return 0;
+            char ch = thispath[thispath.size() - ext.size() - 1];
+            if (ch == '.' || ch == '_') {
+                return ext.size() + 1;
+            } else if (ch == '/') {
+                return ext.size();
+            }
+        }
+        return 0;
     }
     
     std::string path::xattr(std::string const& name) const {
