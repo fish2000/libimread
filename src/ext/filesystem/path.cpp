@@ -465,7 +465,7 @@ namespace filesystem {
     }
     
     bool path::is_runnable() const {
-        return ::access(c_str(), R_OK | X_OK) != -1;
+        return ::access(c_str(), R_OK | X_OK) != -1 && !is_directory();
     }
     
     bool path::is_file() const {
