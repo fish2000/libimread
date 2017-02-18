@@ -161,6 +161,7 @@ namespace filesystem {
             char fdpath[PATH_MAX];
             bool result = (::fcntl(descriptor, F_GETPATH, fdpath) == 0);
             #ifdef __APPLE__
+            /// A workaround, allegedly, for <rdar://6149247>
             result &=     (::fcntl(descriptor, F_GETPATH, fdpath) == 0);
             #endif
             result &=     (::access(fdpath, F_OK) == 0);
@@ -169,10 +170,6 @@ namespace filesystem {
                 return;
             }
             ::usleep(10);
-            // imread_raise(FileSystemError,
-            //     "Internal error in ::fnctl(descriptor, F_GETPATH, fdpath)",
-            //     "where fdpath = ", fdpath,
-            //     std::strerror(errno));
         }
     }
     
@@ -205,6 +202,12 @@ namespace filesystem {
     path::size_type path::size() const { return static_cast<path::size_type>(m_path.size()); }
     bool path::is_absolute() const { return m_absolute; }
     bool path::empty() const       { return m_path.empty(); }
+    
+    detail::dev_t path::device() const  {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return detail::null_dev_v; }
+        return static_cast<detail::dev_t>(sb.st_dev);
+    }
     
     detail::inode_t path::inode() const  {
         detail::stat_t sb;
@@ -306,17 +309,35 @@ namespace filesystem {
                     "For path:", str());
             }
             detail::dirent_t* entp;
-            while ((entp = ::readdir(d.get())) != nullptr) {
-                /// ... it's either a directory, a regular file, or a symbolic link
-                switch (entp->d_type) {
-                    case DT_DIR:
-                        if (std::strcmp(entp->d_name, ".") == 0)   { continue; }
-                        if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
-                    case DT_REG:
-                    case DT_LNK:
-                        out.push_back(full_paths ? abspath/entp->d_name : path(entp->d_name));
-                    default:
-                        continue;
+            if (full_paths) {
+                /// concatenate new paths with `abspath`
+                while ((entp = ::readdir(d.get())) != nullptr) {
+                    /// ... it's either a directory, a regular file, or a symbolic link
+                    switch (entp->d_type) {
+                        case DT_DIR:
+                            if (std::strcmp(entp->d_name, ".") == 0)   { continue; }
+                            if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
+                        case DT_REG:
+                        case DT_LNK:
+                            out.push_back(abspath/entp->d_name);
+                        default:
+                            continue;
+                    }
+                }
+            } else {
+                /// make new relative paths
+                while ((entp = ::readdir(d.get())) != nullptr) {
+                    /// ... it's either a directory, a regular file, or a symbolic link
+                    switch (entp->d_type) {
+                        case DT_DIR:
+                            if (std::strcmp(entp->d_name, ".") == 0)   { continue; }
+                            if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
+                        case DT_REG:
+                        case DT_LNK:
+                            out.push_back(path(entp->d_name));
+                        default:
+                            continue;
+                    }
                 }
             }
         } /// scope exit for d and nowait
@@ -332,7 +353,7 @@ namespace filesystem {
             if (!d.get()) {
                 imread_raise(FileSystemError,
                     "Internal error in opendir():", strerror(errno),
-                    "For path:", FF("***%s***", c_str()));
+                    "For path:", FF("***%s***", make_absolute().c_str()));
             }
             detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != nullptr) {
