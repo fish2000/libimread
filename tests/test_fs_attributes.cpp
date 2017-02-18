@@ -36,7 +36,7 @@ namespace {
     
     TEST_CASE("[attributes] xattr read with `path::xattr()` via `path::walk()`",
               "[xattr-read-path-walk-on-basedir]") {
-        // nowait_t nowait;
+        nowait_t nowait;
         
         path basedir = path(im::test::basedir).parent();
         // path basedir = path::home() / "Downloads";

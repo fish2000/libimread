@@ -327,7 +327,7 @@ namespace filesystem {
         detail::stringvec_t directories;
         detail::stringvec_t files;
         {
-            // detail::nowait_t nowait;
+            detail::nowait_t nowait;
             directory d = detail::ddopen(make_absolute().str());
             if (!d.get()) {
                 imread_raise(FileSystemError,

@@ -3,32 +3,36 @@
 /// Inspired By / Modeled After: `pxattr` by @edenzik
 ///     ... q.v. https://github.com/edenzik/pxattr sub.
 
-#if defined(__gnu_linux__) || \
-   (defined(__FreeBSD_kernel__) && defined(__GLIBC__) && !defined(__FreeBSD__)) || \
-    defined(__CYGWIN32__)
-#define PXALINUX 1
-#endif
+#if defined(__gnu_linux__)
+    #define PXALINUX 1
 
-#if defined(__FreeBSD__) || defined(PXALINUX) || defined(__APPLE__)
+#elif (defined(__FreeBSD_kernel__) && defined(__GLIBC__) && !defined(__FreeBSD__))
+    #define PXALINUX 1
+
+#elif defined(__CYGWIN32__)
+    #define PXALINUX 1
+
+#endif /// define PXALINUX
+
+#if !defined(__FreeBSD__) && !defined(PXALINUX) && !defined(__APPLE__)
+    #error "Unable to identify system - exiting compilaton"
+
+#endif /// defined(__FreeBSD__) || defined(PXALINUX) || defined(__APPLE__)
 
 #include <sys/types.h>
-#include <cerrno>
 #include <cstdlib>
-#include <cstdio>
 #include <algorithm>
 
 #if defined(__FreeBSD__)
-#include <sys/extattr.h>
-#include <sys/uio.h>
+    #include <sys/extattr.h>
+    #include <sys/uio.h>
 
-#elif defined(PXALINUX)
-#include <sys/xattr.h>
-
-#elif defined(__APPLE__)
-#include <sys/xattr.h>
+#elif defined(PXALINUX) || defined(__APPLE__)
+    #include <sys/xattr.h>
 
 #else
-#error "Unknown system - can't compile"
+    #error "Unable to identify system - exiting compilaton"
+
 #endif
 
 #include <libimread/ext/filesystem/path.h>
@@ -565,9 +569,6 @@ namespace filesystem {
             return get();
         }
         
-        
     } /// namespace attribute
     
 } /// namespace filesystem
-
-#endif /// defined(__FreeBSD__) || defined(PXALINUX) || defined(__APPLE__)
