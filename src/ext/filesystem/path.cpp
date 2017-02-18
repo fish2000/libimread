@@ -296,9 +296,7 @@ namespace filesystem {
     detail::pathvec_t path::list(bool full_paths) const {
         /// list all files
         detail::pathvec_t out;
-        if (!is_directory()) {
-            return out;
-        }
+        if (!is_directory()) { return out; }
         path abspath = make_absolute();
         {
             detail::nowait_t nowait;
@@ -381,9 +379,7 @@ namespace filesystem {
     detail::pathvec_t path::list(char const* pattern, bool full_paths) const {
         /// list files with glob
         detail::pathvec_t out;
-        if (!is_directory()) {
-            return out;
-        }
+        if (!is_directory()) { return out; }
         path abspath = make_absolute();
         ::glob_t g = { 0 };
         {
@@ -407,9 +403,7 @@ namespace filesystem {
     detail::pathvec_t path::list(std::string const& pattern, bool full_paths) const {
         /// list files with wordexp
         detail::pathvec_t out;
-        if (!is_directory()) {
-            return out;
-        }
+        if (!is_directory()) { return out; }
         path abspath = make_absolute();
         ::wordexp_t word = { 0 };
         {
@@ -450,8 +444,7 @@ namespace filesystem {
     
     void path::walk(detail::walk_visitor_t&& walk_visitor) const {
         if (!is_directory()) {
-            imread_raise(FileSystemError,
-                "Can't call path::walk() on a non-directory:", str());
+            return;
         }
         
         /// list with tag dispatch for separate return vectors
