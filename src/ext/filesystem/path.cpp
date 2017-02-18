@@ -295,12 +295,11 @@ namespace filesystem {
     
     detail::pathvec_t path::list(bool full_paths) const {
         /// list all files
+        detail::pathvec_t out;
         if (!is_directory()) {
-            imread_raise(FileSystemError,
-                "Can't list files of a non-directory:", str());
+            return out;
         }
         path abspath = make_absolute();
-        detail::pathvec_t out;
         {
             detail::nowait_t nowait;
             directory d = detail::ddopen(abspath.str());
@@ -381,9 +380,9 @@ namespace filesystem {
     
     detail::pathvec_t path::list(char const* pattern, bool full_paths) const {
         /// list files with glob
+        detail::pathvec_t out;
         if (!is_directory()) {
-            imread_raise(FileSystemError,
-                "Call to path::list(char const*) on a non-directory:", str());
+            return out;
         }
         path abspath = make_absolute();
         ::glob_t g = { 0 };
@@ -392,7 +391,6 @@ namespace filesystem {
             filesystem::switchdir s(abspath);
             ::glob(pattern, detail::glob_pattern_flags, nullptr, &g);
         }
-        detail::pathvec_t out;
         if (full_paths) {
             for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
                 out.push_back(abspath/g.gl_pathv[idx]);
@@ -408,9 +406,9 @@ namespace filesystem {
     
     detail::pathvec_t path::list(std::string const& pattern, bool full_paths) const {
         /// list files with wordexp
+        detail::pathvec_t out;
         if (!is_directory()) {
-            imread_raise(FileSystemError,
-                "Call to path::list(std::string const&) on a non-directory:", str());
+            return out;
         }
         path abspath = make_absolute();
         ::wordexp_t word = { 0 };
@@ -419,7 +417,6 @@ namespace filesystem {
             filesystem::switchdir s(abspath);
             ::wordexp(pattern.c_str(), &word, detail::wordexp_pattern_flags);
         }
-        detail::pathvec_t out;
         if (full_paths) {
             for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
                 out.push_back(abspath/word.we_wordv[idx]);
