@@ -443,9 +443,7 @@ namespace filesystem {
     //                                      detail::stringvec_t&)>; /// files
     
     void path::walk(detail::walk_visitor_t&& walk_visitor) const {
-        if (!is_directory()) {
-            return;
-        }
+        if (!is_directory()) { return; }
         
         /// list with tag dispatch for separate return vectors
         const detail::list_separate_t tag{};
