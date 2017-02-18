@@ -54,9 +54,14 @@ namespace filesystem {
         static constexpr char windows_extension_separator = '.';
         static constexpr char windows_path_separator      = '\\';
         static constexpr char windows_pathvar_separator   = ';';
+        
         static constexpr char posix_extension_separator   = '.';
         static constexpr char posix_path_separator        = '/';
         static constexpr char posix_pathvar_separator     = ':';
+        
+        static constexpr char dotpath_extension_separator   = ':';
+        static constexpr char dotpath_path_separator        = '.';
+        static constexpr char dotpath_pathvar_separator     = ',';
         
         /// constant for null (nonexistent) inodes and devices:
         static constexpr dev_t null_dev_v                 = 0;
@@ -74,7 +79,9 @@ namespace filesystem {
             static constexpr character_type pathsep = detail::posix_pathvar_separator;
             
             enum path_type {
-                windows_path = 0, posix_path = 1,
+                windows_path = 0,
+                posix_path = 1,
+                dotpath_path = 2,
                 native_path = posix_path
             };
             
@@ -522,6 +529,26 @@ namespace filesystem {
             bool m_absolute = false;
     
     }; /* class path */
+    
+    class dotpath : public path {
+        
+        public:
+            using size_type = std::string::size_type;
+            using character_type = std::string::value_type;
+            static constexpr character_type sep = detail::dotpath_path_separator;
+            static constexpr character_type extsep = detail::dotpath_extension_separator;
+            static constexpr character_type pathsep = detail::dotpath_pathvar_separator;
+            
+            enum path_type {
+                windows_path = 0,
+                posix_path = 1,
+                dotpath_path = 2,
+                native_path = dotpath_path
+            };
+            
+            using path::path;
+            
+    };
     
 }; /* namespace filesystem */
 

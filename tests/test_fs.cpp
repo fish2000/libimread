@@ -22,6 +22,7 @@
 namespace {
     
     using filesystem::path;
+    using filesystem::dotpath;
     using filesystem::switchdir;
     using filesystem::resolver;
     using filesystem::NamedTemporaryFile;
@@ -310,5 +311,13 @@ namespace {
         (td.dirpath/"yo_dogg_i_heard_you_like_directories").makedir_p();
         CHECK((td.dirpath/"yo_dogg_i_heard_you_like_directories").is_directory());
     }
+    
+    // TEST_CASE("[filesystem] Test dotpath subclass",
+    //           "[fs-test-dotpath-subclass]") {
+    //     dotpath basepath("ost.basepath.ClassName:YoDogg");
+    //     dotpath parentpath("ost.basepath");
+    //     CHECK(basepath.extension() == "YoDogg");
+    //     CHECK(basepath.parent() == parentpath);
+    // }
     
 }
