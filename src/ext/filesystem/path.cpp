@@ -392,8 +392,14 @@ namespace filesystem {
             ::glob(pattern, detail::glob_pattern_flags, nullptr, &g);
         }
         detail::pathvec_t out;
-        for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
-            out.push_back(full_paths ? abspath/g.gl_pathv[idx] : path(g.gl_pathv[idx]));
+        if (full_paths) {
+            for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
+                out.push_back(abspath/g.gl_pathv[idx]);
+            }
+        } else {
+            for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
+                out.push_back(path(g.gl_pathv[idx]));
+            }
         }
         ::globfree(&g);
         return out;
@@ -413,8 +419,14 @@ namespace filesystem {
             ::wordexp(pattern.c_str(), &word, 0);
         }
         detail::pathvec_t out;
-        for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
-            out.push_back(full_paths ? abspath/word.we_wordv[idx] : path(word.we_wordv[idx]));
+        if (full_paths) {
+            for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
+                out.push_back(abspath/word.we_wordv[idx]);
+            }
+        } else {
+            for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
+                out.push_back(path(word.we_wordv[idx]));
+            }
         }
         ::wordfree(&word);
         return out;
