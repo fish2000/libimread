@@ -91,7 +91,7 @@ namespace filesystem {
                 std::for_each(directories.begin(),
                               directories.end(),
                   [&p, &dirs](std::string const& d) {
-                      dirs.push_back(p/d);
+                      dirs.emplace_back(p/d);
                 });
             }
             if (!files.empty()) {
@@ -106,11 +106,9 @@ namespace filesystem {
         /// remove emptied directories per saved list
         if (!dirs.empty()) {
             /// reverse directorylist --
-            std::reverse(dirs.begin(),
-                         dirs.end());
+            std::reverse(dirs.begin(), dirs.end());
             /// -- removing uppermost directories top-down:
-            std::for_each(dirs.begin(),
-                          dirs.end(),
+            std::for_each(dirs.begin(), dirs.end(),
                    [&out](path const& p) {
                 out &= p.remove();
             });
