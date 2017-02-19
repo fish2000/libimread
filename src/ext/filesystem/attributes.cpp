@@ -458,6 +458,7 @@ namespace filesystem {
             detail::stringvec_t strings = attribute::list(pthstr, options, domain);
             accessor_t::accessvec_t out{};
             if (!strings.empty()) {
+                out.reserve(strings.size());
                 std::for_each(strings.begin(),
                               strings.end(),
                           [&](std::string const& attrname) { out.emplace_back(pthstr, attrname); });
@@ -471,6 +472,7 @@ namespace filesystem {
             detail::stringvec_t strings = attribute::list(pth, options, domain);
             accessor_t::accessvec_t out{};
             if (!strings.empty()) {
+                out.reserve(strings.size());
                 std::for_each(strings.begin(),
                               strings.end(),
                           [&](std::string const& attrname) { out.emplace_back(pth, attrname); });
