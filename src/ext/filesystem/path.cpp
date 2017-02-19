@@ -204,16 +204,11 @@ namespace filesystem {
     bool path::is_absolute() const { return m_absolute; }
     bool path::empty() const       { return m_path.empty(); }
     
-    detail::dev_t path::device() const  {
-        detail::stat_t sb;
-        if (::lstat(c_str(), &sb)) { return detail::null_dev_v; }
-        return static_cast<detail::dev_t>(sb.st_dev);
-    }
-    
     detail::inode_t path::inode() const  {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return detail::null_inode_v; }
-        return static_cast<detail::inode_t>(sb.st_ino);
+        return { static_cast<dev_t>(sb.st_dev),
+                 static_cast<ino_t>(sb.st_ino) };
     }
     
     path::size_type path::filesize() const {

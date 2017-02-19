@@ -38,8 +38,7 @@ namespace filesystem {
         using clock_t = std::chrono::system_clock;
         using timepoint_t = std::chrono::time_point<clock_t>;
         using time_triple_t = std::tuple<timepoint_t, timepoint_t, timepoint_t>;
-        using dev_t = uint64_t;
-        using inode_t = uint64_t;
+        using inode_t = std::pair<uint64_t, uint64_t>;
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
         /// instead of plain ol' pathvec_t
@@ -64,8 +63,7 @@ namespace filesystem {
         static constexpr char dotpath_pathvar_separator     = ',';
         
         /// constant for null (nonexistent) inodes and devices:
-        static constexpr dev_t null_dev_v                 = 0;
-        static constexpr inode_t null_inode_v             = 0;
+        static const inode_t null_inode_v                   = { 0, 0 };
     }
     
     /// The actual class for representing a path on the filesystem
@@ -104,7 +102,6 @@ namespace filesystem {
             size_type size() const;
             bool is_absolute() const;
             bool empty() const;
-            detail::dev_t device() const;
             detail::inode_t inode() const;
             size_type filesize() const;
             
@@ -115,10 +112,6 @@ namespace filesystem {
             /// static forwarder for path::is_absolute<P>(p)
             template <typename P> inline
             static bool is_absolute(P&& p) { return path(std::forward<P>(p)).is_absolute(); }
-            
-            /// static forwarder for path::device<P>(p)
-            template <typename P> inline
-            static detail::dev_t device(P&& p) { return path(std::forward<P>(p)).device(); }
             
             /// static forwarder for path::inode<P>(p)
             template <typename P> inline
