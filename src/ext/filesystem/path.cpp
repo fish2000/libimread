@@ -388,10 +388,12 @@ namespace filesystem {
             ::glob(pattern, detail::glob_pattern_flags, nullptr, &g);
         }
         if (full_paths) {
+            out.reserve(g.gl_pathc);
             for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
                 out.emplace_back(abspath/g.gl_pathv[idx]);
             }
         } else {
+            out.reserve(g.gl_pathc);
             for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
                 out.emplace_back(g.gl_pathv[idx]);
             }
@@ -412,10 +414,12 @@ namespace filesystem {
             ::wordexp(pattern.c_str(), &word, detail::wordexp_pattern_flags);
         }
         if (full_paths) {
+            out.reserve(word.we_wordc);
             for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
                 out.emplace_back(abspath/word.we_wordv[idx]);
             }
         } else {
+            out.reserve(word.we_wordc);
             for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
                 out.emplace_back(word.we_wordv[idx]);
             }
