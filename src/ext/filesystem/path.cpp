@@ -317,7 +317,7 @@ namespace filesystem {
                             if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
                         case DT_REG:
                         case DT_LNK:
-                            out.push_back(abspath/entp->d_name);
+                            out.emplace_back(abspath/entp->d_name);
                         default:
                             continue;
                     }
@@ -332,7 +332,7 @@ namespace filesystem {
                             if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
                         case DT_REG:
                         case DT_LNK:
-                            out.push_back(path(entp->d_name));
+                            out.emplace_back(path(entp->d_name));
                         default:
                             continue;
                     }
@@ -360,11 +360,11 @@ namespace filesystem {
                     case DT_DIR:
                         if (std::strcmp(entp->d_name, ".") == 0)   { continue; }
                         if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
-                        directories.push_back(std::string(entp->d_name));
+                        directories.emplace_back(std::string(entp->d_name));
                         continue;
                     case DT_REG:
                     case DT_LNK:
-                        files.push_back(std::string(entp->d_name));
+                        files.emplace_back(std::string(entp->d_name));
                         continue;
                     default:
                         continue;
@@ -389,11 +389,11 @@ namespace filesystem {
         }
         if (full_paths) {
             for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
-                out.push_back(abspath/g.gl_pathv[idx]);
+                out.emplace_back(abspath/g.gl_pathv[idx]);
             }
         } else {
             for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
-                out.push_back(path(g.gl_pathv[idx]));
+                out.emplace_back(path(g.gl_pathv[idx]));
             }
         }
         ::globfree(&g);
@@ -413,11 +413,11 @@ namespace filesystem {
         }
         if (full_paths) {
             for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
-                out.push_back(abspath/word.we_wordv[idx]);
+                out.emplace_back(abspath/word.we_wordv[idx]);
             }
         } else {
             for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
-                out.push_back(path(word.we_wordv[idx]));
+                out.emplace_back(path(word.we_wordv[idx]));
             }
         }
         ::wordfree(&word);
