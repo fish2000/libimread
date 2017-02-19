@@ -332,7 +332,7 @@ namespace filesystem {
                             if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
                         case DT_REG:
                         case DT_LNK:
-                            out.emplace_back(path(entp->d_name));
+                            out.emplace_back(entp->d_name);
                         default:
                             continue;
                     }
@@ -360,11 +360,11 @@ namespace filesystem {
                     case DT_DIR:
                         if (std::strcmp(entp->d_name, ".") == 0)   { continue; }
                         if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
-                        directories.emplace_back(std::string(entp->d_name));
+                        directories.emplace_back(entp->d_name);
                         continue;
                     case DT_REG:
                     case DT_LNK:
-                        files.emplace_back(std::string(entp->d_name));
+                        files.emplace_back(entp->d_name);
                         continue;
                     default:
                         continue;
@@ -393,7 +393,7 @@ namespace filesystem {
             }
         } else {
             for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
-                out.emplace_back(path(g.gl_pathv[idx]));
+                out.emplace_back(g.gl_pathv[idx]);
             }
         }
         ::globfree(&g);
@@ -417,7 +417,7 @@ namespace filesystem {
             }
         } else {
             for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
-                out.emplace_back(path(word.we_wordv[idx]));
+                out.emplace_back(word.we_wordv[idx]);
             }
         }
         ::wordfree(&word);
