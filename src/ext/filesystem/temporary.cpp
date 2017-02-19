@@ -64,9 +64,9 @@ namespace filesystem {
     
     bool TemporaryDirectory::create() {
         if (!pystring::endswith(tpl, "XXX")) {
-            tplpath = path::join(path::gettmp(), tpl).append("-XXXXXX");
+            tplpath = path::join(path::tmp(), tpl).append("-XXXXXX");
         } else {
-            tplpath = path::join(path::gettmp(), tpl);
+            tplpath = path::join(path::tmp(), tpl);
         }
         char const* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
         if (dtemp == nullptr) {
@@ -79,39 +79,41 @@ namespace filesystem {
     bool TemporaryDirectory::clean() {
         if (!dirpath.exists()) { return false; }
         bool out = true;
-        detail::pathvec_t directorylist;
-        path abspath = dirpath.make_absolute();
+        detail::pathvec_t dirs;
         
-        /// walk_visitor_t recursively removes files while saving directories
-        /// as full paths in the `directorylist` vector
-        detail::walk_visitor_t walk_visitor = [&out, &directorylist](
-                                    path const& p,
-                                    detail::stringvec_t& directories,
-                                    detail::stringvec_t& files) {
+        /// perform walk with visitor --
+        /// recursively removing files while saving directories
+        /// as full paths in the `dirs` vector
+        dirpath.make_absolute().walk([&out, &dirs](path const& p,
+                                                   detail::stringvec_t& directories,
+                                                   detail::stringvec_t& files) {
             if (!directories.empty()) {
-                std::for_each(directories.begin(), directories.end(),
-                    [&p, &directorylist](std::string const& directory) {
-                        directorylist.push_back(p/directory); });
+                std::for_each(directories.begin(),
+                              directories.end(),
+                  [&p, &dirs](std::string const& d) {
+                      dirs.push_back(p/d);
+                });
             }
             if (!files.empty()) {
-                std::for_each(files.begin(), files.end(),
-                    [&p, &out](std::string const& file) {
-                        out &= (p/file).remove(); });
+                std::for_each(files.begin(),
+                              files.end(),
+                   [&p, &out](std::string const& f) {
+                      out &= (p/f).remove();
+                });
             }
-        };
-        
-        /// perform walk with visitor
-        abspath.walk(std::forward<detail::walk_visitor_t>(walk_visitor));
+        });
         
         /// remove emptied directories per saved list
-        if (!directorylist.empty()) {
+        if (!dirs.empty()) {
             /// reverse directorylist --
-            std::reverse(directorylist.begin(),
-                         directorylist.end());
+            std::reverse(dirs.begin(),
+                         dirs.end());
             /// -- removing uppermost directories top-down:
-            std::for_each(directorylist.begin(),
-                          directorylist.end(),
-                   [&out](path const& p) { out &= p.remove(); });
+            std::for_each(dirs.begin(),
+                          dirs.end(),
+                   [&out](path const& p) {
+                out &= p.remove();
+            });
         }
         
         /// return as per logical sum of `remove()` call successes
