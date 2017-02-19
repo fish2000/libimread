@@ -253,6 +253,8 @@ namespace {
         TemporaryDirectory td("test-td");
         (td.dirpath/"test-td-subdir0").makedir();
         (td.dirpath/"test-td-subdir1").makedir();
+        REQUIRE((td.dirpath/"test-td-subdir0").is_listable());
+        REQUIRE((td.dirpath/"test-td-subdir1").is_listable());
     }
     
     TEST_CASE("[filesystem] Test the NamedTemporaryFile RAII struct's stream interface",
