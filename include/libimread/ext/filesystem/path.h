@@ -165,6 +165,7 @@ namespace filesystem {
             bool is_executable() const;
             bool is_readwritable() const;
             bool is_runnable() const;
+            bool is_listable() const;
             bool is_file() const;
             bool is_link() const;
             bool is_directory() const;
@@ -194,6 +195,10 @@ namespace filesystem {
             template <typename P> inline
             static bool is_runnable(P&& p) {
                 return path(std::forward<P>(p)).is_runnable();
+            }
+            template <typename P> inline
+            static bool is_listable(P&& p) {
+                return path(std::forward<P>(p)).is_listable();
             }
             template <typename P> inline
             static bool is_file(P&& p) {

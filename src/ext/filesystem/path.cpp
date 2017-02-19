@@ -296,7 +296,7 @@ namespace filesystem {
     detail::pathvec_t path::list(bool full_paths) const {
         /// list all files
         detail::pathvec_t out;
-        if (!is_directory()) { return out; }
+        if (!is_listable()) { return out; }
         path abspath = make_absolute();
         {
             detail::nowait_t nowait;
@@ -379,7 +379,7 @@ namespace filesystem {
     detail::pathvec_t path::list(char const* pattern, bool full_paths) const {
         /// list files with glob
         detail::pathvec_t out;
-        if (!is_directory()) { return out; }
+        if (!is_listable()) { return out; }
         path abspath = make_absolute();
         ::glob_t g = { 0 };
         {
@@ -403,7 +403,7 @@ namespace filesystem {
     detail::pathvec_t path::list(std::string const& pattern, bool full_paths) const {
         /// list files with wordexp
         detail::pathvec_t out;
-        if (!is_directory()) { return out; }
+        if (!is_listable()) { return out; }
         path abspath = make_absolute();
         ::wordexp_t word = { 0 };
         {
@@ -444,7 +444,7 @@ namespace filesystem {
     //                                      detail::stringvec_t&)>; /// files
     
     void path::walk(detail::walk_visitor_t&& walk_visitor) const {
-        if (!is_directory()) { return; }
+        if (!is_listable()) { return; }
         
         /// list with tag dispatch for separate return vectors
         const detail::list_separate_t tag{};
@@ -481,7 +481,7 @@ namespace filesystem {
     }
     
     bool path::is_executable() const {
-        return ::access(c_str(), X_OK) != -1 && !is_directory();
+        return (::access(c_str(), X_OK) != -1) && !is_directory();
     }
     
     bool path::is_readwritable() const {
@@ -489,7 +489,11 @@ namespace filesystem {
     }
     
     bool path::is_runnable() const {
-        return ::access(c_str(), R_OK | X_OK) != -1 && !is_directory();
+        return (::access(c_str(), R_OK | X_OK) != -1) && !is_directory();
+    }
+    
+    bool path::is_listable() const {
+        return (::access(c_str(), R_OK) != -1) && is_directory();
     }
     
     bool path::is_file() const {
