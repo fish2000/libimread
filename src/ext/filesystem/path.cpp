@@ -658,6 +658,20 @@ namespace filesystem {
     path path::duplicate(char const* newpath) const        { return duplicate(path(newpath)); }
     path path::duplicate(std::string const& newpath) const { return duplicate(path(newpath)); }
     
+    bool path::slink(path const& from) const {
+        if (from.exists()) { return false; }
+        return ::symlink(from.c_str(), c_str()) == 0;
+    }
+    bool path::slink(char const* from) const        { return slink(path(from)); }
+    bool path::slink(std::string const& from) const { return slink(path(from)); }
+    
+    bool path::hardlink(path const& from) const {
+        if (from.exists()) { return false; }
+        return ::link(from.c_str(), c_str()) == 0;
+    }
+    bool path::hardlink(char const* from) const        { return hardlink(path(from)); }
+    bool path::hardlink(std::string const& from) const { return hardlink(path(from)); }
+    
     std::string path::extension() const {
         if (empty()) { return ""; }
         std::string const& last = m_path.back();

@@ -369,6 +369,28 @@ namespace filesystem {
                 return path(std::forward<P>(p)).duplicate(std::forward<Q>(q));
             }
             
+            /// create a symlink to this path
+            bool slink(path const& from) const;
+            bool slink(char const* from) const;
+            bool slink(std::string const& from) const;
+            
+            /// Static forwarder for path::slink<P, Q>(p, q) -- (to, from) -- (source, target)
+            template <typename P, typename Q> inline
+            static bool slink(P&& p, Q&& q) {
+                return path(std::forward<P>(p)).slink(std::forward<Q>(q));
+            }
+            
+            /// create a hard link to this path
+            bool hardlink(path const& from) const;
+            bool hardlink(char const* from) const;
+            bool hardlink(std::string const& from) const;
+            
+            /// Static forwarder for path::hardlink<P, Q>(p, q) -- (to, from) -- (source, target)
+            template <typename P, typename Q> inline
+            static bool hardlink(P&& p, Q&& q) {
+                return path(std::forward<P>(p)).hardlink(std::forward<Q>(q));
+            }
+            
             /// Attempt to return the string extention (WITHOUT THE LEADING ".")
             /// ... I never know when to include the fucking leading "." and so
             /// at any given time, half my functions support it and half don't. BLEAH.
