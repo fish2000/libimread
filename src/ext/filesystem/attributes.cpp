@@ -181,7 +181,7 @@ namespace filesystem {
                     /// Need to test for existence:
                     bool exists = false;
                     ssize_t error_value;
-                    if (options & attribute::flags::nofollow) {
+                    if (bool(options & attribute::flags::nofollow)) {
                         error_value = ::extattr_get_link(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
                     } else {
                         error_value = ::extattr_get_file(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
@@ -192,11 +192,11 @@ namespace filesystem {
                     if (error_value < 0 && errno != ENOATTR) {
                         return false;
                     }
-                    if ((options & attribute::flags::create) && exists) {
+                    if (bool(options & attribute::flags::create) && exists) {
                         errno = EEXIST;
                         return false;
                     }
-                    if ((options & attribute::flags::replace) && !exists) {
+                    if (bool(options & attribute::flags::replace) && !exists) {
                         errno = ENOATTR;
                         return false;
                     }
