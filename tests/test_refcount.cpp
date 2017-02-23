@@ -4,18 +4,18 @@
 #include <libimread/errors.hh>
 
 #include "include/catch.hpp"
-#include "helpers/ByteHeap.hh"
+#include "helpers/HeapAllocation.hh"
 
 namespace {
     
     using memory::RefCount;
-    using im::test::ByteHeap;
+    using im::test::Bytes;
     using im::byte;
     
     struct Trivial {
         volatile int integer;
-        Trivial()
-            :integer(0)
+        Trivial(int value = 0)
+            :integer(value)
             {
                 // WTF("Trivial::Trivial() copy constructor");
             }
@@ -41,34 +41,32 @@ namespace {
         
     }
     
-    /*
-    TEST_CASE("[refcount] Test RefCount with ByteHeap",
-              "[refcount-with-byteheap]")
+    TEST_CASE("[refcount] Test RefCount with HeapAllocation<byte>",
+              "[refcount-with-heapallocation-byte]")
     {
         constexpr int SIZE = 128;
         
         {
-            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto heap = RefCount<Bytes>::MakeRef(SIZE);
             auto s = heap->size();
             REQUIRE(s == SIZE);
         }
         {
-            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto heap = RefCount<Bytes>::MakeRef(SIZE);
             auto s = heap->size();
             REQUIRE(s == SIZE);
         }
         {
-            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto heap = RefCount<Bytes>::MakeRef(SIZE);
             auto s = heap->size();
             REQUIRE(s == SIZE);
         }
         {
-            auto heap = RefCount<ByteHeap<byte>>::MakeRef(SIZE);
+            auto heap = RefCount<Bytes>::MakeRef(SIZE);
             auto s = heap->size();
             REQUIRE(s == SIZE);
         }
     }
-    */
     
 }
 
