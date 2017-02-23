@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_EXT_FILESYSTEM_NOWAIT_H_
 #define LIBIMREAD_EXT_FILESYSTEM_NOWAIT_H_
 
+#include <atomic>
 #include <libimread/libimread.hpp>
 
 namespace filesystem {
@@ -22,7 +23,8 @@ namespace filesystem {
                 nowait_t(nowait_t&&);
                 nowait_t& operator=(nowait_t const&);
                 nowait_t& operator=(nowait_t&&);
-                mutable int descriptor = -1;
+                static std::atomic<int> descriptor;
+                static std::atomic<int> retaincount;
             
         };
         
@@ -45,8 +47,8 @@ namespace filesystem {
                 notrigger_t(notrigger_t&&);
                 notrigger_t& operator=(notrigger_t const&);
                 notrigger_t& operator=(notrigger_t&&);
-                mutable int descriptor = -1;
-                
+                static std::atomic<int> descriptor;
+                static std::atomic<int> retaincount;
         };
         
         #else
