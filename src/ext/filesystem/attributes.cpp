@@ -42,24 +42,24 @@ namespace filesystem {
     
     namespace attribute {
         
-        bool operator&(ns lhs, ns rhs) {
-            return static_cast<std::size_t>(lhs) &
-                   static_cast<std::size_t>(rhs);
+        ns operator&(ns lhs, ns rhs) {
+            return static_cast<ns>(static_cast<std::size_t>(lhs) &
+                                   static_cast<std::size_t>(rhs));
         }
         
-        bool operator|(ns lhs, ns rhs) {
-            return static_cast<std::size_t>(lhs) |
-                   static_cast<std::size_t>(rhs);
+        ns operator|(ns lhs, ns rhs) {
+            return static_cast<ns>(static_cast<std::size_t>(lhs) |
+                                   static_cast<std::size_t>(rhs));
         }
         
-        bool operator&(flags lhs, flags rhs) {
-            return static_cast<std::size_t>(lhs) &
-                   static_cast<std::size_t>(rhs);
+        flags operator&(flags lhs, flags rhs) {
+            return static_cast<flags>(static_cast<std::size_t>(lhs) &
+                                      static_cast<std::size_t>(rhs));
         }
         
-        bool operator|(flags lhs, flags rhs) {
-            return static_cast<std::size_t>(lhs) |
-                   static_cast<std::size_t>(rhs);
+        flags operator|(flags lhs, flags rhs) {
+            return static_cast<flags>(static_cast<std::size_t>(lhs) |
+                                      static_cast<std::size_t>(rhs));
         }
         
         enum struct ns : std::size_t {
@@ -108,7 +108,7 @@ namespace filesystem {
             detail::attrbuf_t attrbuffer;
             
             #if defined(__FreeBSD__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_get_link(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
                 } else {
                     status = ::extattr_get_file(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
@@ -118,14 +118,14 @@ namespace filesystem {
                 /// Don't want to deal with possible status = 0:
                 attrbuffer = detail::attrbuf(status + 1);
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_get_link(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), attrbuffer.get(), status);
                 } else {
                     status = ::extattr_get_file(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), attrbuffer.get(), status);
                 }
             
             #elif defined(PXALINUX)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::lgetxattr(pth.c_str(), name.c_str(), 0, 0);
                 } else {
                     status = ::getxattr(pth.c_str(), name.c_str(), 0, 0);
@@ -135,14 +135,14 @@ namespace filesystem {
                 /// Don't want to deal with possible status = 0:
                 attrbuffer = detail::attrbuf(status + 1);
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::lgetxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status);
                 } else {
                     status = ::getxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status);
                 }
             
             #elif defined(__APPLE__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::getxattr(pth.c_str(), name.c_str(), 0, 0, 0, XATTR_NOFOLLOW);
                 } else {
                     status = ::getxattr(pth.c_str(), name.c_str(), 0, 0, 0, 0);
@@ -152,7 +152,7 @@ namespace filesystem {
                 /// Don't want to deal with possible status = 0:
                 attrbuffer = detail::attrbuf(status + 1);
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::getxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status, 0, XATTR_NOFOLLOW);
                 } else {
                     status = ::getxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status, 0, 0);
@@ -177,7 +177,7 @@ namespace filesystem {
             int status = -1;
             
             #if defined(__FreeBSD__)
-                if (options & (attribute::flags::create | attribute::flags::replace)) {
+                if (bool(options & (attribute::flags::create | attribute::flags::replace))) {
                     /// Need to test for existence:
                     bool exists = false;
                     ssize_t error_value;
@@ -201,7 +201,7 @@ namespace filesystem {
                         return false;
                     }
                 }
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_set_link(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), value.c_str(), value.length());
                 } else {
                     status = ::extattr_set_file(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), value.c_str(), value.length());
@@ -209,12 +209,12 @@ namespace filesystem {
             
             #elif defined(PXALINUX)
                 int callopts = 0;
-                if (options & attribute::flags::create) {
+                if (bool(options & attribute::flags::create)) {
                     callopts = XATTR_CREATE;
-                } else if (options & attribute::flags::replace) {
+                } else if (bool(options & attribute::flags::replace)) {
                     callopts = XATTR_REPLACE;
                 }
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::lsetxattr(pth.c_str(), name.c_str(), value.c_str(), value.length(), callopts);
                 } else {
                     status = ::setxattr(pth.c_str(), name.c_str(), value.c_str(), value.length(), callopts);
@@ -222,12 +222,12 @@ namespace filesystem {
             
             #elif defined(__APPLE__)
                 int callopts = 0;
-                if (options & attribute::flags::create) {
+                if (bool(options & attribute::flags::create)) {
                     callopts = XATTR_CREATE;
-                } else if (options & attribute::flags::replace) {
+                } else if (bool(options & attribute::flags::replace)) {
                     callopts = XATTR_REPLACE;
                 }
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::setxattr(pth.c_str(), name.c_str(), value.c_str(), value.length(), 0, XATTR_NOFOLLOW | callopts);
                 } else {
                     status = ::setxattr(pth.c_str(), name.c_str(), value.c_str(), value.length(), 0, callopts);
@@ -248,21 +248,21 @@ namespace filesystem {
             int status = -1;
             
             #if defined(__FreeBSD__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_delete_link(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str());
                 } else {
                     status = ::extattr_delete_file(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str());
                 }
                  
             #elif defined(PXALINUX)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::lremovexattr(pth.c_str(), name.c_str());
                 } else {
                     status = ::removexattr(pth.c_str(), name.c_str());
                 }
             
             #elif defined(__APPLE__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::removexattr(pth.c_str(), name.c_str(), XATTR_NOFOLLOW);
                 } else {
                     status = ::removexattr(pth.c_str(), name.c_str(), 0);
@@ -280,7 +280,7 @@ namespace filesystem {
             detail::attrbuf_t attrbuffer;
             
             #if defined(__FreeBSD__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_list_link(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
                 } else {
                     status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
@@ -291,14 +291,14 @@ namespace filesystem {
                 attrbuffer = detail::attrbuf(status + 1);
                 attrbuffer.get()[status] = 0;
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_list_link(pth.c_str(), EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
                 } else {
                     status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
                 }
             
             #elif defined(PXALINUX)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::llistxattr(pth.c_str(), 0, 0);
                 } else {
                     status = ::listxattr(pth.c_str(), 0, 0);
@@ -308,14 +308,14 @@ namespace filesystem {
                 /// Don't want to deal with possible status = 0:
                 attrbuffer = detail::attrbuf(status + 1);
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::llistxattr(pth.c_str(), attrbuffer.get(), status);
                 } else {
                     status = ::listxattr(pth.c_str(), attrbuffer.get(), status);
                 }
             
             #elif defined(__APPLE__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::listxattr(pth.c_str(), 0, 0, XATTR_NOFOLLOW);
                 } else {
                     status = ::listxattr(pth.c_str(), 0, 0, 0);
@@ -325,7 +325,7 @@ namespace filesystem {
                 /// Don't want to deal with possible status = 0:
                 attrbuffer = detail::attrbuf(status + 1);
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::listxattr(pth.c_str(), attrbuffer.get(), status, XATTR_NOFOLLOW);
                 } else {
                     status = ::listxattr(pth.c_str(), attrbuffer.get(), status, 0);
@@ -373,7 +373,7 @@ namespace filesystem {
             detail::attrbuf_t attrbuffer;
             
             #if defined(__FreeBSD__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_list_link(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
                 } else {
                     status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
@@ -384,14 +384,14 @@ namespace filesystem {
                 attrbuffer = detail::attrbuf(status + 1);
                 attrbuffer.get()[status] = 0;
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_list_link(pth.c_str(), EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
                 } else {
                     status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
                 }
             
             #elif defined(PXALINUX)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::llistxattr(pth.c_str(), 0, 0);
                 } else {
                     status = ::listxattr(pth.c_str(), 0, 0);
@@ -401,14 +401,14 @@ namespace filesystem {
                 /// Don't want to deal with possible status = 0:
                 attrbuffer = detail::attrbuf(status + 1);
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::llistxattr(pth.c_str(), attrbuffer.get(), status);
                 } else {
                     status = ::listxattr(pth.c_str(), attrbuffer.get(), status);
                 }
             
             #elif defined(__APPLE__)
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::listxattr(pth.c_str(), 0, 0, XATTR_NOFOLLOW);
                 } else {
                     status = ::listxattr(pth.c_str(), 0, 0, 0);
@@ -418,7 +418,7 @@ namespace filesystem {
                 /// Don't want to deal with possible status = 0:
                 attrbuffer = detail::attrbuf(status + 1);
                 
-                if (options & attribute::flags::nofollow) {
+                if (bool(options & attribute::flags::nofollow)) {
                     status = ::listxattr(pth.c_str(), attrbuffer.get(), status, XATTR_NOFOLLOW);
                 } else {
                     status = ::listxattr(pth.c_str(), attrbuffer.get(), status, 0);
