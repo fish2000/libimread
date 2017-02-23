@@ -22,7 +22,9 @@ namespace filesystem {
         
         nowait_t::~nowait_t() {
             if (retaincount.fetch_sub(1) == 1) {
-                ::close(descriptor.load());
+                if (::close(descriptor.load()) == 0) {
+                    descriptor.store(-1);
+                }
             }
         }
         
@@ -49,7 +51,9 @@ namespace filesystem {
         
         notrigger_t::~notrigger_t() {
             if (retaincount.fetch_sub(1) == 1) {
-                ::close(descriptor.load());
+                if (::close(descriptor.load()) == 0) {
+                    descriptor.store(-1);
+                }
             }
         }
         
