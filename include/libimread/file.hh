@@ -98,7 +98,7 @@ namespace im {
             filesystem::mode mode() const;
     };
     
-    class FileSource : public file_source_sink {
+    class FileSource final : public file_source_sink {
         public:
             FileSource();
             FileSource(char* cpath);
@@ -108,7 +108,7 @@ namespace im {
             FileSource(filesystem::path const& ppath);
     };
     
-    class FileSink : public file_source_sink {
+    class FileSink final : public file_source_sink {
         public:
             FileSink();
             FileSink(char* cpath);
