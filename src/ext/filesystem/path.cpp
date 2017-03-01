@@ -604,7 +604,7 @@ namespace filesystem {
         
         /// iterate through nonexistant path segments,
         /// using path::makedir() to make each nonexistant directory:
-        if (out) {
+        if (out && idx < max) {
             for (int i = idx; i < max; ++i) {
                 result /= m_path[i];
                 out &= result.makedir();
