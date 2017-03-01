@@ -38,14 +38,20 @@ namespace im {
     std::size_t byte_source::size() const {
         /// super-naive implementation...
         /// OVERRIDE THIS HORRIDNESS, DOGG
-        bytevec_t all_of_it;
-        std::size_t n;
-        byte buffer[4096];
-        byte_source* mutablethis = const_cast<byte_source*>(this);
-        while ((n = mutablethis->read(buffer, sizeof(buffer)))) {
-            all_of_it.insert(all_of_it.end(), buffer, buffer + n);
+        static std::size_t out = 0;
+        static bool sized = false;
+        if (!sized) {
+            bytevec_t all_of_it;
+            std::size_t n;
+            byte buffer[4096];
+            byte_source* mutablethis = const_cast<byte_source*>(this);
+            while ((n = mutablethis->read(buffer, sizeof(buffer)))) {
+                all_of_it.insert(all_of_it.end(), buffer, buffer + n);
+            }
+            out = all_of_it.size();
+            sized = true;
         }
-        return all_of_it.size();
+        return out;
     }
     
     bool byte_source::empty() const {

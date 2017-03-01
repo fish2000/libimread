@@ -12,8 +12,16 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
+#include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/seekable.hh>
+
+// namespace filesystem {
+//     class path;
+//     namespace detail {
+//         using stringvec_t = std::vector<std::string>;
+//     }
+// }
 
 namespace capnp {
     class MessageBuilder;
