@@ -62,7 +62,7 @@ namespace im {
             unsigned required = std::snprintf(&b, 0, fmt, std::forward<Args>(args)...) + 1;
             char bytes[required];
             std::snprintf(bytes, required, fmt,
-						  std::forward<Args>(args)...);
+                          std::forward<Args>(args)...);
             return std::string(bytes);
         }
     

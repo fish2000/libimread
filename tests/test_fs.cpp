@@ -302,16 +302,47 @@ namespace {
               "[fs-test-path-makedir_p]")
     {
         TemporaryDirectory td("test-td");
+        // path dp(td.dirpath.str());
+        // path da(td.dirpath.str());
+        path dp = td.dirpath;
+        path da = td.dirpath;
         
-        (td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories").makedir_p();
+        /// makedir_p() called on rvalue,
+        /// with multiple target directories:
+        REQUIRE((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories").makedir_p());
         CHECK((td.dirpath/"yo").is_directory());
         CHECK((td.dirpath/"yo"/"dogg").is_directory());
         CHECK((td.dirpath/"yo"/"dogg"/"i-heard").is_directory());
         CHECK((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like").is_directory());
         CHECK((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories").is_directory());
         
-        (td.dirpath/"yo_dogg_i_heard_you_like_directories").makedir_p();
+        /// makedir_p() called on lvalue,
+        /// with multiple target directories:
+        dp /= "yo-yo";
+        dp /= "dogg";
+        dp /= "i-heard";
+        dp /= "you-like";
+        dp /= "directories";
+        // WTF("ADJOINED DIRECTORY: ", dp.str());
+        REQUIRE(dp.makedir_p());
+        CHECK((td.dirpath/"yo-yo").is_directory());
+        CHECK((td.dirpath/"yo-yo"/"dogg").is_directory());
+        CHECK((td.dirpath/"yo-yo"/"dogg"/"i-heard").is_directory());
+        CHECK((td.dirpath/"yo-yo"/"dogg"/"i-heard"/"you-like").is_directory());
+        CHECK((td.dirpath/"yo-yo"/"dogg"/"i-heard"/"you-like"/"directories").is_directory());
+        
+        /// makedir_p() called on rvalue,
+        /// with only one target directory:
+        REQUIRE((td.dirpath/"yo_dogg_i_heard_you_like_directories").makedir_p());
         CHECK((td.dirpath/"yo_dogg_i_heard_you_like_directories").is_directory());
+        
+        /// makedir_p() called on lvalue,
+        /// with only one target directory:
+        da /= "yo";
+        da += "_yo_dogg_i_heard_you_like_directories";
+        // WTF("EXTENDED DIRECTORY: ", da.str());
+        REQUIRE(da.makedir_p());
+        CHECK((td.dirpath/"yo_yo_dogg_i_heard_you_like_directories").is_directory());
     }
     
     // TEST_CASE("[filesystem] Test dotpath subclass",

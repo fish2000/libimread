@@ -742,9 +742,26 @@ namespace filesystem {
         return result;
     }
     
+    path& path::adjoin(path const& other) {
+        if (other.m_absolute) {
+            imread_raise(FileSystemError,
+                "path::join() expects a relative-path RHS");
+        }
+        if (!other.m_path.empty()) {
+            std::copy(other.m_path.begin(),
+                      other.m_path.end(),
+                      std::back_inserter(m_path));
+        }
+        return *this;
+    }
+    
     path path::operator/(path const& other) const        { return join(other); }
     path path::operator/(char const* other) const        { return join(path(other)); }
     path path::operator/(std::string const& other) const { return join(path(other)); }
+    
+    path& path::operator/=(path const& other)        { return adjoin(other); }
+    path& path::operator/=(char const* other)        { return adjoin(path(other)); }
+    path& path::operator/=(std::string const& other) { return adjoin(path(other)); }
     
     path path::append(std::string const& appendix) const {
         path out(m_path.empty() ? detail::stringvec_t{ "" } : m_path, m_absolute);
@@ -752,9 +769,23 @@ namespace filesystem {
         return out;
     }
     
+    path& path::extend(std::string const& appendix) {
+        if (m_path.empty()) {
+            m_path = detail::stringvec_t{ "" };
+        }
+        if (!appendix.empty()) {
+            m_path.back().append(appendix);
+        }
+        return *this;
+    }
+    
     path path::operator+(path const& other) const        { return append(other.str()); }
     path path::operator+(char const* other) const        { return append(other); }
     path path::operator+(std::string const& other) const { return append(other); }
+    
+    path& path::operator+=(path const& other)        { return extend(other.str()); }
+    path& path::operator+=(char const* other)        { return extend(other); }
+    path& path::operator+=(std::string const& other) { return extend(other); }
     
     static const std::string sepstring(1, path::sep);
     static const std::string nulstring("");

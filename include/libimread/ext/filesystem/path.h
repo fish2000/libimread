@@ -435,6 +435,7 @@ namespace filesystem {
             
             /// join a path with a new trailing path fragment
             path join(path const& other) const;
+            path& adjoin(path const& other);
             
             /// operator overloads to join paths with slashes -- you can be like this:
             ///     path p = "/yo/dogg";
@@ -444,6 +445,10 @@ namespace filesystem {
             path operator/(path const& other) const;
             path operator/(char const* other) const;
             path operator/(std::string const& other) const;
+            
+            path& operator/=(path const&);
+            path& operator/=(char const*);
+            path& operator/=(std::string const&);
             
             /// Static forwarder for path::join<P, Q>(p, q) --
             /// sometimes you want to just join stuff mainually like:
@@ -456,6 +461,7 @@ namespace filesystem {
             
             /// Simple string-append for the trailing path segment
             path append(std::string const& appendix) const;
+            path& extend(std::string const& appendix);
             
             /// operator overloads for bog-standard string-appending -- like so:
             ///     path p = "/yo/dogg";
@@ -465,6 +471,10 @@ namespace filesystem {
             path operator+(path const& other) const;
             path operator+(char const* other) const;
             path operator+(std::string const& other) const;
+            
+            path& operator+=(path const&);
+            path& operator+=(char const*);
+            path& operator+=(std::string const&);
             
             /// Static forwarder for path::append<P, Q>(p, q) --
             /// you *get* this by now, rite? It's just like some shorthand for
