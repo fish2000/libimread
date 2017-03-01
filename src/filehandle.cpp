@@ -15,6 +15,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/filehandle.hh>
+#include <libimread/ext/filesystem/attributes.h>
 
 namespace im {
     
@@ -138,6 +139,25 @@ namespace im {
             };
         }
         return mapped.get();
+    }
+    
+    std::string handle_source_sink::xattr(std::string const& name) const {
+        filesystem::attribute::accessor_t accessor(::fileno(handle), name);
+        return accessor.get();
+    }
+    
+    std::string handle_source_sink::xattr(std::string const& name, std::string const& value) const {
+        filesystem::attribute::accessor_t accessor(::fileno(handle), name);
+        value == filesystem::attribute::detail::nullstring ? accessor.del() : accessor.set(value);
+        return accessor.get();
+    }
+    
+    int handle_source_sink::xattrcount() const {
+        return filesystem::attribute::fdcount(::fileno(handle));
+    }
+    
+    filesystem::detail::stringvec_t handle_source_sink::xattrs() const {
+        return filesystem::attribute::fdlist(::fileno(handle));
     }
     
     int handle_source_sink::fd() const noexcept {

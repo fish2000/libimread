@@ -62,10 +62,38 @@ namespace filesystem {
                   attribute::flags options = ENUMBASE(attribute::flags),
                   attribute::ns domain = ENUMBASE(attribute::ns));
         
+        std::string fdget(int descriptor,
+                          std::string const& name,
+                          attribute::flags options = ENUMBASE(attribute::flags),
+                          attribute::ns domain = ENUMBASE(attribute::ns));
+        
+        bool fdset(int descriptor,
+                   std::string const& name,
+                   std::string const& value,
+                   attribute::flags options = ENUMBASE(attribute::flags),
+                   attribute::ns domain = ENUMBASE(attribute::ns));
+        
+        bool fddel(int descriptor,
+                   std::string const& name,
+                   attribute::flags options = ENUMBASE(attribute::flags),
+                   attribute::ns domain = ENUMBASE(attribute::ns));
+        
+        detail::stringvec_t fdlist(int descriptor,
+                                   attribute::flags options = ENUMBASE(attribute::flags),
+                                   attribute::ns domain = ENUMBASE(attribute::ns));
+        
+        int fdcount(int descriptor,
+                    attribute::flags options = ENUMBASE(attribute::flags),
+                    attribute::ns domain = ENUMBASE(attribute::ns));
+        
         class accessor_t {
             
             public:
                 using accessvec_t = std::vector<accessor_t>;
+                
+                static accessvec_t list(int descriptor,
+                                        attribute::flags options,
+                                        attribute::ns domain = ENUMBASE(attribute::ns));
                 
                 static accessvec_t list(filesystem::path const& pth,
                                         attribute::flags options,
@@ -74,6 +102,10 @@ namespace filesystem {
                 static accessvec_t list(std::string const& pth,
                                         attribute::flags options,
                                         attribute::ns domain = ENUMBASE(attribute::ns));
+                
+                accessor_t(int descriptor,
+                           std::string const& name,
+                           attribute::ns domain = ENUMBASE(attribute::ns));
                 
                 accessor_t(filesystem::path const& pth,
                            std::string const& name,
@@ -102,6 +134,8 @@ namespace filesystem {
                 std::string pathstring(std::string const&);
                 std::string name() const;
                 std::string name(std::string const&);
+                int descriptor() const;
+                int descriptor(int);
                 attribute::flags options() const;
                 attribute::flags options(attribute::flags);
                 attribute::ns domain() const;
@@ -112,6 +146,7 @@ namespace filesystem {
             private:
                 mutable std::string m_pathstring;
                 mutable std::string m_name;
+                mutable int m_descriptor = -1;
                 attribute::flags m_options = ENUMBASE(attribute::flags);
                 attribute::ns m_domain = ENUMBASE(attribute::ns);
             

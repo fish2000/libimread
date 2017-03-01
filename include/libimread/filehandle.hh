@@ -50,6 +50,12 @@ namespace im {
             
             virtual void* readmap(std::size_t pageoffset = 0) const;
             
+            /// Filesystem extended attribute (“xattr”) access
+            virtual std::string xattr(std::string const&) const;
+            virtual std::string xattr(std::string const&, std::string const&) const;
+            virtual int xattrcount() const;
+            virtual filesystem::detail::stringvec_t xattrs() const;
+            
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
             virtual FILE* fh() const noexcept;
