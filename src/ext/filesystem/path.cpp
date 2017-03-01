@@ -604,9 +604,11 @@ namespace filesystem {
         
         /// iterate through nonexistant path segments,
         /// using path::makedir() to make each nonexistant directory:
-        for (int i = idx; i < max; ++i) {
-            result = result.join(m_path[i]);
-            out &= result.makedir();
+        if (out) {
+            for (int i = idx; i < max; ++i) {
+                result /= m_path[i];
+                out &= result.makedir();
+            }
         }
         
         /// return per the logical sum of operations:
