@@ -10,7 +10,6 @@
 #include <cerrno>
 #include <cstring>
 #include <string>
-#include <utility>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
