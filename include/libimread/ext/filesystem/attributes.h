@@ -8,7 +8,8 @@
 
 #include <memory>
 #include <string>
-#include <vector>
+
+#include <libimread/libimread.hpp>
 
 #define ENUMBASE(enumclass) (enumclass)0
 
@@ -31,7 +32,7 @@ namespace filesystem {
             #else
             static const std::string userstring("");
             #endif
-            static const std::string nullstring("\uFFFF");
+            static const std::string nullstring{ NULL_STR };
             
             std::string sysname(std::string const&, attribute::ns domain = ENUMBASE(attribute::ns));
             std::string pxaname(std::string const&, attribute::ns domain = ENUMBASE(attribute::ns));

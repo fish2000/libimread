@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 
-#include <libimread/libimread.hpp>
-
 namespace store {
     
     template <typename Key, typename Mapped,
@@ -46,12 +44,12 @@ namespace store {
             virtual ~base() {}
             
             virtual key_reference null_key() const {
-                static key_type nk("\uFFFF");
+                static key_type nk{ 0 };
                 return nk;
             }
             
             virtual mapped_reference null_value() const {
-                static mapped_type nv("\uFFFF");
+                static mapped_type nv{ 0 };
                 return nv;
             }
             
@@ -92,6 +90,8 @@ namespace store {
         
         public:
             virtual ~stringmapper();
+            virtual key_reference null_key() const override;
+            virtual mapped_reference null_value() const override;
             
             virtual bool empty() const override;
             virtual std::size_t size() const override;

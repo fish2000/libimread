@@ -33,6 +33,7 @@
 #define FILESYSTEM_TEMP_SUFFIX          ".imr"
 #define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"
 #define FILESYSTEM_TEMP_DIRECTORYNAME   "libimread-XXXXXXX"
+#define NULL_STR                        "\uFFFF"
 
 #ifdef IM_HAVE_STRINGVIEW_HH
 #define __CPP1z__                       1
@@ -44,6 +45,7 @@ namespace im {
     /// a human mnemonic perspective.
     
     using byte = uint8_t;
+    using bytevec_t = std::vector<byte>;
     
     /// string length at compile time -- http://stackoverflow.com/a/26082447/298171
     template <std::size_t N> inline
