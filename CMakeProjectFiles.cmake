@@ -119,6 +119,7 @@ set(hdrs
     ${hdrs_dir}/preview.hh
     ${hdrs_dir}/rehash.hh
     ${hdrs_dir}/seekable.hh
+    ${hdrs_dir}/store.hh
     ${hdrs_dir}/symbols.hh
     ${IOD_SYMBOLS_HEADER}
     ${hdrs_dir}/traits.hh
@@ -198,6 +199,7 @@ set(srcs
     # ${srcs_dir}/palette.cpp
     # ${srcs_dir}/pixels.cpp
     ${srcs_dir}/seekable.cpp
+    ${srcs_dir}/store.cpp
     # ${srcs_dir}/symbols.cpp
     ${preview_src}
 )

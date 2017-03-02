@@ -44,7 +44,10 @@ namespace store {
         
         public:
             virtual ~base() {}
-            virtual key_type null_v() const { return "\uFFFF"; }
+            virtual key_reference null_v() const {
+                static std::string nv("\uFFFF");
+                return nv;
+            }
             
             virtual bool empty() const = 0;
             virtual size_type size() const = 0;
@@ -52,13 +55,13 @@ namespace store {
             
             virtual void clear() = 0;
             virtual bool insert(rvalue_reference) = 0;
-            virtual bool emplace(reference) {}
+            virtual bool emplace(reference) { return false; }
             virtual size_type erase(key_const_reference) = 0;
             
             virtual mapped_reference at(key_const_reference) = 0;
             virtual mapped_const_reference at(key_const_reference) const = 0;
             virtual mapped_reference operator[](key_const_reference) = 0;
-            virtual mapped_reference operator[](key_rvalue_reference) {}
+            virtual mapped_reference operator[](key_rvalue_reference) { return null_v(); }
             virtual size_type count(key_const_reference) const = 0;
     };
     
