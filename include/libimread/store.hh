@@ -87,6 +87,7 @@ namespace store {
             virtual stringvec_t list() const = 0;
             
             virtual stringmap_t mapping() const;
+            virtual std::string mapping_json() const;
         
         public:
             virtual ~stringmapper();
@@ -190,7 +191,8 @@ namespace store {
             virtual bool can_store() const noexcept override;
         
         public:
-            stringmap() noexcept;
+            stringmap() noexcept;                   /// default constructor
+            explicit stringmap(std::string const&); /// decode from JSON string
             
             template <typename T,
                       typename X = typename std::enable_if_t<

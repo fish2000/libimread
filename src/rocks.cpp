@@ -4,6 +4,7 @@
 ///     https://gist.github.com/fish2000/b3a7d8accae8d046703f728b4ac82009
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/rocks.hh>
 #include <libimread/ext/filesystem/path.h>
 #include "rocksdb/db.h"
@@ -57,12 +58,15 @@ namespace store {
     
     std::string& rocks::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
+            WTF("RETURNING CACHED");
             return cache[key];
         } else {
             std::string sval;
             rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
             if (status.ok()) {
-                cache[key] = sval;
+                WTF("INSERTING TO CACHE FOLLOWING GET");
+                cache.insert({ key, sval });
+                WTF("RETURNING FROM CACHE");
                 return cache[key];
             }
             return stringmapper::base_t::null_value();
@@ -71,12 +75,15 @@ namespace store {
     
     std::string const& rocks::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
+            WTF("RETURNING CACHED (const)");
             return cache[key];
         } else {
             std::string sval;
             rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
             if (status.ok()) {
-                cache[key] = sval;
+                WTF("INSERTING TO CACHE FOLLOWING GET (const)");
+                cache.insert({ key, sval });
+                WTF("RETURNING FROM CACHE (const)");
                 return cache[key];
             }
             return stringmapper::base_t::null_value();
@@ -84,10 +91,14 @@ namespace store {
     }
     
     bool rocks::set(std::string const& key, std::string const& value) {
-        rocksdb::Status status = SELF()->Put(rocksdb::WriteOptions(), key, value);
+        rocksdb::WriteOptions writeopts;
+        writeopts.sync = true;
+        rocksdb::Status status = SELF()->Put(writeopts, key, value);
         if (status.ok()) {
-            cache[key] = value;
             rocksdb::Status flushed = SELF()->Flush(rocksdb::FlushOptions());
+            if (flushed.ok()) {
+                cache.insert({ key, value });
+            }
         }
         return status.ok();
     }
@@ -112,7 +123,7 @@ namespace store {
         stringmapper::stringvec_t out{};
         out.reserve(count());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            out.emplace_back(it->value().ToString());
+            out.emplace_back(std::string(it->value().ToString()));
         }
         delete it;
         return out;

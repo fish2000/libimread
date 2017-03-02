@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
+#include <libimread/ext/JSON/json11.h>
 #include <libimread/store.hh>
 
 namespace store {
@@ -9,7 +10,12 @@ namespace store {
     #pragma mark - base class store::stringmapper default methods
     
     stringmapper::stringmap_t stringmapper::mapping() const {
+        for (std::string const& item : list()) { get(item); } /// cache warmup
         return stringmapper::stringmap_t(cache);
+    }
+    
+    std::string stringmapper::mapping_json() const {
+        return Json(mapping()).format();
     }
     
     stringmapper::~stringmapper() {}
@@ -126,6 +132,15 @@ namespace store {
     bool stringmap::can_store() const noexcept { return true; }
     
     stringmap::stringmap() noexcept {}
+    
+    stringmap::stringmap(std::string const& jsonstr) {
+        Json jsonmap = Json::parse(jsonstr);
+        if (jsonmap.type() == Type::OBJECT) {
+            for (std::string const& key : jsonmap.keys()) {
+                set(key, jsonmap.get(key));
+            }
+        }
+    }
     
     std::string& stringmap::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
