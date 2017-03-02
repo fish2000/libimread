@@ -1,5 +1,7 @@
 /// Copyright 2012-2017 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
+/// Adapted from my own Objective-C++ class:
+///     https://gist.github.com/fish2000/b3a7d8accae8d046703f728b4ac82009
 
 #ifndef LIBIMREAD_INCLUDE_ROCKS_HH_
 #define LIBIMREAD_INCLUDE_ROCKS_HH_

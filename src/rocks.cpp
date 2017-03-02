@@ -1,5 +1,7 @@
 /// Copyright 2017 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
+/// Adapted from my own Objective-C++ class:
+///     https://gist.github.com/fish2000/b3a7d8accae8d046703f728b4ac82009
 
 #include <libimread/libimread.hpp>
 #include <libimread/rocks.hh>
