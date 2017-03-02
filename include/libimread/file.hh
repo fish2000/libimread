@@ -16,13 +16,7 @@
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/seekable.hh>
-
-// namespace filesystem {
-//     class path;
-//     namespace detail {
-//         using stringvec_t = std::vector<std::string>;
-//     }
-// }
+#include <libimread/store.hh>
 
 namespace capnp {
     class MessageBuilder;
@@ -35,7 +29,7 @@ namespace im {
         using mapped_t = std::unique_ptr<void, std::function<void(void*)>>;
     }
     
-    class fd_source_sink : public byte_source, public byte_sink {
+    class fd_source_sink : public byte_source, public byte_sink, public store::xattrmap {
         
         protected:
             static constexpr int READ_FLAGS = O_RDWR  | O_NONBLOCK;
@@ -51,27 +45,29 @@ namespace im {
             
             virtual ~fd_source_sink();
             
-            virtual bool can_seek() const noexcept;
-            virtual std::size_t seek_absolute(std::size_t pos);
-            virtual std::size_t seek_relative(int delta);
-            virtual std::size_t seek_end(int delta);
+            /// im::seekable methods
+            virtual bool can_seek() const noexcept override;
+            virtual std::size_t seek_absolute(std::size_t pos) override;
+            virtual std::size_t seek_relative(int delta) override;
+            virtual std::size_t seek_end(int delta) override;
             
-            virtual std::size_t read(byte* buffer, std::size_t n);
-            virtual std::vector<byte> full_data();
-            virtual std::size_t size() const;
-            virtual std::size_t write(const void* buffer, std::size_t n);
-            virtual std::size_t write(std::vector<byte> const&);
+            /// im::byte_source and im::byte_sink methods
+            virtual std::size_t read(byte* buffer, std::size_t n) override;
+            virtual std::vector<byte> full_data() override;
+            virtual std::size_t size() const override;
+            virtual std::size_t write(const void* buffer, std::size_t n) override;
+            virtual std::size_t write(std::vector<byte> const&) override;
             virtual std::size_t write(capnp::MessageBuilder& builder);
             virtual detail::stat_t stat() const;
-            virtual void flush();
+            virtual void flush() override;
             
-            virtual void* readmap(std::size_t pageoffset = 0) const;
+            virtual void* readmap(std::size_t pageoffset = 0) const override;
             
             /// Filesystem extended attribute (“xattr”) access
-            virtual std::string xattr(std::string const&) const;
-            virtual std::string xattr(std::string const&, std::string const&) const;
-            virtual int xattrcount() const;
-            virtual filesystem::detail::stringvec_t xattrs() const;
+            virtual std::string xattr(std::string const&) const override;
+            virtual std::string xattr(std::string const&, std::string const&) const override;
+            virtual int xattrcount() const override;
+            virtual filesystem::detail::stringvec_t xattrs() const override;
             
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;

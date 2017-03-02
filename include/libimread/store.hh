@@ -55,6 +55,8 @@ namespace store {
                 return nv;
             }
             
+            virtual bool can_store() const noexcept { return false; }
+            
             virtual bool empty() const = 0;
             virtual size_type size() const = 0;
             virtual size_type max_size() const noexcept = 0;
@@ -71,7 +73,7 @@ namespace store {
             virtual size_type count(key_const_reference) const = 0;
     };
     
-    class stringmap : public base<std::string, std::string> {
+    class stringmapper : public base<std::string, std::string> {
         
         public:
             using base_t = base<std::string, std::string>;
@@ -89,22 +91,47 @@ namespace store {
             virtual stringmap_t mapping() const;
         
         public:
-            virtual bool empty() const;
-            virtual std::size_t size() const;
-            virtual std::size_t max_size() const noexcept;
+            virtual ~stringmapper();
             
-            virtual void clear();
-            virtual bool insert(std::pair<const std::string, std::string>&& item);
-            virtual std::size_t erase(std::string const& key);
-            virtual std::string& at(std::string const& key);
-            virtual std::string const& at(std::string const& key) const;
-            virtual std::string& operator[](std::string const& key);
-            virtual std::string& operator[](std::string&& key);
-            virtual std::size_t count(std::string const& key) const;
+            virtual bool empty() const override;
+            virtual std::size_t size() const override;
+            virtual std::size_t max_size() const noexcept override;
+            
+            virtual void clear() override;
+            virtual bool insert(std::pair<const std::string, std::string>&& item) override;
+            virtual std::size_t erase(std::string const& key) override;
+            virtual std::string& at(std::string const& key) override;
+            virtual std::string const& at(std::string const& key) const override;
+            virtual std::string& operator[](std::string const& key) override;
+            virtual std::string& operator[](std::string&& key) override;
+            virtual std::size_t count(std::string const& key) const override;
         
         protected:
-            stringmap_t cache;
+            mutable stringmap_t cache;
     
+    };
+    
+    class xattrmap : public stringmapper {
+        
+        public:
+            virtual bool can_store() const noexcept override;
+        
+        public:
+            /// xattr API
+            virtual std::string xattr(std::string const&) const = 0;
+            virtual std::string xattr(std::string const&, std::string const&) const = 0;
+            virtual int xattrcount() const = 0;
+            virtual stringvec_t xattrs() const = 0;
+        
+        public:
+            /// implementation of the stringmapper API, in terms of xattr()/xattrcount()/xattrs()
+            virtual std::string&       get(std::string const& key) override;
+            virtual std::string const& get(std::string const& key) const override;
+            virtual bool set(std::string const& key, std::string const& value) override;
+            virtual bool del(std::string const& key) override;
+            virtual std::size_t count() const override;
+            virtual stringvec_t list() const override;
+        
     };
     
 } /// namespace store
