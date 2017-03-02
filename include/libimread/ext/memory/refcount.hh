@@ -84,7 +84,12 @@ namespace memory {
                 std::malloc(std::forward<Args>(args)...));
         }
         
-        RefCount() = default;
+        RefCount()
+            :object(nullptr)
+            ,deleter(Deleter{})
+            {
+                init();
+            }
         
         explicit RefCount(Target* o)
             :object(o), deleter(Deleter{})
