@@ -8,6 +8,8 @@
 
 #define SELF() instance.get<rocksdb::DB>()
 
+using filesystem::path;
+
 namespace memory {
     
     void killrocks(void*& ptr) {
@@ -19,8 +21,6 @@ namespace memory {
 } /// namespace memory
 
 namespace store {
-    
-    using filesystem::path;
     
     bool rocks::can_store() const noexcept { return true; }
     
