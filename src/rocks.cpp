@@ -52,8 +52,6 @@ namespace store {
         }
     
     rocks::~rocks() {
-        rocksdb::DB* local_instance = SELF();
-        delete local_instance;
         instance.reset(nullptr);
     }
     
