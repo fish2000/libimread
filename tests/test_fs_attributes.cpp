@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <regex>
+// #include <regex>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
@@ -12,7 +12,6 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/attributes.h>
 #include <libimread/ext/filesystem/directory.h>
-// #include <libimread/ext/filesystem/resolver.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/filesystem/nowait.h>
 #include <libimread/file.hh>
