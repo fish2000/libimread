@@ -44,8 +44,14 @@ namespace store {
         
         public:
             virtual ~base() {}
-            virtual key_reference null_v() const {
-                static std::string nv("\uFFFF");
+            
+            virtual key_reference null_key() const {
+                static key_type nk("\uFFFF");
+                return nk;
+            }
+            
+            virtual mapped_reference null_value() const {
+                static mapped_type nv("\uFFFF");
                 return nv;
             }
             
@@ -61,7 +67,7 @@ namespace store {
             virtual mapped_reference at(key_const_reference) = 0;
             virtual mapped_const_reference at(key_const_reference) const = 0;
             virtual mapped_reference operator[](key_const_reference) = 0;
-            virtual mapped_reference operator[](key_rvalue_reference) { return null_v(); }
+            virtual mapped_reference operator[](key_rvalue_reference) { return null_value(); }
             virtual size_type count(key_const_reference) const = 0;
     };
     

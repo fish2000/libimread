@@ -45,9 +45,7 @@ namespace store {
     }
     
     std::size_t stringmap::count(std::string const& key) const {
-        return static_cast<std::size_t>(get(key) == stringmap::base_t::null_v());
+        return static_cast<std::size_t>(get(key) == stringmap::base_t::null_value());
     }
-    
-    
     
 } /// namespace store
