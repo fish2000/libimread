@@ -39,7 +39,7 @@ namespace store {
         public:
             rocks(rocks const&);
             rocks(rocks&&) noexcept;
-            explicit rocks(std::string const& filepth);
+            explicit rocks(std::string const&);
             virtual ~rocks();
         
         public:
