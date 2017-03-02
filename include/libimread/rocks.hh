@@ -42,6 +42,21 @@ namespace store {
             rocks(rocks&&) noexcept;
             explicit rocks(std::string const&);
             virtual ~rocks();
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            X update(T&& from) {
+                store::value_copy(std::forward<T>(from), *this);
+            }
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            X update(T&& from, std::string const& prefix,
+                               std::string const& sep = ":") {
+                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
+            }
         
         public:
             /// implementation of the stringmapper API, in terms of the RocksDB API

@@ -111,29 +111,6 @@ namespace store {
     
     };
     
-    class xattrmap : public stringmapper {
-        
-        public:
-            virtual bool can_store() const noexcept override;
-        
-        public:
-            /// xattr API
-            virtual std::string xattr(std::string const&) const = 0;
-            virtual std::string xattr(std::string const&, std::string const&) const = 0;
-            virtual int xattrcount() const = 0;
-            virtual stringvec_t xattrs() const = 0;
-        
-        public:
-            /// implementation of the stringmapper API, in terms of xattr()/xattrcount()/xattrs()
-            virtual std::string&       get(std::string const& key) override;
-            virtual std::string const& get(std::string const& key) const override;
-            virtual bool set(std::string const& key, std::string const& value) override;
-            virtual bool del(std::string const& key) override;
-            virtual std::size_t count() const override;
-            virtual stringvec_t list() const override;
-        
-    };
-    
     template <typename ...Types>
     struct is_stringmapper : std::conditional_t<
                              std::is_base_of<store::stringmapper,
@@ -175,6 +152,45 @@ namespace store {
                                                     std::forward<T>(from).get(name)); }
         }
     }
+    
+    class xattrmap : public stringmapper {
+        
+        public:
+            virtual bool can_store() const noexcept override;
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            X update(T&& from) {
+                store::value_copy(std::forward<T>(from), *this);
+            }
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            X update(T&& from, std::string const& prefix,
+                               std::string const& sep = ":") {
+                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
+            }
+            
+        
+        public:
+            /// xattr API
+            virtual std::string xattr(std::string const&) const = 0;
+            virtual std::string xattr(std::string const&, std::string const&) const = 0;
+            virtual int xattrcount() const = 0;
+            virtual stringvec_t xattrs() const = 0;
+        
+        public:
+            /// implementation of the stringmapper API, in terms of xattr()/xattrcount()/xattrs()
+            virtual std::string&       get(std::string const& key) override;
+            virtual std::string const& get(std::string const& key) const override;
+            virtual bool set(std::string const& key, std::string const& value) override;
+            virtual bool del(std::string const& key) override;
+            virtual std::size_t count() const override;
+            virtual stringvec_t list() const override;
+        
+    };
     
     class stringmap : public stringmapper {
         
