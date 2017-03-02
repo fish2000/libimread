@@ -1,4 +1,6 @@
 
+#include <array>
+#include <stdexcept>
 #include <fcntl.h>
 #include <unistd.h>
 #include <libimread/ext/filesystem/opaques.h>
@@ -29,8 +31,23 @@ namespace filesystem {
                                      O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
         }
         
-        file ffopen(std::string const& s, mode m) {
-            return file(std::fopen(s.c_str(), fm(m)));
+        filesystem::file ffopen(std::string const& s, mode m) {
+            return filesystem::file(std::fopen(s.c_str(), fm(m)));
+        }
+        
+        std::string execute(char const* command) {
+            std::array<char, EXECUTION_BUFFER_SIZE> buffer;
+            std::string result;
+            std::unique_ptr<FILE, decltype(::pclose)&> pipe(::popen(command, "r"), ::pclose);
+            if (!pipe.get()) {
+                throw std::runtime_error("detail::execute(): ::popen() failed");
+            }
+            while (!std::feof(pipe.get())) {
+                if (std::fgets(buffer.data(), EXECUTION_BUFFER_SIZE, pipe.get()) != nullptr) {
+                    result += buffer.data();
+                }
+            }
+            return result;
         }
         
     } /* namespace detail */

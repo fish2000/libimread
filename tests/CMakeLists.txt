@@ -5,6 +5,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 
 set(TEST_SOURCES ${TEST_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/helpers/termwidth.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_blockhash.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_byte_source_gzio.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_byte_source_iterators.cpp

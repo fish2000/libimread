@@ -77,7 +77,10 @@ namespace filesystem {
         directory ddopen(char const* c);
         directory ddopen(std::string const& s);
         directory ddopen(path const& p);
-        file ffopen(std::string const& s, mode m = mode::READ);
+        filesystem::file ffopen(std::string const& s, mode m = mode::READ);
+        
+        static constexpr int EXECUTION_BUFFER_SIZE = 128;
+        std::string execute(char const* command);
     }
 
 } /* namespace filesystem */
