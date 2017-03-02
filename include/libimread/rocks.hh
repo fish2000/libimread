@@ -24,7 +24,8 @@ namespace memory {
     
     /// final RocksDB ref-counted “smart pointer”
     using rocks_ptr = RefCount<void, RocksDeleter<void>>;
-}
+    
+} /// namespace memory
 
 namespace store {
     

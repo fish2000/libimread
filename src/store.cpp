@@ -6,6 +6,8 @@
 
 namespace store {
     
+    #pragma mark - base class store::stringmapper default methods
+    
     stringmapper::stringmap_t stringmapper::mapping() const {
         return stringmapper::stringmap_t(cache);
     }
@@ -69,6 +71,8 @@ namespace store {
         return static_cast<std::size_t>(get(key) == stringmapper::base_t::null_value());
     }
     
+    #pragma mark - store::xattrmap methods
+    
     bool xattrmap::can_store() const noexcept { return true; }
     
     std::string& xattrmap::get(std::string const& key) {
@@ -99,7 +103,7 @@ namespace store {
     
     bool xattrmap::set(std::string const& key, std::string const& value) {
         cache[key] = value;
-        return xattr(key, value) == key;
+        return xattr(key, value) == value;
     }
     
     bool xattrmap::del(std::string const& key) {
@@ -116,5 +120,53 @@ namespace store {
     stringmapper::stringvec_t xattrmap::list() const {
         return xattrs();
     }
+    
+    #pragma mark - store::stringmap methods
+    
+    bool stringmap::can_store() const noexcept { return true; }
+    
+    stringmap::stringmap() noexcept {}
+    
+    std::string& stringmap::get(std::string const& key) {
+        if (cache.find(key) != cache.end()) {
+            return cache[key];
+        } else {
+            return stringmapper::base_t::null_value();
+        }
+    }
+    
+    std::string const& stringmap::get(std::string const& key) const {
+        if (cache.find(key) != cache.end()) {
+            return cache[key];
+        } else {
+            return stringmapper::base_t::null_value();
+        }
+    }
+    
+    bool stringmap::set(std::string const& key, std::string const& value) {
+        cache[key] = value;
+        return cache.at(key) == value;
+    }
+    
+    bool stringmap::del(std::string const& key) {
+        if (cache.find(key) != cache.end()) {
+            cache.erase(key);
+        }
+        return cache.count(key) == 0;
+    }
+    
+    std::size_t stringmap::count() const {
+        return cache.size();
+    }
+    
+    stringmapper::stringvec_t stringmap::list() const {
+        stringmapper::stringvec_t out{};
+        out.reserve(count());
+        for (auto const& item : cache) {
+            out.emplace_back(item.first);
+        }
+        return out;
+    }
+    
     
 } /// namespace store

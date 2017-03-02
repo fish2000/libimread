@@ -134,6 +134,102 @@ namespace store {
         
     };
     
+    template <typename ...Types>
+    struct is_stringmapper : std::conditional_t<
+                             std::is_base_of<store::stringmapper,
+                                             typename std::common_type<Types...>::type>::value,
+                             std::true_type,
+                             std::false_type>
+    {};
+    
+    template <typename ...Types>
+    constexpr bool is_stringmapper_v = is_stringmapper<Types...>::value;
+    
+    template <typename T, typename U>
+    void value_copy(T&& from, U&& to) {
+        static_assert(store::is_stringmapper_v<T, U>,
+                      "store::value_copy() operands must derive from store::stringmapper");
+        stringmapper::stringvec_t froms(std::forward<T>(from).list());
+        // stringmapper::stringvec_t tos(std::forward<U>(to).list());
+        // if (!tos.empty()) {
+        //     for (std::string const& name : tos) { std::forward<U>(to).del(name); }
+        // }
+        if (!froms.empty()) {
+            for (std::string const& name : froms) { std::forward<U>(to).set(name,
+                                                    std::forward<T>(from).get(name)); }
+        }
+    }
+    
+    template <typename T, typename U>
+    void prefix_copy(T&& from, U&& to, std::string const& prefix = "prefix",
+                                       std::string const& sep = ":") {
+        static_assert(store::is_stringmapper_v<T, U>,
+                      "store::prefix_copy() operands must derive from store::stringmapper");
+        stringmapper::stringvec_t froms(std::forward<T>(from).list());
+        // stringmapper::stringvec_t tos(std::forward<U>(to).list());
+        // if (!tos.empty()) {
+        //     for (std::string const& name : tos) { std::forward<U>(to).del(name); }
+        // }
+        if (!froms.empty()) {
+            for (std::string const& name : froms) { std::forward<U>(to).set(prefix + sep + name,
+                                                    std::forward<T>(from).get(name)); }
+        }
+    }
+    
+    class stringmap : public stringmapper {
+        
+        public:
+            virtual bool can_store() const noexcept override;
+        
+        public:
+            stringmap() noexcept;
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            explicit stringmap(T&& from) noexcept
+                :stringmap()
+                {
+                    store::value_copy(std::forward<T>(from), *this);
+                }
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            explicit stringmap(T&& from, std::string const& prefix,
+                                         std::string const& sep = ":") noexcept
+                :stringmap()
+                {
+                    store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
+                }
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            X update(T&& from) {
+                store::value_copy(std::forward<T>(from), *this);
+            }
+            
+            template <typename T,
+                      typename X = typename std::enable_if_t<
+                                            store::is_stringmapper_v<T>, void>>
+            X update(T&& from, std::string const& prefix,
+                               std::string const& sep = ":") {
+                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
+            }
+        
+        public:
+            /// implementation of the stringmapper API, in terms of std::unordered_map<…> API
+            virtual std::string&       get(std::string const& key) override;
+            virtual std::string const& get(std::string const& key) const override;
+            virtual bool set(std::string const& key, std::string const& value) override;
+            virtual bool del(std::string const& key) override;
+            virtual std::size_t count() const override;
+            virtual stringvec_t list() const override;
+        
+    };
+    
+    
 } /// namespace store
 
 #endif /// LIBIMREAD_INCLUDE_STORE_HH_
