@@ -15,7 +15,7 @@
 // #include <libimread/ext/filesystem/resolver.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/filesystem/nowait.h>
-// #include <libimread/file.hh>
+#include <libimread/file.hh>
 // #include <libimread/filehandle.hh>
 
 #include "include/test_data.hpp"
@@ -34,8 +34,12 @@ namespace {
     using filesystem::attribute::accessor_t;
     using filesystem::attribute::detail::nullstring;
     
+    using im::FileSource;
+    using im::FileSink;
+    
     TEST_CASE("[attributes] xattr read with `path::xattr()` via `path::walk()`",
-              "[xattr-read-path-walk-on-basedir]") {
+              "[xattr-read-path-walk-on-basedir]")
+    {
         nowait_t nowait;
         
         path basedir = path(im::test::basedir).parent();
@@ -104,7 +108,8 @@ namespace {
     }
     
     TEST_CASE("[attributes] xattr read/write with `path::xattr()` via `TemporaryDirectory` and `NamedTemporaryFile`",
-              "[xattr-read-write-temporarydirectory-namedtemporaryfile]") {
+              "[xattr-read-write-temporarydirectory-namedtemporaryfile]")
+    {
         TemporaryDirectory td("test-td");
         td.dirpath.xattr("yo-dogg", "I heard you like xattr writes");
         td.dirpath.xattr("dogg-yo", "So we put some strings in your strings");
@@ -125,7 +130,21 @@ namespace {
                               << td.dirpath.xattr(x) << std::endl;
         });
         std::cout << std::endl;
-        
+    }
+    
+    TEST_CASE("[attributes] xattr read/write via store API in `im::file_source_sink`",
+              "[xattr-read-write-store-api-file_source_sink]")
+    {
+        NamedTemporaryFile tf(".txt");
+        {
+            FileSource fdb(tf.filepath);
+            fdb.set("yo-dogg", "I heard you like xattr writes");
+            fdb.set("dogg-yo", "So we put some strings in your strings");
+            
+            CHECK(fdb.get("yo-dogg") == "I heard you like xattr writes");
+            CHECK(fdb.get("dogg-yo") == "So we put some strings in your strings");
+            CHECK(fdb.get("dogg-NO") == nullstring);
+        }
     }
     
 } /// namespace (anon.)
