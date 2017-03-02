@@ -8,12 +8,12 @@
 #include <libimread/ext/filesystem/path.h>
 #include "rocksdb/db.h"
 
+/// shortcut getter macro for the RocksDB internal instance
 #define SELF() instance.get<rocksdb::DB>()
-
-using filesystem::path;
 
 namespace memory {
     
+    /// type-erased deleter callback, using specific RocksDB types
     void killrocks(void*& ptr) {
         rocksdb::DB* local_target = static_cast<rocksdb::DB*>(ptr);
         delete local_target;
@@ -22,20 +22,25 @@ namespace memory {
     
 } /// namespace memory
 
+using filesystem::path;
+
 namespace store {
     
     bool rocks::can_store() const noexcept { return true; }
     
+    /// copy constructor
     rocks::rocks(rocks const& other)
         :instance(other.instance)
         ,rockspth(other.rockspth)
         {}
     
+    /// move constructor
     rocks::rocks(rocks&& other) noexcept
         :instance(std::move(other.instance))
         ,rockspth(std::move(other.rockspth))
         {}
     
+    /// database file path constructor
     rocks::rocks(std::string const& filepth)
         :rockspth(path::absolute(filepth).str())
         {
