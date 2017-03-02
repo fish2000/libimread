@@ -350,13 +350,14 @@ namespace {
               "[fs-test-command-execution-filesystem-detail-execute]")
     {
         std::string output;
+        std::string command;
         
-        std::string command0("curl -sS 'https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f#.5obyn0apb' | grep -i obvinit");
-        output = filesystem::detail::execute(command0.c_str());
+        command = "curl -sS 'https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f#.5obyn0apb' | grep -i obvinit";
+        output = filesystem::detail::execute(command.c_str());
         CHECK(output.find("obvInit") != std::string::npos);
         
-        std::string command1("ps aux");
-        output = filesystem::detail::execute(command1.c_str());
+        command = "ps aux";
+        output = filesystem::detail::execute(command.c_str());
         CHECK(output.find("ps aux") != std::string::npos);
     }
     

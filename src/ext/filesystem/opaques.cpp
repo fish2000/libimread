@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
+#include <libimread/ext/filesystem/directory.h>
 
 namespace filesystem {
     
@@ -39,6 +40,7 @@ namespace filesystem {
             std::array<char, EXECUTION_BUFFER_SIZE> buffer;
             std::string result;
             std::unique_ptr<FILE, decltype(::pclose)&> pipe(::popen(command, "r"), ::pclose);
+            switchdir s(path::tmp());
             if (!pipe.get()) {
                 throw std::runtime_error("detail::execute(): ::popen() failed");
             }

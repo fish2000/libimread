@@ -1,0 +1,639 @@
+{
+    "value": {
+        "id": "ccbb6338c59f",
+        "versionId": "f2f36f4c48f6",
+        "creatorId": "ee53e9dcd423",
+        "creator": {
+            "userId": "ee53e9dcd423",
+            "name": "Kenzaburo Stallman",
+            "username": "hopro",
+            "createdAt": 1487515367211,
+            "lastPostCreatedAt": 1487563840057,
+            "imageId": "1*ajJTztalJiq22i4Eva-mdA.jpeg",
+            "backgroundImageId": "",
+            "bio": "Tips From The Best Homeless Objective-C++ Programmer On Earth – With Homeless Experience In New York, Los Angeles, and Baltimore",
+            "twitterScreenName": "HOPROPlusPlus",
+            "socialStats": {
+                "userId": "ee53e9dcd423",
+                "usersFollowedCount": 2,
+                "usersFollowedByCount": 0,
+                "type": "SocialStats"
+            },
+            "social": {
+                "userId": "lo_b00261d157fc",
+                "targetUserId": "ee53e9dcd423",
+                "type": "Social"
+            },
+            "facebookAccountId": "",
+            "allowNotes": 0,
+            "type": "User"
+        },
+        "homeCollectionId": "",
+        "title": "Homeless Tips: Time, Space, Data & Power",
+        "detectedLanguage": "en",
+        "latestVersion": "f2f36f4c48f6",
+        "latestPublishedVersion": "f2f36f4c48f6",
+        "hasUnpublishedEdits": false,
+        "latestRev": 933,
+        "createdAt": 1487540229072,
+        "updatedAt": 1487550782315,
+        "acceptedAt": 0,
+        "firstPublishedAt": 1487545996128,
+        "latestPublishedAt": 1487550782315,
+        "vote": false,
+        "experimentalCss": "",
+        "displayAuthor": "",
+        "content": {
+            "subtitle": "The Holy Trinity of Homeless Computing: A Shortlist",
+            "bodyModel": {
+                "paragraphs": [
+                    {
+                        "name": "4484",
+                        "type": 3,
+                        "text": "Homeless Tips: Time, Space, Data & Power",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "fda8",
+                        "type": 4,
+                        "text": "Figure 1. Time, Space, Data & Power (photo by the author).",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 37,
+                                "end": 56,
+                                "href": "https://www.instagram.com/p/BKJaVqTAggO/?taken-by=fish2000",
+                                "title": "",
+                                "rel": "noopener",
+                                "anchorType": 0
+                            }
+                        ],
+                        "layout": 5,
+                        "metadata": {
+                            "id": "1*LrMWSAStP7JhAW934m9FUg.jpeg",
+                            "originalWidth": 1080,
+                            "originalHeight": 1080
+                        }
+                    },
+                    {
+                        "name": "79f1",
+                        "type": 1,
+                        "text": "When you are homeless, you perceive the most bizarre dilation of time. If you don’t know where you’ll be spending the night, it’s at its worst: you won’t be able to think of anything beyond the next few hours. It’s very strange—it’s the experience of having nothing to do to kill all the time in the world, while Heisenbergianly simultaneously right now being right on deadline for everything and having no time at all whatsoever.",
+                        "markups": [
+                            {
+                                "type": 2,
+                                "start": 344,
+                                "end": 353
+                            },
+                            {
+                                "type": 2,
+                                "start": 382,
+                                "end": 392
+                            },
+                            {
+                                "type": 2,
+                                "start": 404,
+                                "end": 418
+                            }
+                        ],
+                        "hasDropCap": true
+                    },
+                    {
+                        "name": "723c",
+                        "type": 1,
+                        "text": "This utterly wretched and flabbergastingly unsettling sensation has, in fact, spurred me to write some of my best code, as like a distraction from the yawning grimness of reality. As homelessless fellows go, I know how lucky I have been to have both a functional computer and a craft to ply with it. What remains elusive to those fortunate enough to be so equipped is the Holy Trinity of Homeless Computing: to find somewhere that’s",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 98,
+                                "end": 118,
+                                "href": "https://github.com/fish2000/subjective-c/blob/master/include/subjective-c/message-args.hh#L18-L80",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ]
+                    },
+                    {
+                        "name": "dbc6",
+                        "type": 10,
+                        "text": "indoors, with somewhere to sit,",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "1d7b",
+                        "type": 10,
+                        "text": "near a serviceable 110v AC electrical outlet,",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "4117",
+                        "type": 10,
+                        "text": "blanketed in WiFi.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "7e18",
+                        "type": 1,
+                        "text": "… if you are trying to kill time and try to functionally fix your life by communicating with the non-homeless world, nothing less than the Trinity will do. You could be toting the largest latest laptop or a rooted five-year-old Android watch you bought at a beauty supply store in Bed-Stuy—in leu of a home, all of us need a roof over an outlet under a chair by an access point.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "a701",
+                        "type": 7,
+                        "text": "So with that in mind, let me offer this shortlist — here are some of the places I’ve found in New York with the Holy Trinity of Homeless Computing:",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "20c8",
+                        "type": 9,
+                        "text": "Starbucks: the obvious choice, as their bathrooms already function as a de facto homeless Fountain of Youth. I always pay the Social Contract Tax when I am computing at Starbucks—which is to say, I buy a beverage from them, of which I drink three-quarters; the rest of which sits next to my power brick and serves as the token indicating that I Have I Right To Be Here, Damnit. ¶ A lot of my homeless peers are way more cavalier — I have seen invincibly unwashed hobos set up Starbucks camps that involve power strips in suitcases—but some locations won’t let you in the bathrooms without some weasely code or what have you, in which case it is worth it to have bought your way into the citizenry.",
+                        "markups": [
+                            {
+                                "type": 1,
+                                "start": 0,
+                                "end": 10
+                            },
+                            {
+                                "type": 2,
+                                "start": 72,
+                                "end": 80
+                            }
+                        ]
+                    },
+                    {
+                        "name": "389d",
+                        "type": 4,
+                        "text": "Figure 2. C++ code written and photographed by the author in a McDonald’s.",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 19,
+                                "end": 26,
+                                "href": "https://github.com/fish2000/libimread/blob/master/python/im/include/models/buffermodel.hh#L102-L129",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            },
+                            {
+                                "type": 3,
+                                "start": 31,
+                                "end": 43,
+                                "href": "https://www.instagram.com/p/BIv-u-WAJSf/?taken-by=fish2000",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ],
+                        "layout": 1,
+                        "metadata": {
+                            "id": "1*HVX5hUXJ_IoTOaG3H2m78w.jpeg",
+                            "originalWidth": 1080,
+                            "originalHeight": 1080
+                        }
+                    },
+                    {
+                        "name": "b824",
+                        "type": 9,
+                        "text": "McDonald’s: don’t laugh, but McD’s actually has WiFi on offer at, like, all their locations. The fact that this sounds less like a perk of dining there—and more like the punchline of a joke—makes it actually quite useable WiFi, as no one else would think to go and take advantage of this. I have never confirmedly seen another McDonald’s customer using the WiFi, and it’s always been bandwith-y for me to run torrents while pushing and pulling Git repositories, all smoothly enough for me to feel… well, to feel as though I wasn’t using the Internet in a fucking McDonald’s, that is for sure. ¶ You will want to choose your McDonald’s with care — the Kingston-Throop location, for example, is never a peaceful place; consider Queens Boulevard past Sunnyside, for example.",
+                        "markups": [
+                            {
+                                "type": 1,
+                                "start": 0,
+                                "end": 10
+                            }
+                        ]
+                    },
+                    {
+                        "name": "0789",
+                        "type": 9,
+                        "text": "Penn Station: a special case. The Amtrak boarding area of Penn Station is open 24 hours and has WiFi on offer in a climate-controlled mezzanine atrium, but to get to the seating, you will need to pretend you have a train ticket (which of course you don’t have one of those because you’re homeless). There are two “Ticketed Passenger Waiting Areas”, one is for Amtrak Regional and NJ Transit ticket holders, but then there is another corral that is literally three times as large reserved for Acela passengers. Both are nominally guarded by an Amtrak flunky who is supposed to check your ticket before letting you sit down—just walk right by them as if you don’t see them with an air of fuck-you self-confidence. ¶ I used to actually take Amtrak a lot, and in addition to my being homeless there, I think I was bothered about having a ticket less than five times, out of like several hundred. Try the Acela area first, because outlets are scarce in both corrals. ¶ The main caveat about Penn Station is in regards to the bathrooms. In a nutshell, the Penn Station Amtrak mezzanine bathrooms are, collectively, one of the worst epicenters of everything that is gross about homelessness. Going into those bathrooms is traumatic enough as a non-homeless person; I will spare you the horrifying details but I witnessed things in there that were made a thousand times worse by realizing they were being… perpetrated… not just by a homeless person, but specifically by another homeless person. Erm.",
+                        "markups": [
+                            {
+                                "type": 1,
+                                "start": 0,
+                                "end": 13
+                            },
+                            {
+                                "type": 2,
+                                "start": 1462,
+                                "end": 1469
+                            }
+                        ]
+                    },
+                    {
+                        "name": "35b2",
+                        "type": 4,
+                        "text": "Figure 3. The 59th Street Apple Store at night, just before the release of WATCH (photo by Yukarin)",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 83,
+                                "end": 99,
+                                "href": "https://www.instagram.com/p/BLX547_j1gt/?taken-at=407390522",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ],
+                        "layout": 1,
+                        "metadata": {
+                            "id": "1*NT-TWPGpNPNAlojvQsckjg.jpeg",
+                            "originalWidth": 750,
+                            "originalHeight": 750
+                        }
+                    },
+                    {
+                        "name": "c3c0",
+                        "type": 9,
+                        "text": "The 59th Street Apple Store: also a special case. This is the famous glass-cube Apple Store, catty-corner from the southeast tip of Central Park—a store that many people do not realize is open 24 hours a day, 7 days a week. What? Why the fuck would that be? I do not know, but it is. ¶ In my pre-homeless life I would specifically go there at 4:00am to buy my computers as I could count on the place being relatively deserted, save for a few highly Adderall’ed Apple Geniuses (and, just once, also Richard Dreyfuss, who had left his Plaza apartment across the street to come and talk excitedly about Internet pornography to everyone). Anyway—if you can’t sleep and you need to compute, head to Apple for late-night power and WiFi. ¶ Note though that like all Apple Stores, this one has at least one dedicated private security person at the entrance, and likely one or two more elsewhere in the store. So the dress code here is respectable-member-of-society; those whose homeless attire is strictly Mugatu Derelicte may be turned away at the door.",
+                        "markups": [
+                            {
+                                "type": 1,
+                                "start": 0,
+                                "end": 28
+                            },
+                            {
+                                "type": 2,
+                                "start": 1005,
+                                "end": 1014
+                            }
+                        ]
+                    },
+                    {
+                        "name": "cba1",
+                        "type": 4,
+                        "text": "Figure 4. The “Classic NYPL” (photo by the author).",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 30,
+                                "end": 49,
+                                "href": "https://www.instagram.com/p/WSI1woEq3t/?taken-by=fish2000",
+                                "title": "",
+                                "rel": "noopener",
+                                "anchorType": 0
+                            }
+                        ],
+                        "layout": 1,
+                        "metadata": {
+                            "id": "1*NdZuwzxw9podMJUO--Q4QA.jpeg",
+                            "originalWidth": 612,
+                            "originalHeight": 612
+                        }
+                    },
+                    {
+                        "name": "5072",
+                        "type": 9,
+                        "text": "Bryant Park and the NYPL: a true winning combo, anytime. Bryant Park, while admittedly outdoors, is swimming in Internet; the classic NYPL building (you know, with the lions and shit, at like the east end of the park) has WiFi too but limited seating (as it is primarily an exhibit hall and office space for all the assuredly sexy librarians) — if you go in the front, walk up the 2nd floor, and cross the balcony to the middle of the building, you’ll see a west-facing corridor with several long wooden desks that, if you are very lucky, are not absolutely 100% jam-packed with other laptop users feasting on the under-the-table outlet power and library-grade wireless. ¶ This little alcove is basically the only spot in the classic NYPL building with the Trinity, so if you can’t find a seat and the weather is inclement enough to keep you out of the park, cross east on the avenue and head one block south to the real NYPL building—it looks and feels like a Mies van der Rohe design for a jail, but there’s WiFi and seating for you (and also all the many other home-free individuals who had the same idea).",
+                        "markups": [
+                            {
+                                "type": 1,
+                                "start": 0,
+                                "end": 25
+                            }
+                        ]
+                    }
+                ],
+                "sections": [
+                    {
+                        "name": "d91b",
+                        "startIndex": 0
+                    },
+                    {
+                        "name": "1487",
+                        "startIndex": 10
+                    },
+                    {
+                        "name": "2f99",
+                        "startIndex": 13
+                    },
+                    {
+                        "name": "9509",
+                        "startIndex": 15
+                    }
+                ]
+            },
+            "postDisplay": {
+                "coverless": true
+            },
+            "metaDescription": "The Holy Trinity of Homeless Computing: A Shortlist"
+        },
+        "virtuals": {
+            "allowNotes": false,
+            "previewImage": {
+                "imageId": "1*LrMWSAStP7JhAW934m9FUg.jpeg",
+                "filter": "",
+                "backgroundSize": "",
+                "originalWidth": 1080,
+                "originalHeight": 1080,
+                "strategy": "resample",
+                "height": 0,
+                "width": 0
+            },
+            "wordCount": 1198,
+            "imageCount": 4,
+            "readingTime": 5.220754716981133,
+            "subtitle": "The Holy Trinity of Homeless Computing: A Shortlist",
+            "usersBySocialRecommends": [
+
+            ],
+            "recommends": 0,
+            "socialRecommends": [
+
+            ],
+            "isBookmarked": false,
+            "tags": [
+                {
+                    "slug": "homeless",
+                    "name": "Homeless",
+                    "postCount": 2846,
+                    "virtuals": {
+                        "isFollowing": false
+                    },
+                    "metadata": {
+                        "followerCount": 672,
+                        "postCount": 2846,
+                        "coverImage": {
+                            "id": "1*NN6zDgsnHiX9qjhcsA0TEw.jpeg",
+                            "originalWidth": 1029,
+                            "originalHeight": 436
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "public-wifi",
+                    "name": "Public Wifi",
+                    "postCount": 18,
+                    "virtuals": {
+                        "isFollowing": false
+                    },
+                    "metadata": {
+                        "followerCount": 2,
+                        "postCount": 18,
+                        "coverImage": {
+                            "id": "1*nUizf07PelFTygpWW_pBcQ.png",
+                            "originalWidth": 2048,
+                            "originalHeight": 1024
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "electricity",
+                    "name": "Electricity",
+                    "postCount": 521,
+                    "virtuals": {
+                        "isFollowing": false
+                    },
+                    "metadata": {
+                        "followerCount": 36,
+                        "postCount": 521,
+                        "coverImage": {
+                            "id": "1*ghYPhfgtfLCdQfvFdg6HIA.jpeg",
+                            "originalWidth": 1004,
+                            "originalHeight": 1400
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "shelter",
+                    "name": "Shelter",
+                    "postCount": 66,
+                    "virtuals": {
+                        "isFollowing": false
+                    },
+                    "metadata": {
+                        "followerCount": 1,
+                        "postCount": 66,
+                        "coverImage": {
+                            "id": "1*NXKoZVNJSkzcwJf_8kwx7w.jpeg",
+                            "originalWidth": 2000,
+                            "originalHeight": 721
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "wifi",
+                    "name": "Wifi",
+                    "postCount": 1559,
+                    "virtuals": {
+                        "isFollowing": false
+                    },
+                    "metadata": {
+                        "followerCount": 61,
+                        "postCount": 1559,
+                        "coverImage": {
+                            "id": "1*m4B6kexgNM1dRB3jl9Z7ow.jpeg",
+                            "originalWidth": 960,
+                            "originalHeight": 640
+                        }
+                    },
+                    "type": "Tag"
+                }
+            ],
+            "socialRecommendsCount": 0,
+            "responsesCreatedCount": 1,
+            "links": {
+                "entries": [
+                    {
+                        "url": "https://www.instagram.com/p/BLX547_j1gt/?taken-at=407390522",
+                        "alts": [
+                            {
+                                "type": 2,
+                                "url": "instagram://media?id=1357808414034450477"
+                            },
+                            {
+                                "type": 3,
+                                "url": "https://www.instagram.com/p/BLX547_j1gt/"
+                            }
+                        ]
+                    },
+                    {
+                        "url": "https://www.instagram.com/p/WSI1woEq3t/?taken-by=fish2000",
+                        "alts": [
+                            {
+                                "type": 2,
+                                "url": "instagram://media?id=401422195505671661"
+                            },
+                            {
+                                "type": 3,
+                                "url": "https://www.instagram.com/p/WSI1woEq3t/"
+                            }
+                        ]
+                    },
+                    {
+                        "url": "https://www.instagram.com/p/BKJaVqTAggO/?taken-by=fish2000",
+                        "alts": [
+                            {
+                                "type": 2,
+                                "url": "instagram://media?id=1335714602226419726"
+                            },
+                            {
+                                "type": 3,
+                                "url": "https://www.instagram.com/p/BKJaVqTAggO/"
+                            }
+                        ]
+                    },
+                    {
+                        "url": "https://www.instagram.com/p/BIv-u-WAJSf/?taken-by=fish2000",
+                        "alts": [
+                            {
+                                "type": 2,
+                                "url": "instagram://media?id=1310541923508851871"
+                            },
+                            {
+                                "type": 3,
+                                "url": "https://www.instagram.com/p/BIv-u-WAJSf/"
+                            }
+                        ]
+                    }
+                ],
+                "version": "0.3",
+                "generatedAt": 1487550782590
+            },
+            "isLockedPreviewOnly": false,
+            "takeoverId": "",
+            "metaDescription": "The Holy Trinity of Homeless Computing: A Shortlist",
+            "totalClapCount": 0
+        },
+        "coverless": true,
+        "slug": "homeless-tips-time-space-data-power",
+        "translationSourcePostId": "",
+        "translationSourceCreatorId": "",
+        "isApprovedTranslation": false,
+        "inResponseToPostId": "",
+        "inResponseToRemovedAt": 0,
+        "isTitleSynthesized": false,
+        "allowResponses": true,
+        "importedUrl": "",
+        "importedPublishedAt": 0,
+        "visibility": 0,
+        "uniqueSlug": "homeless-tips-time-space-data-power-ccbb6338c59f",
+        "previewContent": {
+            "bodyModel": {
+                "paragraphs": [
+                    {
+                        "name": "previewImage",
+                        "type": 4,
+                        "text": "",
+                        "layout": 10,
+                        "metadata": {
+                            "id": "1*LrMWSAStP7JhAW934m9FUg.jpeg",
+                            "originalWidth": 1080,
+                            "originalHeight": 1080
+                        }
+                    },
+                    {
+                        "name": "previewTitle",
+                        "type": 3,
+                        "text": "Homeless Tips: Time, Space, Data & Power",
+                        "alignment": 1
+                    },
+                    {
+                        "name": "previewSubtitle",
+                        "type": 13,
+                        "text": "The Holy Trinity of Homeless Computing: A Shortlist",
+                        "alignment": 1
+                    }
+                ],
+                "sections": [
+                    {
+                        "startIndex": 0
+                    }
+                ]
+            },
+            "isFullContent": false
+        },
+        "license": 0,
+        "inResponseToMediaResourceId": "",
+        "canonicalUrl": "https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f",
+        "approvedHomeCollectionId": "",
+        "newsletterId": "",
+        "webCanonicalUrl": "https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f",
+        "mediumUrl": "https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f",
+        "migrationId": "",
+        "notifyFollowers": true,
+        "notifyTwitter": false,
+        "isSponsored": false,
+        "isRequestToPubDisabled": false,
+        "notifyFacebook": false,
+        "responseHiddenOnParentPostAt": 0,
+        "isSeries": false,
+        "isSubscriptionLocked": false,
+        "seriesLastAppendedAt": 0,
+        "type": "Post"
+    },
+    "mentionedUsers": [
+
+    ],
+    "collaborators": [
+
+    ],
+    "membershipPlans": [
+
+    ],
+    "collectionUserRelations": [
+
+    ],
+    "mode": null,
+    "references": {
+        "User": {
+            "ee53e9dcd423": {
+                "userId": "ee53e9dcd423",
+                "name": "Kenzaburo Stallman",
+                "username": "hopro",
+                "createdAt": 1487515367211,
+                "lastPostCreatedAt": 1487563840057,
+                "imageId": "1*ajJTztalJiq22i4Eva-mdA.jpeg",
+                "backgroundImageId": "",
+                "bio": "Tips From The Best Homeless Objective-C++ Programmer On Earth – With Homeless Experience In New York, Los Angeles, and Baltimore",
+                "twitterScreenName": "HOPROPlusPlus",
+                "socialStats": {
+                    "userId": "ee53e9dcd423",
+                    "usersFollowedCount": 2,
+                    "usersFollowedByCount": 0,
+                    "type": "SocialStats"
+                },
+                "social": {
+                    "userId": "lo_b00261d157fc",
+                    "targetUserId": "ee53e9dcd423",
+                    "type": "Social"
+                },
+                "facebookAccountId": "",
+                "allowNotes": 0,
+                "type": "User"
+            }
+        },
+        "Social": {
+            "ee53e9dcd423": {
+                "userId": "lo_b00261d157fc",
+                "targetUserId": "ee53e9dcd423",
+                "type": "Social"
+            }
+        },
+        "SocialStats": {
+            "ee53e9dcd423": {
+                "userId": "ee53e9dcd423",
+                "usersFollowedCount": 2,
+                "usersFollowedByCount": 0,
+                "type": "SocialStats"
+            }
+        }
+    }
+}
