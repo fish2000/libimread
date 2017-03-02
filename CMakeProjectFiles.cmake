@@ -118,6 +118,7 @@ set(hdrs
     ${hdrs_dir}/pixels.hh
     ${hdrs_dir}/preview.hh
     ${hdrs_dir}/rehash.hh
+    ${hdrs_dir}/rocks.hh
     ${hdrs_dir}/seekable.hh
     ${hdrs_dir}/store.hh
     ${hdrs_dir}/symbols.hh
@@ -198,6 +199,7 @@ set(srcs
     ${srcs_dir}/options.cpp
     # ${srcs_dir}/palette.cpp
     # ${srcs_dir}/pixels.cpp
+    ${srcs_dir}/rocks.cpp
     ${srcs_dir}/seekable.cpp
     ${srcs_dir}/store.cpp
     # ${srcs_dir}/symbols.cpp

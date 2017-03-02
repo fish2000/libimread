@@ -1,4 +1,4 @@
-/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// Copyright 2012-2017 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_INCLUDE_STORE_HH_

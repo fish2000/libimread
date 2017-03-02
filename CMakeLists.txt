@@ -139,6 +139,7 @@ find_package(CapnProto REQUIRED)
 
 set(HDF5_USE_STATIC_LIBRARIES false)
 set(HDF5_ROOT /usr/local/opt/hdf5/)
+
 # message(STATUS "find_package(): looking for HDF5 within HDF5_ROOT = ${HDF5_ROOT}")
 # find_package(HDF5 COMPONENTS C CXX HL NO_MODULE)
 # if(NOT HDF5_FOUND)
@@ -147,8 +148,12 @@ set(HDF5_ROOT /usr/local/opt/hdf5/)
 #     include(FindHDF5)
 #     find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
 # endif()
+
 include(FindHDF5)
 find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
+
+include(FindRocksDB)
+# find_package(RocksDB REQUIRED)
 
 # Include the project-specific `include` directories:
 include_directories(${${PROJECT_NAME}_include_dir})
@@ -224,7 +229,8 @@ target_link_libraries(imread_shared
     ${HDF5_C_LIBRARIES}
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
-    ${CAPNP_LIBRARIES_LITE})
+    ${CAPNP_LIBRARIES_LITE}
+    ${ROCKSDB_LIBRARIES})
 
 target_link_libraries(imread_static
     z png guid
@@ -238,7 +244,8 @@ target_link_libraries(imread_static
     ${HDF5_C_LIBRARIES}
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
-    ${CAPNP_LIBRARIES_LITE})
+    ${CAPNP_LIBRARIES_LITE}
+    ${ROCKSDB_LIBRARIES})
 
 # Set and pass on compile-time config variable values:
 get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
@@ -328,7 +335,8 @@ if(IM_TESTS)
         ${HDF5_C_LIBRARIES}
         ${HDF5_CXX_LIBRARIES}
         ${HDF5_HL_LIBRARIES}
-        ${CAPNP_LIBRARIES_LITE})
+        ${CAPNP_LIBRARIES_LITE}
+        ${ROCKSDB_LIBRARIES})
     
     # Set up ctest and cdash:
     enable_testing()

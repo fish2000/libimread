@@ -4,7 +4,6 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-// #include <regex>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>

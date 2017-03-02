@@ -120,7 +120,6 @@ namespace memory {
         void init() {
             std::lock_guard<std::mutex> lock(mute);
             guid = generator.newGuid();
-            // refcounts.emplace(guid, refcount_t::mapped_type{ 0 });
             refcounts[guid].store(0);
         }
         
@@ -145,6 +144,22 @@ namespace memory {
         
         Target* operator->() const { return  object; }
         Target  operator* () const { return *object; }
+        
+        Target* get() const { return object; }
+        
+        template <typename T>
+        T* get() const { return static_cast<T*>(object); }
+        
+        void reset(Target* reset_to = nullptr) {
+            if (object) {
+                deleter(object);
+                refcounts[guid].store(0);
+            }
+            object = reset_to;
+            if (object) {
+                retain();
+            }
+        }
         
         void gc() {
             if (refcounts[guid].load() < 1) {
