@@ -70,11 +70,21 @@ namespace filesystem {
     class path {
         
         public:
+            /// std::basic_string<T> analogues
             using size_type = std::string::size_type;
             using character_type = std::string::value_type;
             static constexpr character_type sep = detail::posix_path_separator;
             static constexpr character_type extsep = detail::posix_extension_separator;
             static constexpr character_type pathsep = detail::posix_pathvar_separator;
+            
+            /// Mapping analogues -- used with path::xattr()
+            using key_type = std::string;
+            using mapped_type = std::string;
+            using value_type = std::pair<std::add_const_t<key_type>, mapped_type>;
+            using mapping_size_type = std::size_t;
+            using reference = std::add_lvalue_reference_t<value_type>;
+            using const_reference = std::add_const_t<
+                                    std::add_lvalue_reference_t<value_type>>;
             
             enum path_type {
                 windows_path = 0,

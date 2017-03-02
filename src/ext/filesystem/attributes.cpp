@@ -30,9 +30,6 @@
 #elif defined(PXALINUX) || defined(__APPLE__)
     #include <sys/xattr.h>
 
-#else
-    #error "Unable to identify system - exiting compilaton"
-
 #endif
 
 #include <libimread/ext/filesystem/path.h>
