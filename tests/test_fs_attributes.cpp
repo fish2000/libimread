@@ -132,8 +132,8 @@ namespace {
         std::cout << std::endl;
     }
     
-    TEST_CASE("[attributes] xattr read/write via store API in `im::file_source_sink`",
-              "[xattr-read-write-store-api-file_source_sink]")
+    TEST_CASE("[attributes] xattr descriptor read/write via store API in `im::file_source_sink`",
+              "[xattr-descriptor-read-write-store-api-file_source_sink]")
     {
         NamedTemporaryFile tf(".txt");
         {
@@ -144,7 +144,14 @@ namespace {
             CHECK(fdb.get("yo-dogg") == "I heard you like xattr writes");
             CHECK(fdb.get("dogg-yo") == "So we put some strings in your strings");
             CHECK(fdb.get("dogg-NO") == nullstring);
+            
+            CHECK(fdb.path().xattr("yo-dogg") == "I heard you like xattr writes");
+            CHECK(fdb.path().xattr("dogg-yo") == "So we put some strings in your strings");
+            CHECK(fdb.path().xattr("dogg-NO") == nullstring);
         }
+        CHECK(tf.filepath.xattr("yo-dogg") == "I heard you like xattr writes");
+        CHECK(tf.filepath.xattr("dogg-yo") == "So we put some strings in your strings");
+        CHECK(tf.filepath.xattr("dogg-NO") == nullstring);
     }
     
 } /// namespace (anon.)
