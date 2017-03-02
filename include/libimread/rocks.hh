@@ -11,14 +11,18 @@
 
 namespace memory {
     
+    /// callback for type-erased deleter --
+    /// implementation uses RocksDB API types
     void killrocks(void*&);
     
+    /// type-erased RocksDB-specific deleter
     template <typename Target>
     struct RocksDeleter : public std::unary_function<std::add_pointer_t<Target>, void> {
         using target_ptr_t = typename std::add_pointer_t<Target>;
         void operator()(target_ptr_t target) const { if (target) { memory::killrocks(target); } }
     };
     
+    /// final RocksDB ref-counted “smart pointer”
     using rocks_ptr = RefCount<void, RocksDeleter<void>>;
 }
 
