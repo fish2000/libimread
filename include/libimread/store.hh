@@ -127,10 +127,6 @@ namespace store {
         static_assert(store::is_stringmapper_v<T, U>,
                       "store::value_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
-        // stringmapper::stringvec_t tos(std::forward<U>(to).list());
-        // if (!tos.empty()) {
-        //     for (std::string const& name : tos) { std::forward<U>(to).del(name); }
-        // }
         if (!froms.empty()) {
             for (std::string const& name : froms) { std::forward<U>(to).set(name,
                                                     std::forward<T>(from).get(name)); }
@@ -143,10 +139,6 @@ namespace store {
         static_assert(store::is_stringmapper_v<T, U>,
                       "store::prefix_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
-        // stringmapper::stringvec_t tos(std::forward<U>(to).list());
-        // if (!tos.empty()) {
-        //     for (std::string const& name : tos) { std::forward<U>(to).del(name); }
-        // }
         if (!froms.empty()) {
             for (std::string const& name : froms) { std::forward<U>(to).set(prefix + sep + name,
                                                     std::forward<T>(from).get(name)); }
