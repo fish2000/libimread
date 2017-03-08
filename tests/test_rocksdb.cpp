@@ -76,12 +76,15 @@ namespace {
         REQUIRE(database.count() == manualcount);
         
         for (std::string const& key : database.list()) {
-            // WTF("KEY: ", key);
             CHECK(database.get(key) != database.null_value());
         }
         
+        store::stringmap memcopy;
+        memcopy.update(database);
         
-        
+        for (std::string const& key : database.list()) {
+            CHECK(database.get(key) == memcopy.get(key));
+        }
     }
 
 } /// namespace (anon.)
