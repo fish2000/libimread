@@ -118,16 +118,16 @@ namespace store {
     namespace detail {
         
         /// “all_of” bit based on http://stackoverflow.com/q/13562823/298171
-        template <bool... b>
+        template <bool ...b>
         struct static_all_of;
         
         /// implementation: recurse, if the first argument is true
-        template <bool... tail> 
+        template <bool ...tail>
         struct static_all_of<true, tail...> : static_all_of<tail...>
         {};
         
         /// end recursion if first argument is false - 
-        template <bool... tail> 
+        template <bool ...tail>
         struct static_all_of<false, tail...> : std::false_type
         {};
         
@@ -136,10 +136,15 @@ namespace store {
         struct static_all_of<> : std::true_type
         {};
         
+        template <bool ...b>
+        using static_all_of_t = typename static_all_of<b...>::type;
+        
+        template <bool ...b>
+        constexpr bool static_all_of_v = static_all_of<b...>::value;
+        
         template <typename Type, typename ...Requirements>
-        struct are_bases_of : static_all_of<std::is_base_of<Type,
-                                            std::decay_t<Requirements>>::value...
-                                            >::type
+        struct are_bases_of : static_all_of_t<std::is_base_of<Type,
+                                              std::decay_t<Requirements>>::value...>
         {};
     }
     
