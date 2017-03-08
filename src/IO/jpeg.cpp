@@ -187,14 +187,14 @@ namespace im {
         while (decompressor.info.output_scanline < decompressor.info.output_height) {
             jpeg_read_scanlines(&decompressor.info, samples, 1);
             JSAMPLE* srcPtr = samples[0];
-            for (int x = 0; x < w; x++) {
-                for (int c = 0; c < d; c++) {
+            for (int x = 0; x < w; ++x) {
+                for (int c = 0; c < d; ++c) {
                     /// theoretically you would want to scale this next bit,
                     /// depending on whatever the bit depth may be
                     /// -- SOMEDAAAAAAAAAAAAAAY.....
                     pix::convert(*srcPtr++, ptr[c*c_stride]);
                 }
-                ptr++;
+                ++ptr;
             }
         }
         
@@ -283,8 +283,8 @@ namespace im {
         /// write scanlines in pixel loop
         while (compressor.info.next_scanline < compressor.info.image_height) {
             JSAMPLE* __restrict__ dstPtr = rowbuf;
-            for (int x = 0; x < w; x++) {
-                for (int c = 0; c < d; c++) {
+            for (int x = 0; x < w; ++x) {
+                for (int c = 0; c < d; ++c) {
                     pix::convert(
                         at(x, compressor.info.next_scanline, c)[0],
                         *dstPtr++);
