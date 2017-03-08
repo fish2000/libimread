@@ -4,14 +4,10 @@
 #ifndef LIBIMREAD_IO_PNG_HH_
 #define LIBIMREAD_IO_PNG_HH_
 
-#include <cstring>
-#include <csetjmp>
-#include <vector>
-#include <sstream>
-
+#include <memory>
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
-#include <libimread/options.hh>
+#include <libimread/image.hh>
+#include <libimread/imageformat.hh>
 
 namespace im {
     

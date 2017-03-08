@@ -1,8 +1,14 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <cstring>
+#include <csetjmp>
+#include <sstream>
 #include <iostream>
+
 #include <iod/json.hh>
+
+#include <libimread/base.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/IO/png.hh>
 #include <libimread/pixels.hh>

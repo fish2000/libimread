@@ -4,12 +4,11 @@
 #ifndef LIBIMREAD_IO_TIFF_HH_
 #define LIBIMREAD_IO_TIFF_HH_
 
-#include <utility>
-#include <string>
-
+#include <memory>
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
-#include <libimread/pixels.hh>
+#include <libimread/image.hh>
+#include <libimread/imageformat.hh>
+#include <libimread/imagelist.hh>
 
 namespace im {
     

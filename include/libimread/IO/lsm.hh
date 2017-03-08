@@ -57,8 +57,10 @@
 // Pasi Kankaanpää <ppkank@bytl.jyu.fi>
 //
 
+#include <memory>
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
+#include <libimread/image.hh>
+#include <libimread/imageformat.hh>
 
 namespace im {
     

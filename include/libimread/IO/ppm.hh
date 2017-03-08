@@ -4,8 +4,10 @@
 #ifndef LIBIMREAD_IO_PPM_HH_
 #define LIBIMREAD_IO_PPM_HH_
 
+#include <memory>
 #include <libimread/libimread.hpp>
-#include <libimread/base.hh>
+#include <libimread/image.hh>
+#include <libimread/imageformat.hh>
 
 namespace im {
     

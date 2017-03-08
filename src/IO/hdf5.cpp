@@ -3,16 +3,16 @@
 
 #include <string>
 #include <vector>
-#include <memory>
+#include <hdf5.h>
+#include <H5LTpublic.h>
 
 #include <iod/json.hh>
+
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
 #include <libimread/errors.hh>
 #include <libimread/IO/hdf5.hh>
-
-#include <H5LTpublic.h>
 
 namespace im {
     

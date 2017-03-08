@@ -1,8 +1,13 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <cstdio>
+#include <csetjmp>
 #include <algorithm>
+
 #include <iod/json.hh>
+
+#include <libimread/errors.hh>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/pixels.hh>
 

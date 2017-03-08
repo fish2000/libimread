@@ -2,7 +2,9 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <iod/json.hh>
+#include <libimread/errors.hh>
 #include <libimread/IO/bmp.hh>
+#include <libimread/pixels.hh>
 
 namespace im {
     

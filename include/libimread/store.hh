@@ -85,7 +85,8 @@ namespace store {
             virtual bool del(std::string const& key) = 0;
             virtual std::size_t count() const = 0;
             virtual stringvec_t list() const = 0;
-            
+        
+        public:
             virtual void with_json(std::string const&);
             virtual void warm_cache() const;
             virtual stringmap_t& mapping() const;

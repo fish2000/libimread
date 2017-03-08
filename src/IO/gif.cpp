@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <memory>
 #include <iod/json.hh>
+#include <libimread/errors.hh>
+#include <libimread/imagelist.hh>
 #include <libimread/IO/gif.hh>
 #include <libimread/pixels.hh>
 

@@ -10,7 +10,7 @@
 #include <iod/json.hh>
 #include <libimread/IO/ppm.hh>
 #include <libimread/ext/memory/fmemopen.hh>
-#include <libimread/errors.hh>
+#include <libimread/base.hh>
 #include <libimread/pixels.hh>
 
 #define SWAP_ENDIAN16(value) \

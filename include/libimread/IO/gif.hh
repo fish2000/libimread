@@ -6,8 +6,8 @@
 
 #include <memory>
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
-#include <libimread/base.hh>
+#include <libimread/image.hh>
+#include <libimread/imageformat.hh>
 #include <libimread/ext/WriteGIF.hh>
 
 namespace im {

@@ -3,15 +3,10 @@
 
 #define NO_IMPORT_ARRAY
 
-#include <cstring>
-#include <cstdio>
-#include <array>
-#include <sstream>
-#include <iostream>
-#include <type_traits>
-
 #include <iod/json.hh>
+#include <libimread/errors.hh>
 #include <libimread/IO/tiff.hh>
+#include <libimread/pixels.hh>
 
 extern "C" {
    #include <tiffio.h>
