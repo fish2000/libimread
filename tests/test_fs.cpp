@@ -347,21 +347,6 @@ namespace {
         CHECK((td.dirpath/"yo_yo_dogg_i_heard_you_like_directories").is_directory());
     }
     
-    TEST_CASE("[filesystem] Test command execution via filesystem::detail::execute",
-              "[fs-test-command-execution-filesystem-detail-execute]")
-    {
-        std::string output;
-        std::string command;
-        
-        // command = "curl -sS 'https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f#.5obyn0apb' | grep -i obvinit";
-        // output = filesystem::detail::execute(command.c_str());
-        // CHECK(output.find("obvInit") != std::string::npos);
-        
-        command = "ps aux";
-        output = filesystem::detail::execute(command.c_str());
-        CHECK(output.find("ps aux") != std::string::npos);
-    }
-    
     // TEST_CASE("[filesystem] Test dotpath subclass",
     //           "[fs-test-dotpath-subclass]") {
     //     dotpath basepath("ost.basepath.ClassName:YoDogg");
@@ -370,4 +355,4 @@ namespace {
     //     CHECK(basepath.parent() == parentpath);
     // }
     
-}
+} /// namespace (anon.)
