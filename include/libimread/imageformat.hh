@@ -28,43 +28,43 @@ namespace im {
     bool match_magic(byte_source*, char const*, std::size_t const);
     bool match_magic(byte_source*, std::string const&);
     
-    #define DECLARE_BASE_OPTIONS(...)                                                       \
-        using options_t = decltype(D(__VA_ARGS__));                                         \
-        static ImageFormat::unique_t create();                                              \
-        static const options_t OPTS() {                                                     \
-            const options_t O = D(__VA_ARGS__);                                             \
-            return O;                                                                       \
-        }                                                                                   \
-        static const std::string classname;                                                 \
-        static const options_t options;                                                     \
+    #define DECLARE_BASE_OPTIONS(...)                                                  \
+        using options_t = decltype(D(__VA_ARGS__));                                    \
+        static ImageFormat::unique_t create();                                         \
+        static const options_t OPTS() {                                                \
+            const options_t O = D(__VA_ARGS__);                                        \
+            return O;                                                                  \
+        }                                                                              \
+        static const std::string classname;                                            \
+        static const options_t options;                                                \
         static const capacity_t capacity;
     
     /// use `DECLARE_OPTIONS("value", "another-value", ...);` in format.hh:
     
-    #define DECLARE_OPTIONS(...)                                                            \
-        DECLARE_BASE_OPTIONS(__VA_ARGS__);                                                  \
+    #define DECLARE_OPTIONS(...)                                                       \
+        DECLARE_BASE_OPTIONS(__VA_ARGS__);                                             \
         virtual options_map get_options() const override;
     
-    #define SIGNATURE(bytes, length)                                                        \
-        D(_bytes    = base64::encode(bytes, length),                                        \
+    #define SIGNATURE(bytes, length)                                                   \
+        D(_bytes    = base64::encode(bytes, length),                                   \
           _length   = length)
     
     /// ... then use `DECLARE_FORMAT_OPTIONS(FormatClassName);` in format.cpp:
     
-    #define DECLARE_FORMAT_OPTIONS(format)                                                  \
-        ImageFormat::unique_t format::create() {                                            \
-            return std::make_unique<format>();                                              \
-        }                                                                                   \
-        const std::string format::classname = #format;                                      \
-        const format::options_t format::options = format::OPTS();                           \
-        const format::capacity_t format::capacity = format::CAPACITY();                     \
-        options_map format::get_options() const {                                           \
-            return options_map::parse(iod::json_encode(iod::cat(format::options,            \
-                                                  D(_capacity = format::capacity))));       \
-        }                                                                                   \
-        namespace {                                                                         \
-            ImageFormat::Registrar<format> format##Registrar(                               \
-                                           format::options.suffixes[0]);                    \
+    #define DECLARE_FORMAT_OPTIONS(format)                                             \
+        ImageFormat::unique_t format::create() {                                       \
+            return std::make_unique<format>();                                         \
+        }                                                                              \
+        const std::string format::classname = #format;                                 \
+        const format::options_t format::options = format::OPTS();                      \
+        const format::capacity_t format::capacity = format::CAPACITY();                \
+        options_map format::get_options() const {                                      \
+            return options_map::parse(iod::json_encode(iod::cat(format::options,       \
+                                                  D(_capacity = format::capacity))));  \
+        }                                                                              \
+        namespace {                                                                    \
+            ImageFormat::Registrar<format> format##Registrar(                          \
+                                           format::options.suffixes[0]);               \
         };
     
     /// ... those macros also set your format up to register its class (see below).
@@ -171,11 +171,11 @@ namespace im {
         public:
             static const capacity_t CAPACITY() {
                 const capacity_t C(
-                    (traits::has_read<FormatType>()         ),
-                    (traits::has_read_multi<FormatType>()   ),
-                    (traits::has_read_metadata<FormatType>()),
-                    (traits::has_write<FormatType>()        ),
-                    (traits::has_write_multi<FormatType>()  ),
+                    (traits::has_read<FormatType>()          ),
+                    (traits::has_read_multi<FormatType>()    ),
+                    (traits::has_read_metadata<FormatType>() ),
+                    (traits::has_write<FormatType>()         ),
+                    (traits::has_write_multi<FormatType>()   ),
                     (traits::has_write_metadata<FormatType>())
                 );
                 return C;
@@ -217,11 +217,11 @@ namespace im {
                 return get_options().update(opts);
             }
             
-            virtual bool format_can_read() const noexcept override           { return FormatType::can_read::value; }
-            virtual bool format_can_read_multi() const noexcept override     { return FormatType::can_read_multi::value; }
-            virtual bool format_can_read_metadata() const noexcept override  { return FormatType::can_read_metadata::value; }
-            virtual bool format_can_write() const noexcept override          { return FormatType::can_write::value; }
-            virtual bool format_can_write_multi() const noexcept override    { return FormatType::can_write_multi::value; }
+            virtual bool format_can_read() const noexcept override           { return FormatType::can_read::value;           }
+            virtual bool format_can_read_multi() const noexcept override     { return FormatType::can_read_multi::value;     }
+            virtual bool format_can_read_metadata() const noexcept override  { return FormatType::can_read_metadata::value;  }
+            virtual bool format_can_write() const noexcept override          { return FormatType::can_write::value;          }
+            virtual bool format_can_write_multi() const noexcept override    { return FormatType::can_write_multi::value;    }
             virtual bool format_can_write_metadata() const noexcept override { return FormatType::can_write_metadata::value; }
             
             /// LONGCAT IS LOOOOOOOOOONG erm I mean
