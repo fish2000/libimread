@@ -15,7 +15,7 @@
 
 namespace filesystem {
     
-    struct NamedTemporaryFile {
+    struct NamedTemporaryFile final {
         /// As per the eponymous tempfile.NamedTemporaryFile,
         /// of the Python standard library. NOW WITH RAII!!
         using openmode = std::ios_base::openmode;
@@ -102,7 +102,7 @@ namespace filesystem {
     
     };
     
-    struct TemporaryDirectory {
+    struct TemporaryDirectory final {
         
         static constexpr char tdp[] = FILESYSTEM_TEMP_DIRECTORYNAME;
         static constexpr char tfp[] = FILESYSTEM_TEMP_FILENAME;

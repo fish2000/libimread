@@ -13,7 +13,7 @@ namespace filesystem {
         
         #ifdef IM_HAVE_AUTOFS_NOWAIT
         
-        struct nowait_t {
+        struct nowait_t final {
             
             nowait_t();
             ~nowait_t();
@@ -37,7 +37,7 @@ namespace filesystem {
         
         #ifdef IM_HAVE_AUTOFS_NOTRIGGER
         
-        struct notrigger_t {
+        struct notrigger_t final {
             
             notrigger_t();
             ~notrigger_t();

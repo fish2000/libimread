@@ -14,7 +14,7 @@ namespace filesystem {
     /// forward declaration for these next few prototypes/templates
     class path;
     
-    struct switchdir {
+    struct switchdir final {
         
         /// Change working directory temporarily with RAII while
         /// holding a process-unique lock during the switchover.
@@ -75,7 +75,7 @@ namespace filesystem {
             mutable std::string newdir;
     };
     
-    struct workingdir {
+    struct workingdir final {
         
         /// Change working directory multiple times with a RAII idiom,
         /// using a process-unique recursive lock to maintain a stack of
