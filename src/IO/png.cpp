@@ -316,8 +316,8 @@ namespace im {
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                      PNG_FILTER_TYPE_BASE);
         
-        const int compression = opts.cast<int>("png:compression", -1);
-        if (compression && compression != -1) {
+        const int compression = opts.cast<int>("png:compression", 0);
+        if (compression) {
             png_set_compression_level(p.png_ptr, compression);
         }
         
