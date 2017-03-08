@@ -246,7 +246,7 @@ namespace im {
         
         volatile int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
         png_bytep* __restrict__ row_pointers = new png_bytep[h];
-        for (int y = 0; y < h; y++) {
+        for (int y = 0; y < h; ++y) {
             row_pointers[y] = new png_byte[row_bytes];
         }
         
@@ -266,26 +266,26 @@ namespace im {
         //         w, h, channels, bit_depth, d));
         
         if (bit_depth == 8) {
-            for (int y = 0; y < h; y++) {
+            for (int y = 0; y < h; ++y) {
                 uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(row_pointers[y]);
-                for (int x = 0; x < w; x++) {
-                    for (int c = 0; c < d; c++) {
+                for (int x = 0; x < w; ++x) {
+                    for (int c = 0; c < d; ++c) {
                         pix::convert(*srcPtr++, ptr[c*c_stride]);
                     }
-                    ptr++;
+                    ++ptr;
                 }
                 delete[] row_pointers[y];
             }
         } else if (bit_depth == 16) {
-            for (int y = 0; y < h; y++) {
+            for (int y = 0; y < h; ++y) {
                 uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(row_pointers[y]);
-                for (int x = 0; x < w; x++) {
-                    for (int c = 0; c < d; c++) {
+                for (int x = 0; x < w; ++x) {
+                    for (int c = 0; c < d; ++c) {
                         uint16_t hi = (*srcPtr++) << 8;
                         uint16_t lo = hi | (*srcPtr++);
                         pix::convert(lo, ptr[c*c_stride]);
                     }
-                    ptr++;
+                    ++ptr;
                 }
                 delete[] row_pointers[y];
             }
@@ -334,10 +334,10 @@ namespace im {
             // downconvert to uint8_t from uint16_t-ish data
             uint16_t* __restrict__ srcPtr = input.rowp_as<uint16_t>(0);
             
-            for (y = 0; y < height; y++) {
+            for (y = 0; y < height; ++y) {
                 row_pointers[y] = new png_byte[rowbytes];
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
-                for (x = 0; x < width; x++) {
+                for (x = 0; x < width; ++x) {
                     for (c = 0; c < channels; c++) {
                         pix::convert(srcPtr[c*c_stride], *dstPtr++);
                         // *dstPtr++ = out;
@@ -349,10 +349,10 @@ namespace im {
             // stick with uint8_t
             pix::accessor<byte> at = input.access();
             
-            for (y = 0; y < height; y++) {
+            for (y = 0; y < height; ++y) {
                 row_pointers[y] = new png_byte[rowbytes];
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
-                for (x = 0; x < width; x++) {
+                for (x = 0; x < width; ++x) {
                     for (c = 0; c < channels; c++) {
                         pix::convert(at(x, y, c)[0], *dstPtr++);
                     }
@@ -374,7 +374,7 @@ namespace im {
         png_write_end(p.png_ptr, p.png_info);
         
         // clean up
-        for (int y = 0; y < height; y++) { delete[] row_pointers[y]; }
+        for (int y = 0; y < height; ++y) { delete[] row_pointers[y]; }
         delete[] row_pointers;
     }
     
@@ -463,30 +463,30 @@ namespace im {
             // downconvert to uint8_t from uint16_t-ish data
             uint16_t* __restrict__ srcPtr = input.rowp_as<uint16_t>(0);
             
-            for (y = 0; y < height; y++) {
+            for (y = 0; y < height; ++y) {
                 row_pointers[y] = new png_byte[rowbytes];
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
-                for (x = 0; x < width; x++) {
-                    for (c = 0; c < channels; c++) {
+                for (x = 0; x < width; ++x) {
+                    for (c = 0; c < channels; ++c) {
                         pix::convert(srcPtr[c*c_stride], out);
                         *dstPtr++ = out;
                     }
-                    srcPtr++;
+                    ++srcPtr;
                 }
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
             uint8_t* __restrict__ srcPtr = input.rowp_as<uint8_t>(0);
             
-            for (y = 0; y < height; y++) {
+            for (y = 0; y < height; ++y) {
                 row_pointers[y] = new png_byte[rowbytes];
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
-                for (x = 0; x < width; x++) {
-                    for (c = 0; c < channels; c++) {
+                for (x = 0; x < width; ++x) {
+                    for (c = 0; c < channels; ++c) {
                         pix::convert(srcPtr[c*c_stride], out);
                         *dstPtr++ = out;
                     }
-                    srcPtr++;
+                    ++srcPtr;
                 }
             }
         } else {
@@ -505,7 +505,7 @@ namespace im {
         png_write_end(p.png_ptr, p.png_info);
         
         // clean up
-        for (int y = 0; y < height; y++) { delete[] row_pointers[y]; }
+        for (int y = 0; y < height; ++y) { delete[] row_pointers[y]; }
         delete[] row_pointers;
     }
     
