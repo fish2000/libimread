@@ -7,14 +7,9 @@
 #include <sys/stat.h>
 #include <capnp/serialize-packed.h>
 
-#include <cerrno>
-#include <cstring>
-#include <string>
-
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/file.hh>
-// #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/attributes.h>
 
 namespace im {

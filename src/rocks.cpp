@@ -4,7 +4,7 @@
 ///     https://gist.github.com/fish2000/b3a7d8accae8d046703f728b4ac82009
 
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
+// #include <libimread/errors.hh>
 #include <libimread/rocks.hh>
 #include <libimread/ext/filesystem/path.h>
 #include "rocksdb/env.h"

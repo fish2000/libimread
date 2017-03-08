@@ -5,11 +5,10 @@
 #define LIBIMREAD_FILE_HH_
 
 #include <fcntl.h>
-#include <cstdio>
+#include <string>
 #include <vector>
 #include <memory>
 #include <functional>
-#include <utility>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>

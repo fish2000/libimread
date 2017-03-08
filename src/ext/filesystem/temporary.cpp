@@ -9,10 +9,9 @@
 #include <vector>
 #include <algorithm>
 
-#include <libimread/libimread.hpp>
-#include <libimread/ext/pystring.hh>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/filesystem/opaques.h>
+#include <libimread/ext/pystring.hh>
 
 namespace filesystem {
     

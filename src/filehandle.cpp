@@ -7,10 +7,6 @@
 #include <sys/stat.h>
 #include <capnp/serialize-packed.h>
 
-#include <cerrno>
-#include <cstring>
-#include <string>
-
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/filehandle.hh>

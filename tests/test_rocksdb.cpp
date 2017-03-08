@@ -23,15 +23,15 @@
 namespace {
     
     using filesystem::path;
-    using filesystem::switchdir;
+    // using filesystem::switchdir;
     // using filesystem::resolver;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     
-    using filesystem::detail::nowait_t;
-    using filesystem::detail::stringvec_t;
-    using filesystem::attribute::accessor_t;
-    using filesystem::attribute::detail::nullstring;
+    // using filesystem::detail::nowait_t;
+    // using filesystem::detail::stringvec_t;
+    // using filesystem::attribute::accessor_t;
+    // using filesystem::attribute::detail::nullstring;
     
     using im::FileSource;
     using im::FileSink;
@@ -128,7 +128,6 @@ namespace {
             REQUIRE(tf.filepath.is_file());
             REQUIRE(tf.filepath.is_readable());
         }
-        
     }
 
 } /// namespace (anon.)

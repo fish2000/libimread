@@ -23,7 +23,6 @@
 #include <cerrno>
 #include <cstdlib>
 #include <numeric>
-#include <iterator>
 #include <algorithm>
 #include <type_traits>
 
@@ -560,6 +559,7 @@ namespace filesystem {
     }
     
     bool path::remove() const {
+        // WTF("Removing path: ", str());
         {
             detail::nowait_t nowait;
             if (is_file_or_link()) { return bool(::unlink(make_absolute().c_str()) != -1); }

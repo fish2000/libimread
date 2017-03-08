@@ -4,11 +4,10 @@
 #ifndef LIBIMREAD_FILEHANDLE_HH_
 #define LIBIMREAD_FILEHANDLE_HH_
 
-#include <cstdio>
+#include <string>
 #include <vector>
 #include <memory>
 #include <functional>
-#include <utility>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
