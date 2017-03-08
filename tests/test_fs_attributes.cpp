@@ -10,7 +10,7 @@
 #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/attributes.h>
-#include <libimread/ext/filesystem/directory.h>
+// #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/filesystem/nowait.h>
 #include <libimread/file.hh>
@@ -22,14 +22,14 @@
 namespace {
     
     using filesystem::path;
-    using filesystem::switchdir;
+    // using filesystem::switchdir;
     // using filesystem::resolver;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     
     using filesystem::detail::nowait_t;
     using filesystem::detail::stringvec_t;
-    using filesystem::attribute::accessor_t;
+    // using filesystem::attribute::accessor_t;
     using filesystem::attribute::detail::nullstring;
     
     using im::FileSource;
