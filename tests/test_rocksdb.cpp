@@ -56,8 +56,8 @@ namespace {
         Json dictlist = Json::load(jsondoc.str());
         int max = dictlist.size();
         for (int idx = 0; idx < max; ++idx) {
-            Json dict = dictlist[idx];
-            std::string prefix(dict["_id"]);
+            Json dict = dictlist.at(idx);
+            std::string prefix(dict.get("_id"));
             for (std::string const& key : dict.keys()) {
                 /// construct a prefixed key for use in Rocks
                 std::string nk = prefix + ":" + key;
@@ -74,7 +74,6 @@ namespace {
         for (std::string const& key : database.list()) {
             WTF("KEY: ", key);
             CHECK(database.get(key) != database.null_value());
-            // WTF(database.get(key) == database.null_value() ? "YO" : "DOGG");
         }
         
     }

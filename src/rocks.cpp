@@ -58,16 +58,13 @@ namespace store {
     
     std::string& rocks::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
-            // WTF("RETURNING CACHED");
-            return cache[key];
+            return cache.at(key);
         } else {
             std::string sval;
             rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
             if (status.ok()) {
-                // WTF("INSERTING TO CACHE FOLLOWING GET");
-                cache.insert({ key, sval });
-                // WTF("RETURNING FROM CACHE");
-                return cache[key];
+                cache[key] = sval;
+                return cache.at(key);
             }
             return stringmapper::base_t::null_value();
         }
@@ -75,16 +72,13 @@ namespace store {
     
     std::string const& rocks::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
-            // WTF("RETURNING CACHED (const)");
-            return cache[key];
+            return cache.at(key);
         } else {
             std::string sval;
             rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
             if (status.ok()) {
-                // WTF("INSERTING TO CACHE FOLLOWING GET (const)");
-                cache.insert({ key, sval });
-                // WTF("RETURNING FROM CACHE (const)");
-                return cache[key];
+                cache[key] = sval;
+                return cache.at(key);
             }
             return stringmapper::base_t::null_value();
         }
@@ -97,7 +91,11 @@ namespace store {
         if (status.ok()) {
             rocksdb::Status flushed = SELF()->Flush(rocksdb::FlushOptions());
             if (flushed.ok()) {
-                cache.insert({ key, value });
+                if (cache.find(key) != cache.end()) {
+                    cache[key] = value;
+                } else {
+                    cache.insert({ key, value });
+                }
             }
         }
         return status.ok();
@@ -123,7 +121,7 @@ namespace store {
         stringmapper::stringvec_t out{};
         out.reserve(count());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            out.emplace_back(std::string(it->value().ToString()));
+            out.emplace_back(std::string(it->key().ToString()));
         }
         delete it;
         return out;
