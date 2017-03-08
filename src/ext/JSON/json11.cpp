@@ -9,6 +9,7 @@
 // Version 0.6.5, 2013-11-07
 
 #include <cmath>
+#include <cstdlib>
 #include <climits>
 #include <sstream>
 #include <iomanip>
@@ -139,7 +140,8 @@ void Json::Node::unref() {
 bool Json::Array::operator==(Node const& that) const {
     if (this == &that) { return true; }
     if (that.type() != Type::ARRAY) { return false; }
-    Json::nodevec_t& that_list = ((Array*)&that)->list;
+    Json::nodevec_t& that_list = static_cast<Array*>(
+                                 const_cast<Node*>(&that))->list;
     return std::equal(list.begin(), list.end(),
                  that_list.begin(),
                    [](Node* n1, Node* n2) { return *n1 == *n2; });
@@ -149,7 +151,8 @@ bool Json::Object::operator==(Node const& that) const {
     using kv_t = Json::nodepair_t;
     if (this == &that) { return true; }
     if (that.type() != Type::OBJECT) { return false; }
-    Json::nodemap_t& that_map = ((Object*)&that)->map;
+    Json::nodemap_t& that_map = static_cast<Object*>(
+                                const_cast<Node*>(&that))->map;
     return std::equal(map.begin(), map.end(),
                  that_map.begin(),
                    [](kv_t const& p,
@@ -180,7 +183,7 @@ bool Json::is_integer() const {
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::NUMBER)");
     }
-    return ((Number*)root)->is_integer();
+    return static_cast<Number*>(root)->is_integer();
 }
 
 bool Json::Array::contains(Node const* that) const {
@@ -272,7 +275,7 @@ Json::Object* Json::mkobject() {
             "Json::mkobject() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::OBJECT)");
-    return (Object*)root;
+    return static_cast<Object*>(root);
 }
 Json::Object* Json::mkobject() const {
     if (root->type() != Type::OBJECT)
@@ -280,7 +283,7 @@ Json::Object* Json::mkobject() const {
             "Json::mkobject() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::OBJECT)");
-    return (Object*)root;
+    return static_cast<Object*>(root);
 }
 
 Json& Json::set(std::string const& key, Json const& value) {
@@ -302,7 +305,7 @@ Json::Array* Json::mkarray() {
             "Json::mkarray() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::ARRAY)");
-    return (Array*)root;
+    return static_cast<Array*>(root);
 }
 Json::Array* Json::mkarray() const {
     if (root->type() != Type::ARRAY)
@@ -310,7 +313,7 @@ Json::Array* Json::mkarray() const {
             "Json::mkarray() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::ARRAY)");
-    return (Array*)root;
+    return static_cast<Array*>(root);
 }
 
 Json& Json::operator<<(Json const& that) {
@@ -419,19 +422,19 @@ Json Json::Property::operator=(Json const& that) {
             break;
         case Type::NUMBER:
             if (that.is_integer()) {
-                ((Number*)host)->value = static_cast<long>(that);
+                static_cast<Number*>(host)->value = static_cast<long>(that);
             } else {
-                ((Number*)host)->value = static_cast<long double>(that);
+                static_cast<Number*>(host)->value = static_cast<long double>(that);
             }
             break;
         case Type::STRING:
-            ((String*)host)->value = static_cast<std::string>(that);
+            static_cast<String*>(host)->value = static_cast<std::string>(that);
             break;
         case Type::ARRAY:
-            ((Array*)host)->repl(kidx, that.root);
+            static_cast<Array*>(host)->repl(kidx, that.root);
             break;
         case Type::OBJECT:
-            ((Object*)host)->set(key, that.root);
+            static_cast<Object*>(host)->set(key, that.root);
             break;
         case Type::POINTER:
         case Type::SCHEMA:
@@ -464,11 +467,11 @@ Json::Property Json::operator[](std::string const& key) const {
 std::size_t Json::size() const {
     switch (root->type()) {
         case Type::ARRAY:
-            return ((Array*)root)->list.size();
+            return static_cast<Array*>(root)->list.size();
         case Type::OBJECT:
-            return ((Object*)root)->map.size();
+            return static_cast<Object*>(root)->map.size();
         case Type::STRING:
-            return ((String*)root)->value.size();
+            return static_cast<String*>(root)->value.size();
         case Type::JSNULL:
         case Type::BOOLEAN:
         case Type::NUMBER:
@@ -570,8 +573,8 @@ Json::Property::Property(Node* node, int idx)
     }
 
 Json Json::Property::target() const {
-    if (host->type() == Type::OBJECT) { return ((Object*)host)->get(key); }
-    if (host->type() == Type::ARRAY)  { return ((Array*)host)->list.at(kidx); }
+    if (host->type() == Type::OBJECT) { return static_cast<Object*>(host)->get(key); }
+    if (host->type() == Type::ARRAY)  { return static_cast<Array*>(host)->list.at(kidx); }
     imread_raise(JSONLogicError,
         "Property::operator Json() conversion-operator logic error:",
      FF("\tConverstion attempt made on Property object of Type::%s", host->typestr()),
@@ -610,13 +613,15 @@ Json Json::values() const {
 bool Json::String::operator==(Node const& that) const {
     return this == &that || (
             that.type() == Type::STRING &&
-            value == ((String*)&that)->value);
+            value == static_cast<String*>(
+                     const_cast<Node*>(&that))->value);
 }
 
 bool Json::Pointer::operator==(Node const& that) const {
     return this == &that || (
             that.type() == Type::POINTER &&
-            &value == &((Pointer*)&that)->value);
+            &value == &static_cast<Pointer*>(
+                       const_cast<Node*>(&that))->value);
 }
 
 void Json::Bool::print(std::ostream& out) const {
@@ -688,7 +693,7 @@ void Json::Object::print(std::ostream& out) const {
     for (auto const& it : map) {
         if (comma)  { out << ','; }
         if (indent) { out << '\n'
-                          << std::string(indent*level, ' '); }
+                          << std::string(indent * level, ' '); }
         detail::escape(out, *it.first);
         out << ':';
         if (indent) { out << ' '; }
@@ -697,7 +702,7 @@ void Json::Object::print(std::ostream& out) const {
     }
     --level;
     if (indent) { out << '\n'
-                      << std::string(indent*level, ' '); }
+                      << std::string(indent * level, ' '); }
     out << '}';
 }
 
@@ -708,7 +713,7 @@ void Json::Array::print(std::ostream& out) const {
     for (Node const* it : list) {
         if (comma)  { out << ','; }
         if (indent) { out << '\n'
-                          << std::string(indent*level, ' '); }
+                          << std::string(indent * level, ' '); }
         it->print(out);
         comma = true;
     }
@@ -789,7 +794,7 @@ void Json::Array::add(Node* v) {
 }
 
 void Json::Array::pop() {
-    Node* v = (Node*)list.back();
+    Node* v = static_cast<Node*>(list.back());
     v->unref();
     list.pop_back();
 }
@@ -1143,58 +1148,157 @@ std::size_t Json::hash(std::size_t H) const {
 }
 
 Json::operator std::string() const {
-    if (root->type() == Type::STRING) { return ((String*)root)->value; }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return "null";
+        case Type::BOOLEAN: return root == &Bool::T ? "true" : "false";
+        case Type::NUMBER:  return std::to_string(((Number*)root)->value);
+        case Type::STRING:  return ((String*)root)->value;
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator long double() const {
-    if (root->type() == Type::NUMBER) { return ((Number*)root)->value; }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0.0 : 1.0;
+        case Type::NUMBER:  return is_integer() ? std::round(((Number*)root)->value) : ((Number*)root)->value;
+        case Type::STRING:  return std::atof(((String*)root)->value.c_str());
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator double() const {
-    if (root->type() == Type::NUMBER) { return ((Number*)root)->value; }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0.0 : 1.0;
+        case Type::NUMBER:  return is_integer() ? std::round(((Number*)root)->value) : ((Number*)root)->value;
+        case Type::STRING:  return std::atof(((String*)root)->value.c_str());
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator float() const {
-    if (root->type() == Type::NUMBER) { return ((Number*)root)->value; }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0.0 : 1.0;
+        case Type::NUMBER:  return is_integer() ? std::round(((Number*)root)->value) : ((Number*)root)->value;
+        case Type::STRING:  return std::atof(((String*)root)->value.c_str());
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator int() const {
-    if (root->type() == Type::NUMBER) { return ((Number*)root)->value; }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0 : 1;
+        case Type::NUMBER:  return is_integer() ? ((Number*)root)->value : std::lround(((Number*)root)->value);
+        case Type::STRING:  return std::stoi(((String*)root)->value);
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator long() const {
-    if (root->type() == Type::NUMBER) { return ((Number*)root)->value; }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0 : 1;
+        case Type::NUMBER:  return is_integer() ? ((Number*)root)->value : std::lround(((Number*)root)->value);
+        case Type::STRING:  return std::stol(((String*)root)->value);
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator long long() const {
-    if (root->type() == Type::NUMBER) { return ((Number*)root)->value; }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0 : 1;
+        case Type::NUMBER:  return is_integer() ? ((Number*)root)->value : std::llround(((Number*)root)->value);
+        case Type::STRING:  return std::stoll(((String*)root)->value);
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator uint8_t() const {
-    if (root->type() == Type::NUMBER) { return uint8_t(((Number*)root)->value); }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0 : 1;
+        case Type::NUMBER:  return uint8_t(((Number*)root)->value);
+        case Type::STRING:  return uint8_t(std::stoi(((String*)root)->value));
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator uint16_t() const {
-    if (root->type() == Type::NUMBER) { return uint16_t(((Number*)root)->value); }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0 : 1;
+        case Type::NUMBER:  return uint16_t(((Number*)root)->value);
+        case Type::STRING:  return uint16_t(std::stoi(((String*)root)->value));
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator int8_t() const {
-    if (root->type() == Type::NUMBER) { return int8_t(((Number*)root)->value); }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0 : 1;
+        case Type::NUMBER:  return int8_t(((Number*)root)->value);
+        case Type::STRING:  return int8_t(std::stoi(((String*)root)->value));
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 Json::operator int16_t() const {
-    if (root->type() == Type::NUMBER) { return int16_t(((Number*)root)->value); }
-    imread_raise_default(JSONBadCast);
+    switch (root->type()) {
+        case Type::JSNULL:  return 0;
+        case Type::BOOLEAN: return root == &Bool::T ? 0 : 1;
+        case Type::NUMBER:  return int16_t(((Number*)root)->value);
+        case Type::STRING:  return int16_t(std::stoi(((String*)root)->value));
+        case Type::ARRAY:
+        case Type::OBJECT:
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:            imread_raise_default(JSONBadCast);
+    }
 }
 
 // Json::operator int16_t() const {
@@ -1209,10 +1313,14 @@ Json::operator void*() const {
 
 Json::operator bool() const {
     switch (root->type()) {
+        case Type::JSNULL:  return false;
         case Type::BOOLEAN: return root == &Bool::T;
         case Type::NUMBER:  return static_cast<bool>(int(((Number*)root)->value));
         case Type::STRING:  return static_cast<bool>(((String*)root)->value.size());
-        case Type::JSNULL:  return false;
+        case Type::ARRAY:   return static_cast<bool>(((Array*)root)->list.size());
+        case Type::OBJECT:  return static_cast<bool>(((Object*)root)->map.size());
+        case Type::POINTER:
+        case Type::SCHEMA:
         default:            imread_raise_default(JSONBadCast);
     }
     imread_raise_default(JSONBadCast);
