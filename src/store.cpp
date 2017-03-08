@@ -9,7 +9,7 @@ namespace store {
     
     #pragma mark - base class store::stringmapper default methods
     
-    void stringmapper::json_parse(std::string const& jsonstr) {
+    void stringmapper::with_json(std::string const& jsonstr) {
         Json jsonmap = Json::parse(jsonstr);
         if (jsonmap.type() == Type::OBJECT) {
             for (std::string const& key : jsonmap.keys()) {
@@ -159,7 +159,7 @@ namespace store {
     stringmap::stringmap() noexcept {}
     
     stringmap::stringmap(std::string const& jsonstr) {
-        json_parse(jsonstr);
+        with_json(jsonstr);
     }
     
     std::string& stringmap::get(std::string const& key) {

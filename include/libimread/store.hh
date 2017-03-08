@@ -79,7 +79,6 @@ namespace store {
             using stringmap_t = std::unordered_map<std::string, std::string>;
         
         public:
-            virtual void json_parse(std::string const&);
             virtual std::string&       get(std::string const& key) = 0;
             virtual std::string const& get(std::string const& key) const = 0;
             virtual bool set(std::string const& key, std::string const& value) = 0;
@@ -87,6 +86,7 @@ namespace store {
             virtual std::size_t count() const = 0;
             virtual stringvec_t list() const = 0;
             
+            virtual void with_json(std::string const&);
             virtual void warm_cache() const;
             virtual stringmap_t& mapping() const;
             virtual std::string mapping_json() const;
@@ -122,15 +122,18 @@ namespace store {
         
         /// implementation: recurse, if the first argument is true
         template <bool... tail> 
-        struct static_all_of<true, tail...> : static_all_of<tail...> {};
+        struct static_all_of<true, tail...> : static_all_of<tail...>
+        {};
         
         /// end recursion if first argument is false - 
         template <bool... tail> 
-        struct static_all_of<false, tail...> : std::false_type {};
+        struct static_all_of<false, tail...> : std::false_type
+        {};
         
         ///  - or if no more arguments
         template <>
-        struct static_all_of<> : std::true_type {};
+        struct static_all_of<> : std::true_type
+        {};
         
         template <typename Type, typename ...Requirements>
         struct are_bases_of : static_all_of<std::is_base_of<Type,
@@ -140,7 +143,8 @@ namespace store {
     }
     
     template <typename ...Types>
-    struct is_stringmapper : detail::are_bases_of<store::stringmapper, Types...>::type {};
+    struct is_stringmapper : detail::are_bases_of<store::stringmapper, Types...>::type
+    {};
     
     template <typename ...Types>
     constexpr bool is_stringmapper_v = is_stringmapper<Types...>::value;
