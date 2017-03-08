@@ -352,9 +352,9 @@ namespace {
         std::string output;
         std::string command;
         
-        command = "curl -sS 'https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f#.5obyn0apb' | grep -i obvinit";
-        output = filesystem::detail::execute(command.c_str());
-        CHECK(output.find("obvInit") != std::string::npos);
+        // command = "curl -sS 'https://medium.com/@hopro/homeless-tips-time-space-data-power-ccbb6338c59f#.5obyn0apb' | grep -i obvinit";
+        // output = filesystem::detail::execute(command.c_str());
+        // CHECK(output.find("obvInit") != std::string::npos);
         
         command = "ps aux";
         output = filesystem::detail::execute(command.c_str());

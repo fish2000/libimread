@@ -211,7 +211,7 @@ namespace store {
         
     };
     
-    class stringmap : public stringmapper {
+    class stringmap final : public stringmapper {
         
         public:
             virtual bool can_store() const noexcept override;
