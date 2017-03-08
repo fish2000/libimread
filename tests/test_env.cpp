@@ -52,8 +52,10 @@ namespace {
         std::string nv("I heard you like environment variables");
         
         CHECK(std::getenv(nk.c_str()) == nullptr);
+        // CHECK(viron.get(nk) == viron.null_value());
         viron.set(nk, nv);
         CHECK(std::getenv(nk.c_str()) == std::string("I heard you like environment variables"));
+        CHECK(viron.get(nk) == "I heard you like environment variables");
         CHECK(viron.count() == oldcount + 1);
     }
     
