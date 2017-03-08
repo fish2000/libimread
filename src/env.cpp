@@ -18,7 +18,9 @@ namespace store {
     bool env::can_store() const noexcept { return true; }
     
     /// whatever-dogg constructor
-    env::env(void) {}
+    env::env(void) {
+        count();
+    }
     
     /// copy constructor
     env::env(env const& other) {
