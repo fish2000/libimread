@@ -24,11 +24,13 @@ namespace store {
     
     /// copy constructor
     env::env(env const& other) {
+        envcount.store(other.envcount.load());
         cache = other.cache;
     }
     
     /// move constructor
     env::env(env&& other) noexcept {
+        envcount.store(other.envcount.load());
         cache = std::move(other.cache);
     }
     
@@ -70,13 +72,14 @@ namespace store {
     }
     
     bool env::set(std::string const& key, std::string const& value) {
-        if (get(key) == value) { return true; }
+        // if (get(key) == value) { return true; }
         std::lock_guard<std::mutex> lock(mute);
         if (::setenv(key.c_str(), value.c_str(), 1) == 0) {
             if (cache.find(key) != cache.end()) {
                 cache[key] = value;
             } else {
                 cache.insert({ key, value });
+                ++envcount;
             }
             return true;
         }
@@ -88,7 +91,9 @@ namespace store {
             cache.erase(key);
         }
         std::lock_guard<std::mutex> lock(mute);
-        return ::unsetenv(key.c_str()) == 0;
+        bool unset = ::unsetenv(key.c_str()) == 0;
+        if (unset) { --envcount; }
+        return unset;
     }
     
     std::size_t env::count() const {

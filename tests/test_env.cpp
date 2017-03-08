@@ -1,4 +1,5 @@
 
+#include <cstdlib>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 // #include <libimread/ext/filesystem/mode.h>
@@ -36,15 +37,24 @@ namespace {
     TEST_CASE("[environment] List the environment variables of the current process",
               "[environment-list-environment-variables-current-process]")
     {
-        
         store::env viron;
         
         REQUIRE(viron.count() > 0);
-        WTF("Total environment variables: ", viron.count());
+        int oldcount = viron.count();
+        // WTF("Total environment variables: ", viron.count());
         
         for (std::string const& name : viron.list()) {
-            WTF("Environment variable: ", name);
+            // WTF("Environment variable: ", name);
+            CHECK(viron.get(name) == std::getenv(name.c_str()));
         }
+        
+        std::string nk("YO_DOGG");
+        std::string nv("I heard you like environment variables");
+        
+        CHECK(std::getenv(nk.c_str()) == nullptr);
+        viron.set(nk, nv);
+        CHECK(std::getenv(nk.c_str()) == std::string("I heard you like environment variables"));
+        CHECK(viron.count() == oldcount + 1);
     }
     
 } /// namespace (anon.)
