@@ -131,7 +131,7 @@ namespace store {
         stringmapper::stringvec_t out{};
         out.reserve(count());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            out.emplace_back(std::string(it->key().ToString()));
+            out.emplace_back(it->key().ToString());
         }
         delete it;
         return out;

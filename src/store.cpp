@@ -9,8 +9,13 @@ namespace store {
     
     #pragma mark - base class store::stringmapper default methods
     
+    void stringmapper::warm_cache() const {
+        /// cache warmup: call get() for each key in the stringmapper
+        for (std::string const& key : list()) { get(key); }
+    }
+    
     stringmapper::stringmap_t stringmapper::mapping() const {
-        for (std::string const& item : list()) { get(item); } /// cache warmup
+        warm_cache();
         return stringmapper::stringmap_t(cache);
     }
     
