@@ -24,7 +24,7 @@
 namespace {
     
     using filesystem::path;
-    using filesystem::dotpath;
+    // using filesystem::dotpath;
     using filesystem::switchdir;
     using filesystem::resolver;
     using filesystem::NamedTemporaryFile;
