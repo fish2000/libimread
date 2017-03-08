@@ -394,11 +394,10 @@ int Json::index(Json const& other) const {
 }
 
 Json Json::at(int idx) const {
-    Json out(null);
     try {
         return Json(mkarray()->list.at(idx));
     } catch (std::out_of_range const&) {}
-    return out;
+    return Json(null);
 }
 
 Json Json::pop() {
