@@ -99,6 +99,7 @@ set(hdrs
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
     ${hdrs_dir}/color.hh
+    ${hdrs_dir}/env.hh
     ${hdrs_dir}/errors.hh
     ${hdrs_dir}/file.hh
     ${hdrs_dir}/filehandle.hh
@@ -183,6 +184,7 @@ set(srcs
     # ${srcs_dir}/ansicolor.cpp
     # ${srcs_dir}/base.cpp
     # ${srcs_dir}/color.cpp
+    ${srcs_dir}/env.cpp
     ${srcs_dir}/errors.cpp
     ${srcs_dir}/file.cpp
     ${srcs_dir}/filehandle.cpp
