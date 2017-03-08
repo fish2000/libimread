@@ -396,7 +396,7 @@ int Json::index(Json const& other) const {
 Json Json::at(int idx) const {
     Json out(null);
     try {
-        Json out(mkarray()->list.at(idx));
+        return Json(mkarray()->list.at(idx));
     } catch (std::out_of_range const&) {}
     return out;
 }
