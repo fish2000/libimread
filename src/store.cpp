@@ -9,6 +9,24 @@ namespace store {
     
     #pragma mark - base class store::stringmapper default methods
     
+    void stringmapper::json_parse(std::string const& jsonstr) {
+        Json jsonmap = Json::parse(jsonstr);
+        if (jsonmap.type() == Type::OBJECT) {
+            for (std::string const& key : jsonmap.keys()) {
+                set(key, jsonmap.get(key));
+            }
+        } else if (jsonmap.type() == Type::ARRAY) {
+            if (jsonmap.size() == 1) {
+                Json jsonmap0 = jsonmap[0];
+                if (jsonmap0.type() == Type::OBJECT) {
+                    for (std::string const& key : jsonmap0.keys()) {
+                        set(key, jsonmap0.get(key));
+                    }
+                }
+            }
+        }
+    }
+    
     void stringmapper::warm_cache() const {
         /// cache warmup: call get() for each key in the stringmapper
         for (std::string const& key : list()) { get(key); }
@@ -141,21 +159,7 @@ namespace store {
     stringmap::stringmap() noexcept {}
     
     stringmap::stringmap(std::string const& jsonstr) {
-        Json jsonmap = Json::parse(jsonstr);
-        if (jsonmap.type() == Type::OBJECT) {
-            for (std::string const& key : jsonmap.keys()) {
-                set(key, jsonmap.get(key));
-            }
-        } else if (jsonmap.type() == Type::ARRAY) {
-            if (jsonmap.size() == 1) {
-                Json jsonmap0 = jsonmap[0];
-                if (jsonmap0.type() == Type::OBJECT) {
-                    for (std::string const& key : jsonmap0.keys()) {
-                        set(key, jsonmap0.get(key));
-                    }
-                }
-            }
-        }
+        json_parse(jsonstr);
     }
     
     std::string& stringmap::get(std::string const& key) {

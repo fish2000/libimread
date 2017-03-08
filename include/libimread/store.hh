@@ -79,6 +79,7 @@ namespace store {
             using stringmap_t = std::unordered_map<std::string, std::string>;
         
         public:
+            virtual void json_parse(std::string const&);
             virtual std::string&       get(std::string const& key) = 0;
             virtual std::string const& get(std::string const& key) const = 0;
             virtual bool set(std::string const& key, std::string const& value) = 0;
