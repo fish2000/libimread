@@ -87,7 +87,7 @@ namespace store {
             virtual stringvec_t list() const = 0;
             
             virtual void warm_cache() const;
-            virtual stringmap_t mapping() const;
+            virtual stringmap_t& mapping() const;
             virtual std::string mapping_json() const;
         
         public:

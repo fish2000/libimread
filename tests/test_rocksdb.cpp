@@ -42,6 +42,8 @@ namespace {
         /// set up the Rocks instance
         TemporaryDirectory td("test-rocks");
         path rockspth = td.dirpath.join("data.db");
+        path rocksjsonpth = td.dirpath.join("rocks-dump.json");
+        path memoryjsonpth = td.dirpath.join("memory-dump.json");
         store::rocks database(rockspth.str());
         
         /// load some test data
@@ -53,6 +55,7 @@ namespace {
         std::size_t manualcount = 0;
         
         /// list of dicts, each with an _id field
+        REQUIRE(jsondoc.is_readable());
         Json dictlist = Json::load(jsondoc.str());
         int max = dictlist.size();
         
@@ -81,9 +84,51 @@ namespace {
         
         store::stringmap memcopy(database);
         
+        REQUIRE(database.count() == memcopy.count());
+        
         for (std::string const& key : database.list()) {
             CHECK(database.get(key) == memcopy.get(key));
+            CHECK(memcopy.get(key) != memcopy.null_value());
         }
+        
+        Json(database.mapping()).dump(rocksjsonpth.str());
+        Json(memcopy.mapping()).dump(memoryjsonpth.str());
+        REQUIRE(rocksjsonpth.exists());
+        REQUIRE(rocksjsonpth.is_file());
+        REQUIRE(memoryjsonpth.exists());
+        REQUIRE(memoryjsonpth.is_file());
+        
+        {
+            FileSource source(rocksjsonpth);
+            store::value_copy(database, source);
+            for (std::string const& key : database.list()) {
+                CHECK(database.get(key) == source.get(key));
+                CHECK(source.get(key) != source.null_value());
+            }
+        }
+        
+        {
+            FileSource source(memoryjsonpth);
+            store::value_copy(database, source);
+            for (std::string const& key : database.list()) {
+                CHECK(database.get(key) == source.get(key));
+                CHECK(source.get(key) != source.null_value());
+            }
+        }
+        
+        {
+            NamedTemporaryFile tf(".json");
+            REQUIRE(tf.filepath.remove());
+            FileSink sink(tf.filepath);
+            store::value_copy(database, sink);
+            for (std::string const& key : database.list()) {
+                CHECK(database.get(key) == sink.get(key));
+                CHECK(sink.get(key) != sink.null_value());
+            }
+            REQUIRE(tf.filepath.is_file());
+            REQUIRE(tf.filepath.is_readable());
+        }
+        
     }
 
 } /// namespace (anon.)

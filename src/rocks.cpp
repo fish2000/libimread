@@ -7,7 +7,9 @@
 #include <libimread/errors.hh>
 #include <libimread/rocks.hh>
 #include <libimread/ext/filesystem/path.h>
+#include "rocksdb/env.h"
 #include "rocksdb/db.h"
+
 
 /// shortcut getter macro for the RocksDB internal instance
 #define SELF() instance.get<rocksdb::DB>()
@@ -45,7 +47,19 @@ namespace store {
     rocks::rocks(std::string const& filepth)
         :rockspth(path::absolute(filepth).str())
         {
+            /// background thread-pool customization options from:
+            /// https://github.com/facebook/rocksdb/wiki/basic-operations#thread-pools
+            auto env = rocksdb::Env::Default();
+            env->SetBackgroundThreads(2, rocksdb::Env::LOW);
+            env->SetBackgroundThreads(1, rocksdb::Env::HIGH);
             rocksdb::Options options;
+            options.env = env;
+            options.max_background_compactions = 2;
+            options.max_background_flushes = 1;
+            /// basic-optimization options from:
+            /// https://github.com/facebook/rocksdb/blob/master/examples/simple_example.cc
+            options.IncreaseParallelism();
+            options.OptimizeLevelStyleCompaction();
             options.create_if_missing = true;
             rocksdb::DB* local_instance = SELF();
             rocksdb::Status status = rocksdb::DB::Open(options, rockspth, &local_instance);
@@ -96,9 +110,10 @@ namespace store {
     
     bool rocks::set(std::string const& key, std::string const& value) {
         rocksdb::WriteOptions writeopts;
+        rocksdb::Status flushed;
         rocksdb::Status status = SELF()->Put(writeopts, key, value);
         if (status.ok()) {
-            rocksdb::Status flushed = SELF()->Flush(rocksdb::FlushOptions());
+            flushed = SELF()->Flush(rocksdb::FlushOptions());
             if (flushed.ok()) {
                 if (cache.find(key) != cache.end()) {
                     cache[key] = value;
@@ -107,7 +122,7 @@ namespace store {
                 }
             }
         }
-        return status.ok();
+        return status.ok() && flushed.ok();
     }
     
     bool rocks::del(std::string const& key) {

@@ -14,13 +14,15 @@ namespace store {
         for (std::string const& key : list()) { get(key); }
     }
     
-    stringmapper::stringmap_t stringmapper::mapping() const {
+    stringmapper::stringmap_t& stringmapper::mapping() const {
         warm_cache();
-        return stringmapper::stringmap_t(cache);
+        // return stringmapper::stringmap_t(cache);
+        return cache;
     }
     
     std::string stringmapper::mapping_json() const {
-        return Json(mapping()).format();
+        warm_cache();
+        return Json(cache).format();
     }
     
     stringmapper::~stringmapper() {}
@@ -144,6 +146,15 @@ namespace store {
             for (std::string const& key : jsonmap.keys()) {
                 set(key, jsonmap.get(key));
             }
+        } else if (jsonmap.type() == Type::ARRAY) {
+            if (jsonmap.size() == 1) {
+                Json jsonmap0 = jsonmap[0];
+                if (jsonmap0.type() == Type::OBJECT) {
+                    for (std::string const& key : jsonmap0.keys()) {
+                        set(key, jsonmap0.get(key));
+                    }
+                }
+            }
         }
     }
     
@@ -187,6 +198,5 @@ namespace store {
         }
         return out;
     }
-    
     
 } /// namespace store
