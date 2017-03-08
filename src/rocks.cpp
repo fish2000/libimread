@@ -58,15 +58,15 @@ namespace store {
     
     std::string& rocks::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
-            WTF("RETURNING CACHED");
+            // WTF("RETURNING CACHED");
             return cache[key];
         } else {
             std::string sval;
             rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
             if (status.ok()) {
-                WTF("INSERTING TO CACHE FOLLOWING GET");
+                // WTF("INSERTING TO CACHE FOLLOWING GET");
                 cache.insert({ key, sval });
-                WTF("RETURNING FROM CACHE");
+                // WTF("RETURNING FROM CACHE");
                 return cache[key];
             }
             return stringmapper::base_t::null_value();
@@ -75,15 +75,15 @@ namespace store {
     
     std::string const& rocks::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
-            WTF("RETURNING CACHED (const)");
+            // WTF("RETURNING CACHED (const)");
             return cache[key];
         } else {
             std::string sval;
             rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
             if (status.ok()) {
-                WTF("INSERTING TO CACHE FOLLOWING GET (const)");
+                // WTF("INSERTING TO CACHE FOLLOWING GET (const)");
                 cache.insert({ key, sval });
-                WTF("RETURNING FROM CACHE (const)");
+                // WTF("RETURNING FROM CACHE (const)");
                 return cache[key];
             }
             return stringmapper::base_t::null_value();

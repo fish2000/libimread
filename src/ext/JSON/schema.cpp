@@ -361,7 +361,7 @@ Json::Schema::~Schema() {
     /// TODO: the rest
 }
 
-void Json::Node::validate(const Schema& schema, Json::nodecvec_t& path) const {
+void Json::Node::validate(Schema const& schema, Json::nodecvec_t& path) const {
     if (schema.s_enum != nullptr) {
         bool found = false;
         for (const Node* n : schema.s_enum->list) {
@@ -393,7 +393,7 @@ void Json::Node::validate(const Schema& schema, Json::nodecvec_t& path) const {
     /// TODO: oneof, not, definitions
 }
 
-void Json::Array::validate(const Schema& schema, Json::nodecvec_t& path) const {
+void Json::Array::validate(Schema const& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "array") { throw JSONInvalidSchema("type mismatch"); }
     if (list.size() < schema.min_len) { throw JSONInvalidSchema("array length below minItems"); }
@@ -417,7 +417,7 @@ void Json::Array::validate(const Schema& schema, Json::nodecvec_t& path) const {
     path.pop_back();
 }
 
-void Json::Object::validate(const Schema& schema, Json::nodecvec_t& path) const {
+void Json::Object::validate(Schema const& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "object") { throw JSONInvalidSchema("type mismatch"); }
     if (map.size() < schema.min_len) { throw JSONInvalidSchema("number of properties below minimum"); }
@@ -453,7 +453,7 @@ void Json::Object::validate(const Schema& schema, Json::nodecvec_t& path) const 
     path.pop_back();
 }
 
-void Json::Number::validate(const Schema& schema, Json::nodecvec_t& path) const {
+void Json::Number::validate(Schema const& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "number") { throw JSONInvalidSchema("type mismatch"); }
     if (value < schema.min_num) { throw JSONInvalidSchema("number below minimum"); }
@@ -469,7 +469,7 @@ void Json::Number::validate(const Schema& schema, Json::nodecvec_t& path) const 
     path.pop_back();
 }
 
-void Json::String::validate(const Schema& schema, Json::nodecvec_t& path) const {
+void Json::String::validate(Schema const& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "string") { throw JSONInvalidSchema("type mismatch"); }
     if (detail::u8size(value) < schema.min_len) { throw JSONInvalidSchema("string length below minLength"); }
@@ -483,7 +483,7 @@ void Json::String::validate(const Schema& schema, Json::nodecvec_t& path) const 
 }
 
 
-void Json::Pointer::validate(const Schema& schema, Json::nodecvec_t& path) const {
+void Json::Pointer::validate(Schema const& schema, Json::nodecvec_t& path) const {
     path.push_back(this);
     if (schema.s_type != "pointer") { throw JSONInvalidSchema("type mismatch"); }
     /// INSERT STUFF HERE

@@ -393,6 +393,14 @@ int Json::index(Json const& other) const {
     return -1;
 }
 
+Json Json::at(int idx) const {
+    Json out(null);
+    try {
+        Json out(mkarray()->list.at(idx));
+    } catch (std::out_of_range const&) {}
+    return out;
+}
+
 Json Json::pop() {
     auto ap = mkarray();
     auto const& arlist = ap->list;
@@ -403,15 +411,33 @@ Json Json::pop() {
 }
 
 Json Json::Property::operator=(Json const& that) {
-    if (host->type() == Type::OBJECT) {
-        ((Object*)host)->set(key, that.root);
-    } else if (host->type() == Type::ARRAY) {
-        ((Array*)host)->repl(kidx, that.root);
-    } else {
-        imread_raise(JSONLogicError,
-            "Property::operator=(Json) assignment logic error:",
-         FF("\tAssignment attempt made on LHS object of Type::%s", host->typestr()),
-            "\tJson LHS object (assignee) should be Type::OBJECT or Type::ARRAY");
+    switch (host->type()) {
+        case Type::JSNULL:
+            (host = &Node::null)->refcnt++;
+            break;
+        case Type::BOOLEAN:
+            host = that.root == &Bool::T ? &Bool::T : &Bool::F;
+            break;
+        case Type::NUMBER:
+            if (that.is_integer()) {
+                ((Number*)host)->value = static_cast<long>(that);
+            } else {
+                ((Number*)host)->value = static_cast<long double>(that);
+            }
+            break;
+        case Type::STRING:
+            ((String*)host)->value = static_cast<std::string>(that);
+            break;
+        case Type::ARRAY:
+            ((Array*)host)->repl(kidx, that.root);
+            break;
+        case Type::OBJECT:
+            ((Object*)host)->set(key, that.root);
+            break;
+        case Type::POINTER:
+        case Type::SCHEMA:
+        default:
+            break;
     }
     return target();
 }
@@ -437,13 +463,23 @@ Json::Property Json::operator[](std::string const& key) const {
 }
 
 std::size_t Json::size() const {
-    if (root->type() == Type::ARRAY)  { return ((Array*)root)->list.size(); }
-    if (root->type() == Type::OBJECT) { return ((Object*)root)->map.size(); }
-    if (root->type() == Type::STRING) { return ((String*)root)->value.size(); }
-    imread_raise(JSONUseError,
-        "Json::size() method not applicable",
-     FF("root->type() == Type::%s", root->typestr()),
-        "(Requires {Type::OBJECT | Type::ARRAY | Type::STRING})");
+    switch (root->type()) {
+        case Type::ARRAY:
+            return ((Array*)root)->list.size();
+        case Type::OBJECT:
+            return ((Object*)root)->map.size();
+        case Type::STRING:
+            return ((String*)root)->value.size();
+        case Type::JSNULL:
+        case Type::BOOLEAN:
+        case Type::NUMBER:
+        case Type::POINTER:
+        case Type::SCHEMA:
+            imread_raise(JSONUseError,
+                "Json::size() method not applicable",
+             FF("root->type() == Type::%s", root->typestr()),
+                "(Requires {Type::OBJECT | Type::ARRAY | Type::STRING})");
+    }
 }
 
 Json Json::get(std::string const& key) const {
@@ -546,16 +582,18 @@ Json Json::Property::target() const {
 detail::stringvec_t Json::keys() const {
     Object* op = mkobject();
     detail::stringvec_t out;
+    out.reserve(op->map.size());
     for (auto const& it : op->map) {
-        out.push_back(*it.first);
+        out.emplace_back(*it.first);
     }
     return out;
 }
 
 detail::stringvec_t Json::allkeys() {
     detail::stringvec_t out;
+    out.reserve(keyset.size());
     for (auto const& key : keyset) {
-        out.push_back(key);
+        out.emplace_back(key);
     }
     return out;
 }

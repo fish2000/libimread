@@ -239,7 +239,6 @@ namespace store {
         
     };
     
-    
 } /// namespace store
 
 #endif /// LIBIMREAD_INCLUDE_STORE_HH_

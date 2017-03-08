@@ -21,9 +21,6 @@
 #include <type_traits>
 #include <initializer_list>
 
-// #include <libimread/libimread.hpp>
-// #include <libimread/errors.hh>
-
 using Base = std::integral_constant<uint8_t, 1>;
 using BaseType = Base::value_type;
 
@@ -265,6 +262,7 @@ class Json {
         };
         
         struct Schema : Node {
+            using schemavec_t = std::vector<Schema*>;
             static constexpr Type typecode = Type::SCHEMA;
             Type type() const override { return Type::SCHEMA; }
             bool is_schema() const override { return true; }
@@ -273,19 +271,20 @@ class Json {
             std::string uri;
             std::string s_type;
             Array* s_enum = nullptr;
-            std::vector<Schema*> allof;
-            std::vector<Schema*> anyof;
-            std::vector<Schema*> oneof;
+            schemavec_t allof;
+            schemavec_t anyof;
+            schemavec_t oneof;
             Schema* s_not = nullptr;
             long double max_num = LDBL_MAX;
             long double min_num = -LDBL_MAX;
             long double mult_of = 0;
-            bool max_exc = false, min_exc = false;
+            bool max_exc = false;
+            bool min_exc = false;
             unsigned long max_len = UINT32_MAX;
             unsigned long min_len = 0;
             void* pattern = nullptr; /// std::regex
             Schema* item = nullptr;
-            std::vector<Schema*> items;
+            schemavec_t items;
             Schema* add_items = nullptr;
             bool add_items_bool = false;
             bool unique_items = false;
@@ -495,6 +494,7 @@ class Json {
         Json  extend(Json const&) const;
         Json& append(Json const&);
         int    index(Json const&) const;
+        Json      at(int idx) const;
         Json     pop();
         
         /// subscripting
@@ -509,8 +509,8 @@ class Json {
         /// stringification
         std::string stringify() const { return format(); }
         std::string format() const;
-        friend std::ostream &operator<<(std::ostream&, Json const&);
-        friend std::istream &operator>>(std::istream&, Json&);
+        friend std::ostream& operator<<(std::ostream&, Json const&);
+        friend std::istream& operator>>(std::istream&, Json&);
         
         /// hashing
         std::size_t hash(std::size_t H = 0) const;
