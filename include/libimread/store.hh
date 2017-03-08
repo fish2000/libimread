@@ -119,15 +119,15 @@ namespace store {
         template <bool... b>
         struct static_all_of;
         
-        // implementation: recurse, if the first argument is true
+        /// implementation: recurse, if the first argument is true
         template <bool... tail> 
         struct static_all_of<true, tail...> : static_all_of<tail...> {};
         
-        // end recursion if first argument is false - 
+        /// end recursion if first argument is false - 
         template <bool... tail> 
         struct static_all_of<false, tail...> : std::false_type {};
         
-        //  - or if no more arguments
+        ///  - or if no more arguments
         template <>
         struct static_all_of<> : std::true_type {};
         
@@ -146,7 +146,7 @@ namespace store {
     
     template <typename T, typename U>
     void value_copy(T&& from, U&& to) {
-        static_assert(store::is_stringmapper<T, U>::value,
+        static_assert(store::is_stringmapper_v<T, U>,
                       "store::value_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
         if (!froms.empty()) {
@@ -158,7 +158,7 @@ namespace store {
     template <typename T, typename U>
     void prefix_copy(T&& from, U&& to, std::string const& prefix = "prefix",
                                        std::string const& sep = ":") {
-        static_assert(store::is_stringmapper<T, U>::value,
+        static_assert(store::is_stringmapper_v<T, U>,
                       "store::prefix_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
         if (!froms.empty()) {
@@ -174,14 +174,14 @@ namespace store {
             
             template <typename T,
                       typename X = typename std::enable_if_t<
-                                            store::is_stringmapper<T>::value, void>>
+                                            store::is_stringmapper_v<T>, void>>
             X update(T&& from) {
                 store::value_copy(std::forward<T>(from), *this);
             }
             
             template <typename T,
                       typename X = typename std::enable_if_t<
-                                            store::is_stringmapper<T>::value, void>>
+                                            store::is_stringmapper_v<T>, void>>
             X update(T&& from, std::string const& prefix,
                                std::string const& sep = ":") {
                 store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
@@ -217,7 +217,7 @@ namespace store {
             
             template <typename T,
                       typename X = typename std::enable_if_t<
-                                            store::is_stringmapper<T>::value, void>>
+                                            store::is_stringmapper_v<T>, void>>
             explicit stringmap(T&& from) noexcept
                 :stringmap()
                 {
@@ -226,7 +226,7 @@ namespace store {
             
             template <typename T,
                       typename X = typename std::enable_if_t<
-                                            store::is_stringmapper<T>::value, void>>
+                                            store::is_stringmapper_v<T>, void>>
             explicit stringmap(T&& from, std::string const& prefix,
                                          std::string const& sep = ":") noexcept
                 :stringmap()
@@ -236,14 +236,14 @@ namespace store {
             
             template <typename T,
                       typename X = typename std::enable_if_t<
-                                            store::is_stringmapper<T>::value, void>>
+                                            store::is_stringmapper_v<T>, void>>
             X update(T&& from) {
                 store::value_copy(std::forward<T>(from), *this);
             }
             
             template <typename T,
                       typename X = typename std::enable_if_t<
-                                            store::is_stringmapper<T>::value, void>>
+                                            store::is_stringmapper_v<T>, void>>
             X update(T&& from, std::string const& prefix,
                                std::string const& sep = ":") {
                 store::prefix_copy(std::forward<T>(from), *this, prefix, sep);

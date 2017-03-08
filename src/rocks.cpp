@@ -96,7 +96,6 @@ namespace store {
     
     bool rocks::set(std::string const& key, std::string const& value) {
         rocksdb::WriteOptions writeopts;
-        writeopts.sync = true;
         rocksdb::Status status = SELF()->Put(writeopts, key, value);
         if (status.ok()) {
             rocksdb::Status flushed = SELF()->Flush(rocksdb::FlushOptions());

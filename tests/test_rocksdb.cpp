@@ -79,8 +79,7 @@ namespace {
             CHECK(database.get(key) != database.null_value());
         }
         
-        store::stringmap memcopy;
-        memcopy.update(database);
+        store::stringmap memcopy(database);
         
         for (std::string const& key : database.list()) {
             CHECK(database.get(key) == memcopy.get(key));
