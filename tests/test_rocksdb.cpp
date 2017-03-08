@@ -55,15 +55,19 @@ namespace {
         /// list of dicts, each with an _id field
         Json dictlist = Json::load(jsondoc.str());
         int max = dictlist.size();
+        
         for (int idx = 0; idx < max; ++idx) {
             Json dict = dictlist.at(idx);
             std::string prefix(dict.get("_id"));
+            
             for (std::string const& key : dict.keys()) {
                 /// construct a prefixed key for use in Rocks
                 std::string nk = prefix + ":" + key;
-                WTF("KEY: ", nk, "VALUE: ", std::string(dict.get(key)));
+                
+                // WTF("KEY: ", nk, "VALUE: ", std::string(dict.get(key)));
                 std::string nv = dict.cast<std::string>(key);
-                database.set(nk, nv);
+                CHECK(database.set(nk, nv));
+                
                 /// increment manual count
                 ++manualcount;
             }
@@ -72,9 +76,11 @@ namespace {
         REQUIRE(database.count() == manualcount);
         
         for (std::string const& key : database.list()) {
-            WTF("KEY: ", key);
+            // WTF("KEY: ", key);
             CHECK(database.get(key) != database.null_value());
         }
+        
+        
         
     }
 

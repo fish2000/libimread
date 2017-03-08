@@ -56,6 +56,16 @@ namespace store {
         instance.reset(nullptr);
     }
     
+    std::string& rocks::get_force(std::string const& key) const {
+        std::string sval;
+        rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
+        if (status.ok()) {
+            cache[key] = sval;
+            return cache.at(key);
+        }
+        return stringmapper::base_t::null_value();
+    }
+    
     std::string& rocks::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);

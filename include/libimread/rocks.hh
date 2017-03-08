@@ -59,6 +59,9 @@ namespace store {
             }
         
         public:
+            std::string& get_force(std::string const&) const;
+        
+        public:
             /// implementation of the stringmapper API, in terms of the RocksDB API
             virtual std::string&       get(std::string const& key) override;
             virtual std::string const& get(std::string const& key) const override;
