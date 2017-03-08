@@ -14,6 +14,7 @@
 #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/resolver.h>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/ext/filesystem/execute.h>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 
