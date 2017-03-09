@@ -53,10 +53,14 @@ namespace {
         
         CHECK(std::getenv(nk.c_str()) == nullptr);
         CHECK(viron.get(nk) == viron.null_value());
-        viron.set(nk, nv);
+        CHECK(viron.set(nk, nv));
         CHECK(std::getenv(nk.c_str()) == std::string("I heard you like environment variables"));
         CHECK(viron.get(nk) == "I heard you like environment variables");
         CHECK(viron.count() == oldcount + 1);
+        CHECK(viron.del(nk));
+        CHECK(std::getenv(nk.c_str()) == nullptr);
+        CHECK(viron.get(nk) == viron.null_value());
+        CHECK(viron.count() == oldcount);
     }
     
     
@@ -77,15 +81,19 @@ namespace {
         
         std::string nk("YO_DOGG");
         std::string nv("I heard you like environment variables");
-        viron.set(nk, nv);
+        CHECK(viron.set(nk, nv));
         
         store::stringmap memcopy2(viron);
         REQUIRE(viron.count() == memcopy2.count());
         
         /// WAIT WHAT THE FUCK, THIS IS NOT SUPPOSED TO HAPPEN
-        // REQUIRE(viron.count() == memcopycount + 1);
+        // CHECK(viron.get(nk) == memcopy.get(nk));
+        
+        CHECK(viron.count() == memcopy2.count());
+        CHECK(viron.count() == memcopycount + 1);
+        CHECK(viron.count() == memcopy.count() + 1);
         CHECK(viron.get(nk) == memcopy2.get(nk));
-        CHECK(viron.get(nk) == memcopy.get(nk));
+        CHECK(viron.del(nk));
     }
     
 } /// namespace (anon.)
