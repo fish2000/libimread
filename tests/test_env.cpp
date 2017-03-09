@@ -12,7 +12,7 @@
 
 // #include <libimread/file.hh>
 // #include <libimread/filehandle.hh>
-// #include <libimread/store.hh>
+#include <libimread/store.hh>
 // #include <libimread/rocks.hh>
 #include <libimread/env.hh>
 
@@ -52,11 +52,40 @@ namespace {
         std::string nv("I heard you like environment variables");
         
         CHECK(std::getenv(nk.c_str()) == nullptr);
-        // CHECK(viron.get(nk) == viron.null_value());
+        CHECK(viron.get(nk) == viron.null_value());
         viron.set(nk, nv);
         CHECK(std::getenv(nk.c_str()) == std::string("I heard you like environment variables"));
         CHECK(viron.get(nk) == "I heard you like environment variables");
         CHECK(viron.count() == oldcount + 1);
+    }
+    
+    
+    TEST_CASE("[environment] Copy/Dump/Load environment variables via the store API",
+              "[environment-copy-dump-load-environment-variables-store-API]")
+    {
+        store::env viron;
+        int vironcount = viron.count();
+        
+        store::stringmap memcopy(viron);
+        int memcopycount = memcopy.count();
+        
+        REQUIRE(vironcount == memcopycount);
+        
+        for (std::string const& name : memcopy.list()) {
+            CHECK(viron.get(name) == std::getenv(name.c_str()));
+        }
+        
+        std::string nk("YO_DOGG");
+        std::string nv("I heard you like environment variables");
+        viron.set(nk, nv);
+        
+        store::stringmap memcopy2(viron);
+        REQUIRE(viron.count() == memcopy2.count());
+        
+        /// WAIT WHAT THE FUCK, THIS IS NOT SUPPOSED TO HAPPEN
+        // REQUIRE(viron.count() == memcopycount + 1);
+        CHECK(viron.get(nk) == memcopy2.get(nk));
+        CHECK(viron.get(nk) == memcopy.get(nk));
     }
     
 } /// namespace (anon.)

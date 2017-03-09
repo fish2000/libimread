@@ -37,10 +37,13 @@ namespace store {
     env::~env() {}
     
     std::string& env::get_force(std::string const& key) const {
-        std::string value = std::getenv(key.c_str());
-        if (value.size()) {
-            cache[key] = value;
-            return cache.at(key);
+        char* cvalue = std::getenv(key.c_str());
+        if (cvalue != nullptr) {
+            std::string value(cvalue);
+            if (value.size() > 0) {
+                cache[key] = value;
+                return cache.at(key);
+            }
         }
         return stringmapper::base_t::null_value();
     }
@@ -49,10 +52,13 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         } else {
-            std::string value = std::getenv(key.c_str());
-            if (value.size()) {
-                cache[key] = value;
-                return cache.at(key);
+            char* cvalue = std::getenv(key.c_str());
+            if (cvalue != nullptr) {
+                std::string value(cvalue);
+                if (value.size() > 0) {
+                    cache.insert({ key, value });
+                    return cache.at(key);
+                }
             }
             return stringmapper::base_t::null_value();
         }
@@ -62,10 +68,13 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         } else {
-            std::string value = std::getenv(key.c_str());
-            if (value.size()) {
-                cache[key] = value;
-                return cache.at(key);
+            char* cvalue = std::getenv(key.c_str());
+            if (cvalue != nullptr) {
+                std::string value(cvalue);
+                if (value.size() > 0) {
+                    cache.insert({ key, value });
+                    return cache.at(key);
+                }
             }
             return stringmapper::base_t::null_value();
         }

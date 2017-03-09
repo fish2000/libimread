@@ -8,56 +8,60 @@
 #include <string>
 #include <memory>
 #include <libimread/libimread.hpp>
-#include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/filesystem/resolver.h>
-#include <libimread/ext/filesystem/temporary.h>
+// #include <libimread/ext/filesystem/path.h>
+// #include <libimread/ext/filesystem/resolver.h>
+// #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/errors.hh>
 #include <libimread/seekable.hh>
 
 /// Welcome to Singleton, USA
 
-namespace im {
+namespace filesystem {
+    class path;
+}
+
+namespace single {
         
-    class Base : public std::enable_shared_from_this<Base> {
+    class base : public std::enable_shared_from_this<base> {
         
         using shared_t = std::shared_ptr<Base>;
         
         private:
             static std::mutex wintermute;
-            Base(const Base& copy) = delete;
-            Base &operator=(const Base& copy) = delete;
+            base(base const&) = delete;
+            base& operator=(base const&) = delete;
         
         protected:
-            constexpr Base() noexcept = default;
-            virtual ~Base() {}
+            constexpr base() noexcept = default;
+            virtual ~base() {}
             virtual shared_t shared() {
                 return shared_from_this();
             }
         
         public:
-            
             static shared_t& get() {
                 static shared_t instance = nullptr;
                 if (!instance) {
                     std::lock_guard<std::mutex> lock(wintermute);
-                    if (!instance) { instance.reset(new Base()); }
+                    if (!instance) { instance.reset(new base()); }
                     return instance;
                 }
                 return shared();
             }
-            
-            virtual bool has(const path&) = 0;
-            virtual bool has(path&&) = 0;
+        
+        public:
+            virtual bool has(std::string const&) = 0;
+            virtual bool has(std::string&&) = 0;
             
     };
     
-    class Singleton : public Base {
+    class singleton : public base {
         public:
-            virtual bool has(const std::string& s) { return true; }
+            virtual bool has(std::string const& s) { return true; }
             virtual bool has(std::string&& s) { return true; }
         protected:
-            constexpr Singleton() noexcept = default;
-            virtual ~Singleton() {}
+            constexpr singleton() noexcept = default;
+            virtual ~singleton() {}
     };
 }
 
