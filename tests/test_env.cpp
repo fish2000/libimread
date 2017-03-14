@@ -45,7 +45,9 @@ namespace {
         
         for (std::string const& name : viron.list()) {
             // WTF("Environment variable: ", name);
-            CHECK(viron.get(name) == std::getenv(name.c_str()));
+            if (std::strcmp(std::getenv(name.c_str()), "") != 0) {
+                CHECK(viron.get(name) == std::getenv(name.c_str()));
+            }
         }
         
         std::string nk("YO_DOGG");
@@ -76,7 +78,9 @@ namespace {
         REQUIRE(vironcount == memcopycount);
         
         for (std::string const& name : memcopy.list()) {
-            CHECK(viron.get(name) == std::getenv(name.c_str()));
+            if (std::strcmp(std::getenv(name.c_str()), "") != 0) {
+                CHECK(viron.get(name) == std::getenv(name.c_str()));
+            }
         }
         
         std::string nk("YO_DOGG");

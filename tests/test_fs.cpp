@@ -49,7 +49,8 @@ namespace {
         
         /// preflight: store the current WD using path::cwd(),
         ///            manually call chdir() to start out in `basedir`
-        const char* current = path::cwd().c_str();
+        auto current = std::make_unique<char[]>(std::strlen(path::cwd().c_str()) + 1);
+        std::strcpy(current.get(), path::cwd().c_str());
         ::chdir(absdir);
         
         /// confirm the new WD using path::cwd() and operator==() with `absdir`
@@ -82,8 +83,8 @@ namespace {
         ///           so as to hopefully return back into the test runner without having
         ///           problematically fucked with its state (like at least as minimally
         ///           fucked as one can, like possibly, erm)
-        ::chdir(current);
-        // REQUIRE(path::cwd().c_str() == current);
+        ::chdir(current.get());
+        REQUIRE(std::strcmp(path::cwd().c_str(), current.get()) == 0);
     }
     
     TEST_CASE("[filesystem] Test path::hash() and std::hash<path> specialization integrity",
@@ -120,7 +121,7 @@ namespace {
         path basedir(im::test::basedir);
         std::vector<path> v = basedir.list("*.jpg");
         REQUIRE(v.size() == im::test::num_jpg);
-        std::for_each(v.begin(), v.end(), [&](path& p) {
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
         });
         for (int idx = 0; idx < im::test::num_jpg; idx++) {
@@ -151,7 +152,7 @@ namespace {
         path basedir(im::test::basedir);
         std::vector<path> v = basedir.list("*.jpeg");
         REQUIRE(v.size() == im::test::num_jpeg);
-        std::for_each(v.begin(), v.end(), [&](path& p) {
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
         });
         for (int idx = 0; idx < im::test::num_jpeg; idx++) {
@@ -164,7 +165,7 @@ namespace {
         path basedir(im::test::basedir);
         std::vector<path> v = basedir.list("*.png");
         REQUIRE(v.size() == im::test::num_png);
-        std::for_each(v.begin(), v.end(), [&](path& p) {
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
         });
         for (int idx = 0; idx < im::test::num_png; idx++) {
@@ -177,7 +178,7 @@ namespace {
         path basedir(im::test::basedir);
         std::vector<path> v = basedir.list("*.tif");
         REQUIRE(v.size() == im::test::num_tif);
-        std::for_each(v.begin(), v.end(), [&](path& p) {
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
         });
         for (int idx = 0; idx < im::test::num_tif; idx++) {
@@ -190,7 +191,7 @@ namespace {
         path basedir(im::test::basedir);
         std::vector<path> v = basedir.list("*.tiff");
         REQUIRE(v.size() == im::test::num_tiff);
-        std::for_each(v.begin(), v.end(), [&](path& p) {
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
         });
         for (int idx = 0; idx < im::test::num_tiff; idx++) {
@@ -206,7 +207,7 @@ namespace {
         std::regex re("(jpg|jpeg)$", RE_FLAGS);
         std::vector<path> v = basedir.list(re);
         REQUIRE(v.size() == im::test::num_jpg + im::test::num_jpeg);
-        std::for_each(v.begin(), v.end(), [&](path& p) {
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
         });
     }
@@ -216,7 +217,7 @@ namespace {
         path basedir(im::test::basedir);
         std::vector<path> v = basedir.list("*.pvr");
         REQUIRE(v.size() == im::test::num_pvr);
-        std::for_each(v.begin(), v.end(), [&](path& p) {
+        std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
         });
         for (int idx = 0; idx < im::test::num_pvr; idx++) {
