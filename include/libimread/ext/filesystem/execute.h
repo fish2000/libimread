@@ -12,7 +12,8 @@ namespace filesystem {
         
         static constexpr int EXECUTION_BUFFER_SIZE = 128;
         
-        std::string execute(char const* command);
+        std::string execute(char const* command,
+                            char const* workingdir = nullptr);
         
     }
     

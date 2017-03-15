@@ -61,7 +61,8 @@ namespace {
             /// switch working directory to tmpdir
             switchdir s(tmpdir);
             /// confirm we are in the new directory
-            bool check_two = bool(path::cwd() == tmpdir);
+            // bool check_two = bool(path::cwd() == tmpdir);
+            bool check_two = bool(path::cwd().inode() == tmpdir.inode());
             // WTF("CWD: ", path::cwd().str());
             // WTF("TMP: ", tmpdir.str());
             /// confirm we came from the old directory
@@ -69,7 +70,8 @@ namespace {
             /// confirm our new location's listing contains at least one file
             bool check_two_and_two_thirds = bool(path::cwd().list().size() > 0);
             /// proceed ...
-            // REQUIRE(check_two);
+            // WTF("CURRENTLY IN: ", path::cwd().str(), "TMPDIR: ", tmpdir.str());
+            REQUIRE(check_two);
             REQUIRE(check_two_and_a_half);
             REQUIRE(check_two_and_two_thirds);
             /// ... aaaand the working directory flips back to `basedir` at scope exit
@@ -83,8 +85,12 @@ namespace {
         ///           so as to hopefully return back into the test runner without having
         ///           problematically fucked with its state (like at least as minimally
         ///           fucked as one can, like possibly, erm)
+        REQUIRE(current.get() != nullptr);
         ::chdir(current.get());
-        REQUIRE(std::strcmp(path::cwd().c_str(), current.get()) == 0);
+        // REQUIRE(std::strcmp(path::cwd().c_str(), current.get()) == 0);
+        REQUIRE(path::cwd().inode() == path::inode(current.get()));
+        std::string current_string(current.get());
+        REQUIRE(path::cwd().str() == current_string);
     }
     
     TEST_CASE("[filesystem] Test path::hash() and std::hash<path> specialization integrity",

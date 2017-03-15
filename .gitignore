@@ -16,6 +16,7 @@
 *.pyc
 *.pyo
 *.xcuserstate
+.DS_Store
 # *.capnp.c++
 # *.capnp.h
 .tm_properties
