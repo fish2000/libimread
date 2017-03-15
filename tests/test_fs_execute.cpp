@@ -24,5 +24,4 @@ namespace {
         CHECK(output.find("ps aux") != std::string::npos);
     }
     
-    
 } /// namespace (anon.)
