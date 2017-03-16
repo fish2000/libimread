@@ -13,6 +13,9 @@ namespace store {
     class env final : public stringmapper {
         
         public:
+            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(env);
+        
+        public:
             virtual bool can_store() const noexcept override;
         
         public:
@@ -20,21 +23,6 @@ namespace store {
             env(env const&);
             env(env&&) noexcept;
             virtual ~env();
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from) {
-                store::value_copy(std::forward<T>(from), *this);
-            }
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from, std::string const& prefix,
-                               std::string const& sep = ":") {
-                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
-            }
         
         public:
             std::string& get_force(std::string const&) const;

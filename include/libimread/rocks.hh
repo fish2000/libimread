@@ -6,6 +6,9 @@
 #ifndef LIBIMREAD_INCLUDE_ROCKS_HH_
 #define LIBIMREAD_INCLUDE_ROCKS_HH_
 
+#include <type_traits>
+#include <utility>
+
 #include <libimread/store.hh>
 #include <libimread/ext/memory/refcount.hh>
 
@@ -32,6 +35,9 @@ namespace store {
     class rocks : public stringmapper {
         
         public:
+            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(rocks);
+        
+        public:
             virtual bool can_store() const noexcept override;
             
             template <typename T>
@@ -42,21 +48,6 @@ namespace store {
             rocks(rocks&&) noexcept;
             explicit rocks(std::string const&);
             virtual ~rocks();
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from) {
-                store::value_copy(std::forward<T>(from), *this);
-            }
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from, std::string const& prefix,
-                               std::string const& sep = ":") {
-                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
-            }
         
         public:
             std::string& get_force(std::string const&) const;
@@ -74,6 +65,8 @@ namespace store {
             memory::rocks_ptr instance;
             std::string rockspth{ NULL_STR };
         
+        private:
+            rocks(void);
     };
     
 } /// namespace store

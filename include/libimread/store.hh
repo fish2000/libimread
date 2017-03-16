@@ -180,26 +180,62 @@ namespace store {
         }
     }
     
+    #define DECLARE_STRINGMAPPER_TEMPLATE_METHODS()                                             \
+                                                                                                \
+        template <typename T,                                                                   \
+                  typename X = typename std::enable_if_t<                                       \
+                                        store::is_stringmapper_v<T>, void>>                     \
+        X update(T&& from) {                                                                    \
+            store::value_copy(std::forward<T>(from), *this);                                    \
+        }                                                                                       \
+                                                                                                \
+        template <typename T,                                                                   \
+                  typename X = typename std::enable_if_t<                                       \
+                                        store::is_stringmapper_v<T>, void>>                     \
+        X update(T&& from, std::string const& prefix,                                           \
+                           std::string const& sep = ":") {                                      \
+            store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                      \
+        }
+    
+    #define DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(__typename__)                            \
+                                                                                                \
+        template <typename T,                                                                   \
+                  typename X = typename std::enable_if_t<                                       \
+                                        store::is_stringmapper_v<T>, void>>                     \
+        explicit __typename__(T&& from) noexcept                                                \
+            :__typename__()                                                                     \
+            {                                                                                   \
+                store::value_copy(std::forward<T>(from), *this);                                \
+            }                                                                                   \
+                                                                                                \
+        template <typename T,                                                                   \
+                  typename X = typename std::enable_if_t<                                       \
+                                        store::is_stringmapper_v<T>, void>>                     \
+        explicit __typename__(T&& from, std::string const& prefix,                              \
+                                        std::string const& sep = ":") noexcept                  \
+            :__typename__()                                                                     \
+            {                                                                                   \
+                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                  \
+            }                                                                                   \
+        DECLARE_STRINGMAPPER_TEMPLATE_METHODS()
+    
     class xattrmap : public stringmapper {
         
         public:
+            /// We only macro-declare xattrmap::update<…>() methods here –
+            /// the templated explicit constructors delegate to the default
+            /// constructor of the polymorphic union of the base classes,
+            /// which OK that’s kind of a thorny assumption to make, yeah,
+            /// that whatever bases are underneath a `store::xattrmap` can
+            /// just get themselves the fuck constructed without any sort of
+            /// questions asked – but so then of course the fucking intermediate
+            /// file source/sinks `im::fd_store_sink` and `im:: file_source_sink`
+            /// furnish no such default constructors. THOSE FUCKSHIT DICKHOLES.
+            /// I mean, erm, that’s why we have two macros, ah. Yes.
+            DECLARE_STRINGMAPPER_TEMPLATE_METHODS();
+        
+        public:
             virtual bool can_store() const noexcept override;
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from) {
-                store::value_copy(std::forward<T>(from), *this);
-            }
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from, std::string const& prefix,
-                               std::string const& sep = ":") {
-                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
-            }
-            
         
         public:
             /// xattr API
@@ -222,45 +258,14 @@ namespace store {
     class stringmap final : public stringmapper {
         
         public:
+            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(stringmap);
+        
+        public:
             virtual bool can_store() const noexcept override;
         
         public:
             stringmap() noexcept;                   /// default constructor
             explicit stringmap(std::string const&); /// decode from JSON string
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            explicit stringmap(T&& from) noexcept
-                :stringmap()
-                {
-                    store::value_copy(std::forward<T>(from), *this);
-                }
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            explicit stringmap(T&& from, std::string const& prefix,
-                                         std::string const& sep = ":") noexcept
-                :stringmap()
-                {
-                    store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
-                }
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from) {
-                store::value_copy(std::forward<T>(from), *this);
-            }
-            
-            template <typename T,
-                      typename X = typename std::enable_if_t<
-                                            store::is_stringmapper_v<T>, void>>
-            X update(T&& from, std::string const& prefix,
-                               std::string const& sep = ":") {
-                store::prefix_copy(std::forward<T>(from), *this, prefix, sep);
-            }
         
         public:
             /// implementation of the stringmapper API, in terms of std::unordered_map<…> API
