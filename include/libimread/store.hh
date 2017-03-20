@@ -19,11 +19,6 @@ namespace store {
         template <typename ValueType> inline
         auto value_for_null() -> ValueType&;
         
-        // template <typename ValueType> inline
-        // auto value_for_null<std::add_pointer_t<ValueType>>() -> std::add_pointer_t<ValueType> {
-        //     return nullptr;
-        // }
-        
         template <> inline
         auto value_for_null<std::string>() -> std::string& {
             static std::string nk{ NULL_STR };
