@@ -45,16 +45,6 @@ namespace store {
     
     stringmapper::~stringmapper() {}
     
-    stringmapper::base_t::key_reference stringmapper::null_key() const {
-        static stringmapper::base_t::key_type nk{ NULL_STR };
-        return nk;
-    }
-    
-    stringmapper::base_t::mapped_reference stringmapper::null_value() const {
-        static stringmapper::base_t::mapped_type nv{ NULL_STR };
-        return nv;
-    }
-    
     bool stringmapper::empty() const {
         return count() == 0;
     }

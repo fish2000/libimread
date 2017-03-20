@@ -14,6 +14,24 @@
 
 namespace store {
     
+    namespace detail {
+        
+        template <typename ValueType> inline
+        auto value_for_null() -> ValueType&;
+        
+        // template <typename ValueType> inline
+        // auto value_for_null<std::add_pointer_t<ValueType>>() -> std::add_pointer_t<ValueType> {
+        //     return nullptr;
+        // }
+        
+        template <> inline
+        auto value_for_null<std::string>() -> std::string& {
+            static std::string nk{ NULL_STR };
+            return nk;
+        }
+        
+    }
+    
     template <typename Key, typename Mapped,
               typename Value = std::pair<std::add_const_t<Key>, Mapped>>
     class base {
@@ -45,15 +63,15 @@ namespace store {
         public:
             virtual ~base() {}
             
-            virtual key_reference null_key() const {
-                static key_type nk{ NULL_STR };
-                return nk;
-            }
+            template <typename KeyType = Key>
+            auto null_key() const -> KeyType& {
+                return detail::value_for_null<KeyType>();
+            };
             
-            virtual mapped_reference null_value() const {
-                static mapped_type nv{ NULL_STR };
-                return nv;
-            }
+            template <typename MappedType = Mapped>
+            auto null_value() const -> MappedType& {
+                return detail::value_for_null<MappedType>();
+            };
             
             virtual bool can_store() const noexcept { return false; }
             
@@ -79,6 +97,8 @@ namespace store {
             using base_t = base<std::string, std::string>;
             using stringvec_t = std::vector<std::string>;
             using stringmap_t = std::unordered_map<std::string, std::string>;
+            
+            using base_t::null_key;
         
         public:
             virtual std::string&       get(std::string const& key) = 0;
@@ -96,8 +116,6 @@ namespace store {
         
         public:
             virtual ~stringmapper();
-            virtual key_reference null_key() const override;
-            virtual mapped_reference null_value() const override;
             
             virtual bool empty() const override;
             virtual std::size_t size() const override;
