@@ -43,10 +43,10 @@ namespace {
         std::string three = terminator::demangle(TYPE_ID(IRGB));
         std::string four = terminator::demangle(TYPE_ID(IRGBA));
         
-        WTF("Demangling name 01:\t\t", TYPE_ID(RGB),     one);
-        WTF("Demangling name 02:\t\t", TYPE_ID(RGBA),    two);
-        WTF("Demangling name 03:\t\t", TYPE_ID(IRGB),    three);
-        WTF("Demangling name 04:\t\t", TYPE_ID(IRGBA),   four);
+        // WTF("Demangling name 01:\t\t", TYPE_ID(RGB),     one);
+        // WTF("Demangling name 02:\t\t", TYPE_ID(RGBA),    two);
+        // WTF("Demangling name 03:\t\t", TYPE_ID(IRGB),    three);
+        // WTF("Demangling name 04:\t\t", TYPE_ID(IRGBA),   four);
         
     }
     

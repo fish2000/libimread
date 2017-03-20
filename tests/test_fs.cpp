@@ -243,9 +243,9 @@ namespace {
         CHECK(syspaths.contains("clang"));
         CHECK(!syspaths.contains("YoDogg"));
         
-        WTF("SYSTEM PATHS: ",
-            "", syspaths.to_string("\n\t"),
-            "", FF("RESOLVER SIZE: %i", syspaths.size()));
+        // WTF("SYSTEM PATHS: ",
+        //     "", syspaths.to_string("\n\t"),
+        //     "", FF("RESOLVER SIZE: %i", syspaths.size()));
     }
     
     TEST_CASE("[filesystem] Test the default resolver with path::executable()",

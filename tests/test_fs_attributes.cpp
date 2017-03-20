@@ -58,7 +58,7 @@ namespace {
                      [&p](std::string const& directory) {
                 path ourdir = p/directory;
                 
-                // REQUIRE(ourdir.is_directory());
+                REQUIRE(ourdir.is_directory());
                 stringvec_t exes(ourdir.xattrs());
                 
                 if (exes.empty()) {
@@ -70,10 +70,10 @@ namespace {
                     std::for_each(exes.begin(),
                                   exes.end(),
                         [&ourdir](std::string const& x) {
-                        std::cout << "> " << x << " : "
-                                          << ourdir.xattr(x) << std::endl;
+                        // std::cout << "> " << x << " : "
+                        //                   << ourdir.xattr(x) << std::endl;
                     });
-                    std::cout << std::endl;
+                    // std::cout << std::endl;
                 }
             });
             
@@ -82,22 +82,22 @@ namespace {
                      [&p](std::string const& file) {
                 path ourf = p/file;
                 
-                // REQUIRE(ourf.is_file());
+                REQUIRE(ourf.is_file());
                 stringvec_t exes(ourf.xattrs());
                 
                 if (exes.empty()) {
                     // std::cout << "> No xattrs found" << std::endl << std::endl;
                 } else {
-                    std::cout << "File: " << ourf << std::endl;
-                    std::cout << "> Found " << exes.size()
-                              << " xattrs:" << std::endl;
+                    // std::cout << "File: " << ourf << std::endl;
+                    // std::cout << "> Found " << exes.size()
+                    //           << " xattrs:" << std::endl;
                     std::for_each(exes.begin(),
                                   exes.end(),
                           [&ourf](std::string const& x) {
-                        std::cout << "> " << x << " : "
-                                          << ourf.xattr(x) << std::endl;
+                        // std::cout << "> " << x << " : "
+                        //                   << ourf.xattr(x) << std::endl;
                     });
-                    std::cout << std::endl;
+                    // std::cout << std::endl;
                 }
             });
         
@@ -119,15 +119,15 @@ namespace {
         CHECK(td.dirpath.xattrcount() == 2);
         stringvec_t exes(td.dirpath.xattrs());
         CHECK(!exes.empty());
-        std::cout << "> Found " << exes.size()
-                  << " xattrs:" << std::endl;
+        // std::cout << "> Found " << exes.size()
+        //           << " xattrs:" << std::endl;
         std::for_each(exes.begin(),
                       exes.end(),
                   [&](std::string const& x) {
-            std::cout << "> " << x << " : "
-                              << td.dirpath.xattr(x) << std::endl;
+            // std::cout << "> " << x << " : "
+            //                   << td.dirpath.xattr(x) << std::endl;
         });
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
     
     TEST_CASE("[attributes] xattr descriptor read/write via store API in `im::file_source_sink`",

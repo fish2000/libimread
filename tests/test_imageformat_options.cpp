@@ -44,10 +44,10 @@ namespace {
             return lhs + rhs + (rhs == formats.back() ? "" : ", ");
         });
         
-        WTF("",
-            "REGISTRY:",
-            FF("\t contains %i formats:", max = formats.size()),
-            FF("\t %s", joined.c_str()));
+        // WTF("",
+        //     "REGISTRY:",
+        //     FF("\t contains %i formats:", max = formats.size()),
+        //     FF("\t %s", joined.c_str()));
         
         for (auto it = formats.begin();
             it != formats.end() && idx < max;
@@ -55,13 +55,13 @@ namespace {
                 auto format_ptr = ImageFormat::named(format);
                 options_map opts = format_ptr->get_options();
                 
-                WTF("",
-                    FF("FORMAT: %s", format.c_str()),
-                    "As JSON:",
-                    opts.format(), "",
-                    "As encoded IOD:",
-                    iod::json_encode(format_ptr->options),
-                    iod::json_encode(format_ptr->capacity));
+                // WTF("",
+                //     FF("FORMAT: %s", format.c_str()),
+                //     "As JSON:",
+                //     opts.format(), "",
+                //     "As encoded IOD:",
+                //     iod::json_encode(format_ptr->options),
+                //     iod::json_encode(format_ptr->capacity));
                 
             ++idx; }
         

@@ -623,7 +623,7 @@ namespace im {
                 const int w = width(),
                           h = height();
                 
-                WTF("Converting...");
+                // WTF("Converting...");
                 
                 channel_t* data = destination.get();
                 channel_t* dest;
@@ -636,7 +636,7 @@ namespace im {
                     }
                 }
                 
-                WTF("Returning from conversion");
+                // WTF("Returning from conversion");
                 return destination;
             };
             
@@ -650,7 +650,7 @@ namespace im {
                              DestColor::N,
                              sizeof(dest_channel_t));
                 
-                WTF("Returning from conversion operator");
+                // WTF("Returning from conversion operator");
                 return InterleavedImage<DestColor>(newContents, newMeta);
             }
             
