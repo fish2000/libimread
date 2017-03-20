@@ -10,6 +10,7 @@ namespace {
     
     using memory::RefCount;
     using im::test::Bytes;
+    using im::test::Chars;
     using im::byte;
     
     struct Trivial {
@@ -63,6 +64,33 @@ namespace {
         }
         {
             auto heap = RefCount<Bytes>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+    }
+    
+    TEST_CASE("[refcount] Test RefCount with HeapAllocation<char>",
+              "[refcount-with-heapallocation-char]")
+    {
+        constexpr int SIZE = 128;
+        
+        {
+            auto heap = RefCount<Chars>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+        {
+            auto heap = RefCount<Chars>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+        {
+            auto heap = RefCount<Chars>::MakeRef(SIZE);
+            auto s = heap->size();
+            REQUIRE(s == SIZE);
+        }
+        {
+            auto heap = RefCount<Chars>::MakeRef(SIZE);
             auto s = heap->size();
             REQUIRE(s == SIZE);
         }
