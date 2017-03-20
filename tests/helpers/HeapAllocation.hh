@@ -69,7 +69,7 @@ namespace test {
                 vector_t out;
                 out.reserve(len);
                 for (int idx = 0; idx < len; ++idx) {
-                    out.push_back(data[idx]);
+                    out.emplace_back(data[idx]);
                 }
                 return out;
             }
