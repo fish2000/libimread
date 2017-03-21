@@ -32,7 +32,7 @@ install:
       brew tap homebrew/science
       brew install hdf5
       brew install libffi
-      brew -v install llvm --HEAD --with-python
+      brew -v install llvm
       pip install -U setuptools
       pip install -U wheel numpy docopt PyYAML iod-symbolizer
       brew tap fish2000/praxa 
