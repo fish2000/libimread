@@ -1,14 +1,51 @@
 
-addons:
-  apt:
-    packages:
-    - cmake
-    - time
-    - jpeglib
-    - libtiff
-    - hdf5
-    - zlib
-    - halide
+language: cpp
+sudo: false
 
-install: make cmake get-deps
-compiler: clang
+matrix:
+
+  include:
+
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: COMPILER='clang++' BUILD_TYPE='Debug' CPP11=1
+
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: COMPILER='clang++' BUILD_TYPE='Release' CPP11=1
+
+
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="http://www.cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      brew install wget curl git xz
+      brew install automake autoconf libtool szip
+      brew install cmake libyaml
+      brew install jpeg libpng libtiff webp hdf5
+      brew install rocksdb capnp python
+      brew install libffi graphviz ocaml
+      brew install llvm --HEAD --with-python --with-graphviz
+      pip install -U setuptools
+      pip install -U wheel numpy docopt PyYAML iod-symbolizer
+      brew tap fish2000/praxa 
+      brew install halide --HEAD --with-metal --with-opencl --with-opengl --with-opengl-compute --without-python
+    fi
+
+before_script:
+  - export CXX=${COMPILER}
+  - cd ${TRAVIS_BUILD_DIR}
+  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Wdev -DUSE_CPP11=${CPP11}
+  - cd Build
+
+script:
+  - make -j 2
+  - ctest -V -j 2
+
