@@ -445,14 +445,14 @@ namespace im {
                 :Image(), MetaImage(), contents(c), meta(m)
                 {}
             
-            InterleavedImage(const InterleavedImage& other)
+            InterleavedImage(InterleavedImage const& other)
                 :Image(), MetaImage(), contents(other.contents), meta(other.meta)
                 {}
             
             /// NB: is this really necessary?
             virtual ~InterleavedImage() {}
             
-            InterleavedImage& operator=(const InterleavedImage& other) {
+            InterleavedImage& operator=(InterleavedImage const& other) {
                 InterleavedImage(other).swap(*this);
                 return *this;
             }
@@ -532,7 +532,7 @@ namespace im {
                 return ptr[s0 * x + s1 * y + s2 * z + s3 * w];
             }
             
-            const channel_t& operator()(int x, int y = 0, int z = 0, int w = 0) const {
+            channel_t const& operator()(int x, int y = 0, int z = 0, int w = 0) const {
                 channel_t* ptr = contents.get();
                 x -= meta.min[0];
                 y -= meta.min[1];
@@ -545,7 +545,7 @@ namespace im {
                 return ptr[s0 * x + s1 * y + s2 * z + s3 * w];
             }
             
-            void set(int x, int y, const Color& color) {
+            void set(int x, int y, Color const& color) {
                 (*this)(x, y) = color.composite;
             }
             void set(int x, int y, composite_t composite) {
@@ -608,6 +608,7 @@ namespace im {
             using toRGB = im::color::Convert<Color,     im::color::RGB>;
             using toRGBA = im::color::Convert<Color,    im::color::RGBA>;
             using toMono = im::color::Convert<Color,    im::color::Monochrome>;
+            using toHSV = im::color::Convert<Color,     im::color::HSV>;
             
             template <typename Conversion,
                       typename Output = typename Conversion::dest_color_t>

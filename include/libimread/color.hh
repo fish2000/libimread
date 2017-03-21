@@ -52,13 +52,13 @@ namespace im {
         struct ChannelBase {
             using Limits = std::numeric_limits<Channel>;
             using is_value = std::true_type;
-            static constexpr Channel min() noexcept { return Limits::min(); }
-            static constexpr Channel max() noexcept { return Limits::max(); }
-            static constexpr Channel infinity() noexcept { return Limits::infinity(); }
-            static constexpr bool is_fp() noexcept  { return std::is_floating_point<Channel>::value; }
-            static constexpr bool is_int() noexcept { return std::is_integral<Channel>::value; }
-            static constexpr bool is_signed() noexcept { return std::is_signed<Channel>::value; }
-            static constexpr bool contains_value() noexcept { return true; }
+            static constexpr Channel min() noexcept { return Limits::min();                             }
+            static constexpr Channel max() noexcept { return Limits::max();                             }
+            static constexpr Channel infinity() noexcept { return Limits::infinity();                   }
+            static constexpr bool is_fp() noexcept  { return std::is_floating_point<Channel>::value;    }
+            static constexpr bool is_int() noexcept { return std::is_integral<Channel>::value;          }
+            static constexpr bool is_signed() noexcept { return std::is_signed<Channel>::value;         }
+            static constexpr bool contains_value() noexcept { return true;                              }
         };
         
         template <typename Base>
@@ -66,9 +66,9 @@ namespace im {
             using is_value = std::false_type;
             enum channels : typename Base::channel_t { None };
             static constexpr std::size_t channel_count = 0;
-            static constexpr bool is_fp() noexcept { return false; }
-            static constexpr bool is_int() noexcept { return false; }
-            static constexpr bool is_signed() noexcept { return false; }
+            static constexpr bool is_fp() noexcept { return false;          }
+            static constexpr bool is_int() noexcept { return false;         }
+            static constexpr bool is_signed() noexcept { return false;      }
             static constexpr bool contains_value() noexcept { return false; }
         };
         
@@ -94,6 +94,12 @@ namespace im {
         struct RGBA : public ChannelBase<Channel> {
             enum channels : Channel { R, G, B, A, None };
             static constexpr std::size_t channel_count = 4;
+        };
+        
+        template <typename Channel>
+        struct HSV : public ChannelBase<Channel> {
+            enum channels : Channel { H, S, V, None };
+            static constexpr std::size_t channel_count = 3;
         };
     }
     
@@ -156,35 +162,40 @@ namespace im {
         constexpr Channel &operator[](std::size_t c) noexcept { return components[c]; }
         
         template <typename Color>
-        bool operator<(const Color& rhs) const { return binary_op<std::less<channel_t>>(rhs.components); }
-        template <typename Color>
-        bool operator>(const Color& rhs) const { return binary_op<std::greater<channel_t>>(rhs.components); }
-        template <typename Color>
-        bool operator<=(const Color& rhs) const { return binary_op<std::less_equal<channel_t>>(rhs.components); }
-        template <typename Color>
-        bool operator>=(const Color& rhs) const { return binary_op<std::greater_equal<channel_t>>(rhs.components); }
-        template <typename Color>
-        bool operator==(const Color& rhs) const { return binary_op<std::equal_to<channel_t>>(rhs.components); }
-        template <typename Color>
-        bool operator!=(const Color& rhs) const { return binary_op<std::not_equal_to<channel_t>>(rhs.components); }
+        bool operator<(Color const& rhs) const { return binary_op<std::less<channel_t>>(rhs.components); }
         
-        bool operator<(const Composite& rhs) const { return bool(composite < rhs); }
-        bool operator>(const Composite& rhs) const { return bool(composite > rhs); }
-        bool operator<=(const Composite& rhs) const { return bool(composite <= rhs); }
-        bool operator>=(const Composite& rhs) const { return bool(composite >= rhs); }
-        bool operator==(const Composite& rhs) const { return bool(composite == rhs); }
-        bool operator!=(const Composite& rhs) const { return bool(composite != rhs); }
+        template <typename Color>
+        bool operator>(Color const& rhs) const { return binary_op<std::greater<channel_t>>(rhs.components); }
         
-        bool operator<(const Components& rhs) const { return binary_op<std::less<channel_t>>(rhs); }
-        bool operator>(const Components& rhs) const { return binary_op<std::greater<channel_t>>(rhs); }
-        bool operator<=(const Components& rhs) const { return binary_op<std::less_equal<channel_t>>(rhs); }
-        bool operator>=(const Components& rhs) const { return binary_op<std::greater_equal<channel_t>>(rhs); }
-        bool operator==(const Components& rhs) const { return binary_op<std::equal_to<channel_t>>(rhs); }
-        bool operator!=(const Components& rhs) const { return binary_op<std::not_equal_to<channel_t>>(rhs); }
+        template <typename Color>
+        bool operator<=(Color const& rhs) const { return binary_op<std::less_equal<channel_t>>(rhs.components); }
+        
+        template <typename Color>
+        bool operator>=(Color const& rhs) const { return binary_op<std::greater_equal<channel_t>>(rhs.components); }
+        
+        template <typename Color>
+        bool operator==(Color const& rhs) const { return binary_op<std::equal_to<channel_t>>(rhs.components); }
+        
+        template <typename Color>
+        bool operator!=(Color const& rhs) const { return binary_op<std::not_equal_to<channel_t>>(rhs.components); }
+        
+        bool operator<(Composite const& rhs) const   { return bool(composite < rhs);     }
+        bool operator>(Composite const& rhs) const   { return bool(composite > rhs);     }
+        bool operator<=(Composite const& rhs) const  { return bool(composite <= rhs);    }
+        bool operator>=(Composite const& rhs) const  { return bool(composite >= rhs);    }
+        bool operator==(Composite const& rhs) const  { return bool(composite == rhs);    }
+        bool operator!=(Composite const& rhs) const  { return bool(composite != rhs);    }
+        
+        bool operator<(Components const& rhs) const  { return binary_op<std::less<channel_t>>(rhs);          }
+        bool operator>(Components const& rhs) const  { return binary_op<std::greater<channel_t>>(rhs);       }
+        bool operator<=(Components const& rhs) const { return binary_op<std::less_equal<channel_t>>(rhs);    }
+        bool operator>=(Components const& rhs) const { return binary_op<std::greater_equal<channel_t>>(rhs); }
+        bool operator==(Components const& rhs) const { return binary_op<std::equal_to<channel_t>>(rhs);      }
+        bool operator!=(Components const& rhs) const { return binary_op<std::not_equal_to<channel_t>>(rhs);  }
         
         static constexpr std::size_t channels() noexcept { return N; }
         
-        constexpr unsigned int distance(const UniformColor& rhs) const noexcept {
+        constexpr unsigned int distance(UniformColor const& rhs) const noexcept {
             return distance_impl(rhs, 0, sequence_t());
         }
         
@@ -202,7 +213,7 @@ namespace im {
         
         private:
             template <typename BinaryPredicate> inline
-            bool binary_op(const Components& rhs,
+            bool binary_op(Components const& rhs,
                            BinaryPredicate predicate = BinaryPredicate()) const {
                 if (N != rhs.channels()) { return false; }
                 return std::equal(std::begin(components),  std::end(components),
@@ -211,7 +222,7 @@ namespace im {
             }
             
             template <std::size_t ...I> inline
-            unsigned int distance_impl(const UniformColor& rhs,
+            unsigned int distance_impl(UniformColor const& rhs,
                                        unsigned int out,
                                        std::index_sequence<I...>) const noexcept {
                 out += std::abs(std::get<I...>(components) -
@@ -244,19 +255,19 @@ namespace im {
     
     
     
-    #define STATIC_ASSERT_SAME()                                                    \
-        static_assert(detail::same<color_t, dest_color_t>(),                        \
+    #define STATIC_ASSERT_SAME()                                                                        \
+        static_assert(detail::same<color_t, dest_color_t>(),                                            \
                      "Color types color_t and dest_color_t must be the same");
     
-    #define STATIC_ASSERT_DIFFERENT()                                               \
-        static_assert(detail::different<color_t, dest_color_t>(),                   \
+    #define STATIC_ASSERT_DIFFERENT()                                                                   \
+        static_assert(detail::different<color_t, dest_color_t>(),                                       \
                      "Color types color_t and dest_color_t cannot be the same");
     
-    #define DECLARE_CONVERTER(Color, DestColor)                                     \
-        template <>                                                                 \
+    #define DECLARE_CONVERTER(Color, DestColor)                                                         \
+        template <>                                                                                     \
         struct Convert<Color, DestColor> : public ConverterBase<Color, DestColor>
     
-    #define CONVERTER_OP(argname)                                                   \
+    #define CONVERTER_OP(argname)                                                                       \
         inline dest_color_t operator()(component_t&& argname) const
     
     namespace color {
@@ -264,6 +275,7 @@ namespace im {
         using RGBA = UniformColor<>;
         using RGB = UniformColor<meta::RGB>;
         using HDR = UniformColor<meta::RGBA, int64_t, int16_t>;
+        using HSV = UniformColor<meta::HSV, uint64_t, uint16_t>;
         
         template <typename T>
         using void_t = std::conditional_t<true, void, T>;
@@ -287,17 +299,18 @@ namespace im {
         template <typename Color, typename DestColor>
         struct Convert : public ConverterBase<Color, DestColor> {};
         
-        #define DECLARE_IDENTITY_CONVERTER(Color)                                   \
-            DECLARE_CONVERTER(Color, Color) {                                       \
-                STATIC_ASSERT_SAME();                                               \
-                CONVERTER_OP(components) {                                          \
-                    return dest_color_t(components);                                \
-                }                                                                   \
+        #define DECLARE_IDENTITY_CONVERTER(Color)                                                       \
+            DECLARE_CONVERTER(Color, Color) {                                                           \
+                STATIC_ASSERT_SAME();                                                                   \
+                CONVERTER_OP(components) {                                                              \
+                    return dest_color_t(components);                                                    \
+                }                                                                                       \
             }
         
         DECLARE_IDENTITY_CONVERTER(RGB);
         DECLARE_IDENTITY_CONVERTER(RGBA);
         DECLARE_IDENTITY_CONVERTER(Monochrome);
+        DECLARE_IDENTITY_CONVERTER(HSV);
         
         DECLARE_CONVERTER(RGB, RGBA) {
             STATIC_ASSERT_DIFFERENT();
@@ -366,6 +379,107 @@ namespace im {
             }
         };
         
+        DECLARE_CONVERTER(RGB, HSV) {
+            STATIC_ASSERT_DIFFERENT();
+            CONVERTER_OP(components) {
+                /// hsv is h from [0-359], s from [0-100] and v from [0-100]
+                val_t r = components[0],
+                      g = components[1],
+                      b = components[2];
+                val_t min = std::min(std::min(r, g), b);  // Min. value of RGB
+                val_t max = std::max(std::max(r, g), b);  // Max. value of RGB
+                double delta = (double)(max - min);     // Delta RGB value
+                double H = 0,
+                       S = 0,
+                       V = max / 255;
+                if (delta != 0) {
+                    S = (delta / max);
+                    if (r == max) {
+                        if (g >= b) {
+                            H = ((g - b) / delta) * 60;
+                        } else {
+                            H = ((g - b) / delta) * 60 + 360;
+                        }
+                    } else if (g == max) {
+                        H = (2 + ((b - r) / delta)) * 60;
+                    } else {
+                        H = (4 + ((r - g) / delta)) * 60;
+                    }
+                }
+                dest_color_t out{ static_cast<val_t>(H),
+                                  static_cast<val_t>(S * 100),
+                                  static_cast<val_t>(V * 100) };
+                return out;
+            }
+        };
+        
+        DECLARE_CONVERTER(RGBA, HSV) {
+            STATIC_ASSERT_DIFFERENT();
+            CONVERTER_OP(components) {
+                /// hsv is h from [0-359], s from [0-100] and v from [0-100]
+                val_t r = components[0],
+                      g = components[1],
+                      b = components[2];
+                val_t min = std::min(std::min(r, g), b);  // Min. value of RGB
+                val_t max = std::max(std::max(r, g), b);  // Max. value of RGB
+                double delta = (double)(max - min);     // Delta RGB value
+                double H = 0,
+                       S = 0,
+                       V = max / 255;
+                if (delta != 0) {
+                    S = (delta / max);
+                    if (r == max) {
+                        if (g >= b) {
+                            H = ((g - b) / delta) * 60;
+                        } else {
+                            H = ((g - b) / delta) * 60 + 360;
+                        }
+                    } else if (g == max) {
+                        H = (2 + ((b - r) / delta)) * 60;
+                    } else {
+                        H = (4 + ((r - g) / delta)) * 60;
+                    }
+                }
+                dest_color_t out{ static_cast<val_t>(H),
+                                  static_cast<val_t>(S * 100),
+                                  static_cast<val_t>(V * 100) };
+                return out;
+            }
+        };
+        
+        DECLARE_CONVERTER(Monochrome, HSV) {
+            STATIC_ASSERT_DIFFERENT();
+            CONVERTER_OP(components) {
+                /// hsv is h from [0-359], s from [0-100] and v from [0-100]
+                val_t r = components[0],
+                      g = components[0],
+                      b = components[0];
+                val_t min = std::min(std::min(r, g), b);  // Min. value of RGB
+                val_t max = std::max(std::max(r, g), b);  // Max. value of RGB
+                double delta = (double)(max - min);     // Delta RGB value
+                double H = 0,
+                       S = 0,
+                       V = max / 255;
+                if (delta != 0) {
+                    S = (delta / max);
+                    if (r == max) {
+                        if (g >= b) {
+                            H = ((g - b) / delta) * 60;
+                        } else {
+                            H = ((g - b) / delta) * 60 + 360;
+                        }
+                    } else if (g == max) {
+                        H = (2 + ((b - r) / delta)) * 60;
+                    } else {
+                        H = (4 + ((r - g) / delta)) * 60;
+                    }
+                }
+                dest_color_t out{ static_cast<val_t>(H),
+                                  static_cast<val_t>(S * 100),
+                                  static_cast<val_t>(V * 100) };
+                return out;
+            }
+        };
     }
     
     #undef STATIC_ASSERT_SAME
