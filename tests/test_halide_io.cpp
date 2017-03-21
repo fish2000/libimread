@@ -6,6 +6,7 @@
 #include <libimread/IO/png.hh>
 #include <libimread/IO/tiff.hh>
 
+#include "helpers/collect.hh"
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
@@ -17,20 +18,6 @@ namespace {
     using namespace Halide;
     using filesystem::path;
     using U8Image = im::HybridImage<uint8_t>;
-    
-    // static const bool collect_temporaries = true;
-    #define COLLECT_TEMPORARIES 0
-    #define CHECK_DIRECTORY "/Users/fish/Dropbox/libimread/check/"
-    
-    template <typename P>
-    bool COLLECT(P&& p) {
-        #if COLLECT_TEMPORARIES == 1
-            path::makedir(CHECK_DIRECTORY);
-            return path(std::forward<P>(p)).rename(CHECK_DIRECTORY);
-        #else
-            return path::remove(std::forward<P>(p));
-        #endif
-    }
     
     TEST_CASE("[halide-io] Read PNG files",
               "[halide-read-png]")
