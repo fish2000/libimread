@@ -37,7 +37,7 @@ install:
       pip install -U setuptools
       pip install -U wheel docopt PyYAML iod-symbolizer
       brew tap fish2000/praxa
-      brew install halide --HEAD --with-metal --without-opencl --with-opengl --with-opengl-compute --without-python
+      brew -v install halide --HEAD --with-metal --with-opengl --with-opengl-compute --without-python
     fi
 
 before_script:
