@@ -451,31 +451,10 @@ namespace im {
             STATIC_ASSERT_DIFFERENT();
             CONVERTER_OP(components) {
                 /// hsv is h from [0-359], s from [0-100] and v from [0-100]
-                val_t r = components[0],
-                      g = components[0],
-                      b = components[0];
-                val_t min = std::min(std::min(r, g), b);  // Min. value of RGB
-                val_t max = std::max(std::max(r, g), b);  // Max. value of RGB
-                double delta = (double)(max - min);     // Delta RGB value
-                double H = 0,
-                       S = 0,
-                       V = max / 255;
-                if (delta != 0) {
-                    S = (delta / max);
-                    if (r == max) {
-                        if (g >= b) {
-                            H = ((g - b) / delta) * 60;
-                        } else {
-                            H = ((g - b) / delta) * 60 + 360;
-                        }
-                    } else if (g == max) {
-                        H = (2 + ((b - r) / delta)) * 60;
-                    } else {
-                        H = (4 + ((r - g) / delta)) * 60;
-                    }
-                }
-                dest_color_t out{ static_cast<val_t>(H),
-                                  static_cast<val_t>(S * 100),
+                val_t max = components[0];
+                double V = max / 255;
+                dest_color_t out{ static_cast<val_t>(0),
+                                  static_cast<val_t>(0),
                                   static_cast<val_t>(V * 100) };
                 return out;
             }
