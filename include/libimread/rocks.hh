@@ -6,9 +6,6 @@
 #ifndef LIBIMREAD_INCLUDE_ROCKS_HH_
 #define LIBIMREAD_INCLUDE_ROCKS_HH_
 
-#include <type_traits>
-#include <utility>
-
 #include <libimread/store.hh>
 #include <libimread/ext/memory/refcount.hh>
 

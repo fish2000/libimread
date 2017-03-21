@@ -5,7 +5,6 @@
 
 #include <cstdlib>
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
 #include <libimread/env.hh>
 #include <libimread/ext/pystring.hh>
 
