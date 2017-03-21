@@ -4,12 +4,12 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/ext/filesystem/mode.h>
+// #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/filesystem/attributes.h>
-#include <libimread/ext/filesystem/directory.h>
+// #include <libimread/ext/filesystem/attributes.h>
+// #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/temporary.h>
-#include <libimread/ext/filesystem/nowait.h>
+// #include <libimread/ext/filesystem/nowait.h>
 #include <libimread/ext/JSON/json11.h>
 
 #include <libimread/file.hh>
