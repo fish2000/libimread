@@ -195,7 +195,7 @@ namespace memory {
     };
     
     /// GARBAGEDAAAAAY
-    static void garbageday();
+    extern void garbageday();
     
 }; /* namespace memory */
 

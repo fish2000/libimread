@@ -57,6 +57,7 @@ namespace {
             auto s = heap->size();
             REQUIRE(s == SIZE);
         }
+        memory::garbageday();
         {
             auto heap = RefCount<Bytes>::MakeRef(SIZE);
             auto s = heap->size();
@@ -84,6 +85,7 @@ namespace {
             auto s = heap->size();
             REQUIRE(s == SIZE);
         }
+        memory::garbageday();
         {
             auto heap = RefCount<Chars>::MakeRef(SIZE);
             auto s = heap->size();
