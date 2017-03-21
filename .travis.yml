@@ -34,6 +34,7 @@ install:
       brew install libffi
       brew -v install llvm
       pip install -U setuptools
+      pip install -U pip
       pip install -U wheel numpy docopt PyYAML iod-symbolizer
       brew tap halide/halide 
       brew -v install halide
