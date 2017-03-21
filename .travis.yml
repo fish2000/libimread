@@ -35,8 +35,8 @@ install:
       brew -v install llvm
       pip install -U setuptools
       pip install -U wheel numpy docopt PyYAML iod-symbolizer
-      brew tap fish2000/praxa 
-      brew -v install halide --HEAD --with-metal --with-opencl --with-opengl --with-opengl-compute --without-python
+      brew tap halide/halide 
+      brew -v install halide
     fi
 
 before_script:
