@@ -44,8 +44,9 @@ namespace {
         {
             NamedTemporaryFile tf(".json");
             tf.open();
-            tf.stream << viron.mapping_json() << std::endl;
-            tf.close();
+            tf.stream << viron.mapping_json()
+                      << std::endl;
+            CHECK(tf.close());
             CHECK(COLLECT(tf.filepath));
         }
         
