@@ -26,14 +26,14 @@ install:
       mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      brew install automake autoconf libtool szip
+      brew install szip
       brew install cmake libyaml
-      brew install jpeg libpng libtiff webp
-      brew install rocksdb capnp python
+      brew install webp
+      brew install rocksdb capnp
       brew tap homebrew/science
       brew install hdf5
-      brew install libffi graphviz ocaml
-      brew install llvm --HEAD --with-python --with-graphviz
+      brew install libffi
+      brew install llvm --HEAD --with-python
       pip install -U setuptools
       pip install -U wheel numpy docopt PyYAML iod-symbolizer
       brew tap fish2000/praxa 
