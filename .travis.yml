@@ -26,18 +26,18 @@ install:
       mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      brew install szip
-      brew install webp
+      brew install libffi
+      brew install szip webp
       brew install rocksdb capnp
       brew tap homebrew/science
       brew install hdf5
-      brew install libffi
-      brew -v install llvm
-      pip install -U setuptools
+      brew install llvm
+      brew install numpy
       pip install -U pip
-      pip install -U wheel numpy docopt PyYAML iod-symbolizer
-      brew tap halide/halide 
-      brew -v install halide
+      pip install -U setuptools
+      pip install -U wheel docopt PyYAML iod-symbolizer
+      brew tap fish2000/praxa
+      brew install halide --HEAD --with-metal --without-opencl --with-opengl --with-opengl-compute --without-python
     fi
 
 before_script:
