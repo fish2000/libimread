@@ -597,7 +597,7 @@ namespace gif {
             short width = gif->width;
             short height = gif->height;
             char packed = 0;
-            char bgColorIndex = 255;
+            char bgColorIndex = static_cast<char>(255);
             char pixelAspectRatio = 0;
             packed |= GlobalColorTableBit;
             const char BitsPerColor = 8;

@@ -17,6 +17,7 @@
 #include <regex>
 
 using im::JSONInvalidSchema;
+using im::JSONUseError;
 
 namespace detail {
    
@@ -382,7 +383,7 @@ void Json::Node::validate(Schema const& schema, Json::nodecvec_t& path) const {
                 validate(*sp, path);
                 ok = true;
                 break;
-            } catch (JSONInvalidSchema &ex) {
+            } catch (im::JSONInvalidSchema& ex) {
                 path.pop_back();  /// TODO: ???!
             }
         }
@@ -435,7 +436,11 @@ void Json::Object::validate(Schema const& schema, Json::nodecvec_t& path) const 
             if (schema.props->map.find(k) == schema.props->map.end()) {
                 throw JSONInvalidSchema(*k + ": not valid in schema");
             }
-            // TODO: find in patpr
+            if (schema.pattern != nullptr) {
+                if (!std::regex_match(im::stringify(*k), *static_cast<std::regex*>(schema.pattern))) {
+                    throw JSONInvalidSchema("pattern mismatch");
+                }
+            }
         }
     }
     for (auto kv : map) {
@@ -443,7 +448,11 @@ void Json::Object::validate(Schema const& schema, Json::nodecvec_t& path) const 
         if (schema.props == nullptr || schema.props->map.find(k) == schema.props->map.end()) {
             if (schema.add_props == nullptr && schema.add_items_bool) { continue; } // allowed not to validate
             if (schema.add_props != nullptr) { kv.second->validate(*schema.add_props, path); }
-            /// TODO: find with pattern ptr
+            if (schema.pattern != nullptr) {
+                if (!std::regex_match(im::stringify(*k), *static_cast<std::regex*>(schema.pattern))) {
+                    throw JSONInvalidSchema("pattern mismatch");
+                }
+            }
         } else {
             Schema* sub = (Schema*)schema.props->map[k];
             kv.second->validate(*sub, path);
@@ -514,7 +523,7 @@ bool Json::valid(Json& schema, std::string* reason) {
     try {
         ((Node*)root)->validate(*(Schema*)schema.root, path);
         root->validate(*(Schema*)schema.root, path);
-    } catch (JSONInvalidSchema& exc) {
+    } catch (im::JSONInvalidSchema& exc) {
         std::string pref = "";
         for (unsigned i = 1; i < path.size(); i++) {
             const Node* super = path[i-1];

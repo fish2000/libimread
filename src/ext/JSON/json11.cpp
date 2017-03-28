@@ -144,7 +144,7 @@ bool Json::Array::operator==(Node const& that) const {
                                  const_cast<Node*>(&that))->list;
     return std::equal(list.begin(), list.end(),
                  that_list.begin(),
-                   [](Node* n1, Node* n2) { return *n1 == *n2; });
+                   [](Node* p, Node* q) { return *p == *q; });
 }
 
 bool Json::Object::operator==(Node const& that) const {
@@ -328,7 +328,8 @@ Json& Json::operator<<(Json const& that) {
 Json& Json::insert(int idx, Json const& that) {
     if (that.root->contains(root)) {
         imread_raise(JSONUseError,
-            "cyclic dependency"); }
+            "cyclic dependency");
+    }
     mkarray()->ins(idx, that.root);
     return *this;
 }
@@ -379,7 +380,8 @@ Json Json::extend(Json const& other) const {
 Json& Json::append(Json const& other) {
     if (other.root->contains(root)) {
         imread_raise(JSONUseError,
-            "cyclic dependency"); }
+            "cyclic dependency");
+    }
     mkarray()->add(other.root);
     return *this;
 }
@@ -512,11 +514,11 @@ Json Json::update(Json const& other) const {
     auto const& b = static_cast<Object*>(other.root)->map;
     auto op = out.mkobject();
     std::for_each(b.begin(), b.end(),
-              [&](auto const& pair) {
+            [&op](auto const& pair) {
         op->set(*pair.first, pair.second);
     });
     std::for_each(a.begin(), a.end(),
-              [&](auto const& pair) {
+            [&op](auto const& pair) {
         op->set(*pair.first, pair.second);
     });
     return out;
@@ -1125,6 +1127,11 @@ Json Json::load(std::string const& source) {
             "Json::load(source): non-file-or-link source file",
          FF("\tsource == %s", source.c_str()));
     }
+    if (!path::is_readable(source)) {
+        imread_raise(JSONIOError,
+            "Json::load(source): unreadable source file",
+         FF("\tsource == %s", source.c_str()));
+    }
     
     std::fstream stream;
     stream.open(source, std::ios::in);
@@ -1154,7 +1161,7 @@ Json::operator std::string() const {
         case Type::NUMBER:  return std::to_string(((Number*)root)->value);
         case Type::STRING:  return ((String*)root)->value;
         case Type::ARRAY:
-        case Type::OBJECT:
+        case Type::OBJECT:  return format();
         case Type::POINTER:
         case Type::SCHEMA:
         default:            imread_raise_default(JSONBadCast);
