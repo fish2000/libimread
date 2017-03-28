@@ -30,8 +30,8 @@ namespace im {
     std::string ImageFormat::get_mimetype() const { return ImageFormat::options.mimetype; }
     std::string ImageFormat::get_suffix() const   { return ImageFormat::options.suffixes[0]; }
     std::string ImageFormat::get_suffix(bool with_period) const   {
-        return with_period ? ("." + ImageFormat::options.suffixes[0]) :
-                                    ImageFormat::options.suffixes[0];
+        return with_period ? (std::string(".") + ImageFormat::options.suffixes[0]) :
+                                                 ImageFormat::options.suffixes[0];
     }
     
     void ImageFormat::registrate(std::string const& name, ImageFormat::create_t fp) {

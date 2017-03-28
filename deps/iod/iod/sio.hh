@@ -63,7 +63,7 @@ namespace iod
     static inline void run(F f, Const<T>&... args)
     {
       iod_foreach_runner<Const, N-1, F, T...>::run(f, args...);
-      f(args.template get_nth_attribute<N>()...);
+      f(args.template get_nth_member<N>()...);
     }
   };
 
@@ -130,9 +130,9 @@ namespace iod
     template <unsigned N>
     not_found get_nth() const { return not_found(); }
     template <unsigned N>
-    const member_not_found& get_nth_attribute() const { return *(member_not_found*)(0); }
+    member_not_found get_nth_attribute() const { return member_not_found(); }
     template <unsigned N>
-    member_not_found& get_nth_attribute() { return *(member_not_found*)(0); }
+    member_not_found get_nth_attribute() { return member_not_found(); }
     template <typename E, typename D>
     D get(const E&, const D default_) const { return default_; }
 
@@ -151,36 +151,13 @@ namespace iod
     template <std::size_t N>
     using nth_member_type = tl::get_nth_type<N, Ms...>;
 
-    // -----------------------------------------
-    // Retrieve type of member with symbol S.
-    // -----------------------------------------
-    template <std::size_t N, typename M, typename S, typename Sr, typename B = void>
-    struct _member_type_;
-
-    template <typename M, typename S, typename Sr>
-    struct _member_type_<_size - 1, M, S, Sr, std::enable_if_t<!std::is_same<S, Sr>::value>>
-    {
-      typedef member_not_found type;
-    };
-
-    template <std::size_t N, typename M, typename S>
-    struct _member_type_<N, M, S, S>
-    {
-      typedef M type;
-    };
-    
-    template <std::size_t N, typename M, typename S, typename Sr>
-      struct _member_type_<N, M, S, Sr, std::enable_if_t<(N < _size - 1 and !std::is_same<S, Sr>::value)>>
-    {
-      typedef nth_member_type<N+1> Next;
-      typedef typename _member_type_<N+1, Next, typename Next::symbol_type, Sr>::type type;
-    };
-    
+    // Get the position of a given symbol    
     template <typename S>
-    using symbol_to_member_type = typename _member_type_<0, nth_member_type<0>,
-                                                         typename nth_member_type<0>::symbol_type, S>::type;
-
+    using symbol_to_member_type = nth_member_type<
+      tl::get_type_position<S, typename Ms::symbol_type...>::value
+                                  >;
     
+    // Get the value type of a diven symbol.
     template <typename S>
     using member_value_type = typename symbol_to_member_type<S>::value_type;
 
@@ -188,11 +165,13 @@ namespace iod
     // struct simple_enum { enum { value = V}; };
     
     template <typename S>
-    using _has = std::integral_constant<bool, not std::is_same<symbol_to_member_type<S>, member_not_found>::value>;
+    using _has = std::integral_constant<bool, tl::type_list_has<S, typename Ms::symbol_type...>::value>;
 
     // Constructor.
     inline sio() = default;
-    inline sio(Ms&&... members) : Ms(members)... {}
+    inline sio(self&&) = default;
+    inline sio(const self&) = default;
+    inline sio(Ms&&... members) : Ms(std::forward<Ms>(members))... {}
     inline sio(const Ms&... members) : Ms(members)... {}
 
     // Get the member associated with the symbol S.
@@ -274,15 +253,17 @@ namespace iod
     auto symbols_as_tuple() const { return std::make_tuple(Ms::symbol()...); }
     
     // Assignment.
+    self& operator=(self&& o) = default;
     template <typename... Otail>
     self& operator=(const sio<Otail...>& o)
     {
       foreach(o) | [this] (auto& m) { (*this)[m.symbol()] = m.value(); };
       return *this;
     }
-  
+    
   };
 
+  
   template <typename R, typename S>
   using has_symbol = typename R::template _has<S>;
 

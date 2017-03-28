@@ -16,43 +16,43 @@ namespace iod
     else return 1 + count_first_falses(b...);
   }
 
-
-  template <typename E, typename T1, typename... T>
-  decltype(auto) arg_get_by_type_(std::enable_if_t<std::is_same<E,
-                                 std::decay_t<T1>>::value>*,
-                                 T1&& a1, T&&... args)
+  template <typename E, typename... T>
+  decltype(auto) arg_get_by_type_(void*,
+                                  E* a1, T&&... args)
   {
-    return std::forward<T1>(a1);
+    return std::forward<E*>(a1);
   }
 
-
-  // template <typename E, typename T1, typename T2, typename... T>
-  // decltype(auto) arg_get_by_type_(std::enable_if_t<!std::is_same<E,
-  //                                std::decay_t<T1>>::value and std::is_same<E,
-  //                                std::decay_t<T2>>::value>*,
-  //                                T1&& a1, T2&& a2, T&&... args)
-  // {
-  //   return std::forward<T2>(a2);
-  // }
-  
-  template <typename E, typename T1, typename... T>
-  decltype(auto) arg_get_by_type_(std::enable_if_t<!std::is_same<E,
-                                 std::decay_t<T1>>::value>*,
-                                 T1&&, T&&... args)
+  template <typename E, typename... T>
+  decltype(auto) arg_get_by_type_(void*,
+                                  const E* a1, T&&... args)
   {
-    return arg_get_by_type_<E>(0, std::forward<T>(args)...);
-  }
-
-  template <typename E, typename T1, typename T2, typename... T>
-  decltype(auto) arg_get_by_type_(std::enable_if_t<!std::is_same<E,
-                                  std::decay_t<T1>>::value and !std::is_same<E,
-                                  std::decay_t<T2>>::value>*,
-                                  T1&&, T2&&, T&&... args)
-  {
-    
-    return arg_get_by_type_<E>(0, std::forward<T>(args)...);
+    return std::forward<const E*>(a1);
   }
   
+  template <typename E, typename... T>
+  decltype(auto) arg_get_by_type_(void*,
+                                  E& a1, T&&... args)
+  {
+    return std::forward<E&>(a1);
+  }
+
+  template <typename E, typename... T>
+  decltype(auto) arg_get_by_type_(void*,
+                                  const E& a1, T&&... args)
+  {
+    return std::forward<const E&>(a1);
+  }
+  
+  template <typename E, typename T1, typename... T>
+  decltype(auto) arg_get_by_type_( std::enable_if_t<!std::is_same<E,
+                                   std::decay_t<T1>>::value>*,
+                                   //void*,
+                                  T1&&, T&&... args)
+  {
+    return arg_get_by_type_<E>((void*)0, std::forward<T>(args)...);
+  }
+
   template <typename E, typename... T>
   decltype(auto) arg_get_by_type(T&&... args)
   {
@@ -155,5 +155,78 @@ namespace iod
   
   template <typename T, typename... E>
   using tuple_remove_elements_t = typename tuple_remove_elements<T, E...>::type;
+
+
+  template<typename F, size_t... I, typename... T>
+  inline F tuple_map(std::tuple<T...>& t, F f, std::index_sequence<I...>)
+  {
+    return (void)std::initializer_list<int>{((void)f(std::get<I>(t)), 0)...}, f;
+  }
+
+  template<typename F, typename... T>
+  inline void tuple_map(std::tuple<T...>& t, F f)
+  {
+    tuple_map(t, f, std::index_sequence_for<T...>{});
+  }
+
+  template<typename F, size_t... I, typename T>
+  inline decltype(auto) tuple_transform(T&& t, F f, std::index_sequence<I...>)
+  {
+    return std::make_tuple(f(std::get<I>(std::forward<T>(t)))...);
+  }
+
+  template<typename F, typename T>
+  inline decltype(auto) tuple_transform(T&& t, F f)
+  {
+    return tuple_transform(std::forward<T>(t), f,
+                           std::make_index_sequence<std::tuple_size<std::decay_t<T>>{}>{});
+  }
+
+  template <template <class> class F, typename T, typename I, typename R, typename X = void>
+  struct tuple_filter_sequence;
+
+  template <template <class> class F, typename... T, typename R>
+  struct tuple_filter_sequence<F, std::tuple<T...>,
+                               std::index_sequence<>,
+                               R>
+  {
+    using ret = R;
+  };
+
+  template <template <class> class F, typename T1, typename... T, size_t I1, size_t... I, size_t... R>
+  struct tuple_filter_sequence<F, std::tuple<T1, T...>,
+                               std::index_sequence<I1, I...>,
+                               std::index_sequence<R...>,
+                               std::enable_if_t<F<T1>::value>>
+  {
+    using ret = typename tuple_filter_sequence<F, std::tuple<T...>,
+                                           std::index_sequence<I...>,
+                                           std::index_sequence<R..., I1>>::ret;
+  };
+
+  template <template <class> class F, typename T1, typename... T, size_t I1, size_t... I, size_t... R>
+  struct tuple_filter_sequence<F, std::tuple<T1, T...>,
+                               std::index_sequence<I1, I...>,
+                               std::index_sequence<R...>,
+                               std::enable_if_t<!F<T1>::value>>
+  {
+    using ret = typename tuple_filter_sequence<F, std::tuple<T...>, std::index_sequence<I...>,
+                                               std::index_sequence<R...>>::ret;
+  };
+
+
+  template <std::size_t... I, typename T>
+  decltype(auto) tuple_filter_impl(std::index_sequence<I...>, T&&t)
+  {
+    return std::make_tuple(std::get<I>(t)...);
+  }
   
+  template <template <class> class F, typename T>
+  decltype(auto) tuple_filter(T&& t)
+  {
+    using seq = typename tuple_filter_sequence<F, std::decay_t<T>,
+                                               std::make_index_sequence<std::tuple_size<std::decay_t<T>>::value>,
+                                               std::index_sequence<>>::ret;
+    return tuple_filter_impl(seq{}, t);
+  }
 }
