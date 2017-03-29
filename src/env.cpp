@@ -118,6 +118,7 @@ namespace store {
         stringmapper::stringvec_t out{};
         stringmapper::stringvec_t parts{};
         std::size_t idx = 0;
+        out.reserve(envcount.load());
         std::lock_guard<std::mutex> lock(mute);
         while (environ[idx]) {
             std::string envkv(environ[idx++]);
