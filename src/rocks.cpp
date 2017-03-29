@@ -3,6 +3,7 @@
 /// Adapted from my own Objective-C++ class:
 ///     https://gist.github.com/fish2000/b3a7d8accae8d046703f728b4ac82009
 
+#include <memory>
 #include <libimread/libimread.hpp>
 #include <libimread/rocks.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -24,6 +25,7 @@ namespace memory {
 } /// namespace memory
 
 using filesystem::path;
+using iterator_ptr_t = std::unique_ptr<rocksdb::Iterator>;
 
 namespace store {
     
@@ -139,13 +141,12 @@ namespace store {
     }
     
     stringmapper::stringvec_t rocks::list() const {
-        rocksdb::Iterator* it = SELF()->NewIterator(rocksdb::ReadOptions());
+        iterator_ptr_t it(SELF()->NewIterator(rocksdb::ReadOptions()));
         stringmapper::stringvec_t out{};
         out.reserve(count());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             out.emplace_back(it->key().ToString());
         }
-        delete it;
         return out;
     }
     
