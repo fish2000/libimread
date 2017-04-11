@@ -140,7 +140,10 @@ find_package(LibUnwind REQUIRED)
 find_package(CapnProto REQUIRED)
 
 set(HDF5_USE_STATIC_LIBRARIES false)
-set(HDF5_ROOT /usr/local/opt/hdf5/)
+# set(HDF5_ROOT /usr/local/opt/hdf5/)
+# set(HDF5_DIR  /usr/local/opt/hdf5/)
+set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE true)
+set(HDF5_COMPILER_NO_INTERROGATE true)
 
 # message(STATUS "find_package(): looking for HDF5 within HDF5_ROOT = ${HDF5_ROOT}")
 # find_package(HDF5 COMPONENTS C CXX HL NO_MODULE)
@@ -151,8 +154,10 @@ set(HDF5_ROOT /usr/local/opt/hdf5/)
 #     find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
 # endif()
 
-include(FindHDF5)
+# include(FindHDF5)
 find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
+# find_package(HDF5 REQUIRED COMPONENTS CXX)
+# find_package(HDF5 REQUIRED COMPONENTS HL)
 
 include(FindRocksDB)
 # find_package(RocksDB REQUIRED)
