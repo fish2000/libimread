@@ -66,6 +66,7 @@ set(hdrs
     ${hdrs_dir}/ext/base64.hh
     ${hdrs_dir}/ext/butteraugli.hh
     ${hdrs_dir}/ext/exif.hh
+    ${hdrs_dir}/ext/glob.hh
     ${hdrs_dir}/ext/lzw.hh
     ${hdrs_dir}/ext/MurmurHash2.hh
     ${hdrs_dir}/ext/iod.hh
@@ -159,6 +160,7 @@ set(srcs
     ${srcs_dir}/ext/base64.cpp
     ${srcs_dir}/ext/butteraugli.cpp
     ${srcs_dir}/ext/exif.cpp
+    ${srcs_dir}/ext/glob.cpp
     ${srcs_dir}/ext/lzw.cpp
     ${srcs_dir}/ext/MurmurHash2.cpp
     ${srcs_dir}/ext/pvr.cpp

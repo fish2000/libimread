@@ -420,19 +420,28 @@ namespace filesystem {
         return out;
     }
     
-    detail::pathvec_t path::list(std::regex const& pattern, bool case_sensitive, bool full_paths) const {
-        /// list files with regex object
+    detail::pathvec_t path::list_rx(std::regex const& pattern, bool full_paths,
+                                                               bool case_sensitive) const {
+        /// list files, filtered with a regex object
         detail::pathvec_t unfiltered = list(full_paths);
         detail::pathvec_t out;
         if (unfiltered.size() == 0) { return out; }
         std::copy_if(unfiltered.begin(),
                      unfiltered.end(),
                      std::back_inserter(out),
-                 [&](path const& p) {
-            /// keep those paths that match the pattern
+                     [&pattern, &case_sensitive](path const& p) {
+            /// keep any matching paths:
             return p.search(pattern, case_sensitive);
         });
         return out;
+    }
+    
+    detail::pathvec_t path::list(std::regex const& pattern, bool full_paths) const {
+        return list_rx(pattern, full_paths, true); /// <---- case_sensitive=true
+    }
+    
+    detail::pathvec_t path::ilist(std::regex const& pattern, bool full_paths) const {
+        return list_rx(pattern, full_paths, false); /// <---- case_sensitive=false
     }
     
     // using walk_visitor_t = std::function<void(const path&,       /// root path

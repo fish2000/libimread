@@ -361,6 +361,7 @@ if(IM_TESTS)
     add_imread_test("attributes") # filesystem-attributes
     add_imread_test("execute") # filesystem-execute
     add_imread_test("gif-write")
+    add_imread_test("glob-stringview")
     add_imread_test("halide-io")
     add_imread_test("hdf5-io")
     add_imread_test("imageformat-options")

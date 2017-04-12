@@ -93,21 +93,22 @@ namespace filesystem {
                 native_path = posix_path
             };
             
-            path();
-            explicit path(bool);
+            path();                                             /// Empty path constructor
+            explicit path(bool);                                /// Empty but possibly absolute path constructor
             
-            path(path const&);
-            path(path&&) noexcept;
+            path(path const&);                                  /// Copy constructor
+            path(path&&) noexcept;                              /// MOVE CONSTRUCTA!!
             
-            path(char*);
+            path(char*);                                        /// C-string constructors
             path(char const*);
-            path(std::string const&);
+            path(std::string const&);                           /// STL-string constructor
             
-            explicit path(int descriptor);
-            explicit path(const void* address);
+            explicit path(int descriptor);                      /// File descriptor constructor
+            explicit path(const void* address);                 /// Memory-address (dl_info) constructor
+            
             explicit path(detail::stringvec_t const& vec, bool absolute = false);
             explicit path(detail::stringvec_t&& vec, bool absolute = false) noexcept;
-            explicit path(detail::stringlist_t);
+            explicit path(detail::stringlist_t);                /// initializer-list constructors
             
             size_type size() const;
             bool is_absolute() const;
@@ -275,18 +276,35 @@ namespace filesystem {
             ///     b) pass a detail::list_separate_t tag, like vanilla list(), but returns a pair of path vectors;
             ///     c) pass a string (C-style or std::string) with a glob with which to filter the list, or;
             ///     d) pass a std::regex (optionally case-sensitive) for fine-grained iterator-based filtering.
+            ///
             /// ... in all cases, you can specify a trailing boolean to ensure the paths you get back are absolute.
+            /// N.B. There used to be a secondary `bool case_sensitive=false` option occasionally cluttering up
+            /// the arity of these functions; now we just use `ilist(…)` to accomplsh the same.
             detail::pathvec_t     list(                             bool full_paths=false) const;
             detail::vector_pair_t list(detail::list_separate_t tag, bool full_paths=false) const;
             detail::pathvec_t     list(char const* pattern,         bool full_paths=false) const;
             detail::pathvec_t     list(std::string const& pattern,  bool full_paths=false) const;
-            detail::pathvec_t     list(std::regex const& pattern,
-                                       bool case_sensitive=false,   bool full_paths=false) const;
+            detail::pathvec_t     list(std::regex const& pattern,   bool full_paths=false) const; /// case-sensitive
+            detail::pathvec_t    ilist(std::regex const& pattern,   bool full_paths=false) const; /// case-insensitive
             
+        private:
+            detail::pathvec_t  list_rx(std::regex const& pattern,   bool full_paths=false,
+                                                                    bool case_sensitive=false) const;
+            
+        public:
             /// Generic static forwarder for permutations of path::list<P, G>(p, g)
             template <typename P, typename G> inline
             static detail::pathvec_t list(P&& p, G&& g, bool full_paths=false) {
                 return path(std::forward<P>(p)).list(std::forward<G>(g), full_paths);
+            }
+            
+            /// Generic static forwarder for permutations of path::ilist<P, G>(p, g) --
+            /// at the moment, this is only a valid overload for the regex permutation of path::ilist();
+            /// the other versions are backed, respectively, by glob.h and wordexp.h and,
+            /// as such, aren’t readily made insensitive to case.
+            template <typename P, typename G> inline
+            static detail::pathvec_t ilist(P&& p, G&& g, bool full_paths=false) {
+                return path(std::forward<P>(p)).ilist(std::forward<G>(g), full_paths);
             }
             
             /// Walk a path, a la os.walk() / os.path.walk() from Python
@@ -443,8 +461,10 @@ namespace filesystem {
             path parent() const;
             path dirname() const;
             
-            /// join a path with a new trailing path fragment
+            /// join a path with another trailing path fragment, creating a new path:
             path join(path const& other) const;
+            
+            /// join a path in place with another trailing path fragment and return it:
             path& adjoin(path const& other);
             
             /// operator overloads to join paths with slashes -- you can be like this:
@@ -456,6 +476,7 @@ namespace filesystem {
             path operator/(char const* other) const;
             path operator/(std::string const& other) const;
             
+            /// analogous join-in-place slash-equals operators:
             path& operator/=(path const&);
             path& operator/=(char const*);
             path& operator/=(std::string const&);
@@ -469,8 +490,10 @@ namespace filesystem {
                 return path(std::forward<P>(one)) / std::forward<Q>(theother);
             }
             
-            /// Simple string-append for the trailing path segment
+            /// Simple string append for the trailing path segment:
             path append(std::string const& appendix) const;
+            
+            /// Simple string append-in-place for the trailing path segment:
             path& extend(std::string const& appendix);
             
             /// operator overloads for bog-standard string-appending -- like so:
@@ -482,6 +505,7 @@ namespace filesystem {
             path operator+(char const* other) const;
             path operator+(std::string const& other) const;
             
+            /// analogous append-in-place plus-equals operators:
             path& operator+=(path const&);
             path& operator+=(char const*);
             path& operator+=(std::string const&);
@@ -520,6 +544,9 @@ namespace filesystem {
             static path executable();
             static std::string currentprogram();
             
+            /// Return a vector of strings -- not paths -- corresponding to the components
+            /// of the $PATH environment variable on your system (this is used internally
+            /// by the filesystem::resolver class to resolve binaries as the shell would):
             static detail::stringvec_t system();
             
             /// Conversion operators -- in theory you can pass your paths to functions
@@ -561,12 +588,14 @@ namespace filesystem {
             detail::stringvec_t components() const;
             
         protected:
+            /// Tokenize a string into a string vector:
             static detail::stringvec_t tokenize(std::string const& source,
                                                 character_type const delim);
             
-            path_type m_type = native_path;
-            detail::stringvec_t m_path;
-            bool m_absolute = false;
+            
+            path_type m_type = native_path;             /// What type of path are we?
+            detail::stringvec_t m_path;                 /// Where do we lead?
+            bool m_absolute = false;                    /// Do we lead there absolutely?
     
     }; /* class path */
     
