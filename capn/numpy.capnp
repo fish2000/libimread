@@ -61,7 +61,7 @@ enum NumpyTypes {
     npyCHAR                 @26;
     npyUSERDEF              @27;
 
-    # npyUSERDEF     @256; # WAT
+    # npyUSERDEF     @256;          # WAT
     #NPY_NTYPES_ABI_COMPATIBLE @21; # double WAT
 
     npyNtypesABICompatible  @28;
