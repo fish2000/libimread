@@ -33,21 +33,21 @@ namespace glob {
     using stringview_t = std::experimental::string_view;
     
     namespace detail {
-    
+        
         template <typename equal_f>
         bool match(stringview_t pattern, stringview_t target, equal_f equal) {
             auto p = pattern.begin(); auto pe = pattern.end();
             auto q = target.begin();  auto qe = target.end();
-            for (;;) {
+            while (true) {
                 if (p == pe) { return q == qe; }
                 if (*p == '*') {
                     ++p;
                     for (auto backtracker = qe; backtracker >= q; --backtracker) {
-                        if (detail::match(stringview_t(p, pe - p),
-                                          stringview_t(backtracker, qe - backtracker),
-                                          equal)) { return true; }
-                        break;
+                        if (match(stringview_t(p, pe - p),
+                                  stringview_t(backtracker, qe - backtracker),
+                                  equal)) { return true; }
                     }
+                    break;
                 }
                 if (q == qe) { break; }
                 if (*p != '?' && !equal(*p, *q)) { break; }
@@ -60,15 +60,12 @@ namespace glob {
     
     bool match(stringview_t pattern, stringview_t target) {
         return detail::match(pattern, target,
-                          [](char a, char b) { return a == b; });
+                          [](int a, int b) { return a == b; });
     }
     
     bool imatch(stringview_t pattern, stringview_t target) {
         return detail::match(pattern, target,
-                          [](char a, char b) {
-                              return tolower(static_cast<unsigned char>(a)) ==
-                                     tolower(static_cast<unsigned char>(b));
-                           });
+                          [](int a, int b) { return std::tolower(a) == std::tolower(b); });
     }
 
 } /// namespace glob

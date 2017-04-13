@@ -14,10 +14,10 @@ namespace {
         CHECK(!glob::match("hello", "hi"));
         
         CHECK(glob::match("he?lo", "hello"));
-        // CHECK(glob::match("h*o", "hello"));
-        // CHECK(glob::match("h******o", "hello"));
-        // CHECK(glob::match("h***?***o", "hello"));
-        // CHECK(glob::match("*o", "hello"));
+        CHECK(glob::match("h*o", "hello"));
+        CHECK(glob::match("h******o", "hello"));
+        CHECK(glob::match("h***?***o", "hello"));
+        CHECK(glob::match("*o", "hello"));
         CHECK(glob::match("h*", "hello"));
         
         CHECK(!glob::match("", "hello"));
@@ -26,11 +26,11 @@ namespace {
         CHECK(glob::match("*", "hello"));
         CHECK(!glob::match("?", ""));
         
-        // CHECK(glob::match(std::string("h***?***o"), std::string("hello")));
+        CHECK(glob::match(std::string("h***?***o"), std::string("hello")));
         
         CHECK(!glob::match("hello", "HELLO"));
         CHECK(glob::imatch("hello", "HELLO"));
-        // CHECK(glob::imatch("h*L?", "hello"));
+        CHECK(glob::imatch("h*L?", "hello"));
         CHECK(!glob::match("h*L?", "hello"));
     }
 }
