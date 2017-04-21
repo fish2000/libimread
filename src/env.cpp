@@ -101,12 +101,22 @@ namespace store {
     }
     
     bool env::set(std::string const& key, std::string const& value) {
-        std::unique_lock<std::mutex> setlock(setmute);
-        if (::setenv(key.c_str(), value.c_str(), 1) == 0) {
+        int status;
+        {
+            std::lock(setmute, getmute);
+            std::lock_guard<std::mutex> setlock(setmute, std::adopt_lock);
+            std::lock_guard<std::mutex> getlock(getmute, std::adopt_lock);
+            status = ::setenv(key.c_str(), value.c_str(), 1);
+        }
+        if (status == 0) {
             if (cache.find(key) != cache.end()) {
+                std::unique_lock<std::mutex> setlock(setmute);
                 cache[key] = value;
             } else {
-                cache.insert({ key, value });
+                {
+                    std::unique_lock<std::mutex> setlock(setmute);
+                    cache.insert({ key, value });
+                }
                 ++envcount;
             }
             return true;
@@ -116,13 +126,15 @@ namespace store {
     
     bool env::del(std::string const& key) {
         bool unset = false;
+        {
+            std::lock(setmute, getmute);
+            std::lock_guard<std::mutex> setlock(setmute, std::adopt_lock);
+            std::lock_guard<std::mutex> getlock(getmute, std::adopt_lock);
+            unset = ::unsetenv(key.c_str()) == 0;
+        }
         if (cache.find(key) != cache.end()) {
             std::unique_lock<std::mutex> setlock(setmute);
             cache.erase(key);
-            unset = ::unsetenv(key.c_str()) == 0;
-        } else {
-            std::unique_lock<std::mutex> setlock(setmute);
-            unset = ::unsetenv(key.c_str()) == 0;
         }
         if (unset) { --envcount; }
         return unset;
