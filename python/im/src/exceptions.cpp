@@ -101,13 +101,14 @@ namespace py {
     
     /// ... in retrospect, I may have named too many methods `get()`:
     PyObject* LastError(void) {
+        using namespace ex;
         if (!py::ErrorOccurred()) { return nullptr; }
-        auto const& iter = std::find_if(ex::idx::begin(),
-                                        ex::idx::end(),
+        auto const& iter = std::find_if(idx::begin(),
+                                        idx::end(),
                                      [](py::ref& exc) -> bool {
             return PyErr_ExceptionMatches(exc.get());
         });
-        return iter != ex::idx::end() ? iter->get() : nullptr;
+        return iter != idx::end() ? iter->get() : nullptr;
     }
     
     
