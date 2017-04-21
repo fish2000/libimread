@@ -13,9 +13,9 @@ namespace py {
     
     namespace functions {
         
-        PyObject* image_check(PyObject* self, PyObject* args);
+        // PyObject* image_check(PyObject* self, PyObject* args);
         PyObject* buffer_check(PyObject* self, PyObject* args);
-        PyObject* imagebuffer_check(PyObject* self, PyObject* args);
+        // PyObject* imagebuffer_check(PyObject* self, PyObject* args);
         PyObject* array_check(PyObject* self, PyObject* args);
         PyObject* arraybuffer_check(PyObject* self, PyObject* args);
         PyObject* batch_check(PyObject* self, PyObject* args);

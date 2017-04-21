@@ -16,8 +16,8 @@ namespace py {
     namespace ext {
         
         /// “Models” are python wrapper types
-        using ImageModel = ImageModelBase<HalideNumpyImage, buffer_t>;
-        using ImageBufferModel = ImageModel::BufferModel;
+        // using ImageModel = ImageModelBase<HalideNumpyImage, buffer_t>;
+        // using ImageBufferModel = ImageModel::BufferModel;
         
         using ArrayModel = ImageModelBase<ArrayImage, buffer_t>;
         using ArrayBufferModel = ArrayModel::BufferModel;

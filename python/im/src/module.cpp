@@ -3,13 +3,13 @@
 #include <iostream>
 #include "module.hpp"
 
-using im::HalideNumpyImage;
+// using im::HalideNumpyImage;
 using im::ArrayImage;
-using im::HybridFactory;
+// using im::HybridFactory;
 using im::ArrayFactory;
-using py::ext::ImageModel;
+// using py::ext::ImageModel;
 using py::ext::ArrayModel;
-using py::ext::ImageBufferModel;
+// using py::ext::ImageBufferModel;
 using py::ext::ArrayBufferModel;
 using py::ext::BatchModel;
 using py::ext::BatchIterator;
@@ -65,107 +65,107 @@ PyTypeObject BufferModel_Type = {
     0,                                                                  /* tp_version_tag */
 };
 
-PyTypeObject ImageModel_Type = {
-    PyObject_HEAD_INIT(nullptr)
-    0,                                                                  /* ob_size */
-    py::ext::ImageModel::typestring(),                                  /* tp_name */
-    sizeof(ImageModel),                                                 /* tp_basicsize */
-    0,                                                                  /* tp_itemsize */
-    (destructor)py::ext::image::dealloc<HalideNumpyImage, buffer_t>,    /* tp_dealloc */
-    0,                                                                  /* tp_print */
-    0,                                                                  /* tp_getattr */
-    0,                                                                  /* tp_setattr */
-    (cmpfunc)py::ext::image::compare<HalideNumpyImage, buffer_t>,       /* tp_compare */
-    (reprfunc)py::ext::image::repr<HalideNumpyImage, buffer_t>,         /* tp_repr */
-    0,                                                                  /* tp_as_number */
-    py::ext::image::methods::sequence<HalideNumpyImage>(),              /* tp_as_sequence */
-    0,                                                                  /* tp_as_mapping */
-    0, /*(hashfunc)py::ext::image::hash<HalideNumpyImage, buffer_t>,*/  /* tp_hash */
-    0,                                                                  /* tp_call */
-    (reprfunc)py::ext::image::str<HalideNumpyImage, buffer_t>,          /* tp_str */
-    (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
-    (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
-    py::ext::image::methods::buffer<HalideNumpyImage>(),                /* tp_as_buffer */
-    py::ext::ImageModel::typeflags(),                                   /* tp_flags */
-    py::ext::ImageModel::typedoc(),                                     /* tp_doc */
-    (traverseproc)py::ext::image::traverse<HalideNumpyImage, buffer_t>, /* tp_traverse */
-    (inquiry)py::ext::image::clear<HalideNumpyImage, buffer_t>,         /* tp_clear */
-    0,                                                                  /* tp_richcompare */
-    py::detail::offset(&ImageModel::weakrefs),                          /* tp_weaklistoffset */
-    0,                                                                  /* tp_iter */
-    0,                                                                  /* tp_iternext */
-    py::ext::image::methods::basic<HalideNumpyImage>(),                 /* tp_methods */
-    0,                                                                  /* tp_members */
-    py::ext::image::methods::getset<HalideNumpyImage>(),                /* tp_getset */
-    0,                                                                  /* tp_base */
-    0,                                                                  /* tp_dict */
-    0,                                                                  /* tp_descr_get */
-    0,                                                                  /* tp_descr_set */
-    0,                                                                  /* tp_dictoffset */
-    (initproc)py::ext::image::init<HalideNumpyImage, buffer_t>,         /* tp_init */
-    0,                                                                  /* tp_alloc */
-    py::ext::image::createnew<HalideNumpyImage, buffer_t>,              /* tp_new */
-    0,                                                                  /* tp_free */
-    0,                                                                  /* tp_is_gc */
-    0,                                                                  /* tp_bases */
-    0,                                                                  /* tp_mro */
-    0,                                                                  /* tp_cache */
-    0,                                                                  /* tp_subclasses */
-    0,                                                                  /* tp_weaklist */
-    0,                                                                  /* tp_del */
-    0,                                                                  /* tp_version_tag */
-};
+// PyTypeObject ImageModel_Type = {
+//     PyObject_HEAD_INIT(nullptr)
+//     0,                                                                  /* ob_size */
+//     py::ext::ImageModel::typestring(),                                  /* tp_name */
+//     sizeof(ImageModel),                                                 /* tp_basicsize */
+//     0,                                                                  /* tp_itemsize */
+//     (destructor)py::ext::image::dealloc<HalideNumpyImage, buffer_t>,    /* tp_dealloc */
+//     0,                                                                  /* tp_print */
+//     0,                                                                  /* tp_getattr */
+//     0,                                                                  /* tp_setattr */
+//     (cmpfunc)py::ext::image::compare<HalideNumpyImage, buffer_t>,       /* tp_compare */
+//     (reprfunc)py::ext::image::repr<HalideNumpyImage, buffer_t>,         /* tp_repr */
+//     0,                                                                  /* tp_as_number */
+//     py::ext::image::methods::sequence<HalideNumpyImage>(),              /* tp_as_sequence */
+//     0,                                                                  /* tp_as_mapping */
+//     0, /*(hashfunc)py::ext::image::hash<HalideNumpyImage, buffer_t>,*/  /* tp_hash */
+//     0,                                                                  /* tp_call */
+//     (reprfunc)py::ext::image::str<HalideNumpyImage, buffer_t>,          /* tp_str */
+//     (getattrofunc)PyObject_GenericGetAttr,                              /* tp_getattro */
+//     (setattrofunc)PyObject_GenericSetAttr,                              /* tp_setattro */
+//     py::ext::image::methods::buffer<HalideNumpyImage>(),                /* tp_as_buffer */
+//     py::ext::ImageModel::typeflags(),                                   /* tp_flags */
+//     py::ext::ImageModel::typedoc(),                                     /* tp_doc */
+//     (traverseproc)py::ext::image::traverse<HalideNumpyImage, buffer_t>, /* tp_traverse */
+//     (inquiry)py::ext::image::clear<HalideNumpyImage, buffer_t>,         /* tp_clear */
+//     0,                                                                  /* tp_richcompare */
+//     py::detail::offset(&ImageModel::weakrefs),                          /* tp_weaklistoffset */
+//     0,                                                                  /* tp_iter */
+//     0,                                                                  /* tp_iternext */
+//     py::ext::image::methods::basic<HalideNumpyImage>(),                 /* tp_methods */
+//     0,                                                                  /* tp_members */
+//     py::ext::image::methods::getset<HalideNumpyImage>(),                /* tp_getset */
+//     0,                                                                  /* tp_base */
+//     0,                                                                  /* tp_dict */
+//     0,                                                                  /* tp_descr_get */
+//     0,                                                                  /* tp_descr_set */
+//     0,                                                                  /* tp_dictoffset */
+//     (initproc)py::ext::image::init<HalideNumpyImage, buffer_t>,         /* tp_init */
+//     0,                                                                  /* tp_alloc */
+//     py::ext::image::createnew<HalideNumpyImage, buffer_t>,              /* tp_new */
+//     0,                                                                  /* tp_free */
+//     0,                                                                  /* tp_is_gc */
+//     0,                                                                  /* tp_bases */
+//     0,                                                                  /* tp_mro */
+//     0,                                                                  /* tp_cache */
+//     0,                                                                  /* tp_subclasses */
+//     0,                                                                  /* tp_weaklist */
+//     0,                                                                  /* tp_del */
+//     0,                                                                  /* tp_version_tag */
+// };
 
-PyTypeObject ImageBufferModel_Type = {
-    PyObject_HEAD_INIT(nullptr)
-    0,                                                                      /* ob_size */
-    py::ext::ImageModel::BufferModel::typestring(),                         /* tp_name */
-    sizeof(ImageBufferModel),                                               /* tp_basicsize */
-    0,                                                                      /* tp_itemsize */
-    (destructor)py::ext::buffer::dealloc<buffer_t, ImageBufferModel>,       /* tp_dealloc */
-    0,                                                                      /* tp_print */
-    0,                                                                      /* tp_getattr */
-    0,                                                                      /* tp_setattr */
-    (cmpfunc)py::ext::buffer::compare<buffer_t, ImageBufferModel>,          /* tp_compare */
-    (reprfunc)py::ext::buffer::repr<buffer_t, ImageBufferModel>,            /* tp_repr */
-    0,                                                                      /* tp_as_number */
-    py::ext::buffer::methods::sequence<buffer_t, ImageBufferModel>(),       /* tp_as_sequence */
-    0,                                                                      /* tp_as_mapping */
-    0,                                                                      /* tp_hash */
-    0,                                                                      /* tp_call */
-    (reprfunc)py::ext::buffer::str<buffer_t, ImageBufferModel>,             /* tp_str */
-    (getattrofunc)PyObject_GenericGetAttr,                                  /* tp_getattro */
-    (setattrofunc)PyObject_GenericSetAttr,                                  /* tp_setattro */
-    py::ext::buffer::methods::buffer<buffer_t, ImageBufferModel>(),         /* tp_as_buffer */
-    py::ext::ImageModel::BufferModel::typeflags(),                          /* tp_flags */
-    py::ext::ImageModel::BufferModel::typedoc(),                            /* tp_doc */
-    (traverseproc)py::ext::buffer::traverse<buffer_t, ImageBufferModel>,    /* tp_traverse */
-    (inquiry)py::ext::buffer::clear<buffer_t, ImageBufferModel>,            /* tp_clear */
-    0,                                                                      /* tp_richcompare */
-    py::detail::offset(&ImageBufferModel::weakrefs),                        /* tp_weaklistoffset */
-    0,                                                                      /* tp_iter */
-    0,                                                                      /* tp_iternext */
-    py::ext::buffer::methods::basic<buffer_t, ImageBufferModel>(),          /* tp_methods */
-    0,                                                                      /* tp_members */
-    py::ext::buffer::methods::getset<buffer_t, ImageBufferModel>(),         /* tp_getset */
-    0,                                                                      /* tp_base */
-    0,                                                                      /* tp_dict */
-    0,                                                                      /* tp_descr_get */
-    0,                                                                      /* tp_descr_set */
-    0,                                                                      /* tp_dictoffset */
-    (initproc)py::ext::buffer::init<buffer_t, ImageBufferModel>,            /* tp_init */
-    0,                                                                      /* tp_alloc */
-    py::ext::buffer::createnew<buffer_t, ImageBufferModel>,                 /* tp_new */
-    0,                                                                      /* tp_free */
-    0,                                                                      /* tp_is_gc */
-    0,                                                                      /* tp_bases */
-    0,                                                                      /* tp_mro */
-    0,                                                                      /* tp_cache */
-    0,                                                                      /* tp_subclasses */
-    0,                                                                      /* tp_weaklist */
-    0,                                                                      /* tp_del */
-    0,                                                                      /* tp_version_tag */
-};
+// PyTypeObject ImageBufferModel_Type = {
+//     PyObject_HEAD_INIT(nullptr)
+//     0,                                                                      /* ob_size */
+//     py::ext::ImageModel::BufferModel::typestring(),                         /* tp_name */
+//     sizeof(ImageBufferModel),                                               /* tp_basicsize */
+//     0,                                                                      /* tp_itemsize */
+//     (destructor)py::ext::buffer::dealloc<buffer_t, ImageBufferModel>,       /* tp_dealloc */
+//     0,                                                                      /* tp_print */
+//     0,                                                                      /* tp_getattr */
+//     0,                                                                      /* tp_setattr */
+//     (cmpfunc)py::ext::buffer::compare<buffer_t, ImageBufferModel>,          /* tp_compare */
+//     (reprfunc)py::ext::buffer::repr<buffer_t, ImageBufferModel>,            /* tp_repr */
+//     0,                                                                      /* tp_as_number */
+//     py::ext::buffer::methods::sequence<buffer_t, ImageBufferModel>(),       /* tp_as_sequence */
+//     0,                                                                      /* tp_as_mapping */
+//     0,                                                                      /* tp_hash */
+//     0,                                                                      /* tp_call */
+//     (reprfunc)py::ext::buffer::str<buffer_t, ImageBufferModel>,             /* tp_str */
+//     (getattrofunc)PyObject_GenericGetAttr,                                  /* tp_getattro */
+//     (setattrofunc)PyObject_GenericSetAttr,                                  /* tp_setattro */
+//     py::ext::buffer::methods::buffer<buffer_t, ImageBufferModel>(),         /* tp_as_buffer */
+//     py::ext::ImageModel::BufferModel::typeflags(),                          /* tp_flags */
+//     py::ext::ImageModel::BufferModel::typedoc(),                            /* tp_doc */
+//     (traverseproc)py::ext::buffer::traverse<buffer_t, ImageBufferModel>,    /* tp_traverse */
+//     (inquiry)py::ext::buffer::clear<buffer_t, ImageBufferModel>,            /* tp_clear */
+//     0,                                                                      /* tp_richcompare */
+//     py::detail::offset(&ImageBufferModel::weakrefs),                        /* tp_weaklistoffset */
+//     0,                                                                      /* tp_iter */
+//     0,                                                                      /* tp_iternext */
+//     py::ext::buffer::methods::basic<buffer_t, ImageBufferModel>(),          /* tp_methods */
+//     0,                                                                      /* tp_members */
+//     py::ext::buffer::methods::getset<buffer_t, ImageBufferModel>(),         /* tp_getset */
+//     0,                                                                      /* tp_base */
+//     0,                                                                      /* tp_dict */
+//     0,                                                                      /* tp_descr_get */
+//     0,                                                                      /* tp_descr_set */
+//     0,                                                                      /* tp_dictoffset */
+//     (initproc)py::ext::buffer::init<buffer_t, ImageBufferModel>,            /* tp_init */
+//     0,                                                                      /* tp_alloc */
+//     py::ext::buffer::createnew<buffer_t, ImageBufferModel>,                 /* tp_new */
+//     0,                                                                      /* tp_free */
+//     0,                                                                      /* tp_is_gc */
+//     0,                                                                      /* tp_bases */
+//     0,                                                                      /* tp_mro */
+//     0,                                                                      /* tp_cache */
+//     0,                                                                      /* tp_subclasses */
+//     0,                                                                      /* tp_weaklist */
+//     0,                                                                      /* tp_del */
+//     0,                                                                      /* tp_version_tag */
+// };
 
 PyTypeObject ArrayModel_Type = {
     PyObject_HEAD_INIT(nullptr)
@@ -402,21 +402,21 @@ static PyMethodDef module_functions[] = {
             (PyCFunction)py::functions::structcode_convert,
             METH_VARARGS,
             "Directly convert struct code internal tuple to Python values" },
-    {
-        "image_check",
-            (PyCFunction)py::functions::image_check,
-            METH_VARARGS,
-            "Boolean function to test for im.Image instances" },
+    // {
+    //     "image_check",
+    //         (PyCFunction)py::functions::image_check,
+    //         METH_VARARGS,
+    //         "Boolean function to test for im.Image instances" },
     {
         "buffer_check",
             (PyCFunction)py::functions::buffer_check,
             METH_VARARGS,
             "Boolean function to test for im.Buffer instances" },
-    {
-        "imagebuffer_check",
-            (PyCFunction)py::functions::imagebuffer_check,
-            METH_VARARGS,
-            "Boolean function to test for im.Image.Buffer instances" },
+    // {
+    //     "imagebuffer_check",
+    //         (PyCFunction)py::functions::imagebuffer_check,
+    //         METH_VARARGS,
+    //         "Boolean function to test for im.Image.Buffer instances" },
     {
         "array_check",
             (PyCFunction)py::functions::array_check,
@@ -474,13 +474,13 @@ namespace {
         /// Manually amend our declared types, as needed:
         /// -- Specify that im.Image.Buffer and im.Array.Buffer are
         /// subclasses of im.Buffer
-        ImageBufferModel_Type.tp_base = &BufferModel_Type;
+        // ImageBufferModel_Type.tp_base = &BufferModel_Type;
         ArrayBufferModel_Type.tp_base = &BufferModel_Type;
         
         /// -- Prepare the tp_dict of types that have subtype objects:
         /// im.Image (py::ext::ImageModel)
-        ImageModel_Type.tp_dict = PyDict_New();
-        if (!ImageModel_Type.tp_dict)                 { return false; }
+        // ImageModel_Type.tp_dict = PyDict_New();
+        // if (!ImageModel_Type.tp_dict)                 { return false; }
         /// im.Array (py::ext::ArrayModel)
         ArrayModel_Type.tp_dict = PyDict_New();
         if (!ArrayModel_Type.tp_dict)                 { return false; }
@@ -490,8 +490,8 @@ namespace {
         
         /// Check readiness of our extension type declarations (?)
         if (PyType_Ready(&BufferModel_Type) < 0)      { return false; }
-        if (PyType_Ready(&ImageModel_Type) < 0)       { return false; }
-        if (PyType_Ready(&ImageBufferModel_Type) < 0) { return false; }
+        // if (PyType_Ready(&ImageModel_Type) < 0)       { return false; }
+        // if (PyType_Ready(&ImageBufferModel_Type) < 0) { return false; }
         if (PyType_Ready(&ArrayModel_Type) < 0)       { return false; }
         if (PyType_Ready(&ArrayBufferModel_Type) < 0) { return false; }
         if (PyType_Ready(&BatchModel_Type) < 0)       { return false; }
@@ -523,16 +523,16 @@ namespace {
         ///     im.Image.ImageBuffer
         /// 
         /// ... thanks SO! http://stackoverflow.com/q/35954016/298171
-        Py_INCREF(&ImageBufferModel_Type);
-        PyDict_SetItemString(ImageModel_Type.tp_dict,
-            "Buffer",
-            (PyObject*)&ImageBufferModel_Type);
+        // Py_INCREF(&ImageBufferModel_Type);
+        // PyDict_SetItemString(ImageModel_Type.tp_dict,
+        //     "Buffer",
+        //     (PyObject*)&ImageBufferModel_Type);
         
         /// Add the ImageModel type object to the module
-        Py_INCREF(&ImageModel_Type);
-        PyModule_AddObject(module,
-            "Image",
-            (PyObject*)&ImageModel_Type);
+        // Py_INCREF(&ImageModel_Type);
+        // PyModule_AddObject(module,
+        //     "Image",
+        //     (PyObject*)&ImageModel_Type);
         
         Py_INCREF(&ArrayBufferModel_Type);
         PyDict_SetItemString(ArrayModel_Type.tp_dict,

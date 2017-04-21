@@ -80,8 +80,8 @@ namespace py {
                     return std::string((const char*)&fulldata[0], fulldata.size());
                 }
             } else if (BufferModel_Check(value)         ||
-                       ImageModel_Check(value)          ||
-                       ImageBufferModel_Check(value)    ||
+                       // ImageModel_Check(value)          ||
+                       // ImageBufferModel_Check(value)    ||
                        BatchModel_Check(value)          ||
                        BatchIterator_Check(value)) {
                 return py::ValueError(

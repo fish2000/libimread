@@ -137,207 +137,207 @@ namespace im {
         }
     }
     
-    HalideNumpyImage::HalideNumpyImage()
-        :HalBase(), PythonBufferImage(), MetaImage()
-        ,dtype_(NPY_UINT8)
-        {}
-    
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
-        :HalBase(detail::for_dtype(d), *b), PythonBufferImage(), MetaImage(name)
-        ,dtype_(d)
-        {}
-    
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, y, z, w), PythonBufferImage(), MetaImage(name)
-        ,dtype_(d)
-        {}
-    
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, y, z, 0), PythonBufferImage(), MetaImage(name)
-        ,dtype_(d)
-        {}
-    
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, y, 0, 0), PythonBufferImage(), MetaImage(name)
-        ,dtype_(d)
-        {}
-    
-    HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, std::string const& name)
-        :HalBase(detail::for_dtype(d), x, 0, 0, 0), PythonBufferImage(), MetaImage(name)
-        ,dtype_(d)
-        {}
-    
-    HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& other, int const zidx, std::string const& name)
-        :HalBase(other.type(), other.dim(0), other.dim(1), 1, 0)
-        ,PythonBufferImage(), MetaImage(name)
-        ,dtype_(other.dtype())
-        {
-            /// rely on Halide's use of planar image strides
-            pix::accessor<byte> source = other.access<byte>();
-            pix::accessor<byte> target = this->access<byte>();
-            const int w = other.dim(0);
-            const int h = other.dim(1);
-            for (int y = 0; y < h; ++y) {
-                for (int x = 0; x < w; ++x) {
-                    pix::convert(source(x, y, zidx)[0],
-                                 target(x, y,    0)[0]);
-                }
-            }
-        }
-    
-    HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& basis, HalideNumpyImage const& etc, std::string const& name)
-        :HalBase(basis.type(), basis.dim(0), basis.dim(1), basis.dim(2) + etc.dim(2), 0)
-        ,PythonBufferImage(), MetaImage(name)
-        ,dtype_(basis.dtype())
-        {
-            /// rely on Halide's use of planar image strides
-            pix::accessor<byte> source = basis.access<byte>();
-            pix::accessor<byte> extend = etc.access<byte>();
-            pix::accessor<byte> target = this->access<byte>();
-            const int w = basis.dim(0);
-            const int h = basis.dim(1);
-            const int p = basis.dim(2);
-            const int px = etc.dim(2);
-            for (int cc = 0; cc < p; ++cc) {
-                for (int y = 0; y < h; ++y) {
-                    for (int x = 0; x < w; ++x) {
-                        pix::convert(source(x, y, cc)[0],
-                                     target(x, y, cc)[0]);
-                    }
-                }
-            }
-            for (int cc = 0; cc < px; ++cc) {
-                for (int y = 0; y < h; ++y) {
-                    for (int x = 0; x < w; ++x) {
-                        pix::convert(extend(x, y,   cc)[0],
-                                     target(x, y, p+cc)[0]);
-                    }
-                }
-            }
-        }
-    
-    HalideNumpyImage::~HalideNumpyImage() {}
-    
-    /// This returns the same type of data as buffer_t.host
-    uint8_t* HalideNumpyImage::data() const {
-        return (uint8_t*)HalBase::raw_buffer();
-    }
-    
-    uint8_t* HalideNumpyImage::data(int s) const {
-        return (uint8_t*)HalBase::raw_buffer() + std::ptrdiff_t(s);
-    }
-    
-    std::string_view HalideNumpyImage::view() const {
-        using value_t = std::add_pointer_t<typename std::string_view::value_type>;
-        return std::string_view(static_cast<value_t>(rowp(0)),
-                                static_cast<std::size_t>(size()));
-    }
-    
-    halide_type_t HalideNumpyImage::type() const {
-        return HalBase::type();
-    }
-    
-    buffer_t* HalideNumpyImage::buffer_ptr() const {
-        return const_cast<buffer_t*>(HalBase::raw_buffer());
-    }
-    
-    int HalideNumpyImage::nbits() const {
-        return HalBase::type().bits;
-    }
-    
-    int HalideNumpyImage::nbytes() const {
-        const int bits = HalBase::type().bits;
-        return (bits / 8) + bool(bits % 8);
-    }
-    
-    int HalideNumpyImage::ndims() const {
-        return HalBase::dimensions();
-    }
-    
-    int HalideNumpyImage::dim(int d) const {
-        return HalBase::extent(d);
-    }
-    
-    int HalideNumpyImage::stride(int s) const {
-        return HalBase::stride(s);
-    }
-    
-    int HalideNumpyImage::min(int s) const {
-        return HalBase::min(s);
-    }
-    
-    bool HalideNumpyImage::is_signed() const {
-        /// If it's not UInt, it's signed --
-        /// it's either Float, Int, or someshit.
-        return HalBase::type().code != halide_type_code_t::halide_type_uint;
-    }
-    
-    bool HalideNumpyImage::is_floating_point() const {
-        return HalBase::type().code == halide_type_code_t::halide_type_float;
-    }
-    
-    off_t HalideNumpyImage::rowp_stride() const {
-        return HalBase::channels() == 1 ? 0 : off_t(HalBase::stride(1));
-    }
-    
-    void* HalideNumpyImage::rowp(int r) const {
-        uint8_t* host = data();
-        host += off_t(r * rowp_stride());
-        return static_cast<void*>(host);
-    }
-    
-    /// type encoding
-    NPY_TYPES   HalideNumpyImage::dtype() const         { return dtype_; }
-    char        HalideNumpyImage::dtypechar() const     { return static_cast<char>(typecode::typechar(dtype_)); }
-    std::string HalideNumpyImage::dtypename() const     { return typecode::name(dtype_); }
-    char const* HalideNumpyImage::structcode() const    { return im::detail::structcode(dtype_); }
-    
-    std::string HalideNumpyImage::dsignature(Endian e) const {
-        char endianness = static_cast<char>(e);
-        char typechar = static_cast<char>(typecode::typechar(dtype_));
-        int bytes = nbytes();
-        int buffer_size = std::snprintf(nullptr, 0, "%c%c%i",
-                                        endianness, typechar, bytes) + 1;
-        char out_buffer[buffer_size];
-        __attribute__((unused))
-        int buffer_used = std::snprintf(out_buffer, buffer_size, "%c%c%i",
-                                        endianness, typechar, bytes);
-        return std::string(out_buffer);
-    }
-    
-    /// extent, stride, min
-    int32_t*    HalideNumpyImage::dims()                { return HalBase::raw_buffer()->extent; }
-    int32_t*    HalideNumpyImage::strides()             { return HalBase::raw_buffer()->stride; }
-    int32_t*    HalideNumpyImage::offsets()             { return HalBase::raw_buffer()->min; }
-    
-#define xWIDTH d1
-#define xHEIGHT d0
-#define xDEPTH d2
-    
-    HybridFactory::HybridFactory()
-        :nm("Image")
-        {}
-    
-    HybridFactory::HybridFactory(std::string const& n)
-        :nm(n)
-        {}
-    
-    HybridFactory::~HybridFactory() {}
-    
-    std::string& HybridFactory::name() { return nm; }
-    void HybridFactory::name(std::string const& n) { nm = n; }
-    
-    std::unique_ptr<Image> HybridFactory::create(int nbits,
-                                                 int xHEIGHT, int xWIDTH, int xDEPTH,
-                                                 int d3, int d4) {
-        return std::unique_ptr<Image>(
-            new HalideNumpyImage(
-                detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
-    }
-    
-#undef xWIDTH
-#undef xHEIGHT
-#undef xDEPTH
+//     HalideNumpyImage::HalideNumpyImage()
+//         :HalBase(), PythonBufferImage(), MetaImage()
+//         ,dtype_(NPY_UINT8)
+//         {}
+//
+//     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
+//         :HalBase(detail::for_dtype(d), *b), PythonBufferImage(), MetaImage(name)
+//         ,dtype_(d)
+//         {}
+//
+//     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
+//         :HalBase(detail::for_dtype(d), x, y, z, w), PythonBufferImage(), MetaImage(name)
+//         ,dtype_(d)
+//         {}
+//
+//     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, std::string const& name)
+//         :HalBase(detail::for_dtype(d), x, y, z, 0), PythonBufferImage(), MetaImage(name)
+//         ,dtype_(d)
+//         {}
+//
+//     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, std::string const& name)
+//         :HalBase(detail::for_dtype(d), x, y, 0, 0), PythonBufferImage(), MetaImage(name)
+//         ,dtype_(d)
+//         {}
+//
+//     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, std::string const& name)
+//         :HalBase(detail::for_dtype(d), x, 0, 0, 0), PythonBufferImage(), MetaImage(name)
+//         ,dtype_(d)
+//         {}
+//
+//     HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& other, int const zidx, std::string const& name)
+//         :HalBase(other.type(), other.dim(0), other.dim(1), 1, 0)
+//         ,PythonBufferImage(), MetaImage(name)
+//         ,dtype_(other.dtype())
+//         {
+//             /// rely on Halide's use of planar image strides
+//             pix::accessor<byte> source = other.access<byte>();
+//             pix::accessor<byte> target = this->access<byte>();
+//             const int w = other.dim(0);
+//             const int h = other.dim(1);
+//             for (int y = 0; y < h; ++y) {
+//                 for (int x = 0; x < w; ++x) {
+//                     pix::convert(source(x, y, zidx)[0],
+//                                  target(x, y,    0)[0]);
+//                 }
+//             }
+//         }
+//
+//     HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& basis, HalideNumpyImage const& etc, std::string const& name)
+//         :HalBase(basis.type(), basis.dim(0), basis.dim(1), basis.dim(2) + etc.dim(2), 0)
+//         ,PythonBufferImage(), MetaImage(name)
+//         ,dtype_(basis.dtype())
+//         {
+//             /// rely on Halide's use of planar image strides
+//             pix::accessor<byte> source = basis.access<byte>();
+//             pix::accessor<byte> extend = etc.access<byte>();
+//             pix::accessor<byte> target = this->access<byte>();
+//             const int w = basis.dim(0);
+//             const int h = basis.dim(1);
+//             const int p = basis.dim(2);
+//             const int px = etc.dim(2);
+//             for (int cc = 0; cc < p; ++cc) {
+//                 for (int y = 0; y < h; ++y) {
+//                     for (int x = 0; x < w; ++x) {
+//                         pix::convert(source(x, y, cc)[0],
+//                                      target(x, y, cc)[0]);
+//                     }
+//                 }
+//             }
+//             for (int cc = 0; cc < px; ++cc) {
+//                 for (int y = 0; y < h; ++y) {
+//                     for (int x = 0; x < w; ++x) {
+//                         pix::convert(extend(x, y,   cc)[0],
+//                                      target(x, y, p+cc)[0]);
+//                     }
+//                 }
+//             }
+//         }
+//
+//     HalideNumpyImage::~HalideNumpyImage() {}
+//
+//     /// This returns the same type of data as buffer_t.host
+//     uint8_t* HalideNumpyImage::data() const {
+//         return (uint8_t*)HalBase::raw_buffer();
+//     }
+//
+//     uint8_t* HalideNumpyImage::data(int s) const {
+//         return (uint8_t*)HalBase::raw_buffer() + std::ptrdiff_t(s);
+//     }
+//
+//     std::string_view HalideNumpyImage::view() const {
+//         using value_t = std::add_pointer_t<typename std::string_view::value_type>;
+//         return std::string_view(static_cast<value_t>(rowp(0)),
+//                                 static_cast<std::size_t>(size()));
+//     }
+//
+//     halide_type_t HalideNumpyImage::type() const {
+//         return HalBase::type();
+//     }
+//
+//     buffer_t* HalideNumpyImage::buffer_ptr() const {
+//         return const_cast<buffer_t*>(HalBase::raw_buffer());
+//     }
+//
+//     int HalideNumpyImage::nbits() const {
+//         return HalBase::type().bits;
+//     }
+//
+//     int HalideNumpyImage::nbytes() const {
+//         const int bits = HalBase::type().bits;
+//         return (bits / 8) + bool(bits % 8);
+//     }
+//
+//     int HalideNumpyImage::ndims() const {
+//         return HalBase::dimensions();
+//     }
+//
+//     int HalideNumpyImage::dim(int d) const {
+//         return HalBase::extent(d);
+//     }
+//
+//     int HalideNumpyImage::stride(int s) const {
+//         return HalBase::stride(s);
+//     }
+//
+//     int HalideNumpyImage::min(int s) const {
+//         return HalBase::min(s);
+//     }
+//
+//     bool HalideNumpyImage::is_signed() const {
+//         /// If it's not UInt, it's signed --
+//         /// it's either Float, Int, or someshit.
+//         return HalBase::type().code != halide_type_code_t::halide_type_uint;
+//     }
+//
+//     bool HalideNumpyImage::is_floating_point() const {
+//         return HalBase::type().code == halide_type_code_t::halide_type_float;
+//     }
+//
+//     off_t HalideNumpyImage::rowp_stride() const {
+//         return HalBase::channels() == 1 ? 0 : off_t(HalBase::stride(1));
+//     }
+//
+//     void* HalideNumpyImage::rowp(int r) const {
+//         uint8_t* host = data();
+//         host += off_t(r * rowp_stride());
+//         return static_cast<void*>(host);
+//     }
+//
+//     /// type encoding
+//     NPY_TYPES   HalideNumpyImage::dtype() const         { return dtype_; }
+//     char        HalideNumpyImage::dtypechar() const     { return static_cast<char>(typecode::typechar(dtype_)); }
+//     std::string HalideNumpyImage::dtypename() const     { return typecode::name(dtype_); }
+//     char const* HalideNumpyImage::structcode() const    { return im::detail::structcode(dtype_); }
+//
+//     std::string HalideNumpyImage::dsignature(Endian e) const {
+//         char endianness = static_cast<char>(e);
+//         char typechar = static_cast<char>(typecode::typechar(dtype_));
+//         int bytes = nbytes();
+//         int buffer_size = std::snprintf(nullptr, 0, "%c%c%i",
+//                                         endianness, typechar, bytes) + 1;
+//         char out_buffer[buffer_size];
+//         __attribute__((unused))
+//         int buffer_used = std::snprintf(out_buffer, buffer_size, "%c%c%i",
+//                                         endianness, typechar, bytes);
+//         return std::string(out_buffer);
+//     }
+//
+//     /// extent, stride, min
+//     int32_t*    HalideNumpyImage::dims()                { return HalBase::raw_buffer()->extent; }
+//     int32_t*    HalideNumpyImage::strides()             { return HalBase::raw_buffer()->stride; }
+//     int32_t*    HalideNumpyImage::offsets()             { return HalBase::raw_buffer()->min; }
+//
+// #define xWIDTH d1
+// #define xHEIGHT d0
+// #define xDEPTH d2
+//
+//     HybridFactory::HybridFactory()
+//         :nm("Image")
+//         {}
+//
+//     HybridFactory::HybridFactory(std::string const& n)
+//         :nm(n)
+//         {}
+//
+//     HybridFactory::~HybridFactory() {}
+//
+//     std::string& HybridFactory::name() { return nm; }
+//     void HybridFactory::name(std::string const& n) { nm = n; }
+//
+//     std::unique_ptr<Image> HybridFactory::create(int nbits,
+//                                                  int xHEIGHT, int xWIDTH, int xDEPTH,
+//                                                  int d3, int d4) {
+//         return std::unique_ptr<Image>(
+//             new HalideNumpyImage(
+//                 detail::for_nbits(nbits), xWIDTH, xHEIGHT, xDEPTH));
+//     }
+//
+// #undef xWIDTH
+// #undef xHEIGHT
+// #undef xDEPTH
     
     ArrayImage::ArrayImage()
         :PythonBufferImage(), MetaImage()

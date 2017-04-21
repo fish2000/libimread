@@ -53,8 +53,8 @@ class BatchTests(BaseCase):
     
     def test_batch_load_jpgs(self):
         for image_path in self.jpgs:
-            image0 = self.imagetypes.Image(image_path)
-            image1 = self.imagetypes.Image(image_path)
+            image0 = self.imagetypes.Array(image_path)
+            image1 = self.imagetypes.Array(image_path)
             batch0 = im.Batch(image0, image1)
             self.assertEqual(len(batch0), 2)
             self.assertEqual(batch0.width,  image0.width)
@@ -70,7 +70,7 @@ class BatchTests(BaseCase):
     
     def test_batch_load_pngs(self):
         for image_path in self.pngs:
-            image = self.imagetypes.Image(image_path)
+            image = self.imagetypes.Array(image_path)
             array = self.imagetypes.Array(image_path)
             batch0 = im.Batch(image, array)
             self.assertEqual(len(batch0), 2)
@@ -79,7 +79,7 @@ class BatchTests(BaseCase):
             self.assertEqual(batch0.width,  array.width)
             self.assertEqual(batch0.height, array.height)
             batch1 = im.Batch()
-            batch1.append(self.imagetypes.Image(image_path))
+            batch1.append(self.imagetypes.Array(image_path))
             batch1.append(self.imagetypes.Array(image_path))
             self.assertEqual(len(batch0), len(batch1))
             batch1.append(imread.imread(image_path))
@@ -87,7 +87,7 @@ class BatchTests(BaseCase):
     
     def test_batch_load_tifs(self):
         for image_path in self.tifs:
-            image = self.imagetypes.Image(image_path)
+            image = self.imagetypes.Array(image_path)
             array = self.imagetypes.Array(image_path)
             batch0 = im.Batch(image, array)
             self.assertEqual(len(batch0), 2)
@@ -96,7 +96,7 @@ class BatchTests(BaseCase):
             self.assertEqual(batch0.width,  array.width)
             self.assertEqual(batch0.height, array.height)
             batch1 = im.Batch()
-            batch1.append(self.imagetypes.Image(image_path))
+            batch1.append(self.imagetypes.Array(image_path))
             batch1.append(self.imagetypes.Array(image_path))
             self.assertEqual(len(batch0), len(batch1))
             batch1.append(imread.imread(image_path))
@@ -104,7 +104,7 @@ class BatchTests(BaseCase):
     
     def test_batch_load_pvrs(self):
         for image_path in self.pvrs:
-            image = self.imagetypes.Image(image_path)
+            image = self.imagetypes.Array(image_path)
             array = self.imagetypes.Array(image_path)
             batch0 = im.Batch(image, array)
             self.assertEqual(len(batch0), 2)
@@ -113,7 +113,7 @@ class BatchTests(BaseCase):
             self.assertEqual(batch0.width,  array.width)
             self.assertEqual(batch0.height, array.height)
             batch1 = im.Batch()
-            batch1.append(self.imagetypes.Image(image_path))
+            batch1.append(self.imagetypes.Array(image_path))
             batch1.append(self.imagetypes.Array(image_path))
             self.assertEqual(len(batch0), len(batch1))
             batch1.append(imread.imread(image_path))

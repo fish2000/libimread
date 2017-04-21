@@ -81,9 +81,9 @@ namespace py {
         using im::Image;
         using im::ImageFormat;
         using im::Histogram;
-        using im::HalideNumpyImage;
+        // using im::HalideNumpyImage;
         using im::ArrayImage;
-        using im::HybridFactory;
+        // using im::HybridFactory;
         using im::ArrayFactory;
         
         using im::FileSource;

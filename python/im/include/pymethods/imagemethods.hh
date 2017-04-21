@@ -37,7 +37,7 @@ namespace py {
         namespace image {
             
             /// ALLOCATE / __new__ implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* createnew(PyTypeObject* type, PyObject* args, PyObject* kwargs) {
@@ -46,7 +46,7 @@ namespace py {
             }
             
             /// ALLOCATE / new(width, height, planes, fill, nbits, is_signed) implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* newfromsize(PyObject* _nothing_, PyObject* args, PyObject* kwargs) {
@@ -120,7 +120,7 @@ namespace py {
             
             
             /// ALLOCATE / frombuffer(bufferInstance) implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* newfrombuffer(PyObject* _nothing_, PyObject* buffer) {
@@ -129,7 +129,7 @@ namespace py {
                     return py::ValueError("missing im.Buffer argument");
                 }
                 if (!BufferModel_Check(buffer) &&
-                    !ImageBufferModel_Check(buffer) &&
+                    // !ImageBufferModel_Check(buffer) &&
                     !ArrayBufferModel_Check(buffer)) {
                     return py::ValueError("invalid im.Buffer instance");
                 }
@@ -137,7 +137,7 @@ namespace py {
             }
             
             /// ALLOCATE / fromimage(imageInstance) implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* newfromimage(PyObject* _nothing_, PyObject* other) {
@@ -145,15 +145,14 @@ namespace py {
                 if (!other) {
                     return py::ValueError("missing ImageType argument");
                 }
-                if (!ImageModel_Check(other) &&
-                    !ArrayModel_Check(other)) {
+                if (!ArrayModel_Check(other)) { /// !ImageModel_Check(other) &&
                     return py::ValueError("invalid ImageType instance");
                 }
                 return py::convert(new PythonImageType(other, tag_t{}));
             }
             
             /// ALLOCATE / merge(tuple(imageInstance, imageInstance [...])) implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* newfrommerge(PyTypeObject* type, PyObject* planes) {
@@ -212,7 +211,7 @@ namespace py {
             }
             
             /// __init__ implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int init(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -278,7 +277,7 @@ namespace py {
             }
             
             /// __repr__ implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* repr(PyObject* self) {
@@ -294,7 +293,7 @@ namespace py {
             }
             
             /// __str__ implementaton -- return bytes of image
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* str(PyObject* self) {
@@ -310,7 +309,7 @@ namespace py {
             }
             
             /// cmp(image0, image1) implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int compare(PyObject* pylhs, PyObject* pyrhs) {
@@ -327,7 +326,7 @@ namespace py {
             }
             
             /// __hash__ implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             long hash(PyObject* self) {
@@ -336,7 +335,7 @@ namespace py {
             }
             
             /// __len__ implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             Py_ssize_t length(PyObject* self) {
@@ -347,7 +346,7 @@ namespace py {
             }
             
             /// sq_concat implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* concat(PyObject* pylhs, PyObject* pyrhs) {
@@ -355,7 +354,7 @@ namespace py {
             }
             
             /// sq_repeat implementation
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* repeat(PyObject* basis, Py_ssize_t count) {
@@ -378,7 +377,7 @@ namespace py {
                 }
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* atindex(PyObject* self, Py_ssize_t idx) {
@@ -388,7 +387,7 @@ namespace py {
                 return imbuf->__index__(idx, static_cast<int>(pyim->dtype->type_num));
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int getbuffer(PyObject* self, Py_buffer* view, int flags) {
@@ -398,7 +397,7 @@ namespace py {
                 return imbuf->getbuffer(view, flags, static_cast<NPY_TYPES>(pyim->dtype->type_num));
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             void releasebuffer(PyObject* self, Py_buffer* view) {
@@ -409,7 +408,7 @@ namespace py {
             }
             
             /// DEALLOCATE
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             void dealloc(PyObject* self) {
@@ -418,7 +417,7 @@ namespace py {
             }
             
             /// CLEAR
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int clear(PyObject* self) {
@@ -428,7 +427,7 @@ namespace py {
             }
             
             /// TRAVERSE
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int traverse(PyObject* self, visitproc visit, void* arg) {
@@ -436,7 +435,7 @@ namespace py {
                 return pyim->vacay(visit, arg);
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* write(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -536,7 +535,7 @@ namespace py {
                 return py::string(dststr);
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* split(PyObject* self, PyObject*) {
@@ -552,7 +551,7 @@ namespace py {
                 return py::tuplize(new PythonImageType(self, 0));
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* plane_at(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -592,7 +591,7 @@ namespace py {
                 return pyim->plane_at(idx);
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* histogram_at(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -632,7 +631,7 @@ namespace py {
                 return pyim->histogram_at(idx);
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* entropy_at(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -672,7 +671,7 @@ namespace py {
                 return pyim->entropy_at(idx);
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* otsu_at(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -712,7 +711,7 @@ namespace py {
                 return pyim->otsu_at(idx);
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* histogram(PyObject* self, PyObject*) {
@@ -720,7 +719,7 @@ namespace py {
                 return pyim->histogram_all();
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* entropy(PyObject* self, PyObject*) {
@@ -728,7 +727,7 @@ namespace py {
                 return pyim->entropy_all();
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* otsu(PyObject* self, PyObject*) {
@@ -736,7 +735,7 @@ namespace py {
                 return pyim->otsu_all();
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* scale(PyObject* self, PyObject* scale_factor) {
@@ -745,7 +744,7 @@ namespace py {
                 return pyim->scale(factor);
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_png(PyObject* self, PyObject*) {
@@ -758,7 +757,7 @@ namespace py {
                 return pyim->saveblob(pyim->writeopts());
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_jpeg(PyObject* self, PyObject*) {
@@ -771,7 +770,7 @@ namespace py {
                 return pyim->saveblob(pyim->writeopts());
             }
             
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject* jupyter_repr_html(PyObject* self, PyObject*) {
@@ -811,7 +810,7 @@ namespace py {
             }
             
             /// ImageType.{mode,has_alpha} getter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_mode_property(PyObject* self, void* closure) {
@@ -820,7 +819,7 @@ namespace py {
             }
             
             /// ImageType.{bits,bytes} getter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_size_property(PyObject* self, void* closure) {
@@ -832,7 +831,7 @@ namespace py {
             }
             
             /// ImageType.{dtype,buffer} getter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_subobject(PyObject* self, void* closure) {
@@ -842,7 +841,7 @@ namespace py {
             }
             
             /// ImageType.{shape,strides} getter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_liminal_tuple(PyObject* self, void* closure) {
@@ -853,7 +852,7 @@ namespace py {
             }
             
             /// ImageType.{width,height,planes} getter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_dimensional_attribute(PyObject* self, void* closure) {
@@ -863,7 +862,7 @@ namespace py {
             }
             
             /// ImageType.{read,write}_opts getter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_opts(PyObject* self, void* closure) {
@@ -872,7 +871,7 @@ namespace py {
             }
             
             /// ImageType.{read,write}_opts setter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             int          set_opts(PyObject* self, PyObject* value, void* closure) {
@@ -893,7 +892,7 @@ namespace py {
             }
             
             /// ImageType.__array_{struct,interface}__ getter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    get_array_attribute(PyObject* self, void* closure) {
@@ -904,7 +903,7 @@ namespace py {
             }
             
             /// ImageType.read_opts formatter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    format_read_opts(PyObject* self, PyObject*) {
@@ -913,7 +912,7 @@ namespace py {
             }
             
             /// ImageType.read_opts file-dumper
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    dump_read_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -922,7 +921,7 @@ namespace py {
             }
             
             /// ImageType.write_opts formatter
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    format_write_opts(PyObject* self, PyObject*) {
@@ -931,7 +930,7 @@ namespace py {
             }
             
             /// ImageType.write_opts file-dumper
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    dump_write_opts(PyObject* self, PyObject* args, PyObject* kwargs) {
@@ -940,7 +939,7 @@ namespace py {
             }
             
             /// ImageType.add_alpha() method
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    add_alpha(PyObject* self, PyObject*) {
@@ -949,7 +948,7 @@ namespace py {
             }
             
             /// ImageType.remove_alpha() method
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    remove_alpha(PyObject* self, PyObject*) {
@@ -958,7 +957,7 @@ namespace py {
             }
             
             /// ImageType.encapsulate() method
-            template <typename ImageType = HalideNumpyImage,
+            template <typename ImageType = ArrayImage,
                       typename BufferType = buffer_t,
                       typename PythonImageType = ImageModelBase<ImageType, BufferType>>
             PyObject*    encapsulate(PyObject* self, PyObject*) {

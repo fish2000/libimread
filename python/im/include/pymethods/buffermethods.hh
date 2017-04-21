@@ -57,7 +57,7 @@ namespace py {
                     return py::ValueError("missing im.Buffer argument");
                 }
                 if (!BufferModel_Check(buffer) &&
-                    !ImageBufferModel_Check(buffer) &&
+                    // !ImageBufferModel_Check(buffer) &&
                     !ArrayBufferModel_Check(buffer)) {
                     return py::ValueError("invalid im.Buffer instance");
                 }

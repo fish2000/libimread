@@ -12,7 +12,7 @@ from im import (
     structcode_parse,
     
     Buffer,
-    Image,
+    # Image,
     Array,
     Batch)
 
@@ -38,5 +38,7 @@ __all__ = [
     detect, structcode_parse,
     show, to_PIL,
     mimetype, butteraugli,
-    Buffer, Image, Array, Batch
+    Buffer,
+    # Image,
+    Array, Batch
 ]

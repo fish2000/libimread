@@ -124,105 +124,105 @@ namespace im {
         
     };
     
-    /// We use Halide::ImageBase instead of Halide::Image here,
-    /// so that we don't have to muck around with templates when
-    /// working with arbitrary NumPy dtype values.
-    using HalBase = Halide::Runtime::Buffer<>;
+//     /// We use Halide::ImageBase instead of Halide::Image here,
+//     /// so that we don't have to muck around with templates when
+//     /// working with arbitrary NumPy dtype values.
+//     using HalBase = Halide::Runtime::Buffer<>;
     using MetaImage = ImageWithMetadata;
-    
-    /// forward-declare factory class
-    class HybridFactory;
-    
-    class HalideNumpyImage : public HalBase, public PythonBufferImage, public MetaImage {
-        
-        public:
-            using factory_t = HybridFactory;
-            
-            using HalBase::dimensions;
-            using HalBase::extent;
-            using HalBase::stride;
-            using HalBase::channels;
-            using HalBase::raw_buffer;
-            
-            HalideNumpyImage();
-            HalideNumpyImage(NPY_TYPES d, buffer_t const* b,            std::string const& name = "");
-            HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w,   std::string const& name = "");
-            HalideNumpyImage(NPY_TYPES d, int x, int y, int z,          std::string const& name = "");
-            HalideNumpyImage(NPY_TYPES d, int x, int y,                 std::string const& name = "");
-            HalideNumpyImage(NPY_TYPES d, int x,                        std::string const& name = "");
-            
-            explicit HalideNumpyImage(HalideNumpyImage const& other,
-                                      int const zidx = 0,               std::string const& name = "");
-            explicit HalideNumpyImage(HalideNumpyImage const& basis,
-                                      HalideNumpyImage const& etc,      std::string const& name = "");
-            
-            virtual ~HalideNumpyImage();
-            
-            /// This returns the same type of data as buffer_t.host
-            virtual uint8_t* data() const;
-            virtual uint8_t* data(int s) const;
-            virtual std::string_view view() const;
-            
-            halide_type_t type() const;
-            buffer_t* buffer_ptr() const;
-            virtual int nbits() const override;
-            virtual int nbytes() const override;
-            virtual int ndims() const override;
-            virtual int dim(int d) const override;
-            virtual int stride(int s) const override;
-            virtual int min(int s) const override;
-            virtual bool is_signed() const override;
-            virtual bool is_floating_point() const override;
-            inline off_t rowp_stride() const;
-            virtual void* rowp(int r) const override;
-            
-            /// type encoding
-            virtual NPY_TYPES dtype() const;
-            virtual char dtypechar() const;
-            virtual std::string dtypename() const;
-            virtual char const* structcode() const;
-            virtual std::string dsignature(Endian e = Endian::Unspecified) const;
-            
-            /// extent, stride, min
-            virtual int32_t* dims();
-            virtual int32_t* strides();
-            virtual int32_t* offsets();
-            
-        private:
-            NPY_TYPES dtype_;
-    };
-    
-#define xWIDTH d1
-#define xHEIGHT d0
-#define xDEPTH d2
-    
-    class HybridFactory : public ImageFactory {
-        
-        private:
-            std::string nm;
-        
-        public:
-            using image_t = HalideNumpyImage;
-            
-            HybridFactory();
-            HybridFactory(std::string const& n);
-            
-            virtual ~HybridFactory();
-            std::string& name();
-            void name(std::string const& n);
-            
-            static PyTypeObject* image_type() { return &ImageModel_Type; }
-            static PyTypeObject* buffer_type() { return &ImageBufferModel_Type; }
-        
-        protected:
-            virtual std::unique_ptr<Image> create(int nbits,
-                                          int xHEIGHT, int xWIDTH, int xDEPTH,
-                                          int d3, int d4) override;
-    };
-
-#undef xWIDTH
-#undef xHEIGHT
-#undef xDEPTH
+//
+//     /// forward-declare factory class
+//     class HybridFactory;
+//
+//     class HalideNumpyImage : public HalBase, public PythonBufferImage, public MetaImage {
+//
+//         public:
+//             using factory_t = HybridFactory;
+//
+//             using HalBase::dimensions;
+//             using HalBase::extent;
+//             using HalBase::stride;
+//             using HalBase::channels;
+//             using HalBase::raw_buffer;
+//
+//             HalideNumpyImage();
+//             HalideNumpyImage(NPY_TYPES d, buffer_t const* b,            std::string const& name = "");
+//             HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w,   std::string const& name = "");
+//             HalideNumpyImage(NPY_TYPES d, int x, int y, int z,          std::string const& name = "");
+//             HalideNumpyImage(NPY_TYPES d, int x, int y,                 std::string const& name = "");
+//             HalideNumpyImage(NPY_TYPES d, int x,                        std::string const& name = "");
+//
+//             explicit HalideNumpyImage(HalideNumpyImage const& other,
+//                                       int const zidx = 0,               std::string const& name = "");
+//             explicit HalideNumpyImage(HalideNumpyImage const& basis,
+//                                       HalideNumpyImage const& etc,      std::string const& name = "");
+//
+//             virtual ~HalideNumpyImage();
+//
+//             /// This returns the same type of data as buffer_t.host
+//             virtual uint8_t* data() const;
+//             virtual uint8_t* data(int s) const;
+//             virtual std::string_view view() const;
+//
+//             halide_type_t type() const;
+//             buffer_t* buffer_ptr() const;
+//             virtual int nbits() const override;
+//             virtual int nbytes() const override;
+//             virtual int ndims() const override;
+//             virtual int dim(int d) const override;
+//             virtual int stride(int s) const override;
+//             virtual int min(int s) const override;
+//             virtual bool is_signed() const override;
+//             virtual bool is_floating_point() const override;
+//             inline off_t rowp_stride() const;
+//             virtual void* rowp(int r) const override;
+//
+//             /// type encoding
+//             virtual NPY_TYPES dtype() const;
+//             virtual char dtypechar() const;
+//             virtual std::string dtypename() const;
+//             virtual char const* structcode() const;
+//             virtual std::string dsignature(Endian e = Endian::Unspecified) const;
+//
+//             /// extent, stride, min
+//             virtual int32_t* dims();
+//             virtual int32_t* strides();
+//             virtual int32_t* offsets();
+//
+//         private:
+//             NPY_TYPES dtype_;
+//     };
+//
+// #define xWIDTH d1
+// #define xHEIGHT d0
+// #define xDEPTH d2
+//
+//     class HybridFactory : public ImageFactory {
+//
+//         private:
+//             std::string nm;
+//
+//         public:
+//             using image_t = HalideNumpyImage;
+//
+//             HybridFactory();
+//             HybridFactory(std::string const& n);
+//
+//             virtual ~HybridFactory();
+//             std::string& name();
+//             void name(std::string const& n);
+//
+//             static PyTypeObject* image_type() { return &ImageModel_Type; }
+//             static PyTypeObject* buffer_type() { return &ImageBufferModel_Type; }
+//
+//         protected:
+//             virtual std::unique_ptr<Image> create(int nbits,
+//                                           int xHEIGHT, int xWIDTH, int xDEPTH,
+//                                           int d3, int d4) override;
+//     };
+//
+// #undef xWIDTH
+// #undef xHEIGHT
+// #undef xDEPTH
     
     /// forward-declare factory class
     class ArrayFactory;
