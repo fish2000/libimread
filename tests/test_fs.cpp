@@ -142,11 +142,11 @@ namespace {
                         std::vector<std::string>& directories,
                         std::vector<std::string>& files) {
             std::for_each(directories.begin(), directories.end(), [&](std::string const& d) {
-                std::cout << "Directory: " << p/d << std::endl;
+                // std::cout << "Directory: " << p/d << std::endl;
                 REQUIRE((p/d).is_directory());
             });
             std::for_each(files.begin(), files.end(), [&](std::string const& f) {
-                std::cout << "File: " << p/f << std::endl;
+                // std::cout << "File: " << p/f << std::endl;
                 REQUIRE((p/f).is_file());
             });
         });

@@ -146,7 +146,7 @@ namespace im {
     
     std::string fd_source_sink::xattr(std::string const& name, std::string const& value) const {
         filesystem::attribute::accessor_t accessor(descriptor, name);
-        value == filesystem::attribute::detail::nullstring ? accessor.del() : accessor.set(value);
+        (value == filesystem::attribute::detail::nullstring) ? accessor.del() : accessor.set(value);
         return accessor.get();
     }
     

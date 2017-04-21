@@ -144,7 +144,7 @@ namespace im {
     
     std::string handle_source_sink::xattr(std::string const& name, std::string const& value) const {
         filesystem::attribute::accessor_t accessor(::fileno(handle), name);
-        value == filesystem::attribute::detail::nullstring ? accessor.del() : accessor.set(value);
+        (value == filesystem::attribute::detail::nullstring) ? accessor.del() : accessor.set(value);
         return accessor.get();
     }
     

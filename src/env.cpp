@@ -36,11 +36,18 @@ namespace store {
     env::~env() {}
     
     std::string& env::get_force(std::string const& key) const {
-        char* cvalue = std::getenv(key.c_str());
+        char* cvalue = nullptr;
+        {
+            std::unique_lock<std::mutex> getlock(getmute);
+            cvalue = std::getenv(key.c_str());
+        }
         if (cvalue != nullptr) {
             std::string value(cvalue);
             if (value.size() > 0) {
-                cache[key] = value;
+                {
+                    std::unique_lock<std::mutex> setlock(setmute);
+                    cache[key] = value;
+                }
                 return cache.at(key);
             }
         }
@@ -51,11 +58,18 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         } else {
-            char* cvalue = std::getenv(key.c_str());
+            char* cvalue = nullptr;
+            {
+                std::unique_lock<std::mutex> getlock(getmute);
+                cvalue = std::getenv(key.c_str());
+            }
             if (cvalue != nullptr) {
                 std::string value(cvalue);
                 if (value.size() > 0) {
-                    cache.insert({ key, value });
+                    {
+                        std::unique_lock<std::mutex> setlock(setmute);
+                        cache.insert({ key, value });
+                    }
                     return cache.at(key);
                 }
             }
@@ -67,11 +81,18 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         } else {
-            char* cvalue = std::getenv(key.c_str());
+            char* cvalue;
+            {
+                std::unique_lock<std::mutex> getlock(getmute);
+                cvalue = std::getenv(key.c_str());
+            }
             if (cvalue != nullptr) {
                 std::string value(cvalue);
                 if (value.size() > 0) {
-                    cache.insert({ key, value });
+                    {
+                        std::unique_lock<std::mutex> setlock(setmute);
+                        cache.insert({ key, value });
+                    }
                     return cache.at(key);
                 }
             }
@@ -80,8 +101,7 @@ namespace store {
     }
     
     bool env::set(std::string const& key, std::string const& value) {
-        // if (get(key) == value) { return true; }
-        std::lock_guard<std::mutex> lock(mute);
+        std::unique_lock<std::mutex> setlock(setmute);
         if (::setenv(key.c_str(), value.c_str(), 1) == 0) {
             if (cache.find(key) != cache.end()) {
                 cache[key] = value;
@@ -95,11 +115,15 @@ namespace store {
     }
     
     bool env::del(std::string const& key) {
+        bool unset = false;
         if (cache.find(key) != cache.end()) {
+            std::unique_lock<std::mutex> setlock(setmute);
             cache.erase(key);
+            unset = ::unsetenv(key.c_str()) == 0;
+        } else {
+            std::unique_lock<std::mutex> setlock(setmute);
+            unset = ::unsetenv(key.c_str()) == 0;
         }
-        std::lock_guard<std::mutex> lock(mute);
-        bool unset = ::unsetenv(key.c_str()) == 0;
         if (unset) { --envcount; }
         return unset;
     }
@@ -107,8 +131,10 @@ namespace store {
     std::size_t env::count() const {
         if (envcount.load() == 0) {
             std::size_t idx = 0;
-            std::lock_guard<std::mutex> lock(mute);
-            while (environ[idx]) { idx++; }
+            {
+                std::unique_lock<std::mutex> getlock(getmute);
+                while (environ[idx]) { idx++; }
+            }
             envcount.store(idx);
         }
         return envcount.load();
@@ -119,16 +145,19 @@ namespace store {
         stringmapper::stringvec_t parts{};
         std::size_t idx = 0;
         out.reserve(envcount.load());
-        std::lock_guard<std::mutex> lock(mute);
-        while (environ[idx]) {
-            std::string envkv(environ[idx++]);
-            pystring::split(envkv, parts, "=");
-            out.emplace_back(parts.front());
+        {
+            std::unique_lock<std::mutex> getlock(getmute);
+            while (environ[idx]) {
+                std::string envkv(environ[idx++]);
+                pystring::split(envkv, parts, "=");
+                out.emplace_back(parts.front());
+            }
         }
         return out;
     }
     
     /// define static mutex declared within store::env :
-    std::mutex env::mute;
+    std::mutex env::getmute;
+    std::mutex env::setmute;
     
 } /// namespace store

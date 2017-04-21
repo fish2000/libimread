@@ -61,19 +61,12 @@ namespace {
                 REQUIRE(ourdir.is_directory());
                 stringvec_t exes(ourdir.xattrs());
                 
-                if (exes.empty()) {
-                    // std::cout << "> No xattrs found" << std::endl << std::endl;
-                } else {
-                    std::cout << "Directory: " << ourdir << std::endl;
-                    std::cout << "> Found " << exes.size()
-                              << " xattrs:" << std::endl;
+                if (!exes.empty()) {
                     std::for_each(exes.begin(),
                                   exes.end(),
                         [&ourdir](std::string const& x) {
-                        // std::cout << "> " << x << " : "
-                        //                   << ourdir.xattr(x) << std::endl;
+                            CHECK(ourdir.xattr(x) != nullstring);
                     });
-                    // std::cout << std::endl;
                 }
             });
             
@@ -85,19 +78,12 @@ namespace {
                 REQUIRE(ourf.is_file());
                 stringvec_t exes(ourf.xattrs());
                 
-                if (exes.empty()) {
-                    // std::cout << "> No xattrs found" << std::endl << std::endl;
-                } else {
-                    // std::cout << "File: " << ourf << std::endl;
-                    // std::cout << "> Found " << exes.size()
-                    //           << " xattrs:" << std::endl;
+                if (!exes.empty()) {
                     std::for_each(exes.begin(),
                                   exes.end(),
                           [&ourf](std::string const& x) {
-                        // std::cout << "> " << x << " : "
-                        //                   << ourf.xattr(x) << std::endl;
+                              CHECK(ourf.xattr(x) != nullstring);
                     });
-                    // std::cout << std::endl;
                 }
             });
         
@@ -105,8 +91,8 @@ namespace {
     
     }
     
-    TEST_CASE("[attributes] xattr read/write with `path::xattr()` via `TemporaryDirectory` and `NamedTemporaryFile`",
-              "[xattr-read-write-temporarydirectory-namedtemporaryfile]")
+    TEST_CASE("[attributes] xattr read/write with `path::xattr()` via `TemporaryDirectory`",
+              "[xattr-read-write-path-temporarydirectory]")
     {
         TemporaryDirectory td("test-td");
         td.dirpath.xattr("yo-dogg", "I heard you like xattr writes");
@@ -119,21 +105,18 @@ namespace {
         CHECK(td.dirpath.xattrcount() == 2);
         stringvec_t exes(td.dirpath.xattrs());
         CHECK(!exes.empty());
-        // std::cout << "> Found " << exes.size()
-        //           << " xattrs:" << std::endl;
         std::for_each(exes.begin(),
                       exes.end(),
                   [&](std::string const& x) {
-            // std::cout << "> " << x << " : "
-            //                   << td.dirpath.xattr(x) << std::endl;
+                      CHECK(td.dirpath.xattr(x) != nullstring);
         });
-        // std::cout << std::endl;
     }
     
-    TEST_CASE("[attributes] xattr descriptor read/write via store API in `im::file_source_sink`",
-              "[xattr-descriptor-read-write-store-api-file_source_sink]")
+    TEST_CASE("[attributes] xattr descriptor read/write via store API in `im::file_source_sink` using `NamedTemporaryFile`",
+              "[xattr-descriptor-read-write-store-api-file_source_sink-namedtemporaryfile]")
     {
         NamedTemporaryFile tf(".txt");
+        
         {
             FileSource fdb(tf.filepath);
             fdb.set("yo-dogg", "I heard you like xattr writes");
@@ -147,9 +130,19 @@ namespace {
             CHECK(fdb.path().xattr("dogg-yo") == "So we put some strings in your strings");
             CHECK(fdb.path().xattr("dogg-NO") == nullstring);
         }
+        
         CHECK(tf.filepath.xattr("yo-dogg") == "I heard you like xattr writes");
         CHECK(tf.filepath.xattr("dogg-yo") == "So we put some strings in your strings");
         CHECK(tf.filepath.xattr("dogg-NO") == nullstring);
+        
+        CHECK(tf.filepath.xattrcount() == 2);
+        stringvec_t exes(tf.filepath.xattrs());
+        CHECK(!exes.empty());
+        std::for_each(exes.begin(),
+                      exes.end(),
+                  [&](std::string const& x) {
+                      CHECK(tf.filepath.xattr(x) != nullstring);
+        });
     }
     
 } /// namespace (anon.)

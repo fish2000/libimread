@@ -38,7 +38,8 @@ namespace store {
         
         protected:
             mutable std::atomic<int> envcount{ 0 };
-            static std::mutex mute;
+            static std::mutex getmute;
+            static std::mutex setmute;
     };
     
 } /// namespace store
