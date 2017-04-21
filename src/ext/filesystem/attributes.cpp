@@ -3,17 +3,6 @@
 /// Inspired By / Modeled After: `pxattr` by @edenzik
 ///     ... q.v. https://github.com/edenzik/pxattr sub.
 
-#if defined(__gnu_linux__)
-    #define PXALINUX 1
-
-#elif (defined(__FreeBSD_kernel__) && defined(__GLIBC__) && !defined(__FreeBSD__))
-    #define PXALINUX 1
-
-#elif defined(__CYGWIN32__)
-    #define PXALINUX 1
-
-#endif /// define PXALINUX
-
 #if !defined(__FreeBSD__) && !defined(PXALINUX) && !defined(__APPLE__)
     #error "Unable to identify system - exiting compilaton"
 

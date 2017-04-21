@@ -11,6 +11,17 @@
 
 #include <libimread/libimread.hpp>
 
+#if defined(__gnu_linux__)
+    #define PXALINUX 1
+
+#elif (defined(__FreeBSD_kernel__) && defined(__GLIBC__) && !defined(__FreeBSD__))
+    #define PXALINUX 1
+
+#elif defined(__CYGWIN32__)
+    #define PXALINUX 1
+
+#endif /// define PXALINUX
+
 #define ENUMBASE(enumclass) (enumclass)0
 
 namespace filesystem {
