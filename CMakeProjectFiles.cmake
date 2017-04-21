@@ -236,6 +236,25 @@ foreach(src_file IN LISTS ${srcs})
     endforeach()
 endforeach()
 
+
+IF(APPLE)
+    
+    FIND_LIBRARY(SYSTEM_LIBRARY System)
+    FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
+    FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
+    
+    MARK_AS_ADVANCED(SYSTEM_LIBRARY
+                     FOUNDATION_LIBRARY
+                 COREFOUNDATION_LIBRARY)
+    
+    SET(EXTRA_LIBS ${EXTRA_LIBS}
+        ${SYSTEM_LIBRARY}
+        ${FOUNDATION_LIBRARY}
+    ${COREFOUNDATION_LIBRARY})
+    
+ENDIF(APPLE)
+
+
 add_definitions(
     ${CXX_OPTIONS}
     -DWITH_SCHEMA

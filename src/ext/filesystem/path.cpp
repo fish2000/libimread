@@ -20,8 +20,9 @@
 #include <sys/sendfile.h>
 #endif
 
-#include <cerrno>
 #include <cstdlib>
+#include <cerrno>
+#include <thread>
 #include <numeric>
 #include <algorithm>
 #include <type_traits>
@@ -37,6 +38,7 @@
 #include <libimread/rehash.hh>
 
 using im::byte;
+using namespace std::chrono_literals;
 
 namespace filesystem {
     
@@ -45,13 +47,8 @@ namespace filesystem {
         using stat_t = struct stat;
         using passwd_t = struct passwd;
         using rehasher_t = hash::rehasher<std::string>;
-        // using inode_t = std::make_signed_t<::ino_t>;
         using dlinfo_t = ::Dl_info;
         using scandir_f = std::add_pointer_t<int(detail::dirent_t*)>;
-        
-        // scandir_f scandir_select = [](detail::dirent_t* dirent) -> int {
-        //     return bool(std::regex_search(dirent->d_name, pattern));
-        // };
         
         std::string tmpdir() noexcept {
             /// cribbed/tweaked from boost
@@ -169,7 +166,7 @@ namespace filesystem {
                 set(fdpath);
                 return;
             }
-            ::usleep(10);
+            std::this_thread::sleep_for(10us);
         }
     }
     

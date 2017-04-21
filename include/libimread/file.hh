@@ -31,7 +31,7 @@ namespace im {
     class fd_source_sink : public byte_source, public byte_sink, public store::xattrmap {
         
         protected:
-            static constexpr int READ_FLAGS = O_RDWR  | O_NONBLOCK;
+            static constexpr int READ_FLAGS =  O_RDWR | O_NONBLOCK;
             static constexpr int WRITE_FLAGS = O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
             static constexpr int WRITE_CREATE_MASK = 0644;
             
