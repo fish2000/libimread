@@ -106,9 +106,13 @@ namespace filesystem {
             explicit path(int descriptor);                      /// File descriptor constructor
             explicit path(const void* address);                 /// Memory-address (dl_info) constructor
             
-            explicit path(detail::stringvec_t const& vec, bool absolute = false);
-            explicit path(detail::stringvec_t&& vec, bool absolute = false) noexcept;
-            explicit path(detail::stringlist_t);                /// initializer-list constructors
+            explicit path(detail::stringvec_t const& vec,
+                          bool absolute = false);               /// String-vector copy-constructor
+            explicit path(detail::stringvec_t&& vec,
+                          bool absolute = false) noexcept;      /// String-vector move-constructor
+            explicit path(detail::stringlist_t);                /// Initializer-list constructor
+            
+            virtual ~path();                                    /// The path class has a vtable
             
             size_type size() const;
             bool is_absolute() const;

@@ -199,6 +199,8 @@ namespace filesystem {
         :m_path(list)
         {}
     
+    path::~path() {}
+    
     path::size_type path::size() const { return static_cast<path::size_type>(m_path.size()); }
     bool path::is_absolute() const { return m_absolute; }
     bool path::empty() const       { return m_path.empty(); }
