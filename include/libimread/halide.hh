@@ -13,10 +13,10 @@
 #include <type_traits>
 
 #include <Halide.h>
+#define BUFFER_T_DEFINED
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/temporary.h>
-// #include <libimread/private/buffer_t.h>;
 #include <libimread/errors.hh>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>

@@ -18,9 +18,7 @@ namespace py {
         }
         
         objectvec_t::iterator       idx::begin()       { return std::begin(get());  }
-        objectvec_t::const_iterator idx::begin() const { return std::cbegin(get()); }
         objectvec_t::iterator       idx::end()         { return std::end(get());    }
-        objectvec_t::const_iterator idx::end() const   { return std::cend(get());   }
         
 #define REDEFINE_PYTHON_ERROR(errorname)                                \
         PyObject* errorname = PyExc_##errorname##Error;                 \
