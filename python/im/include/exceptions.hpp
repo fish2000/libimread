@@ -22,6 +22,10 @@ namespace py {
         struct idx {
             explicit idx(PyObject*);
             static objectvec_t& get();
+            static objectvec_t::iterator begin();
+            static objectvec_t::const_iterator begin() const;
+            static objectvec_t::iterator end();
+            static objectvec_t::const_iterator end() const;
         };
         
         /// This list is adapted unabashedly right from the docs:

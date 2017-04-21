@@ -17,6 +17,10 @@ namespace py {
             return internal;
         }
         
+        objectvec_t::iterator       idx::begin()       { return std::begin(get());  }
+        objectvec_t::const_iterator idx::begin() const { return std::cbegin(get()); }
+        objectvec_t::iterator       idx::end()         { return std::end(get());    }
+        objectvec_t::const_iterator idx::end() const   { return std::cend(get());   }
         
 #define REDEFINE_PYTHON_ERROR(errorname)                                \
         PyObject* errorname = PyExc_##errorname##Error;                 \
@@ -98,12 +102,12 @@ namespace py {
     /// ... in retrospect, I may have named too many methods `get()`:
     PyObject* LastError(void) {
         if (!py::ErrorOccurred()) { return nullptr; }
-        auto const& iter = std::find_if(ex::idx::get().begin(),
-                                        ex::idx::get().end(),
+        auto const& iter = std::find_if(ex::idx::begin(),
+                                        ex::idx::end(),
                                      [](py::ref& exc) -> bool {
             return PyErr_ExceptionMatches(exc.get());
         });
-        return iter != std::end(ex::idx::get()) ? iter->get() : nullptr;
+        return iter != ex::idx::end() ? iter->get() : nullptr;
     }
     
     
