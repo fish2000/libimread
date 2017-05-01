@@ -52,8 +52,17 @@ namespace store {
             using mapped_const_reference = std::add_lvalue_reference_t<
                                            std::add_const_t<mapped_type>>;
             using mapped_rvalue_reference = std::add_rvalue_reference_t<mapped_type>;
+        
+        public:
+            enum class formatter : int8_t {
+                undefined   = -1,
+                json        = 0,
+                plist       = 1,
+                pickle      = 2,
+                ini         = 4
+            };
             
-            using container_type = std::unordered_map<key_type, mapped_type>;
+            static constexpr formatter format = formatter::undefined;
         
         public:
             virtual ~base() {}
@@ -94,6 +103,10 @@ namespace store {
             using stringmap_t = std::unordered_map<std::string, std::string>;
             
             using base_t::null_key;
+            using base_t::null_value;
+            using base_t::formatter;
+            
+            static constexpr formatter format = formatter::json;
         
         public:
             virtual std::string&       get(std::string const& key) = 0;
@@ -108,6 +121,8 @@ namespace store {
             virtual void warm_cache() const;
             virtual stringmap_t& mapping() const;
             virtual std::string mapping_json() const;
+            virtual bool dump(std::string const& destination, formatter format = formatter::json,
+                                                                bool overwrite = false) const;
         
         public:
             virtual ~stringmapper();
@@ -133,29 +148,29 @@ namespace store {
     namespace detail {
         
         /// “all_of” bit based on http://stackoverflow.com/q/13562823/298171
-        template <bool ...b>
+        template <bool ...booleans>
         struct static_all_of;
         
-        /// implementation: recurse, if the first argument is true
+        /// derive recursively, if the first argument is true:
         template <bool ...tail>
         struct static_all_of<true, tail...> : static_all_of<tail...>
         {};
         
-        /// end recursion if first argument is false - 
+        /// end recursion: false, if first argument is false:
         template <bool ...tail>
         struct static_all_of<false, tail...> : std::false_type
         {};
         
-        ///  - or if no more arguments
+        /// end recursion: true, if all arguments have been exhausted:
         template <>
         struct static_all_of<> : std::true_type
         {};
         
-        template <bool ...b>
-        using static_all_of_t = typename static_all_of<b...>::type;
+        template <bool ...booleans>
+        using static_all_of_t = typename static_all_of<booleans...>::type;
         
-        template <bool ...b>
-        constexpr bool static_all_of_v = static_all_of<b...>::value;
+        template <bool ...booleans>
+        constexpr bool static_all_of_v = static_all_of<booleans...>::value;
         
         template <typename Type, typename ...Requirements>
         struct are_bases_of : static_all_of_t<std::is_base_of<Type,
@@ -173,7 +188,7 @@ namespace store {
     template <typename T, typename U>
     void value_copy(T&& from, U&& to) {
         static_assert(store::is_stringmapper_v<T, U>,
-                      "store::value_copy() operands must derive from store::stringmapper");
+                     "store::value_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
         if (!froms.empty()) {
             for (std::string const& name : froms) { std::forward<U>(to).set(name,
@@ -185,7 +200,7 @@ namespace store {
     void prefix_copy(T&& from, U&& to, std::string const& prefix = "prefix",
                                        std::string const& sep = ":") {
         static_assert(store::is_stringmapper_v<T, U>,
-                      "store::prefix_copy() operands must derive from store::stringmapper");
+                     "store::prefix_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
         if (!froms.empty()) {
             for (std::string const& name : froms) { std::forward<U>(to).set(prefix + sep + name,
@@ -210,6 +225,17 @@ namespace store {
             store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                      \
         }
     
+    #define DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(__typename__)                           \
+                                                                                                \
+        using __rvalue_ref__ = std::add_rvalue_reference_t<__typename__>;                       \
+                                                                                                \
+        template <typename ...Args>                                                             \
+        static __typename__ load(std::string const& source, Args&& ...args) {                   \
+            __typename__ out(std::forward<Args>(args)...);                                      \
+            store::value_copy(store::stringmap::load_map(source), out);                         \
+            return out;                                                                         \
+        }
+    
     #define DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(__typename__)                            \
                                                                                                 \
         template <typename T,                                                                   \
@@ -230,6 +256,7 @@ namespace store {
             {                                                                                   \
                 store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                  \
             }                                                                                   \
+        DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(__typename__)                               \
         DECLARE_STRINGMAPPER_TEMPLATE_METHODS()
     
     class xattrmap : public stringmapper {
@@ -277,8 +304,11 @@ namespace store {
             virtual bool can_store() const noexcept override;
         
         public:
-            stringmap() noexcept;                   /// default constructor
-            explicit stringmap(std::string const&); /// decode from JSON string
+            stringmap() noexcept;                               /// default constructor
+            explicit stringmap(std::string const&);             /// decode from JSON string
+        
+        public:
+            static stringmap load_map(std::string const&);      /// load from disk-based file
         
         public:
             /// implementation of the stringmapper API, in terms of std::unordered_map<…> API

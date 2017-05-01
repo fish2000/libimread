@@ -108,6 +108,11 @@ namespace {
         CHECK(viron.count() == memcopy.count() + 1);
         CHECK(viron.get(nk) == memcopy2.get(nk));
         CHECK(viron.del(nk));
+        
+        // NamedTemporaryFile tf(".json");
+        // path rocksjsonpth = td.dirpath.join("rocks-dump.json");
+        // path memoryjsonpth = td.dirpath.join("memory-dump.json");
+        
     }
     
 } /// namespace (anon.)

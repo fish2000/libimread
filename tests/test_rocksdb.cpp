@@ -11,6 +11,7 @@
 #include <libimread/ext/filesystem/temporary.h>
 // #include <libimread/ext/filesystem/nowait.h>
 #include <libimread/ext/JSON/json11.h>
+#include <libimread/ext/pystring.hh>
 
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
@@ -29,7 +30,7 @@ namespace {
     using filesystem::TemporaryDirectory;
     
     // using filesystem::detail::nowait_t;
-    // using filesystem::detail::stringvec_t;
+    using filesystem::detail::stringvec_t;
     // using filesystem::attribute::accessor_t;
     // using filesystem::attribute::detail::nullstring;
     
@@ -91,13 +92,57 @@ namespace {
             CHECK(memcopy.get(key) != memcopy.null_value());
         }
         
-        Json(database.mapping()).dump(rocksjsonpth.str());
-        Json(memcopy.mapping()).dump(memoryjsonpth.str());
+        // Json(database.mapping()).dump(rocksjsonpth.str());
+        // Json(memcopy.mapping()).dump(memoryjsonpth.str());
+        database.dump(rocksjsonpth.str());
+        memcopy.dump(memoryjsonpth.str());
+        
         REQUIRE(rocksjsonpth.exists());
         REQUIRE(rocksjsonpth.is_file());
         REQUIRE(memoryjsonpth.exists());
         REQUIRE(memoryjsonpth.is_file());
         
+        SECTION("[rocksdb] » Reconstitute the Rocks database using store::stringmap::load()")
+        {
+            // WTF("PRE-CONSTITUTED FILE SIZE: ", rocksjsonpth.filesize());
+            
+            store::stringmap reconstituted = store::stringmap::load(rocksjsonpth.str());
+            reconstituted.warm_cache();
+            stringvec_t rekeyed = reconstituted.list();
+            stringvec_t revalued;
+            
+            // WTF("RETURNED RECONSTITUTED: ",
+            //     FF("%i mapped indexes",   reconstituted.count()),
+            //     FF("%i string indexes\n", rekeyed.size()),
+            //     pystring::join(", \n\t", rekeyed));
+            
+            revalued.reserve(rekeyed.size());
+            std::for_each(rekeyed.begin(), rekeyed.end(), [&](std::string const& key) {
+                std::string value(reconstituted.get(key));
+                CHECK(value != reconstituted.null_value());
+                if (value != reconstituted.null_value()) {
+                    revalued.emplace_back(value.size() < 40 ? std::move(value) : value.substr(0, 40));
+                }
+            });
+            
+            // WTF("RETURNED RECONSTITUTED: ",
+            //     FF("%i indexed values\n", revalued.size()),
+            //     pystring::join(", \n\t", revalued));
+            
+            REQUIRE(rekeyed.size() == revalued.size());
+            
+            for (std::string const& key : reconstituted.list()) {
+                if (key == reconstituted.null_key()) {
+                    // WTF("NULL KEY FOUND");
+                } else {
+                    // WTF("KEY: ", key);
+                    CHECK(database.get(key) == reconstituted.get(key));
+                    CHECK(reconstituted.get(key) != reconstituted.null_value());
+                }
+            }
+        }
+        
+        SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr")
         {
             FileSource source(rocksjsonpth);
             store::value_copy(database, source);
@@ -107,6 +152,7 @@ namespace {
             }
         }
         
+        SECTION("[rocksdb] » Copy the string database using value_copy() and xattr")
         {
             FileSource source(memoryjsonpth);
             store::value_copy(database, source);
@@ -116,6 +162,7 @@ namespace {
             }
         }
         
+        SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr with a NamedTemporaryFile")
         {
             NamedTemporaryFile tf(".json");
             REQUIRE(tf.filepath.remove());

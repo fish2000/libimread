@@ -165,6 +165,9 @@ namespace store {
                 out.emplace_back(parts.front());
             }
         }
+        if (idx != envcount.load()) {
+            envcount.store(idx);
+        }
         return out;
     }
     

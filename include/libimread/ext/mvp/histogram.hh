@@ -38,18 +38,25 @@ using randomizer_t = std::independent_bits_engine<
                      sizeof(DataType)*8, DataType>;
 
 template <typename ValueType>
-std::ostream& operator<<(std::ostream& out, std::valarray<ValueType> const& va) {
+std::ostream& operator<<(std::ostream& out,
+                         std::valarray<ValueType> const& varray) {
     if (std::is_floating_point<ValueType>::value) {
-        out << std::dec << std::fixed << std::setprecision(2) << std::setw(2) << std::showpoint;
+        out << std::dec << std::fixed
+            << std::setprecision(2)
+            << std::setw(2)
+            << std::showpoint;
     } else {
-        out << std::fixed << std::noshowpoint;
+        out << std::fixed
+            << std::noshowpoint;
     }
-    std::for_each(std::begin(va), std::end(va),
+    
+    std::for_each(std::begin(varray),
+                  std::end(varray),
            [&out](ValueType const& value) {
         out << std::to_string(value)
             << ", ";
     });
-
+    
     return out;
 }
 
@@ -158,6 +165,9 @@ namespace {
             std::cout << "entropy: " << entropy << std::endl;
             std::cout << "histogram: " << histogram << std::endl;
             std::cout << "wat: " << wat << std::endl;
+            
+            std::cout << std::endl << std::endl << std::endl;
+            std::cout << "sizeof(unsigned short): " << sizeof(unsigned short) << std::endl;
             
             return 0;
         }

@@ -2,45 +2,83 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/ext/JSON/json11.h>
+#include <libimread/ext/pystring.hh>
 #include <libimread/store.hh>
 
 namespace store {
+    
+    namespace detail {
+        
+        inline void json_map_impl(Json const& jsonmap, stringmapper* stringmap_ptr) {
+            if (stringmap_ptr == nullptr)       { return; }
+            if (jsonmap.type() != Type::OBJECT) { return; }
+            for (std::string const& key : jsonmap.keys()) {
+                stringmap_ptr->set(key, jsonmap.get(key));
+            }
+        }
+        
+        inline void json_impl(Json const& jsonmap, stringmapper* stringmap_ptr) {
+            if (stringmap_ptr == nullptr) { return; }
+            switch (jsonmap.type()) {
+                case Type::OBJECT:
+                    json_map_impl(jsonmap, stringmap_ptr);
+                    return;
+                case Type::ARRAY: {
+                    std::size_t max = jsonmap.size();
+                    if (max > 0) {
+                        for (std::size_t idx = 0; idx < max; ++idx) {
+                            json_map_impl(jsonmap[idx], stringmap_ptr);
+                        }
+                    }
+                    return;
+                }
+                case Type::JSNULL:
+                case Type::BOOLEAN:
+                case Type::NUMBER:
+                case Type::STRING:
+                default:
+                    return;
+            }
+        }
+        
+    }
     
     #pragma mark - base class store::stringmapper default methods
     
     void stringmapper::with_json(std::string const& jsonstr) {
         Json jsonmap = Json::parse(jsonstr);
-        if (jsonmap.type() == Type::OBJECT) {
-            for (std::string const& key : jsonmap.keys()) {
-                set(key, jsonmap.get(key));
-            }
-        } else if (jsonmap.type() == Type::ARRAY) {
-            if (jsonmap.size() == 1) {
-                Json jsonmap0 = jsonmap[0];
-                if (jsonmap0.type() == Type::OBJECT) {
-                    for (std::string const& key : jsonmap0.keys()) {
-                        set(key, jsonmap0.get(key));
-                    }
-                }
-            }
-        }
+        detail::json_impl(jsonmap, this);
     }
     
     void stringmapper::warm_cache() const {
-        /// cache warmup: call get() for each key in the stringmapper
+        /// call get() for each key to warm the cache:
         for (std::string const& key : list()) { get(key); }
     }
     
     stringmapper::stringmap_t& stringmapper::mapping() const {
         warm_cache();
-        // return stringmapper::stringmap_t(cache);
         return cache;
     }
     
     std::string stringmapper::mapping_json() const {
         warm_cache();
         return Json(cache).format();
+    }
+    
+    bool stringmapper::dump(std::string const& destination, formatter format, bool overwrite) const {
+        /// only JSON works for now:
+        warm_cache();
+        Json dumpee(cache);
+        try {
+            dumpee.dump(destination, overwrite);
+        } catch (im::FileSystemError&) {
+            return false;
+        } catch (im::JSONIOError&) {
+            return false;
+        }
+        return true;
     }
     
     stringmapper::~stringmapper() {}
@@ -150,6 +188,23 @@ namespace store {
     
     stringmap::stringmap(std::string const& jsonstr) {
         with_json(jsonstr);
+    }
+    
+    stringmap stringmap::load_map(std::string const& source) {
+        /// load_map() is a static function, there is no `this`:
+        Json loadee = Json::null;
+        stringmap out;
+        try {
+            loadee = Json::load(source);
+        } catch (im::FileSystemError& exc) {
+            WTF("FileSystemError:", exc.what());
+            return out;
+        } catch (im::JSONIOError& exc) {
+            WTF("JSONIOError:", exc.what());
+            return out;
+        }
+        detail::json_impl(loadee, &out);
+        return out;
     }
     
     std::string& stringmap::get(std::string const& key) {

@@ -15,6 +15,31 @@
 
 namespace filesystem {
     
+    DECLARE_CONSTEXPR_CHAR(TemporaryName::tfp, FILESYSTEM_TEMP_FILENAME);
+    DECLARE_CONSTEXPR_CHAR(TemporaryName::tfs, FILESYSTEM_TEMP_SUFFIX);
+    
+    bool TemporaryName::create() {
+        /// Create a new temporary file and return a descriptor
+        descriptor = ::mkstemps(const_cast<char*>(pathname.c_str()),
+                                std::strlen(suffix));
+        
+        /// Return false if temporary file creation went bad
+        if (descriptor < 0) { return false; }
+        
+        /// Stash the normalized path name of the temporary file
+        pathname = path(descriptor).make_absolute();
+        filename = ::strdup(pathname.basename().c_str());
+        
+        /// Attempt to close the descriptor
+        if (::close(descriptor) == -1) { return false; }
+        
+        /// Attempt to remove the file itself and return per the status
+        return pathname.remove();
+    }
+    
+    bool TemporaryName::exists() { return pathname.is_file(); }
+    bool TemporaryName::remove() { return pathname.remove(); }
+    
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfp, FILESYSTEM_TEMP_FILENAME);
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfs, FILESYSTEM_TEMP_SUFFIX);
     

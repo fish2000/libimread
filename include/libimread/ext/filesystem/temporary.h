@@ -15,6 +15,80 @@
 
 namespace filesystem {
     
+    struct TemporaryName final {
+        
+        static constexpr char tfp[] = FILESYSTEM_TEMP_FILENAME;
+        static constexpr char tfs[] = FILESYSTEM_TEMP_SUFFIX;
+        
+        int  descriptor;
+        bool cleanup;
+        bool deallocate;
+        char* suffix;
+        char* prefix;
+        path  pathname;
+        char* filename;
+        
+        explicit TemporaryName(char const* s = tfs, bool c = true,
+                               char const* p = tfp,
+                               path const& td = path::tmp())
+                                        :descriptor(-1), cleanup(c), deallocate(true)
+                                        ,suffix(::strdup(s)), prefix(::strdup(p))
+                                        ,pathname(td/std::strcat(prefix, s))
+                                        {
+                                            create();
+                                        }
+        
+        explicit TemporaryName(std::string const& s, bool c = true,
+                               std::string const& p = tfp,
+                               path const& td = path::tmp())
+                                        :descriptor(-1), cleanup(c), deallocate(true)
+                                        ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
+                                        ,pathname(td/(p+s))
+                                        {
+                                            create();
+                                        }
+        
+        TemporaryName(TemporaryName const& other)
+            :descriptor(other.descriptor)
+            ,cleanup(other.cleanup), deallocate(true)
+            ,suffix(::strdup(other.suffix)), prefix(::strdup(other.prefix))
+            ,pathname(other.pathname)
+            ,filename(::strdup(other.filename))
+            {}
+        
+        TemporaryName(TemporaryName&& other) noexcept
+            :descriptor(other.descriptor)
+            ,cleanup(other.cleanup), deallocate(true)
+            ,suffix(std::move(other.suffix)), prefix(std::move(other.prefix))
+            ,pathname(std::move(other.pathname))
+            ,filename(std::move(other.filename))
+            {
+                other.cleanup = false;
+                other.deallocate = false;
+            }
+        
+        inline std::string   str() const noexcept  { return pathname.str(); }
+        inline char const* c_str() const noexcept  { return pathname.c_str(); }
+        operator std::string() const noexcept      { return str(); }
+        operator char const*() const noexcept      { return c_str(); }
+        
+        bool create();
+        bool exists();
+        bool remove();
+        
+        char const* do_not_destroy() {
+            cleanup = false;
+            return filename;
+        }
+        
+        ~TemporaryName() {
+            if (cleanup && exists()) { remove(); }
+            if (deallocate) { std::free(suffix);
+                              std::free(prefix);
+                              std::free(filename); }
+        }
+    };
+    
     struct NamedTemporaryFile final {
         /// As per the eponymous tempfile.NamedTemporaryFile,
         /// of the Python standard library. NOW WITH RAII!!
@@ -32,9 +106,11 @@ namespace filesystem {
         path filepath;
         std::fstream stream;
         
-        explicit NamedTemporaryFile(char const* s = tfs, bool c = true, char const* p = tfp,
-                                    mode m = mode::WRITE, path const& td = path::tmp())
-                                        :cleanup(c), deallocate(true)
+        explicit NamedTemporaryFile(char const* s = tfs, bool c = true,
+                                    char const* p = tfp,
+                                    mode m = mode::WRITE,
+                                    path const& td = path::tmp())
+                                        :descriptor(-1), cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s)), prefix(::strdup(p))
                                         ,filemode(m)
                                         ,filepath(td/std::strcat(prefix, s))
@@ -43,9 +119,11 @@ namespace filesystem {
                                             create();
                                         }
         
-        explicit NamedTemporaryFile(std::string const& s, bool c = true, std::string const& p = tfp,
-                                    mode m = mode::WRITE, path const& td = path::tmp())
-                                        :cleanup(c), deallocate(true)
+        explicit NamedTemporaryFile(std::string const& s, bool c = true,
+                                    std::string const& p = tfp,
+                                    mode m = mode::WRITE,
+                                    path const& td = path::tmp())
+                                        :descriptor(-1), cleanup(c), deallocate(true)
                                         ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
                                         ,filemode(m)
                                         ,filepath(td/(p+s))

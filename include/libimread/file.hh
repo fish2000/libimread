@@ -107,6 +107,7 @@ namespace im {
     };
     
     class FileSource final : public file_source_sink {
+        
         public:
             FileSource();
             FileSource(char* cpath);
@@ -114,9 +115,13 @@ namespace im {
             FileSource(std::string& spath);
             FileSource(std::string const& cspath);
             FileSource(filesystem::path const& ppath);
+            
+        public:
+            // DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(FileSource);
     };
     
     class FileSink final : public file_source_sink {
+        
         public:
             FileSink();
             FileSink(char* cpath);
@@ -124,6 +129,9 @@ namespace im {
             FileSink(std::string& spath);
             FileSink(std::string const& cspath);
             FileSink(filesystem::path const& ppath);
+            
+        public:
+            // DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(FileSink);
     };
     
 

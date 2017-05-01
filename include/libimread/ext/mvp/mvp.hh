@@ -609,7 +609,7 @@ class Tree {
                         if (newNode->sv2) { ncount++; }
                         
                         pointvec_t temporary(ncount);
-                        i = idx = 0;
+                        i = j = idx = 0;
                         if (newNode->sv1) { temporary.push_back(newNode->sv1); }
                         if (newNode->sv2) { temporary.push_back(newNode->sv2); }
                         /// NOTE TO SELF: redo these two forloopies
