@@ -197,10 +197,8 @@ namespace store {
         try {
             loadee = Json::load(source);
         } catch (im::FileSystemError& exc) {
-            WTF("FileSystemError:", exc.what());
             return out;
         } catch (im::JSONIOError& exc) {
-            WTF("JSONIOError:", exc.what());
             return out;
         }
         detail::json_impl(loadee, &out);
