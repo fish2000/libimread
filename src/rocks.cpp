@@ -129,7 +129,6 @@ namespace store {
     }
     
     bool rocks::set(std::string const& key, std::string const& value) {
-        // rocksdb::WriteOptions writeopts;
         rocksdb::Status flushed;
         rocksdb::Status status = SELF()->Put(options::write(), key, value);
         if (status.ok()) {
