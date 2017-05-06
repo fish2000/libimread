@@ -67,19 +67,16 @@ namespace filesystem {
                 other.deallocate = false;
             }
         
-        inline std::string   str() const noexcept  { return pathname.str(); }
-        inline char const* c_str() const noexcept  { return pathname.c_str(); }
-        operator std::string() const noexcept      { return str(); }
-        operator char const*() const noexcept      { return c_str(); }
+        std::string   str() const noexcept;
+        char const* c_str() const noexcept;
+        operator std::string() const noexcept;
+        operator char const*() const noexcept;
         
         bool create();
         bool exists();
         bool remove();
         
-        char const* do_not_destroy() {
-            cleanup = false;
-            return filename;
-        }
+        char const* do_not_destroy();
         
         ~TemporaryName() {
             if (cleanup && exists()) { remove(); }
@@ -87,6 +84,7 @@ namespace filesystem {
                               std::free(prefix);
                               std::free(filename); }
         }
+        
     };
     
     struct NamedTemporaryFile final {
@@ -132,6 +130,15 @@ namespace filesystem {
                                             create();
                                         }
         
+        explicit NamedTemporaryFile(TemporaryName&& name)
+            :descriptor(name.descriptor)
+            ,cleanup(name.cleanup), deallocate(true)
+            ,suffix(::strdup(name.suffix)), prefix(::strdup(name.prefix))
+            ,filemode(mode::WRITE)
+            ,filepath(name.pathname)
+            ,stream()
+            {}
+        
         NamedTemporaryFile(NamedTemporaryFile const& other)
             :descriptor(other.descriptor)
             ,cleanup(other.cleanup), deallocate(true)
@@ -153,17 +160,14 @@ namespace filesystem {
                 other.deallocate = false;
             }
         
-        inline std::string   str() const noexcept  { return filepath.str(); }
-        inline char const* c_str() const noexcept  { return filepath.c_str(); }
-        operator std::string() const noexcept      { return str(); }
-        operator char const*() const noexcept      { return c_str(); }
         
-        inline openmode mode() const noexcept {
-            return filemode == mode::WRITE ? std::ios::out : std::ios::in;
-        }
-        inline openmode mode(openmode additionally) const noexcept {
-            return this->mode() | additionally;
-        }
+        std::string   str() const noexcept;
+        char const* c_str() const noexcept;
+        operator std::string() const noexcept;
+        operator char const*() const noexcept;
+        
+        openmode mode() const noexcept;
+        openmode mode(openmode additionally) const noexcept;
         
         bool open(openmode additionally = std::ios::trunc);
         bool reopen(openmode additionally = std::ios::in);
@@ -221,10 +225,10 @@ namespace filesystem {
                 other.deallocate = false;
             }
         
-        inline std::string   str() const noexcept   { return dirpath.str(); }
-        inline char const* c_str() const noexcept   { return dirpath.c_str(); }
-        operator std::string() const noexcept       { return str(); }
-        operator char const*() const noexcept       { return c_str(); }
+        std::string   str() const noexcept;
+        char const* c_str() const noexcept;
+        operator std::string() const noexcept;
+        operator char const*() const noexcept;
         
         NamedTemporaryFile get(std::string const& suffix = tfs,
                                std::string const& prefix = tfp,
