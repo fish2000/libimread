@@ -307,6 +307,9 @@ namespace store {
             static stringmap load_map(std::string const&);      /// load from disk-based file
         
         public:
+            virtual void warm_cache() const override;           /// override with no-op
+        
+        public:
             /// implementation of the stringmapper API, in terms of std::unordered_map<…> API
             virtual std::string&       get(std::string const& key) override;
             virtual std::string const& get(std::string const& key) const override;

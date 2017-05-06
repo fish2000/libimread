@@ -12,24 +12,24 @@ namespace store {
     namespace detail {
         
         inline void json_map_impl(Json const& jsonmap, stringmapper* stringmap_ptr) {
-            if (stringmap_ptr == nullptr)       { return; }
-            if (jsonmap.type() != Type::OBJECT) { return; }
+            if (stringmap_ptr == nullptr)       { return; }     /// `stringmap_ptr` must be a valid pointer
+            if (jsonmap.type() != Type::OBJECT) { return; }     /// `jsonmap` must be a JSON map (née “Object”)
             for (std::string const& key : jsonmap.keys()) {
                 stringmap_ptr->set(key, jsonmap.get(key));
             }
         }
         
-        inline void json_impl(Json const& jsonmap, stringmapper* stringmap_ptr) {
-            if (stringmap_ptr == nullptr) { return; }
-            switch (jsonmap.type()) {
+        inline void json_impl(Json const& json, stringmapper* stringmap_ptr) {
+            if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
+            switch (json.type()) {
                 case Type::OBJECT:
-                    json_map_impl(jsonmap, stringmap_ptr);
+                    json_map_impl(json, stringmap_ptr);
                     return;
                 case Type::ARRAY: {
-                    std::size_t max = jsonmap.size();
+                    std::size_t max = json.size();
                     if (max > 0) {
                         for (std::size_t idx = 0; idx < max; ++idx) {
-                            json_map_impl(jsonmap[idx], stringmap_ptr);
+                            json_map_impl(json[idx], stringmap_ptr);
                         }
                     }
                     return;
@@ -48,8 +48,8 @@ namespace store {
     #pragma mark - base class store::stringmapper default methods
     
     void stringmapper::with_json(std::string const& jsonstr) {
-        Json jsonmap = Json::parse(jsonstr);
-        detail::json_impl(jsonmap, this);
+        Json json = Json::parse(jsonstr);
+        detail::json_impl(json, this);
     }
     
     void stringmapper::warm_cache() const {
@@ -100,8 +100,7 @@ namespace store {
     }
     
     bool stringmapper::insert(std::pair<const std::string, std::string>&& item) {
-        // del(item.second);
-        return set(item.first, item.second);
+        return (del(item.first) && set(item.first, item.second));
     }
     
     std::size_t stringmapper::erase(std::string const& key) {
@@ -199,6 +198,11 @@ namespace store {
         }
         detail::json_impl(loadee, &out);
         return out;
+    }
+    
+    void stringmap::warm_cache() const {
+        /// NO-OP: the cache is the only backend --
+        /// warming it just wastes a bunch of ops
     }
     
     std::string& stringmap::get(std::string const& key) {

@@ -108,7 +108,6 @@ namespace {
             // WTF("PRE-CONSTITUTED FILE SIZE: ", rocksjsonpth.filesize());
             
             store::stringmap reconstituted = store::stringmap::load(rocksjsonpth.str());
-            reconstituted.warm_cache();
             stringvec_t rekeyed = reconstituted.list();
             stringvec_t revalued;
             
