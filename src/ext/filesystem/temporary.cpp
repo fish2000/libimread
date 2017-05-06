@@ -99,7 +99,13 @@ namespace filesystem {
         return true;
     }
     
+    bool NamedTemporaryFile::exists() { return filepath.is_file(); }
     bool NamedTemporaryFile::remove() { return filepath.remove(); }
+    
+    char const* NamedTemporaryFile::do_not_destroy() {
+        cleanup = false;
+        return filepath.basename().c_str();
+    }
     
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tdp, FILESYSTEM_TEMP_DIRECTORYNAME);
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfp, FILESYSTEM_TEMP_FILENAME);
@@ -126,42 +132,10 @@ namespace filesystem {
     
     bool TemporaryDirectory::clean() {
         if (!dirpath.exists()) { return false; }
-        bool out = true;
-        detail::pathvec_t dirs;
-        
-        /// perform walk with visitor --
-        /// recursively removing files while saving directories
-        /// as full paths in the `dirs` vector
-        dirpath.walk([&out, &dirs](path const& p,
-                                   detail::stringvec_t& directories,
-                                   detail::stringvec_t& files) {
-            if (!directories.empty()) {
-                std::for_each(directories.begin(),
-                              directories.end(),
-                  [&p, &dirs](std::string const& d) {
-                      dirs.emplace_back(p/d);
-                });
-            }
-            if (!files.empty()) {
-                std::for_each(files.begin(),
-                              files.end(),
-                   [&p, &out](std::string const& f) {
-                      out &= (p/f).remove();
-                });
-            }
-        });
-        
-        /// remove emptied directories per saved list
-        if (!dirs.empty()) {
-            std::reverse(dirs.begin(), dirs.end());         /// reverse directorylist --
-            std::for_each(dirs.begin(), dirs.end(),         /// -- removing uppermost directories top-down:
-                   [&out](path const& p) { out &= p.remove(); });
-        }
-        
-        /// return as per logical sum of `remove()` call successes
-        return out;
+        return dirpath.rm_rf();
     }
     
+    bool TemporaryDirectory::exists() { return dirpath.is_directory(); }
     bool TemporaryDirectory::remove() { return dirpath.remove(); }
     
 }

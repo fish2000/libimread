@@ -567,11 +567,55 @@ namespace filesystem {
     }
     
     bool path::remove() const {
-        // WTF("Removing path: ", str());
         {
             detail::nowait_t nowait;
             if (is_file_or_link()) { return bool(::unlink(make_absolute().c_str()) != -1); }
             if (is_directory())    { return bool(::rmdir(make_absolute().c_str()) != -1); }
+        }
+        return false;
+    }
+    
+    bool path::rm_rf() const {
+        {
+            detail::nowait_t nowait;
+            if (is_file_or_link()) { return remove(); }
+            if (is_directory()) {
+                bool out = true;
+                detail::pathvec_t dirs;
+                
+                /// perform walk with visitor --
+                /// recursively removing files while saving directories
+                /// as full paths in the `dirs` vector
+                walk([&out, &dirs](path const& p,
+                                   detail::stringvec_t& directories,
+                                   detail::stringvec_t& files) {
+                    if (!directories.empty()) {
+                        std::for_each(directories.begin(),
+                                      directories.end(),
+                          [&p, &dirs](std::string const& d) {
+                              dirs.emplace_back(p/d);
+                        });
+                    }
+                    if (!files.empty()) {
+                        std::for_each(files.begin(),
+                                      files.end(),
+                           [&p, &out](std::string const& f) {
+                              out &= (p/f).remove();
+                        });
+                    }
+                });
+                
+                /// remove emptied directories per saved list
+                if (!dirs.empty()) {
+                    std::reverse(dirs.begin(), dirs.end());         /// reverse directorylist --
+                    std::for_each(dirs.begin(), dirs.end(),         /// -- removing uppermost directories top-down:
+                           [&out](path const& p) { out &= p.remove(); });
+                }
+                
+                /// return as per logical sum of `remove()` call successes
+                out &= remove();
+                return out;
+            }
         }
         return false;
     }

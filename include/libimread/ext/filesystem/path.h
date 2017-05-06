@@ -344,6 +344,14 @@ namespace filesystem {
                 return path(std::forward<P>(p)).remove();
             }
             
+            bool rm_rf() const;
+            
+            /// Static forwarder for path::rm_rf<P>(p) that should also be USED WITH EXTREME CAUTION
+            template <typename P> inline
+            static bool rm_rf(P&& p) {
+                return path(std::forward<P>(p)).rm_rf();
+            }
+            
             /// attempt to create a directory at this path. same USE-WITH-CAUTION caveats
             /// apply as per `path::remove()` (q.v. note supra).
             bool makedir() const;

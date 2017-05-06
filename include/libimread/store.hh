@@ -54,17 +54,6 @@ namespace store {
             using mapped_rvalue_reference = std::add_rvalue_reference_t<mapped_type>;
         
         public:
-            enum class formatter : int8_t {
-                undefined   = -1,
-                json        = 0,
-                plist       = 1,
-                pickle      = 2,
-                ini         = 4
-            };
-            
-            static constexpr formatter format = formatter::undefined;
-        
-        public:
             virtual ~base() {}
             
             template <typename KeyType = Key>
@@ -104,7 +93,15 @@ namespace store {
             
             using base_t::null_key;
             using base_t::null_value;
-            using base_t::formatter;
+        
+        public:
+            enum class formatter : int8_t {
+                undefined   = -1,
+                json        = 0,
+                plist       = 1,
+                pickle      = 2,
+                ini         = 4
+            };
             
             static constexpr formatter format = formatter::json;
         
@@ -227,8 +224,6 @@ namespace store {
     
     #define DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(__typename__)                           \
                                                                                                 \
-        using __rvalue_ref__ = std::add_rvalue_reference_t<__typename__>;                       \
-                                                                                                \
         template <typename ...Args>                                                             \
         static __typename__ load(std::string const& source, Args&& ...args) {                   \
             __typename__ out(std::forward<Args>(args)...);                                      \
@@ -256,6 +251,7 @@ namespace store {
             {                                                                                   \
                 store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                  \
             }                                                                                   \
+                                                                                                \
         DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(__typename__)                               \
         DECLARE_STRINGMAPPER_TEMPLATE_METHODS()
     

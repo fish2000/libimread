@@ -137,7 +137,9 @@ namespace filesystem {
             ,filemode(mode::WRITE)
             ,filepath(name.pathname)
             ,stream()
-            {}
+            {
+                create();
+            }
         
         NamedTemporaryFile(NamedTemporaryFile const& other)
             :descriptor(other.descriptor)
@@ -174,7 +176,10 @@ namespace filesystem {
         bool close();
         
         bool create();
+        bool exists();
         bool remove();
+        
+        char const* do_not_destroy();
         
         ~NamedTemporaryFile() {
             if (cleanup) { close(); remove(); }
@@ -238,6 +243,7 @@ namespace filesystem {
         
         bool create();
         bool clean();
+        bool exists();
         bool remove();
         
         ~TemporaryDirectory() {
