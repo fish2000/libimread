@@ -4,7 +4,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/JSON/json11.h>
-#include <libimread/ext/pystring.hh>
+// #include <libimread/ext/pystring.hh>
 #include <libimread/store.hh>
 
 namespace store {
@@ -96,13 +96,11 @@ namespace store {
     }
     
     void stringmapper::clear() {
-        for (std::string const& key : list()) {
-            del(key);
-        }
+        for (std::string const& key : list()) { del(key); }
     }
     
     bool stringmapper::insert(std::pair<const std::string, std::string>&& item) {
-        del(item.second);
+        // del(item.second);
         return set(item.first, item.second);
     }
     
@@ -166,9 +164,7 @@ namespace store {
     }
     
     bool xattrmap::del(std::string const& key) {
-        if (cache.find(key) != cache.end()) {
-            cache.erase(key);
-        }
+        if (cache.find(key) != cache.end()) { cache.erase(key); }
         return xattr(key, stringmapper::base_t::null_value()) == stringmapper::base_t::null_value();
     }
     
@@ -196,9 +192,9 @@ namespace store {
         stringmap out;
         try {
             loadee = Json::load(source);
-        } catch (im::FileSystemError& exc) {
+        } catch (im::FileSystemError&) {
             return out;
-        } catch (im::JSONIOError& exc) {
+        } catch (im::JSONIOError&) {
             return out;
         }
         detail::json_impl(loadee, &out);
@@ -227,9 +223,7 @@ namespace store {
     }
     
     bool stringmap::del(std::string const& key) {
-        if (cache.find(key) != cache.end()) {
-            cache.erase(key);
-        }
+        if (cache.find(key) != cache.end()) { cache.erase(key); }
         return cache.count(key) == 0;
     }
     

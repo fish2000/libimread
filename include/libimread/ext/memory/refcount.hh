@@ -113,7 +113,7 @@ namespace memory {
                 retain();
             }
         
-        RefCount(RefCount&& other)
+        RefCount(RefCount&& other) noexcept
             :object(std::move(other.object))
             ,guid(std::move(other.guid))
             ,deleter(std::move(other.deleter))

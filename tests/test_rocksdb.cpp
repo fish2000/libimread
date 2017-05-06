@@ -26,6 +26,7 @@ namespace {
     using filesystem::path;
     // using filesystem::switchdir;
     // using filesystem::resolver;
+    using filesystem::TemporaryName;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     
@@ -175,6 +176,20 @@ namespace {
             REQUIRE(tf.filepath.is_file());
             REQUIRE(tf.filepath.is_readable());
         }
+        
+        SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr with a TemporaryName")
+        {
+            TemporaryName tn(".json");
+            FileSink sink(tn.pathname);
+            store::value_copy(database, sink);
+            for (std::string const& key : database.list()) {
+                CHECK(database.get(key) == sink.get(key));
+                CHECK(sink.get(key) != sink.null_value());
+            }
+            REQUIRE(tn.pathname.is_file());
+            REQUIRE(tn.pathname.is_readable());
+        }
+        
     }
 
 } /// namespace (anon.)
