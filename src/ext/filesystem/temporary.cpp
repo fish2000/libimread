@@ -61,7 +61,7 @@ namespace filesystem {
     TemporaryName::operator char const*() const noexcept    { return c_str(); }
     
     bool TemporaryName::create() {
-        /// Create a new temporary file and return a descriptor
+        /// Create a new temporary file, storing the descriptor
         descriptor = ::mkstemps(const_cast<char*>(pathname.c_str()),
                                 std::strlen(suffix));
         
@@ -188,14 +188,20 @@ namespace filesystem {
     }
     
     bool NamedTemporaryFile::create() {
+        /// Create a new temporary file, storing the descriptor
         descriptor = ::mkstemps(const_cast<char*>(filepath.c_str()),
                                 std::strlen(suffix));
         
+        /// Return false if temporary file creation went bad
         if (descriptor < 0) { return false; }
         
+        /// Stash the normalized path of the temporary file
         filepath = path(descriptor).make_absolute();
         
+        /// Attempt to close the descriptor
         if (::close(descriptor) == -1) { return false; }
+        
+        /// All is well, return as such
         return true;
     }
     
@@ -254,20 +260,28 @@ namespace filesystem {
     NamedTemporaryFile TemporaryDirectory::get(std::string const& suffix,
                                                std::string const& prefix,
                                                enum mode m) { return NamedTemporaryFile(suffix,
-                                                                                   cleanup,
-                                                                                   prefix, m, dirpath); }
+                                                                                        cleanup,
+                                                                                        prefix, m, dirpath); }
     
     bool TemporaryDirectory::create() {
+        /// Create a new path in the temporary directory,
+        /// suffixed properly for mkdtemp()
         if (!pystring::endswith(tpl, "XXX")) {
             tplpath = path::tmp().join(tpl).append("-XXXXXX");
         } else {
             tplpath = path::tmp().join(tpl);
         }
         
+        /// Actually create the temporary directory
         char const* dtemp = ::mkdtemp(const_cast<char*>(tplpath.c_str()));
+        
+        /// Return false if the temporary directory creation went bad
         if (dtemp == nullptr) { return false; }
         
+        /// Stash the normalized path of the temporary directory
         dirpath = path(dtemp).make_absolute();
+        
+        /// All is well, return as such
         return true;
     }
     
@@ -279,7 +293,7 @@ namespace filesystem {
     bool TemporaryDirectory::exists() { return dirpath.is_directory(); }
     bool TemporaryDirectory::remove() { return dirpath.remove(); }
     
-   TemporaryDirectory::~TemporaryDirectory() {
+    TemporaryDirectory::~TemporaryDirectory() {
         if (cleanup)    { clean(); remove(); }
         if (deallocate) { std::free(tpl); }
     }
