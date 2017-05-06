@@ -43,7 +43,7 @@ namespace filesystem {
     }
     
     bool TemporaryName::exists() { return pathname.is_file(); }
-    bool TemporaryName::remove() { return pathname.remove(); }
+    bool TemporaryName::remove() { return pathname.rm_rf(); }
     
     char const* TemporaryName::do_not_destroy() {
         cleanup = false;
