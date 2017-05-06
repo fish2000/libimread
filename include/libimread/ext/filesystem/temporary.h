@@ -5,8 +5,8 @@
 #define LIBIMREAD_EXT_FILESYSTEM_TEMPORARY_H_
 
 #include <string>
-#include <fstream>
 #include <cstring>
+#include <fstream>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>

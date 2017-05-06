@@ -2,7 +2,6 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <cstdio>
-#include <cerrno>
 #include <unistd.h>
 
 #include <libimread/ext/filesystem/temporary.h>
