@@ -3,14 +3,9 @@
 
 #include <cstdio>
 #include <cerrno>
-#include <cstdlib>
 #include <unistd.h>
 
-#include <vector>
-#include <algorithm>
-
 #include <libimread/ext/filesystem/temporary.h>
-#include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/pystring.hh>
 
 namespace filesystem {

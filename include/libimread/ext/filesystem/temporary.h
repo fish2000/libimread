@@ -7,7 +7,6 @@
 #include <string>
 #include <fstream>
 #include <cstring>
-#include <cstdlib>
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
