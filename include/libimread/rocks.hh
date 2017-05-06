@@ -62,6 +62,9 @@ namespace store {
             memory::rocks_ptr instance;
             std::string rockspth{ NULL_STR };
         
+        protected:
+            struct options;
+        
         private:
             rocks(void);
     };

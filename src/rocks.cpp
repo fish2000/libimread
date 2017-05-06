@@ -31,6 +31,26 @@ namespace store {
     
     bool rocks::can_store() const noexcept { return true; }
     
+    /// RocksDB {Read,Write,Flush}Options static-storage
+    struct rocks::options {
+        
+        static rocksdb::ReadOptions& read() {
+            static rocksdb::ReadOptions ro;
+            return ro;
+        }
+        
+        static rocksdb::WriteOptions& write() {
+            static rocksdb::WriteOptions wo;
+            return wo;
+        }
+        
+        static rocksdb::FlushOptions& flush() {
+            static rocksdb::FlushOptions fo;
+            return fo;
+        }
+        
+    };
+    
     /// copy constructor
     rocks::rocks(rocks const& other)
         :instance(other.instance)
@@ -72,7 +92,7 @@ namespace store {
     
     std::string& rocks::get_force(std::string const& key) const {
         std::string sval;
-        rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
+        rocksdb::Status status = SELF()->Get(options::read(), key, &sval);
         if (status.ok()) {
             cache[key] = sval;
             return cache.at(key);
@@ -85,7 +105,7 @@ namespace store {
             return cache.at(key);
         } else {
             std::string sval;
-            rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
+            rocksdb::Status status = SELF()->Get(options::read(), key, &sval);
             if (status.ok()) {
                 cache[key] = sval;
                 return cache.at(key);
@@ -99,7 +119,7 @@ namespace store {
             return cache.at(key);
         } else {
             std::string sval;
-            rocksdb::Status status = SELF()->Get(rocksdb::ReadOptions(), key, &sval);
+            rocksdb::Status status = SELF()->Get(options::read(), key, &sval);
             if (status.ok()) {
                 cache[key] = sval;
                 return cache.at(key);
@@ -109,11 +129,11 @@ namespace store {
     }
     
     bool rocks::set(std::string const& key, std::string const& value) {
-        rocksdb::WriteOptions writeopts;
+        // rocksdb::WriteOptions writeopts;
         rocksdb::Status flushed;
-        rocksdb::Status status = SELF()->Put(writeopts, key, value);
+        rocksdb::Status status = SELF()->Put(options::write(), key, value);
         if (status.ok()) {
-            flushed = SELF()->Flush(rocksdb::FlushOptions());
+            flushed = SELF()->Flush(options::flush());
             if (flushed.ok()) {
                 if (cache.find(key) != cache.end()) {
                     cache[key] = value;
@@ -129,7 +149,7 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             cache.erase(key);
         }
-        rocksdb::Status status = SELF()->Delete(rocksdb::WriteOptions(), key);
+        rocksdb::Status status = SELF()->Delete(options::write(), key);
         return status.ok();
     }
     
@@ -141,7 +161,7 @@ namespace store {
     }
     
     stringmapper::stringvec_t rocks::list() const {
-        iterator_ptr_t it(SELF()->NewIterator(rocksdb::ReadOptions()));
+        iterator_ptr_t it(SELF()->NewIterator(options::read()));
         stringmapper::stringvec_t out{};
         out.reserve(count());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
