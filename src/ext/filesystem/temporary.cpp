@@ -18,6 +18,43 @@ namespace filesystem {
     DECLARE_CONSTEXPR_CHAR(TemporaryName::tfp, FILESYSTEM_TEMP_FILENAME);
     DECLARE_CONSTEXPR_CHAR(TemporaryName::tfs, FILESYSTEM_TEMP_SUFFIX);
     
+    TemporaryName::TemporaryName(char const* s, bool c,
+                                 char const* p, path const& td)
+                                    :descriptor(-1), cleanup(c), deallocate(true)
+                                    ,suffix(::strdup(s)), prefix(::strdup(p))
+                                    ,pathname(td/std::strcat(prefix, s))
+                                    {
+                                        create();
+                                    }
+    
+    TemporaryName::TemporaryName(std::string const& s, bool c,
+                                 std::string const& p, path const& td)
+                                    :descriptor(-1), cleanup(c), deallocate(true)
+                                    ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
+                                    ,pathname(td/(p+s))
+                                    {
+                                        create();
+                                    }
+    
+    TemporaryName::TemporaryName(TemporaryName const& other)
+        :descriptor(other.descriptor)
+        ,cleanup(other.cleanup), deallocate(true)
+        ,suffix(::strdup(other.suffix)), prefix(::strdup(other.prefix))
+        ,pathname(other.pathname)
+        ,filename(::strdup(other.filename))
+        {}
+    
+    TemporaryName::TemporaryName(TemporaryName&& other) noexcept
+        :descriptor(other.descriptor)
+        ,cleanup(other.cleanup), deallocate(true)
+        ,suffix(std::move(other.suffix)), prefix(std::move(other.prefix))
+        ,pathname(std::move(other.pathname))
+        ,filename(std::move(other.filename))
+        {
+            other.cleanup = false;
+            other.deallocate = false;
+        }
+    
     std::string   TemporaryName::str() const noexcept       { return pathname.str(); }
     char const* TemporaryName::c_str() const noexcept       { return pathname.c_str(); }
     TemporaryName::operator std::string() const noexcept    { return str(); }
@@ -50,8 +87,71 @@ namespace filesystem {
         return filename;
     }
     
+    TemporaryName::~TemporaryName() {
+        if (cleanup && exists()) { remove(); }
+        if (deallocate) { std::free(suffix);
+                          std::free(prefix);
+                          std::free(filename); }
+    }
+    
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfp, FILESYSTEM_TEMP_FILENAME);
     DECLARE_CONSTEXPR_CHAR(NamedTemporaryFile::tfs, FILESYSTEM_TEMP_SUFFIX);
+    
+    NamedTemporaryFile::NamedTemporaryFile(char const* s, bool c,
+                                           char const* p, enum mode m,
+                                           path const& td)
+                                            :descriptor(-1), cleanup(c), deallocate(true)
+                                            ,suffix(::strdup(s)), prefix(::strdup(p))
+                                            ,filemode(m)
+                                            ,filepath(td/std::strcat(prefix, s))
+                                            ,stream()
+                                            {
+                                                create();
+                                            }
+    
+    NamedTemporaryFile::NamedTemporaryFile(std::string const& s, bool c,
+                                           std::string const& p, enum mode m,
+                                           path const& td)
+                                            :descriptor(-1), cleanup(c), deallocate(true)
+                                            ,suffix(::strdup(s.c_str())), prefix(::strdup(p.c_str()))
+                                            ,filemode(m)
+                                            ,filepath(td/(p+s))
+                                            ,stream()
+                                            {
+                                                create();
+                                            }
+    
+    NamedTemporaryFile::NamedTemporaryFile(TemporaryName&& name)
+        :descriptor(name.descriptor)
+        ,cleanup(name.cleanup), deallocate(true)
+        ,suffix(::strdup(name.suffix)), prefix(::strdup(name.prefix))
+        ,filemode(mode::WRITE)
+        ,filepath(name.pathname)
+        ,stream()
+        {
+            create();
+        }
+    
+    NamedTemporaryFile::NamedTemporaryFile(NamedTemporaryFile const& other)
+        :descriptor(other.descriptor)
+        ,cleanup(other.cleanup), deallocate(true)
+        ,suffix(::strdup(other.suffix)), prefix(::strdup(other.prefix))
+        ,filemode(other.filemode)
+        ,filepath(other.filepath)
+        ,stream()
+        {}
+    
+    NamedTemporaryFile::NamedTemporaryFile(NamedTemporaryFile&& other) noexcept
+        :descriptor(other.descriptor)
+        ,cleanup(other.cleanup), deallocate(true)
+        ,suffix(std::move(other.suffix)), prefix(std::move(other.prefix))
+        ,filemode(other.filemode)
+        ,filepath(std::move(other.filepath))
+        ,stream(std::move(other.stream))
+        {
+            other.cleanup = false;
+            other.deallocate = false;
+        }
     
     std::string   NamedTemporaryFile::str() const noexcept      { return filepath.str(); }
     char const* NamedTemporaryFile::c_str() const noexcept      { return filepath.c_str(); }
@@ -107,14 +207,55 @@ namespace filesystem {
         return filepath.basename().c_str();
     }
     
+    NamedTemporaryFile::~NamedTemporaryFile() {
+        if (cleanup) { close(); remove(); }
+        if (deallocate) { std::free(suffix);
+                          std::free(prefix); }
+    }
+    
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tdp, FILESYSTEM_TEMP_DIRECTORYNAME);
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfp, FILESYSTEM_TEMP_FILENAME);
     DECLARE_CONSTEXPR_CHAR(TemporaryDirectory::tfs, FILESYSTEM_TEMP_SUFFIX);
+    
+    TemporaryDirectory::TemporaryDirectory(char const* t, bool c)
+        :tpl(::strdup(t)), cleanup(c), deallocate(true)
+        {
+            create();
+        }
+    
+    TemporaryDirectory::TemporaryDirectory(std::string const& t, bool c)
+        :tpl(::strdup(t.c_str())), cleanup(c), deallocate(true)
+        {
+            create();
+        }
+    
+    TemporaryDirectory::TemporaryDirectory(TemporaryDirectory const& other)
+        :tpl(::strdup(other.tpl))
+        ,cleanup(other.cleanup), deallocate(true)
+        ,tplpath(other.tplpath)
+        ,dirpath(other.dirpath)
+        {}
+    
+    TemporaryDirectory::TemporaryDirectory(TemporaryDirectory&& other) noexcept
+        :tpl(std::move(other.tpl))
+        ,cleanup(other.cleanup), deallocate(true)
+        ,tplpath(std::move(other.tplpath))
+        ,dirpath(std::move(other.dirpath))
+        {
+            other.cleanup = false;
+            other.deallocate = false;
+        }
     
     std::string   TemporaryDirectory::str() const noexcept      { return dirpath.str(); }
     char const* TemporaryDirectory::c_str() const noexcept      { return dirpath.c_str(); }
     TemporaryDirectory::operator std::string() const noexcept   { return str(); }
     TemporaryDirectory::operator char const*() const noexcept   { return c_str(); }
+    
+    NamedTemporaryFile TemporaryDirectory::get(std::string const& suffix,
+                                               std::string const& prefix,
+                                               enum mode m) { return NamedTemporaryFile(suffix,
+                                                                                   cleanup,
+                                                                                   prefix, m, dirpath); }
     
     bool TemporaryDirectory::create() {
         if (!pystring::endswith(tpl, "XXX")) {
@@ -137,5 +278,10 @@ namespace filesystem {
     
     bool TemporaryDirectory::exists() { return dirpath.is_directory(); }
     bool TemporaryDirectory::remove() { return dirpath.remove(); }
+    
+   TemporaryDirectory::~TemporaryDirectory() {
+        if (cleanup)    { clean(); remove(); }
+        if (deallocate) { std::free(tpl); }
+    }
     
 }
