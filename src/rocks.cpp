@@ -27,6 +27,7 @@ namespace memory {
     
 } /// namespace memory
 
+using rocksdb::Status;
 using filesystem::path;
 using iterator_ptr_t = std::unique_ptr<rocksdb::Iterator>;
 
@@ -36,6 +37,36 @@ namespace store {
     
     /// RocksDB {Read,Write,Flush}Options static-storage
     struct rocks::options {
+        
+        static rocksdb::Env* env() {
+            /// background thread-pool customization options from:
+            /// https://github.com/facebook/rocksdb/wiki/basic-operations#thread-pools
+            static rocksdb::Env* env = rocksdb::Env::Default();
+            static bool configured = false;
+            if (!configured) {
+                configured = true;
+                env->SetBackgroundThreads(2, rocksdb::Env::LOW);
+                env->SetBackgroundThreads(1, rocksdb::Env::HIGH);
+            }
+            return env;
+        }
+        
+        static rocksdb::Options& opts() {
+            /// basic-optimization options from:
+            /// https://github.com/facebook/rocksdb/blob/master/examples/simple_example.cc
+            static rocksdb::Options o;
+            static bool configured = false;
+            if (!configured) {
+                configured = true;
+                o.env = rocks::options::env();
+                o.max_background_compactions = 2;
+                o.max_background_flushes = 1;
+                o.IncreaseParallelism();
+                o.OptimizeLevelStyleCompaction();
+                o.create_if_missing = true;
+            }
+            return o;
+        }
         
         static rocksdb::ReadOptions& read() {
             static rocksdb::ReadOptions ro;
@@ -58,10 +89,12 @@ namespace store {
     struct rocks::flags {
         
         #define FLAG(flagname)                                                      \
-            static decltype(rocksdb::DB::Properties::flagname) flagname() {         \
+            __attribute__((__warn_unused_result__))                                 \
+            static decltype(rocksdb::DB::Properties::flagname)& flagname() {        \
                 return      rocksdb::DB::Properties::flagname;                      \
             }
         
+        FLAG(kSizeAllMemTables);
         FLAG(kEstimateNumKeys);
         
     };
@@ -80,24 +113,12 @@ namespace store {
     
     /// database file path constructor
     rocks::rocks(std::string const& filepth)
-        :rockspth(path::absolute(filepth).str())
+        :rockspth(path::expand_user(filepth).make_absolute().str())
         {
-            /// background thread-pool customization options from:
-            /// https://github.com/facebook/rocksdb/wiki/basic-operations#thread-pools
-            auto env = rocksdb::Env::Default();
-            env->SetBackgroundThreads(2, rocksdb::Env::LOW);
-            env->SetBackgroundThreads(1, rocksdb::Env::HIGH);
-            rocksdb::Options options;
-            options.env = env;
-            options.max_background_compactions = 2;
-            options.max_background_flushes = 1;
-            /// basic-optimization options from:
-            /// https://github.com/facebook/rocksdb/blob/master/examples/simple_example.cc
-            options.IncreaseParallelism();
-            options.OptimizeLevelStyleCompaction();
-            options.create_if_missing = true;
             rocksdb::DB* local_instance = SELF();
-            rocksdb::Status status = rocksdb::DB::Open(options, rockspth, &local_instance);
+            Status status = rocksdb::DB::Open(options::opts(),
+                                              rockspth,
+                                              &local_instance);
             instance.reset((void*)local_instance);
         }
     
@@ -107,7 +128,7 @@ namespace store {
     
     std::string& rocks::get_force(std::string const& key) const {
         std::string sval;
-        rocksdb::Status status = SELF()->Get(options::read(), key, &sval);
+        Status status = SELF()->Get(options::read(), key, &sval);
         if (status.ok()) {
             cache[key] = sval;
             return cache.at(key);
@@ -115,12 +136,23 @@ namespace store {
         return STRINGNULL();
     }
     
+    std::string const& rocks::filepath() const {
+        return rockspth;
+    }
+    
+    std::size_t rocks::memorysize() const {
+        uint64_t memsize = 0;
+        bool status = SELF()->GetAggregatedIntProperty(flags::kSizeAllMemTables(), &memsize);
+        if (status) { return static_cast<std::size_t>(memsize); }
+        return 0;
+    }
+    
     std::string& rocks::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         } else {
             std::string sval;
-            rocksdb::Status status = SELF()->Get(options::read(), key, &sval);
+            Status status = SELF()->Get(options::read(), key, &sval);
             if (status.ok()) {
                 cache[key] = sval;
                 return cache.at(key);
@@ -134,7 +166,7 @@ namespace store {
             return cache.at(key);
         } else {
             std::string sval;
-            rocksdb::Status status = SELF()->Get(options::read(), key, &sval);
+            Status status = SELF()->Get(options::read(), key, &sval);
             if (status.ok()) {
                 cache[key] = sval;
                 return cache.at(key);
@@ -144,9 +176,9 @@ namespace store {
     }
     
     bool rocks::set(std::string const& key, std::string const& value) {
-        rocksdb::Status flushed;
-        rocksdb::Status status = value == STRINGNULL() ? SELF()->Put(options::write(), key, value)
-                                                       : SELF()->Delete(options::write(), key);
+        Status flushed;
+        Status status = value != STRINGNULL() ? SELF()->Put(options::write(), key, value)
+                                              : SELF()->Delete(options::write(), key);
         if (status.ok()) {
             flushed = SELF()->Flush(options::flush());
             if (flushed.ok()) {
@@ -168,7 +200,7 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             cache.erase(key);
         }
-        rocksdb::Status status = SELF()->Delete(options::write(), key);
+        Status status = SELF()->Delete(options::write(), key);
         return status.ok();
     }
     
@@ -191,4 +223,6 @@ namespace store {
     
 } /// namespace store
 
+#undef STRINGNULL
 #undef SELF
+#undef FLAG

@@ -48,6 +48,8 @@ namespace store {
         
         public:
             std::string& get_force(std::string const&) const;
+            std::string const& filepath() const;
+            std::size_t memorysize() const;
         
         public:
             /// implementation of the stringmapper API, in terms of the RocksDB API
