@@ -270,19 +270,21 @@ Json::Object* Json::mkobject() {
         root = new Object();
         root->refcnt++;
     }
-    if (root->type() != Type::OBJECT)
+    if (root->type() != Type::OBJECT) {
         imread_raise(JSONUseError,
             "Json::mkobject() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::OBJECT)");
+    }
     return static_cast<Object*>(root);
 }
 Json::Object* Json::mkobject() const {
-    if (root->type() != Type::OBJECT)
+    if (root->type() != Type::OBJECT) {
         imread_raise(JSONUseError,
             "Json::mkobject() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::OBJECT)");
+    }
     return static_cast<Object*>(root);
 }
 
@@ -300,19 +302,21 @@ Json::Array* Json::mkarray() {
         root = new Array();
         root->refcnt++;
     }
-    if (root->type() != Type::ARRAY)
+    if (root->type() != Type::ARRAY) {
         imread_raise(JSONUseError,
             "Json::mkarray() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::ARRAY)");
+    }
     return static_cast<Array*>(root);
 }
 Json::Array* Json::mkarray() const {
-    if (root->type() != Type::ARRAY)
+    if (root->type() != Type::ARRAY) {
         imread_raise(JSONUseError,
             "Json::mkarray() method not applicable",
          FF("\troot->type() == Type::%s", root->typestr()),
             "\t(Requires Type::ARRAY)");
+    }
     return static_cast<Array*>(root);
 }
 

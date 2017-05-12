@@ -4,8 +4,9 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/JSON/json11.h>
-// #include <libimread/ext/pystring.hh>
 #include <libimread/store.hh>
+
+#define STRINGNULL() stringmapper::base_t::null_value()
 
 namespace store {
     
@@ -124,7 +125,7 @@ namespace store {
     }
     
     std::size_t stringmapper::count(std::string const& key) const {
-        return static_cast<std::size_t>(get(key) == stringmapper::base_t::null_value());
+        return static_cast<std::size_t>(get(key) == STRINGNULL());
     }
     
     #pragma mark - store::xattrmap methods
@@ -136,11 +137,11 @@ namespace store {
             return cache[key];
         } else {
             std::string val(xattr(key));
-            if (val != stringmapper::base_t::null_value()) {
+            if (val != STRINGNULL()) {
                 cache[key] = val;
                 return cache[key];
             }
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
@@ -149,11 +150,11 @@ namespace store {
             return cache[key];
         } else {
             std::string val(xattr(key));
-            if (val != stringmapper::base_t::null_value()) {
+            if (val != STRINGNULL()) {
                 cache[key] = val;
                 return cache[key];
             }
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
@@ -164,7 +165,7 @@ namespace store {
     
     bool xattrmap::del(std::string const& key) {
         if (cache.find(key) != cache.end()) { cache.erase(key); }
-        return xattr(key, stringmapper::base_t::null_value()) == stringmapper::base_t::null_value();
+        return xattr(key, STRINGNULL()) == STRINGNULL();
     }
     
     std::size_t xattrmap::count() const {
@@ -209,7 +210,7 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache[key];
         } else {
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
@@ -217,13 +218,13 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache[key];
         } else {
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
     bool stringmap::set(std::string const& key, std::string const& value) {
         cache[key] = value;
-        return cache.at(key) == value;
+        return cache.count(key) == 1;
     }
     
     bool stringmap::del(std::string const& key) {
@@ -237,7 +238,7 @@ namespace store {
     
     stringmapper::stringvec_t stringmap::list() const {
         stringmapper::stringvec_t out{};
-        out.reserve(count());
+        out.reserve(cache.size());
         for (auto const& item : cache) {
             out.emplace_back(item.first);
         }

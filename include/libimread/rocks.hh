@@ -64,6 +64,7 @@ namespace store {
         
         protected:
             struct options;
+            struct flags;
         
         private:
             rocks(void);

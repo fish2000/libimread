@@ -10,8 +10,11 @@
 #include "rocksdb/env.h"
 #include "rocksdb/db.h"
 
-/// shortcut getter macro for the RocksDB internal instance
+/// Shortcut getter macro for the RocksDB internal instance
 #define SELF() instance.get<rocksdb::DB>()
+
+/// Shortcut to std::string{ NULL_STR } value
+#define STRINGNULL() stringmapper::base_t::null_value()
 
 namespace memory {
     
@@ -48,6 +51,18 @@ namespace store {
             static rocksdb::FlushOptions fo;
             return fo;
         }
+        
+    };
+    
+    /// Stortcuts to flags defined in rocksdb::DB::Properties
+    struct rocks::flags {
+        
+        #define FLAG(flagname)                                                      \
+            static decltype(rocksdb::DB::Properties::flagname) flagname() {         \
+                return      rocksdb::DB::Properties::flagname;                      \
+            }
+        
+        FLAG(kEstimateNumKeys);
         
     };
     
@@ -97,7 +112,7 @@ namespace store {
             cache[key] = sval;
             return cache.at(key);
         }
-        return stringmapper::base_t::null_value();
+        return STRINGNULL();
     }
     
     std::string& rocks::get(std::string const& key) {
@@ -110,7 +125,7 @@ namespace store {
                 cache[key] = sval;
                 return cache.at(key);
             }
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
@@ -124,19 +139,24 @@ namespace store {
                 cache[key] = sval;
                 return cache.at(key);
             }
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
     bool rocks::set(std::string const& key, std::string const& value) {
         rocksdb::Status flushed;
-        rocksdb::Status status = SELF()->Put(options::write(), key, value);
+        rocksdb::Status status = value == STRINGNULL() ? SELF()->Put(options::write(), key, value)
+                                                       : SELF()->Delete(options::write(), key);
         if (status.ok()) {
             flushed = SELF()->Flush(options::flush());
             if (flushed.ok()) {
                 if (cache.find(key) != cache.end()) {
-                    cache[key] = value;
-                } else {
+                    if (value == STRINGNULL()) {
+                        cache.erase(key);
+                    } else {
+                        cache[key] = value;
+                    }
+                } else if (value != STRINGNULL()) {
                     cache.insert({ key, value });
                 }
             }
@@ -154,7 +174,7 @@ namespace store {
     
     std::size_t rocks::count() const {
         uint64_t cnt;
-        bool status = SELF()->GetIntProperty(rocksdb::DB::Properties::kEstimateNumKeys, &cnt);
+        bool status = SELF()->GetIntProperty(flags::kEstimateNumKeys(), &cnt);
         if (status) { return static_cast<std::size_t>(cnt); }
         return 0;
     }
