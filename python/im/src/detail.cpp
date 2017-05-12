@@ -448,6 +448,42 @@ namespace py {
         return to_json();
     }
     
+    bool ref::hasattr(std::string const& attr) const {
+        return PyObject_HasAttrString(referent, attr.c_str()) == 1;
+    }
+    
+    bool ref::hasattr(ref const& attr) const {
+        return PyObject_HasAttr(referent, attr.inc().get()) == 1;
+    }
+    
+    ref ref::getattr(std::string const& attr) const {
+        return PyObject_GetAttrString(referent, attr.c_str());
+    }
+    
+    ref ref::getattr(ref const& attr) const {
+        return PyObject_GetAttr(referent, attr.inc().get());
+    }
+    
+    ref ref::getattr(std::string const& attr, ref::pyptr_t default_value) const {
+        PyObject* out = PyObject_GetAttrString(referent, attr.c_str());
+        if (!out) { return default_value; }
+        return out;
+    }
+    
+    ref ref::getattr(ref const& attr, ref::pyptr_t default_value) const {
+        PyObject* out = PyObject_GetAttr(referent, attr.inc().get());
+        if (!out) { return default_value; }
+        return out;
+    }
+    
+    ref ref::operator[](std::string const& attr) const {
+        return PyObject_GetAttrString(referent, attr.c_str());
+    }
+    
+    ref ref::operator[](ref const& attr) const {
+        return PyObject_GetAttr(referent, ref.inc().get());
+    }
+    
     py::ref&& asref(PyObject* referent) {
         py::ref out;
         out.set(referent);

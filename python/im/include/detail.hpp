@@ -529,6 +529,16 @@ namespace py {
             Json to_json() const;
             operator Json() const;
             
+            /// Object protocol
+            bool hasattr(std::string const&) const;
+            bool hasattr(ref const&) const;
+            ref getattr(std::string const&) const;
+            ref getattr(ref const&) const;
+            ref getattr(std::string const&, pyptr_t) const;
+            ref getattr(ref const&, pyptr_t) const;
+            ref operator[](std::string const&) const;
+            ref operator[](ref const&) const;
+            
         private:
             
             ref(ref const&);                    /// NO COPYING
