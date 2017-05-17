@@ -21,7 +21,6 @@ namespace im {
     
     namespace {
         
-        // const std::size_t buffer_size = 4096;
         const std::size_t buffer_size = JPEGFormat::options.buffer_size;
         
         struct jpeg_source_adaptor {
@@ -169,8 +168,13 @@ namespace im {
             }
             
             void set_quality(std::size_t quality) {
+                if (quality > 100) { quality = 100; }
                 jpeg_set_quality(&info, quality, (boolean)false);
             }
+            
+            int height() const          { return info.image_height; }
+            int width() const           { return info.image_width; }
+            int next_scanline() const   { return info.next_scanline; }
             
             void set_height(int height)         { info.image_height = height; }
             void set_width(int width)           { info.image_width = width; }
@@ -187,9 +191,13 @@ namespace im {
         
         struct error_mgr {
             error_mgr();
-            struct jpeg_error_mgr pub;
-            jmp_buf setjmp_buffer;
-            char error_message[JMSG_LENGTH_MAX];
+            mutable struct jpeg_error_mgr pub;
+            mutable jmp_buf setjmp_buffer;
+            mutable char error_message[JMSG_LENGTH_MAX];
+            
+            bool has_error() const {
+                return setjmp(this->setjmp_buffer);
+            }
         };
         
         void err_long_jump(j_common_ptr cinfo) {
@@ -220,19 +228,10 @@ namespace im {
         /// source
         decompressor.info.src = &adaptor.mgr;
         
-        // if (setjmp(jerr.setjmp_buffer)) {
-        //     imread_raise(CannotReadError,
-        //         "libjpeg internal error:",
-        //         jerr.error_message);
-        // }
-        
         /// now read the header & image data
-        // jpeg_read_header(&decompressor.info, (boolean)true);
-        // jpeg_start_decompress(&decompressor.info);
         decompressor.start();
         
-        
-        if (setjmp(jerr.setjmp_buffer)) {
+        if (jerr.has_error()) {
             imread_raise(CannotReadError,
                 "libjpeg internal error:",
                 jerr.error_message);
@@ -244,8 +243,6 @@ namespace im {
         
         std::unique_ptr<Image> output(factory->create(8, h, w, d));
         
-        // JSAMPARRAY samples = (*decompressor.info.mem->alloc_sarray)(
-        //      (j_common_ptr)&decompressor.info, JPOOL_IMAGE, w * d, 1);
         /// allocate single-row sample array
         JSAMPARRAY samples = decompressor.allocate_samples(w, d, 1);
         
@@ -254,7 +251,6 @@ namespace im {
         uint8_t* __restrict__ ptr = output->rowp_as<uint8_t>(0);
         
         while (decompressor.info.output_scanline < decompressor.info.output_height) {
-            // jpeg_read_scanlines(&decompressor.info, samples, 1);
             decompressor.read_samples(samples);
             JSAMPLE* srcPtr = samples[0];
             for (int x = 0; x < w; ++x) {
@@ -268,13 +264,12 @@ namespace im {
             }
         }
         
-        if (setjmp(jerr.setjmp_buffer)) {
+        if (jerr.has_error()) {
             imread_raise(CannotReadError,
                 "libjpeg internal error:",
                 jerr.error_message);
         }
         
-        // jpeg_finish_decompress(&decompressor.info);
         return output;
     }
     
@@ -299,52 +294,27 @@ namespace im {
         /// destination
         compressor.info.dest = &adaptor.mgr;
         
-        /// error check
-        // if (setjmp(jerr.setjmp_buffer)) {
-        //     imread_raise(CannotWriteError,
-        //         "libjpeg internal error:",
-        //         jerr.error_message);
-        // }
-        
         const int w = input.dim(0);
         const int h = input.dim(1);
         const int d = std::min(3, input.dim(2));
         const int dims = input.ndims();
-        int quality;
         
         /// assign image values
         compressor.set_width(w);
         compressor.set_height(h);
         compressor.set_components(d);
-        // compressor.info.image_width = w;
-        // compressor.info.image_height = h;
-        // compressor.info.input_components = d;
-        // compressor.info.in_color_space = color_space(compressor.info.input_components);
         
         /// set 'defaults'
-        // jpeg_set_defaults(&compressor.info);
         compressor.set_defaults();
         
-        /// error check
-        if (setjmp(jerr.setjmp_buffer)) {
-            imread_raise(CannotWriteError,
-                "libjpeg internal error:",
-                jerr.error_message);
-        }
-        
         /// set quality value (0 ≤ quality ≤ 100)
-        quality = opts.cast<int>("jpg:quality", 100);
-        if (quality > 100) { quality = 100; }
-        if (quality < 0) { quality = 0; }
-        // jpeg_set_quality(&compressor.info, quality, (boolean)false);
-        compressor.set_quality(quality);
+        compressor.set_quality(opts.cast<std::size_t>("jpg:quality", 100));
         
         /// start compression!
-        // jpeg_start_compress(&compressor.info, (boolean)true);
         compressor.start();
         
         /// error check
-        if (setjmp(jerr.setjmp_buffer)) {
+        if (jerr.has_error()) {
             imread_raise(CannotWriteError,
                 "libjpeg internal error:",
                 jerr.error_message);
@@ -357,21 +327,20 @@ namespace im {
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
         /// write scanlines in pixel loop
-        while (compressor.info.next_scanline < compressor.info.image_height) {
+        while (compressor.next_scanline() < compressor.height()) {
             JSAMPLE* __restrict__ dstPtr = rowbuf;
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
                     pix::convert(
-                        at(x, compressor.info.next_scanline, c)[0],
+                        at(x, compressor.next_scanline(), c)[0],
                         *dstPtr++);
                 }
             }
-            // jpeg_write_scanlines(&compressor.info, &rowbuf, 1);
             compressor.write_scanlines(&rowbuf);
         }
         
         /// error check
-        if (setjmp(jerr.setjmp_buffer)) {
+        if (jerr.has_error()) {
             imread_raise(CannotWriteError,
                 "libjpeg internal error:",
                 jerr.error_message);
@@ -379,8 +348,5 @@ namespace im {
         
         /// deallocate row buffer
         delete[] rowbuf;
-        
-        /// finish compression
-        // jpeg_finish_compress(&compressor.info);
     }
 }

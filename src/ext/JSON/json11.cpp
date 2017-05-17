@@ -1359,3 +1359,9 @@ char*               Json::cast<char*>(std::string const& key) const {
     std::string out = static_cast<std::string>(get(key));
     return const_cast<char*>(out.c_str());
 }
+
+template <>
+std::size_t         Json::cast<std::size_t>(std::string const& key) const {
+    int out = static_cast<int>(get(key));
+    return static_cast<std::size_t>(out);
+}

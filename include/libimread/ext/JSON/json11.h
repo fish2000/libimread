@@ -556,6 +556,9 @@ const char*         Json::cast<const char*>(std::string const& key) const;
 template <>
 char*               Json::cast<char*>(std::string const& key) const;
 
+template <>
+std::size_t         Json::cast<std::size_t>(std::string const& key) const;
+
 namespace std {
     
     /// std::hash specialization for Json
