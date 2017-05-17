@@ -402,23 +402,23 @@ namespace filesystem {
                 return path(std::forward<P>(p)).duplicate(std::forward<Q>(q));
             }
             
-            /// create a symlink to this path
-            bool slink(path const& from) const;
-            bool slink(char const* from) const;
-            bool slink(std::string const& from) const;
+            /// create a symbolic link (via ::symlink()) from this path to another
+            bool symboliclink(path const&) const;
+            bool symboliclink(char const*) const;
+            bool symboliclink(std::string const&) const;
             
-            /// Static forwarder for path::slink<P, Q>(p, q) -- (to, from) -- (source, target)
+            /// Static forwarder for path::symboliclink<P, Q>(p, q) -- (from, to) -- (source, target)
             template <typename P, typename Q> inline
-            static bool slink(P&& p, Q&& q) {
+            static bool symboliclink(P&& p, Q&& q) {
                 return path(std::forward<P>(p)).slink(std::forward<Q>(q));
             }
             
-            /// create a hard link to this path
-            bool hardlink(path const& from) const;
-            bool hardlink(char const* from) const;
-            bool hardlink(std::string const& from) const;
+            /// create a hard link (via ::link()) from this path to another
+            bool hardlink(path const&) const;
+            bool hardlink(char const*) const;
+            bool hardlink(std::string const&) const;
             
-            /// Static forwarder for path::hardlink<P, Q>(p, q) -- (to, from) -- (source, target)
+            /// Static forwarder for path::hardlink<P, Q>(p, q) -- (from, to) -- (source, target)
             template <typename P, typename Q> inline
             static bool hardlink(P&& p, Q&& q) {
                 return path(std::forward<P>(p)).hardlink(std::forward<Q>(q));

@@ -709,19 +709,21 @@ namespace filesystem {
     path path::duplicate(char const* newpath) const        { return duplicate(path(newpath)); }
     path path::duplicate(std::string const& newpath) const { return duplicate(path(newpath)); }
     
-    bool path::slink(path const& from) const {
-        if (from.exists()) { return false; }
-        return ::symlink(from.c_str(), c_str()) == 0;
+    bool path::symboliclink(path const& to) const {
+        if (to.exists()) { return false; }
+        if (!exists())   { return false; }
+        return ::symlink(c_str(), to.c_str()) == 0;
     }
-    bool path::slink(char const* from) const        { return slink(path(from)); }
-    bool path::slink(std::string const& from) const { return slink(path(from)); }
+    bool path::symboliclink(char const* to) const        { return slink(path(to)); }
+    bool path::symboliclink(std::string const& to) const { return slink(path(to)); }
     
-    bool path::hardlink(path const& from) const {
-        if (from.exists()) { return false; }
-        return ::link(from.c_str(), c_str()) == 0;
+    bool path::hardlink(path const& to) const {
+        if (to.exists()) { return false; }
+        if (!exists())   { return false; }
+        return ::link(c_str(), to.c_str()) == 0;
     }
-    bool path::hardlink(char const* from) const        { return hardlink(path(from)); }
-    bool path::hardlink(std::string const& from) const { return hardlink(path(from)); }
+    bool path::hardlink(char const* to) const        { return hardlink(path(to)); }
+    bool path::hardlink(std::string const& to) const { return hardlink(path(to)); }
     
     std::string path::extension() const {
         if (empty()) { return ""; }
@@ -824,7 +826,7 @@ namespace filesystem {
     }
     
     path& path::extend(std::string const& appendix) {
-        if (m_path.empty()) {
+        if (m_path.empty() && !appendix.empty()) {
             m_path = detail::stringvec_t{ "" };
         }
         if (!appendix.empty()) {

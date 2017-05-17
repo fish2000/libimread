@@ -17,6 +17,7 @@
 *.pyo
 *.xcuserstate
 .DS_Store
+.vscode
 # *.capnp.c++
 # *.capnp.h
 .tm_properties

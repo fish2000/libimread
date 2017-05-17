@@ -266,7 +266,7 @@ namespace store {
             /// just get themselves the fuck constructed without any sort of
             /// questions asked – but so then of course the fucking intermediate
             /// file source/sinks `im::fd_store_sink` and `im:: file_source_sink`
-            /// furnish no such default constructors. THOSE FUCKSHIT DICKHOLES.
+            /// furnish no such default constructors, LIKE A COUPLE OF COMMIES.
             /// I mean, erm, that’s why we have two macros, ah. Yes.
             DECLARE_STRINGMAPPER_TEMPLATE_METHODS();
         
