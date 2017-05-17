@@ -26,7 +26,17 @@ namespace im {
                     SIGNATURE("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8)
                 },
                 _suffixes = { "png" },
-                _mimetype = "image/png"
+                _mimetype = "image/png",
+                _standard_gamma = 0.45455,
+                _primary_cromacities = D(
+                    _white = D(_xx = 0.312700,
+                               _yy = 0.329000),
+                    _red   = D(_xx = 0.640000,
+                               _yy = 0.330000),
+                    _blue  = D(_xx = 0.300000,
+                               _yy = 0.600000),
+                    _green = D(_xx = 0.150000,
+                               _yy = 0.060000))
             );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
