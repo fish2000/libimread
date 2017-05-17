@@ -714,8 +714,8 @@ namespace filesystem {
         if (!exists())   { return false; }
         return ::symlink(c_str(), to.c_str()) == 0;
     }
-    bool path::symboliclink(char const* to) const        { return slink(path(to)); }
-    bool path::symboliclink(std::string const& to) const { return slink(path(to)); }
+    bool path::symboliclink(char const* to) const        { return symboliclink(path(to)); }
+    bool path::symboliclink(std::string const& to) const { return symboliclink(path(to)); }
     
     bool path::hardlink(path const& to) const {
         if (to.exists()) { return false; }

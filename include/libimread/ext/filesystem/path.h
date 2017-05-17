@@ -410,7 +410,7 @@ namespace filesystem {
             /// Static forwarder for path::symboliclink<P, Q>(p, q) -- (from, to) -- (source, target)
             template <typename P, typename Q> inline
             static bool symboliclink(P&& p, Q&& q) {
-                return path(std::forward<P>(p)).slink(std::forward<Q>(q));
+                return path(std::forward<P>(p)).symboliclink(std::forward<Q>(q));
             }
             
             /// create a hard link (via ::link()) from this path to another

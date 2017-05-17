@@ -103,16 +103,84 @@ namespace im {
                 mgr.term_destination = flush_output_buffer;
             }
         
+        inline J_COLOR_SPACE color_space(int components) {
+            if (components == 1) { return JCS_GRAYSCALE; }
+            if (components == 3) { return JCS_RGB; }
+            if (components == 4) { return JCS_CMYK; }
+            imread_raise(CannotReadError,
+                "\tim::(anon)::color_space() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
+             FF("\tim::(anon)::color_space() got:    `components` = (int){ %i }", components),
+                "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3, 4 }");
+        }
+        
         struct jpeg_decompress_holder {
-            jpeg_decompress_holder() { jpeg_create_decompress(&info); }
-            ~jpeg_decompress_holder() { jpeg_destroy_decompress(&info); }
-            jpeg_decompress_struct info;
+            
+            jpeg_decompress_holder() {
+                jpeg_create_decompress(&info);
+            }
+            
+            ~jpeg_decompress_holder() {
+                jpeg_finish_decompress(&info);
+                jpeg_destroy_decompress(&info);
+            }
+            
+            void start() {
+                jpeg_read_header(&info, (boolean)true);
+                jpeg_start_decompress(&info);
+            }
+            
+            int height() const      { return info.output_height; }
+            int width() const       { return info.output_width; }
+            int components() const  { return info.output_components; }
+            
+            JSAMPARRAY allocate_samples(int width, int depth, int height = 1) {
+                return (*info.mem->alloc_sarray)((j_common_ptr)&info, JPOOL_IMAGE,
+                                                                      width * depth,
+                                                                      height);
+            }
+            
+            void read_samples(JSAMPARRAY samples, int idx = 1) {
+                jpeg_read_scanlines(&info, samples, idx);
+            }
+            
+            public:
+                jpeg_decompress_struct info;
         };
         
         struct jpeg_compress_holder {
-            jpeg_compress_holder() { jpeg_create_compress(&info); }
-            ~jpeg_compress_holder() { jpeg_destroy_compress(&info); }
-            jpeg_compress_struct info;
+            
+            jpeg_compress_holder() {
+                jpeg_create_compress(&info);
+            }
+            
+            ~jpeg_compress_holder() {
+                jpeg_finish_compress(&info);
+                jpeg_destroy_compress(&info);
+            }
+            
+            void start() {
+                jpeg_start_compress(&info, (boolean)true);
+            }
+            
+            void set_defaults() {
+                jpeg_set_defaults(&info);
+            }
+            
+            void set_quality(std::size_t quality) {
+                jpeg_set_quality(&info, quality, (boolean)false);
+            }
+            
+            void set_height(int height)         { info.image_height = height; }
+            void set_width(int width)           { info.image_width = width; }
+            void set_components(int components) { info.input_components = components;
+                                                  info.in_color_space = color_space(components); }
+            
+            void write_scanlines(JSAMPLE** rows, int idx = 1) {
+                jpeg_write_scanlines(&info, rows, idx);
+            }
+            
+            public:
+                jpeg_compress_struct info;
         };
         
         struct error_mgr {
@@ -132,16 +200,6 @@ namespace im {
             jpeg_std_error(&pub);
             pub.error_exit = err_long_jump;
             error_message[0] = 0;
-        }
-        
-        inline J_COLOR_SPACE color_space(int components) {
-            if (components == 1) { return JCS_GRAYSCALE; }
-            if (components == 3) { return JCS_RGB; }
-            if (components == 4) { return JCS_CMYK; }
-            imread_raise(CannotReadError,
-                "\tim::(anon)::color_space() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
-             FF("\tim::(anon)::color_space() got:    `components` = (int){ %i }", components),
-                "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3, 4 }");
         }
         
     } /// namespace (anon.)
@@ -167,8 +225,10 @@ namespace im {
         // }
         
         /// now read the header & image data
-        jpeg_read_header(&decompressor.info, (boolean)true);
-        jpeg_start_decompress(&decompressor.info);
+        // jpeg_read_header(&decompressor.info, (boolean)true);
+        // jpeg_start_decompress(&decompressor.info);
+        decompressor.start();
+        
         
         if (setjmp(jerr.setjmp_buffer)) {
             imread_raise(CannotReadError,
@@ -176,21 +236,24 @@ namespace im {
                 jerr.error_message);
         }
         
-        const int h = decompressor.info.output_height;
-        const int w = decompressor.info.output_width;
-        const int d = decompressor.info.output_components;
+        const int h = decompressor.height();
+        const int w = decompressor.width();
+        const int d = decompressor.components();
         
         std::unique_ptr<Image> output(factory->create(8, h, w, d));
         
-        JSAMPARRAY samples = (*decompressor.info.mem->alloc_sarray)(
-             (j_common_ptr)&decompressor.info, JPOOL_IMAGE, w * d, 1);
+        // JSAMPARRAY samples = (*decompressor.info.mem->alloc_sarray)(
+        //      (j_common_ptr)&decompressor.info, JPOOL_IMAGE, w * d, 1);
+        /// allocate single-row sample array
+        JSAMPARRAY samples = decompressor.allocate_samples(w, d, 1);
         
         /// Hardcoding uint8_t as the type for now
         int c_stride = (d == 1) ? 0 : output->stride(2);
         uint8_t* __restrict__ ptr = output->rowp_as<uint8_t>(0);
         
         while (decompressor.info.output_scanline < decompressor.info.output_height) {
-            jpeg_read_scanlines(&decompressor.info, samples, 1);
+            // jpeg_read_scanlines(&decompressor.info, samples, 1);
+            decompressor.read_samples(samples);
             JSAMPLE* srcPtr = samples[0];
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
@@ -209,7 +272,7 @@ namespace im {
                 jerr.error_message);
         }
         
-        jpeg_finish_decompress(&decompressor.info);
+        // jpeg_finish_decompress(&decompressor.info);
         return output;
     }
     
@@ -248,13 +311,17 @@ namespace im {
         int quality;
         
         /// assign image values
-        compressor.info.image_width = w;
-        compressor.info.image_height = h;
-        compressor.info.input_components = d;
-        compressor.info.in_color_space = color_space(compressor.info.input_components);
+        compressor.set_width(w);
+        compressor.set_height(h);
+        compressor.set_components(d);
+        // compressor.info.image_width = w;
+        // compressor.info.image_height = h;
+        // compressor.info.input_components = d;
+        // compressor.info.in_color_space = color_space(compressor.info.input_components);
         
         /// set 'defaults'
-        jpeg_set_defaults(&compressor.info);
+        // jpeg_set_defaults(&compressor.info);
+        compressor.set_defaults();
         
         /// error check
         if (setjmp(jerr.setjmp_buffer)) {
@@ -267,10 +334,12 @@ namespace im {
         quality = opts.cast<int>("jpg:quality", 100);
         if (quality > 100) { quality = 100; }
         if (quality < 0) { quality = 0; }
-        jpeg_set_quality(&compressor.info, quality, (boolean)false);
+        // jpeg_set_quality(&compressor.info, quality, (boolean)false);
+        compressor.set_quality(quality);
         
         /// start compression!
-        jpeg_start_compress(&compressor.info, (boolean)true);
+        // jpeg_start_compress(&compressor.info, (boolean)true);
+        compressor.start();
         
         /// error check
         if (setjmp(jerr.setjmp_buffer)) {
@@ -295,7 +364,8 @@ namespace im {
                         *dstPtr++);
                 }
             }
-            jpeg_write_scanlines(&compressor.info, &rowbuf, 1);
+            // jpeg_write_scanlines(&compressor.info, &rowbuf, 1);
+            compressor.write_scanlines(&rowbuf);
         }
         
         /// error check
@@ -309,6 +379,6 @@ namespace im {
         delete[] rowbuf;
         
         /// finish compression
-        jpeg_finish_compress(&compressor.info);
+        // jpeg_finish_compress(&compressor.info);
     }
 }
