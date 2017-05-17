@@ -21,7 +21,8 @@ namespace im {
     
     namespace {
         
-        const std::size_t buffer_size = 4096;
+        // const std::size_t buffer_size = 4096;
+        const std::size_t buffer_size = JPEGFormat::options.buffer_size;
         
         struct jpeg_source_adaptor {
             jpeg_source_mgr mgr;
@@ -31,6 +32,7 @@ namespace im {
             jpeg_source_adaptor(byte_source* s);
             ~jpeg_source_adaptor() { delete[] buf; }
         };
+        
         struct jpeg_dst_adaptor {
             jpeg_destination_mgr mgr;
             byte_sink* s;

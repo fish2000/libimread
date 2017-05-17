@@ -22,6 +22,7 @@ namespace im {
                 },
                 _suffixes = { "jpg", "jpeg", "jpe" },
                 _mimetype = "image/jpeg",
+                _buffer_size = 4096,
                 _writeopts = D(
                     _quality = 0.75
                 )
