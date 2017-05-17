@@ -133,6 +133,7 @@ namespace im {
             int height() const      { return info.output_height; }
             int width() const       { return info.output_width; }
             int components() const  { return info.output_components; }
+            int scanline() const    { return info.output_scanline; }
             
             JSAMPARRAY allocate_samples(int width, int depth, int height = 1) {
                 return (*info.mem->alloc_sarray)((j_common_ptr)&info, JPOOL_IMAGE,
@@ -250,7 +251,7 @@ namespace im {
         int c_stride = (d == 1) ? 0 : output->stride(2);
         uint8_t* __restrict__ ptr = output->rowp_as<uint8_t>(0);
         
-        while (decompressor.info.output_scanline < decompressor.info.output_height) {
+        while (decompressor.scanline() < decompressor.height()) {
             decompressor.read_samples(samples);
             JSAMPLE* srcPtr = samples[0];
             for (int x = 0; x < w; ++x) {
