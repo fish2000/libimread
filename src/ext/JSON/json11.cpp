@@ -1312,11 +1312,6 @@ Json::operator int16_t() const {
     }
 }
 
-// Json::operator int16_t() const {
-//     if (root->type() == Type::NUMBER) { return int16_t(((Number*)root)->value); }
-//     imread_raise_default(JSONBadCast);
-// }
-
 Json::operator void*() const {
     if (root->type() == Type::POINTER) { return ((Pointer*)root)->value; }
     imread_raise_default(JSONBadCast);
