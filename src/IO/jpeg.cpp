@@ -4,12 +4,16 @@
 #include <cstdio>
 #include <csetjmp>
 #include <algorithm>
+#include <vector>
+#include <array>
 
 #include <iod/json.hh>
 
 #include <libimread/errors.hh>
 #include <libimread/IO/jpeg.hh>
 #include <libimread/pixels.hh>
+#include <libimread/seekable.hh>
+#include <libimread/ext/exif.hh>
 
 extern "C" {
 #include <jpeglib.h>
@@ -213,6 +217,16 @@ namespace im {
             error_message[0] = 0;
         }
         
+        template <typename Iterator>
+        uint16_t parse_size(Iterator it) {
+            Iterator siz0 = std::next(it, 2);
+            Iterator siz1 = std::next(it, 3);
+            return (static_cast<uint16_t>(*siz0) << 8) | *siz1;
+        }
+        
+        /// the marker for EXIF byte regions:
+        const std::array<byte, 2> marker{ 0xFF, 0xE1 };
+    
     } /// namespace (anon.)
     
     std::unique_ptr<Image> JPEGFormat::read(byte_source* src,
@@ -272,6 +286,77 @@ namespace im {
         }
         
         return output;
+    }
+    
+    
+    options_map JPEGFormat::read_metadata(byte_source* src,
+                                          options_map const& opts) {
+        using easyexif::EXIFInfo;
+        using im::byte_iterator;
+        
+        options_map out;
+        // src->seek_absolute(0);
+        
+        byte_iterator result = std::search(src->begin(),   src->end(),
+                                           marker.begin(), marker.end());
+        bool has_exif = result != src->end();
+        if (!has_exif) { return out; }
+        
+        std::vector<byte> data;
+        uint16_t size = parse_size(result);
+        data.reserve(size);
+        
+        std::advance(result, 4);
+        std::copy(result, result + size,
+                  std::back_inserter(data));
+        
+        EXIFInfo exif;
+        if (exif.parseFromEXIFSegment(&data[0], data.size()) != PARSE_EXIF_SUCCESS) {
+            imread_raise(MetadataReadError,
+                "Error parsing JPEG EXIF metadata");
+            // return out;
+        }
+        
+        /// strings
+        out.set("ImageDescription",     exif.ImageDescription);
+        out.set("Make",                 exif.Make);
+        out.set("Model",                exif.Model);
+        out.set("Software",             exif.Software);
+        out.set("DateTime",             exif.DateTime);
+        out.set("DateTimeOriginal",     exif.DateTimeOriginal);
+        out.set("DateTimeDigitized",    exif.DateTimeDigitized);
+        out.set("SubSecTimeOriginal",   exif.SubSecTimeOriginal);
+        out.set("Copyright",            exif.Copyright);
+        
+        /// numbers
+        out.set("BitsPerSample",        exif.BitsPerSample);
+        out.set("ExosureTime",          exif.ExposureTime);
+        out.set("FNumber",              exif.FNumber);
+        out.set("ISOSpeedRatings",      exif.ISOSpeedRatings);
+        out.set("ShutterSpeedValue",    exif.ShutterSpeedValue);
+        out.set("ExposureBiasValue",    exif.ExposureBiasValue);
+        out.set("SubjectDistance",      exif.SubjectDistance);
+        out.set("FocalLength",          exif.FocalLength);
+        out.set("FocalLengthIn35mm",    exif.FocalLengthIn35mm);
+        out.set("ImageWidth",           exif.ImageWidth);
+        out.set("ImageHeight",          exif.ImageHeight);
+        
+        /// “enums”
+        out.set("Orientation",          exif.Orientation);       /// 0: unspecified in EXIF data
+                                                                 /// 1: upper left of image
+                                                                 /// 3: lower right of image
+                                                                 /// 6: upper right of image
+                                                                 /// 8: lower left of image
+                                                                 /// 9: undefined
+        out.set("Flash",                exif.Flash);             /// 0: no flash, 1: flash
+        out.set("MeteringMode",         exif.MeteringMode);      /// 1: average
+                                                                 /// 2: center weighted average
+                                                                 /// 3: spot
+                                                                 /// 4: multi-spot
+                                                                 /// 5: multi-segment
+        
+        /// return the options_map full of metadata:
+        return out;
     }
     
     void JPEGFormat::write(Image& input,

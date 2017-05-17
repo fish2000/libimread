@@ -23,6 +23,8 @@ namespace im {
 
     DECLARE_IMREAD_ERROR_DEFAULT(CannotReadError,          "Read Error");
     DECLARE_IMREAD_ERROR_DEFAULT(CannotWriteError,         "Write Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(MetadataReadError,        "Metadata Read Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(MetadataWriteError,       "Metadata Write Error");
     DECLARE_IMREAD_ERROR_DEFAULT(NotImplementedError,      "Not Implemented");
     DECLARE_IMREAD_ERROR_DEFAULT(ProgrammingError,         "Programming Error");
     DECLARE_IMREAD_ERROR_DEFAULT(OptionsError,             "Options Error");

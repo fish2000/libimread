@@ -67,6 +67,11 @@ namespace im {
         imread_raise_default(NotImplementedError);
     }
     
+    options_map ImageFormat::read_metadata(byte_source* src,
+                                           options_map const& opts) {
+        imread_raise_default(NotImplementedError);
+    }
+    
     void ImageFormat::write(Image& input,
                             byte_sink* output,
                             options_map const& opts) {

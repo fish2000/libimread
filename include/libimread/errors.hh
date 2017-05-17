@@ -276,6 +276,8 @@ namespace im {
 
 DECLARE_IMREAD_ERROR_TYPE(CannotReadError,          "Read Error");
 DECLARE_IMREAD_ERROR_TYPE(CannotWriteError,         "Write Error");
+DECLARE_IMREAD_ERROR_TYPE(MetadataReadError,        "Metadata Read Error");
+DECLARE_IMREAD_ERROR_TYPE(MetadataWriteError,       "Metadata Write Error");
 DECLARE_IMREAD_ERROR_TYPE(NotImplementedError,      "Not Implemented");
 DECLARE_IMREAD_ERROR_TYPE(ProgrammingError,         "Programming Error");
 DECLARE_IMREAD_ERROR_TYPE(OptionsError,             "Options Error");

@@ -147,6 +147,12 @@ class Json {
             explicit Number(long x)
                 :value(x)
                 {}
+            explicit Number(unsigned long x)
+                :value(static_cast<int>(x))
+                {}
+            explicit Number(unsigned int x)
+                :value(static_cast<int>(x))
+                {}
             explicit Number(uint8_t x)
                 :value(static_cast<int>(x))
                 {}
@@ -369,6 +375,8 @@ class Json {
         Json(bool x)                { (root = (x ? &Bool::T : &Bool::F))->refcnt++; }
         Json(long x)                { (root = new Number(x))->refcnt++; }
         Json(long long x)           { (root = new Number(x))->refcnt++; }
+        Json(unsigned int x)        { (root = new Number(x))->refcnt++; }
+        Json(unsigned long x)       { (root = new Number(x))->refcnt++; }
         Json(double x)              { (root = new Number(x))->refcnt++; }
         Json(long double x)         { (root = new Number(x))->refcnt++; }
         Json(char const* s)         { (root = new String(s))->refcnt++; }

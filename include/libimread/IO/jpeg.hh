@@ -10,10 +10,12 @@
 #include <libimread/imageformat.hh>
 
 namespace im {
-
+    
     class JPEGFormat : public ImageFormatBase<JPEGFormat> {
+        
         public:
             using can_read = std::true_type;
+            using can_read_metadata = std::true_type;
             using can_write = std::true_type;
             
             DECLARE_OPTIONS(
@@ -31,6 +33,9 @@ namespace im {
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
                                                 options_map const& opts) override;
+            
+            virtual options_map read_metadata(byte_source* src,
+                                              options_map const& opts) override;
             
             virtual void write(Image& input,
                                byte_sink* output,

@@ -147,6 +147,9 @@ namespace im {
                                          ImageFactory* factory,
                                          options_map const& opts);
             
+            virtual options_map read_metadata(byte_source* src,
+                                              options_map const& opts);
+            
             virtual void write(Image& input,
                                byte_sink* output,
                                options_map const& opts);
