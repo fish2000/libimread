@@ -60,6 +60,7 @@ namespace {
                 /// NB. GZIO's `full_data()` is the pathological base class version
                 std::unique_ptr<GZSource> gzinput(new GZSource(ttp));
                 readback = gzinput->full_data();
+                CHECK(gzinput->uncompressed_byte_size() == readback.size());
             }
             
             CHECK(readback.size() == fulldata.size());
