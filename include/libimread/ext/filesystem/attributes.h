@@ -128,7 +128,7 @@ namespace filesystem {
                            attribute::ns domain = ENUMBASE(attribute::ns));
                 
                 accessor_t(accessor_t const& other);
-                accessor_t(accessor_t&& other);
+                accessor_t(accessor_t&& other) noexcept;
                 
                 virtual ~accessor_t();
                 

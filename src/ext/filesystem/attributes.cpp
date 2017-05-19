@@ -767,7 +767,7 @@ namespace filesystem {
             ,m_domain(other.m_domain)
             {}
             
-        accessor_t::accessor_t(accessor_t&& other)
+        accessor_t::accessor_t(accessor_t&& other) noexcept
             :m_pathstring(std::move(other.m_pathstring))
             ,m_name(std::move(other.m_name))
             ,m_descriptor(other.m_descriptor)
