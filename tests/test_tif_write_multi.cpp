@@ -17,6 +17,7 @@ namespace {
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     using filesystem::path;
+    using pathvec_t = std::vector<path>;
     using U8Image = im::HybridImage<uint8_t>;
     using im::ImageList;
     
@@ -26,7 +27,7 @@ namespace {
         NamedTemporaryFile composite(".tif");
         ImageList outlist;
         path basedir(im::test::basedir);
-        const std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
+        const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
         /// build an ImageList
         CHECK(composite.remove());
@@ -60,7 +61,7 @@ namespace {
         NamedTemporaryFile composite(".tif");
         ImageList outlist;
         path basedir(im::test::basedir);
-        const std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
+        const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
         /// build an ImageList
         CHECK(composite.remove());

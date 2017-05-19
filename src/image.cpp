@@ -98,8 +98,6 @@ namespace im {
     
     ImageWithMetadata::~ImageWithMetadata() {}
     
-    using bytevec_t = ImageWithMetadata::bytevec_t;
-    
     bool ImageWithMetadata::has_meta() const { return !meta.empty(); }
     std::string const& ImageWithMetadata::get_meta() const { return meta; }
     std::string const& ImageWithMetadata::set_meta(std::string const& m) { meta = m; return meta; }

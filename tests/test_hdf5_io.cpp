@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <vector>
 
 #include <libimread/libimread.hpp>
 #include <libimread/halide.hh>
@@ -17,14 +18,15 @@
 namespace {
     
     using filesystem::path;
+    using pathvec_t = std::vector<path>;
     
     TEST_CASE("[hdf5-io] Read PNG and JPEG files and write as individual HDF5 binary store files",
               "[hdf5-read-png-jpeg-write-individual-hdf5-files]")
     {
         filesystem::TemporaryDirectory td("test-hdf5-io");
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
-        const std::vector<path> jpgs = basedir.list("*.jpg");
+        const pathvec_t pngs = basedir.list("*.png");
+        const pathvec_t jpgs = basedir.list("*.jpg");
         
         std::for_each(pngs.begin(), pngs.end(), [&basedir, &td](path const& p) {
             auto png = im::halide::read(basedir/p);
@@ -40,7 +42,7 @@ namespace {
             im::halide::write(jpg, npext);
         });
         
-        const std::vector<path> hdfs = td.dirpath.list("*.hdf5");
+        const pathvec_t hdfs = td.dirpath.list("*.hdf5");
         CHECK(hdfs.size() == pngs.size() + jpgs.size());
         
         std::for_each(hdfs.begin(), hdfs.end(), [&basedir, &td](path const& p) {
@@ -57,7 +59,7 @@ namespace {
     {
         filesystem::TemporaryDirectory td("test-hdf5-io");
         path basedir(im::test::basedir);
-        const std::vector<path> tifs = basedir.list("*.tif*");
+        const pathvec_t tifs = basedir.list("*.tif*");
         
         std::for_each(tifs.begin(), tifs.end(), [&basedir, &td](path const& p) {
             auto tif = im::halide::read(basedir/p);
@@ -66,7 +68,7 @@ namespace {
             im::halide::write(tif, npext);
         });
         
-        const std::vector<path> hdfs = td.dirpath.list("*.hdf5");
+        const pathvec_t hdfs = td.dirpath.list("*.hdf5");
         CHECK(hdfs.size() == tifs.size());
         
         std::for_each(hdfs.begin(), hdfs.end(), [&basedir, &td](path const& p) {

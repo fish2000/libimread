@@ -23,7 +23,6 @@ namespace im {
             
             using byteva_t  = std::valarray<byte>;
             using floatva_t = std::valarray<float>;
-            using bytevec_t = std::vector<byte>;
             
             using value_type = float;
             using begin_t = decltype(std::begin(std::declval<floatva_t>()));

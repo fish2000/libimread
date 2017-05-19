@@ -20,12 +20,14 @@ namespace {
     using U8Image = im::HybridImage<uint8_t>;
     using im::ImageList;
     
+    using pathvec_t = std::vector<path>;
+    
     TEST_CASE("[gif-write] Read PNG files and write as individual GIF files",
               "[gif-write-individual-files]")
     {
         TemporaryDirectory td("write-individual-gifs");
         path basedir(im::test::basedir);
-        const std::vector<path> outglob = basedir.list("output_*.png");
+        const pathvec_t outglob = basedir.list("output_*.png");
         
         std::for_each(outglob.begin(), outglob.end(),
                   [&](path const& p) {
@@ -43,7 +45,7 @@ namespace {
         NamedTemporaryFile composite(".gif");
         ImageList outlist;
         path basedir(im::test::basedir);
-        const std::vector<path> sequence = basedir.list(std::regex("output_([0-9]+).png"));
+        const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
         CHECK(composite.remove());
         std::for_each(sequence.begin(), sequence.end(),

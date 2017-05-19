@@ -52,10 +52,10 @@ namespace im {
             
             /// im::byte_source and im::byte_sink methods
             virtual std::size_t read(byte* buffer, std::size_t n) override;
-            virtual std::vector<byte> full_data() override;
+            virtual bytevec_t full_data() override;
             virtual std::size_t size() const override;
             virtual std::size_t write(const void* buffer, std::size_t n) override;
-            virtual std::size_t write(std::vector<byte> const&) override;
+            virtual std::size_t write(bytevec_t const&) override;
             virtual std::size_t write(capnp::MessageBuilder& builder);
             virtual detail::stat_t stat() const;
             virtual void flush() override;

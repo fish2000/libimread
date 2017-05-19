@@ -13,7 +13,7 @@ namespace im {
     std::unique_ptr<Image> WebPFormat::read(byte_source* src,
                                             ImageFactory* factory,
                                             options_map const& opts) {
-        std::vector<byte> data = src->full_data();
+        bytevec_t data = src->full_data();
         int w, h;
         int ok = WebPGetInfo(&data[0], data.size(), &w, &h);
         

@@ -59,7 +59,7 @@ namespace im {
         return static_cast<std::size_t>(out);
     }
     
-    std::size_t fd_source_sink::write(std::vector<byte> const& bv) {
+    std::size_t fd_source_sink::write(bytevec_t const& bv) {
         return this->write(
             static_cast<const void*>(&bv[0]),
             bv.size());
@@ -83,14 +83,14 @@ namespace im {
     
     void fd_source_sink::flush() { ::fsync(descriptor); }
     
-    std::vector<byte> fd_source_sink::full_data() {
+    bytevec_t fd_source_sink::full_data() {
         /// grab stat struct and store initial seek position
         detail::stat_t info = this->stat();
         std::size_t fsize = info.st_size * sizeof(byte);
         std::size_t orig = ::lseek(descriptor, 0, SEEK_CUR);
         
         /// allocate output vector per size of file
-        std::vector<byte> result(fsize);
+        bytevec_t result(fsize);
         
         /// start as you mean to go on
         ::lseek(descriptor, 0, SEEK_SET);

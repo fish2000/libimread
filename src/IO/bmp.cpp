@@ -23,12 +23,12 @@ namespace im {
             }
         }
         
-        void color_expand(const std::vector<byte>& color_table, byte* row,
+        void color_expand(bytevec_t const& color_table, byte* row,
                           const int w) {
             // We are expanding in-place --
             // This means that we must process the row backwards,
             // which is slightly awkward, but works correctly
-            std::vector<byte>::const_iterator pbegin = color_table.begin();
+            bytevec_t::const_iterator pbegin = color_table.begin();
             for (int i = w - 1; i >= 0; --i) {
                 std::copy(
                     pbegin + 4 * row[i],
@@ -132,7 +132,7 @@ namespace im {
         std::unique_ptr<Image> output(
             factory->create(nbits, height, width, depth));
         
-        std::vector<byte> color_table;
+        bytevec_t color_table;
         if (bitsppixel <= 8) {
             const uint32_t table_size = (n_colours == 0 ? detail::pow2(bitsppixel) : n_colours);
             color_table.resize(table_size * 4);

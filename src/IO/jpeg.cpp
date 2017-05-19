@@ -303,7 +303,7 @@ namespace im {
         bool has_exif = result != src->end();
         if (!has_exif) { return out; }
         
-        std::vector<byte> data;
+        bytevec_t data;
         uint16_t size = parse_size(result);
         data.reserve(size);
         

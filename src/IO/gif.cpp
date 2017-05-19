@@ -103,7 +103,7 @@ namespace im {
         detail::gifholder g = detail::gifsink(3);
         write_impl(input, g);
         
-        std::vector<byte> out = gif::write(g.get());
+        bytevec_t out = gif::write(g.get());
         output->write(&out[0], out.size());
         output->flush();
         
@@ -120,7 +120,7 @@ namespace im {
         std::for_each(input.begin(), input.end(),
                   [&](Image* image) { write_impl(*image, g); });
         
-        std::vector<byte> out = gif::write(g.get());
+        bytevec_t out = gif::write(g.get());
         output->write(&out[0], out.size());
         output->flush();
         

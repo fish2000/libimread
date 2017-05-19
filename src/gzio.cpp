@@ -87,7 +87,7 @@ namespace im {
         return static_cast<std::size_t>(out);
     }
     
-    std::size_t gzio_source_sink::write(std::vector<byte> const& bv) {
+    std::size_t gzio_source_sink::write(bytevec_t const& bv) {
         return this->write(
             static_cast<const void*>(&bv[0]),
             bv.size());

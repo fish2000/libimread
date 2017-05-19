@@ -15,7 +15,7 @@ namespace im {
     bool PVRTCFormat::match_format(byte_source* src) {
         /// Adapted from the standard match_format() case, using techniques found in
         /// PVRTexture::loadApplePVRTC() and PVRTexture::load(), from ext/pvr.cpp
-        std::vector<byte> headerbuf(sizeof(PVRHeader));
+        bytevec_t headerbuf(sizeof(PVRHeader));
         const int bytesread = static_cast<int>(src->read(&headerbuf.front(), sizeof(PVRHeader)));
         src->seek_relative(-bytesread);
         PVRHeader* header = (PVRHeader*)&headerbuf.front();
@@ -27,7 +27,7 @@ namespace im {
                                              ImageFactory* factory,
                                              options_map const& opts)  {
         PVRTexture pvr;
-        std::vector<byte> data = src->full_data();
+        bytevec_t data = src->full_data();
         ePVRLoadResult result = pvr.load(&data[0], data.size());
         
         if (result) {

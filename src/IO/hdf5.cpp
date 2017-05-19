@@ -51,7 +51,7 @@ namespace im {
                                             options_map const& opts) {
         
         /// load the raw sources' full data, and set some options:
-        std::vector<byte> data = src->full_data();
+        bytevec_t data = src->full_data();
         path h5imagepath = opts.cast<path>("hdf5:path",
                                      path("/image/raster"));
         std::string name = opts.cast<std::string>("hdf5:name",
@@ -246,7 +246,7 @@ namespace im {
         /// read the binary data back from the temporary file,
         /// and write it out to the output byte sink
         std::unique_ptr<FileSource> readback(new FileSource(tf.filepath));
-        std::vector<byte> data = readback->full_data();
+        bytevec_t data = readback->full_data();
         output->write((const void*)&data[0], data.size());
         output->flush();
         

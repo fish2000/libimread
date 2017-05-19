@@ -141,7 +141,6 @@ namespace im {
     class ImageWithMetadata {
         
         public:
-            using bytevec_t = std::vector<byte>;
             
             ImageWithMetadata();
             ImageWithMetadata(std::string const& m);

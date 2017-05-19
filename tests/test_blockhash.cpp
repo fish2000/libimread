@@ -15,6 +15,7 @@
 namespace {
     
     using filesystem::path;
+    using pathvec_t = std::vector<path>;
     
     namespace detail {
         /// to_hex() courtesy of:
@@ -33,7 +34,7 @@ namespace {
               "[blockhash-quick-hybridimage-png]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
+        const pathvec_t pngs = basedir.list("*.png");
         std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash_quick(png);
@@ -49,7 +50,7 @@ namespace {
               "[blockhash-hybridimage-png]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
+        const pathvec_t pngs = basedir.list("*.png");
         std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             auto png = im::halide::read(basedir/p);
             auto bithash = blockhash::blockhash(png);

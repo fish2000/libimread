@@ -202,7 +202,7 @@ namespace im {
                 virtual std::size_t seek_end(int n) { return s->seek_end(n+shift_)-shift_; }
                 
                 /// delegate these fully, to avoid using naive implementations:
-                virtual std::vector<byte> full_data() { return s->full_data(); }
+                virtual bytevec_t full_data() { return s->full_data(); }
                 virtual std::size_t size() { return s->size(); }
                 virtual void* readmap(std::size_t pageoffset = 0) const {
                     return s->readmap(pageoffset);
@@ -378,7 +378,7 @@ namespace im {
                         nullptr,
                         nullptr);
         
-        std::vector<byte> bufdata;
+        bytevec_t bufdata;
         byte* __restrict__ bufp = 0;
         bool copy_data = opts.cast<bool>("tiff:copy-data", true);
         const uint32_t w = input.dim(0);
@@ -512,7 +512,7 @@ namespace im {
                         nullptr,
                         nullptr);
         
-        std::vector<byte> bufdata;
+        bytevec_t bufdata;
         const unsigned n_pages = input.size();
         
         if (is_multi) {

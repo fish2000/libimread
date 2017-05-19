@@ -23,8 +23,6 @@ namespace im {
         virtual std::size_t seek_end(int);
     };
     
-    using bytevec_t = std::vector<byte>;
-    
     class byte_source : virtual public seekable {
         
         public:

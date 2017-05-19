@@ -30,6 +30,9 @@ namespace {
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     
+    using stringvec_t = std::vector<std::string>;
+    using pathvec_t = std::vector<path>;
+    
     TEST_CASE("[filesystem] Check if `basedir` is a directory",
               "[fs-basedir-isdirectory]") {
         path basedir(im::test::basedir);
@@ -125,7 +128,7 @@ namespace {
     TEST_CASE("[filesystem] Check count and names of test jpg files",
               "[fs-check-jpg]") {
         path basedir(im::test::basedir);
-        std::vector<path> v = basedir.list("*.jpg");
+        pathvec_t v = basedir.list("*.jpg");
         REQUIRE(v.size() == im::test::num_jpg);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
@@ -139,8 +142,8 @@ namespace {
               "[fs-path-walk-on-basedir]") {
         path basedir(im::test::basedir);
         basedir.walk([](path const& p,
-                        std::vector<std::string>& directories,
-                        std::vector<std::string>& files) {
+                        stringvec_t& directories,
+                        stringvec_t& files) {
             std::for_each(directories.begin(), directories.end(), [&](std::string const& d) {
                 // std::cout << "Directory: " << p/d << std::endl;
                 REQUIRE((p/d).is_directory());
@@ -156,7 +159,7 @@ namespace {
     TEST_CASE("[filesystem] Check count of test jpeg files",
               "[fs-count-jpeg]") {
         path basedir(im::test::basedir);
-        std::vector<path> v = basedir.list("*.jpeg");
+        pathvec_t v = basedir.list("*.jpeg");
         REQUIRE(v.size() == im::test::num_jpeg);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
@@ -169,7 +172,7 @@ namespace {
     TEST_CASE("[filesystem] Check count of test png files",
               "[fs-count-png]") {
         path basedir(im::test::basedir);
-        std::vector<path> v = basedir.list("*.png");
+        pathvec_t v = basedir.list("*.png");
         REQUIRE(v.size() == im::test::num_png);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
@@ -182,7 +185,7 @@ namespace {
     TEST_CASE("[filesystem] Check count of test tif files",
               "[fs-count-tif]") {
         path basedir(im::test::basedir);
-        std::vector<path> v = basedir.list("*.tif");
+        pathvec_t v = basedir.list("*.tif");
         REQUIRE(v.size() == im::test::num_tif);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
@@ -195,7 +198,7 @@ namespace {
     TEST_CASE("[filesystem] Check count of test tiff files",
               "[fs-count-tiff]") {
         path basedir(im::test::basedir);
-        std::vector<path> v = basedir.list("*.tiff");
+        pathvec_t v = basedir.list("*.tiff");
         REQUIRE(v.size() == im::test::num_tiff);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
@@ -211,7 +214,7 @@ namespace {
               "[fs-count-jpg-jpeg-regex]") {
         path basedir(im::test::basedir);
         std::regex re("(jpg|jpeg)$", RE_FLAGS);
-        std::vector<path> v = basedir.list(re);
+        pathvec_t v = basedir.list(re);
         REQUIRE(v.size() == im::test::num_jpg + im::test::num_jpeg);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
@@ -221,7 +224,7 @@ namespace {
     TEST_CASE("[filesystem] Check count of test pvr files",
               "[fs-count-pvr]") {
         path basedir(im::test::basedir);
-        std::vector<path> v = basedir.list("*.pvr");
+        pathvec_t v = basedir.list("*.pvr");
         REQUIRE(v.size() == im::test::num_pvr);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             REQUIRE((basedir/p).is_file());
@@ -281,7 +284,7 @@ namespace {
     TEST_CASE("[filesystem] Test path::extension(), path::extensions(), path::strip_extension(), and path::strip_extensions()",
               "[fs-test-path-extension-path-extensions-path-strip_extension-path-strip_extensions]") {
         path basedir(im::test::basedir);
-        const std::vector<path> v = basedir.list(std::string("*.jpg"));
+        const pathvec_t v = basedir.list(std::string("*.jpg"));
         REQUIRE(v.size() == im::test::num_jpg);
         std::for_each(v.begin(), v.end(), [&](path const& p) {
             CHECK((basedir/p).is_file());

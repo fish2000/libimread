@@ -24,7 +24,7 @@ namespace im {
                                            ImageFactory* factory,
                                            options_map const& opts) {
         /// YO DOGG
-        std::vector<byte> all = src->full_data();
+        bytevec_t all = src->full_data();
         memory::buffer membuf = memory::source(&all[0], all.size());
         
         int width, height, maxval;

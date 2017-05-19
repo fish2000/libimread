@@ -19,6 +19,7 @@
 namespace {
     
     using im::byte;
+    using im::bytevec_t;
     using im::FileSource;
     using HandleSource = im::handle::source;
     using GZSource = im::gzio::source;
@@ -41,8 +42,8 @@ namespace {
             std::string pth = imagepath.str();
             std::string ttp = gzpath.str();
             std::unique_ptr<FileSource> source(new FileSource(pth));
-            std::vector<byte> fulldata = source->full_data();
-            std::vector<byte> readback;
+            bytevec_t fulldata = source->full_data();
+            bytevec_t readback;
             
             {
                 /// nest scope to ensure GZSink gets rightly dumpstered

@@ -29,8 +29,8 @@ namespace im {
     std::size_t memory_source::seek_relative(int delta) { return pos += delta; }
     std::size_t memory_source::seek_end(int delta) { return pos = (length-delta-1); }
     
-    std::vector<byte> memory_source::full_data() {
-        std::vector<byte> result(length);
+    bytevec_t memory_source::full_data() {
+        bytevec_t result(length);
         std::memcpy(&result[0], data, length);
         return result;
     }
@@ -77,7 +77,7 @@ namespace im {
         return std::fwrite(buffer, sizeof(byte), n, membuf.get());
     }
     
-    // std::size_t memory_sink::write(std::vector<byte> const& bv) {
+    // std::size_t memory_sink::write(bytevec_t const& bv) {
     //     return this->write(
     //         static_cast<const void*>(&bv[0]),
     //         bv.size());
@@ -85,8 +85,8 @@ namespace im {
     
     void memory_sink::flush() { std::fflush(membuf.get()); }
     
-    std::vector<byte> memory_sink::contents() {
-        std::vector<byte> out(length);
+    bytevec_t memory_sink::contents() {
+        bytevec_t out(length);
         std::fflush(membuf.get());
         std::memcpy(&out[0], data, length);
         return out;

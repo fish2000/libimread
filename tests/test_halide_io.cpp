@@ -18,6 +18,7 @@ namespace {
     using namespace Halide;
     using filesystem::path;
     using U8Image = im::HybridImage<uint8_t>;
+    using pathvec_t = std::vector<path>;
     
     TEST_CASE("[halide-io] Read PNG files",
               "[halide-read-png]")
@@ -81,7 +82,7 @@ namespace {
         using im::format::PNG;
         
         path basedir(im::test::basedir);
-        const std::vector<path> tifs = basedir.list("*.tif*");
+        const pathvec_t tifs = basedir.list("*.tif*");
         
         std::for_each(tifs.begin(), tifs.end(), [&basedir](path const& p) {
             auto tif = im::halide::read(basedir/p);

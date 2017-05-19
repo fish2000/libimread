@@ -29,6 +29,7 @@ namespace {
     using shared_image_t = std::shared_ptr<Image>;
     using bytevec_t = std::vector<byte>;
     using stringvec_t = std::vector<std::string>;
+    using pathvec_t = std::vector<path>;
     using HybridImage = im::HybridImage<byte>;
     using unique_hybridimage_t = std::unique_ptr<HybridImage>;
     using shared_hybridimage_t = std::shared_ptr<HybridImage>;
@@ -42,8 +43,8 @@ namespace {
               "[imageview-create-shared-imageview-from-image]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
-        const std::vector<path> jpgs = basedir.list("*.jpg");
+        const pathvec_t pngs = basedir.list("*.png");
+        const pathvec_t jpgs = basedir.list("*.jpg");
         
         std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             auto png = im::halide::unique(basedir/p);
@@ -90,8 +91,8 @@ namespace {
               "[imageview-calculate-histogram-data-from-image-using-imageview]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
-        const std::vector<path> jpgs = basedir.list("*.jpg");
+        const pathvec_t pngs = basedir.list("*.png");
+        const pathvec_t jpgs = basedir.list("*.jpg");
         std::unordered_map<path, float> entropies;
         std::unordered_map<path, int> otsus;
         

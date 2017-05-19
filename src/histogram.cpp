@@ -17,7 +17,7 @@ namespace im {
         static const float flinitial = 0.00000000;
     }
     
-    Histogram::Histogram(Histogram::bytevec_t const& plane)
+    Histogram::Histogram(bytevec_t const& plane)
         :source(plane.data(), plane.size())
         ,histogram(std::cref(detail::flinitial), detail::histogram_size)
         {

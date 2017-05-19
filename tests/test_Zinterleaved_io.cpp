@@ -17,6 +17,7 @@
 namespace {
     
     using filesystem::path;
+    using pathvec_t = std::vector<path>;
     
     // template <typename Color = color::RGBA>
     // InterleavedImage<Color>
@@ -49,7 +50,7 @@ namespace {
               "[interleaved-read-png]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
+        const pathvec_t pngs = basedir.list("*.png");
         std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
             auto png = im::interleaved::read(basedir/p);
             REQUIRE(png.width() > 0);
@@ -61,7 +62,7 @@ namespace {
               "[interleaved-read-jpg]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> jpgs = basedir.list("*.jpg");
+        const pathvec_t jpgs = basedir.list("*.jpg");
         std::for_each(jpgs.begin(), jpgs.end(), [&basedir](path const& p) {
             auto jpg = im::interleaved::read(basedir/p);
             CHECK(jpg.width() > 0);
