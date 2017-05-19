@@ -15,6 +15,9 @@
 #include <libimread/gzio.hh>
 #include <libimread/ext/filesystem/attributes.h>
 
+/// Shortcut to std::string{ NULL_STR } value
+#define STRINGNULL() store::stringmapper::base_t::null_value()
+
 namespace im {
     
     namespace detail {
@@ -87,19 +90,34 @@ namespace im {
                 "::gzwrite() returned -1",
                 std::strerror(errno));
         }
+        if (descriptor > 0 && out > 0) {
+            filesystem::attribute::accessor_t accessor(descriptor, kUncompressedSize);
+            std::size_t current_size = accessor.get() == STRINGNULL() ? 0 : std::stoul(accessor.get());
+            std::string uncompressed_size = std::to_string(static_cast<std::size_t>(out) + current_size);
+            if (!accessor.set(uncompressed_size)) {
+                imread_raise(MetadataWriteError, "zlib xattr-storage failure:",
+                    FF("\taccessor_t(%i, \"%s\")", descriptor, kUncompressedSize),
+                    FF("\taccessor.set(\"%i\") returned false", std::stoi(uncompressed_size)));
+            }
+        }
         return static_cast<std::size_t>(out);
     }
     
     std::size_t gzio_source_sink::write(bytevec_t const& bv) {
+        if (bv.empty()) { return 0; }
         return this->write(
             static_cast<const void*>(&bv[0]),
             bv.size());
     }
     
     detail::stat_t gzio_source_sink::stat() const {
-        if (!external) {
+        // if (!external) {
+        //     imread_raise(CannotReadError,
+        //         "cannot fstat() on an internal gzhandle_t");
+        // }
+        if (descriptor < 0) {
             imread_raise(CannotReadError,
-                "cannot fstat() on an internal gzhandle_t");
+                "cannot fstat(…) on an invalid descriptor");
         }
         detail::stat_t info;
         if (::fstat(descriptor, &info) == -1) {
@@ -141,6 +159,24 @@ namespace im {
         return filesystem::attribute::fdlist(descriptor);
     }
     
+    std::size_t gzio_source_sink::original_byte_size() const {
+        return this->xattr(kOriginalSize) == STRINGNULL() ? 0 : std::stoul(this->xattr(kOriginalSize));
+    }
+    
+    std::size_t gzio_source_sink::original_byte_size(std::size_t new_size) const {
+        std::string out = this->xattr(kOriginalSize, std::to_string(new_size));
+        return out == STRINGNULL() ? 0 : std::stoul(out);
+    }
+    
+    std::size_t gzio_source_sink::uncompressed_byte_size() const {
+        return this->xattr(kUncompressedSize) == STRINGNULL() ? 0 : std::stoul(this->xattr(kUncompressedSize));
+    }
+    
+    std::size_t gzio_source_sink::uncompressed_byte_size(std::size_t new_size) const {
+        std::string out = this->xattr(kUncompressedSize, std::to_string(new_size));
+        return out == STRINGNULL() ? 0 : std::stoul(out);
+    }
+    
     int gzio_source_sink::fd() const noexcept {
         return descriptor;
     }
@@ -151,10 +187,11 @@ namespace im {
     }
     
     bool gzio_source_sink::exists() const noexcept {
-        if (!external) { return false; }
+        // if (!external) { return false; }
+        if (descriptor < 0) { return false; }
         try {
             this->stat();
-        } catch (CannotReadError const& e) {
+        } catch (CannotReadError&) {
             return false;
         }
         return true;
@@ -211,11 +248,15 @@ namespace im {
         using std::swap;
         int out = -1;
         if (::gzclose(gzhandle) != Z_OK) {
-            if (descriptor > 0) { ::close(descriptor); }
-            imread_raise(FileSystemError,
-                FF("error closing gzhandle (with descriptor %i):", descriptor),
-                std::strerror(errno));
+            if (descriptor > 0) {
+                ::close(descriptor);
+            }
+            imread_raise(FileSystemError, "error closing gzhandle",
+                FF("\t::gzclose(%i)",   gzhandle),
+                FF("\tdescriptor = %i", descriptor),
+                "\tERROR MESSAGE IS: ", std::strerror(errno));
         }
+        swap(out, descriptor);
         return out;
     }
     

@@ -69,6 +69,12 @@ namespace im {
             virtual int xattrcount() const override;
             virtual filesystem::detail::stringvec_t xattrs() const override;
             
+            /// implementation-specific xattr access
+            std::size_t original_byte_size() const;
+            std::size_t original_byte_size(std::size_t) const;
+            std::size_t uncompressed_byte_size() const;
+            std::size_t uncompressed_byte_size(std::size_t) const;
+            
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
             

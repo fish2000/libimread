@@ -50,6 +50,7 @@ namespace {
                 /// nest scope to ensure GZSink gets rightly dumpstered
                 std::unique_ptr<GZSink> gzoutput(new GZSink(ttp));
                 gzoutput->write(fulldata);
+                CHECK(gzoutput->uncompressed_byte_size() == fulldata.size());
             }
             
             REQUIRE(gzpath.is_file());
