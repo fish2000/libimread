@@ -13,6 +13,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/gzio.hh>
+#include <libimread/ext/filesystem/attributes.h>
 
 namespace im {
     
@@ -116,6 +117,25 @@ namespace im {
     void* gzio_source_sink::readmap(std::size_t pageoffset) const {
         /// HOW IS COMPRES MMAP FORMED
         imread_raise_default(NotImplementedError);
+    }
+    
+    std::string gzio_source_sink::xattr(std::string const& name) const {
+        filesystem::attribute::accessor_t accessor(descriptor, name);
+        return accessor.get();
+    }
+    
+    std::string gzio_source_sink::xattr(std::string const& name, std::string const& value) const {
+        filesystem::attribute::accessor_t accessor(descriptor, name);
+        (value == filesystem::attribute::detail::nullstring) ? accessor.del() : accessor.set(value);
+        return accessor.get();
+    }
+    
+    int gzio_source_sink::xattrcount() const {
+        return filesystem::attribute::fdcount(descriptor);
+    }
+    
+    filesystem::detail::stringvec_t gzio_source_sink::xattrs() const {
+        return filesystem::attribute::fdlist(descriptor);
     }
     
     int gzio_source_sink::fd() const noexcept {

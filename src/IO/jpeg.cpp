@@ -219,6 +219,7 @@ namespace im {
         
         template <typename Iterator>
         uint16_t parse_size(Iterator it) {
+            /// extract size of an EXIF byte region:
             Iterator siz0 = std::next(it, 2);
             Iterator siz1 = std::next(it, 3);
             return (static_cast<uint16_t>(*siz0) << 8) | *siz1;
@@ -383,7 +384,6 @@ namespace im {
         const int w = input.dim(0);
         const int h = input.dim(1);
         const int d = std::min(3, input.dim(2));
-        const int dims = input.ndims();
         
         /// assign image values
         compressor.set_width(w);
