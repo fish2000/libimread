@@ -111,10 +111,6 @@ namespace im {
     }
     
     detail::stat_t gzio_source_sink::stat() const {
-        // if (!external) {
-        //     imread_raise(CannotReadError,
-        //         "cannot fstat() on an internal gzhandle_t");
-        // }
         if (descriptor < 0) {
             imread_raise(CannotReadError,
                 "cannot fstat(…) on an invalid descriptor");
@@ -194,7 +190,6 @@ namespace im {
     }
     
     bool gzio_source_sink::exists() const noexcept {
-        // if (!external) { return false; }
         if (descriptor < 0) { return false; }
         try {
             this->stat();
@@ -229,7 +224,6 @@ namespace im {
         /// according to the zlib manual (which is for append-only type situations)
         char const* modestring = fmode == filesystem::mode::READ ? "rb" : "wb";
         gzhandle = ::gzdopen(descriptor, modestring);
-        // gzhandle = ::gzopen(cpath, modestring);
         
         if (!gzhandle) {
             imread_raise(CannotReadError, "zlib stream-open failure:",
