@@ -36,6 +36,9 @@ namespace im {
             static constexpr int WRITE_FLAGS = O_WRONLY | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
             static constexpr int WRITE_CREATE_MASK = 0644;
             
+            static constexpr char kOriginalSize[]     = "im:original_size";
+            static constexpr char kUncompressedSize[] = "im:uncompressed_size";
+            
             int open_read(char* p) const;
             int open_write(char* p, int mask = WRITE_CREATE_MASK) const;
         
@@ -80,6 +83,7 @@ namespace im {
     };
     
     class gzfile_source_sink : public gzio_source_sink {
+        
         private:
             filesystem::path pth;
             filesystem::mode md;
@@ -108,6 +112,7 @@ namespace im {
         /// NB. Acronym-pronouncers can phonetically call this “Gizzy-O”
         
         class source : public gzfile_source_sink {
+            
             public:
                 source();
                 source(char* cpath);
@@ -115,9 +120,14 @@ namespace im {
                 source(std::string& spath);
                 source(std::string const& cspath);
                 source(filesystem::path const& ppath);
+                
+            public:
+                /// for im::gzio::source::load(…)
+                DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(gzio::source);
         };
         
         class sink : public gzfile_source_sink {
+            
             public:
                 sink();
                 sink(char* cpath);
@@ -125,6 +135,10 @@ namespace im {
                 sink(std::string& spath);
                 sink(std::string const& cspath);
                 sink(filesystem::path const& ppath);
+                
+            public:
+                /// for im::gzio::sink::load(…)
+                DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(gzio::sink);
         };
         
     } /* namespace gzio */

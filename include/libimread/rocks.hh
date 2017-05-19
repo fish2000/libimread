@@ -32,7 +32,7 @@ namespace store {
     class rocks : public stringmapper {
         
         public:
-            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(rocks);
+            DECLARE_STRINGMAPPER_TEMPLATES(rocks);
         
         public:
             virtual bool can_store() const noexcept override;

@@ -36,6 +36,9 @@ namespace im {
     constexpr int gzio_source_sink::WRITE_FLAGS;
     constexpr int gzio_source_sink::WRITE_CREATE_MASK;
     
+    DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kOriginalSize,     "im:original_size");
+    DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kUncompressedSize, "im:uncompressed_size");
+    
     int gzio_source_sink::open_read(char* p) const {
         return ::open(p, READ_FLAGS);
     }
@@ -81,7 +84,7 @@ namespace im {
         int out = ::gzwrite(gzhandle, buffer, n);
         if (out == -1) {
             imread_raise(CannotWriteError,
-                "::write() returned -1",
+                "::gzwrite() returned -1",
                 std::strerror(errno));
         }
         return static_cast<std::size_t>(out);
@@ -96,9 +99,9 @@ namespace im {
     detail::stat_t gzio_source_sink::stat() const {
         if (!external) {
             imread_raise(CannotReadError,
-                "cannot stat() on an internal gzhandler_t");
+                "cannot fstat() on an internal gzhandle_t");
         }
-            detail::stat_t info;
+        detail::stat_t info;
         if (::fstat(descriptor, &info) == -1) {
             imread_raise(CannotReadError,
                 "::fstat() returned -1",
@@ -158,6 +161,8 @@ namespace im {
     }
     
     int gzio_source_sink::open(char* cpath, filesystem::mode fmode) {
+        using filesystem::path;
+        
         if (fmode == filesystem::mode::WRITE) {
             descriptor = open_write(cpath);
             if (descriptor < 0) {
@@ -188,6 +193,16 @@ namespace im {
                 FF("\treturned negative value: %i", descriptor),
                     "\tERROR MESSAGE IS: ", std::strerror(errno));
         }
+        
+        /// store original file size in xattr
+        std::string original_size = std::to_string(path::filesize(cpath));
+        filesystem::attribute::accessor_t accessor(descriptor, kOriginalSize);
+        if (!accessor.set(original_size)) {
+            imread_raise(MetadataWriteError, "zlib xattr-storage failure:",
+                FF("\taccessor_t(%i, \"%s\")", descriptor, kOriginalSize),
+                FF("\taccessor.set(\"%i\") returned false", std::stoi(original_size)));
+        }
+        
         external = true;
         return descriptor;
     }

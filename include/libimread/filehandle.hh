@@ -99,7 +99,7 @@ namespace im {
         class source : public filehandle_source_sink {
             
             public:
-                // DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(im::handle::source);
+                DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(source);
             
             public:
                 source();
@@ -114,7 +114,7 @@ namespace im {
         class sink : public filehandle_source_sink {
             
             public:
-                // DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(im::handle::sink);
+                DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(sink);
             
             public:
                 sink();

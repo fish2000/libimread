@@ -13,7 +13,7 @@ namespace store {
     class env final : public stringmapper {
         
         public:
-            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(env);
+            DECLARE_STRINGMAPPER_TEMPLATES(env);
         
         public:
             virtual bool can_store() const noexcept override;

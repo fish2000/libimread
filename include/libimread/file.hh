@@ -117,7 +117,7 @@ namespace im {
             FileSource(filesystem::path const& ppath);
             
         public:
-            // DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(FileSource);
+            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FileSource);
     };
     
     class FileSink final : public file_source_sink {
@@ -131,7 +131,7 @@ namespace im {
             FileSink(filesystem::path const& ppath);
             
         public:
-            // DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(FileSink);
+            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FileSink);
     };
     
 

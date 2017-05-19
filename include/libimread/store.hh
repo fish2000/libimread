@@ -250,8 +250,11 @@ namespace store {
             :__typename__()                                                                     \
             {                                                                                   \
                 store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                  \
-            }                                                                                   \
+            }
+    
+    #define DECLARE_STRINGMAPPER_TEMPLATES(__typename__)                                        \
                                                                                                 \
+        DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(__typename__)                                \
         DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(__typename__)                               \
         DECLARE_STRINGMAPPER_TEMPLATE_METHODS()
     
@@ -294,7 +297,7 @@ namespace store {
     class stringmap final : public stringmapper {
         
         public:
-            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(stringmap);
+            DECLARE_STRINGMAPPER_TEMPLATES(stringmap);
         
         public:
             virtual bool can_store() const noexcept override;

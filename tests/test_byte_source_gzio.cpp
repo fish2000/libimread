@@ -28,13 +28,14 @@ namespace {
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     using filesystem::path;
+    using pathvec_t = std::vector<path>;
     
     TEST_CASE("[byte-source-gzio] Basic GZIO byte_source sanity check",
               "[byte-source-gzio-basic-gzio-byte_source-sanity-check]")
     {
         path basedir(im::test::basedir);
         TemporaryDirectory td("test-byte-source-gzio");
-        const std::vector<path> pngs = basedir.list("*.png");
+        const pathvec_t pngs = basedir.list("*.png");
         
         std::for_each(pngs.begin(), pngs.end(), [&](path const& p) {
             path imagepath = basedir/p;
