@@ -74,6 +74,7 @@ namespace im {
             std::size_t original_byte_size(std::size_t) const;
             std::size_t uncompressed_byte_size() const;
             std::size_t uncompressed_byte_size(std::size_t) const;
+            float       compression_ratio() const;
             
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;

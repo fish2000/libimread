@@ -177,6 +177,13 @@ namespace im {
         return out == STRINGNULL() ? 0 : std::stoul(out);
     }
     
+    float gzio_source_sink::compression_ratio() const {
+        std::size_t compressed = size();
+        std::size_t uncompressed = uncompressed_byte_size();
+        if (compressed == 0 || uncompressed == 0) { return -1.0f; }
+        return static_cast<float>(compressed) / static_cast<float>(uncompressed);
+    }
+    
     int gzio_source_sink::fd() const noexcept {
         return descriptor;
     }
@@ -229,6 +236,10 @@ namespace im {
                 FF("\t::gzopen(\"%s\", %s)", cpath, modestring),
                 FF("\treturned negative value: %i", descriptor),
                     "\tERROR MESSAGE IS: ", std::strerror(errno));
+        }
+        
+        if (fmode == filesystem::mode::WRITE) {
+            ::gzsetparams(gzhandle, 9, Z_FILTERED);
         }
         
         /// store original file size in xattr
