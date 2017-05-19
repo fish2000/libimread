@@ -11,7 +11,7 @@
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/gzio.hh>
 #include <libimread/file.hh>
-#include <libimread/filehandle.hh>
+// #include <libimread/filehandle.hh>
 
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
@@ -21,11 +21,11 @@ namespace {
     using im::byte;
     using im::bytevec_t;
     using im::FileSource;
-    using HandleSource = im::handle::source;
+    // using HandleSource = im::handle::source;
     using GZSource = im::gzio::source;
     using GZSink = im::gzio::sink;
     
-    using filesystem::NamedTemporaryFile;
+    // using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     using filesystem::path;
     using pathvec_t = std::vector<path>;
@@ -54,6 +54,7 @@ namespace {
             }
             
             REQUIRE(gzpath.is_file());
+            REQUIRE(gzpath.is_readable());
             
             {
                 /// nest scope again -- same deal, but like, for GZSource readback
