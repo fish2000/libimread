@@ -135,27 +135,25 @@ namespace store {
     std::string& xattrmap::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
             return cache[key];
-        } else {
-            std::string val(xattr(key));
-            if (val != STRINGNULL()) {
-                cache[key] = val;
-                return cache[key];
-            }
-            return STRINGNULL();
         }
+        std::string val(xattr(key));
+        if (val != STRINGNULL()) {
+            cache[key] = val;
+            return cache[key];
+        }
+        return STRINGNULL();
     }
     
     std::string const& xattrmap::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
             return cache[key];
-        } else {
-            std::string val(xattr(key));
-            if (val != STRINGNULL()) {
-                cache[key] = val;
-                return cache[key];
-            }
-            return STRINGNULL();
         }
+        std::string val(xattr(key));
+        if (val != STRINGNULL()) {
+            cache[key] = val;
+            return cache[key];
+        }
+        return STRINGNULL();
     }
     
     bool xattrmap::set(std::string const& key, std::string const& value) {
@@ -207,19 +205,13 @@ namespace store {
     }
     
     std::string& stringmap::get(std::string const& key) {
-        if (cache.find(key) != cache.end()) {
-            return cache[key];
-        } else {
-            return STRINGNULL();
-        }
+        if (cache.find(key) != cache.end()) { return cache[key]; }
+        return STRINGNULL();
     }
     
     std::string const& stringmap::get(std::string const& key) const {
-        if (cache.find(key) != cache.end()) {
-            return cache[key];
-        } else {
-            return STRINGNULL();
-        }
+        if (cache.find(key) != cache.end()) { return cache[key]; }
+        return STRINGNULL();
     }
     
     bool stringmap::set(std::string const& key, std::string const& value) {
