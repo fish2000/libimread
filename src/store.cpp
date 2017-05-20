@@ -68,7 +68,7 @@ namespace store {
         return Json(cache).format();
     }
     
-    bool stringmapper::dump(std::string const& destination, formatter format, bool overwrite) const {
+    bool stringmapper::dump(std::string const& destination, bool overwrite, formatter format) const {
         /// only JSON works for now:
         warm_cache();
         Json dumpee(cache);

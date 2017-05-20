@@ -103,7 +103,7 @@ namespace store {
                 ini         = 4
             };
             
-            static constexpr formatter format = formatter::json;
+            static constexpr formatter default_format = formatter::json;
         
         public:
             virtual std::string&       get(std::string const& key) = 0;
@@ -118,8 +118,9 @@ namespace store {
             virtual void warm_cache() const;
             virtual stringmap_t& mapping() const;
             virtual std::string mapping_json() const;
-            virtual bool dump(std::string const& destination, formatter format = formatter::json,
-                                                                bool overwrite = false) const;
+            virtual bool dump(std::string const& destination,
+                                bool overwrite = false,
+                              formatter format = stringmapper::default_format) const;
         
         public:
             virtual ~stringmapper();
