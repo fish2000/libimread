@@ -283,6 +283,7 @@ DECLARE_IMREAD_ERROR_TYPE(ProgrammingError,         "Programming Error");
 DECLARE_IMREAD_ERROR_TYPE(OptionsError,             "Options Error");
 DECLARE_IMREAD_ERROR_TYPE(WriteOptionsError,        "Write Options Error");
 DECLARE_IMREAD_ERROR_TYPE(FileSystemError,          "File System Error");
+DECLARE_IMREAD_ERROR_TYPE(GZipIOError,              "GZip I/O Error");
 DECLARE_IMREAD_ERROR_TYPE(FormatNotFound,           "File Format Not Found");
 
 DECLARE_IMREAD_ERROR_SUBTYPE(JSONParseError,

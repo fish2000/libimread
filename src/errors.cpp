@@ -30,15 +30,18 @@ namespace im {
     DECLARE_IMREAD_ERROR_DEFAULT(OptionsError,             "Options Error");
     DECLARE_IMREAD_ERROR_DEFAULT(WriteOptionsError,        "Write Options Error");
     DECLARE_IMREAD_ERROR_DEFAULT(FileSystemError,          "File System Error");
+    DECLARE_IMREAD_ERROR_DEFAULT(GZipIOError,              "GZip I/O Error");
     DECLARE_IMREAD_ERROR_DEFAULT(FormatNotFound,           "File Format Not Found");
     
     DECLARE_IMREAD_ERROR_DEFAULT(JSONParseError,           "JSON parsing error");
     DECLARE_IMREAD_ERROR_DEFAULT(JSONLogicError,           "JSON operator logic error");
+    
     DECLARE_IMREAD_ERROR_DEFAULT(JSONUseError,             "JSON library internal error");
     DECLARE_IMREAD_ERROR_DEFAULT(JSONInvalidSchema,        "JSON schema parsing error");
     DECLARE_IMREAD_ERROR_DEFAULT(JSONOutOfRange,           "JSON index value out of range");
     DECLARE_IMREAD_ERROR_DEFAULT(JSONBadCast,              "Error casting JSON value");
     DECLARE_IMREAD_ERROR_DEFAULT(JSONIOError,              "Error in JSON I/O");
+    
     DECLARE_IMREAD_ERROR_DEFAULT(HDF5IOError,              "Error in HDF5 I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(PNGIOError,               "Error in PNG/libpng I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(TIFFIOError,              "Error in TIFF/libtiff I/O");

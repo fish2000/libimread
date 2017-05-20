@@ -42,11 +42,11 @@ namespace im {
     DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kOriginalSize,     "im:original_size");
     DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kUncompressedSize, "im:uncompressed_size");
     
-    int gzio_source_sink::open_read(char* p) const {
+    int gzio_source_sink::open_read(char const* p) const {
         return ::open(p, READ_FLAGS);
     }
     
-    int gzio_source_sink::open_write(char* p, int mask) const {
+    int gzio_source_sink::open_write(char const* p, int mask) const {
         return ::open(p, WRITE_FLAGS, mask);
     }
     
@@ -59,7 +59,7 @@ namespace im {
     gzio_source_sink::gzio_source_sink(int fd)
         :descriptor(fd)
         ,gzhandle{ ::gzdopen(descriptor,
-                             detail::descriptor_mode(descriptor)) }
+                     detail::descriptor_mode(descriptor)) }
         ,external(true)
         {}
     
@@ -76,7 +76,7 @@ namespace im {
     std::size_t gzio_source_sink::read(byte* buffer, std::size_t n) {
         int out = ::gzread(gzhandle, buffer, n);
         if (out == -1) {
-            imread_raise(CannotReadError,
+            imread_raise(GZipIOError,
                 "::gzread() returned -1",
                 std::strerror(errno));
         }
@@ -86,7 +86,7 @@ namespace im {
     std::size_t gzio_source_sink::write(const void* buffer, std::size_t n) {
         int out = ::gzwrite(gzhandle, buffer, n);
         if (out == -1) {
-            imread_raise(CannotWriteError,
+            imread_raise(GZipIOError,
                 "::gzwrite() returned -1",
                 std::strerror(errno));
         }
@@ -112,12 +112,12 @@ namespace im {
     
     detail::stat_t gzio_source_sink::stat() const {
         if (descriptor < 0) {
-            imread_raise(CannotReadError,
+            imread_raise(FileSystemError,
                 "cannot fstat(…) on an invalid descriptor");
         }
         detail::stat_t info;
         if (::fstat(descriptor, &info) == -1) {
-            imread_raise(CannotReadError,
+            imread_raise(FileSystemError,
                 "::fstat() returned -1",
                 std::strerror(errno));
         }
@@ -143,7 +143,7 @@ namespace im {
     
     std::string gzio_source_sink::xattr(std::string const& name, std::string const& value) const {
         filesystem::attribute::accessor_t accessor(descriptor, name);
-        (value == filesystem::attribute::detail::nullstring) ? accessor.del() : accessor.set(value);
+        (value == STRINGNULL()) ? accessor.del() : accessor.set(value);
         return accessor.get();
     }
     
@@ -156,7 +156,8 @@ namespace im {
     }
     
     std::size_t gzio_source_sink::original_byte_size() const {
-        return this->xattr(kOriginalSize) == STRINGNULL() ? 0 : std::stoul(this->xattr(kOriginalSize));
+        std::string out = this->xattr(kOriginalSize);
+        return out == STRINGNULL() ? 0 : std::stoul(out);
     }
     
     std::size_t gzio_source_sink::original_byte_size(std::size_t new_size) const {
@@ -165,7 +166,8 @@ namespace im {
     }
     
     std::size_t gzio_source_sink::uncompressed_byte_size() const {
-        return this->xattr(kUncompressedSize) == STRINGNULL() ? 0 : std::stoul(this->xattr(kUncompressedSize));
+        std::string out = this->xattr(kUncompressedSize);
+        return out == STRINGNULL() ? 0 : std::stoul(out);
     }
     
     std::size_t gzio_source_sink::uncompressed_byte_size(std::size_t new_size) const {
@@ -193,28 +195,34 @@ namespace im {
         if (descriptor < 0) { return false; }
         try {
             this->stat();
-        } catch (CannotReadError&) {
+        } catch (FileSystemError&) {
             return false;
         }
         return true;
     }
     
-    int gzio_source_sink::open(char* cpath, filesystem::mode fmode) {
+    int gzio_source_sink::open(std::string const& spath, filesystem::mode fmode) {
         using filesystem::path;
         
+        if (!path::exists(spath)) {
+            /// change the default mode to write,
+            /// if the file is nonexistant at the named path:
+            fmode = filesystem::mode::WRITE;
+        }
+        
         if (fmode == filesystem::mode::WRITE) {
-            descriptor = open_write(cpath);
+            descriptor = open_write(spath.c_str());
             if (descriptor < 0) {
-                imread_raise(CannotWriteError, "descriptor open-to-write failure:",
-                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC)", cpath),
+                imread_raise(FileSystemError, "descriptor open-to-write failure:",
+                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }
         } else {
-            descriptor = open_read(cpath);
+            descriptor = open_read(spath.c_str());
             if (descriptor < 0) {
-                imread_raise(CannotReadError, "descriptor open-to-read failure:",
-                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC)", cpath),
+                imread_raise(FileSystemError, "descriptor open-to-read failure:",
+                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC)", spath.c_str()),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }
@@ -226,8 +234,8 @@ namespace im {
         gzhandle = ::gzdopen(descriptor, modestring);
         
         if (!gzhandle) {
-            imread_raise(CannotReadError, "zlib stream-open failure:",
-                FF("\t::gzopen(\"%s\", %s)", cpath, modestring),
+            imread_raise(GZipIOError, "zlib stream-open failure:",
+                FF("\t::gzopen(\"%s\", %s)", spath.c_str(), modestring),
                 FF("\treturned negative value: %i", descriptor),
                     "\tERROR MESSAGE IS: ", std::strerror(errno));
         }
@@ -237,7 +245,7 @@ namespace im {
         }
         
         /// store original file size in xattr
-        std::string original_size = std::to_string(path::filesize(cpath));
+        std::string original_size = std::to_string(path::filesize(spath));
         filesystem::attribute::accessor_t accessor(descriptor, kOriginalSize);
         if (!accessor.set(original_size)) {
             imread_raise(MetadataWriteError, "zlib xattr-storage failure:",
@@ -256,7 +264,7 @@ namespace im {
             if (descriptor > 0) {
                 ::close(descriptor);
             }
-            imread_raise(FileSystemError, "error closing gzhandle",
+            imread_raise(GZipIOError, "error closing gzhandle",
                 FF("\t::gzclose(%i)",   gzhandle),
                 FF("\tdescriptor = %i", descriptor),
                 "\tERROR MESSAGE IS: ", std::strerror(errno));
@@ -272,24 +280,32 @@ namespace im {
     gzfile_source_sink::gzfile_source_sink(char* cpath, filesystem::mode fmode)
         :gzio_source_sink(), pth(cpath), md(fmode)
         {
-            gzio_source_sink::open(cpath, fmode);
+            gzio_source_sink::open(const_cast<char const*>(cpath), fmode);
         }
     
     gzfile_source_sink::gzfile_source_sink(char const* ccpath, filesystem::mode fmode)
-        :gzfile_source_sink(const_cast<char*>(ccpath), fmode)
-        {}
+        :gzio_source_sink(), pth(ccpath), md(fmode)
+        {
+            gzio_source_sink::open(ccpath, fmode);
+        }
     
     gzfile_source_sink::gzfile_source_sink(std::string& spath, filesystem::mode fmode)
-        :gzfile_source_sink(spath.c_str(), fmode)
-        {}
+        :gzio_source_sink(), pth(spath), md(fmode)
+        {
+            gzio_source_sink::open(spath, fmode);
+        }
     
     gzfile_source_sink::gzfile_source_sink(std::string const& cspath, filesystem::mode fmode)
-        :gzfile_source_sink(cspath.c_str(), fmode)
-        {}
+        :gzio_source_sink(), pth(cspath), md(fmode)
+        {
+            gzio_source_sink::open(cspath, fmode);
+        }
     
     gzfile_source_sink::gzfile_source_sink(filesystem::path const& ppath, filesystem::mode fmode)
-        :gzfile_source_sink(ppath.c_str(), fmode)
-        {}
+        :gzio_source_sink(), pth(ppath), md(fmode)
+        {
+            gzio_source_sink::open(pth.str(), fmode);
+        }
     
     filesystem::path const& gzfile_source_sink::path() const {
         return pth;

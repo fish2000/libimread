@@ -39,8 +39,8 @@ namespace im {
             static constexpr char kOriginalSize[]     = "im:original_size";
             static constexpr char kUncompressedSize[] = "im:uncompressed_size";
             
-            int open_read(char* p) const;
-            int open_write(char* p, int mask = WRITE_CREATE_MASK) const;
+            int open_read(char const* p) const;
+            int open_write(char const* p, int mask = WRITE_CREATE_MASK) const;
         
         public:
             gzio_source_sink();
@@ -80,7 +80,7 @@ namespace im {
             virtual void fd(int fd) noexcept;
             
             virtual bool exists() const noexcept;
-            virtual int open(char* cpath, filesystem::mode fmode = filesystem::mode::READ);
+            virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ);
             virtual int close();
             
         private:
