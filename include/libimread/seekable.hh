@@ -43,14 +43,6 @@ namespace im {
             virtual ~byte_source();
             virtual std::size_t read(byte*, std::size_t) warn_unused = 0;
             virtual void* readmap(std::size_t pageoffset = 0) const = 0;
-            
-            // void read_check(byte* buffer, std::size_t n) {
-            //     if (this->read(buffer, n) != n) {
-            //         imread_raise(CannotReadError,
-            //             "File ended prematurely");
-            //     }
-            // }
-            
             virtual bytevec_t full_data();
             virtual std::size_t size() const;
             bool empty() const;
@@ -74,23 +66,22 @@ namespace im {
         
         public:
             using value_type = byte;
+            
             using difference_type = std::ptrdiff_t;
             using size_type = std::size_t;
+            using reference_type = std::add_lvalue_reference_t<value_type>;
             using reference = std::add_lvalue_reference_t<value_type>;
             using const_reference = std::add_const_t<reference>;
+            using pointer = std::add_pointer_t<value_type>;
+            
+            using iterator = byte_iterator;
+            using const_iterator = byte_iterator;
+            using reverse_iterator = std::reverse_iterator<iterator>;
+            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
             
             virtual ~byte_sink();
             virtual std::size_t write(const void*, std::size_t) = 0;
             virtual std::size_t write(bytevec_t const&);
-            
-            // void write_check(const byte* buffer, std::size_t n) {
-            //     std::size_t out = this->write(buffer, n);
-            //     imread_assert(out == n,
-            //         "write_check() return value differs from n:",
-            //             FF("\t  n = %i", n),
-            //             FF("\tout = %i", out));
-            // }
-            
             virtual void flush();
             
             template <typename ...Args>
