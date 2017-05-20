@@ -38,8 +38,6 @@ namespace im {
     std::size_t byte_source::size() const {
         /// super-naive implementation...
         /// OVERRIDE THIS HORRIDNESS, DOGG
-        static std::size_t out = 0;
-        static bool sized = false;
         if (!sized) {
             bytevec_t all_of_it;
             std::size_t n;
@@ -48,10 +46,10 @@ namespace im {
             while ((n = mutablethis->read(buffer, sizeof(buffer)))) {
                 all_of_it.insert(all_of_it.end(), buffer, buffer + n);
             }
-            out = all_of_it.size();
+            siz = all_of_it.size();
             sized = true;
         }
-        return out;
+        return siz;
     }
     
     bool byte_source::empty() const {

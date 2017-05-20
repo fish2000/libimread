@@ -64,6 +64,10 @@ namespace im {
             reverse_iterator rend();
             const_reverse_iterator rbegin() const;
             const_reverse_iterator rend() const;
+        
+        protected:
+            mutable bool sized = false;
+            mutable size_type siz = 0;
     };
     
     class byte_sink : virtual public seekable {
