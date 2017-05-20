@@ -95,11 +95,11 @@ namespace {
                 gzoutput->write(fulldata);
                 gzoutput->flush();
                 CHECK(gzoutput->uncompressed_byte_size() == fulldata.size());
-                WTF("GZIO compression ratio: ",
-                    FF("\tFile size (compressed):   %u", gzoutput->size()),
-                    FF("\tFile size (stat):         %u", gzpath.filesize()),
-                    FF("\tData size (uncompressed): %u", gzoutput->uncompressed_byte_size()),
-                    FF("\tCompression ratio:        %f", gzoutput->compression_ratio()));
+                // WTF("GZIO compression ratio: ",
+                //     FF("\tFile size (compressed):   %u", gzoutput->size()),
+                //     FF("\tFile size (stat):         %u", gzpath.filesize()),
+                //     FF("\tData size (uncompressed): %u", gzoutput->uncompressed_byte_size()),
+                //     FF("\tCompression ratio:        %f", gzoutput->compression_ratio()));
             }
             
             REQUIRE(gzpath.is_file());
@@ -111,11 +111,11 @@ namespace {
                 std::unique_ptr<GZSource> gzinput(new GZSource(gzpath));
                 readback = gzinput->full_data();
                 CHECK(gzinput->uncompressed_byte_size() == readback.size());
-                WTF("GZIO compression ratio: ",
-                    FF("\tFile size (compressed):   %u", gzinput->size()),
-                    FF("\tFile size (stat):         %u", gzpath.filesize()),
-                    FF("\tData size (uncompressed): %u", gzinput->uncompressed_byte_size()),
-                    FF("\tCompression ratio:        %f", gzinput->compression_ratio()));
+                // WTF("GZIO compression ratio: ",
+                //     FF("\tFile size (compressed):   %u", gzinput->size()),
+                //     FF("\tFile size (stat):         %u", gzpath.filesize()),
+                //     FF("\tData size (uncompressed): %u", gzinput->uncompressed_byte_size()),
+                //     FF("\tCompression ratio:        %f", gzinput->compression_ratio()));
             }
             
             CHECK(readback.size() == fulldata.size());
