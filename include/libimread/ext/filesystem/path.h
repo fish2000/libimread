@@ -177,6 +177,9 @@ namespace filesystem {
             bool is_file() const;
             bool is_link() const;
             bool is_directory() const;
+            bool is_block_device() const;
+            bool is_character_device() const;
+            bool is_pipe() const;
             bool is_file_or_link() const;
             
             /// Static forwarders for aforementioned interrogatives
@@ -219,6 +222,18 @@ namespace filesystem {
             template <typename P> inline
             static bool is_directory(P&& p) {
                 return path(std::forward<P>(p)).is_directory();
+            }
+            template <typename P> inline
+            static bool is_block_device(P&& p) {
+                return path(std::forward<P>(p)).is_block_device();
+            }
+            template <typename P> inline
+            static bool is_character_device(P&& p) {
+                return path(std::forward<P>(p)).is_character_device();
+            }
+            template <typename P> inline
+            static bool is_pipe(P&& p) {
+                return path(std::forward<P>(p)).is_pipe();
             }
             template <typename P> inline
             static bool is_file_or_link(P&& p) {

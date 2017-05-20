@@ -522,6 +522,24 @@ namespace filesystem {
         return S_ISDIR(sb.st_mode);
     }
     
+    bool path::is_block_device() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return false; }
+        return S_ISBLK(sb.st_mode);
+    }
+    
+    bool path::is_character_device() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return false; }
+        return S_ISCHR(sb.st_mode);
+    }
+    
+    bool path::is_pipe() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return false; }
+        return S_ISFIFO(sb.st_mode);
+    }
+    
     bool path::is_file_or_link() const {
         detail::stat_t sb;
         if (::lstat(c_str(), &sb)) { return false; }
