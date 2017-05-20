@@ -126,6 +126,10 @@ namespace filesystem {
         static constexpr int wordexp_pattern_flags                  = WRDE_NOCMD | WRDE_DOOFFS;
         static constexpr mode_t mkdir_flags                         = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
         
+        static const std::string extsepstring(1, path::extsep);
+        static const std::string sepstring(1, path::sep);
+        static const std::string nulstring("");
+        
     } /* namespace detail */
     
     constexpr path::character_type path::sep;
@@ -759,11 +763,9 @@ namespace filesystem {
         return result;
     }
     
-    static const std::string extsepstring(1, path::extsep);
-    
     detail::stringvec_t path::split_extensions() const {
         detail::stringvec_t out;
-        pystring::split(extensions(), out, extsepstring);
+        pystring::split(extensions(), out, detail::extsepstring);
         return out;
     }
     
@@ -843,16 +845,15 @@ namespace filesystem {
     path& path::operator+=(char const* other)        { return extend(other); }
     path& path::operator+=(std::string const& other) { return extend(other); }
     
-    static const std::string sepstring(1, path::sep);
-    static const std::string nulstring("");
-    
     std::string path::str() const {
         return std::accumulate(m_path.begin(),
                                m_path.end(),
-                               m_absolute ? sepstring : nulstring,
+                               m_absolute ? detail::sepstring
+                                          : detail::nulstring,
                            [&](std::string const& lhs,
                                std::string const& rhs) {
-            return lhs + rhs + ((rhs.c_str() == m_path.back().c_str()) ? nulstring : sepstring);
+            return lhs + rhs + ((rhs.c_str() == m_path.back().c_str()) ? detail::nulstring
+                                                                       : detail::sepstring);
         });
     }
     
