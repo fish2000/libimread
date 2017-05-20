@@ -122,9 +122,7 @@ namespace store {
             instance.reset((void*)local_instance);
         }
     
-    rocks::~rocks() {
-        instance.reset(nullptr);
-    }
+    rocks::~rocks() {}
     
     std::string& rocks::get_force(std::string const& key) const {
         std::string sval;
@@ -150,29 +148,27 @@ namespace store {
     std::string& rocks::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
-        } else {
-            std::string sval;
-            Status status = SELF()->Get(options::read(), key, &sval);
-            if (status.ok()) {
-                cache[key] = sval;
-                return cache.at(key);
-            }
-            return STRINGNULL();
         }
+        std::string sval;
+        Status status = SELF()->Get(options::read(), key, &sval);
+        if (status.ok()) {
+            cache[key] = sval;
+            return cache.at(key);
+        }
+        return STRINGNULL();
     }
     
     std::string const& rocks::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
-        } else {
-            std::string sval;
-            Status status = SELF()->Get(options::read(), key, &sval);
-            if (status.ok()) {
-                cache[key] = sval;
-                return cache.at(key);
-            }
-            return STRINGNULL();
         }
+        std::string sval;
+        Status status = SELF()->Get(options::read(), key, &sval);
+        if (status.ok()) {
+            cache[key] = sval;
+            return cache.at(key);
+        }
+        return STRINGNULL();
     }
     
     bool rocks::set(std::string const& key, std::string const& value) {

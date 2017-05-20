@@ -307,7 +307,7 @@ namespace im {
     gzfile_source_sink::gzfile_source_sink(char* cpath, filesystem::mode fmode)
         :gzio_source_sink(), pth(cpath), md(fmode)
         {
-            gzio_source_sink::open(const_cast<char const*>(cpath), fmode);
+            gzio_source_sink::open(pth.str(), fmode);
         }
     
     gzfile_source_sink::gzfile_source_sink(char const* ccpath, filesystem::mode fmode)

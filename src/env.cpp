@@ -8,6 +8,9 @@
 #include <libimread/env.hh>
 #include <libimread/ext/pystring.hh>
 
+/// Shortcut to std::string{ NULL_STR } value
+#define STRINGNULL() stringmapper::base_t::null_value()
+
 /// the environment array -- q.v. note sub:
 /// http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap08.html#tag_08
 extern char** environ;
@@ -51,7 +54,7 @@ namespace store {
                 return cache.at(key);
             }
         }
-        return stringmapper::base_t::null_value();
+        return STRINGNULL();
     }
     
     std::string& env::get(std::string const& key) {
@@ -73,7 +76,7 @@ namespace store {
                     return cache.at(key);
                 }
             }
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
@@ -96,7 +99,7 @@ namespace store {
                     return cache.at(key);
                 }
             }
-            return stringmapper::base_t::null_value();
+            return STRINGNULL();
         }
     }
     
