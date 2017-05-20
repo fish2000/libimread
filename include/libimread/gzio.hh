@@ -39,8 +39,12 @@ namespace im {
             static constexpr char kOriginalSize[]     = "im:original_size";
             static constexpr char kUncompressedSize[] = "im:uncompressed_size";
             
-            int open_read(char const* p) const;
-            int open_write(char const* p, int mask = WRITE_CREATE_MASK) const;
+            static int open_read(char const* p);
+            static int open_write(char const* p, int mask = WRITE_CREATE_MASK);
+        
+        public:
+            static std::size_t max_descriptor_count();
+            static std::size_t max_descriptor_count(std::size_t);
         
         public:
             gzio_source_sink();

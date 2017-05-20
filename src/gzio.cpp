@@ -3,6 +3,8 @@
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/stat.h>
 
 #include <cerrno>
@@ -21,6 +23,7 @@
 namespace im {
     
     namespace detail {
+        using rlimit_t = struct rlimit;
         using gzhandle_t = gzFile;
         
         char const* descriptor_mode(int descriptor) {
@@ -42,12 +45,36 @@ namespace im {
     DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kOriginalSize,     "im:original_size");
     DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kUncompressedSize, "im:uncompressed_size");
     
-    int gzio_source_sink::open_read(char const* p) const {
+    int gzio_source_sink::open_read(char const* p) {
         return ::open(p, READ_FLAGS);
     }
     
-    int gzio_source_sink::open_write(char const* p, int mask) const {
+    int gzio_source_sink::open_write(char const* p, int mask) {
         return ::open(p, WRITE_FLAGS, mask);
+    }
+    
+    std::size_t gzio_source_sink::max_descriptor_count() {
+        detail::rlimit_t rl;
+        if (::getrlimit(RLIMIT_NOFILE, &rl) == -1) {
+            imread_raise(MetadataReadError,
+                "descriptor limit value read failure",
+                "\t::getrlimit(RLIMIT_NOFILE, &rl) returned -1",
+                "\tERROR MESSAGE IS: ", std::strerror(errno));
+        }
+        return rl.rlim_cur;
+    }
+    
+    std::size_t gzio_source_sink::max_descriptor_count(std::size_t new_max) {
+        detail::rlimit_t rl;
+        rl.rlim_cur = new_max;
+        rl.rlim_max = new_max;
+        if (::setrlimit(RLIMIT_NOFILE, &rl) == -1) {
+            imread_raise(MetadataWriteError,
+                "descriptor limit value write failure",
+             FF("\t::setrlimit(RLIMIT_NOFILE, &rl) [new_max = %u] returned -1", new_max),
+                "\tERROR MESSAGE IS: ", std::strerror(errno));
+        }
+        return new_max;
     }
     
     gzio_source_sink::gzio_source_sink() {}

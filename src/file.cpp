@@ -3,6 +3,8 @@
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <capnp/serialize-packed.h>
@@ -14,16 +16,44 @@
 
 namespace im {
     
+    namespace detail {
+        using rlimit_t = struct rlimit;
+    }
+    
     constexpr int fd_source_sink::READ_FLAGS;
     constexpr int fd_source_sink::WRITE_FLAGS;
     constexpr int fd_source_sink::WRITE_CREATE_MASK;
     
-    int fd_source_sink::open_read(char* p) const {
+    int fd_source_sink::open_read(char const* p) {
         return ::open(p, READ_FLAGS);
     }
     
-    int fd_source_sink::open_write(char* p, int mask) const {
+    int fd_source_sink::open_write(char const* p, int mask) {
         return ::open(p, WRITE_FLAGS, mask);
+    }
+    
+    std::size_t fd_source_sink::max_descriptor_count() {
+        detail::rlimit_t rl;
+        if (::getrlimit(RLIMIT_NOFILE, &rl) == -1) {
+            imread_raise(MetadataReadError,
+                "descriptor limit value read failure",
+                "\t::getrlimit(RLIMIT_NOFILE, &rl) returned -1",
+                "\tERROR MESSAGE IS: ", std::strerror(errno));
+        }
+        return rl.rlim_cur;
+    }
+    
+    std::size_t fd_source_sink::max_descriptor_count(std::size_t new_max) {
+        detail::rlimit_t rl;
+        rl.rlim_cur = new_max;
+        rl.rlim_max = new_max;
+        if (::setrlimit(RLIMIT_NOFILE, &rl) == -1) {
+            imread_raise(MetadataWriteError,
+                "descriptor limit value write failure",
+             FF("\t::setrlimit(RLIMIT_NOFILE, &rl) [new_max = %u] returned -1", new_max),
+                "\tERROR MESSAGE IS: ", std::strerror(errno));
+        }
+        return new_max;
     }
     
     fd_source_sink::fd_source_sink() {}
@@ -183,21 +213,21 @@ namespace im {
         return true;
     }
     
-    int fd_source_sink::open(char* cpath,
+    int fd_source_sink::open(std::string const& spath,
                              filesystem::mode fmode) {
         if (fmode == filesystem::mode::WRITE) {
-            descriptor = open_write(cpath);
+            descriptor = open_write(spath.c_str());
             if (descriptor < 0) {
                 imread_raise(CannotWriteError, "descriptor open-to-write failure:",
-                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC)", cpath),
+                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }
         } else {
-            descriptor = open_read(cpath);
+            descriptor = open_read(spath.c_str());
             if (descriptor < 0) {
                 imread_raise(CannotReadError, "descriptor open-to-read failure:",
-                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC)", cpath),
+                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC)", spath.c_str()),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }
@@ -227,12 +257,14 @@ namespace im {
     file_source_sink::file_source_sink(char* cpath, filesystem::mode fmode)
         :fd_source_sink(), pth(cpath), md(fmode)
         {
-            fd_source_sink::open(cpath, fmode);
+            fd_source_sink::open(pth.str(), fmode);
         }
     
     file_source_sink::file_source_sink(char const* ccpath, filesystem::mode fmode)
-        :file_source_sink(const_cast<char*>(ccpath), fmode)
-        {}
+        :fd_source_sink(), pth(ccpath), md(fmode)
+        {
+            fd_source_sink::open(pth.str(), fmode);
+        }
     
     file_source_sink::file_source_sink(std::string& spath, filesystem::mode fmode)
         :file_source_sink(spath.c_str(), fmode)
@@ -243,8 +275,10 @@ namespace im {
         {}
     
     file_source_sink::file_source_sink(filesystem::path const& ppath, filesystem::mode fmode)
-        :file_source_sink(ppath.c_str(), fmode)
-        {}
+        :fd_source_sink(), pth(ppath), md(fmode)
+        {
+            fd_source_sink::open(pth.str(), fmode);
+        }
     
     filesystem::path const& file_source_sink::path() const {
         return pth;

@@ -35,8 +35,12 @@ namespace im {
             static constexpr int WRITE_FLAGS = O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
             static constexpr int WRITE_CREATE_MASK = 0644;
             
-            int open_read(char* p) const;
-            int open_write(char* p, int mask = WRITE_CREATE_MASK) const;
+            static int open_read(char const* p);
+            static int open_write(char const* p, int mask = WRITE_CREATE_MASK);
+        
+        public:
+            static std::size_t max_descriptor_count();
+            static std::size_t max_descriptor_count(std::size_t);
         
         public:
             fd_source_sink();
@@ -74,7 +78,7 @@ namespace im {
             virtual void fh(FILE* fh) noexcept;
             
             virtual bool exists() const noexcept;
-            virtual int open(char* cpath, filesystem::mode fmode = filesystem::mode::READ);
+            virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ);
             virtual int close();
             
         private:
