@@ -14,6 +14,8 @@ namespace im {
     
     namespace detail {
         
+        using gifholder = std::shared_ptr<gif::GIF>;
+        
         template <typename G>
         struct gifdisposer {
             constexpr gifdisposer() noexcept = default;
@@ -21,12 +23,15 @@ namespace im {
             void operator()(G* gp) { gif::dispose(gp); gp = nullptr; }
         };
         
-        using gifholder = std::shared_ptr<gif::GIF>;
-        
+        gifholder gifsink(int frame_interval = 3);
     }
     
     class GIFFormat : public ImageFormatBase<GIFFormat> {
+        
         public:
+            #if defined(__APPLE__)
+            // using can_read = std::true_type;
+            #endif
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
             
@@ -38,6 +43,12 @@ namespace im {
                 _mimetype = "image/gif"
             );
             
+            #if defined(__APPLE__)
+            // virtual std::unique_ptr<Image> read(byte_source* src,
+            //                                     ImageFactory* factory,
+            //                                     options_map const& opts) override;
+            #endif
+            
             virtual void write(Image& input,
                                byte_sink* output,
                                options_map const& opts) override;
@@ -45,9 +56,9 @@ namespace im {
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
                                      options_map const& opts) override;
-        
+            
         private:
-            void write_impl(Image& input, detail::gifholder g);
+            void write_impl(Image const& input, detail::gifholder& g);
     };
     
     namespace format {

@@ -20,54 +20,61 @@ namespace im {
             rgb[0] = r; rgb[1] = g; rgb[2] = b;
         }
         
-        gifholder gifsink(int delay=3) {
-            return gifholder(
-                gif::newGIF(delay),
-                gifdisposer<gif::GIF>());
+        gifholder gifsink(int frame_interval) {
+            return gifholder{ gif::newGIF(frame_interval),
+                              gifdisposer<gif::GIF>() };
         }
         
         struct gifbuffer {
-            int width;
-            int height;
             
             public:
-                explicit gifbuffer(int w, int h)
-                    :data_ptr(std::make_unique<byte[]>(w * h * 3))
-                    ,width(w), height(h)
+                explicit gifbuffer(int w, int h, int c = 3)
+                    :width(w), height(h), channels(c)
+                    ,data_ptr(
+                     std::make_unique<byte[]>(width * height * channels))
                     {}
                 
-                virtual ~gifbuffer() { data_ptr.reset(nullptr); }
+                virtual ~gifbuffer()            {}
+                byte* data() const              { return data_ptr.get(); }
+                operator unsigned char*() const { return data_ptr.get(); }
+                std::size_t size() const        { return width
+                                                      * height
+                                                    * channels; }
                 
-                byte* data() const { return data_ptr.get(); }
-                operator unsigned char*() const { return data(); }
-                
-            private:
+            public:
+                int width, height, channels;
+            
+            protected:
                 std::unique_ptr<byte[]> data_ptr;
+            
+            private:
+                gifbuffer(void);
                 gifbuffer(gifbuffer const&);
                 gifbuffer(gifbuffer&&);
-                gifbuffer &operator=(gifbuffer const&);
-                gifbuffer &operator=(gifbuffer&&);
+                gifbuffer& operator=(gifbuffer const&);
+                gifbuffer& operator=(gifbuffer&&);
         };
     }
     
-    void GIFFormat::write_impl(Image& input, detail::gifholder g) {
+    void GIFFormat::write_impl(Image const& input, detail::gifholder& g) {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
         const int channels = input.dim(2); /// should be 3
         const int bit_depth = input.nbits();
-        const int full_size = width * height * 3;
+        const int full_size = width * height * channels;
         
         /// Allocate buffer
-        detail::gifbuffer gbuf(width, height);
+        detail::gifbuffer gbuf(width, height, channels);
         
-        /// Check what we got
+        /// Check bit depth
         if (bit_depth != 8) {
             imread_raise(CannotWriteError,
                     "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE BIT DEPTH\"",
                  FF("im::GIFFormat::write() got:    `bit_depth` = (int){ %d }", bit_depth),
                     "im::GIFFormat::write() needs:  `bit_depth` = (int){ 8 }");
         }
+        /// Check channel count
         if (channels != 3) {
             imread_raise(CannotWriteError,
                     "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE COLOR MODE\"",
@@ -104,7 +111,7 @@ namespace im {
         write_impl(input, g);
         
         bytevec_t out = gif::write(g.get());
-        output->write(&out[0], out.size());
+        output->write(out);
         output->flush();
         
         imread_assert(out.size() > 0,
@@ -121,7 +128,7 @@ namespace im {
                   [&](Image* image) { write_impl(*image, g); });
         
         bytevec_t out = gif::write(g.get());
-        output->write(&out[0], out.size());
+        output->write(out);
         output->flush();
         
         imread_assert(out.size() > 0,

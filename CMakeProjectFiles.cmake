@@ -129,15 +129,20 @@ set(hdrs
     ${hdrs_dir}/traits.hh
 )
 
-set(preview_src ${srcs_dir}/plat/preview.cpp)
+set(preview_src ${srcs_dir}/plat/posix/preview.cpp)
+unset(additional_src)
+
 if(WINDOWS)
-    set(preview_src ${srcs_dir}/plat/preview_windows.cpp)
+    set(preview_src ${srcs_dir}/plat/windows/preview.cpp)
 endif(WINDOWS)
+
 if(LINUX)
-    set(preview_src ${srcs_dir}/plat/preview_linux.cpp)
+    set(preview_src ${srcs_dir}/plat/linux/preview.cpp)
 endif(LINUX)
+
 if(APPLE)
-    set(preview_src ${srcs_dir}/plat/preview_mac.mm)
+    set(preview_src ${srcs_dir}/plat/mac/preview.mm)
+    # set(additional_src ${srcs_dir}/plat/mac/IO/gif.mm)
 endif(APPLE)
 
 # Project source files
@@ -210,6 +215,7 @@ set(srcs
     ${srcs_dir}/store.cpp
     # ${srcs_dir}/symbols.cpp
     ${preview_src}
+    ${additional_src}
 )
 
 # set source properties
@@ -240,12 +246,18 @@ endforeach()
 IF(APPLE)
     
     FIND_LIBRARY(SYSTEM_LIBRARY System)
-    FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
+    # FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
+    FIND_LIBRARY(COREGRAPHICS_LIBRARY CoreGraphics)
+    FIND_LIBRARY(QUARTZCORE_LIBRARY QuartzCore)
+    FIND_LIBRARY(IMAGEIO_LIBRARY ImageIO)
     
     MARK_AS_ADVANCED(SYSTEM_LIBRARY
-                     FOUNDATION_LIBRARY
-                 COREFOUNDATION_LIBRARY)
+                     # FOUNDATION_LIBRARY
+                 COREFOUNDATION_LIBRARY
+                   COREGRAPHICS_LIBRARY
+                     QUARTZCORE_LIBRARY
+                        IMAGEIO_LIBRARY)
     
     SET(EXTRA_LIBS ${EXTRA_LIBS}
         ${SYSTEM_LIBRARY}

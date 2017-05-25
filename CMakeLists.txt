@@ -20,7 +20,7 @@ unset(HAVE_AUTOFS_NOWAIT CACHE)
 unset(HAVE_AUTOFS_NOTRIGGER CACHE)
 
 if(IM_USE_GCC)
-    # hardcode homebrew path for now
+    # hardcode homebrew path for now -- NOTE THAT THIS SHIT IS WAY OLD:
     set(CMAKE_C_COMPILER    "/usr/local/opt/gcc/bin/gcc-5")
     set(CMAKE_CXX_COMPILER  "/usr/local/opt/gcc/bin/g++-5")
 endif()
