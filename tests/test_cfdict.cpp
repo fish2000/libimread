@@ -148,6 +148,27 @@ namespace {
             REQUIRE(tn.pathname.is_readable());
         }
         
+        SECTION("[cfdict] » Copy the CFDictionaryRef database using {prefix,defix}_copy() and xattr with a TemporaryName")
+        {
+            TemporaryName tn0(".json");
+            TemporaryName tn1(".json");
+            FileSink sink0(tn0.pathname);
+            FileSink sink1(tn1.pathname);
+            
+            store::prefix_copy(database, sink0, "prefix");
+            store::defix_copy(sink0, sink1, "prefix");
+            
+            for (std::string const& key : database.list()) {
+                CHECK(database.get(key) != sink0.get(key));
+                CHECK(database.get(key) == sink1.get(key));
+                CHECK(sink1.get(key) != sink1.null_value());
+            }
+            
+            REQUIRE(tn0.pathname.is_file());
+            REQUIRE(tn0.pathname.is_readable());
+            REQUIRE(tn1.pathname.is_file());
+            REQUIRE(tn1.pathname.is_readable());
+        }
         
     }
     
