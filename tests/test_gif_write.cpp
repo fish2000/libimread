@@ -138,7 +138,7 @@ namespace {
             }
             
             REQUIRE(redopath.is_file());
-            CHECK(COLLECT(redopath));
+            // CHECK(COLLECT(redopath));
             
         });
     }
