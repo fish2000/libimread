@@ -49,6 +49,7 @@ namespace {
         const pathvec_t outglob = basedir.list("output_*.png");
         std::unique_ptr<formats::PNG> png_format{ new formats::PNG };
         std::unique_ptr<formats::GIF> gif_format{ new formats::GIF };
+        std::unique_ptr<HalideFactory> factory = std::make_unique<HalideFactory>();
         Options read_options;
         Options write_options;
         
@@ -58,7 +59,6 @@ namespace {
             path newpath(td.dirpath/p + ".gif");
             
             // U8Image halim = im::halide::read(fullpath.str());
-            std::unique_ptr<HalideFactory> factory = std::make_unique<HalideFactory>(fullpath);
             std::unique_ptr<FileSource> source = std::make_unique<FileSource>(fullpath);
             std::unique_ptr<Image> input = png_format->read(source.get(),
                                                             factory.get(),
