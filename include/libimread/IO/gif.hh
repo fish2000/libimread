@@ -30,7 +30,7 @@ namespace im {
         
         public:
             #if defined(__APPLE__)
-            // using can_read = std::true_type;
+            using can_read = std::true_type;
             #endif
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
@@ -44,9 +44,9 @@ namespace im {
             );
             
             #if defined(__APPLE__)
-            // virtual std::unique_ptr<Image> read(byte_source* src,
-            //                                     ImageFactory* factory,
-            //                                     options_map const& opts) override;
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
+                                                options_map const& opts) override;
             #endif
             
             virtual void write(Image& input,

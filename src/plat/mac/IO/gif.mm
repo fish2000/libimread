@@ -4,10 +4,31 @@
 #include <memory>
 #include <cstdlib>
 #include <libimread/IO/gif.hh>
+#include <libimread/pixels.hh>
 
 #import  <CoreFoundation/CoreFoundation.h>
-// #import  <Foundation/Foundation.h>
 #import  <ImageIO/ImageIO.h>
+
+/// N.B. this next whole conditional import is just to define `kUTTypeGIF`
+#if defined( __IPHONE_OS_VERSION_MIN_REQUIRED ) && __IPHONE_OS_VERSION_MIN_REQUIRED
+#import <MobileCoreServices/MobileCoreServices.h>
+#else
+#import <CoreServices/CoreServices.h>
+#endif
+
+/// These macros, like much other stuff in this implementation TU,
+/// are adapted from the always-handy-dandy Ray Wenderlich -- specifically, q.v.:
+/// https://www.raywenderlich.com/69855/image-processing-in-ios-part-1-raw-bitmap-modification
+/// http://www.modejong.com/blog/post3_pixel_binary_layout_w_premultiplied_alpha/index.html
+
+#define UNCOMPAND(x)    ((x) & 0xFF)
+#define R(x)            (UNCOMPAND(x))
+#define G(x)            (UNCOMPAND(x >> 8 ))
+#define B(x)            (UNCOMPAND(x >> 16))
+#define A(x)            (UNCOMPAND(x >> 24))
+
+#define CF_IDX(x)       static_cast<CFIndex>(x)
+#define CG_FLOAT(x)     static_cast<CGFloat>(x)
 
 namespace im {
     
@@ -15,11 +36,14 @@ namespace im {
         
         using pixbuf_t = std::unique_ptr<uint32_t[]>;
         
-        template <typename CF>
+        template <typename CoreFoundationType>
         struct cfreleaser {
             constexpr cfreleaser() noexcept = default;
             template <typename U> cfreleaser(cfreleaser<U> const&) noexcept {};
-            void operator()(CF cfp) { CFRelease(cfp); cfp = nil; }
+            void operator()(CoreFoundationType __attribute__((cf_consumed)) cfp) {
+                CFRelease(cfp);
+                cfp = nil;
+            }
         };
         
         template <typename CoreFoundationType>
@@ -28,58 +52,126 @@ namespace im {
                                std::remove_pointer_t<CoreFoundationType>>,
                                           cfreleaser<CoreFoundationType>>;
         
-        // template <typename CoreFoundationType>
-        // using cfp_t = std::unique_ptr<
-        //               std::remove_pointer_t<CoreFoundationType>,
-        //               decltype(CFRelease)&>
-        // #define CF_SCOPED(name, instance) detail::cfp name{ instance, CFRelease }
-        
     }
     
     std::unique_ptr<Image> GIFFormat::read(byte_source* src,
                                            ImageFactory* factory,
                                            options_map const& opts) {
-        /// YO DOGG
-        char const* yo = "DOGG";
         
-        /// CFURL
+        /// byte_source* src -> CFDataRef
+        /// N.B. using kCFAllocatorNull as the fourth parameter ensures that no deallocator
+        /// will be invoked upon the CFDataRef’s destruction (which is what we want, as we’re)
+        /// only referencing the bytes from the byte_source* `src`; these could be the backing
+        /// store of a std::vector, an mmapped file descriptor, a transient memory buffer, or
+        /// whatever the fuck other shit, by design I would not know, actually
+        detail::cfp_t<CFDataRef> sourcedata(const_cast<__CFData *>(
+                CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+                                            src->data(),
+                                            src->size(),
+                                            kCFAllocatorNull)));
         
+        // detail::cfp_t<CGDataProviderRef> provider(
+        //            CGDataProviderCreateWithCFData(sourcedata.get()));
         
-        /// CFData
+        /// CFDataRef -> CGImageSourceRef
+        detail::cfp_t<CGImageSourceRef> source(
+                   CGImageSourceCreateWithData(sourcedata.get(),
+                                               nullptr));
         
+        detail::cfp_t<CFDictionaryRef> options(nullptr);                            /// empty dictionary ref ptr
         
-        /// CGImageRef
-        // CGImageRef imageref = nullptr;
-        detail::cfp_t<CGImageRef> imageref(nullptr);
+        {
+            /// Deal with metadata:
+            // detail::cfp_t<CFDictionaryRef> metadata(const_cast<__CFDictionary *>(
+            //      CGImageSourceCopyPropertiesAtIndex(source.get(),
+            //                                         CF_IDX(0),
+            //                                         nullptr)));
+            
+            /// Deal with options, as passed to CGImageSourceCreateImageAtIndex(…):
+            const void* keys[]      = { kCGImageSourceShouldCache,
+                                        kCGImageSourceShouldAllowFloat,
+                                        kCGImageSourceTypeIdentifierHint };
+            
+            const void* values[]    = { kCFBooleanTrue,                             /// YES CACHING;
+                                        kCFBooleanFalse,                            /// NO FLOATS;
+                                        kUTTypeGIF };                               /// ITS A GIF, DOGG
+            
+            /// CFDictionaryCreate() copies CFTypes from `keys` and `values`
+            options.reset(const_cast<__CFDictionary *>(
+                                    CFDictionaryCreate(kCFAllocatorDefault,
+                                                       keys, values, CF_IDX(3),
+                                                       &kCFTypeDictionaryKeyCallBacks,
+                                                       &kCFTypeDictionaryValueCallBacks)));
+        }
         
-        // CGColorSpaceRef csref = CGColorSpaceCreateDeviceRGB();
-        // CF_SCOPED(cfref, CGColorSpaceCreateDeviceRGB());
+        /// CGImageSourceRef -> CGImageRef
+        detail::cfp_t<CGImageRef> image(
+        CGImageSourceCreateImageAtIndex(source.get(),                               /// CGImageSourceRef
+                                        CF_IDX(0),                                  /// new image index
+                                        options.get()));                            /// CFDictionaryRef
         
-        detail::cfp_t<CGColorSpaceRef> colorspace(CGColorSpaceCreateDeviceRGB());
+        /// CGImageRef -> CGColorSpaceRef: image (source) colorspace
+        detail::cfp_t<CGColorSpaceRef> colorspace(
+                             CGImageGetColorSpace(image.get()));                    /// Image (source) colorspace
         
-        std::size_t width = CGImageGetWidth(imageref.get()),
-                   height = CGImageGetHeight(imageref.get()),
-                      bpp = 4,                              /// bytes per pixel
-                      bpr = bpp * width,                    /// bytes per row
-                      bpc = 8;                              /// bits per component
+        /// Image bitmap dimensions:
+        std::size_t width = CGImageGetWidth(image.get()),
+                   height = CGImageGetHeight(image.get()),
+               components = CGColorSpaceGetNumberOfComponents(colorspace.get()),    /// colorspace component count
+                      bpc = CGImageGetBitsPerComponent(image.get()),                /// bits per component
+                      bpp = CGImageGetBitsPerPixel(image.get()) / bpc,              /// BYTES per pixel (not bits)
+                      bpr = bpp * width;                                            /// bytes per row
+      
+        /// CGRect encompassing image bounds:
+        CGRect bounds{ 0, 0, CG_FLOAT(width),
+                             CG_FLOAT(height) };
         
-        // uint32_t* pixelbuffer;
-        detail::pixbuf_t pixbuf = std::make_unique<uint32_t[]>(width * height);
+        /// pixelbuffer: uint32_t[width * height]
+        detail::pixbuf_t pixbuf = std::make_unique<uint32_t[]>(width * height);     /// pixels are 32-bit, for 4x 8-bit components
         
-        /// CGContextRef
+        /// CGColorSpaceRef: destination colorspace
+        detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
+        
+        /// CGImageRef + pixelbuffer -> CGContextRef
         detail::cfp_t<CGContextRef> context(
                       CGBitmapContextCreate(pixbuf.get(),
                                             width, height,
-                                            bpc, bpr, colorspace.get(),
+                                            bpc, bpr,
+                                            deviceRGB.get(),
                                             kCGImageAlphaPremultipliedLast |
                                             kCGBitmapByteOrder32Big));
         
-        CGContextDrawImage(context.get(),
-                           CGRectMake(0, 0, width, height),
-                           imageref.get());
+        /// Render image to bitmap context:
+        CGContextDrawImage(context.get(), bounds, image.get());
         
-        /// pixel loop
-        return nullptr;
+        /// create new im::Image instance using factory pointer:
+        std::unique_ptr<Image> output = factory->create(bpc,                        /// bit depth (should be 8)
+                                                        height,                     /// image height
+                                                        width,                      /// image width
+                                                        bpp);                       /// channel count (likely 4 for RGBA)
+        
+        /// Temporary values and pointers
+        uint32_t* currentpixel = pixbuf.get();
+        uint32_t  c_stride = (bpp == 1) ? 0 : output->stride(2);
+        uint32_t  x, y, compand;
+        byte*     destPtr;
+        
+        /// Read from pixel buffer, copy to newly created im::Image:
+        for (y = 0; y < height; ++y) {
+            destPtr = output->rowp_as<byte>(y);
+            for (x = 0; x < width; ++x) {
+                compand = *currentpixel;
+                pix::convert(R(compand), destPtr[0]);                               /// 0 * c_stride
+                pix::convert(G(compand), destPtr[c_stride]);                        /// 1 * c_stride
+                pix::convert(B(compand), destPtr[2*c_stride]);
+                pix::convert(A(compand), destPtr[3*c_stride]);
+                currentpixel++;
+                destPtr++;
+            }
+        }
+        
+        /// return unique_ptr to new im::Image instance:
+        return output;
     }
     
 }

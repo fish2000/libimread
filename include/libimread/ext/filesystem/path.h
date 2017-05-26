@@ -21,12 +21,11 @@ namespace filesystem {
     class path;
     
     namespace detail {
-        /// returns a C-style string containing the temporary directory,
-        /// using std::getenv() and some guesswork -- originally cribbed from boost
         std::string tmpdir() noexcept;
         std::string userdir() noexcept;
         std::string syspaths() noexcept;
         std::string execpath() noexcept;
+        uint64_t execstarttime() noexcept;
         ssize_t copyfile(char const*, char const*);
         
         /// return type for path::list(), when called with a detail::list_separate_t tag
@@ -345,6 +344,17 @@ namespace filesystem {
             template <typename P, typename F> inline
             static void walk(P&& p, F&& f) {
                 path(std::forward<P>(p)).walk(std::forward<F>(f));
+            }
+            
+            /// Compute the total size of the path tree, as per the sum of the size
+            /// of all files contained therein -- traversing the tree internally
+            /// using a path::walk(…) visitor lambda.
+            size_type total_size() const;
+            
+            /// Static forwarder for path::total_size<P>(p)
+            template <typename P> inline
+            static size_type total_size(P&& p) {
+                return path(std::forward<P>(p)).total_size();
             }
             
             /// attempt to delete the file or directory at this path.

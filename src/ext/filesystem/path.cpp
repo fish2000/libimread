@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/sysctl.h>
 #include <pwd.h>
 #include <glob.h>
 #include <wordexp.h>
@@ -49,9 +50,12 @@ namespace filesystem {
         using rehasher_t = hash::rehasher<std::string>;
         using dlinfo_t = ::Dl_info;
         using scandir_f = std::add_pointer_t<int(detail::dirent_t*)>;
+        using kinfo_proc_t = struct kinfo_proc;
+        using timeval_t = struct timeval;
         
         std::string tmpdir() noexcept {
-            /// cribbed/tweaked from boost
+            /// Returns a std::string containing the temporary directory,
+            /// using std::getenv() and some guesswork -- originally cribbed from boost
             char const* dirname;
             dirname = std::getenv("TMPDIR");
             if (nullptr == dirname) { dirname = std::getenv("TMP"); }
@@ -61,6 +65,8 @@ namespace filesystem {
         }
         
         std::string userdir() noexcept {
+            /// Returns a std::string containing the users’ home directory,
+            /// using std::getenv() and some guesswork -- originally cribbed from boost
             char const* dirname;
             dirname = std::getenv("HOME");
             if (nullptr == dirname) {
@@ -72,6 +78,8 @@ namespace filesystem {
         }
         
         std::string syspaths() noexcept {
+            /// Returns a std::string containing the system paths (aka the $PATH variable),
+            /// using std::getenv() and some guesswork -- originally cribbed from boost
             char const* paths;
             paths = std::getenv("PATH");
             if (nullptr == paths) { paths = "/bin:/usr/bin"; }
@@ -79,6 +87,8 @@ namespace filesystem {
         }
         
         std::string execpath() noexcept {
+            /// Returns a std::string with the path to the calling executable,
+            /// using either _NSGetExecutablePath() or /proc/self/exe:
             char pbuf[PATH_MAX] = { 0 };
             uint32_t size = sizeof(pbuf);
             #ifdef __APPLE__
@@ -89,6 +99,31 @@ namespace filesystem {
                 if (res == 0 || res == sizeof(pbuf)) { return "" }
             #endif
             return std::string(pbuf, res);
+        }
+        
+        uint64_t execstarttime() noexcept {
+            /// Returns the calling process’ startup time as a UNIX timestamp,
+            /// using getpid(), sysctl(), `struct kinfo_proc`, and `struct timeval` --
+            /// Adapted from https://github.com/ibireme/tmp/blob/master/snippet/app_startup.m:
+            int mib[4] = {
+                CTL_KERN,
+                KERN_PROC,
+                KERN_PROC_PID,
+                getpid() /// current pid
+            };
+            
+            kinfo_proc_t kinfo = { 0 };
+            std::size_t size = sizeof(kinfo);
+            
+            int result = ::sysctl(mib, sizeof(mib) / sizeof(*mib),
+                                  &kinfo, &size,
+                                  nullptr, 0);
+            
+            if (result != 0) { return 0; } /// ERROR!
+            
+            timeval_t* tv = &kinfo.kp_proc.p_un.__p_starttime;
+            uint64_t ts = (tv->tv_sec * static_cast<uint64_t>(1000)) + (tv->tv_usec / 1000);
+            return ts;
         }
         
         ssize_t copyfile(char const* source, char const* destination) {
@@ -586,6 +621,25 @@ namespace filesystem {
     bool path::update_timestamps() {
         if (!exists()) return false;
         return ::utimes(c_str(), nullptr) != -1;
+    }
+    
+    path::size_type path::total_size() const {
+        detail::nowait_t nowait;
+        if (is_file_or_link()) { return filesize(); }
+        if (is_directory()) {
+            path::size_type out = 0;
+            walk([&out](path const& p,
+                        detail::stringvec_t& directories,
+                        detail::stringvec_t& files) {
+                if (!files.empty()) {
+                    std::for_each(files.begin(),
+                                  files.end(),
+                       [&p, &out](std::string const& f) { out += (p/f).filesize(); });
+                }
+            });
+            return out;
+        }
+        return 0;
     }
     
     bool path::remove() const {

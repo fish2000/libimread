@@ -142,7 +142,7 @@ endif(LINUX)
 
 if(APPLE)
     set(preview_src ${srcs_dir}/plat/mac/preview.mm)
-    # set(additional_src ${srcs_dir}/plat/mac/IO/gif.mm)
+    set(additional_src ${srcs_dir}/plat/mac/IO/gif.mm)
 endif(APPLE)
 
 # Project source files
@@ -246,23 +246,30 @@ endforeach()
 IF(APPLE)
     
     FIND_LIBRARY(SYSTEM_LIBRARY System)
-    # FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
+    FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
     FIND_LIBRARY(COREGRAPHICS_LIBRARY CoreGraphics)
+    FIND_LIBRARY(CORESERVICES_LIBRARY CoreServices)
     FIND_LIBRARY(QUARTZCORE_LIBRARY QuartzCore)
     FIND_LIBRARY(IMAGEIO_LIBRARY ImageIO)
     
     MARK_AS_ADVANCED(SYSTEM_LIBRARY
-                     # FOUNDATION_LIBRARY
+                     FOUNDATION_LIBRARY
                  COREFOUNDATION_LIBRARY
                    COREGRAPHICS_LIBRARY
+                   CORESERVICES_LIBRARY
                      QUARTZCORE_LIBRARY
                         IMAGEIO_LIBRARY)
     
-    SET(EXTRA_LIBS ${EXTRA_LIBS}
-        ${SYSTEM_LIBRARY}
+    SET(EXTRA_LIBS
+             ${EXTRA_LIBS}
+            ${SYSTEM_LIBRARY}
         ${FOUNDATION_LIBRARY}
-    ${COREFOUNDATION_LIBRARY})
+    ${COREFOUNDATION_LIBRARY}
+      ${COREGRAPHICS_LIBRARY}
+      ${CORESERVICES_LIBRARY}
+        ${QUARTZCORE_LIBRARY}
+           ${IMAGEIO_LIBRARY})
     
 ENDIF(APPLE)
 
