@@ -38,7 +38,7 @@ namespace store {
     
     env::~env() {}
     
-    std::string& env::get_force(std::string const& key) const {
+    std::string const& env::get_force(std::string const& key) const {
         char* cvalue = nullptr;
         {
             std::unique_lock<std::mutex> getlock(getmute);

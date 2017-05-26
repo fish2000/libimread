@@ -47,7 +47,7 @@ namespace store {
             virtual ~rocks();
         
         public:
-            std::string& get_force(std::string const&) const;
+            std::string const& get_force(std::string const&) const;
             std::string const& filepath() const;
             std::size_t memorysize() const;
         

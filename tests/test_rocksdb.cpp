@@ -8,7 +8,7 @@
 
 #include <libimread/file.hh>
 // #include <libimread/filehandle.hh>
-// #include <libimread/store.hh>
+#include <libimread/store.hh>
 #include <libimread/rocks.hh>
 
 #include "include/test_data.hpp"

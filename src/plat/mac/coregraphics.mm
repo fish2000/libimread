@@ -66,7 +66,7 @@ namespace store {
         return CFDictionaryContainsKey(instance.get(), cfkey);
     }
     
-    std::string& cfdict::get_force(std::string const& key) const {
+    std::string const& cfdict::get_force(std::string const& key) const {
         im::detail::cfp_t<CFStringRef> cfkey(
                     const_cast<__CFString *>(
                  CFStringCreateWithSTLString(kCFAllocatorDefault, key)));

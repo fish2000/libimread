@@ -124,7 +124,7 @@ namespace store {
     
     rocks::~rocks() {}
     
-    std::string& rocks::get_force(std::string const& key) const {
+    std::string const& rocks::get_force(std::string const& key) const {
         std::string sval;
         Status status = SELF()->Get(options::read(), key, &sval);
         if (status.ok()) {
