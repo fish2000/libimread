@@ -55,7 +55,7 @@ namespace {
         std::for_each(outglob.begin(), outglob.end(),
                   [&](path const& p) {
             path fullpath = basedir/p;
-            path newpath((td.dirpath/p).str() + ".gif");
+            path newpath(td.dirpath/p + ".gif");
             
             // U8Image halim = im::halide::read(fullpath.str());
             std::unique_ptr<HalideFactory> factory = std::make_unique<HalideFactory>(fullpath);
