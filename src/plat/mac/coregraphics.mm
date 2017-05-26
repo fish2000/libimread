@@ -30,17 +30,18 @@ namespace store {
     /// default constructor
     cfdict::cfdict(void)
         :instance{ const_cast<__CFDictionary *>(
-                             CFDictionaryCreate(kCFAllocatorDefault,
-                                                {}, {}, CF_IDX(0),
-                                               &kCFCopyStringDictionaryKeyCallBacks,
-                                               &kCFTypeDictionaryValueCallBacks)) }
+                             CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                                       CF_IDX(0),
+                                                      &kCFCopyStringDictionaryKeyCallBacks,
+                                                      &kCFTypeDictionaryValueCallBacks)) }
         {}
     
     /// copy constructor
     cfdict::cfdict(cfdict const& other)
         :instance{ const_cast<__CFDictionary *>(
-                         CFDictionaryCreateCopy(kCFAllocatorDefault,
-                                                other.instance.get())) }
+                         CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+                                                       other.count(),
+                                                       other.instance.get())) }
         {}
     
     /// move constructor
@@ -50,7 +51,12 @@ namespace store {
     
     cfdict::cfdict(CFDictionaryRef raw)
         :instance{ const_cast<__CFDictionary *>(
-                         CFDictionaryCreateCopy(kCFAllocatorDefault, raw)) }
+                         CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 0, raw)) }
+        {}
+    
+    cfdict::cfdict(CFMutableDictionaryRef raw)
+        :instance{ const_cast<__CFDictionary *>(
+                         CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 0, raw)) }
         {}
     
     cfdict::~cfdict() {}
@@ -172,6 +178,14 @@ namespace store {
     
     cfdict::operator CFDictionaryRef() const {
         return CFDictionaryCreateCopy(kCFAllocatorDefault, instance.get());
+    }
+    
+    CFMutableDictionaryRef cfdict::cfmutabledictionary() const {
+        return CFDictionaryCreateMutableCopy(kCFAllocatorDefault, count(), instance.get());
+    }
+    
+    cfdict::operator CFMutableDictionaryRef() const {
+        return CFDictionaryCreateMutableCopy(kCFAllocatorDefault, count(), instance.get());
     }
     
 }

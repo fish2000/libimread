@@ -73,7 +73,7 @@ namespace im {
 
 namespace store {
     
-    using cfdict_ptr = im::detail::cfp_t<CFDictionaryRef>;
+    using cfmdict_ptr = im::detail::cfp_t<CFMutableDictionaryRef>;
     
     class cfdict : public store::stringmapper {
         
@@ -88,6 +88,7 @@ namespace store {
             cfdict(cfdict const&);
             cfdict(cfdict&&) noexcept;
             explicit cfdict(CFDictionaryRef);
+            explicit cfdict(CFMutableDictionaryRef);
             virtual ~cfdict();
         
         protected:
@@ -110,9 +111,11 @@ namespace store {
         public:
             CFDictionaryRef cfdictionary() const;
             operator CFDictionaryRef() const;
+            CFMutableDictionaryRef cfmutabledictionary() const;
+            operator CFMutableDictionaryRef() const;
         
         protected:
-            mutable cfdict_ptr instance{ nullptr };
+            mutable cfmdict_ptr instance{ nullptr };
     };
     
 }
