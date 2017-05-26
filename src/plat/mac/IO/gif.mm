@@ -23,11 +23,6 @@ namespace im {
                                             src->size(),
                                             kCFAllocatorNull)));
         
-        /// CFDataRef -> CGImageSourceRef
-        detail::cfp_t<CGImageSourceRef> source(
-                   CGImageSourceCreateWithData(sourcedata.get(),
-                                               nullptr));
-        
         detail::cfp_t<CFDictionaryRef> options(nullptr);                            /// empty dictionary ref ptr
         
         {
@@ -54,6 +49,11 @@ namespace im {
                                                       &kCFTypeDictionaryKeyCallBacks,
                                                       &kCFTypeDictionaryValueCallBacks)));
         }
+        
+        /// CFDataRef -> CGImageSourceRef
+        detail::cfp_t<CGImageSourceRef> source(
+                   CGImageSourceCreateWithData(sourcedata.get(),
+                                               options.get()));
         
         /// CGImageSourceRef -> CGImageRef
         detail::cfp_t<CGImageRef> image(
