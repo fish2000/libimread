@@ -47,9 +47,9 @@ namespace {
         TemporaryDirectory td("write-individual-gifs");
         path basedir(im::test::basedir);
         const pathvec_t outglob = basedir.list("output_*.png");
+        std::unique_ptr<HalideFactory> factory{ new HalideFactory };
         std::unique_ptr<formats::PNG> png_format{ new formats::PNG };
         std::unique_ptr<formats::GIF> gif_format{ new formats::GIF };
-        std::unique_ptr<HalideFactory> factory = std::make_unique<HalideFactory>();
         Options read_options;
         Options write_options;
         
