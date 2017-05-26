@@ -30,18 +30,17 @@ namespace store {
     /// default constructor
     cfdict::cfdict(void)
         :instance{ const_cast<__CFDictionary *>(
-                             CFDictionaryCreateMutable(kCFAllocatorDefault,
-                                                       CF_IDX(0),
-                                                      &kCFCopyStringDictionaryKeyCallBacks,
-                                                      &kCFTypeDictionaryValueCallBacks)) }
+                      CFDictionaryCreateMutable(kCFAllocatorDefault, CF_IDX(0),
+                                               &kCFCopyStringDictionaryKeyCallBacks,
+                                               &kCFTypeDictionaryValueCallBacks)) }
         {}
     
     /// copy constructor
     cfdict::cfdict(cfdict const& other)
         :instance{ const_cast<__CFDictionary *>(
-                         CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
-                                                       other.count(),
-                                                       other.instance.get())) }
+                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+                                                other.count(),
+                                                other.instance.get())) }
         {}
     
     /// move constructor
@@ -51,12 +50,12 @@ namespace store {
     
     cfdict::cfdict(CFDictionaryRef raw)
         :instance{ const_cast<__CFDictionary *>(
-                         CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 0, raw)) }
+                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault, CF_IDX(0), raw)) }
         {}
     
     cfdict::cfdict(CFMutableDictionaryRef raw)
         :instance{ const_cast<__CFDictionary *>(
-                         CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 0, raw)) }
+                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault, CF_IDX(0), raw)) }
         {}
     
     cfdict::~cfdict() {}
@@ -80,7 +79,8 @@ namespace store {
             im::detail::cfp_t<CFStringRef> cfval(
                        static_cast<__CFString *>(
                               const_cast<void *>(
-                            CFDictionaryGetValue(instance.get(), cfkey.get()))));
+                            CFDictionaryGetValue(instance.get(),
+                                                    cfkey.get()))));
             cache[key] = CFStringGetSTLString(cfval.get());
             return cache.at(key);
         }
@@ -98,7 +98,8 @@ namespace store {
                 im::detail::cfp_t<CFStringRef> cfval(
                            static_cast<__CFString *>(
                                   const_cast<void *>(
-                                CFDictionaryGetValue(instance.get(), cfkey.get()))));
+                                CFDictionaryGetValue(instance.get(),
+                                                        cfkey.get()))));
                 cache[key] = CFStringGetSTLString(cfval.get());
                 return cache.at(key);
             }
@@ -117,7 +118,8 @@ namespace store {
                 im::detail::cfp_t<CFStringRef> cfval(
                            static_cast<__CFString *>(
                                   const_cast<void *>(
-                                CFDictionaryGetValue(instance.get(), cfkey.get()))));
+                                CFDictionaryGetValue(instance.get(),
+                                                        cfkey.get()))));
                 cache[key] = CFStringGetSTLString(cfval.get());
                 return cache.at(key);
             }
@@ -133,7 +135,9 @@ namespace store {
         im::detail::cfp_t<CFStringRef> cfval(
                     const_cast<__CFString *>(
                  CFStringCreateWithSTLString(kCFAllocatorDefault, value)));
-        CFDictionarySetValue(instance.get(), cfkey.get(), cfval.get());
+        CFDictionarySetValue(instance.get(),
+                                cfkey.get(),
+                                cfval.get());
         cache[key] = value;
         return true;
     }
@@ -146,44 +150,52 @@ namespace store {
                     const_cast<__CFString *>(
                  CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
         if (has(cfkey.get())) {
-            CFDictionaryRemoveValue(instance.get(), cfkey.get());
+            CFDictionaryRemoveValue(instance.get(),
+                                       cfkey.get());
             return true;
         }
         return false;
     }
     
     std::size_t cfdict::count() const {
-        return static_cast<std::size_t>(CFDictionaryGetCount(instance.get()));
+        return static_cast<std::size_t>(
+                   CFDictionaryGetCount(instance.get()));
     }
     
-    store::stringmapper::stringvec_t cfdict::list() const {
-        store::stringmapper::stringvec_t outvec{};
+    cfdict::stringvec_t cfdict::list() const {
+        stringvec_t outvec{};
         outvec.reserve(count());
         
         CFDictionaryApplyFunction(instance.get(),
                                [](const void* key, const void* value, void* context) {
                                   CFStringRef cfkey = static_cast<CFStringRef>(key);
-                                  store::stringmapper::stringvec_t* vec = ((store::stringmapper::stringvec_t*)context);
-                                  vec->emplace_back(CFStringGetSTLString(cfkey));
-        }, &outvec);
+                                  stringvec_t* vecp = static_cast<stringvec_t*>(context);
+                                  vecp->emplace_back(CFStringGetSTLString(cfkey));
+                                  }, &outvec);
         
         return outvec;
     }
     
     CFDictionaryRef cfdict::cfdictionary() const {
-        return CFDictionaryCreateCopy(kCFAllocatorDefault, instance.get());
+        return CFDictionaryCreateCopy(kCFAllocatorDefault,
+                                      instance.get());
     }
     
     cfdict::operator CFDictionaryRef() const {
-        return CFDictionaryCreateCopy(kCFAllocatorDefault, instance.get());
+        return CFDictionaryCreateCopy(kCFAllocatorDefault,
+                                      instance.get());
     }
     
     CFMutableDictionaryRef cfdict::cfmutabledictionary() const {
-        return CFDictionaryCreateMutableCopy(kCFAllocatorDefault, count(), instance.get());
+        return CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+                        CFDictionaryGetCount(instance.get()),
+                                             instance.get());
     }
     
     cfdict::operator CFMutableDictionaryRef() const {
-        return CFDictionaryCreateMutableCopy(kCFAllocatorDefault, count(), instance.get());
+        return CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+                        CFDictionaryGetCount(instance.get()),
+                                             instance.get());
     }
     
 }

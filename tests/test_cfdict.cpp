@@ -23,6 +23,7 @@ namespace {
     using filesystem::detail::stringvec_t;
     using im::FileSource;
     using im::FileSink;
+    using im::detail::cfp_t;
     
     TEST_CASE("[cfdict] Create, update, read from, and ultimately destroy a CFDictionaryRef store",
               "[cfdict-create-update-readfrom-ultimately-destroy-cfdictionaryref-store]")
@@ -72,6 +73,14 @@ namespace {
             CHECK(memcopy.get(key) != memcopy.null_value());        /// 3) that none of the values are std::string{ NULL_STR }.
         }
         
+        store::stringmap memcopy2(database);                        /// duplicate the RocksDB database to an in-memory stringmap
+        
+        REQUIRE(database.count() == memcopy2.count());              /// ensure 1) the two databases hold the same number of values,
+        for (std::string const& key : database.list()) {            /// 2) that the values themselves are equal,
+            CHECK(database.get(key) == memcopy2.get(key));          ///    and,
+            CHECK(memcopy.get(key) != memcopy2.null_value());       /// 3) that none of the values are std::string{ NULL_STR }.
+        }
+        
         // Json(database.mapping()).dump(cfdictjsonpth.str());
         // Json(memcopy.mapping()).dump(memoryjsonpth.str());
         database.dump(cfdictjsonpth);                               /// dump the databases to disk-based representations (currently JSON dicts)
@@ -81,6 +90,13 @@ namespace {
         REQUIRE(cfdictjsonpth.is_file());
         REQUIRE(memoryjsonpth.exists());
         REQUIRE(memoryjsonpth.is_file());
+        
+        cfp_t<CFDictionaryRef> immutable(const_cast<__CFDictionary *>(
+                                         database.cfdictionary())); /// copy the databases’ internal CFMutableDictionaruyRef into
+                                                                    /// a managed-pointer non-mutable CFDictionaryRef instance
+        
+        REQUIRE(database.count() ==
+                CFDictionaryGetCount(immutable.get()));
         
     }
     
