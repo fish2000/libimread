@@ -109,23 +109,20 @@ namespace im {
         
         /// Temporary values and pointers
         uint32_t* currentpixel = pixbuf.get();
-        uint32_t  c_stride = (bpp == 1) ? 0 : output->stride(2);
+        uint32_t  c_stride = (bpp == 1) ? 0 : output->stride(2); /// this is janky
         uint32_t  x, y, compand;
         byte*     destPtr;
         
-        /// Read from pixel buffer, copy to newly created im::Image:
+        /// Read from pixel buffer, copy to newly created im::Image
         for (y = 0; y < height; ++y) {
             destPtr = output->rowp_as<byte>(y);
             for (x = 0; x < width; ++x) {
                 compand = *currentpixel;
-                // pix::convert(R(compand), destPtr[0]);                               /// 0 * c_stride
-                // pix::convert(G(compand), destPtr[c_stride]);                        /// 1 * c_stride
-                // pix::convert(B(compand), destPtr[2*c_stride]);
-                // pix::convert(A(compand), destPtr[3*c_stride]);
                 
-                destPtr[0] = R(compand);
-                destPtr[c_stride] = G(compand);
+                destPtr[0]          = R(compand);
+                destPtr[c_stride]   = G(compand);
                 destPtr[2*c_stride] = B(compand);
+                // destPtr[3*c_stride] = A(compand);
                 
                 currentpixel++;
                 destPtr++;
