@@ -108,6 +108,7 @@ namespace store {
         
         public:
             CFDictionaryRef cfdictionary() const;
+            operator CFDictionaryRef() const;
         
         protected:
             mutable cfdict_ptr instance{ nullptr };

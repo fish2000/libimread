@@ -165,4 +165,8 @@ namespace store {
         return CFDictionaryCreateCopy(kCFAllocatorDefault, instance.get());
     }
     
+    cfdict::operator CFDictionaryRef() const {
+        return CFDictionaryCreateCopy(kCFAllocatorDefault, instance.get());
+    }
+    
 }
