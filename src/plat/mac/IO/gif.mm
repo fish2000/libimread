@@ -52,8 +52,8 @@ namespace im {
         
         /// CFDataRef -> CGImageSourceRef
         detail::cfp_t<CGImageSourceRef> source(
-                   CGImageSourceCreateWithData(sourcedata.get(),
-                                               options.get()));
+                   CGImageSourceCreateWithData(sourcedata.get(),                    /// CFDataRef
+                                               options.get()));                     /// CFDictionaryRef
         
         /// CGImageSourceRef -> CGImageRef
         detail::cfp_t<CGImageRef> image(
