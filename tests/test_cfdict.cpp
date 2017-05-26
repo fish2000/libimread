@@ -98,6 +98,57 @@ namespace {
         REQUIRE(database.count() ==
                 CFDictionaryGetCount(immutable.get()));
         
+        SECTION("[cfdict] » Reconstitute the CFDictionaryRef database using store::stringmap::load()")
+        {
+            // WTF("PRE-CONSTITUTED FILE SIZE: ", rocksjsonpth.filesize());
+            
+            store::stringmap reconstituted = store::stringmap::load(cfdictjsonpth.str());
+            stringvec_t rekeyed = reconstituted.list();
+            stringvec_t revalued;
+            
+            // WTF("RETURNED RECONSTITUTED: ",
+            //     FF("%i mapped indexes",   reconstituted.count()),
+            //     FF("%i string indexes\n", rekeyed.size()),
+            //     pystring::join(", \n\t", rekeyed));
+            
+            revalued.reserve(rekeyed.size());
+            std::for_each(rekeyed.begin(), rekeyed.end(), [&](std::string const& key) {
+                std::string value(reconstituted.get(key));
+                CHECK(value != reconstituted.null_value());
+                if (value != reconstituted.null_value()) {
+                    revalued.emplace_back(value.size() < 40 ? std::move(value) : value.substr(0, 40));
+                }
+            });
+            
+            // WTF("RETURNED RECONSTITUTED: ",
+            //     FF("%i indexed values\n", revalued.size()),
+            //     pystring::join(", \n\t", revalued));
+            
+            REQUIRE(rekeyed.size() == revalued.size());
+            
+            for (std::string const& key : reconstituted.list()) {
+                if (key != reconstituted.null_key()) {
+                    // WTF("KEY: ", key);
+                    CHECK(database.get(key) == reconstituted.get(key));
+                    CHECK(reconstituted.get(key) != reconstituted.null_value());
+                }
+            }
+        }
+        
+        SECTION("[cfdict] » Copy the CFDictionaryRef database using value_copy() and xattr with a TemporaryName")
+        {
+            TemporaryName tn(".json");
+            FileSink sink(tn.pathname);
+            store::value_copy(database, sink);
+            for (std::string const& key : database.list()) {
+                CHECK(database.get(key) == sink.get(key));
+                CHECK(sink.get(key) != sink.null_value());
+            }
+            REQUIRE(tn.pathname.is_file());
+            REQUIRE(tn.pathname.is_readable());
+        }
+        
+        
     }
     
 }

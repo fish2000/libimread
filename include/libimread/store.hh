@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <utility>
 #include <string>
+#include <regex>
 #include <vector>
 
 #include <libimread/libimread.hpp>
@@ -195,13 +196,27 @@ namespace store {
     }
     
     template <typename T, typename U>
-    void prefix_copy(T&& from, U&& to, std::string const& prefix = "prefix",
+    void prefix_copy(T&& from, U&& to, std::string const& prefix,
                                        std::string const& sep = ":") {
         static_assert(store::is_stringmapper_v<T, U>,
                      "store::prefix_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
         if (!froms.empty()) {
             for (std::string const& name : froms) { std::forward<U>(to).set(prefix + sep + name,
+                                                    std::forward<T>(from).get(name)); }
+        }
+    }
+    
+    template <typename T, typename U>
+    void defix_copy(T&& from, U&& to, std::string const& prefix,
+                                      std::string const& sep = ":") {
+        static_assert(store::is_stringmapper_v<T, U>,
+                     "store::defix_copy() operands must derive from store::stringmapper");
+        stringmapper::stringvec_t froms(std::forward<T>(from).list());
+        std::regex defix_re("^" + prefix + sep, std::regex::extended);
+        if (!froms.empty()) {
+            for (std::string const& name : froms) { std::forward<U>(to).set(
+                                                    std::regex_replace(name, defix_re, ""),
                                                     std::forward<T>(from).get(name)); }
         }
     }
@@ -218,9 +233,17 @@ namespace store {
         template <typename T,                                                                   \
                   typename X = typename std::enable_if_t<                                       \
                                         store::is_stringmapper_v<T>, void>>                     \
-        X update(T&& from, std::string const& prefix,                                           \
+        X prefix(T&& from, std::string const& prefix,                                           \
                            std::string const& sep = ":") {                                      \
             store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                      \
+        }                                                                                       \
+                                                                                                \
+        template <typename T,                                                                   \
+                  typename X = typename std::enable_if_t<                                       \
+                                        store::is_stringmapper_v<T>, void>>                     \
+        X defix(T&& from, std::string const& prefix,                                            \
+                          std::string const& sep = ":") {                                       \
+            store::defix_copy(std::forward<T>(from), *this, prefix, sep);                       \
         }
     
     #define DECLARE_STRINGMAPPER_TEMPLATE_TYPED_METHODS(__typename__)                           \
