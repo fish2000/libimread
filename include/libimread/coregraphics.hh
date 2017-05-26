@@ -87,6 +87,7 @@ namespace store {
             cfdict(void);
             cfdict(cfdict const&);
             cfdict(cfdict&&) noexcept;
+            explicit cfdict(CFDictionaryRef);
             virtual ~cfdict();
         
         protected:

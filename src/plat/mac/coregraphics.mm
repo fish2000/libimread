@@ -48,6 +48,11 @@ namespace store {
         :instance(std::move(other.instance))
         {}
     
+    cfdict::cfdict(CFDictionaryRef raw)
+        :instance{ const_cast<__CFDictionary *>(
+                         CFDictionaryCreateCopy(kCFAllocatorDefault, raw)) }
+        {}
+    
     cfdict::~cfdict() {}
     
     bool cfdict::has(std::string const& key) const {
