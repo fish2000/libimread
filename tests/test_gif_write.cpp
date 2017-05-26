@@ -65,11 +65,12 @@ namespace {
                                                             png_format->add_options(read_options));
             
             HybridImage first_hybrid(dynamic_cast<HybridImage&>(*input.get()));
-            WTF("*** Loaded First HybridImage:",
-             FF("\t<%i> [w:%i h:%i p:%i]", &first_hybrid,
-                                            first_hybrid.dim(0),
-                                            first_hybrid.dim(1),
-                                            first_hybrid.dim(2)));
+            
+            // WTF("*** Loaded First HybridImage:",
+            //  FF("\t<%i> [w:%i h:%i p:%i]", &first_hybrid,
+            //                                 first_hybrid.dim(0),
+            //                                 first_hybrid.dim(1),
+            //                                 first_hybrid.dim(2)));
             
             // im::halide::write(halim, newpath.str());
             {
@@ -91,11 +92,12 @@ namespace {
                                                              gif_format->add_options(read_options));
             
             HybridImage second_hybrid(dynamic_cast<HybridImage&>(*output.get()));
-            WTF("*** Loaded Second HybridImage:",
-             FF("\t<%i> [w:%i h:%i p:%i]", &second_hybrid,
-                                            second_hybrid.dim(0),
-                                            second_hybrid.dim(1),
-                                            second_hybrid.dim(2)));
+            
+            // WTF("*** Loaded Second HybridImage:",
+            //  FF("\t<%i> [w:%i h:%i p:%i]", &second_hybrid,
+            //                                 second_hybrid.dim(0),
+            //                                 second_hybrid.dim(1),
+            //                                 second_hybrid.dim(2)));
             
             /// compare first-pass and second-pass image-data properties
             CHECK(first_hybrid.nbits()                  == second_hybrid.nbits());
