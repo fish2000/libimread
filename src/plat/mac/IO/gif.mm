@@ -99,10 +99,12 @@ namespace im {
         CGContextDrawImage(context.get(), bounds, image.get());
         
         /// create new im::Image instance using factory pointer:
-        std::unique_ptr<Image> output = factory->create(bpc,                        /// bit depth (should be 8)
-                                                        height,                     /// image height
-                                                        width,                      /// image width
-                                                        bpp);                       /// channel count (likely 4 for RGBA)
+        // std::unique_ptr<Image> output = factory->create(bpc,                        /// bit depth (should be 8)
+        //                                                 height,                     /// image height
+        //                                                 width,                      /// image width
+        //                                                 bpp);                       /// channel count (likely 4 for RGBA)
+        
+        std::unique_ptr<Image> output = factory->create(8, height, width, 3);
         
         /// Temporary values and pointers
         uint32_t* currentpixel = pixbuf.get();
@@ -118,7 +120,7 @@ namespace im {
                 pix::convert(R(compand), destPtr[0]);                               /// 0 * c_stride
                 pix::convert(G(compand), destPtr[c_stride]);                        /// 1 * c_stride
                 pix::convert(B(compand), destPtr[2*c_stride]);
-                pix::convert(A(compand), destPtr[3*c_stride]);
+                // pix::convert(A(compand), destPtr[3*c_stride]);
                 currentpixel++;
                 destPtr++;
             }

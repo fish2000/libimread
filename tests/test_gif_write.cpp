@@ -104,7 +104,7 @@ namespace {
             CHECK(first_hybrid.is_signed()              == second_hybrid.is_signed());
             CHECK(first_hybrid.is_floating_point()      == second_hybrid.is_floating_point());
             CHECK(first_hybrid.rowp_stride()            == second_hybrid.rowp_stride());
-            // CHECK(first_hybrid.size()                   == second_hybrid.size());
+            CHECK(first_hybrid.size()                   == second_hybrid.size());
             // CHECK(first_hybrid.width()                  == second_hybrid.width());
             // CHECK(first_hybrid.height()                 == second_hybrid.height());
             
