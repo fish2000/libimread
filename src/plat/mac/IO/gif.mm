@@ -87,13 +87,14 @@ namespace im {
         detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
         
         /// CGImageRef + pixelbuffer -> CGContextRef
+        // kCGImageAlphaPremultipliedLast |
+        // kCGBitmapByteOrder32Big
         detail::cfp_t<CGContextRef> context(
                       CGBitmapContextCreate(pixbuf.get(),
                                             width, height,
                                             bpc, bpr,
                                             deviceRGB.get(),
-                                            kCGImageAlphaPremultipliedLast |
-                                            kCGBitmapByteOrder32Big));
+                                            kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big));
         
         /// Render image to bitmap context:
         CGContextDrawImage(context.get(), bounds, image.get());
@@ -117,10 +118,15 @@ namespace im {
             destPtr = output->rowp_as<byte>(y);
             for (x = 0; x < width; ++x) {
                 compand = *currentpixel;
-                pix::convert(R(compand), destPtr[0]);                               /// 0 * c_stride
-                pix::convert(G(compand), destPtr[c_stride]);                        /// 1 * c_stride
-                pix::convert(B(compand), destPtr[2*c_stride]);
+                // pix::convert(R(compand), destPtr[0]);                               /// 0 * c_stride
+                // pix::convert(G(compand), destPtr[c_stride]);                        /// 1 * c_stride
+                // pix::convert(B(compand), destPtr[2*c_stride]);
                 // pix::convert(A(compand), destPtr[3*c_stride]);
+                
+                destPtr[0] = R(compand);
+                destPtr[c_stride] = G(compand);
+                destPtr[2*c_stride] = B(compand);
+                
                 currentpixel++;
                 destPtr++;
             }

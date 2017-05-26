@@ -14,6 +14,7 @@
 #include <libimread/IO/gif.hh>
 #include <libimread/halide.hh>
 
+#include "helpers/collect.hh"
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
@@ -57,6 +58,7 @@ namespace {
                   [&](path const& p) {
             path fullpath = basedir/p;
             path newpath(td.dirpath/p + ".gif");
+            path redopath(td.dirpath/p + "-2.gif");
             
             // U8Image halim = im::halide::read(fullpath.str());
             std::unique_ptr<FileSource> source = std::make_unique<FileSource>(fullpath);
@@ -85,6 +87,7 @@ namespace {
             }
             
             REQUIRE(newpath.is_file());
+            // CHECK(COLLECT(newpath));
             
             std::unique_ptr<FileSource> readback = std::make_unique<FileSource>(newpath);
             std::unique_ptr<Image> output = gif_format->read(source.get(),
@@ -117,6 +120,26 @@ namespace {
             CHECK(newpath.xattr("im:original_path")     == fullpath.str());
             CHECK(newpath.xattr("im:original_size")     == std::to_string(source->size()));
             // CHECK(newpath.xattr("im:original_size")     == std::to_string(readback->size()));
+            
+            /// compare image content
+            // CHECK(first_hybrid.allplanes<byte>()        == second_hybrid.allplanes<byte>());
+            // CHECK(first_hybrid.plane<byte>(0)           == second_hybrid.plane<byte>(0));
+            
+            // im::halide::write(halim, redopath.str());
+            {
+                std::unique_ptr<FileSink> rerewrite = std::make_unique<FileSink>(redopath);
+                gif_format->write(dynamic_cast<Image&>(second_hybrid),
+                                  rerewrite.get(),
+                                  gif_format->add_options(write_options));
+                
+                rerewrite->xattr("im:original_format", "gif");
+                rerewrite->xattr("im:original_path",   newpath.str());
+                rerewrite->xattr("im:original_size",   std::to_string(readback->size()));
+            }
+            
+            REQUIRE(redopath.is_file());
+            CHECK(COLLECT(redopath));
+            
         });
     }
     

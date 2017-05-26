@@ -6,7 +6,7 @@
 #include <libimread/ext/filesystem/path.h>
 
 #ifndef COLLECT_TEMPORARIES
-#define COLLECT_TEMPORARIES 0
+#define COLLECT_TEMPORARIES 1
 #endif
 
 #ifndef CHECK_DIRECTORY
@@ -18,7 +18,7 @@ bool COLLECT(P&& p) {
     using filesystem::path;
     #if COLLECT_TEMPORARIES == 1
         path::makedir(CHECK_DIRECTORY);
-        return path(std::forward<P>(p)).rename(CHECK_DIRECTORY);
+        return path(std::forward<P>(p)).duplicate(CHECK_DIRECTORY);
     #else
         return path::remove(std::forward<P>(p));
     #endif
