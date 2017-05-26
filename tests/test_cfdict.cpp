@@ -59,6 +59,29 @@ namespace {
         }
         
         REQUIRE(database.count() == manualcount);                   /// ensure manual count and CFDictionaryRef internal count are equal
+        
+        for (std::string const& key : database.list()) {            /// ensure the database contains no null-value strings
+            CHECK(database.get(key) != database.null_value());
+        }
+        
+        store::stringmap memcopy(database);                         /// duplicate the RocksDB database to an in-memory stringmap
+        
+        REQUIRE(database.count() == memcopy.count());               /// ensure 1) the two databases hold the same number of values,
+        for (std::string const& key : database.list()) {            /// 2) that the values themselves are equal,
+            CHECK(database.get(key) == memcopy.get(key));           ///    and,
+            CHECK(memcopy.get(key) != memcopy.null_value());        /// 3) that none of the values are std::string{ NULL_STR }.
+        }
+        
+        // Json(database.mapping()).dump(cfdictjsonpth.str());
+        // Json(memcopy.mapping()).dump(memoryjsonpth.str());
+        database.dump(cfdictjsonpth);                               /// dump the databases to disk-based representations (currently JSON dicts)
+        memcopy.dump(memoryjsonpth);
+        
+        REQUIRE(cfdictjsonpth.exists());                            /// ensure the above calls to store::cfdict::dump() do what they should
+        REQUIRE(cfdictjsonpth.is_file());
+        REQUIRE(memoryjsonpth.exists());
+        REQUIRE(memoryjsonpth.is_file());
+        
     }
     
 }

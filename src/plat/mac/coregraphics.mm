@@ -157,19 +157,17 @@ namespace store {
     }
     
     store::stringmapper::stringvec_t cfdict::list() const {
-        store::stringmapper::stringvec_t out{};
-        out.reserve(count());
+        store::stringmapper::stringvec_t outvec{};
+        outvec.reserve(count());
         
         CFDictionaryApplyFunction(instance.get(),
                                [](const void* key, const void* value, void* context) {
-                                  im::detail::cfp_t<CFStringRef> cfkey(
-                                             static_cast<__CFString *>(
-                                                    const_cast<void *>(key)));
-                                ((store::stringmapper::stringvec_t*)context)->emplace_back(
-                                                                      CFStringGetSTLString(cfkey.get()));
-        }, &out);
+                                  CFStringRef cfkey = static_cast<CFStringRef>(key);
+                                  store::stringmapper::stringvec_t* vec = ((store::stringmapper::stringvec_t*)context);
+                                  vec->emplace_back(CFStringGetSTLString(cfkey));
+        }, &outvec);
         
-        return out;
+        return outvec;
     }
     
     CFDictionaryRef cfdict::cfdictionary() const {
