@@ -23,9 +23,6 @@ namespace im {
                                             src->size(),
                                             kCFAllocatorNull)));
         
-        // detail::cfp_t<CGDataProviderRef> provider(
-        //            CGDataProviderCreateWithCFData(sourcedata.get()));
-        
         /// CFDataRef -> CGImageSourceRef
         detail::cfp_t<CGImageSourceRef> source(
                    CGImageSourceCreateWithData(sourcedata.get(),
@@ -87,8 +84,6 @@ namespace im {
         detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
         
         /// CGImageRef + pixelbuffer -> CGContextRef
-        // kCGImageAlphaPremultipliedLast |
-        // kCGBitmapByteOrder32Big
         detail::cfp_t<CGContextRef> context(
                       CGBitmapContextCreate(pixbuf.get(),
                                             width, height,
@@ -99,12 +94,7 @@ namespace im {
         /// Render image to bitmap context:
         CGContextDrawImage(context.get(), bounds, image.get());
         
-        /// create new im::Image instance using factory pointer:
-        // std::unique_ptr<Image> output = factory->create(bpc,                        /// bit depth (should be 8)
-        //                                                 height,                     /// image height
-        //                                                 width,                      /// image width
-        //                                                 bpp);                       /// channel count (likely 4 for RGBA)
-        
+        /// Create new im::Image instance using factory pointer:
         std::unique_ptr<Image> output = factory->create(8, height, width, 3);
         
         /// Temporary values and pointers
