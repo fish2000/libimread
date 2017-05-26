@@ -1,58 +1,11 @@
 // Copyright 2017 Alexander Bohn <fish2000@gmail.com>
 // License: MIT (see COPYING.MIT file)
 
-#include <memory>
-#include <cstdlib>
 #include <libimread/IO/gif.hh>
 #include <libimread/pixels.hh>
-
-#import  <CoreFoundation/CoreFoundation.h>
-#import  <ImageIO/ImageIO.h>
-
-/// N.B. this next whole conditional import is just to define `kUTTypeGIF`
-#if defined( __IPHONE_OS_VERSION_MIN_REQUIRED ) && __IPHONE_OS_VERSION_MIN_REQUIRED
-#import <MobileCoreServices/MobileCoreServices.h>
-#else
-#import <CoreServices/CoreServices.h>
-#endif
-
-/// These macros, like much other stuff in this implementation TU,
-/// are adapted from the always-handy-dandy Ray Wenderlich -- specifically, q.v.:
-/// https://www.raywenderlich.com/69855/image-processing-in-ios-part-1-raw-bitmap-modification
-/// http://www.modejong.com/blog/post3_pixel_binary_layout_w_premultiplied_alpha/index.html
-
-#define UNCOMPAND(x)    ((x) & 0xFF)
-#define R(x)            (UNCOMPAND(x))
-#define G(x)            (UNCOMPAND(x >> 8 ))
-#define B(x)            (UNCOMPAND(x >> 16))
-#define A(x)            (UNCOMPAND(x >> 24))
-
-#define CF_IDX(x)       static_cast<CFIndex>(x)
-#define CG_FLOAT(x)     static_cast<CGFloat>(x)
+#include <libimread/coregraphics.hh>
 
 namespace im {
-    
-    namespace detail {
-        
-        using pixbuf_t = std::unique_ptr<uint32_t[]>;
-        
-        template <typename CoreFoundationType>
-        struct cfreleaser {
-            constexpr cfreleaser() noexcept = default;
-            template <typename U> cfreleaser(cfreleaser<U> const&) noexcept {};
-            void operator()(CoreFoundationType __attribute__((cf_consumed)) cfp) {
-                CFRelease(cfp);
-                cfp = nil;
-            }
-        };
-        
-        template <typename CoreFoundationType>
-        using cfp_t = std::unique_ptr<
-                      typename std::decay_t<
-                               std::remove_pointer_t<CoreFoundationType>>,
-                                          cfreleaser<CoreFoundationType>>;
-        
-    }
     
     std::unique_ptr<Image> GIFFormat::read(byte_source* src,
                                            ImageFactory* factory,
@@ -97,11 +50,12 @@ namespace im {
                                         kUTTypeGIF };                               /// ITS A GIF, DOGG
             
             /// CFDictionaryCreate() copies CFTypes from `keys` and `values`
+            /// N.B. consider using kCFCopyStringDictionaryKeyCallBacks
             options.reset(const_cast<__CFDictionary *>(
                                     CFDictionaryCreate(kCFAllocatorDefault,
                                                        keys, values, CF_IDX(3),
-                                                       &kCFTypeDictionaryKeyCallBacks,
-                                                       &kCFTypeDictionaryValueCallBacks)));
+                                                      &kCFTypeDictionaryKeyCallBacks,
+                                                      &kCFTypeDictionaryValueCallBacks)));
         }
         
         /// CGImageSourceRef -> CGImageRef

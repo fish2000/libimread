@@ -36,8 +36,6 @@ namespace im {
         using PVRTC = PVRTCFormat;
     }
     
-
 }
-
 
 #endif /// LIBIMREAD_IO_PVRTC_HH_

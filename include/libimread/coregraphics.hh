@@ -4,61 +4,114 @@
 #ifndef LIBIMREAD_COREGRAPHICS_HH_
 #define LIBIMREAD_COREGRAPHICS_HH_
 
-#include <libimread/libimread.hpp>
-#include <libimread/ext/filesystem/path.h>
-#include <libimread/halide.hh>
-#include <libimread/interleaved.hh>
-#include <libimread/IO/apple.hh>
+#include <memory>
+#include <cstdlib>
+#include <libimread/store.hh>
+
+#import  <CoreFoundation/CoreFoundation.h>
+#import  <ImageIO/ImageIO.h>
+
+/// N.B. this next whole conditional import is just to define `kUTTypeGIF`
+#if defined( __IPHONE_OS_VERSION_MIN_REQUIRED ) && __IPHONE_OS_VERSION_MIN_REQUIRED
+#import <MobileCoreServices/MobileCoreServices.h>
+#else
+#import <CoreServices/CoreServices.h>
+#endif
+
+/// These macros, like much other stuff in this implementation TU,
+/// are adapted from the always-handy-dandy Ray Wenderlich -- specifically, q.v.:
+/// https://www.raywenderlich.com/69855/image-processing-in-ios-part-1-raw-bitmap-modification
+/// http://www.modejong.com/blog/post3_pixel_binary_layout_w_premultiplied_alpha/index.html
+
+#define UNCOMPAND(x)    ((x) & 0xFF)
+#define R(x)            (UNCOMPAND(x))
+#define G(x)            (UNCOMPAND(x >> 8 ))
+#define B(x)            (UNCOMPAND(x >> 16))
+#define A(x)            (UNCOMPAND(x >> 24))
+
+#define CF_IDX(x)       static_cast<CFIndex>(x)
+#define CG_FLOAT(x)     static_cast<CGFloat>(x)
+
+CF_EXPORT
+CFStringRef CFStringCreateWithSTLString(CFAllocatorRef alloc,
+                                        char const* cStr,
+                                        CFStringEncoding encoding = kCFStringEncodingUTF8);
+
+CF_EXPORT
+CFStringRef CFStringCreateWithSTLString(CFAllocatorRef alloc,
+                                        std::string const& stlStr,
+                                        CFStringEncoding encoding = kCFStringEncodingUTF8);
+
+CF_EXPORT
+std::string CFStringGetSTLString(CFStringRef theString,
+                                 CFStringEncoding encoding = kCFStringEncodingUTF8);
 
 namespace im {
     
-    namespace apple {
+    namespace detail {
         
-        using filesystem::path;
+        using pixbuf_t = std::unique_ptr<uint32_t[]>;
         
-        template <typename T>
-        using ImageType = HybridImage<std::decay_t<T>>;
+        template <typename CoreFoundationType>
+        struct cfreleaser {
+            constexpr cfreleaser() noexcept = default;
+            template <typename U> cfreleaser(cfreleaser<U> const&) noexcept {};
+            void operator()(CoreFoundationType __attribute__((cf_consumed)) cfp) {
+                CFRelease(cfp);
+                cfp = nil;
+            }
+        };
         
-        template <typename T>
-        using image_ptr = std::unique_ptr<ImageType<T>>;
-        
-        template <typename T = byte> inline
-        ImageType<T> read(std::string const& filename,
-                          options_map const& opts = options_map()) {
-            HalideFactory<T> factory(filename);
-            std::unique_ptr<ImageFormat> format(new format::Apple());
-            std::unique_ptr<FileSource> input(new FileSource(filename));
-            options_map readopts(format->add_options(opts));
-            readopts.set("filename", filename);
-            readopts.set("extension", path::extension(filename));
-            std::unique_ptr<Image> output = format->read(input.get(), &factory, readopts);
-            ImageType<T> image(dynamic_cast<ImageType<T>&>(*output));
-            return image;
-        }
-        
-        template <typename T = byte> inline
-        void write(HybridImage<T>& input, std::string const& filename,
-                                          options_map const& opts = options_map()) {
-            std::unique_ptr<ImageFormat> format(new format::Apple());
-            std::unique_ptr<FileSink> output(new FileSink(filename));
-            options_map writeopts(format->add_options(opts));
-            writeopts.set("filename", filename);
-            writeopts.set("extension", path::extension(filename));
-            format->write(dynamic_cast<Image&>(input), output.get(), writeopts);
-        }
-        
-        template <typename Color = color::RGBA> inline
-        void write(InterleavedImage<Color>& input, std::string const& filename,
-                                                   options_map const& opts = options_map()) {
-            std::unique_ptr<ImageFormat> format(new format::Apple());
-            std::unique_ptr<FileSink> output(new FileSink(filename));
-            options_map writeopts(format->add_options(opts));
-            writeopts.set("filename", filename);
-            writeopts.set("extension", path::extension(filename));
-            format->write(dynamic_cast<Image&>(input), output.get(), writeopts);
-        }
-        
+        template <typename CoreFoundationType>
+        using cfp_t = std::unique_ptr<
+                      typename std::decay_t<
+                               std::remove_pointer_t<CoreFoundationType>>,
+                                          cfreleaser<CoreFoundationType>>;
     }
+    
+}
+
+namespace store {
+    
+    using cfdict_ptr = im::detail::cfp_t<CFDictionaryRef>;
+    
+    class cfdict : public store::stringmapper {
+        
+        public:
+            DECLARE_STRINGMAPPER_TEMPLATES(cfdict);
+        
+        public:
+            virtual bool can_store() const noexcept override;
+        
+        public:
+            cfdict(void);
+            cfdict(cfdict const&);
+            cfdict(cfdict&&) noexcept;
+            virtual ~cfdict();
+        
+        protected:
+            bool has(std::string const&) const;
+            bool has(CFStringRef) const;
+        
+        public:
+            std::string& get_force(std::string const&) const;
+        
+        public:
+            /// implementation of the store::stringmapper API,
+            /// in terms of the CoreFoundation CFDictionary API
+            virtual std::string&       get(std::string const& key) override;
+            virtual std::string const& get(std::string const& key) const override;
+            virtual bool set(std::string const& key, std::string const& value) override;
+            virtual bool del(std::string const& key) override;
+            virtual std::size_t count() const override;
+            virtual stringvec_t list() const override;
+        
+        public:
+            CFDictionaryRef cfdictionary() const;
+        
+        protected:
+            mutable cfdict_ptr instance{ nullptr };
+    };
     
 }
 

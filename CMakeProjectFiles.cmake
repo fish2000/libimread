@@ -42,6 +42,28 @@ SEPARATE_ARGUMENTS(C_OPTIONS)
 SEPARATE_ARGUMENTS(CXX_OPTIONS)
 SEPARATE_ARGUMENTS(IO_EXTRA_OPTIONS)
 
+set(preview_src ${srcs_dir}/plat/posix/preview.cpp)
+unset(additional_src)
+unset(additional_hdrs)
+
+if(WINDOWS)
+    set(preview_src ${srcs_dir}/plat/windows/preview.cpp)
+endif(WINDOWS)
+
+if(LINUX)
+    set(preview_src ${srcs_dir}/plat/linux/preview.cpp)
+endif(LINUX)
+
+if(APPLE)
+    set(preview_src
+        ${srcs_dir}/plat/mac/preview.mm)
+    set(additional_hdrs
+        ${hdrs_dir}/coregraphics.hh)
+    set(additional_src
+        ${srcs_dir}/plat/mac/IO/gif.mm
+        ${srcs_dir}/plat/mac/coregraphics.mm)
+endif(APPLE)
+
 # Project header files
 set(hdrs
     ${CAPN_DIR}/halide.capnp.h
@@ -74,7 +96,7 @@ set(hdrs
     ${hdrs_dir}/ext/pystring.hh
     ${hdrs_dir}/ext/valarray.hh
     ${hdrs_dir}/ext/WriteGIF.hh
-
+    
     ${hdrs_dir}/IO/ansi.hh
     ${hdrs_dir}/IO/bmp.hh
     ${hdrs_dir}/IO/gif.hh
@@ -86,17 +108,17 @@ set(hdrs
     ${hdrs_dir}/IO/pvrtc.hh
     ${hdrs_dir}/IO/tiff.hh
     ${hdrs_dir}/IO/webp.hh
-
+    
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
     # ${hdrs_dir}/private/singleton.hh
     ${hdrs_dir}/private/static_image.h
     # ${hdrs_dir}/private/vpp_symbols.hh
-
+    
     # ${hdrs_dir}/process/jitresize.hh
     ${hdrs_dir}/process/neuquant.hh
     ${hdrs_dir}/process/neuquant.inl
-
+    
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
     ${hdrs_dir}/color.hh
@@ -127,23 +149,8 @@ set(hdrs
     ${hdrs_dir}/symbols.hh
     ${IOD_SYMBOLS_HEADER}
     ${hdrs_dir}/traits.hh
+    ${additional_hdrs}
 )
-
-set(preview_src ${srcs_dir}/plat/posix/preview.cpp)
-unset(additional_src)
-
-if(WINDOWS)
-    set(preview_src ${srcs_dir}/plat/windows/preview.cpp)
-endif(WINDOWS)
-
-if(LINUX)
-    set(preview_src ${srcs_dir}/plat/linux/preview.cpp)
-endif(LINUX)
-
-if(APPLE)
-    set(preview_src ${srcs_dir}/plat/mac/preview.mm)
-    set(additional_src ${srcs_dir}/plat/mac/IO/gif.mm)
-endif(APPLE)
 
 # Project source files
 set(srcs
@@ -184,10 +191,10 @@ set(srcs
     ${srcs_dir}/IO/pvrtc.cpp
     ${srcs_dir}/IO/tiff.cpp
     ${srcs_dir}/IO/webp.cpp
-
+    
     # ${srcs_dir}/process/jitresize.cpp
     # ${srcs_dir}/process/neuquant.cpp
-
+    
     # ${srcs_dir}/ansicolor.cpp
     # ${srcs_dir}/base.cpp
     # ${srcs_dir}/color.cpp
