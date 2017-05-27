@@ -164,14 +164,26 @@ namespace store {
     
     cfdict::stringvec_t cfdict::list() const {
         stringvec_t outvec{};
-        outvec.reserve(count());
         
+        /// Directly calling CFDictionaryGetCount --
+        /// rather than cfdict::count() -- saves us
+        /// the minute (yet arguably circuitous) cost
+        /// of dynamic method-dispatch via vtable...
+        /// not to mention whatever register-abuse the
+        /// gratuitous return-type casting may incur, dogg.
+        outvec.reserve(CFDictionaryGetCount(
+                               instance.get()));
+        
+        /// Remember, a non-capturing lambda can
+        /// implicitly convert to a function pointer!
         CFDictionaryApplyFunction(instance.get(),
-                               [](const void* key, const void* value, void* context) {
-                                  CFStringRef cfkey = static_cast<CFStringRef>(key);
-                                  stringvec_t* vecp = static_cast<stringvec_t*>(context);
-                                  vecp->emplace_back(CFStringGetSTLString(cfkey));
-                                  }, &outvec);
+                               [](const void* key,
+                                  const void* value,
+                                        void* context) {
+             CFStringRef cfkey = static_cast<CFStringRef>(key);
+             stringvec_t* vecp = static_cast<stringvec_t*>(context);
+             vecp->emplace_back(CFStringGetSTLString(cfkey));
+        }, &outvec);
         
         return outvec;
     }
