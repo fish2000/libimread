@@ -66,43 +66,37 @@
 
 namespace image_codec_compression {
 
-// This compressor only supports compression from RGBA8888 to 2BPP PVRTC RGBA.
-// All unsupported methods will simply return false.
-class PvrtcCompressor : public Compressor {
- public:
-  PvrtcCompressor();
-  virtual ~PvrtcCompressor();
+    // This compressor only supports compression from RGBA8888 to 2BPP PVRTC RGBA.
+    // All unsupported methods will simply return false.
+    class PvrtcCompressor : public Compressor {
+        
+        public:
+            PvrtcCompressor();
+            virtual ~PvrtcCompressor();
 
-  virtual bool SupportsFormat(CompressedImage::Format format) const;
-  virtual bool IsValidCompressedImage(const CompressedImage &image);
-  virtual size_t ComputeCompressedDataSize(CompressedImage::Format format,
-                                           uint32 height, uint32 width);
-  virtual bool Compress(CompressedImage::Format format,
-                        uint32 height, uint32 width,
-                        uint32 padding_bytes_per_row,
-                        const uint8 *buffer, CompressedImage *image);
-  virtual bool Decompress(const CompressedImage &image,
-                          std::vector<uint8> *decompressed_buffer);
-  virtual bool Downsample(const CompressedImage &image,
-                          CompressedImage *downsampled_image);
-  virtual bool Pad(const CompressedImage &image,
-                   uint32 padded_height, uint32 padded_width,
-                   CompressedImage *padded_image);
-  virtual bool CompressAndPad(CompressedImage::Format format,
-                              uint32 height, uint32 width,
-                              uint32 padded_height, uint32 padded_width,
-                              uint32 padding_bytes_per_row,
-                              const uint8 *buffer,
-                              CompressedImage *padded_image);
-  virtual bool CreateSolidImage(CompressedImage::Format format,
-                                uint32 height, uint32 width, const uint8 *color,
-                                CompressedImage *image);
-  virtual bool CopySubimage(const CompressedImage &image,
-                            uint32 start_row, uint32 start_column,
-                            uint32 height, uint32 width,
-                            CompressedImage *subimage);
-};
+            virtual bool   SupportsFormat(CompressedImage::Format format) const;
+            virtual bool   IsValidCompressedImage(const CompressedImage& image);
+            virtual size_t ComputeCompressedDataSize(CompressedImage::Format format, uint32_t height,
+                                                     uint32_t width);
+            virtual bool   Compress(CompressedImage::Format format, uint32_t height, uint32_t width,
+                                    uint32_t padding_bytes_per_row, const uint8_t* buffer,
+                                    CompressedImage* image);
+            virtual bool   Decompress(const CompressedImage& image,
+                                      std::vector<uint8_t>*    decompressed_buffer);
+            virtual bool   Downsample(const CompressedImage& image, CompressedImage* downsampled_image);
+            virtual bool   Pad(const CompressedImage& image, uint32_t padded_height, uint32_t padded_width,
+                               CompressedImage* padded_image);
+            virtual bool   CompressAndPad(CompressedImage::Format format, uint32_t height, uint32_t width,
+                                          uint32_t padded_height, uint32_t padded_width,
+                                          uint32_t padding_bytes_per_row, const uint8_t* buffer,
+                                          CompressedImage* padded_image);
+            virtual bool   CreateSolidImage(CompressedImage::Format format, uint32_t height, uint32_t width,
+                                            const uint8_t* color, CompressedImage* image);
+            virtual bool   CopySubimage(const CompressedImage& image, uint32_t start_row,
+                                        uint32_t start_column, uint32_t height, uint32_t width,
+                                        CompressedImage* subimage);
+    };
 
-}  // namespace image_codec_compression
+} // namespace image_codec_compression
 
-#endif  // IMAGE_COMPRESSION_PUBLIC_PVRTC_COMPRESSOR_H_
+#endif // IMAGE_COMPRESSION_PUBLIC_PVRTC_COMPRESSOR_H_
