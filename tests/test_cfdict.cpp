@@ -135,8 +135,11 @@ namespace {
             }
         }
         
-        SECTION("[cfdict] » Copy the CFDictionaryRef database using value_copy() and xattr with a TemporaryName")
+        SECTION("[cfdict] » Transfer the dict-backed database, "
+                           "using value_copy(), "
+                           "and xattr with a TemporaryName")
         {
+            /// Allocate character-writeablw, steam
             TemporaryName tn(".json");
             FileSink sink(tn.pathname);
             store::value_copy(database, sink);
@@ -148,7 +151,7 @@ namespace {
             REQUIRE(tn.pathname.is_readable());
         }
         
-        SECTION("[cfdict] » Copy the CFDictionaryRef database using {prefix,defix}_copy() and xattr with a TemporaryName")
+        SECTION("[cfdict] » Copy the dict-backed database using {prefix,defix}_copy() and xattr with a TemporaryName")
         {
             TemporaryName tn0(".json");
             TemporaryName tn1(".json");
