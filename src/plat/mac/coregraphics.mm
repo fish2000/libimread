@@ -5,12 +5,14 @@
 
 #define STRINGNULL() store::stringmapper::base_t::null_value()
 
+__attribute__((cf_returns_retained))
 CFStringRef CFStringCreateWithSTLString(CFAllocatorRef alloc,
                                         char const* cStr,
                                         CFStringEncoding encoding) {
     return CFStringCreateWithCString(alloc, cStr, encoding);
 }
 
+__attribute__((cf_returns_retained))
 CFStringRef CFStringCreateWithSTLString(CFAllocatorRef alloc,
                                         std::string const& stlStr,
                                         CFStringEncoding encoding) {
@@ -186,22 +188,26 @@ namespace store {
         return outvec;
     }
     
-    CFDictionaryRef cfdict::cfdictionary() const {
+    __attribute__((cf_returns_retained))
+    CFDictionaryRef cfdict::dictionary() const {
         return CFDictionaryCreateCopy(kCFAllocatorDefault,
                                       instance.get());
     }
     
+    __attribute__((cf_returns_retained))
     cfdict::operator CFDictionaryRef() const {
         return CFDictionaryCreateCopy(kCFAllocatorDefault,
                                       instance.get());
     }
     
-    CFMutableDictionaryRef cfdict::cfmutabledictionary() const {
+    __attribute__((cf_returns_retained))
+    CFMutableDictionaryRef cfdict::mutabledictionary() const {
         return CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
                         CFDictionaryGetCount(instance.get()),
                                              instance.get());
     }
     
+    __attribute__((cf_returns_retained))
     cfdict::operator CFMutableDictionaryRef() const {
         return CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
                         CFDictionaryGetCount(instance.get()),

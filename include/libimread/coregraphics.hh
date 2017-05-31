@@ -33,11 +33,13 @@
 #define CG_FLOAT(x)     static_cast<CGFloat>(x)
 
 CF_EXPORT
+__attribute__((cf_returns_retained))
 CFStringRef CFStringCreateWithSTLString(CFAllocatorRef alloc,
                                         char const* cStr,
                                         CFStringEncoding encoding = kCFStringEncodingUTF8);
 
 CF_EXPORT
+__attribute__((cf_returns_retained))
 CFStringRef CFStringCreateWithSTLString(CFAllocatorRef alloc,
                                         std::string const& stlStr,
                                         CFStringEncoding encoding = kCFStringEncodingUTF8);
@@ -57,8 +59,7 @@ namespace im {
             constexpr cfreleaser() noexcept = default;
             template <typename U> cfreleaser(cfreleaser<U> const&) noexcept {};
             void operator()(CoreFoundationType __attribute__((cf_consumed)) cfp) {
-                CFRelease(cfp);
-                cfp = nil;
+                if (cfp) { CFRelease(cfp); cfp = nullptr; }
             }
         };
         
@@ -109,10 +110,10 @@ namespace store {
             virtual stringvec_t list() const override;
         
         public:
-            CFDictionaryRef cfdictionary() const;
-            operator CFDictionaryRef() const;
-            CFMutableDictionaryRef cfmutabledictionary() const;
-            operator CFMutableDictionaryRef() const;
+            __attribute__((cf_returns_retained)) CFDictionaryRef dictionary() const;
+            __attribute__((cf_returns_retained)) operator CFDictionaryRef() const;
+            __attribute__((cf_returns_retained)) CFMutableDictionaryRef mutabledictionary() const;
+            __attribute__((cf_returns_retained)) operator CFMutableDictionaryRef() const;
         
         protected:
             mutable cfmdict_ptr instance{ nullptr };

@@ -90,7 +90,7 @@ namespace {
         REQUIRE(memoryjsonpth.is_file());
         
         cfp_t<CFDictionaryRef> immutable(const_cast<__CFDictionary *>(
-                                         database.cfdictionary())); /// copy the databases’ internal CFMutableDictionaruyRef into
+                                         database.dictionary()));   /// copy the databases’ internal CFMutableDictionaruyRef into
                                                                     /// a managed-pointer non-mutable CFDictionaryRef instance
         
         REQUIRE(database.count() ==
