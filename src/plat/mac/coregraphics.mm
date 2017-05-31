@@ -90,41 +90,39 @@ namespace store {
     std::string& cfdict::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
-        } else {
-            im::detail::cfp_t<CFStringRef> cfkey(
-                        const_cast<__CFString *>(
-                     CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
-            if (has(cfkey.get())) {
-                im::detail::cfp_t<CFStringRef> cfval(
-                           static_cast<__CFString *>(
-                                  const_cast<void *>(
-                                CFDictionaryGetValue(instance.get(),
-                                                        cfkey.get()))));
-                cache[key] = CFStringGetSTLString(cfval.get());
-                return cache.at(key);
-            }
-            return STRINGNULL();
         }
+        im::detail::cfp_t<CFStringRef> cfkey(
+                    const_cast<__CFString *>(
+                 CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
+        if (has(cfkey.get())) {
+            im::detail::cfp_t<CFStringRef> cfval(
+                       static_cast<__CFString *>(
+                              const_cast<void *>(
+                            CFDictionaryGetValue(instance.get(),
+                                                    cfkey.get()))));
+            cache[key] = CFStringGetSTLString(cfval.get());
+            return cache.at(key);
+        }
+        return STRINGNULL();
     }
     
     std::string const& cfdict::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
-        } else {
-            im::detail::cfp_t<CFStringRef> cfkey(
-                        const_cast<__CFString *>(
-                     CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
-            if (has(cfkey.get())) {
-                im::detail::cfp_t<CFStringRef> cfval(
-                           static_cast<__CFString *>(
-                                  const_cast<void *>(
-                                CFDictionaryGetValue(instance.get(),
-                                                        cfkey.get()))));
-                cache[key] = CFStringGetSTLString(cfval.get());
-                return cache.at(key);
-            }
-            return STRINGNULL();
         }
+        im::detail::cfp_t<CFStringRef> cfkey(
+                    const_cast<__CFString *>(
+                 CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
+        if (has(cfkey.get())) {
+            im::detail::cfp_t<CFStringRef> cfval(
+                       static_cast<__CFString *>(
+                              const_cast<void *>(
+                            CFDictionaryGetValue(instance.get(),
+                                                    cfkey.get()))));
+            cache[key] = CFStringGetSTLString(cfval.get());
+            return cache.at(key);
+        }
+        return STRINGNULL();
     }
     
     bool cfdict::set(std::string const& key, std::string const& value) {
