@@ -60,7 +60,6 @@ namespace {
             path newpath(td.dirpath/p + ".gif");
             path redopath(td.dirpath/p + "-2.gif");
             
-            // U8Image halim = im::halide::read(fullpath.str());
             std::unique_ptr<FileSource> source = std::make_unique<FileSource>(fullpath);
             std::unique_ptr<Image> input = png_format->read(source.get(),
                                                             factory.get(),
@@ -74,13 +73,13 @@ namespace {
             //                                 first_hybrid.dim(1),
             //                                 first_hybrid.dim(2)));
             
-            // im::halide::write(halim, newpath.str());
             {
                 std::unique_ptr<FileSink> rewrite = std::make_unique<FileSink>(newpath);
                 gif_format->write(dynamic_cast<Image&>(first_hybrid),
                                   rewrite.get(),
                                   gif_format->add_options(write_options));
                 
+                /// Stash some metadata w/r/t the image source using xattrs:
                 rewrite->xattr("im:original_format", "png");
                 rewrite->xattr("im:original_path",   fullpath.str());
                 rewrite->xattr("im:original_size",   std::to_string(source->size()));
@@ -102,7 +101,7 @@ namespace {
             //                                 second_hybrid.dim(1),
             //                                 second_hybrid.dim(2)));
             
-            /// compare first-pass and second-pass image-data properties
+            /// Compare first-pass and second-pass image-data properties:
             CHECK(first_hybrid.nbits()                  == second_hybrid.nbits());
             CHECK(first_hybrid.nbytes()                 == second_hybrid.nbytes());
             CHECK(first_hybrid.ndims()                  == second_hybrid.ndims());
@@ -115,31 +114,34 @@ namespace {
             // CHECK(first_hybrid.width()                  == second_hybrid.width());
             // CHECK(first_hybrid.height()                 == second_hybrid.height());
             
-            /// verify xattr metadata
+            /// Verify stashed xattr metadata:
             CHECK(newpath.xattr("im:original_format")   == "png");
             CHECK(newpath.xattr("im:original_path")     == fullpath.str());
             CHECK(newpath.xattr("im:original_size")     == std::to_string(source->size()));
-            // CHECK(newpath.xattr("im:original_size")     == std::to_string(readback->size()));
             
-            /// compare image content
+            /// Compare image content
             // CHECK(first_hybrid.allplanes<byte>()        == second_hybrid.allplanes<byte>());
             // CHECK(first_hybrid.plane<byte>(0)           == second_hybrid.plane<byte>(0));
             
-            // im::halide::write(halim, redopath.str());
             {
                 std::unique_ptr<FileSink> rerewrite = std::make_unique<FileSink>(redopath);
                 gif_format->write(dynamic_cast<Image&>(second_hybrid),
                                   rerewrite.get(),
                                   gif_format->add_options(write_options));
                 
+                /// Stash some metadata w/r/t the image source using xattrs:
                 rerewrite->xattr("im:original_format", "gif");
-                rerewrite->xattr("im:original_path",   newpath.str());
+                rerewrite->xattr("im:original_path",   redopath.str());
                 rerewrite->xattr("im:original_size",   std::to_string(readback->size()));
             }
             
             REQUIRE(redopath.is_file());
             // CHECK(COLLECT(redopath));
             
+            /// Verify stashed xattr metadata:
+            CHECK(redopath.xattr("im:original_format")   == "gif");
+            CHECK(redopath.xattr("im:original_path")     == redopath.str());
+            CHECK(redopath.xattr("im:original_size")     == std::to_string(readback->size()));
         });
     }
     
