@@ -52,12 +52,14 @@ namespace store {
     
     cfdict::cfdict(CFDictionaryRef raw)
         :instance{ const_cast<__CFDictionary *>(
-                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault, CF_IDX(0), raw)) }
+                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+                           CFDictionaryGetCount(raw), raw)) }
         {}
     
     cfdict::cfdict(CFMutableDictionaryRef raw)
         :instance{ const_cast<__CFDictionary *>(
-                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault, CF_IDX(0), raw)) }
+                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+                           CFDictionaryGetCount(raw), raw)) }
         {}
     
     cfdict::~cfdict() {}
