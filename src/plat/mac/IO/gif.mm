@@ -5,6 +5,13 @@
 #include <libimread/pixels.hh>
 #include <libimread/coregraphics.hh>
 
+/// N.B. this next whole conditional import is just to define `kUTTypeGIF`
+#if defined( __IPHONE_OS_VERSION_MIN_REQUIRED ) && __IPHONE_OS_VERSION_MIN_REQUIRED
+#import <MobileCoreServices/MobileCoreServices.h>
+#else
+#import <CoreServices/CoreServices.h>
+#endif
+
 namespace im {
     
     std::unique_ptr<Image> GIFFormat::read(byte_source* src,

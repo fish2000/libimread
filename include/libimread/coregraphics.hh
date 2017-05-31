@@ -11,13 +11,6 @@
 #import  <CoreFoundation/CoreFoundation.h>
 #import  <ImageIO/ImageIO.h>
 
-/// N.B. this next whole conditional import is just to define `kUTTypeGIF`
-#if defined( __IPHONE_OS_VERSION_MIN_REQUIRED ) && __IPHONE_OS_VERSION_MIN_REQUIRED
-#import <MobileCoreServices/MobileCoreServices.h>
-#else
-#import <CoreServices/CoreServices.h>
-#endif
-
 /// These macros, like much other stuff in this implementation TU,
 /// are adapted from the always-handy-dandy Ray Wenderlich -- specifically, q.v.:
 /// https://www.raywenderlich.com/69855/image-processing-in-ios-part-1-raw-bitmap-modification
