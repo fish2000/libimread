@@ -18,10 +18,6 @@
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
-// std::unique_ptr<ImageFormat> format_ptr = ImageFormat::named("png");
-// std::unique_ptr<formats::PNG> png_format = std::make_unique<formats::PNG>();
-// std::unique_ptr<formats::GIF> gif_format = std::make_unique<formats::GIF>();
-
 namespace formats = im::format;
 
 namespace {

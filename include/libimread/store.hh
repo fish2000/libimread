@@ -221,6 +221,12 @@ namespace store {
         }
     }
     
+    namespace tag {
+        struct tagbase     {};
+        struct prefix : public tagbase  {};
+        struct defix : public tagbase   {};
+    }
+    
     #define DECLARE_STRINGMAPPER_TEMPLATE_METHODS()                                             \
                                                                                                 \
         template <typename T,                                                                   \
@@ -270,10 +276,22 @@ namespace store {
                   typename X = typename std::enable_if_t<                                       \
                                         store::is_stringmapper_v<T>, void>>                     \
         explicit __typename__(T&& from, std::string const& prefix,                              \
-                                        std::string const& sep = ":") noexcept                  \
+                                        std::string const& sep = ":",                           \
+                                        store::tag::prefix tag = store::tag::prefix{}) noexcept \
             :__typename__()                                                                     \
             {                                                                                   \
                 store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                  \
+            }                                                                                   \
+                                                                                                \
+        template <typename T,                                                                   \
+                  typename X = typename std::enable_if_t<                                       \
+                                        store::is_stringmapper_v<T>, void>>                     \
+        explicit __typename__(T&& from, std::string const& prefix,                              \
+                                        std::string const& sep,                                 \
+                                        store::tag::defix tag)                                  \
+            :__typename__()                                                                     \
+            {                                                                                   \
+                store::defix_copy(std::forward<T>(from), *this, prefix, sep);                   \
             }
     
     #define DECLARE_STRINGMAPPER_TEMPLATES(__typename__)                                        \
