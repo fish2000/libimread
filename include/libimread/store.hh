@@ -222,9 +222,9 @@ namespace store {
     }
     
     namespace tag {
-        struct tagbase     {};
+        struct tagbase                  {};
         struct prefix : public tagbase  {};
-        struct defix : public tagbase   {};
+        struct defix  : public tagbase  {};
     }
     
     #define DECLARE_STRINGMAPPER_TEMPLATE_METHODS()                                             \
@@ -277,7 +277,7 @@ namespace store {
                                         store::is_stringmapper_v<T>, void>>                     \
         explicit __typename__(T&& from, std::string const& prefix,                              \
                                         std::string const& sep = ":",                           \
-                                        store::tag::prefix tag = store::tag::prefix{}) noexcept \
+                                        store::tag::prefix tag = store::tag::prefix{})          \
             :__typename__()                                                                     \
             {                                                                                   \
                 store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                  \
