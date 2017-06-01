@@ -20,16 +20,16 @@ namespace im {
         using rlimit_t = struct rlimit;
     }
     
-    constexpr int fd_source_sink::READ_FLAGS;
-    constexpr int fd_source_sink::WRITE_FLAGS;
-    constexpr int fd_source_sink::WRITE_CREATE_MASK;
+    constexpr int fd_source_sink::kReadFlags;
+    constexpr int fd_source_sink::kWriteFlags;
+    constexpr int fd_source_sink::kWriteCreateMask;
     
     int fd_source_sink::open_read(char const* p) {
-        return ::open(p, READ_FLAGS);
+        return ::open(p, kReadFlags);
     }
     
     int fd_source_sink::open_write(char const* p, int mask) {
-        return ::open(p, WRITE_FLAGS, mask);
+        return ::open(p, kWriteFlags, mask);
     }
     
     std::size_t fd_source_sink::max_descriptor_count() {

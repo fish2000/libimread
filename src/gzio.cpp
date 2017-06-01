@@ -38,19 +38,19 @@ namespace im {
         }
     }
     
-    constexpr int gzio_source_sink::READ_FLAGS;
-    constexpr int gzio_source_sink::WRITE_FLAGS;
-    constexpr int gzio_source_sink::WRITE_CREATE_MASK;
+    constexpr int gzio_source_sink::kReadFlags;
+    constexpr int gzio_source_sink::kWriteFlags;
+    constexpr int gzio_source_sink::kWriteCreateMask;
     
     DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kOriginalSize,     "im:original_size");
     DECLARE_CONSTEXPR_CHAR(gzio_source_sink::kUncompressedSize, "im:uncompressed_size");
     
     int gzio_source_sink::open_read(char const* p) {
-        return ::open(p, READ_FLAGS);
+        return ::open(p, kReadFlags);
     }
     
     int gzio_source_sink::open_write(char const* p, int mask) {
-        return ::open(p, WRITE_FLAGS, mask);
+        return ::open(p, kWriteFlags, mask);
     }
     
     std::size_t gzio_source_sink::max_descriptor_count() {

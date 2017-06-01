@@ -32,15 +32,15 @@ namespace im {
     class gzio_source_sink : public byte_source, public byte_sink, public store::xattrmap {
         
         protected:
-            static constexpr int READ_FLAGS = O_RDONLY | O_NONBLOCK;
-            static constexpr int WRITE_FLAGS = O_WRONLY | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
-            static constexpr int WRITE_CREATE_MASK = 0644;
+            static constexpr int kReadFlags             = O_RDONLY | O_NONBLOCK;
+            static constexpr int kWriteFlags            = O_WRONLY | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
+            static constexpr int kWriteCreateMask       = 0644;
             
-            static constexpr char kOriginalSize[]     = "im:original_size";
-            static constexpr char kUncompressedSize[] = "im:uncompressed_size";
+            static constexpr char kOriginalSize[]       = "im:original_size";
+            static constexpr char kUncompressedSize[]   = "im:uncompressed_size";
             
             static int open_read(char const* p);
-            static int open_write(char const* p, int mask = WRITE_CREATE_MASK);
+            static int open_write(char const* p, int mask = kWriteCreateMask);
         
         public:
             static std::size_t max_descriptor_count();
