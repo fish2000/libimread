@@ -124,7 +124,7 @@ namespace store {
     
     rocks::~rocks() {}
     
-    std::string const& rocks::get_force(std::string const& key) const {
+    std::string& rocks::get_force(std::string const& key) const {
         std::string sval;
         Status status = SELF()->Get(options::read(), key, &sval);
         if (status.ok()) {
@@ -149,26 +149,14 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         }
-        std::string sval;
-        Status status = SELF()->Get(options::read(), key, &sval);
-        if (status.ok()) {
-            cache[key] = sval;
-            return cache.at(key);
-        }
-        return STRINGNULL();
+        return get_force(key);
     }
     
     std::string const& rocks::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         }
-        std::string sval;
-        Status status = SELF()->Get(options::read(), key, &sval);
-        if (status.ok()) {
-            cache[key] = sval;
-            return cache.at(key);
-        }
-        return STRINGNULL();
+        return get_force(key);
     }
     
     bool rocks::set(std::string const& key, std::string const& value) {
