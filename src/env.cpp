@@ -38,7 +38,7 @@ namespace store {
     
     env::~env() {}
     
-    std::string const& env::get_force(std::string const& key) const {
+    std::string& env::get_force(std::string const& key) const {
         char* cvalue = nullptr;
         {
             std::unique_lock<std::mutex> getlock(getmute);
@@ -60,47 +60,15 @@ namespace store {
     std::string& env::get(std::string const& key) {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
-        } else {
-            char* cvalue = nullptr;
-            {
-                std::unique_lock<std::mutex> getlock(getmute);
-                cvalue = std::getenv(key.c_str());
-            }
-            if (cvalue != nullptr) {
-                std::string value(cvalue);
-                if (value.size() > 0) {
-                    {
-                        std::unique_lock<std::mutex> setlock(setmute);
-                        cache.insert({ key, value });
-                    }
-                    return cache.at(key);
-                }
-            }
-            return STRINGNULL();
         }
+        return get_force(key);
     }
     
     std::string const& env::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
-        } else {
-            char* cvalue;
-            {
-                std::unique_lock<std::mutex> getlock(getmute);
-                cvalue = std::getenv(key.c_str());
-            }
-            if (cvalue != nullptr) {
-                std::string value(cvalue);
-                if (value.size() > 0) {
-                    {
-                        std::unique_lock<std::mutex> setlock(setmute);
-                        cache.insert({ key, value });
-                    }
-                    return cache.at(key);
-                }
-            }
-            return STRINGNULL();
         }
+        return get_force(key);
     }
     
     bool env::set(std::string const& key, std::string const& value) {
