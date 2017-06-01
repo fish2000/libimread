@@ -19,7 +19,7 @@
 #include "image_compression/internal/logging.h"
 #include "image_compression/internal/color_util.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     //
     // The Pixel4x4 class is used to simplify access to a 4x4 block of
@@ -156,6 +156,6 @@ namespace image_codec_compression {
         }
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_INTERNAL_PIXEL4X4_H_

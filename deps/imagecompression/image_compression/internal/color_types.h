@@ -20,7 +20,7 @@
 #include <cstddef>
 #include "image_compression/internal/logging.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     //
     // This file contains some basic types that help deal with colors in image
@@ -170,6 +170,6 @@ namespace image_codec_compression {
     typedef RgbColor<int32_t>  RgbInt;
     typedef RgbaColor<int32_t> RgbaInt;
     
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_INTERNAL_COLOR_TYPES_H_

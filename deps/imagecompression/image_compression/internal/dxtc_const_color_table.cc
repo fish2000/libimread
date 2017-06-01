@@ -15,7 +15,7 @@
 #include "image_compression/internal/dxtc_const_color_table.h"
 #include <cstddef>
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     namespace {
         /*
@@ -389,4 +389,4 @@ namespace image_codec_compression {
         return which_bits;
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression

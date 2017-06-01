@@ -21,7 +21,7 @@
 
 #include "image_compression/internal/logging.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     // This class is used to represent an image that has been compressed
     // using a Compressor. It encapsulates all information about the image
@@ -186,6 +186,6 @@ namespace image_codec_compression {
         return format == CompressedImage::kBGR || format == CompressedImage::kBGRA;
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_PUBLIC_COMPRESSED_IMAGE_H_

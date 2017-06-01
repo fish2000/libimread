@@ -18,7 +18,7 @@
 #include <cstddef>
 #include "image_compression/internal/logging.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     //
     // This file contains types and functions that help deal with bit
@@ -66,6 +66,6 @@ namespace image_codec_compression {
         return (value << num_to_shift) >> num_to_shift;
     }
     
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_INTERNAL_BIT_UTIL_H_

@@ -24,7 +24,7 @@
 #include "image_compression/internal/dxtc_const_color_table.h"
 #include "image_compression/internal/pixel4x4.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     //-----------------------------------------------------------------------------
     
@@ -840,4 +840,4 @@ namespace image_codec_compression {
         }
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression

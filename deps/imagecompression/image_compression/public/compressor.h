@@ -42,7 +42,7 @@
 
 #include "image_compression/public/compressed_image.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     class Compressor {
         
@@ -140,6 +140,6 @@ namespace image_codec_compression {
                                       CompressedImage* subimage) = 0;
     };
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_PUBLIC_COMPRESSOR_H_

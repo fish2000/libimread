@@ -21,7 +21,7 @@
 #include "image_compression/internal/logging.h"
 #include "image_compression/internal/color_types.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     //
     // This file contains functions that help deal with colors in image compression
@@ -458,6 +458,6 @@ namespace image_codec_compression {
         return out;
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_INTERNAL_COLOR_UTIL_H_

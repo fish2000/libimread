@@ -46,7 +46,7 @@
 #include "image_compression/public/compressed_image.h"
 #include "image_compression/public/compressor.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     class DxtcCompressor : public Compressor {
         
@@ -94,6 +94,6 @@ namespace image_codec_compression {
                                       CompressedImage* subimage);
     };
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_PUBLIC_DXTC_COMPRESSOR_H_

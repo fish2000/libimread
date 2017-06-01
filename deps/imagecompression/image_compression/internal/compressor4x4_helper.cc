@@ -17,7 +17,7 @@
 #include <cstddef>
 #include "image_compression/internal/logging.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     bool Compressor4x4Helper::SetUpCompressedImage(std::string const& compressor_name,
                                                    size_t block_size,
@@ -43,4 +43,4 @@ namespace image_codec_compression {
         return true;
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression

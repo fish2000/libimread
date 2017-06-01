@@ -63,7 +63,7 @@
 #include "image_compression/public/compressed_image.h"
 #include "image_compression/public/compressor.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     // This compressor only supports compression from RGBA8888 to 2BPP PVRTC RGBA.
     // All unsupported methods will simply return false.
@@ -114,6 +114,6 @@ namespace image_codec_compression {
                                         CompressedImage* subimage);
     };
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_PUBLIC_PVRTC_COMPRESSOR_H_

@@ -75,7 +75,7 @@
 #include "image_compression/internal/pixel4x4.h"
 #include "image_compression/public/compressed_image.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     class Compressor4x4Helper {
         
@@ -611,6 +611,6 @@ namespace image_codec_compression {
         return encode(pixel4x4, false);
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_INTERNAL_COMPRESSOR4X4_HELPER_H_

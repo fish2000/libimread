@@ -47,7 +47,7 @@
 #include "image_compression/public/compressed_image.h"
 #include "image_compression/public/compressor.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     class EtcCompressor : public Compressor {
         
@@ -115,6 +115,6 @@ namespace image_codec_compression {
             CompressionStrategy compression_strategy_;
     };
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_PUBLIC_ETC_COMPRESSOR_H_

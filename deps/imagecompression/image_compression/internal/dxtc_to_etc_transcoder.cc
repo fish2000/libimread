@@ -17,7 +17,7 @@
 #include "image_compression/internal/pixel4x4.h"
 #include "image_compression/public/etc_compressor.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     // Forward declarations of objects only seen in .cc files.
     struct Dxt1Block;
@@ -42,4 +42,4 @@ namespace image_codec_compression {
         }
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression

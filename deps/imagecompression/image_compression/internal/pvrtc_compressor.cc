@@ -23,7 +23,7 @@
 #include "image_compression/internal/color_util.h"
 #include "image_compression/public/compressed_image.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     // Four methods of encoding modulation bits for a block of pixels used by this
     // compressor.
@@ -617,12 +617,13 @@ namespace image_codec_compression {
             image->CreateOwnedData(metadata, data_size);
         } else {
             // Make sure the external storage has the correct size.
-            if (image->GetDataSize() != data_size)
-                return false;
+            if (image->GetDataSize() != data_size) { return false; }
             image->SetMetadata(metadata);
         }
         
-        CompressPVRTC_RGBA_2BPP((const Rgba8888*)buffer, width, height, image->GetMutableData());
+        CompressPVRTC_RGBA_2BPP((const Rgba8888*)buffer,
+                                width, height,
+                                image->GetMutableData());
         return true;
     }
     
@@ -660,4 +661,4 @@ namespace image_codec_compression {
         return false;
     }
     
-} // namespace image_codec_compression
+} // namespace imagecompression

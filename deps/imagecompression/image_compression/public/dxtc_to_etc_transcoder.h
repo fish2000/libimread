@@ -17,12 +17,12 @@
 
 #include "image_compression/public/compressed_image.h"
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     // This function transcodes the given image in-place from DXT1 format to ETC1
     // format. Only the data section of the image is modified.
     void TranscodeDxt1ToEtc1(CompressedImage* image);
 
-} // namespace image_codec_compression
+} // namespace imagecompression
 
 #endif // IMAGE_COMPRESSION_PUBLIC_DXTC_TO_ETC_TRANSCODER

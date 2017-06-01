@@ -27,7 +27,7 @@
 
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
 
-namespace image_codec_compression {
+namespace imagecompression {
 
     //============================================================================
     //
@@ -816,4 +816,4 @@ namespace image_codec_compression {
                                                            subimage);
     }
 
-} // namespace image_codec_compression
+} // namespace imagecompression

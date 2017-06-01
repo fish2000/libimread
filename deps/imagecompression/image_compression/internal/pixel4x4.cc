@@ -16,7 +16,7 @@
 #include "image_compression/internal/pixel4x4.h"
 #include <cstddef>
 
-namespace image_codec_compression {
+namespace imagecompression {
     
     template <typename ColorType>
     void Pixel4x4::ConstructOutsideImage(const ColorType* pixels,
@@ -70,4 +70,4 @@ namespace image_codec_compression {
                                                    uint32_t bytes_per_row,
                                                    int row, int column);
 
-} // namespace image_codec_compression
+} // namespace imagecompression
