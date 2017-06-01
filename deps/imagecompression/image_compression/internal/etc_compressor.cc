@@ -526,8 +526,8 @@ namespace image_codec_compression {
     }
     
     // Encodes a 4x4 array of RGB pixels into a single 64-bit ETC1 block.
-    static uint64_t EncodeBlock(Pixel4x4 const& pixel4x4,
-                                EtcCompressor::CompressionStrategy strategy) {
+    uint64_t EncodeEtc1Block(Pixel4x4 const& pixel4x4,
+                             EtcCompressor::CompressionStrategy strategy) {
         uint32_t error_lr, error_tb;
         switch (strategy) {
             case EtcCompressor::kSplitHorizontally:
@@ -611,7 +611,7 @@ namespace image_codec_compression {
                 : strategy_(strategy) {}
             uint64_t operator()(Pixel4x4 const& pixel4x4, bool swap_red_and_blue) {
                 DCHECK(!swap_red_and_blue);
-                return EncodeBlock(pixel4x4, strategy_);
+                return EncodeEtc1Block(pixel4x4, strategy_);
             }
         
         private:
@@ -641,7 +641,7 @@ namespace image_codec_compression {
                         pixel4x4.SetPixel(y, x, last_column_color);
                     }
                 }
-                return EncodeBlock(pixel4x4, strategy_);
+                return EncodeEtc1Block(pixel4x4, strategy_);
             }
         
         private:
@@ -664,7 +664,7 @@ namespace image_codec_compression {
                         pixel4x4.SetPixel(y, x, last_row_color);
                     }
                 }
-                return EncodeBlock(pixel4x4, strategy_);
+                return EncodeEtc1Block(pixel4x4, strategy_);
             }
         
         private:

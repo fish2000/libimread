@@ -30,6 +30,7 @@ set(hdrs "image_compression/internal/logging.h"
          "image_compression/public/compressed_image.h"
          "image_compression/public/compressor.h"
          "image_compression/public/dxtc_compressor.h"
+         "image_compression/public/dxtc_to_etc_transcoder.h"
          "image_compression/public/etc_compressor.h"
          "image_compression/public/pvrtc_compressor.h")
 
@@ -37,6 +38,7 @@ set(hdrs "image_compression/internal/logging.h"
 set(srcs "image_compression/internal/compressor4x4_helper.cc"
          "image_compression/internal/dxtc_compressor.cc"
          "image_compression/internal/dxtc_const_color_table.cc"
+         "image_compression/internal/dxtc_to_etc_transcoder.cc"
          "image_compression/internal/etc_compressor.cc"
          "image_compression/internal/pixel4x4.cc"
          "image_compression/internal/pvrtc_compressor.cc")
