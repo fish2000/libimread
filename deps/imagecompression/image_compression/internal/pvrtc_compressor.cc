@@ -43,12 +43,11 @@ namespace imagecompression {
     };
     
     // Block width and height as for 2BPP PVRTC.
-    // static const uint32_t kBlockWidth  = 8;
-    // static const uint32_t kBlockHeight = 4;
     static const uint32_t kLog2BlockWidth = 3;
     static const uint32_t kLog2BlockHeight = 2;
     static const uint32_t kBlockWidth = (1 << kLog2BlockWidth);
-    static const uint32_t kBlockHeight = (1 << kLog2BlockHeight);    
+    static const uint32_t kBlockHeight = (1 << kLog2BlockHeight);
+    
     //
     // General helper functions.
     //
@@ -234,8 +233,11 @@ namespace imagecompression {
     // |x0| left edge of the block to be considered in pixels.
     // |y0| top edge of the block to be considered in pixels.
     // |out_index_0|, |out_index_1| output colors as indices into |image|.
-    static void GetExtremesFast(const Rgba8888* image, uint32_t width, uint32_t height, uint32_t x0,
-                                uint32_t y0, uint32_t* out_index_0, uint32_t* out_index_1) {
+    static void GetExtremesFast(const Rgba8888* image,
+                                uint32_t width, uint32_t height,
+                                uint32_t x0, uint32_t y0,
+                                uint32_t* out_index_0,
+                                uint32_t* out_index_1) {
         
         // Consider 5 different pairs; lightness, then R, G, B, A axes.
         #define PAIRS 5
@@ -374,9 +376,9 @@ namespace imagecompression {
     // |width| and |height| image_mod pixel dimensions (must be a power of two).
     // |block_x| block x coordinate, i.e. ranging from 0 to |width| / kBlockWidth.
     // |block_y| block y coordinate, i.e. ranging from 0 to |height| / kBlockHeight.
-    static ModulationMode CalculateBlockModulationMode(const uint8_t* image_mod, uint32_t width,
-                                                       uint32_t height, uint32_t block_x,
-                                                       uint32_t block_y) {
+    static ModulationMode CalculateBlockModulationMode(const uint8_t* image_mod,
+                                                       uint32_t width, uint32_t height,
+                                                       uint32_t block_x, uint32_t block_y) {
         // A count of how many pixels are best served by modulation values 2 or 3,
         // i.e. intermediate between the extremes of one color or the other.
         uint32_t intermediate_value_count = 0;
@@ -612,7 +614,8 @@ namespace imagecompression {
         if (width % kBlockWidth != 0 || height % kBlockHeight != 0) { return false; }
         
         size_t data_size = ComputeCompressedDataSize(format, height, width);
-        const CompressedImage::Metadata metadata(format, "pvrtc", height, width, height, width, 0);
+        const CompressedImage::Metadata metadata(format, "pvrtc", height, width,
+                                                                  height, width, 0);
         if (image->OwnsData()) {
             image->CreateOwnedData(metadata, data_size);
         } else {

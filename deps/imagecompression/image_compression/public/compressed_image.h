@@ -81,7 +81,8 @@ namespace imagecompression {
                 : metadata_(kRGB, "", 0, 0, 0, 0, 0)
                 , data_size_(0)
                 , data_(NULL)
-                , owns_data_(true) {}
+                , owns_data_(true)
+            {}
             
             // This constructor can be used when data storage is managed
             // externally.  It is assumed that the lifetime of the data is at
@@ -90,10 +91,11 @@ namespace imagecompression {
                 : metadata_(kRGB, "", 0, 0, 0, 0, 0)
                 , data_size_(data_size)
                 , data_(external_data)
-                , owns_data_(false) {
+                , owns_data_(false)
+            {
                 DCHECK(external_data);
             }
-
+            
             // The destructor frees up the data storage if it is owned by this instance.
             ~CompressedImage() {
                 if (OwnsData()) {
@@ -168,7 +170,7 @@ namespace imagecompression {
             CompressedImage(CompressedImage const&);
             void operator=(CompressedImage const&);
     };
-
+    
     // Returns the number of components in the given format.
     inline int GetNumFormatComponents(CompressedImage::Format format) {
         switch (format) {

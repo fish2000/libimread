@@ -73,15 +73,20 @@ namespace imagecompression {
             PvrtcCompressor();
             virtual ~PvrtcCompressor();
             
-            virtual bool   SupportsFormat(CompressedImage::Format format) const;
-            virtual bool   IsValidCompressedImage(CompressedImage const& image);
-            virtual size_t ComputeCompressedDataSize(CompressedImage::Format format,
+            virtual bool   SupportsFormat(CompressedImage::Format format) const;            /// OK
+            virtual bool   IsValidCompressedImage(CompressedImage const& image);            /// OK
+            virtual size_t ComputeCompressedDataSize(CompressedImage::Format format,        /// OK
                                                      uint32_t height,
                                                      uint32_t width);
             
-            virtual bool   Compress(CompressedImage::Format format,
-                                    uint32_t height,
-                                    uint32_t width,
+            /// log2 = lambda x: math.log(x)/math.log(2)
+            /// power2 = lambda x: log2(x) == round(log2(x))
+            /// power2(128) == True
+            /// power2(129) == False
+            
+            virtual bool   Compress(CompressedImage::Format format,                         /// OK with kRGBA,
+                                    uint32_t height,                                        /// power2(height),
+                                    uint32_t width,                                         /// power2(width)
                                     uint32_t padding_bytes_per_row,
                                     const uint8_t* buffer,
                                     CompressedImage* image);
