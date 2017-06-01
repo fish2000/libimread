@@ -92,7 +92,7 @@ IOD_SYMBOLIZE(
 
 # Set variables for the deps and apps directories:
 SET(APPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/apps")
-SET(CAPN_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/capn")
+# SET(CAPN_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/capn")
 SET(DEPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 SET(HALOGEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/halogen")
 
@@ -137,7 +137,7 @@ find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
 find_package(LibUnwind REQUIRED)
-find_package(CapnProto REQUIRED)
+# find_package(CapnProto REQUIRED)
 
 set(HDF5_USE_STATIC_LIBRARIES false)
 # set(HDF5_ROOT /usr/local/opt/hdf5/)
@@ -238,7 +238,7 @@ target_link_libraries(imread_shared
     ${HDF5_C_LIBRARIES}
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
-    ${CAPNP_LIBRARIES_LITE}
+    # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES})
 
 target_link_libraries(imread_static
@@ -253,7 +253,7 @@ target_link_libraries(imread_static
     ${HDF5_C_LIBRARIES}
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
-    ${CAPNP_LIBRARIES_LITE}
+    # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES})
 
 # Set and pass on compile-time config variable values:
@@ -344,7 +344,7 @@ if(IM_TESTS)
         ${HDF5_C_LIBRARIES}
         ${HDF5_CXX_LIBRARIES}
         ${HDF5_HL_LIBRARIES}
-        ${CAPNP_LIBRARIES_LITE}
+        # ${CAPNP_LIBRARIES_LITE}
         ${ROCKSDB_LIBRARIES})
     
     # Set up ctest and cdash:

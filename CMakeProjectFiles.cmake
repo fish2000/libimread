@@ -66,8 +66,8 @@ endif(APPLE)
 
 # Project header files
 set(hdrs
-    ${CAPN_DIR}/halide.capnp.h
-    ${CAPN_DIR}/numpy.capnp.h
+    # ${CAPN_DIR}/halide.capnp.h
+    # ${CAPN_DIR}/numpy.capnp.h
     ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
@@ -154,8 +154,8 @@ set(hdrs
 
 # Project source files
 set(srcs
-    ${CAPN_DIR}/halide.capnp.c++
-    ${CAPN_DIR}/numpy.capnp.c++
+    # ${CAPN_DIR}/halide.capnp.c++
+    # ${CAPN_DIR}/numpy.capnp.c++
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/attributes.cpp

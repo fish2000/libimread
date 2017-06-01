@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <capnp/serialize-packed.h>
+// #include <capnp/serialize-packed.h>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
@@ -53,11 +53,11 @@ namespace im {
             bv.size());
     }
     
-    std::size_t handle_source_sink::write(capnp::MessageBuilder& builder) {
-        capnp::writePackedMessageToFd(::fileno(handle), builder);
-        // return capnp::computeUnpackedSizeInWords(builder.getSegmentsForOutput());
-        return capnp::computeSerializedSizeInWords(builder);
-    }
+    // std::size_t handle_source_sink::write(capnp::MessageBuilder& builder) {
+    //     capnp::writePackedMessageToFd(::fileno(handle), builder);
+    //     // return capnp::computeUnpackedSizeInWords(builder.getSegmentsForOutput());
+    //     return capnp::computeSerializedSizeInWords(builder);
+    // }
     
     detail::stat_t handle_source_sink::stat() const {
         detail::stat_t info;
