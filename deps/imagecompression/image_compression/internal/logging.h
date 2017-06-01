@@ -21,38 +21,39 @@
 #include <string>
 
 class LogNull {
- public:
-  LogNull() {}
-  ~LogNull() {}
-  std::ostream& GetStream() {
-    static std::ostream null_stream(NULL);
-    return null_stream;
-  }
+    
+    public:
+        LogNull() {}
+        ~LogNull() {}
+        std::ostream& GetStream() {
+            static std::ostream null_stream(NULL);
+            return null_stream;
+        }
 };
 
 #ifdef _DEBUG
 
 class LogFatal {
- public:
-  LogFatal(const char* file, int line) { str_ << file << ":" << line << ": "; }
-  ~LogFatal() {
-    const std::string s = str_.str();
-    std::cerr << s << std::endl;
-    abort();
-  }
-  std::ostream& GetStream() { return str_; }
-
- private:
-  std::ostringstream str_;
+    
+    public:
+        LogFatal(const char* file, int line) { str_ << file << ":" << line << ": "; }
+        ~LogFatal() {
+            const std::string s = str_.str();
+            std::cerr << s << std::endl;
+            abort();
+        }
+        std::ostream& GetStream() { return str_; }
+    
+    private:
+        std::ostringstream str_;
 };
 
-#define LOG_IF(condition)              \
-  !(condition) ? LogNull().GetStream() \
-               : LogFatal(__FILE__, __LINE__).GetStream()
+#define LOG_IF(condition)                                                                          \
+    !(condition) ? LogNull().GetStream() : LogFatal(__FILE__, __LINE__).GetStream()
 
 #define DCHECK_OP(a, b, op) LOG_IF((a)op(b))
 
-#define DCHECK_LE(a, b) DCHECK_OP((a), (b), <= )
+#define DCHECK_LE(a, b) DCHECK_OP((a), (b), <=)
 #define DCHECK_GE(a, b) DCHECK_OP((a), (b), >=)
 #define DCHECK_LT(a, b) DCHECK_OP((a), (b), <)
 #define DCHECK_GT(a, b) DCHECK_OP((a), (b), >)
@@ -72,4 +73,4 @@ class LogFatal {
 
 #endif
 
-#endif  // BASE_LOGGING_H_
+#endif // BASE_LOGGING_H_

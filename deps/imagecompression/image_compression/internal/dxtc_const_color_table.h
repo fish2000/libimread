@@ -18,16 +18,16 @@
 #include "image_compression/internal/color_util.h"
 
 namespace image_codec_compression {
+    
+    // Sets color0 and color1 to the best end point colors to use to represent the
+    // constant block color, target_color.  Returns the 2-bit value to use to encode
+    // the pixels in the block.
+    // If always_4_color_case is false, will also use 1/2-way interpolation rules
+    // to reduce errors further.
+    int GetBestDxtcConstColors(RgbInt const& target_color,
+                               Rgb565* color0, Rgb565* color1,
+                               bool always_4_color_case);
+    
+} // namespace image_codec_compression
 
-// Sets color0 and color1 to the best end point colors to use to represent the
-// constant block color, target_color.  Returns the 2-bit value to use to encode
-// the pixels in the block.
-// If always_4_color_case is false, will also use 1/2-way interpolation rules
-// to reduce errors further.
-int GetBestDxtcConstColors(const RgbInt& target_color,
-                           Rgb565* color0, Rgb565* color1,
-                           bool always_4_color_case);
-
-}  // namespace image_codec_compression
-
-#endif  // IMAGE_COMPRESSION_INTERNAL_DXTC_CONST_COLOR_TABLE_H_
+#endif // IMAGE_COMPRESSION_INTERNAL_DXTC_CONST_COLOR_TABLE_H_

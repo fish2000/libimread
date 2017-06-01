@@ -14,32 +14,33 @@
 
 #include "image_compression/internal/compressor4x4_helper.h"
 
-#include "base/integral_types.h"
-#include "base/logging.h"
+#include <cstddef>
+#include "image_compression/internal/logging.h"
 
 namespace image_codec_compression {
 
-bool Compressor4x4Helper::SetUpCompressedImage(
-    const std::string &compressor_name, size_t block_size,
-    CompressedImage::Format format, uint32 height, uint32 width,
-    uint32 padding_bytes_per_row, CompressedImage *image) {
-  DCHECK(image);
-  const uint32 num_block_rows = GetNumBlocks(height);
-  const uint32 num_block_cols = GetNumBlocks(width);
-  const size_t data_size = num_block_rows * num_block_cols * block_size;
+    bool Compressor4x4Helper::SetUpCompressedImage(std::string const& compressor_name,
+                                                   size_t block_size,
+                                                   CompressedImage::Format format,
+                                                   uint32_t height, uint32_t width,
+                                                   uint32_t padding_bytes_per_row,
+                                                   CompressedImage* image) {
+        DCHECK(image);
+        const uint32_t num_block_rows = GetNumBlocks(height);
+        const uint32_t num_block_cols = GetNumBlocks(width);
+        const size_t   data_size      = num_block_rows * num_block_cols * block_size;
+        const CompressedImage::Metadata metadata(format, compressor_name, height, width,
+                                                 4 * num_block_rows, 4 * num_block_cols,
+                                                 padding_bytes_per_row);
+        if (image->OwnsData()) {
+            image->CreateOwnedData(metadata, data_size);
+        } else {
+            // Make sure the external storage has the correct size.
+            if (image->GetDataSize() != data_size)
+                return false;
+            image->SetMetadata(metadata);
+        }
+        return true;
+    }
 
-  const CompressedImage::Metadata metadata(
-      format, compressor_name, height, width,
-      4 * num_block_rows, 4 * num_block_cols, padding_bytes_per_row);
-  if (image->OwnsData()) {
-    image->CreateOwnedData(metadata, data_size);
-  } else {
-    // Make sure the external storage has the correct size.
-    if (image->GetDataSize() != data_size)
-      return false;
-    image->SetMetadata(metadata);
-  }
-  return true;
-}
-
-}  // namespace image_codec_compression
+} // namespace image_codec_compression

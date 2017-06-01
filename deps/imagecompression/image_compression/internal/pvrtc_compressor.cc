@@ -18,8 +18,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "base/integral_types.h"
-#include "base/logging.h"
+#include "image_compression/internal/logging.h"
 #include "image_compression/internal/bit_util.h"
 #include "image_compression/internal/color_util.h"
 #include "image_compression/public/compressed_image.h"

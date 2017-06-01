@@ -60,7 +60,6 @@
 #include <cstddef>
 #include <vector>
 
-#include "base/integral_types.h"
 #include "image_compression/public/compressed_image.h"
 #include "image_compression/public/compressor.h"
 

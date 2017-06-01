@@ -229,7 +229,7 @@ set_target_properties(imread_static
 target_link_libraries(imread_shared
     z png guid
     # libbf interpol
-    imagecompression
+    imagecompression_shared
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -244,7 +244,7 @@ target_link_libraries(imread_shared
 target_link_libraries(imread_static
     z png guid
     # libbf interpol
-    imagecompression
+    imagecompression_static
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -332,7 +332,7 @@ if(IM_TESTS)
     # Link the `imread_tests` executable
     target_link_libraries(imread_tests
         imread_shared
-        imagecompression
+        imagecompression_shared
         # libbf interpol
         # vdb-client
         guid png z
