@@ -43,7 +43,7 @@ class CompressedImage {
   struct Metadata {
     // The constructor is passed all values.
     Metadata(Format format_in,
-             const std::string &compressor_name_in,
+             std::string const& compressor_name_in,
              uint32 uncompressed_height_in,
              uint32 uncompressed_width_in,
              uint32 compressed_height_in,
@@ -109,7 +109,7 @@ class CompressedImage {
   // Copies metadata and data from another instance, which must have
   // data. This instance will own its data regardless of the ownership
   // status of the other instance.
-  void Duplicate(const CompressedImage &from) {
+  void Duplicate(CompressedImage const& from) {
     // Duplicating from an instance to itself is permissible, but is a no-op if
     // the instance already owns its own data.
     if (&from != this || !OwnsData()) {
@@ -124,7 +124,7 @@ class CompressedImage {
   // Sets the instance to contain the given metadata and a data area
   // of the given size. The data will be freed when the instance is
   // destroyed.
-  void CreateOwnedData(const Metadata &metadata, size_t data_size) {
+  void CreateOwnedData(Metadata const& metadata, size_t data_size) {
     if (OwnsData())
       delete[] data_;
     metadata_ = metadata;
@@ -136,7 +136,7 @@ class CompressedImage {
   // Sets the metadata in the instance. This should be called only in
   // the case where the instance was constructed with external data.
   // Otherwise, CreateOwnedData() should be used.
-  void SetMetadata(const Metadata &metadata) {
+  void SetMetadata(Metadata const& metadata) {
     DCHECK(!OwnsData());
     metadata_ = metadata;
   }
@@ -180,8 +180,8 @@ class CompressedImage {
   bool owns_data_;
 
   // Only the provided Copy functions should be used for copying.
-  CompressedImage(const CompressedImage&);
-  void operator=(const CompressedImage&);
+  CompressedImage(CompressedImage const&);
+  void operator=(CompressedImage const&);
 };
 
 // Returns the number of components in the given format.
