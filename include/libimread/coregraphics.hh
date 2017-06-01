@@ -90,7 +90,7 @@ namespace store {
             bool has(CFStringRef) const;
         
         public:
-            std::string const& get_force(std::string const&) const;
+            std::string& get_force(std::string const&) const;
         
         public:
             /// implementation of the store::stringmapper API,

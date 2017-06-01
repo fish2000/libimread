@@ -75,7 +75,7 @@ namespace store {
         return CFDictionaryContainsKey(instance.get(), cfkey);
     }
     
-    std::string const& cfdict::get_force(std::string const& key) const {
+    std::string& cfdict::get_force(std::string const& key) const {
         im::detail::cfp_t<CFStringRef> cfkey(
                     const_cast<__CFString *>(
                  CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
@@ -95,38 +95,14 @@ namespace store {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         }
-        im::detail::cfp_t<CFStringRef> cfkey(
-                    const_cast<__CFString *>(
-                 CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
-        if (has(cfkey.get())) {
-            im::detail::cfp_t<CFStringRef> cfval(
-                       static_cast<__CFString *>(
-                              const_cast<void *>(
-                            CFDictionaryGetValue(instance.get(),
-                                                    cfkey.get()))));
-            cache[key] = CFStringGetSTLString(cfval.get());
-            return cache.at(key);
-        }
-        return STRINGNULL();
+        return get_force(key);
     }
     
     std::string const& cfdict::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) {
             return cache.at(key);
         }
-        im::detail::cfp_t<CFStringRef> cfkey(
-                    const_cast<__CFString *>(
-                 CFStringCreateWithSTLString(kCFAllocatorDefault, key)));
-        if (has(cfkey.get())) {
-            im::detail::cfp_t<CFStringRef> cfval(
-                       static_cast<__CFString *>(
-                              const_cast<void *>(
-                            CFDictionaryGetValue(instance.get(),
-                                                    cfkey.get()))));
-            cache[key] = CFStringGetSTLString(cfval.get());
-            return cache.at(key);
-        }
-        return STRINGNULL();
+        return get_force(key);
     }
     
     bool cfdict::set(std::string const& key, std::string const& value) {
