@@ -612,7 +612,7 @@ namespace imagecompression {
                                    CompressedImage* image) {
         if (!buffer || !image || height == 0 || width == 0) { return false; }
         if (!IsPowerOfTwo(width) || !IsPowerOfTwo(height) || width != height) { return false; }
-        if (padding_bytes_per_row != 0) { return false; }
+        if (padding_bytes_per_row != 0) { return false; } /// WHAT THEN EXACTLY IS THE POINT OF THIS
         if (width % kBlockWidth != 0 || height % kBlockHeight != 0) { return false; }
         
         size_t data_size = ComputeCompressedDataSize(format, height, width);
