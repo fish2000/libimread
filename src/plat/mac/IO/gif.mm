@@ -63,8 +63,8 @@ namespace im {
                    CGImageSourceCreateWithData(sourcedata.get(),                    /// CFDataRef
                                                options.get()));                     /// CFDictionaryRef
             
-       /// CGColorSpaceRef: destination colorspace
-       detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
+        /// CGColorSpaceRef: destination colorspace
+        detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
         
         std::size_t count = CGImageSourceGetCount(source.get()),
                     idx = 0;
