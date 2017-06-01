@@ -73,27 +73,45 @@ namespace image_codec_compression {
         public:
             PvrtcCompressor();
             virtual ~PvrtcCompressor();
-
+            
             virtual bool   SupportsFormat(CompressedImage::Format format) const;
-            virtual bool   IsValidCompressedImage(const CompressedImage& image);
-            virtual size_t ComputeCompressedDataSize(CompressedImage::Format format, uint32_t height,
+            virtual bool   IsValidCompressedImage(CompressedImage const& image);
+            virtual size_t ComputeCompressedDataSize(CompressedImage::Format format,
+                                                     uint32_t height,
                                                      uint32_t width);
-            virtual bool   Compress(CompressedImage::Format format, uint32_t height, uint32_t width,
-                                    uint32_t padding_bytes_per_row, const uint8_t* buffer,
+            
+            virtual bool   Compress(CompressedImage::Format format,
+                                    uint32_t height,
+                                    uint32_t width,
+                                    uint32_t padding_bytes_per_row,
+                                    const uint8_t* buffer,
                                     CompressedImage* image);
-            virtual bool   Decompress(const CompressedImage& image,
-                                      std::vector<uint8_t>*    decompressed_buffer);
-            virtual bool   Downsample(const CompressedImage& image, CompressedImage* downsampled_image);
-            virtual bool   Pad(const CompressedImage& image, uint32_t padded_height, uint32_t padded_width,
+            
+            virtual bool   Decompress(CompressedImage const& image,
+                                      std::vector<uint8_t>* decompressed_buffer);
+            
+            virtual bool   Downsample(CompressedImage const& image,
+                                      CompressedImage* downsampled_image);
+            
+            virtual bool   Pad(CompressedImage const& image,
+                               uint32_t padded_height,
+                               uint32_t padded_width,
                                CompressedImage* padded_image);
-            virtual bool   CompressAndPad(CompressedImage::Format format, uint32_t height, uint32_t width,
+            
+            virtual bool   CompressAndPad(CompressedImage::Format format,
+                                          uint32_t height, uint32_t width,
                                           uint32_t padded_height, uint32_t padded_width,
-                                          uint32_t padding_bytes_per_row, const uint8_t* buffer,
+                                          uint32_t padding_bytes_per_row,
+                                          const uint8_t* buffer,
                                           CompressedImage* padded_image);
-            virtual bool   CreateSolidImage(CompressedImage::Format format, uint32_t height, uint32_t width,
+            
+            virtual bool   CreateSolidImage(CompressedImage::Format format,
+                                            uint32_t height, uint32_t width,
                                             const uint8_t* color, CompressedImage* image);
-            virtual bool   CopySubimage(const CompressedImage& image, uint32_t start_row,
-                                        uint32_t start_column, uint32_t height, uint32_t width,
+            
+            virtual bool   CopySubimage(CompressedImage const& image,
+                                        uint32_t start_row, uint32_t start_column,
+                                        uint32_t height, uint32_t width,
                                         CompressedImage* subimage);
     };
 

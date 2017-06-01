@@ -147,10 +147,8 @@ namespace {
     {
         TemporaryName composite(".gif");
         std::unique_ptr<HalideFactory> factory{ new HalideFactory };
-        std::unique_ptr<formats::PNG> png_format{ new formats::PNG };
         std::unique_ptr<formats::GIF> gif_format{ new formats::GIF };
         Options read_options;
-        Options write_options;
         ImageList outlist, inlist;
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
@@ -164,14 +162,14 @@ namespace {
         });
         
         im::halide::write_multi(outlist, composite.str());
-        CHECK(composite.pathname.is_file());
+        REQUIRE(composite.pathname.is_file());
         
         {
             std::unique_ptr<FileSource> source = std::make_unique<FileSource>(composite.pathname);
             inlist = gif_format->read_multi(source.get(),
                                             factory.get(),
                                             gif_format->add_options(read_options));
-            CHECK(inlist.size() == sequence.size());
+            REQUIRE(inlist.size() == sequence.size());
         }
         
     }

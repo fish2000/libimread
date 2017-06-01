@@ -83,13 +83,13 @@ namespace im {
                                             options.get()));                            /// CFDictionaryRef
             
             /// CGImageRef -> CGColorSpaceRef: image (source) colorspace
-            detail::cfp_t<CGColorSpaceRef> colorspace(
-                                 CGImageGetColorSpace(image.get()));                    /// Image (source) colorspace
+            // detail::cfp_t<CGColorSpaceRef> colorspace(
+            //                      CGImageGetColorSpace(image.get()));                    /// Image (source) colorspace
             
             /// Image bitmap dimensions:
             std::size_t width = CGImageGetWidth(image.get()),
                        height = CGImageGetHeight(image.get()),
-                   components = CGColorSpaceGetNumberOfComponents(colorspace.get()),    /// colorspace component count
+                   // components = CGColorSpaceGetNumberOfComponents(colorspace.get()),    /// colorspace component count
                           bpc = CGImageGetBitsPerComponent(image.get()),                /// bits per component
                           bpp = CGImageGetBitsPerPixel(image.get()) / bpc,              /// BYTES per pixel (not bits)
                           bpr = bpp * width;                                            /// bytes per row
