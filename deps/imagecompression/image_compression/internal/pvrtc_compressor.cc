@@ -600,13 +600,15 @@ namespace imagecompression {
                                                                 metadata.uncompressed_width);
     }
     
-    size_t PvrtcCompressor::ComputeCompressedDataSize(CompressedImage::Format format, uint32_t height,
-                                                      uint32_t width) {
+    size_t PvrtcCompressor::ComputeCompressedDataSize(CompressedImage::Format format,
+                                                      uint32_t height, uint32_t width) {
         return width * height / 4;
     }
     
-    bool PvrtcCompressor::Compress(CompressedImage::Format format, uint32_t height, uint32_t width,
-                                   uint32_t padding_bytes_per_row, const uint8_t* buffer,
+    bool PvrtcCompressor::Compress(CompressedImage::Format format,
+                                   uint32_t height, uint32_t width,
+                                   uint32_t padding_bytes_per_row,
+                                   const uint8_t* buffer,
                                    CompressedImage* image) {
         if (!buffer || !image || height == 0 || width == 0) { return false; }
         if (!IsPowerOfTwo(width) || !IsPowerOfTwo(height) || width != height) { return false; }
@@ -640,26 +642,31 @@ namespace imagecompression {
         return false;
     }
     
-    bool PvrtcCompressor::Pad(CompressedImage const& image, uint32_t padded_height,
-                              uint32_t padded_width, CompressedImage* padded_image) {
+    bool PvrtcCompressor::Pad(CompressedImage const& image,
+                              uint32_t padded_height, uint32_t padded_width,
+                              CompressedImage* padded_image) {
         return false;
     }
     
-    bool PvrtcCompressor::CompressAndPad(CompressedImage::Format format, uint32_t height,
-                                         uint32_t width, uint32_t padded_height, uint32_t padded_width,
-                                         uint32_t padding_bytes_per_row, const uint8_t* buffer,
+    bool PvrtcCompressor::CompressAndPad(CompressedImage::Format format,
+                                         uint32_t height, uint32_t width,
+                                         uint32_t padded_height, uint32_t padded_width,
+                                         uint32_t padding_bytes_per_row,
+                                         const uint8_t* buffer,
                                          CompressedImage* padded_image) {
         return false;
     }
     
-    bool PvrtcCompressor::CreateSolidImage(CompressedImage::Format format, uint32_t height,
-                                           uint32_t width, const uint8_t* color,
+    bool PvrtcCompressor::CreateSolidImage(CompressedImage::Format format,
+                                           uint32_t height, uint32_t width,
+                                           const uint8_t* color,
                                            CompressedImage* image) {
         return false;
     }
     
-    bool PvrtcCompressor::CopySubimage(CompressedImage const& image, uint32_t start_row,
-                                       uint32_t start_column, uint32_t height, uint32_t width,
+    bool PvrtcCompressor::CopySubimage(CompressedImage const& image,
+                                       uint32_t start_row, uint32_t start_column,
+                                       uint32_t height, uint32_t width,
                                        CompressedImage* subimage) {
         return false;
     }

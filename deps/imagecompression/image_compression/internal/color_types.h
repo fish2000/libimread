@@ -86,7 +86,7 @@ namespace imagecompression {
             , a(alpha) {}
         
         // Constructor taking an RGB color and alpha.
-        RgbaColor(const RgbColor<T>& rgb, T alpha)
+        RgbaColor(RgbColor<T> const& rgb, T alpha)
             : RgbColor<T>(rgb)
             , a(alpha) {}
         

@@ -98,9 +98,7 @@ namespace imagecompression {
             
             // The destructor frees up the data storage if it is owned by this instance.
             ~CompressedImage() {
-                if (OwnsData()) {
-                    delete[] data_;
-                }
+                if (OwnsData()) { delete[] data_; }
             }
             
             // Copies metadata and data from another instance, which must have
@@ -122,8 +120,7 @@ namespace imagecompression {
             // of the given size. The data will be freed when the instance is
             // destroyed.
             void CreateOwnedData(Metadata const& metadata, size_t data_size) {
-                if (OwnsData())
-                    delete[] data_;
+                if (OwnsData()) { delete[] data_; }
                 metadata_  = metadata;
                 data_size_ = data_size;
                 data_      = new uint8_t[data_size_];
