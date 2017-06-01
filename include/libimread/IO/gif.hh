@@ -8,6 +8,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
+#include <libimread/imagelist.hh>
 #include <libimread/ext/WriteGIF.hh>
 
 namespace im {
@@ -29,8 +30,10 @@ namespace im {
     class GIFFormat : public ImageFormatBase<GIFFormat> {
         
         public:
+            
             #if defined(__APPLE__)
             using can_read = std::true_type;
+            using can_read_multi = std::true_type;
             #endif
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
@@ -43,11 +46,27 @@ namespace im {
                 _mimetype = "image/gif"
             );
             
-            #if defined(__APPLE__)
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                options_map const& opts) override;
-            #endif
+                                                options_map const& opts) override {
+                #if defined(__APPLE__)
+                    ImageList pages = this->read_impl(src, factory, false, opts);
+                    std::unique_ptr<Image> out = pages.pop();
+                    return out;
+                #else
+                    imread_raise_default(NotImplementedError);
+                #endif
+            }
+            
+            virtual ImageList read_multi(byte_source* src,
+                                         ImageFactory* factory,
+                                         options_map const& opts) override {
+                #if defined(__APPLE__)
+                    return this->read_impl(src, factory, true, opts);
+                #else
+                    imread_raise_default(NotImplementedError);
+                #endif
+            }
             
             virtual void write(Image& input,
                                byte_sink* output,
@@ -58,7 +77,15 @@ namespace im {
                                      options_map const& opts) override;
             
         private:
-            void write_impl(Image const& input, detail::gifholder& g);
+            
+            void        write_impl(Image const& input, detail::gifholder& g);
+            
+            #if defined(__APPLE__)
+            ImageList   read_impl(byte_source* src,
+                                  ImageFactory* factory,
+                                  bool is_multi,
+                                  options_map const& opts);
+            #endif
     };
     
     namespace format {

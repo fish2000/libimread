@@ -22,6 +22,7 @@ namespace formats = im::format;
 
 namespace {
     
+    using filesystem::TemporaryName;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     using filesystem::path;
@@ -144,12 +145,18 @@ namespace {
     TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file",
               "[gif-write-multi-animated]")
     {
-        NamedTemporaryFile composite(".gif");
-        ImageList outlist;
+        TemporaryName composite(".gif");
+        std::unique_ptr<HalideFactory> factory{ new HalideFactory };
+        std::unique_ptr<formats::PNG> png_format{ new formats::PNG };
+        std::unique_ptr<formats::GIF> gif_format{ new formats::GIF };
+        Options read_options;
+        Options write_options;
+        ImageList outlist, inlist;
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
-        CHECK(composite.remove());
+        // std::size_t sequence_count = sequence.size();
+        
         std::for_each(sequence.begin(), sequence.end(),
                   [&](path const& p) {
             HybridImage* halim = new HybridImage(im::halide::read((basedir/p).str()));
@@ -157,7 +164,16 @@ namespace {
         });
         
         im::halide::write_multi(outlist, composite.str());
-        CHECK(composite.filepath.is_file());
+        CHECK(composite.pathname.is_file());
+        
+        {
+            std::unique_ptr<FileSource> source = std::make_unique<FileSource>(composite.pathname);
+            inlist = gif_format->read_multi(source.get(),
+                                            factory.get(),
+                                            gif_format->add_options(read_options));
+            CHECK(inlist.size() == sequence.size());
+        }
+        
     }
     
 }

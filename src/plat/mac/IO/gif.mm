@@ -14,9 +14,10 @@
 
 namespace im {
     
-    std::unique_ptr<Image> GIFFormat::read(byte_source* src,
-                                           ImageFactory* factory,
-                                           options_map const& opts) {
+    ImageList GIFFormat::read_impl(byte_source* src,
+                                   ImageFactory* factory,
+                                   bool is_multi,
+                                   options_map const& opts) {
         
         /// byte_source* src -> CFDataRef
         /// N.B. using kCFAllocatorNull as the fourth parameter ensures that no deallocator
@@ -61,73 +62,88 @@ namespace im {
         detail::cfp_t<CGImageSourceRef> source(
                    CGImageSourceCreateWithData(sourcedata.get(),                    /// CFDataRef
                                                options.get()));                     /// CFDictionaryRef
+            
+       /// CGColorSpaceRef: destination colorspace
+       detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
         
-        /// CGImageSourceRef -> CGImageRef
-        detail::cfp_t<CGImageRef> image(
-        CGImageSourceCreateImageAtIndex(source.get(),                               /// CGImageSourceRef
-                                        CF_IDX(0),                                  /// new image index
-                                        options.get()));                            /// CFDictionaryRef
+        std::size_t count = CGImageSourceGetCount(source.get()),
+                    idx = 0;
         
-        /// CGImageRef -> CGColorSpaceRef: image (source) colorspace
-        detail::cfp_t<CGColorSpaceRef> colorspace(
-                             CGImageGetColorSpace(image.get()));                    /// Image (source) colorspace
+        ImageList images;
         
-        /// Image bitmap dimensions:
-        std::size_t width = CGImageGetWidth(image.get()),
-                   height = CGImageGetHeight(image.get()),
-               components = CGColorSpaceGetNumberOfComponents(colorspace.get()),    /// colorspace component count
-                      bpc = CGImageGetBitsPerComponent(image.get()),                /// bits per component
-                      bpp = CGImageGetBitsPerPixel(image.get()) / bpc,              /// BYTES per pixel (not bits)
-                      bpr = bpp * width;                                            /// bytes per row
-      
-        /// CGRect encompassing image bounds:
-        CGRect bounds{ 0, 0, CG_FLOAT(width),
-                             CG_FLOAT(height) };
-        
-        /// pixelbuffer: uint32_t[width * height]
-        detail::pixbuf_t pixbuf = std::make_unique<uint32_t[]>(width * height);     /// pixels are 32-bit, for 4x 8-bit components
-        
-        /// CGColorSpaceRef: destination colorspace
-        detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
-        
-        /// CGImageRef + pixelbuffer -> CGContextRef
-        detail::cfp_t<CGContextRef> context(
-                      CGBitmapContextCreate(pixbuf.get(),
-                                            width, height,
-                                            bpc, bpr,
-                                            deviceRGB.get(),
-                                            kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big));
-        
-        /// Render image to bitmap context:
-        CGContextDrawImage(context.get(), bounds, image.get());
-        
-        /// Create new im::Image instance using factory pointer:
-        std::unique_ptr<Image> output = factory->create(8, height, width, 3);
-        
-        /// Temporary values and pointers
-        uint32_t* currentpixel = pixbuf.get();
-        uint32_t  c_stride = (bpp == 1) ? 0 : output->stride(2); /// this is janky
-        uint32_t  x, y, compand;
-        byte*     destPtr;
-        
-        /// Read from pixel buffer, copy to newly created im::Image
-        for (y = 0; y < height; ++y) {
-            destPtr = output->rowp_as<byte>(y);
-            for (x = 0; x < width; ++x) {
-                compand = *currentpixel;
-                
-                destPtr[0]          = R(compand);
-                destPtr[c_stride]   = G(compand);
-                destPtr[2*c_stride] = B(compand);
-                // destPtr[3*c_stride] = A(compand);
-                
-                currentpixel++;
-                destPtr++;
+        do {
+            
+            /// CGImageSourceRef -> CGImageRef
+            detail::cfp_t<CGImageRef> image(
+            CGImageSourceCreateImageAtIndex(source.get(),                               /// CGImageSourceRef
+                                            CF_IDX(idx),                                /// new image index
+                                            options.get()));                            /// CFDictionaryRef
+            
+            /// CGImageRef -> CGColorSpaceRef: image (source) colorspace
+            detail::cfp_t<CGColorSpaceRef> colorspace(
+                                 CGImageGetColorSpace(image.get()));                    /// Image (source) colorspace
+            
+            /// Image bitmap dimensions:
+            std::size_t width = CGImageGetWidth(image.get()),
+                       height = CGImageGetHeight(image.get()),
+                   components = CGColorSpaceGetNumberOfComponents(colorspace.get()),    /// colorspace component count
+                          bpc = CGImageGetBitsPerComponent(image.get()),                /// bits per component
+                          bpp = CGImageGetBitsPerPixel(image.get()) / bpc,              /// BYTES per pixel (not bits)
+                          bpr = bpp * width;                                            /// bytes per row
+            
+            /// CGRect encompassing image bounds:
+            CGRect bounds{ 0, 0, CG_FLOAT(width),
+                                 CG_FLOAT(height) };
+            
+            /// pixelbuffer: uint32_t[width * height]
+            detail::pixbuf_t pixbuf = std::make_unique<uint32_t[]>(width * height);     /// pixels are 32-bit, for 4x 8-bit components
+            
+            /// CGImageRef + pixelbuffer -> CGContextRef
+            detail::cfp_t<CGContextRef> context(
+                          CGBitmapContextCreate(pixbuf.get(),
+                                                width, height,
+                                                bpc, bpr,
+                                                deviceRGB.get(),
+                                                kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big));
+            
+            /// Render image to bitmap context:
+            CGContextDrawImage(context.get(), bounds, image.get());
+            
+            /// Create new im::Image instance using factory pointer:
+            std::unique_ptr<Image> output = factory->create(8, height, width, 3);
+            
+            /// Temporary values and pointers
+            uint32_t* currentpixel = pixbuf.get();
+            uint32_t  c_stride = (bpp == 1) ? 0 : output->stride(2); /// this is janky
+            uint32_t  x, y, compand;
+            byte*     destPtr;
+            
+            /// Read from pixel buffer, copy to newly created im::Image
+            for (y = 0; y < height; ++y) {
+                destPtr = output->rowp_as<byte>(y);
+                for (x = 0; x < width; ++x) {
+                    compand = *currentpixel;
+                    
+                    destPtr[0]          = R(compand);
+                    destPtr[c_stride]   = G(compand);
+                    destPtr[2*c_stride] = B(compand);
+                    // destPtr[3*c_stride] = A(compand);
+                    
+                    currentpixel++;
+                    destPtr++;
+                }
             }
-        }
+            
+            /// stow unique_ptr to new im::Image instance:
+            images.push_back(std::move(output));
+            
+            /// increment image idx
+            ++idx;
+            
+        } while (is_multi && idx < count);
         
-        /// return unique_ptr to new im::Image instance:
-        return output;
+        /// return ImageList:
+        return images;
     }
     
 }
