@@ -66,9 +66,12 @@ namespace im {
         /// CGColorSpaceRef: destination colorspace
         detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
         
+        /// CGImageSourceGetCount(…) will be 1 unless we are called
+        /// by `read_multi`, to read an animated GIF:
         std::size_t count = CGImageSourceGetCount(source.get()),
                     idx = 0;
         
+        /// Return-value image list:
         ImageList images;
         
         do {
@@ -142,7 +145,7 @@ namespace im {
             
         } while (is_multi && idx < count);
         
-        /// return ImageList:
+        /// return the ImageList:
         return images;
     }
     
