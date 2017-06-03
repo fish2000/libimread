@@ -11,12 +11,9 @@
 #define __has_feature(x)                0   /// Compatibility with non-clang compilers
 #endif
 
-#define IM_VERSION_MAJOR                @libimread_VERSION_MAJOR@
-#define IM_VERSION_MINOR                @libimread_VERSION_MINOR@
-#define IM_VERSION_PATCH                @libimread_VERSION_PATCH@
-#define IM_VERSION                      "@libimread_VERSION_MAJOR@.@libimread_VERSION_MINOR@.@libimread_VERSION_PATCH@"
-
+#define IM_VERSION                      "@IM_VERSION@"
 #define IM_INSTALL_PREFIX               "@CMAKE_INSTALL_PREFIX@"
+#define IM_CMAKE_BINARY_DIR             "@CMAKE_BINARY_DIR@"
 #define IM_COMPILE_OPTIONS              "@IM_COMPILE_OPTIONS@"
 #define IM_INCLUDE_DIRECTORIES          "@IM_INCLUDE_DIRECTORIES@"
 #define IM_LINK_LIBRARIES               "@IM_LINK_LIBRARIES@"
@@ -36,6 +33,10 @@
 #define NULL_STR                        "\uFFFF"
 
 #ifdef IM_HAVE_STRINGVIEW_HH
+#define __CPP17__                       1
+#define __CPP1z__                       1
+#else
+#define __CPP17__                       0
 #define __CPP1z__                       1
 #endif
 

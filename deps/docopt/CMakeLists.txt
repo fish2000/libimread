@@ -25,12 +25,40 @@ set(hdrs
     "docopt_util.h"
     "docopt_value.h")
 
-add_library(docopt SHARED ${srcs} ${hdrs})
-
-set_target_properties(docopt
+# Add an “OBJECT” library target called “docopt”:
+add_library(
+    docopt
+    OBJECT ${srcs} ${hdrs})
+set_target_properties(
+    docopt
     PROPERTIES LIBRARY_OUTPUT_NAME "docopt")
-target_link_libraries(docopt)
+set_property(
+    TARGET docopt
+    PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-install(TARGETS docopt DESTINATION lib)
+# Add shared and static library targets, based on the “OBJECT” library,
+# respectively  called “docopt_shared” and “docopt_static”:
+add_library(
+    docopt_shared
+    SHARED $<TARGET_OBJECTS:docopt>)
+add_library(
+    docopt_static
+    STATIC $<TARGET_OBJECTS:docopt>)
+set_target_properties(
+    docopt_shared
+    PROPERTIES LIBRARY_OUTPUT_NAME "docopt")
+set_target_properties(
+    docopt_static
+    PROPERTIES ARCHIVE_OUTPUT_NAME "docopt")
+target_link_libraries(docopt_shared)
+target_link_libraries(docopt_static)
+
+# Install the shared and static library target outputs:
+install(TARGETS docopt_shared
+        DESTINATION lib)
+install(TARGETS docopt_static
+        DESTINATION lib)
+
+# Install the header files:
 install(DIRECTORY ./ DESTINATION include/libdocopt
     FILES_MATCHING PATTERN "*.h")

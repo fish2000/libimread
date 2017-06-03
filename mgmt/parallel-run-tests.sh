@@ -7,17 +7,19 @@ echo "*** TEST RUN COMMENCING"
 source "${PRAXONS}/anybar.sh"
 source "${PRAXONS}/gmalloc.sh"
 
-PROJECT_PATH="/Users/fish/Dropbox/libimread"
+: ${PROJECT_PATH:="/Users/fish/Dropbox/libimread"}
 
-: ${APPS:="OFF"}
+: ${APPS:="ON"}
 : ${COLOR_TRACE:="ON"}
 : ${VERBOSE:="ON"}
 : ${TERMINATOR:="ON"}
 : ${PROCESSORS:=$(py 'multiprocessing.cpu_count()')}
 
 pushd $PROJECT_PATH
-    rm -rf ./build ./dist
-    mkdir -p ./build ./dist
+    rm -rf ${PROJECT_PATH}/build ${PROJECT_PATH}/dist
+    mkdir -p ${PROJECT_PATH}/build
+    mkdir -p ${PROJECT_PATH}/dist
+    
     pushd ./build
         cmake .. \
             -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist" \
@@ -28,9 +30,9 @@ pushd $PROJECT_PATH
             -Wno-dev && \
         make -j$PROCESSORS install && \
         ctest -j$PROCESSORS -D Experimental --output-on-failure
-
-popd
-rm -rf ./Testing
+    
+    popd
+    rm -rf ./Testing
 
 popd
 

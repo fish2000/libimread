@@ -285,6 +285,18 @@ namespace filesystem {
         return path(temp);
     }
     
+    path path::make_real() const {
+        /// same as path::make_absolute(), minus the m_absolute precheck:
+        char temp[PATH_MAX];
+        if (::realpath(c_str(), temp) == nullptr) {
+            imread_raise(FileSystemError,
+                "In reference to path value:", str(),
+                "FATAL internal error in path::make_real() call to ::realpath():",
+                std::strerror(errno));
+        }
+        return path(temp);
+    }
+    
     static const std::regex user_directory_re("^~", detail::regex_flags);
     
     path path::expand_user() const {

@@ -122,6 +122,7 @@ namespace filesystem {
             /// return a new and fully-absolute path wrapper,
             /// based on the path in question
             path make_absolute() const;
+            path make_real() const;
             
             /// static forwarder for path::is_absolute<P>(p)
             template <typename P> inline
@@ -138,6 +139,10 @@ namespace filesystem {
             /// static forwarder for path::make_absolute<P>(p)
             template <typename P> inline
             static path absolute(P&& p) { return path(std::forward<P>(p)).make_absolute(); }
+            
+            /// static forwarder for path::make_absolute<P>(p)
+            template <typename P> inline
+            static path real(P&& p) { return path(std::forward<P>(p)).make_real(); }
             
             /// expand a leading tilde segment -- e.g.
             ///     ~/Downloads/file.jpg

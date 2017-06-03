@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.3)
 project(libimread)
 
 option(IM_TESTS             "Compile and run tests"                             ON)
-option(IM_APPS              "Compile and run companion apps"                    ON)
+option(IM_APPS              "Compile companion apps"                            ON)
 option(IM_USE_GCC           "Compile using GCC"                                 OFF)
 option(IM_RESYMBOLIZE       "Regenerate include/libimread/symbols.hpp"          OFF)
 option(IM_GENERATE_HEADER   "Only generate libimread.hpp (do not compile)"      OFF)
@@ -40,9 +40,12 @@ if(IM_RESYMBOLIZE)
 endif()
 
 # Go through some stuff
-set(libimread_VERSION_MAJOR "0")
-set(libimread_VERSION_MINOR "1")
-set(libimread_VERSION_PATCH "2")
+set(libimread_VERSION_MAJOR "0" CACHE STRING "Major version" FORCE)
+set(libimread_VERSION_MINOR "3" CACHE STRING "Minor version" FORCE)
+set(libimread_VERSION_PATCH "2" CACHE STRING "Patch version" FORCE)
+set(IM_VERSION
+    "${libimread_VERSION_MAJOR}.${libimread_VERSION_MINOR}.${libimread_VERSION_PATCH}"
+    CACHE STRING "Full version number" FORCE)
 
 # If the build script is called from a parent project,
 # use the configuration from there.
@@ -257,16 +260,22 @@ target_link_libraries(imread_static
     ${ROCKSDB_LIBRARIES})
 
 # Set and pass on compile-time config variable values:
-get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY COMPILE_FLAGS)
+# get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS})
 get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
 get_target_property(IM_LINK_LIBRARIES imread_shared LINK_LIBRARIES)
-get_target_property(IM_LINK_FLAGS imread_shared LINK_FLAGS)
+# get_target_property(IM_LINK_FLAGS imread_shared CMAKE_SHARED_LINKER_FLAGS)
+
+set(IM_COMPILE_OPTIONS          ${CMAKE_CXX_FLAGS}
+                                ${CMAKE_C_FLAGS}
+                                CACHE STRING "Compile options")
+set(IM_LINK_FLAGS               ${CMAKE_SHARED_LINKER_FLAGS}
+                                CACHE STRING "Linker options")
 
 # set stuff from cache
-set(IM_HAVE_STRINGVIEW_HH       ${HAVE_STRINGVIEW_HH})
-set(IM_HAVE_SYS_SENDFILE_H      ${HAVE_SYS_SENDFILE_H})
-set(IM_HAVE_AUTOFS_NOWAIT       ${HAVE_AUTOFS_NOWAIT})
-set(IM_HAVE_AUTOFS_NOTRIGGER    ${HAVE_AUTOFS_NOTRIGGER})
+set(IM_HAVE_STRINGVIEW_HH       ${HAVE_STRINGVIEW_HH} CACHE BOOL "Is std::string_vew available?")
+set(IM_HAVE_SYS_SENDFILE_H      ${HAVE_SYS_SENDFILE_H} CACHE BOOL "Is sys/sendfile.h available?")
+set(IM_HAVE_AUTOFS_NOWAIT       ${HAVE_AUTOFS_NOWAIT} CACHE BOOL "Is /dev/autofs_nowait available?")
+set(IM_HAVE_AUTOFS_NOTRIGGER    ${HAVE_AUTOFS_NOTRIGGER} CACHE BOOL "Is /dev/autofs_notrigger available?")
 
 # Configure and generate the compile-time project header file:
 set(PROJECT_HEADER

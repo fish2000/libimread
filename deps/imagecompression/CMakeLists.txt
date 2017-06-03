@@ -80,7 +80,7 @@ set_target_properties(
 target_link_libraries(imagecompression_shared)
 target_link_libraries(imagecompression_static)
 
-# Install the shared and static library target outputs::
+# Install the shared and static library target outputs:
 install(TARGETS imagecompression_shared
         DESTINATION lib)
 install(TARGETS imagecompression_static

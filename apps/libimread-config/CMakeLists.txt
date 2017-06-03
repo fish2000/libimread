@@ -25,12 +25,14 @@ add_definitions(
 set(EXTRA_LIBS
     ${EXTRA_LIBS}
     imread_shared
-    docopt)
+    docopt_static)
 
 set(hdrs "libimread-config.h")
 set(srcs "main.cpp")
+
 add_executable("imread-config" ${srcs} ${hdrs})
 target_link_libraries("imread-config" ${EXTRA_LIBS})
-add_dependencies("imread-config" imread)
-add_dependencies("imread-config" docopt)
+add_dependencies("imread-config" imread_shared)
+add_dependencies("imread-config" docopt_static)
+
 install(TARGETS "imread-config" DESTINATION bin)

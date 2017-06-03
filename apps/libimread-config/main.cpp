@@ -56,23 +56,40 @@ int main(int argc, const char** argv) {
     /// print the value for the truthy option flag
     for (auto const& arg : args) {
         if (arg.second == truth) {
+            
             if (arg.first == "--prefix") {
-                std::cout << im::config::prefix << std::endl;
+                std::cout << pystring::strip(im::config::prefix)
+                          << std::endl;
                 break;
-            } else if (arg.first == "--exec-prefix") {
-                std::cout << im::config::exec_prefix << std::endl;
+            }
+            
+            if (arg.first == "--exec-prefix") {
+                std::cout << pystring::strip(im::config::exec_prefix)
+                          << std::endl;
                 break;
-            } else if (arg.first == "--includes") {
-                std::cout << im::config::includes << std::endl;
+            }
+            
+            if (arg.first == "--includes") {
+                std::cout << pystring::strip(im::config::includes)
+                          << std::endl;
                 break;
-            } else if (arg.first == "--libs") {
-                std::cout << im::config::libs << std::endl;
+            }
+            
+            if (arg.first == "--libs") {
+                std::cout << pystring::strip(im::config::libs)
+                          << std::endl;
                 break;
-            } else if (arg.first == "--cflags") {
-                std::cout << im::config::cflags << std::endl;
+            }
+            
+            if (arg.first == "--cflags") {
+                std::cout << pystring::strip(im::config::cflags)
+                          << std::endl;
                 break;
-            } else if (arg.first == "--ldflags") {
-                std::cout << im::config::ldflags << std::endl;
+            }
+            
+            if (arg.first == "--ldflags") {
+                std::cout << pystring::strip(im::config::ldflags)
+                          << std::endl;
                 break;
             }
         }
