@@ -20,11 +20,13 @@ namespace im {
         
         namespace {
             
-            inline std::string get_includes() {
+            inline std::string get_includes(std::string const& inclist) {
                 stringvec_t incvec, outvec;
-                pystring::split(pystring::replace(IM_INCLUDE_DIRECTORIES,
-                                                  IM_CMAKE_BINARY_DIR,
-                                                  IM_INSTALL_PREFIX), incvec, ";");
+                pystring::split(
+                    pystring::replace(inclist,
+                                      IM_CMAKE_BINARY_DIR,
+                                      IM_INSTALL_PREFIX),
+                                      incvec, ";");
                 std::sort(incvec.begin(), incvec.end());
                 auto last = std::unique(incvec.begin(), incvec.end());
                 incvec.erase(last, incvec.end());
@@ -34,11 +36,13 @@ namespace im {
                 return "-I" + pystring::join(" -I", outvec);
             }
             
-            inline std::string get_libs() {
+            inline std::string get_libs(std::string const& liblist) {
                 stringvec_t libvec, outvec;
-                pystring::split(pystring::replace(IM_LINK_LIBRARIES,
-                                                  IM_CMAKE_BINARY_DIR,
-                                                  IM_INSTALL_PREFIX), libvec, ";");
+                pystring::split(
+                    pystring::replace(liblist,
+                                      IM_CMAKE_BINARY_DIR,
+                                      IM_INSTALL_PREFIX),
+                                      libvec, ";");
                 std::sort(libvec.begin(), libvec.end());
                 auto last = std::unique(libvec.begin(), libvec.end());
                 libvec.erase(last, libvec.end());
@@ -56,12 +60,15 @@ namespace im {
         
         const std::string version = IM_VERSION;
         
-        const std::string prefix = std::string(IM_INSTALL_PREFIX);
-        const std::string exec_prefix = std::string(IM_INSTALL_PREFIX);
-        const std::string includes = get_includes();
-        const std::string libs = get_libs();
+        const std::string prefix = IM_INSTALL_PREFIX;
+        const std::string exec_prefix = IM_INSTALL_PREFIX;
+        const std::string includes = get_includes(IM_INCLUDE_DIRECTORIES);
+        const std::string libs = get_libs(IM_LINK_LIBRARIES);
         
-        const std::string cflags = std::string(IM_COMPILE_OPTIONS) + " " + includes;
+        const std::string cflags = std::string(IM_COMPILE_OPTIONS) + " "
+                                 + std::string(IM_COMPILE_FLAGS) + " "
+                                 + includes;
+        
         const std::string ldflags = std::string(IM_LINK_FLAGS) + " " + libs;
         
     };

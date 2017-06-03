@@ -140,6 +140,7 @@ find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
 find_package(LibUnwind REQUIRED)
+find_package(PkgConfig REQUIRED)
 # find_package(CapnProto REQUIRED)
 
 set(HDF5_USE_STATIC_LIBRARIES false)
@@ -164,6 +165,8 @@ find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
 
 include(FindRocksDB)
 # find_package(RocksDB REQUIRED)
+
+pkg_search_module(LIBPLIST REQUIRED libplist)
 
 # Include the project-specific `include` directories:
 include_directories(${${PROJECT_NAME}_include_dir})
@@ -195,7 +198,8 @@ include_directories(
     ${WEBP_INCLUDE_DIR}
     ${HALIDE_INCLUDE_DIR}
     ${LIBUNWIND_INCLUDE_DIR}
-    ${HDF5_INCLUDE_DIRS})
+    ${HDF5_INCLUDE_DIRS}
+    ${LIBPLIST_INCLUDE_DIRS})
 
 # Set the source files and source-file-specific options
 # required to build the library:
@@ -242,7 +246,8 @@ target_link_libraries(imread_shared
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
     # ${CAPNP_LIBRARIES_LITE}
-    ${ROCKSDB_LIBRARIES})
+    ${ROCKSDB_LIBRARIES}
+    ${LIBPLIST_LIBRARIES})
 
 target_link_libraries(imread_static
     z png guid
@@ -257,21 +262,23 @@ target_link_libraries(imread_static
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
     # ${CAPNP_LIBRARIES_LITE}
-    ${ROCKSDB_LIBRARIES})
+    ${ROCKSDB_LIBRARIES}
+    ${LIBPLIST_STATIC_LIBRARIES})
 
 # Set and pass on compile-time config variable values:
 # get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS})
 get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
 get_target_property(IM_LINK_LIBRARIES imread_shared LINK_LIBRARIES)
-# get_target_property(IM_LINK_FLAGS imread_shared CMAKE_SHARED_LINKER_FLAGS)
-# get_target_property(IM_COMPILE_FLAGS imread COMPILE_DEFINITIONS)
+get_target_property(IM_LINK_FLAGS imread_shared LINK_FLAGS)
+get_target_property(IM_COMPILE_FLAGS imread_shared COMPILE_FLAGS)
+get_directory_property(IM_COMPILE_OPTIONS "${CMAKE_CURRENT_SOURCE_DIR}" COMPILE_DEFINITIONS)
 
-set(IM_COMPILE_OPTIONS          ${CMAKE_CXX_FLAGS}
-                                ${CMAKE_C_FLAGS}
-                                ${IM_COMPILE_FLAGS}
-                                CACHE STRING "Compile options")
-set(IM_LINK_FLAGS               ${CMAKE_SHARED_LINKER_FLAGS}
-                                CACHE STRING "Linker options")
+# set(IM_COMPILE_OPTIONS          ${CMAKE_CXX_FLAGS}
+#                                 ${CMAKE_C_FLAGS}
+#                                 ${IM_COMPILE_FLAGS}
+#                                 CACHE STRING "Compile options")
+# set(IM_LINK_FLAGS               ${CMAKE_SHARED_LINKER_FLAGS}
+#                                 CACHE STRING "Linker options")
 set(IM_DYLIB_SUFFIX             ${CMAKE_SHARED_LIBRARY_SUFFIX}
                                 CACHE STRING "Dynamic library suffix")
 
@@ -358,7 +365,8 @@ if(IM_TESTS)
         ${HDF5_CXX_LIBRARIES}
         ${HDF5_HL_LIBRARIES}
         # ${CAPNP_LIBRARIES_LITE}
-        ${ROCKSDB_LIBRARIES})
+        ${ROCKSDB_LIBRARIES}
+        ${LIBPLIST_LIBRARIES})
     
     # Set up ctest and cdash:
     enable_testing()
