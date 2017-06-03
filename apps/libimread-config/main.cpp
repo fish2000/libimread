@@ -60,39 +60,46 @@ int main(int argc, const char** argv) {
             if (arg.first == "--prefix") {
                 std::cout << pystring::strip(im::config::prefix)
                           << std::endl;
-                break;
+                return EXIT_SUCCESS;
             }
             
             if (arg.first == "--exec-prefix") {
                 std::cout << pystring::strip(im::config::exec_prefix)
                           << std::endl;
-                break;
+                return EXIT_SUCCESS;
             }
             
             if (arg.first == "--includes") {
                 std::cout << pystring::strip(im::config::includes)
                           << std::endl;
-                break;
+                return EXIT_SUCCESS;
             }
             
             if (arg.first == "--libs") {
                 std::cout << pystring::strip(im::config::libs)
                           << std::endl;
-                break;
+                return EXIT_SUCCESS;
             }
             
             if (arg.first == "--cflags") {
                 std::cout << pystring::strip(im::config::cflags)
                           << std::endl;
-                break;
+                return EXIT_SUCCESS;
             }
             
             if (arg.first == "--ldflags") {
                 std::cout << pystring::strip(im::config::ldflags)
                           << std::endl;
-                break;
+                return EXIT_SUCCESS;
             }
         }
     }
-
+    
+    std::cout << "Error: no recognizable option passed"
+              << std::endl
+              << "Use -h or --help to see valid options"
+              << std::endl;
+    return EXIT_FAILURE;
+    
+    
 }

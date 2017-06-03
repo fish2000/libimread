@@ -20,19 +20,6 @@ namespace im {
         
         namespace {
             
-            // inline std::string abspath(std::string const& p) {
-            //     return path::real(p).str();
-            // }
-            
-            // inline void absolutepath(std::string& p) {
-            //     std::string po = path::absolute(p);
-            //     p = po;
-            // }
-            
-            // std::string incs = pystring::replace(std::string("-I") + pystring::replace(IM_INCLUDE_DIRECTORIES, ";", " -I"),
-            //                                      IM_CMAKE_BINARY_DIR,
-            //                                      IM_INSTALL_PREFIX);
-            
             inline std::string get_includes() {
                 stringvec_t incvec, outvec;
                 pystring::split(pystring::replace(IM_INCLUDE_DIRECTORIES,
@@ -42,8 +29,6 @@ namespace im {
                 auto last = std::unique(incvec.begin(), incvec.end());
                 incvec.erase(last, incvec.end());
                 std::reverse(incvec.begin(), incvec.end());
-                // std::for_each(incvec.begin(), incvec.end(), absolutepath);
-                // std::transform(incvec.begin(), incvec.end(), std::back_inserter(outvec), abspath);
                 std::for_each(incvec.begin(), incvec.end(),
                     [&outvec](std::string const& p) { outvec.emplace_back(path::real(p).str()); });
                 return "-I" + pystring::join(" -I", outvec);
@@ -51,7 +36,6 @@ namespace im {
             
             inline std::string get_libs() {
                 stringvec_t libvec, outvec;
-                // pystring::split(IM_LINK_LIBRARIES, libvec, ";");
                 pystring::split(pystring::replace(IM_LINK_LIBRARIES,
                                                   IM_CMAKE_BINARY_DIR,
                                                   IM_INSTALL_PREFIX), libvec, ";");
@@ -63,7 +47,7 @@ namespace im {
                     [&outvec](std::string const& p) {
                         /// N.B. this resolves library-versioning symlinks,
                         /// which may be undesirable:
-                        outvec.emplace_back(pystring::endswith(p, ".dylib") ? path::real(p).str() : p);
+                        outvec.emplace_back(pystring::endswith(p, IM_DYLIB_SUFFIX) ? path::real(p).str() : p);
                 });
                 return "-l" + pystring::join(" -l", outvec);
             }

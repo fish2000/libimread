@@ -280,7 +280,6 @@ IF(APPLE)
     
 ENDIF(APPLE)
 
-
 add_definitions(
     ${CXX_OPTIONS}
     -DWITH_SCHEMA

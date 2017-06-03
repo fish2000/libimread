@@ -264,12 +264,16 @@ target_link_libraries(imread_static
 get_target_property(IM_INCLUDE_DIRECTORIES imread INCLUDE_DIRECTORIES)
 get_target_property(IM_LINK_LIBRARIES imread_shared LINK_LIBRARIES)
 # get_target_property(IM_LINK_FLAGS imread_shared CMAKE_SHARED_LINKER_FLAGS)
+# get_target_property(IM_COMPILE_FLAGS imread COMPILE_DEFINITIONS)
 
 set(IM_COMPILE_OPTIONS          ${CMAKE_CXX_FLAGS}
                                 ${CMAKE_C_FLAGS}
+                                ${IM_COMPILE_FLAGS}
                                 CACHE STRING "Compile options")
 set(IM_LINK_FLAGS               ${CMAKE_SHARED_LINKER_FLAGS}
                                 CACHE STRING "Linker options")
+set(IM_DYLIB_SUFFIX             ${CMAKE_SHARED_LIBRARY_SUFFIX}
+                                CACHE STRING "Dynamic library suffix")
 
 # set stuff from cache
 set(IM_HAVE_STRINGVIEW_HH       ${HAVE_STRINGVIEW_HH} CACHE BOOL "Is std::string_vew available?")
