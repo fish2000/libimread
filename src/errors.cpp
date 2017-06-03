@@ -41,6 +41,7 @@ namespace im {
     DECLARE_IMREAD_ERROR_DEFAULT(JSONOutOfRange,           "JSON index value out of range");
     DECLARE_IMREAD_ERROR_DEFAULT(JSONBadCast,              "Error casting JSON value");
     DECLARE_IMREAD_ERROR_DEFAULT(JSONIOError,              "Error in JSON I/O");
+    DECLARE_IMREAD_ERROR_DEFAULT(PListIOError,             "Error in Property List I/O");
     
     DECLARE_IMREAD_ERROR_DEFAULT(HDF5IOError,              "Error in HDF5 I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(PNGIOError,               "Error in PNG/libpng I/O");
