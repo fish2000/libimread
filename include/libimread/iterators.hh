@@ -55,7 +55,7 @@ namespace im {
             friend byte_iterator operator-(byte_iterator const& lhs, size_type rhs);
             friend idx_t operator-(byte_iterator lhs, byte_iterator rhs);
             
-            value_type operator*() const;
+            reference_type operator*() const;
             pointer operator->() const;
             pointer operator&() const;
             reference_type operator[](size_type idx) const;

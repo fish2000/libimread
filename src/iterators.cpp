@@ -99,7 +99,7 @@ namespace im {
         return (byte_iterator::idx_t)lhs.sourcemap - (byte_iterator::idx_t)rhs.sourcemap;
     }
     
-    byte_iterator::value_type byte_iterator::operator*() const {
+    byte_iterator::reference_type byte_iterator::operator*() const {
         return *sourcemap;
     }
     
