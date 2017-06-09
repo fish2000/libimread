@@ -16,10 +16,6 @@
 #include <libimread/seekable.hh>
 #include <libimread/store.hh>
 
-// namespace capnp {
-//     class MessageBuilder;
-// }
-
 namespace im {
     
     namespace detail {
@@ -47,7 +43,6 @@ namespace im {
             virtual std::size_t size() const override;
             virtual std::size_t write(const void* buffer, std::size_t n) override;
             virtual std::size_t write(bytevec_t const&) override;
-            // virtual std::size_t write(capnp::MessageBuilder& builder);
             virtual detail::stat_t stat() const;
             virtual void flush() override;
             
