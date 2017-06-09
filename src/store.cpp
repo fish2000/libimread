@@ -255,6 +255,7 @@ namespace store {
     }
     
     bool xattrmap::set(std::string const& key, std::string const& value) {
+        if (value == STRINGNULL()) { return del(key); }
         cache[key] = value;
         return xattr(key, value) == value;
     }
