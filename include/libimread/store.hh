@@ -381,14 +381,7 @@ X operator==(T const& lhs,
     bool out = ((lhs.count() == rhs.count()) &&
                 (lhs.count() == keys.size()) &&
                 (rhs.count() == keys.size()));
-    if (!out) {
-        // WTF("sizes compare unequal",
-        //  FF("%i, %i, %i", keys.size(),
-        //                   lhs.count(),
-        //                   rhs.count()));
-        return false;
-    }
-    // WTF("sizes compare equal", keys.size());
+    if (!out) { return false; }
     for (std::string const& key : keys) {
         out &= (lhs.get(key) == rhs.get(key));
     }
