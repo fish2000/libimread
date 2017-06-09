@@ -6,33 +6,49 @@
 
 namespace im {
     
+    byte_iterator::byte_iterator(void)
+        :sourcemap{ 0 }
+        {}
+    
     byte_iterator::byte_iterator(byte_iterator::pointer byteptr)
-        :sourcemap(byteptr)
+        :sourcemap{ byteptr }
         {}
     
     byte_iterator::byte_iterator(byte_iterator::pointer byteptr, size_type initial_idx)
-        :sourcemap(byteptr)
-        {
-            sourcemap += initial_idx;
-        }
+        :sourcemap{ byteptr + initial_idx }
+        {}
     
     byte_iterator::byte_iterator(byte_iterator const& other)
-        :sourcemap(other.sourcemap)
+        :sourcemap{ other.sourcemap }
         {}
     
     byte_iterator::byte_iterator(byte_iterator&& other) noexcept
-        :sourcemap(std::move(other.sourcemap))
+        :sourcemap{ other.sourcemap }
         {}
     
     byte_iterator::~byte_iterator() {}
     
     byte_iterator& byte_iterator::operator=(byte_iterator const& other) {
-        byte_iterator(other).swap(*this);
+        if (sourcemap != other.sourcemap) {
+            byte_iterator(other).swap(*this);
+        }
         return *this;
     }
     
     byte_iterator& byte_iterator::operator=(byte_iterator&& other) noexcept {
-        sourcemap = std::move(other.sourcemap);
+        if (sourcemap != other.sourcemap) {
+            byte_iterator(other).swap(*this);
+        }
+        return *this;
+    }
+    
+    byte_iterator& byte_iterator::operator,(byte_iterator const& other) {
+        *this += other;
+        return *this;
+    }
+    
+    byte_iterator& byte_iterator::operator,(byte_iterator&& other) {
+        *this += other;
         return *this;
     }
     
@@ -45,7 +61,7 @@ namespace im {
     /// postfix increment
     byte_iterator byte_iterator::operator++(int) {
         byte_iterator out(*this);
-        sourcemap++;
+        ++sourcemap;
         return out;
     }
     
@@ -58,8 +74,18 @@ namespace im {
     /// postfix decrement
     byte_iterator byte_iterator::operator--(int) {
         byte_iterator out(*this);
-        sourcemap--;
+        --sourcemap;
         return out;
+    }
+    
+    byte_iterator& byte_iterator::operator+=(byte_iterator const& offset) {
+        sourcemap += reinterpret_cast<byte_iterator::size_type>(offset.sourcemap);
+        return *this;
+    }
+    
+    byte_iterator& byte_iterator::operator-=(byte_iterator const& offset) {
+        sourcemap -= reinterpret_cast<byte_iterator::size_type>(offset.sourcemap);
+        return *this;
     }
     
     byte_iterator& byte_iterator::operator+=(size_type offset) {

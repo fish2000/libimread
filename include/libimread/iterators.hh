@@ -26,14 +26,37 @@ namespace im {
             using const_reference = std::add_const_t<reference>;
             using pointer = std::add_pointer_t<value_type>;
             
-            explicit byte_iterator(pointer byteptr);
-            explicit byte_iterator(pointer byteptr, size_type initial_idx);
-            byte_iterator(byte_iterator const& other);
-            byte_iterator(byte_iterator&& other) noexcept;
+            byte_iterator(void);
+            explicit byte_iterator(pointer);
+            explicit byte_iterator(pointer, size_type);
+            byte_iterator(byte_iterator const&);
+            byte_iterator(byte_iterator&&) noexcept;
             virtual ~byte_iterator();
             
-            byte_iterator& operator=(byte_iterator const& other);
-            byte_iterator& operator=(byte_iterator&& other) noexcept;
+            byte_iterator& operator=(byte_iterator const&);
+            byte_iterator& operator=(byte_iterator&&) noexcept;
+            
+            template <typename T> inline
+            typename std::enable_if_t<std::is_arithmetic<T>::value,
+                reference> operator=(T value)
+            {
+                pointer pv = reinterpret_cast<byte_iterator::pointer>(value);
+                if (sourcemap != pv) {
+                    byte_iterator(pv).swap(*this);
+                }
+                return *this;
+            }
+            
+            byte_iterator& operator,(byte_iterator const&);
+            byte_iterator& operator,(byte_iterator&&);
+            
+            template <typename T> inline
+            typename std::enable_if_t<std::is_arithmetic<T>::value,
+                reference> operator,(T value)
+            {
+                sourcemap += reinterpret_cast<byte_iterator::size_type>(value);
+                return *this;
+            }
             
             /// prefix increment
             byte_iterator& operator++();
@@ -47,8 +70,10 @@ namespace im {
             /// postfix decrement
             byte_iterator operator--(int);
             
-            byte_iterator& operator+=(size_type offset);
-            byte_iterator& operator-=(size_type offset);
+            byte_iterator& operator+=(byte_iterator const&);
+            byte_iterator& operator-=(byte_iterator const&);
+            byte_iterator& operator+=(size_type);
+            byte_iterator& operator-=(size_type);
             
             friend byte_iterator operator+(byte_iterator const& lhs, size_type rhs);
             friend byte_iterator operator+(size_type lhs, byte_iterator const& rhs);
@@ -58,7 +83,7 @@ namespace im {
             reference_type operator*() const;
             pointer operator->() const;
             pointer operator&() const;
-            reference_type operator[](size_type idx) const;
+            reference_type operator[](size_type) const;
             
             friend bool operator<(byte_iterator const& lhs, byte_iterator const& rhs);
             friend bool operator>(byte_iterator const& lhs, byte_iterator const& rhs);
@@ -67,11 +92,11 @@ namespace im {
             friend bool operator==(byte_iterator const& lhs, byte_iterator const& rhs);
             friend bool operator!=(byte_iterator const& lhs, byte_iterator const& rhs);
             
-            void swap(byte_iterator& other);
+            void swap(byte_iterator&);
             friend void swap(byte_iterator& lhs, byte_iterator& rhs);
             
         protected:
-            pointer sourcemap;
+            mutable pointer sourcemap;
     };
     
 } /* namespace im */
