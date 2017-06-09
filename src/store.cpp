@@ -8,7 +8,6 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/JSON/json11.h>
-// #include <libimread/file.hh>
 #include <libimread/store.hh>
 
 #define STRINGNULL() stringmapper::base_t::null_value()

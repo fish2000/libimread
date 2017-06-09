@@ -67,11 +67,12 @@ namespace im {
     using HalImage = Halide::Buffer<std::decay_t<T>>;
     using MetaImage = ImageWithMetadata;
     
-    template <typename pT>
-    class HybridImage : public HalImage<pT>, public Image, public MetaImage {
+    template <typename pT,
+              typename hT = HalImage<pT>>
+    class HybridImage : public hT, public Image, public MetaImage {
         public:
             using pixel_t = pT;
-            using halide_image_t = HalImage<pT>;
+            using halide_image_t = hT;
             
             HybridImage()
                 :halide_image_t(), Image(), MetaImage()
