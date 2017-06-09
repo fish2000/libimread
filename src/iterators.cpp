@@ -50,7 +50,7 @@ namespace im {
     /// postfix increment
     byte_iterator byte_iterator::operator++(int) {
         byte_iterator out(*this);
-        out.sourcemap++;
+        sourcemap++;
         return out;
     }
     
@@ -63,7 +63,7 @@ namespace im {
     /// postfix decrement
     byte_iterator byte_iterator::operator--(int) {
         byte_iterator out(*this);
-        out.sourcemap--;
+        sourcemap--;
         return out;
     }
     
@@ -100,7 +100,7 @@ namespace im {
     }
     
     byte_iterator::value_type byte_iterator::operator*() const {
-        return sourcemap[0];
+        return *sourcemap;
     }
     
     byte_iterator::pointer byte_iterator::operator->() const {
@@ -112,16 +112,17 @@ namespace im {
     }
     
     byte_iterator::reference_type byte_iterator::operator[](size_type idx) const {
-        return sourceidx[idx];
+        // return sourceidx[idx];
+        return sourcemap[idx];
     }
     
-    byte_iterator::operator byte_iterator::value_type() const {
-        return sourcemap[0];
-    }
+    // byte_iterator::operator byte_iterator::value_type() const {
+    //     return sourcemap[0];
+    // }
     
-    byte_iterator::operator byte_iterator::size_type() const {
-        return (size_type)((byte_iterator::idx_t)sourcemap - (byte_iterator::idx_t)sourceidx);
-    }
+    // byte_iterator::operator byte_iterator::size_type() const {
+    //     return (size_type)((byte_iterator::idx_t)sourcemap - (byte_iterator::idx_t)sourceidx);
+    // }
     
     bool operator<(byte_iterator const& lhs, byte_iterator const& rhs) {
         return lhs.sourcemap < rhs.sourcemap;

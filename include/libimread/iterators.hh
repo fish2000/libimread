@@ -60,8 +60,8 @@ namespace im {
             pointer operator&() const;
             reference_type operator[](size_type idx) const;
             
-            explicit operator value_type() const;
-            explicit operator size_type() const;
+            // explicit operator value_type() const;
+            // explicit operator size_type() const;
             
             friend bool operator<(byte_iterator const& lhs, byte_iterator const& rhs);
             friend bool operator>(byte_iterator const& lhs, byte_iterator const& rhs);
