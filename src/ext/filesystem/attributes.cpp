@@ -159,6 +159,7 @@ namespace filesystem {
                  attribute::ns domain) {
             std::string name = detail::sysname(name_);
             if (name == detail::nullstring) { return false; }
+            if (value == detail::nullstring) { return del(pth, name_, options, domain); }
             
             int status = -1;
             
@@ -489,6 +490,7 @@ namespace filesystem {
                    attribute::ns domain) {
             std::string name = detail::sysname(name_);
             if (name == detail::nullstring) { return false; }
+            if (value == detail::nullstring) { return fddel(descriptor, name_, options, domain); }
             
             int status = -1;
             
@@ -813,6 +815,7 @@ namespace filesystem {
         }
         
         std::string accessor_t::pathstring(std::string const& newpathstring) {
+            m_descriptor = -1;
             m_pathstring = std::string(newpathstring);
             return m_pathstring;
         }
@@ -833,6 +836,7 @@ namespace filesystem {
         int accessor_t::descriptor(int fd) {
             if (fd > 0) {
                 m_descriptor = fd;
+                m_pathstring = filesystem::path(m_descriptor).str();
             }
             return m_descriptor;
         }
