@@ -1,19 +1,11 @@
 
 #include <cstdlib>
 #include <libimread/libimread.hpp>
-// #include <libimread/errors.hh>
-// #include <libimread/ext/filesystem/mode.h>
+#include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
-// #include <libimread/ext/filesystem/attributes.h>
-// #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/temporary.h>
-// #include <libimread/ext/filesystem/nowait.h>
-// #include <libimread/ext/JSON/json11.h>
 
-// #include <libimread/file.hh>
-// #include <libimread/filehandle.hh>
 #include <libimread/store.hh>
-// #include <libimread/rocks.hh>
 #include <libimread/env.hh>
 
 // #define COLLECT_TEMPORARIES 1
@@ -23,18 +15,8 @@
 namespace {
     
     using filesystem::path;
-    // using filesystem::switchdir;
-    // using filesystem::resolver;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
-    
-    // using filesystem::detail::nowait_t;
-    // using filesystem::detail::stringvec_t;
-    // using filesystem::attribute::accessor_t;
-    // using filesystem::attribute::detail::nullstring;
-    
-    // using im::FileSource;
-    // using im::FileSink;
     
     TEST_CASE("[environment] List the environment variables of the current process",
               "[environment-list-environment-variables-current-process]")
@@ -66,11 +48,13 @@ namespace {
         
         CHECK(std::getenv(nk.c_str()) == nullptr);
         CHECK(viron.get(nk) == viron.null_value());
-        CHECK(viron.set(nk, nv));
+        
+        REQUIRE(viron.set(nk, nv));
         CHECK(std::getenv(nk.c_str()) == std::string("I heard you like environment variables"));
         CHECK(viron.get(nk) == "I heard you like environment variables");
         CHECK(viron.count() == oldcount + 1);
-        CHECK(viron.del(nk));
+        
+        REQUIRE(viron.del(nk));
         CHECK(std::getenv(nk.c_str()) == nullptr);
         CHECK(viron.get(nk) == viron.null_value());
         CHECK(viron.count() == oldcount);
@@ -95,7 +79,7 @@ namespace {
         
         std::string nk("YO_DOGG");
         std::string nv("I heard you like environment variables");
-        CHECK(viron.set(nk, nv));
+        REQUIRE(viron.set(nk, nv));
         
         store::stringmap memcopy2(viron);
         REQUIRE(viron.count() == memcopy2.count());
@@ -107,11 +91,44 @@ namespace {
         CHECK(viron.count() == memcopycount + 1);
         CHECK(viron.count() == memcopy.count() + 1);
         CHECK(viron.get(nk) == memcopy2.get(nk));
-        CHECK(viron.del(nk));
         
-        // NamedTemporaryFile tf(".json");
-        // path rocksjsonpth = td.dirpath.join("rocks-dump.json");
-        // path memoryjsonpth = td.dirpath.join("memory-dump.json");
+        for (std::string const& name : memcopy2.list()) {
+            if (std::strcmp(std::getenv(name.c_str()), "") != 0) {
+                CHECK(viron.get(name) == std::getenv(name.c_str()));
+            }
+        }
+        
+        REQUIRE(viron.del(nk));
+        CHECK(viron.get(nk) == viron.null_value());
+        CHECK(viron.count() == memcopy.count());
+        CHECK(viron.count() == memcopycount);
+        // CHECK(viron.get(nk) == memcopy.get(nk));
+        CHECK(viron.count() == memcopy2.count() - 1);
+        
+        {
+            NamedTemporaryFile vt(".json");
+            vt.open();
+            vt.stream << viron.mapping_json()
+                      << std::endl;
+            CHECK(vt.close());
+            CHECK(COLLECT(vt.filepath));
+        }
+        
+        {
+            NamedTemporaryFile mt(".json");
+            mt.open();
+            mt.stream << memcopy.mapping_json()
+                      << std::endl;
+            CHECK(mt.close());
+            CHECK(COLLECT(mt.filepath));
+        }
+        
+        bool compare_eq = (viron == memcopy);
+        
+        REQUIRE(compare_eq);
+        
+        // path vironpth = td.dirpath.join("viron-dump.json");
+        // path memorypth = td.dirpath.join("memory-dump.json");
         
     }
     

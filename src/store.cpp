@@ -225,6 +225,29 @@ namespace store {
         return static_cast<std::size_t>(get(key) == STRINGNULL());
     }
     
+    // bool stringmapper::compare(stringmapper const& other) const {
+    //     warm_cache();
+    //     other.warm_cache();
+    //     stringmap_t lhs = mapping();
+    //     stringmap_t rhs = other.mapping();
+    //     stringvec_t keys = list();
+    //     bool out = ((lhs.size() == rhs.size()) &&
+    //                 (lhs.size() == keys.size()) &&
+    //                 (rhs.size() == keys.size()));
+    //     if (!out) {
+    //         WTF("sizes compare unequal",
+    //          FF("%i, %i, %i", keys.size(),
+    //                           lhs.size(),
+    //                           rhs.size()));
+    //         return false;
+    //     }
+    //     WTF("sizes compare equal", keys.size());
+    //     for (std::string const& key : keys) {
+    //         out &= (get(key) == other.get(key));
+    //     }
+    //     return out;
+    // }
+    
     #pragma mark - store::xattrmap methods
     
     bool xattrmap::can_store() const noexcept { return true; }

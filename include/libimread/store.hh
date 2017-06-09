@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <libimread/libimread.hpp>
+// #include <libimread/errors.hh>
 
 namespace store {
     
@@ -366,5 +367,40 @@ namespace store {
     };
     
 } /// namespace store
+
+template <typename T,
+          typename U,
+          typename X = typename std::enable_if_t<
+                                store::is_stringmapper_v<T, U>,
+                       bool>>
+X operator==(T const& lhs,
+             U const& rhs) {
+    lhs.warm_cache();
+    rhs.warm_cache();
+    store::stringmapper::stringvec_t keys = lhs.list();
+    bool out = ((lhs.count() == rhs.count()) &&
+                (lhs.count() == keys.size()) &&
+                (rhs.count() == keys.size()));
+    if (!out) {
+        // WTF("sizes compare unequal",
+        //  FF("%i, %i, %i", keys.size(),
+        //                   lhs.count(),
+        //                   rhs.count()));
+        return false;
+    }
+    // WTF("sizes compare equal", keys.size());
+    for (std::string const& key : keys) {
+        out &= (lhs.get(key) == rhs.get(key));
+    }
+    return out;
+}
+
+template <typename T,
+          typename U,
+          typename X = typename std::enable_if_t<
+                                store::is_stringmapper_v<T, U>,
+                       bool>>
+X operator!=(T const& lhs,
+             U const& rhs) { return !(operator==<T, U>(lhs, rhs)); }
 
 #endif /// LIBIMREAD_INCLUDE_STORE_HH_

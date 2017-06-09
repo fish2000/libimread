@@ -84,10 +84,8 @@ namespace store {
                 std::unique_lock<std::mutex> setlock(setmute);
                 cache[key] = value;
             } else {
-                {
-                    std::unique_lock<std::mutex> setlock(setmute);
-                    cache.insert({ key, value });
-                }
+                std::unique_lock<std::mutex> setlock(setmute);
+                cache.insert({ key, value });
                 ++envcount;
             }
             return true;
@@ -101,7 +99,7 @@ namespace store {
             std::lock(setmute, getmute);
             std::lock_guard<std::mutex> setlock(setmute, std::adopt_lock);
             std::lock_guard<std::mutex> getlock(getmute, std::adopt_lock);
-            unset = ::unsetenv(key.c_str()) == 0;
+            unset = (::unsetenv(key.c_str()) == 0);
         }
         if (cache.find(key) != cache.end()) {
             std::unique_lock<std::mutex> setlock(setmute);
@@ -112,22 +110,20 @@ namespace store {
     }
     
     std::size_t env::count() const {
-        if (envcount.load() == 0) {
-            std::size_t idx = 0;
-            {
-                std::unique_lock<std::mutex> getlock(getmute);
-                while (environ[idx]) { idx++; }
-            }
-            envcount.store(idx);
+        std::size_t idx = 0;
+        {
+            std::unique_lock<std::mutex> getlock(getmute);
+            while (environ[idx]) { ++idx; }
         }
-        return envcount.load();
+        envcount.store(idx);
+        return idx;
     }
     
     stringmapper::stringvec_t env::list() const {
         stringmapper::stringvec_t out{};
         stringmapper::stringvec_t parts{};
         std::size_t idx = 0;
-        out.reserve(envcount.load());
+        out.reserve(count());
         {
             std::unique_lock<std::mutex> getlock(getmute);
             while (environ[idx]) {
@@ -135,8 +131,6 @@ namespace store {
                 pystring::split(envkv, parts, "=");
                 out.emplace_back(parts.front());
             }
-        }
-        if (idx != envcount.load()) {
             envcount.store(idx);
         }
         return out;

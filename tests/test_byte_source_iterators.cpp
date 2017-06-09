@@ -29,13 +29,11 @@ namespace {
               "[byte-source-iterators-test-FileSource-iterators]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
+        const std::vector<path> pngs = basedir.list("*.png", true); /// full_paths=true
         
-        std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
-            path imagepath = basedir/p;
+        std::for_each(pngs.begin(), pngs.end(), [](path const& p) {
             bytevec_t data;
-            std::string pth = imagepath.str();
-            std::unique_ptr<FileSource> source(new FileSource(pth));
+            std::unique_ptr<FileSource> source(new FileSource(p));
             std::copy(std::begin(source.get()),
                       std::end(source.get()),
                       std::back_inserter(data));
@@ -52,14 +50,13 @@ namespace {
               "[byte-source-iterators-test-handle-source-iterators]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png");
+        const std::vector<path> pngs = basedir.list("*.png", true); /// full_paths=true
         
-        std::for_each(pngs.begin(), pngs.end(), [&basedir](path const& p) {
-            path imagepath = basedir/p;
+        std::for_each(pngs.begin(), pngs.end(), [](path const& p) {
             bytevec_t data;
-            std::string pth = imagepath.str();
-            HandleSource source(pth);
-            std::copy(source.begin(), source.end(),
+            HandleSource source(p);
+            std::copy(source.begin(),
+                      source.end(),
                       std::back_inserter(data));
             bytevec_t fulldata(source.full_data());
             
@@ -82,15 +79,13 @@ namespace {
     {
         path basedir(im::test::basedir);
         const std::array<byte, 2> marker{ 0xFF, 0xE1 };
-        const std::vector<path> jpgs = basedir.list("*.jpg");
-        // const std::vector<path> pngs = basedir.list("*.png");
-        // const std::vector<path> tifs = basedir.list("*.tif");
+        const std::vector<path> jpgs = basedir.list("*.jpg", true); /// full_paths=true
+        // const std::vector<path> pngs = basedir.list("*.png", true);
+        // const std::vector<path> tifs = basedir.list("*.tif", true);
         
-        auto exif_extractor = [&](path const& p) {
-            path imagepath = basedir/p;
-            bytevec_t data;
-            std::string pth = imagepath.str();
-            FileSource source(pth);
+        auto exif_extractor = [&marker](path const& p) {
+            FileSource source(p);
+            bytevec_t exif_bytes;
             byte_iterator result = std::search(source.begin(), source.end(),
                                                marker.begin(), marker.end());
             bool has_exif = result != source.end();
@@ -98,7 +93,7 @@ namespace {
                 uint16_t size = parse_size(result);
                 std::advance(result, 4);
                 std::copy(result, result + size,
-                          std::back_inserter(data));
+                          std::back_inserter(exif_bytes));
                 
                 // char m[6];
                 // std::memcpy(m, &result, sizeof(m));
@@ -108,7 +103,8 @@ namespace {
                 //  FF("with value: %s", m));
                 
                 EXIFInfo exif;
-                CHECK(exif.parseFromEXIFSegment(&data[0], data.size()) == PARSE_EXIF_SUCCESS);
+                CHECK(exif.parseFromEXIFSegment(exif_bytes.data(),
+                                                exif_bytes.size()) == PARSE_EXIF_SUCCESS);
                 
                 // WTF("EXIF data extracted:",
                 //     FF("\tImage Description: %s",   exif.ImageDescription.c_str()),

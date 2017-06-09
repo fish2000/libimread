@@ -32,20 +32,21 @@ namespace {
     {
         path basedir(im::test::basedir);
         TemporaryDirectory td("test-gzio-pngs");
-        const pathvec_t pngs = basedir.list("*.png");
+        const pathvec_t pngs = basedir.list("*.png", true); /// full_paths=true
         
-        std::for_each(pngs.begin(), pngs.end(), [&](path const& p) {
-            path imagepath = basedir/p;
-            path gzpath = td.dirpath/p + ".gz";
-            std::unique_ptr<FileSource> source(new FileSource(imagepath));
-            bytevec_t fulldata = source->full_data();
+        std::for_each(pngs.begin(), pngs.end(), [&td](path const& p) {
+            path gzpath = td.dirpath/(p.basename() + ".gz");
+            std::unique_ptr<FileSource> source(new FileSource(p));
             bytevec_t readback;
+            bytevec_t fulldata(std::begin(source.get()),
+                               std::end(source.get()));
             
             {
                 /// nest scope to ensure GZSink gets rightly dumpstered
                 std::unique_ptr<GZSink> gzoutput(new GZSink(gzpath));
                 gzoutput->write(fulldata);
                 CHECK(gzoutput->uncompressed_byte_size() == fulldata.size());
+                
                 // WTF("GZIO compression ratio: ",
                 //     FF("\tFile size (compressed):   %u", gzoutput->size()),
                 //     FF("\tData size (uncompressed): %u", gzoutput->uncompressed_byte_size()),
@@ -61,6 +62,7 @@ namespace {
                 std::unique_ptr<GZSource> gzinput(new GZSource(gzpath));
                 readback = gzinput->full_data();
                 CHECK(gzinput->uncompressed_byte_size() == readback.size());
+                
                 // WTF("GZIO compression ratio: ",
                 //     FF("\tFile size (compressed):   %u", gzinput->size()),
                 //     FF("\tData size (uncompressed): %u", gzinput->uncompressed_byte_size()),
@@ -80,14 +82,14 @@ namespace {
     {
         path basedir(im::test::basedir);
         TemporaryDirectory td("test-gzio-jpgs");
-        const pathvec_t jpgs = basedir.list("*.jpg");
+        const pathvec_t jpgs = basedir.list("*.jpg", true); /// full_paths=true
         
-        std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
-            path imagepath = basedir/p;
-            path gzpath = td.dirpath/p + ".gz";
-            std::unique_ptr<FileSource> source(new FileSource(imagepath));
-            bytevec_t fulldata = source->full_data();
+        std::for_each(jpgs.begin(), jpgs.end(), [&td](path const& p) {
+            path gzpath = td.dirpath/(p.basename() + ".gz");
+            std::unique_ptr<FileSource> source(new FileSource(p));
             bytevec_t readback;
+            bytevec_t fulldata(std::begin(source.get()),
+                               std::end(source.get()));
             
             {
                 /// nest scope to ensure GZSink gets rightly dumpstered
@@ -95,6 +97,7 @@ namespace {
                 gzoutput->write(fulldata);
                 gzoutput->flush();
                 CHECK(gzoutput->uncompressed_byte_size() == fulldata.size());
+                
                 // WTF("GZIO compression ratio: ",
                 //     FF("\tFile size (compressed):   %u", gzoutput->size()),
                 //     FF("\tFile size (stat):         %u", gzpath.filesize()),
@@ -111,6 +114,7 @@ namespace {
                 std::unique_ptr<GZSource> gzinput(new GZSource(gzpath));
                 readback = gzinput->full_data();
                 CHECK(gzinput->uncompressed_byte_size() == readback.size());
+                
                 // WTF("GZIO compression ratio: ",
                 //     FF("\tFile size (compressed):   %u", gzinput->size()),
                 //     FF("\tFile size (stat):         %u", gzpath.filesize()),
