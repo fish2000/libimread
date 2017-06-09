@@ -44,7 +44,6 @@ namespace im {
             virtual std::size_t seek_end(int delta);
             
             virtual std::size_t write(const void* buffer, std::size_t n);
-            // virtual std::size_t write(bytevec_t const& bv);
             virtual void flush();
             
             virtual bytevec_t contents();

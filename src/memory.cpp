@@ -77,12 +77,6 @@ namespace im {
         return std::fwrite(buffer, sizeof(byte), n, membuf.get());
     }
     
-    // std::size_t memory_sink::write(bytevec_t const& bv) {
-    //     return this->write(
-    //         static_cast<const void*>(&bv[0]),
-    //         bv.size());
-    // }
-    
     void memory_sink::flush() { std::fflush(membuf.get()); }
     
     bytevec_t memory_sink::contents() {

@@ -16,30 +16,45 @@
 namespace im {
     
     struct seekable {
+        
+        using value_type = byte;
+        using difference_type = std::ptrdiff_t;
+        using size_type = std::size_t;
+        
+        using reference_type = std::add_lvalue_reference_t<value_type>;
+        using reference = std::add_lvalue_reference_t<value_type>;
+        using const_reference = std::add_const_t<reference>;
+        using pointer = std::add_pointer_t<value_type>;
+        
+        using iterator = byte_iterator;
+        using const_iterator = byte_iterator;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+        
         virtual ~seekable();
         virtual bool can_seek() const noexcept;
         virtual std::size_t seek_absolute(std::size_t);
         virtual std::size_t seek_relative(int);
         virtual std::size_t seek_end(int);
+        
     };
     
     class byte_source : virtual public seekable {
         
         public:
-            using value_type = byte;
-            
-            using difference_type = std::ptrdiff_t;
-            using size_type = std::size_t;
-            using reference_type = std::add_lvalue_reference_t<value_type>;
-            using reference = std::add_lvalue_reference_t<value_type>;
-            using const_reference = std::add_const_t<reference>;
-            using pointer = std::add_pointer_t<value_type>;
-            
-            using iterator = byte_iterator;
-            using const_iterator = byte_iterator;
-            using reverse_iterator = std::reverse_iterator<iterator>;
-            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-            
+            using seekable::value_type;
+            using seekable::difference_type;
+            using seekable::size_type;
+            using seekable::reference_type;
+            using seekable::reference;
+            using seekable::const_reference;
+            using seekable::pointer;
+            using seekable::iterator;
+            using seekable::const_iterator;
+            using seekable::reverse_iterator;
+            using seekable::const_reverse_iterator;
+        
+        public:
             virtual ~byte_source();
             virtual std::size_t read(byte*, std::size_t) warn_unused = 0;
             virtual void* readmap(std::size_t pageoffset = 0) const = 0;
@@ -48,6 +63,7 @@ namespace im {
             bool empty() const;
             byte* data() const;
             
+        public:
             iterator begin();
             iterator end();
             const_iterator begin() const;
@@ -57,39 +73,40 @@ namespace im {
             const_reverse_iterator rbegin() const;
             const_reverse_iterator rend() const;
         
-        protected:
-            mutable bool sized = false;
-            mutable size_type siz = 0;
+        private:
+            mutable bool __sized = false;
+            mutable size_type __siz = 0;
     };
     
     class byte_sink : virtual public seekable {
         
         public:
-            using value_type = byte;
+            using seekable::value_type;
+            using seekable::difference_type;
+            using seekable::size_type;
+            using seekable::reference_type;
+            using seekable::reference;
+            using seekable::const_reference;
+            using seekable::pointer;
+            using seekable::iterator;
+            using seekable::const_iterator;
+            using seekable::reverse_iterator;
+            using seekable::const_reverse_iterator;
             
-            using difference_type = std::ptrdiff_t;
-            using size_type = std::size_t;
-            using reference_type = std::add_lvalue_reference_t<value_type>;
-            using reference = std::add_lvalue_reference_t<value_type>;
-            using const_reference = std::add_const_t<reference>;
-            using pointer = std::add_pointer_t<value_type>;
-            
-            using iterator = byte_iterator;
-            using const_iterator = byte_iterator;
-            using reverse_iterator = std::reverse_iterator<iterator>;
-            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-            
+        public:
             virtual ~byte_sink();
             virtual std::size_t write(const void*, std::size_t) = 0;
             virtual std::size_t write(bytevec_t const&);
             virtual void flush();
             
+        public:
             template <typename ...Args>
-            std::size_t writef(const char* format, Args... args) {
+            __attribute__((nonnull (2)))
+            std::size_t writef(char const* format, Args... args) {
                 char buffer[1024];
                 std::snprintf(buffer, 1024, format, args...);
                 return this->write(buffer, std::strlen(
-                                   static_cast<const char*>(buffer)));
+                              static_cast<char const*>(buffer)));
             }
     };
 
