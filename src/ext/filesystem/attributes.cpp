@@ -61,7 +61,7 @@ namespace filesystem {
         
         namespace detail {
             
-            inline attrbuf_t attrbuf(std::size_t size) {
+            static attrbuf_t attrbuf(std::size_t size) {
                 return std::make_unique<char[]>(size);
             }
             
