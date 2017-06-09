@@ -8,24 +8,24 @@ namespace im {
     
     byte_iterator::byte_iterator(byte_iterator::pointer byteptr)
         :sourcemap(byteptr)
-        ,sourceidx(byteptr)
+        // ,sourceidx(byteptr)
         {}
     
     byte_iterator::byte_iterator(byte_iterator::pointer byteptr, size_type initial_idx)
         :sourcemap(byteptr)
-        ,sourceidx(byteptr)
+        // ,sourceidx(byteptr)
         {
             sourcemap += initial_idx;
         }
     
     byte_iterator::byte_iterator(byte_iterator const& other)
         :sourcemap(other.sourcemap)
-        ,sourceidx(other.sourceidx)
+        // ,sourceidx(other.sourceidx)
         {}
     
     byte_iterator::byte_iterator(byte_iterator&& other) noexcept
         :sourcemap(std::move(other.sourcemap))
-        ,sourceidx(std::move(other.sourceidx))
+        // ,sourceidx(std::move(other.sourceidx))
         {}
     
     byte_iterator::~byte_iterator() {}
@@ -37,7 +37,7 @@ namespace im {
     
     byte_iterator& byte_iterator::operator=(byte_iterator&& other) noexcept {
         sourcemap = std::move(other.sourcemap);
-        sourceidx = std::move(other.sourceidx);
+        // sourceidx = std::move(other.sourceidx);
         return *this;
     }
     
@@ -151,13 +151,13 @@ namespace im {
     void byte_iterator::swap(byte_iterator& other) {
         using std::swap;
         swap(sourcemap, other.sourcemap);
-        swap(sourceidx, other.sourceidx);
+        // swap(sourceidx, other.sourceidx);
     }
     
     void swap(byte_iterator& lhs, byte_iterator& rhs) {
         using std::swap;
         swap(lhs.sourcemap, rhs.sourcemap);
-        swap(lhs.sourceidx, rhs.sourceidx);
+        // swap(lhs.sourceidx, rhs.sourceidx);
     }
     
 } /* namespace im */

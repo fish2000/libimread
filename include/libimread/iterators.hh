@@ -75,7 +75,7 @@ namespace im {
             
         protected:
             pointer sourcemap;
-            pointer sourceidx;
+            // pointer sourceidx;
     };
     
 } /* namespace im */
