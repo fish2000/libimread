@@ -165,6 +165,11 @@ namespace store {
         return Json(cache).format();
     }
     
+    std::string stringmapper::to_string() const {
+        warm_cache();
+        return Json(cache).format();
+    }
+    
     bool stringmapper::dump(std::string const& destination, bool overwrite, formatter format) const {
         /// only JSON works for now:
         warm_cache();

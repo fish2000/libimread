@@ -120,6 +120,7 @@ namespace store {
             virtual void warm_cache() const;
             virtual stringmap_t& mapping() const;
             virtual std::string mapping_json() const;
+            virtual std::string to_string() const;
             virtual bool dump(std::string const& destination,
                                 bool overwrite = false,
                               formatter format = stringmapper::default_format) const;

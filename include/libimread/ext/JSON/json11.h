@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <cfloat>
 #include <vector>
-#include <mutex>
 #include <map>
 #include <set>
 #include <string>
@@ -346,8 +345,6 @@ class Json {
         static detail::stringset_t keyset;   /// all propery names
         static int level;                    /// for pretty printing
         static int indent;                   /// for pretty printing
-        static bool locking;
-        static std::mutex mute;
         
         Json(Node* node) {
             (root = (node == nullptr ? &Node::null : node))->refcnt++;

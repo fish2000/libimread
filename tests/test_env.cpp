@@ -123,11 +123,19 @@ namespace {
             CHECK(COLLECT(mt.filepath));
         }
         
-        bool compare_eq_0 = (viron == memcopy);
-        bool compare_eq_1 = (memcopy == viron);
+        // bool compare_eq_0 = (viron == memcopy);
+        // bool compare_eq_1 = (memcopy == viron);
+        // bool compare_eq_2 = (viron != memcopy2);
+        // bool compare_eq_3 = (memcopy2 != viron);
+        // REQUIRE(compare_eq_0);
+        // REQUIRE(compare_eq_1);
+        // REQUIRE(compare_eq_2);
+        // REQUIRE(compare_eq_3);
         
-        REQUIRE(compare_eq_0);
-        REQUIRE(compare_eq_1);
+        REQUIRE(viron == memcopy);
+        REQUIRE(memcopy == viron);
+        REQUIRE(viron != memcopy2);
+        REQUIRE(memcopy2 != viron);
         
         // path vironpth = td.dirpath.join("viron-dump.json");
         // path memorypth = td.dirpath.join("memory-dump.json");

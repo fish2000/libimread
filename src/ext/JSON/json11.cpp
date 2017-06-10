@@ -33,8 +33,6 @@ Json::Bool Json::Bool::F(false);
 detail::stringset_t Json::keyset;
 int Json::indent = 4;
 int Json::level;
-bool Json::locking = false;
-std::mutex Json::mute;
 
 namespace tc {
     
@@ -87,20 +85,17 @@ namespace detail {
                 case '\\':
                     out << c << c;
                     break;
-                case '\b':
-                    out << '\\' << 'b';
-                    break;
-                case '\f':
-                    out << '\\' << 'f';
-                    break;
+                case '\'':
                 case '\n':
-                    out << '\\' << 'n';
-                    break;
-                case '\r':
-                    out << '\\' << 'r';
-                    break;
                 case '\t':
-                    out << '\\' << 't';
+                case '\b':
+                case '\f':
+                case '\r':
+                case '\v':
+                // case '\p':
+                // case '\x':
+                case '\?':
+                    out << '\\' << c;
                     break;
                 default:
                     out << c;
@@ -698,7 +693,7 @@ void Json::Object::print(std::ostream& out) const {
     bool comma = false;
     for (auto const& it : map) {
         if (comma)  { out << ','; }
-        if (indent) { out << '\n'
+        if (indent) { out << std::endl
                           << std::string(indent * level, ' '); }
         detail::escape(out, *it.first);
         out << ':';
@@ -707,7 +702,7 @@ void Json::Object::print(std::ostream& out) const {
         comma = true;
     }
     --level;
-    if (indent) { out << '\n'
+    if (indent) { out << std::endl
                       << std::string(indent * level, ' '); }
     out << '}';
 }
@@ -718,14 +713,14 @@ void Json::Array::print(std::ostream& out) const {
     bool comma = false;
     for (Node const* it : list) {
         if (comma)  { out << ','; }
-        if (indent) { out << '\n'
+        if (indent) { out << std::endl
                           << std::string(indent * level, ' '); }
         it->print(out);
         comma = true;
     }
     --level;
-    if (indent) { out << '\n'
-                      << std::string(indent*level, ' '); }
+    if (indent) { out << std::endl
+                      << std::string(indent * level, ' '); }
     out << ']';
 }
 
@@ -1040,11 +1035,9 @@ out:
 }
 
 std::string Json::format() const {
-    if (locking) { mute.lock(); }
     std::ostringstream out;
     out << *this;
     std::string outstr(out.str());
-    if (locking) { mute.unlock(); }
     return outstr;
 }
 
