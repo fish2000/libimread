@@ -155,11 +155,13 @@ namespace filesystem {
             template <typename P> inline
             static path expand_user(P&& p) { return path(std::forward<P>(p)).expand_user(); }
             
-            bool compare_debug(path const& other) const;        /// legacy, full of printf-debuggery
-            bool compare_lexical(path const& other) const;      /// compare using std::strcmp(),
-                                                                /// fails for nonexistant paths
-            bool compare_inodes(path const& other) const;       /// compare using filesystem inode values
-            bool compare(path const& other) const noexcept;     /// compare using fast-as-fuck path::hash()
+            bool compare_debug(path const&) const;        /// legacy, full of printf-debuggery,
+                                                          /// throws on nonexistant paths
+            bool compare_lexical(path const&) const;      /// compare using std::strcmp(),
+                                                          /// fails for nonexistant paths
+            bool compare_inodes(path const&) const;       /// compare using filesystem inode values,
+                                                          /// fails for nonexistant paths
+            bool compare(path const&) const noexcept;     /// compare using fast-as-fuck path::hash()
             
             /// static forwarder for path::compare<P>(p)
             template <typename P, typename Q> inline

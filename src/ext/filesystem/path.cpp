@@ -331,11 +331,11 @@ namespace filesystem {
     }
     
     bool path::compare_inodes(path const& other) const {
-        detail::stat_t sblhs, sbrhs;
-        if (::lstat(c_str(),       &sblhs)) { return false; }
-        if (::lstat(other.c_str(), &sbrhs)) { return false; }
-        return (sblhs.st_dev == sbrhs.st_dev) &&
-               (sblhs.st_ino == sbrhs.st_ino);
+        detail::stat_t sb_lhs, sb_rhs;
+        if (::lstat(c_str(),       &sb_lhs)) { return false; }
+        if (::lstat(other.c_str(), &sb_rhs)) { return false; }
+        return (sb_lhs.st_dev == sb_rhs.st_dev) &&
+               (sb_lhs.st_ino == sb_rhs.st_ino);
     }
     
     bool path::compare(path const& other) const noexcept {
