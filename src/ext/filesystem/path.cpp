@@ -109,7 +109,7 @@ namespace filesystem {
                 CTL_KERN,
                 KERN_PROC,
                 KERN_PROC_PID,
-                getpid() /// current pid
+                ::getpid() /// current pid
             };
             
             kinfo_proc_t kinfo = { 0 };
@@ -742,7 +742,7 @@ namespace filesystem {
         bool out = true;
         
         /// backtrack through path parents to find an existant base:
-        int idx, max;
+        std::size_t idx, max, i;
         idx = max = size();
         for (path p(*this); !p.exists(); p = p.parent()) { --idx; }
         
@@ -758,7 +758,7 @@ namespace filesystem {
         /// iterate through nonexistant path segments,
         /// using path::makedir() to make each nonexistant directory:
         if (out && idx < max) {
-            for (int i = idx; i < max; ++i) {
+            for (i = idx; i < max; ++i) {
                 result /= m_path[i];
                 out &= result.makedir();
             }
