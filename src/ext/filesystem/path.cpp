@@ -164,6 +164,7 @@ namespace filesystem {
         static const std::string extsepstring(1, path::extsep);
         static const std::string sepstring(1, path::sep);
         static const std::string nulstring("");
+        static const std::regex  user_directory_re("^~", regex_flags);
         
     } /* namespace detail */
     
@@ -254,8 +255,6 @@ namespace filesystem {
         return sb.st_size * sizeof(byte);
     }
     
-    // #define REGEX_FLAGS case_sensitive ? detail::regex_flags_icase : detail::regex_flags
-    
     bool path::match(std::regex const& pattern, bool case_sensitive) const {
         return std::regex_match(str(), pattern);
     }
@@ -270,8 +269,6 @@ namespace filesystem {
     path path::replace(std::regex const& pattern, std::string const& replacement, bool case_sensitive) const {
         return path(std::regex_replace(str(), pattern, replacement));
     }
-    
-    // #undef REGEX_FLAGS
     
     path path::make_absolute() const {
         if (m_absolute) { return path(*this); }
@@ -297,12 +294,10 @@ namespace filesystem {
         return path(temp);
     }
     
-    static const std::regex user_directory_re("^~", detail::regex_flags);
-    
     path path::expand_user() const {
         if (m_path.empty()) { return path(); }
         if (m_path.front().substr(0, 1) != "~") { return path(*this); }
-        return replace(user_directory_re, detail::userdir());
+        return replace(detail::user_directory_re, detail::userdir());
     }
     
     bool path::compare_debug(path const& other) const {
