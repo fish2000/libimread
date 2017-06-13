@@ -158,6 +158,7 @@ namespace filesystem {
             bool compare_debug(path const& other) const;        /// legacy, full of printf-debuggery
             bool compare_lexical(path const& other) const;      /// compare using std::strcmp(),
                                                                 /// fails for nonexistant paths
+            bool compare_inodes(path const& other) const;       /// compare using filesystem inode values
             bool compare(path const& other) const noexcept;     /// compare using fast-as-fuck path::hash()
             
             /// static forwarder for path::compare<P>(p)
@@ -167,8 +168,8 @@ namespace filesystem {
             }
             
             /// equality-test operators use path::hash()
-            bool operator==(path const& other) const { return compare(other); }
-            bool operator!=(path const& other) const { return !compare(other); }
+            bool operator==(path const&) const;
+            bool operator!=(path const&) const;
             
             /// self-explanatory interrogatives
             bool exists() const;
@@ -593,8 +594,8 @@ namespace filesystem {
             
             /// Conversion operators -- in theory you can pass your paths to functions
             /// expecting either std::strings or const char*s with these...
-            operator std::string()           { return str(); }
-            operator char const*()           { return c_str(); }
+            operator std::string();
+            operator char const*();
             
             /// less-than operator -- allows the use of filesystem::path in e.g. std::map
             bool operator<(path const& rhs) const noexcept;

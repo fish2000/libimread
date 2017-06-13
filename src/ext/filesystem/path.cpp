@@ -306,6 +306,7 @@ namespace filesystem {
     }
     
     bool path::compare_debug(path const& other) const {
+        if (!exists() || !other.exists()) { return false; }
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(), raw_self) == nullptr) {
@@ -326,11 +327,20 @@ namespace filesystem {
     }
     
     bool path::compare_lexical(path const& other) const {
+        if (!exists() || !other.exists()) { return false; }
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(),       raw_self)  == nullptr) { return false; }
         if (::realpath(other.c_str(), raw_other) == nullptr) { return false; }
         return bool(std::strcmp(raw_self, raw_other) == 0);
+    }
+    
+    bool path::compare_inodes(path const& other) const {
+        detail::stat_t sblhs, sbrhs;
+        if (::lstat(c_str(),       &sblhs)) { return false; }
+        if (::lstat(other.c_str(), &sbrhs)) { return false; }
+        return (sblhs.st_dev == sbrhs.st_dev) &&
+               (sblhs.st_ino == sbrhs.st_ino);
     }
     
     bool path::compare(path const& other) const noexcept {
@@ -522,6 +532,9 @@ namespace filesystem {
                 std::forward<detail::walk_visitor_t>(walk_visitor));
         });
     }
+    
+    bool path::operator==(path const& other) const { return compare(other); }
+    bool path::operator!=(path const& other) const { return !compare(other); }
     
     bool path::exists() const {
         return ::access(c_str(), F_OK) != -1;
@@ -1002,6 +1015,9 @@ namespace filesystem {
     detail::stringvec_t path::system() {
         return tokenize(detail::syspaths(), path::pathsep);
     }
+    
+    path::operator std::string()        { return str(); }
+    path::operator char const*()        { return c_str(); }
     
     bool path::operator<(path const& rhs) const noexcept {
         return status_time() < rhs.status_time();
