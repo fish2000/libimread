@@ -18,12 +18,13 @@
 namespace {
     
     using filesystem::path;
+    using filesystem::TemporaryDirectory;
     using pathvec_t = std::vector<path>;
     
     TEST_CASE("[hdf5-io] Read PNG and JPEG files and write as individual HDF5 binary store files",
               "[hdf5-read-png-jpeg-write-individual-hdf5-files]")
     {
-        filesystem::TemporaryDirectory td("test-hdf5-io");
+        TemporaryDirectory td("test-hdf5-io");
         path basedir(im::test::basedir);
         const pathvec_t pngs = basedir.list("*.png");
         const pathvec_t jpgs = basedir.list("*.jpg");
@@ -57,7 +58,7 @@ namespace {
     TEST_CASE("[hdf5-io] Read TIFF files and write as individual HDF5 binary store files",
               "[hdf5-read-tiff-write-individual-hdf5-files]")
     {
-        filesystem::TemporaryDirectory td("test-hdf5-io");
+        TemporaryDirectory td("test-hdf5-io");
         path basedir(im::test::basedir);
         const pathvec_t tifs = basedir.list("*.tif*");
         

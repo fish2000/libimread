@@ -314,8 +314,6 @@ namespace {
               "[fs-test-path-makedir_p]")
     {
         TemporaryDirectory td("test-td");
-        // path dp(td.dirpath.str());
-        // path da(td.dirpath.str());
         path dp = td.dirpath;
         path da = td.dirpath;
         

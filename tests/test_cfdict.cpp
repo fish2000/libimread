@@ -7,7 +7,6 @@
 // #include <libimread/ext/pystring.hh>
 
 #include <libimread/file.hh>
-// #include <libimread/filehandle.hh>
 #include <libimread/store.hh>
 #include <libimread/coregraphics.hh>
 
@@ -18,7 +17,6 @@ namespace {
     
     using filesystem::path;
     using filesystem::TemporaryName;
-    using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     using filesystem::detail::stringvec_t;
     using im::FileSource;

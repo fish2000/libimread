@@ -14,7 +14,7 @@
 
 namespace {
     
-    using filesystem::NamedTemporaryFile;
+    using filesystem::TemporaryName;
     using filesystem::TemporaryDirectory;
     using filesystem::path;
     using pathvec_t = std::vector<path>;
@@ -24,13 +24,12 @@ namespace {
     TEST_CASE("[tif-write-multi] Read PNG files and write as a single multi-image TIF file",
               "[tif-write-multi]")
     {
-        NamedTemporaryFile composite(".tif");
+        TemporaryName composite(".tif");
         ImageList outlist;
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
         /// build an ImageList
-        CHECK(composite.remove());
         std::for_each(sequence.begin(), sequence.end(),
                   [&](path const& p) {
             U8Image* halim = new U8Image(im::halide::read((basedir/p).str()));
@@ -39,7 +38,7 @@ namespace {
         
         /// call write_multi()
         im::halide::write_multi(outlist, composite.str());
-        CHECK(composite.filepath.is_file());
+        CHECK(composite.pathname.is_file());
         
         /// try readback
         ImageList readback = im::halide::read_multi(composite.str());
@@ -58,13 +57,12 @@ namespace {
     TEST_CASE("[tif-write-multi] Read PNG files and write as a single multi-image TIF file (with a filehandle)",
               "[tif-write-multi-filehandle]")
     {
-        NamedTemporaryFile composite(".tif");
+        TemporaryName composite(".tif");
         ImageList outlist;
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
         /// build an ImageList
-        CHECK(composite.remove());
         std::for_each(sequence.begin(), sequence.end(),
                   [&](path const& p) {
             U8Image* halim = new U8Image(im::halide::read((basedir/p).str()));
@@ -73,7 +71,7 @@ namespace {
         
         /// call TIFFFormat::write_multi() via halide::write_multi_handle()
         im::halide::write_multi_handle(outlist, composite.str());
-        CHECK(composite.filepath.is_file());
+        CHECK(composite.pathname.is_file());
         
         /// try readback
         ImageList readback = im::halide::read_multi(composite.str());

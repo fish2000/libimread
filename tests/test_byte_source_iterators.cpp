@@ -23,13 +23,14 @@ namespace {
     using HandleSource = im::handle::source;
     using im::byte_iterator;
     using filesystem::path;
+    using pathvec_t = std::vector<path>;
     using easyexif::EXIFInfo;
     
     TEST_CASE("[byte-source-iterators] Test FileSource iterators",
               "[byte-source-iterators-test-FileSource-iterators]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png", true); /// full_paths=true
+        const pathvec_t pngs = basedir.list("*.png", true); /// full_paths=true
         
         std::for_each(pngs.begin(), pngs.end(), [](path const& p) {
             bytevec_t data;
@@ -50,7 +51,7 @@ namespace {
               "[byte-source-iterators-test-handle-source-iterators]")
     {
         path basedir(im::test::basedir);
-        const std::vector<path> pngs = basedir.list("*.png", true); /// full_paths=true
+        const pathvec_t pngs = basedir.list("*.png", true); /// full_paths=true
         
         std::for_each(pngs.begin(), pngs.end(), [](path const& p) {
             bytevec_t data;
@@ -79,7 +80,7 @@ namespace {
     {
         path basedir(im::test::basedir);
         const std::array<byte, 2> marker{ 0xFF, 0xE1 };
-        const std::vector<path> jpgs = basedir.list("*.jpg", true); /// full_paths=true
+        const pathvec_t jpgs = basedir.list("*.jpg", true); /// full_paths=true
         // const std::vector<path> pngs = basedir.list("*.png", true);
         // const std::vector<path> tifs = basedir.list("*.tif", true);
         

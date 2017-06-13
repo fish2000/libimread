@@ -23,7 +23,6 @@ namespace formats = im::format;
 namespace {
     
     using filesystem::TemporaryName;
-    using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     using filesystem::path;
     
