@@ -6,8 +6,8 @@
 
 #include <memory>
 #include <cstdlib>
-#include <libimread/corefoundation.hh>
 
+#import  <CoreFoundation/CoreFoundation.h>
 #import  <ImageIO/ImageIO.h>
 
 /// These macros, like much other stuff in this implementation TU,

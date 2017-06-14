@@ -3,6 +3,7 @@
 
 #include <libimread/IO/gif.hh>
 #include <libimread/pixels.hh>
+#include <libimread/corefoundation.hh>
 #include <libimread/coregraphics.hh>
 
 /// N.B. this next whole conditional import is just to define `kUTTypeGIF`
