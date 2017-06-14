@@ -8,7 +8,7 @@
 
 #include <libimread/file.hh>
 #include <libimread/store.hh>
-#include <libimread/coregraphics.hh>
+#include <libimread/corefoundation.hh>
 
 #include "include/test_data.hpp"
 #include "include/catch.hpp"

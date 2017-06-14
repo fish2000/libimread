@@ -58,10 +58,12 @@ if(APPLE)
     set(preview_src
         ${srcs_dir}/plat/mac/preview.mm)
     set(additional_hdrs
-        ${hdrs_dir}/coregraphics.hh)
+        ${hdrs_dir}/coregraphics.hh
+        ${hdrs_dir}/corefoundation.hh)
     set(additional_src
         ${srcs_dir}/plat/mac/IO/gif.mm
-        ${srcs_dir}/plat/mac/coregraphics.mm)
+        ${srcs_dir}/plat/mac/coregraphics.mm
+        ${srcs_dir}/plat/mac/corefoundation.mm)
 endif(APPLE)
 
 # Project header files

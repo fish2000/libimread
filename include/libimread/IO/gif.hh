@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/imagelist.hh>
@@ -53,9 +54,8 @@ namespace im {
                     ImageList pages = this->read_impl(src, factory, false, opts);
                     std::unique_ptr<Image> out = pages.pop();
                     return out;
-                #else
-                    imread_raise_default(NotImplementedError);
                 #endif
+                imread_raise_default(NotImplementedError);
             }
             
             virtual ImageList read_multi(byte_source* src,
@@ -63,9 +63,8 @@ namespace im {
                                          options_map const& opts) override {
                 #if defined(__APPLE__)
                     return this->read_impl(src, factory, true, opts);
-                #else
-                    imread_raise_default(NotImplementedError);
                 #endif
+                imread_raise_default(NotImplementedError);
             }
             
             virtual void write(Image& input,
