@@ -638,7 +638,7 @@ namespace filesystem {
         return detail::clock_t::from_time_t(sb.st_ctime);
     }
     
-    bool path::update_timestamps() {
+    bool path::update_timestamps() const {
         if (!exists()) return false;
         return ::utimes(c_str(), nullptr) != -1;
     }
@@ -920,12 +920,13 @@ namespace filesystem {
     }
     
     path& path::extend(std::string const& appendix) {
-        if (m_path.empty() && !appendix.empty()) {
+        if (appendix.empty()) {
+            return *this;
+        }
+        if (m_path.empty()) {
             m_path = detail::stringvec_t{ "" };
         }
-        if (!appendix.empty()) {
-            m_path.back().append(appendix);
-        }
+        m_path.back().append(appendix);
         return *this;
     }
     
@@ -954,6 +955,7 @@ namespace filesystem {
     }
     
     path::size_type path::rank(std::string const& ext) const {
+        /// I can't remember from whence I stole this implementation
         std::string thispath = str();
         if (thispath.size() >= ext.size() &&
             thispath.compare(thispath.size() - ext.size(), ext.size(), ext) == 0) {
@@ -1011,8 +1013,8 @@ namespace filesystem {
         return tokenize(detail::syspaths(), path::pathsep);
     }
     
-    path::operator std::string()        { return str(); }
-    path::operator char const*()        { return c_str(); }
+    path::operator std::string() const  { return str(); }
+    path::operator char const*() const  { return c_str(); }
     
     bool path::operator<(path const& rhs) const noexcept {
         return status_time() < rhs.status_time();
@@ -1064,8 +1066,8 @@ namespace filesystem {
         return os << p.str();
     }
     
-    /// calculate the hash value for the path
     path::size_type path::hash() const noexcept {
+        /// calculate the hash value for the path
         return std::accumulate(m_path.begin(),
                                m_path.end(),
                                static_cast<path::size_type>(m_absolute),
@@ -1078,8 +1080,8 @@ namespace filesystem {
         swap(m_absolute, other.m_absolute);
     }
     
-    /// path component vector
     detail::stringvec_t path::components() const {
+        /// return path component vector
         detail::stringvec_t out;
         std::copy(m_path.begin(), m_path.end(),
                   std::back_inserter(out));
@@ -1104,15 +1106,13 @@ namespace filesystem {
         return tokens;
     }
     
-    
-    /// define static mutex,
-    /// as declared in switchdir struct:
+    /// define static mutex, as declared in the switchdir struct:
     std::mutex switchdir::mute;
     
-    /// define static recursive mutex and global path stack,
-    /// as declared in workingdir struct:
+    /// define static recursive mutex, global path stack, and empty path value,
+    /// as declared in the workingdir struct:
     std::recursive_mutex workingdir::mute;
-    std::stack<path> workingdir::dstack;
+    detail::pathstack_t workingdir::dstack;
     const path workingdir::empty = path();
     
 } /* namespace filesystem */

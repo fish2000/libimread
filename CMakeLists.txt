@@ -378,6 +378,7 @@ if(IM_TESTS)
     add_imread_test("byte-source-gzio")
     add_imread_test("byte-source-iterators")
     add_imread_test("cfdict")
+    add_imread_test("cvpixelformat")
     add_imread_test("environment")
     add_imread_test("filesystem")
     add_imread_test("attributes") # filesystem-attributes

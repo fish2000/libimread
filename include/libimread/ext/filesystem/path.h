@@ -119,11 +119,6 @@ namespace filesystem {
             detail::inode_t inode() const;
             size_type filesize() const;
             
-            /// return a new and fully-absolute path wrapper,
-            /// based on the path in question
-            path make_absolute() const;
-            path make_real() const;
-            
             /// static forwarder for path::is_absolute<P>(p)
             template <typename P> inline
             static bool is_absolute(P&& p) { return path(std::forward<P>(p)).is_absolute(); }
@@ -136,11 +131,15 @@ namespace filesystem {
             template <typename P> inline
             static size_type filesize(P&& p) { return path(std::forward<P>(p)).filesize(); }
             
-            /// static forwarder for path::make_absolute<P>(p)
+            /// return a new and fully-absolute path wrapper,
+            /// based on the path in question
+            path make_absolute() const;
+            path make_real() const;
+            
+            /// static forwarders for path::make_absolute<P>(p) and path::make_real<P>(p)
             template <typename P> inline
             static path absolute(P&& p) { return path(std::forward<P>(p)).make_absolute(); }
             
-            /// static forwarder for path::make_absolute<P>(p)
             template <typename P> inline
             static path real(P&& p) { return path(std::forward<P>(p)).make_real(); }
             
@@ -153,23 +152,43 @@ namespace filesystem {
             
             /// static forwarder for path::expand_user<P>(p)
             template <typename P> inline
-            static path expand_user(P&& p) { return path(std::forward<P>(p)).expand_user(); }
+            static path expand_user(P&& p) {
+                return path(std::forward<P>(p)).expand_user();
+            }
             
-            bool compare_debug(path const&) const;        /// legacy, full of printf-debuggery,
-                                                          /// throws on nonexistant paths
-            bool compare_lexical(path const&) const;      /// compare using std::strcmp(),
-                                                          /// fails for nonexistant paths
-            bool compare_inodes(path const&) const;       /// compare using filesystem inode values,
-                                                          /// fails for nonexistant paths
-            bool compare(path const&) const noexcept;     /// compare using fast-as-fuck path::hash()
+            bool compare_debug(path const&) const;        /// legacy, full of printf-debuggery --
+                                                          /// this will throw if either path is nonexistant
+            bool compare_lexical(path const&) const;      /// compare ::realpath(…) values using std::strcmp(…) --
+                                                          /// this fails with nonexistant paths
+            bool compare_inodes(path const&) const;       /// compare on-disk paths using detail::stat_t::st_ino values --
+                                                          /// this fails with nonexistant paths
+            bool compare(path const&) const noexcept;     /// compare stringified paths using fast-as-fuck path::hash() --
+                                                          /// this works as expected with nonexistant paths
             
-            /// static forwarder for path::compare<P>(p)
+            /// static forwarders for path::compare_lexical<P, Q>(p, q), path::compare_inodes<P, Q>(p, q)
+            /// and path::compare<P, Q>(p, q)
+            template <typename P, typename Q> inline
+            static bool compare_lexical(P&& p, Q&& q) {
+                path lhs(std::forward<P>(p));
+                path rhs(std::forward<Q>(q));
+                if (!lhs.exists() || !rhs.exists()) { return false; }
+                return lhs.compare_lexical(rhs);
+            }
+            
+            template <typename P, typename Q> inline
+            static bool compare_inodes(P&& p, Q&& q) {
+                path lhs(std::forward<P>(p));
+                path rhs(std::forward<Q>(q));
+                if (!lhs.exists() || !rhs.exists()) { return false; }
+                return lhs.compare_inodes(rhs);
+            }
+            
             template <typename P, typename Q> inline
             static bool compare(P&& p, Q&& q) {
                 return path(std::forward<P>(p)).compare(path(std::forward<Q>(q)));
             }
             
-            /// equality-test operators use path::hash()
+            /// equality-test operators use path::compare(…) and therefore path::hash()
             bool operator==(path const&) const;
             bool operator!=(path const&) const;
             
@@ -189,78 +208,77 @@ namespace filesystem {
             bool is_pipe() const;
             bool is_file_or_link() const;
             
-            /// Static forwarders for aforementioned interrogatives
+            /// Static forwarders for the aforementioned interrogatives
             template <typename P> inline
-            static bool exists(P&& p) {
-                return path(std::forward<P>(p)).exists();
-            }
+            static bool exists(P&& p) { return path(std::forward<P>(p)).exists(); }
             template <typename P> inline
-            static bool is_readable(P&& p) {
-                return path(std::forward<P>(p)).is_readable();
-            }
+            static bool is_readable(P&& p) { return path(std::forward<P>(p)).is_readable(); }
             template <typename P> inline
-            static bool is_writable(P&& p) {
-                return path(std::forward<P>(p)).is_writable();
-            }
+            static bool is_writable(P&& p) { return path(std::forward<P>(p)).is_writable(); }
             template <typename P> inline
-            static bool is_executable(P&& p) {
-                return path(std::forward<P>(p)).is_executable();
-            }
+            static bool is_executable(P&& p) { return path(std::forward<P>(p)).is_executable(); }
             template <typename P> inline
-            static bool is_readwritable(P&& p) {
-                return path(std::forward<P>(p)).is_readwritable();
-            }
+            static bool is_readwritable(P&& p) { return path(std::forward<P>(p)).is_readwritable(); }
             template <typename P> inline
-            static bool is_runnable(P&& p) {
-                return path(std::forward<P>(p)).is_runnable();
-            }
+            static bool is_runnable(P&& p) { return path(std::forward<P>(p)).is_runnable(); }
             template <typename P> inline
-            static bool is_listable(P&& p) {
-                return path(std::forward<P>(p)).is_listable();
-            }
+            static bool is_listable(P&& p) { return path(std::forward<P>(p)).is_listable(); }
             template <typename P> inline
-            static bool is_file(P&& p) {
-                return path(std::forward<P>(p)).is_file();
-            }
+            static bool is_file(P&& p) { return path(std::forward<P>(p)).is_file(); }
             template <typename P> inline
-            static bool is_link(P&& p) {
-                return path(std::forward<P>(p)).is_link();
-            }
+            static bool is_link(P&& p) { return path(std::forward<P>(p)).is_link(); }
             template <typename P> inline
-            static bool is_directory(P&& p) {
-                return path(std::forward<P>(p)).is_directory();
-            }
+            static bool is_directory(P&& p) { return path(std::forward<P>(p)).is_directory(); }
             template <typename P> inline
-            static bool is_block_device(P&& p) {
-                return path(std::forward<P>(p)).is_block_device();
-            }
+            static bool is_block_device(P&& p) { return path(std::forward<P>(p)).is_block_device(); }
             template <typename P> inline
-            static bool is_character_device(P&& p) {
-                return path(std::forward<P>(p)).is_character_device();
-            }
+            static bool is_character_device(P&& p) { return path(std::forward<P>(p)).is_character_device(); }
             template <typename P> inline
-            static bool is_pipe(P&& p) {
-                return path(std::forward<P>(p)).is_pipe();
-            }
+            static bool is_pipe(P&& p) { return path(std::forward<P>(p)).is_pipe(); }
             template <typename P> inline
-            static bool is_file_or_link(P&& p) {
-                return path(std::forward<P>(p)).is_file_or_link();
-            }
+            static bool is_file_or_link(P&& p) { return path(std::forward<P>(p)).is_file_or_link(); }
             
-            /// max_file_name_length() and max_relative_path_length()
+            /// path::max_file_name_length() and path::max_relative_path_length()
             /// return the respective values for _PC_NAME_MAX and _PC_PATH_MAX
-            /// using ::pathconf() ... -1 is returned for non-directories
+            /// using ::pathconf() (a value of -1 is returned for non-directories)
             long max_file_name_length() const;
             long max_relative_path_length() const;
             
-            /// get individual timestamps from detail::stat_t structure
+            /// get timestamp values from the paths’ detail::stat_t structure,
+            /// as per the system clock (std::chrono::system_clock)
             detail::time_triple_t timestamps() const;
             detail::timepoint_t access_time() const;
             detail::timepoint_t modify_time() const;
             detail::timepoint_t status_time() const;
             
             /// update the access and modification timestamps for the path
-            bool update_timestamps();
+            bool update_timestamps() const;
+            
+            /// Static forwarder for path::timestamps<P>(p) and the other timestamp-related methods
+            template <typename P> inline
+            static detail::time_triple_t timestamps(P&& p) {
+                return path(std::forward<P>(p)).timestamps();
+            }
+            
+            template <typename P> inline
+            static detail::timepoint_t access_time(P&& p) {
+                return path(std::forward<P>(p)).access_time();
+            }
+            
+            template <typename P> inline
+            static detail::timepoint_t modify_time(P&& p) {
+                return path(std::forward<P>(p)).modify_time();
+            }
+            
+            template <typename P> inline
+            static detail::timepoint_t status_time(P&& p) {
+                return path(std::forward<P>(p)).status_time();
+            }
+            
+            template <typename P> inline
+            static bool update_timestamps(P&& p) {
+                return path(std::forward<P>(p)).update_timestamps();
+            }
             
             /// Convenience funcs for running a std::regex against the path in question:
             /// match(), search() and replace() hand respectively straight off to std::regex_match,
@@ -274,21 +292,21 @@ namespace filesystem {
             path replace(std::regex const& pattern,         std::string const& replacement,
                                                             bool case_sensitive=false) const;
             
-            /// static forwarder for path::match<P>(p)
+            /// static forwarder for path::match<P>(p, pattern)
             template <typename P> inline
             static bool match(P&& p, std::regex&& pattern,  bool case_sensitive=false) {
                 return path(std::forward<P>(p)).match(
                     std::forward<std::regex>(pattern), case_sensitive);
             }
             
-            /// static forwarder for path::search<P>(p)
+            /// static forwarder for path::search<P>(p, pattern)
             template <typename P> inline
             static bool search(P&& p, std::regex&& pattern, bool case_sensitive=false) {
                 return path(std::forward<P>(p)).search(
                     std::forward<std::regex>(pattern), case_sensitive);
             }
             
-            /// static forwarder for path::replace<P>(p)
+            /// static forwarder for path::replace<P, S>(p, pattern, s)
             template <typename P, typename S> inline
             static path replace(P&& p, std::regex&& pattern, S&& s, bool case_sensitive=false) {
                 return path(std::forward<P>(p)).replace(
@@ -334,18 +352,22 @@ namespace filesystem {
             }
             
             /// Walk a path, a la os.walk() / os.path.walk() from Python
-            /// ... pass a function like so:
+            /// ... pass a function to visit each subdirectory of a path, like so:
+            /// 
             ///     path p = "/yo/dogg";
-            ///     p.walk([](path const& p,
+            ///     p.walk([](path const& subdir,
             ///               detail::stringvec_t& directories,
             ///               detail::stringvec_t& files) {
-            ///         std::for_each(directories.begin(), directories.end(), [&p](std::string& d) {
-            ///             std::cout << "Directory: " << p/d << std::endl;
+            ///         std::for_each(directories.begin(), directories.end(),
+            ///             [&subdir](std::string const& directory) {
+            ///                 std::cout << "Directory: " << subdir/directory << std::endl;
             ///         });
-            ///         std::for_each(files.begin(), files.end(), [&p](std::string& f) {
-            ///             std::cout << "File: " << p/f << std::endl;
+            ///         std::for_each(files.begin(), files.end(),
+            ///             [&subdir](std::string const& file) {
+            ///                 std::cout << "File: " << subdir/file << std::endl;
             ///         });
             ///     });
+            /// 
             void walk(detail::walk_visitor_t&& walk_visitor) const;
             
             /// static forwarder for path::walk<P, F>(p, f)
@@ -377,6 +399,10 @@ namespace filesystem {
                 return path(std::forward<P>(p)).remove();
             }
             
+            /// Annihilate the file or directory -- recursively via path::walk(…) if the latter --
+            /// in an EXTREMELY PERMANENTLY DANGEROUS manner that, really, should be USED WITH
+            /// ONLY THE GREATEST EXTREMETY OF CAUTIONS EXTREME (as you would the shell command
+            /// after which the method in question is named)
             bool rm_rf() const;
             
             /// Static forwarder for path::rm_rf<P>(p) that should also be USED WITH EXTREME CAUTION
@@ -396,6 +422,7 @@ namespace filesystem {
             static bool makedir(P&& p) {
                 return path(std::forward<P>(p)).makedir();
             }
+            
             template <typename P> inline
             static bool makedir_p(P&& p) {
                 return path(std::forward<P>(p)).makedir_p();
@@ -506,6 +533,17 @@ namespace filesystem {
             path parent() const;
             path dirname() const;
             
+            /// Static forwarder for path::parent<P>(p) and path::dirname<P>(p)
+            template <typename P> inline
+            static path parent(P&& p) {
+                return path(std::forward<P>(p)).parent();
+            }
+            
+            template <typename P> inline
+            static path dirname(P&& p) {
+                return path(std::forward<P>(p)).dirname();
+            }
+            
             /// join a path with another trailing path fragment, creating a new path:
             path join(path const& other) const;
             
@@ -578,6 +616,13 @@ namespace filesystem {
             /// Path rank value per extension
             size_type rank(std::string const&) const;
             
+            /// Static forwarder for path::rank<P, S>(p, s)
+            template <typename P, typename S> inline
+            static size_type rank(P&& p, S&& s) {
+                return path(std::forward<P>(p)).rank(std::forward<S>(s));
+            }
+            
+            
             /// Static functions to retrieve the current directory, the system temporary directory,
             /// user/home directories, and the current running executable/program name and full path.
             static path getcwd();
@@ -596,8 +641,8 @@ namespace filesystem {
             
             /// Conversion operators -- in theory you can pass your paths to functions
             /// expecting either std::strings or const char*s with these...
-            operator std::string();
-            operator char const*();
+            operator std::string() const;
+            operator char const*() const;
             
             /// less-than operator -- allows the use of filesystem::path in e.g. std::map
             bool operator<(path const& rhs) const noexcept;

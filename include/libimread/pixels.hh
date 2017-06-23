@@ -66,7 +66,7 @@ namespace im {
         
         template <typename PixelType  = byte,
                   typename OffsetType = std::ptrdiff_t>
-        struct alignas(alignof(PixelType) * 16) accessor {
+        struct accessor {
             
             /// Pointer difference and pixel types
             using pdiff_t = OffsetType;
@@ -103,6 +103,13 @@ namespace im {
                                pdiff_t idx = 0) {
                 return operator()(x, y, z)[idx];
             }
+            
+        };
+        
+        template <>
+        struct accessor<uint32_t> {
+            
+            
             
         };
         

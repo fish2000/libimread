@@ -12,11 +12,14 @@ namespace filesystem {
     
     namespace detail {
         
+        using pipe_t = std::unique_ptr<FILE, decltype(::pclose)&>;
+        
         std::string execute(char const* command, char const* workingdir) {
+            if (!command) { return NULL_STR; }
             std::array<char, EXECUTION_BUFFER_SIZE> buffer;
             std::string result;
-            std::unique_ptr<FILE, decltype(::pclose)&> pipe(::popen(command, "r"), ::pclose);
             switchdir s(workingdir ? path(workingdir) : path::tmp());
+            pipe_t pipe(::popen(command, "r"), ::pclose);
             if (!pipe.get()) { return NULL_STR; }
             while (!std::feof(pipe.get())) {
                 if (std::fgets(buffer.data(), EXECUTION_BUFFER_SIZE, pipe.get()) != nullptr) {

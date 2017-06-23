@@ -11,50 +11,55 @@ namespace filesystem {
     
     namespace detail {
         
+        #define VFS_INHIBITOR_DECLARATION(__typename__)                 \
+            struct __typename__ final {                                 \
+                                                                        \
+                __typename__();                                         \
+                ~__typename__();                                        \
+                                                                        \
+                private:                                                \
+                    __typename__(__typename__ const&);                  \
+                    __typename__(__typename__&&);                       \
+                    __typename__& operator=(__typename__ const&);       \
+                    __typename__& operator=(__typename__&&);            \
+                                                                        \
+                private:                                                \
+                    static std::atomic<int> descriptor;                 \
+                    static std::atomic<int> retaincount;                \
+                                                                        \
+            };
+        
+        #define VFS_INHIBITOR_EMPTY_STRUCT(__typename__)                \
+            struct __typename__ {};
+        
+        #define VFS_INHIBITOR_DEFINITION(__typename__, __device__)      \
+            std::atomic<int> __typename__::descriptor{ -1 };            \
+            std::atomic<int> __typename__::retaincount{ 0 };            \
+                                                                        \
+            __typename__::__typename__() {                              \
+                if (retaincount.fetch_add(1) == 1) {                    \
+                    descriptor.store(::open(__device__, 0));            \
+                }                                                       \
+            }                                                           \
+                                                                        \
+            __typename__::~__typename__() {                             \
+                if (retaincount.fetch_sub(1) == 0) {                    \
+                    if (::close(descriptor.load()) == 0) {              \
+                        descriptor.store(-1);                           \
+                    }                                                   \
+                }                                                       \
+            }
+        
         #ifdef IM_HAVE_AUTOFS_NOWAIT
-        
-        struct nowait_t final {
-            
-            nowait_t();
-            ~nowait_t();
-            
-            private:
-                nowait_t(nowait_t const&);
-                nowait_t(nowait_t&&);
-                nowait_t& operator=(nowait_t const&);
-                nowait_t& operator=(nowait_t&&);
-                static std::atomic<int> descriptor;
-                static std::atomic<int> retaincount;
-            
-        };
-        
+        VFS_INHIBITOR_DECLARATION(nowait_t);
         #else
-        
-        struct nowait_t {};
-        
+        VFS_INHIBITOR_EMPTY_STRUCT(nowait_t);
         #endif
         
-        
         #ifdef IM_HAVE_AUTOFS_NOTRIGGER
-        
-        struct notrigger_t final {
-            
-            notrigger_t();
-            ~notrigger_t();
-            
-            private:
-                notrigger_t(notrigger_t const&);
-                notrigger_t(notrigger_t&&);
-                notrigger_t& operator=(notrigger_t const&);
-                notrigger_t& operator=(notrigger_t&&);
-                static std::atomic<int> descriptor;
-                static std::atomic<int> retaincount;
-        };
-        
+        VFS_INHIBITOR_DECLARATION(notrigger_t);
         #else
-        
-        struct notrigger_t {};
-        
+        VFS_INHIBITOR_EMPTY_STRUCT(notrigger_t);
         #endif
         
     }

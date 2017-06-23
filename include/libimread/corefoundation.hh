@@ -32,7 +32,8 @@ namespace im {
     
     namespace detail {
         
-        using pixbuf_t = std::unique_ptr<uint32_t[]>;
+        using pixbuf_t = std::unique_ptr<uint32_t[],
+                         std::default_delete<uint32_t[]>>;
         
         template <typename CoreFoundationType>
         struct cfreleaser {
@@ -69,7 +70,7 @@ namespace store {
             cfdict(cfdict const&);
             cfdict(cfdict&&) noexcept;
             explicit cfdict(CFDictionaryRef);
-            explicit cfdict(CFMutableDictionaryRef);
+            // explicit cfdict(CFMutableDictionaryRef);
             virtual ~cfdict();
         
         protected:

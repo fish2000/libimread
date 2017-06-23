@@ -14,6 +14,10 @@ namespace filesystem {
     /// forward declaration for these next few prototypes/templates
     class path;
     
+    namespace detail {
+        using pathstack_t = std::stack<path>;
+    }
+    
     struct switchdir final {
         
         /// Change working directory temporarily with RAII while
@@ -57,7 +61,9 @@ namespace filesystem {
                 ::chdir(newdir.c_str());
             }
         
-        path from() const { return path(olddir); }
+        path from() const {
+            return path(olddir);
+        }
         
         ~switchdir() {
             ::chdir(olddir.c_str());
@@ -70,7 +76,9 @@ namespace filesystem {
             switchdir(switchdir&&);
             switchdir& operator=(switchdir const&);
             switchdir& operator=(switchdir&&);
-            static std::mutex mute; /// declaration not definition
+            
+        private:
+            static std::mutex mute;         /// declaration not definition
             mutable std::string olddir;
             mutable std::string newdir;
     };
@@ -83,11 +91,16 @@ namespace filesystem {
         /// rewinding automatically to the previous originating directory
         /// on scope exit.
         
-        workingdir(path&& nd)
+        explicit workingdir(path&& nd)
             { push(std::forward<path>(nd)); }
         
-        path from() const { return path(top()); }
-        ~workingdir() { pop(); }
+        path from() const {
+            return path(top());
+        }
+        
+        ~workingdir() {
+            pop();
+        }
         
         static void push(path&& nd) {
             if (nd == dstack.top()) { return; }
@@ -103,19 +116,21 @@ namespace filesystem {
             dstack.pop();
         }
         
-        static const path& top() {
+        static path const& top() {
             return dstack.empty() ? empty : dstack.top();
         }
         
         private:
             workingdir(void);
-            workingdir(const workingdir&);
+            workingdir(workingdir const&);
             workingdir(workingdir&&);
             workingdir& operator=(workingdir const&);
             workingdir& operator=(workingdir&&);
-            static std::recursive_mutex mute; /// declaration not definition
-            static std::stack<path> dstack;   /// declaration not definition
-            static const path empty;          /// declaration not definition
+            
+        private:
+            static std::recursive_mutex mute;   /// declaration not definition
+            static detail::pathstack_t dstack;  /// declaration not definition
+            static const path empty;            /// declaration not definition
     };
     
 }

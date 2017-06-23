@@ -270,13 +270,9 @@ namespace im {
         template <typename Format, typename T = byte> inline
         std::string tmpwrite(HybridImage<T>& input,
                              options_map const& opts = halide_default_opts) {
-            using filesystem::NamedTemporaryFile;
-            std::string out;
-            {
-                NamedTemporaryFile tf(Format::suffix(true), false); /// cleanup on scope exit
-                tf.remove();
-                out = std::string(tf.str());
-            }
+            using filesystem::TemporaryName;
+            TemporaryName tn(Format::suffix(true), false); /// cleanup on scope exit
+            std::string out = tn.do_not_destroy();
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(out));
             format->write(dynamic_cast<Image&>(input), output.get(),

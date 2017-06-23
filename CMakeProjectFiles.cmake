@@ -261,6 +261,7 @@ IF(APPLE)
     FIND_LIBRARY(CORESERVICES_LIBRARY CoreServices)
     FIND_LIBRARY(QUARTZCORE_LIBRARY QuartzCore)
     FIND_LIBRARY(IMAGEIO_LIBRARY ImageIO)
+    FIND_LIBRARY(COREVIDEO_LIBRARY CoreVideo)
     
     MARK_AS_ADVANCED(SYSTEM_LIBRARY
                      FOUNDATION_LIBRARY
@@ -268,7 +269,8 @@ IF(APPLE)
                    COREGRAPHICS_LIBRARY
                    CORESERVICES_LIBRARY
                      QUARTZCORE_LIBRARY
-                        IMAGEIO_LIBRARY)
+                        IMAGEIO_LIBRARY
+                      COREVIDEO_LIBRARY)
     
     SET(EXTRA_LIBS
              ${EXTRA_LIBS}
@@ -278,7 +280,8 @@ IF(APPLE)
       ${COREGRAPHICS_LIBRARY}
       ${CORESERVICES_LIBRARY}
         ${QUARTZCORE_LIBRARY}
-           ${IMAGEIO_LIBRARY})
+           ${IMAGEIO_LIBRARY}
+         ${COREVIDEO_LIBRARY})
     
 ENDIF(APPLE)
 

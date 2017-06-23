@@ -51,16 +51,21 @@ namespace store {
         {}
     
     cfdict::cfdict(CFDictionaryRef raw)
-        :instance{ const_cast<__CFDictionary *>(
-                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
-                           CFDictionaryGetCount(raw), raw)) }
+        :instance{ CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+                                          CF_IDX(0), raw) }
         {}
     
-    cfdict::cfdict(CFMutableDictionaryRef raw)
-        :instance{ const_cast<__CFDictionary *>(
-                  CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
-                           CFDictionaryGetCount(raw), raw)) }
-        {}
+    // cfdict::cfdict(CFDictionaryRef raw)
+    //     :instance{ const_cast<__CFDictionary *>(
+    //               CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+    //                                      CF_IDX(0), raw)) }
+    //     {}
+    
+    // cfdict::cfdict(CFMutableDictionaryRef raw)
+    //     :instance{ const_cast<__CFDictionary *>(
+    //               CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
+    //                                      CF_IDX(0), raw)) }
+    //     {}
     
     cfdict::~cfdict() {}
     
