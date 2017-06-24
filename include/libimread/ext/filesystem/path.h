@@ -20,6 +20,7 @@ namespace filesystem {
     class path;
     
     namespace detail {
+        
         std::string tmpdir() noexcept;
         std::string userdir() noexcept;
         std::string syspaths() noexcept;

@@ -36,10 +36,10 @@ namespace {
         // dict.set("kCVPixelFormatName", "YO DOGG");
         // CVPixelFormatDescriptionRegisterDescriptionWithPixelFormatType();
         
-        REQUIRE(pxfmt.get() != NULL);
+        // REQUIRE(pxfmt.get() != NULL);
         
-        store::cfdict dict(pxfmt.get());
-        WTF("PIXEL FORMAT DESCRIPTION DICT:", dict.to_string());
+        // store::cfdict dict(pxfmt.get());
+        // WTF("PIXEL FORMAT DESCRIPTION DICT:", dict.to_string());
         
     }
     
