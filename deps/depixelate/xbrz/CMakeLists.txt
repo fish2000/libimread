@@ -26,20 +26,20 @@ set_property(
 
 # Add shared and static library targets, based on the “OBJECT” library,
 # respectively called “depixelate_xbrz_shared” and “depixelate_xbrz_static”:
-add_library(
-    depixelate_xbrz_shared
-    SHARED $<TARGET_OBJECTS:depixelate_xbrz>)
-add_library(
-    depixelate_xbrz_static
-    STATIC $<TARGET_OBJECTS:depixelate_xbrz>)
-set_target_properties(
-    depixelate_xbrz_shared
-    PROPERTIES LIBRARY_OUTPUT_NAME "depixelate_xbrz")
-set_target_properties(
-    depixelate_xbrz_static
-    PROPERTIES ARCHIVE_OUTPUT_NAME "depixelate_xbrz")
-target_link_libraries(depixelate_xbrz_shared)
-target_link_libraries(depixelate_xbrz_static)
+# add_library(
+#     depixelate_xbrz_shared
+#     SHARED $<TARGET_OBJECTS:depixelate_xbrz>)
+# add_library(
+#     depixelate_xbrz_static
+#     STATIC $<TARGET_OBJECTS:depixelate_xbrz>)
+# set_target_properties(
+#     depixelate_xbrz_shared
+#     PROPERTIES LIBRARY_OUTPUT_NAME "depixelate_xbrz")
+# set_target_properties(
+#     depixelate_xbrz_static
+#     PROPERTIES ARCHIVE_OUTPUT_NAME "depixelate_xbrz")
+# target_link_libraries(depixelate_xbrz_shared)
+# target_link_libraries(depixelate_xbrz_static)
 
 # Install the shared and static library target outputs:
 # install(TARGETS depixelate_xbrz_shared

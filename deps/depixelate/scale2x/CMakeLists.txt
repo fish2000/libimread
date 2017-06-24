@@ -31,20 +31,20 @@ set_property(
 
 # Add shared and static library targets, based on the “OBJECT” library,
 # respectively called “depixelate_scale2x_shared” and “depixelate_scale2x_static”:
-add_library(
-    depixelate_scale2x_shared
-    SHARED $<TARGET_OBJECTS:depixelate_scale2x>)
-add_library(
-    depixelate_scale2x_static
-    STATIC $<TARGET_OBJECTS:depixelate_scale2x>)
-set_target_properties(
-    depixelate_scale2x_shared
-    PROPERTIES LIBRARY_OUTPUT_NAME "depixelate_scale2x")
-set_target_properties(
-    depixelate_scale2x_static
-    PROPERTIES ARCHIVE_OUTPUT_NAME "depixelate_scale2x")
-target_link_libraries(depixelate_scale2x_shared)
-target_link_libraries(depixelate_scale2x_static)
+# add_library(
+#     depixelate_scale2x_shared
+#     SHARED $<TARGET_OBJECTS:depixelate_scale2x>)
+# add_library(
+#     depixelate_scale2x_static
+#     STATIC $<TARGET_OBJECTS:depixelate_scale2x>)
+# set_target_properties(
+#     depixelate_scale2x_shared
+#     PROPERTIES LIBRARY_OUTPUT_NAME "depixelate_scale2x")
+# set_target_properties(
+#     depixelate_scale2x_static
+#     PROPERTIES ARCHIVE_OUTPUT_NAME "depixelate_scale2x")
+# target_link_libraries(depixelate_scale2x_shared)
+# target_link_libraries(depixelate_scale2x_static)
 
 # Install the shared and static library target outputs:
 # install(TARGETS depixelate_scale2x_shared

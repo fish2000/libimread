@@ -13,15 +13,10 @@ add_subdirectory(xbrz)
 
 find_package(PkgConfig REQUIRED)
 pkg_search_module(IL REQUIRED IL)
-pkg_search_module(ILU REQUIRED ILU)
-pkg_search_module(ILUT REQUIRED ILUT)
-
 find_library(FOUNDATION_LIBRARY Foundation)
 find_library(APPKIT_LIBRARY AppKit)
 
-include_directories(${IL_INCLUDE_DIRS}
-                    ${ILU_INCLUDE_DIRS}
-                    ${ILUT_INCLUDE_DIRS})
+include_directories(${IL_INCLUDE_DIRS})
 
 add_definitions(
     -Wall -Werror -fstack-protector-all
@@ -32,8 +27,7 @@ add_definitions(
     -mtune=native -fstrict-aliasing
     -x objective-c++)
 
-set(srcs
-    "main.mm")
+set(srcs "main.mm")
 
 # Add an “OBJECT” library target called “depixelate”:
 add_library(
@@ -71,14 +65,10 @@ set_target_properties(
     PROPERTIES ARCHIVE_OUTPUT_NAME "depixelate")
 
 target_link_libraries(depixelate_shared ${IL_LIBRARIES}
-                                        ${ILU_LIBRARIES}
-                                        ${ILUT_LIBRARIES}
                                         ${FOUNDATION_LIBRARY}
                                         ${APPKIT_LIBRARY})
 
 target_link_libraries(depixelate_static ${IL_LIBRARIES}
-                                        ${ILU_LIBRARIES}
-                                        ${ILUT_LIBRARIES}
                                         ${FOUNDATION_LIBRARY}
                                         ${APPKIT_LIBRARY})
 
