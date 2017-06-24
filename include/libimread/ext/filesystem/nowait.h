@@ -1,4 +1,4 @@
-/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2017 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_EXT_FILESYSTEM_NOWAIT_H_
@@ -6,6 +6,62 @@
 
 #include <atomic>
 #include <libimread/libimread.hpp>
+
+/// This header, nowait.h, and its corresponding implementation file, nowait.cpp,
+/// furnish RAII structures implementing an idiom found in Apple’s published
+/// open-source codebase for the CoreFoundation framework (q.v. the GitHub repo
+/// https://github.com/opensource-apple/CF sub.) in which acquiring a descriptor
+/// on a /dev filesystem entry before issuing POSIX calls (and subsequently closing
+/// that descriptor afterward) will enable certain filesystem-level optimizations --
+/// optimizations that may have side-effects and are therefore not universally enabled
+/// by default. 
+///
+/// The RAII structures are themselves implemented with convenience macros, as they
+/// each operate identically, aside from the specific /dev entry each RAII structure
+/// effectively manages. To create a new structure of this sort, use the macro
+/// VFS_INHIBITOR_DECLARATION(…) in your header file, and VFS_INHIBITOR_DEFINITION(…)
+/// in the corresponding implementation -- for example, to manage descriptors on
+/// a new /dev entry /dev/autofs_yodogg, you would do it like this:
+///
+///     /* yodogg.hh */
+///     namespace iheardyoulike { /// or what have you
+///         VFS_INHIBITOR_DECLARATION(yodogg_t);
+///     }
+/// 
+///     /* yodogg.cc */
+///     namespace iheardyoulike { /// or whichever you used in the header file
+///         VFS_INHIBITOR_DEFINITION(yodogg_t, "/dev/autofs_yodogg");
+///     }
+///
+/// … this will yield you a `iheardyoulike::yodogg_t` struct, which you can use like so:
+///
+///     {
+///         iheardyoulike::yodogg_t yodogg;
+///         relevant_POSIX_call();
+///         another_relevant_POSIX_call();
+///     }
+///
+/// … which will execute those relevant POSIX calls while the /dev descriptor is held,
+/// and automatically release the descriptor on scope exit -- which, in the snippet above,
+/// is when the curly braces close out.
+/// 
+/// I use some cmake-defined preprocessor values to check for the existence of these
+/// /dev entries during the pre-build, and fill in an empty struct using an additional
+/// macro VFS_INHIBITOR_EMPTY_STRUCT(…) when the related /dev entries aren’t available.
+/// This allows me to festoon my POSIX filesystem code with RAII dev-entry-management
+/// stuff as I please, knowing that they will work as advertised on an Apple platform,
+/// and compile down to NOOPs anywhere else.
+///
+/// Internally, each RAII structure uses std::atomic<…> values to track its descriptor
+/// and retain-count values to guarantee thread-safe operation. This will, of course,
+/// require C++11 compilation at least… but you can totally handle that, right? Right.
+///
+/// My RAII structures are based on the CoreFoundation c99 code here:
+///     https://git.io/vQYXO
+/// Use of the original Apple idiom within CoreFoundation’s POSIX interface here:
+///     https://github.com/opensource-apple/CF/blob/master/CFFileUtilities.c
+/// Background information on the subject is here:
+///     https://stackoverflow.com/q/39403803/298171
 
 namespace filesystem {
     
