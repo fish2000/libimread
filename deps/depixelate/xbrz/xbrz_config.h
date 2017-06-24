@@ -13,28 +13,31 @@
 // * do so, delete this exception statement from your version.                *
 // ****************************************************************************
 
-#ifndef XBRZ_CONFIG_HEADER_284578425345
-#define XBRZ_CONFIG_HEADER_284578425345
+#ifndef XBRZ_CONFIG_H_
+#define XBRZ_CONFIG_H_
 
-//do NOT include any headers here! used by xBRZ_dll!!!
+/// do NOT include any headers here! used by xBRZ_dll!!!
 
-namespace xbrz
-{
-struct ScalerCfg
-{
-    ScalerCfg() :
-        luminanceWeight_(1),
-        equalColorTolerance_(30),
-        dominantDirectionThreshold(3.6),
-        steepDirectionThreshold(2.2),
-        newTestAttribute_(0) {}
+namespace xbrz {
+    
+    struct ScalerCfg {
+        
+        ScalerCfg()
+            :luminanceWeight_(1)
+            ,equalColorTolerance_(30)
+            ,dominantDirectionThreshold(3.6)
+            ,steepDirectionThreshold(2.2)
+            ,newTestAttribute_(0)
+            {}
+        
+        double luminanceWeight_;
+        double equalColorTolerance_;
+        double dominantDirectionThreshold;
+        double steepDirectionThreshold;
+        double newTestAttribute_; /// unused; test new parameters
+        
+    };
+    
+} /* namespace xbrz */
 
-    double luminanceWeight_;
-    double equalColorTolerance_;
-    double dominantDirectionThreshold;
-    double steepDirectionThreshold;
-    double newTestAttribute_; //unused; test new parameters
-};
-}
-
-#endif
+#endif /// XBRZ_CONFIG_H_

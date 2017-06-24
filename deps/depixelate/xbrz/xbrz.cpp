@@ -20,29 +20,29 @@
 #include <math.h>
 
 namespace {
-    template <uint32_t N>
-    inline unsigned char getByte(uint32_t val) {
+    
+    template <uint32_t N> inline
+    unsigned char getByte(uint32_t val) {
         return static_cast<unsigned char>((val >> (8 * N)) & 0xff);
     }
-
+    
     inline unsigned char getRed(uint32_t val) { return getByte<2>(val); }
     inline unsigned char getGreen(uint32_t val) { return getByte<1>(val); }
     inline unsigned char getBlue(uint32_t val) { return getByte<0>(val); }
-
-    template <class T>
-    inline T abs(T value) {
+    
+    template <class T> inline
+    T abs(T value) {
         static_assert(std::is_signed<T>::value, "");
         return value < 0 ? -value : value;
     }
-
+    
     const uint32_t redMask   = 0xff0000;
     const uint32_t greenMask = 0x00ff00;
     const uint32_t blueMask  = 0x0000ff;
-
-    template <unsigned int N, unsigned int M>
-    inline void alphaBlend(uint32_t& dst,
-                           uint32_t  col) // blend color over destination with opacity N / M
-    {
+    
+    template <unsigned int N, unsigned int M> inline
+    void alphaBlend(uint32_t& dst, uint32_t col) {
+        /// blend color over destination with opacity N / M
         static_assert(N < 256, "possible overflow of (col & redMask) * N");
         static_assert(M < 256,
                       "possible overflow of (col & redMask  ) * N + (dst & redMask  ) * (M - N)");
@@ -52,7 +52,7 @@ namespace {
               (greenMask & ((col & greenMask) * N + (dst & greenMask) * (M - N)) / M) |
               (blueMask & ((col & blueMask) * N + (dst & blueMask) * (M - N)) / M);
     }
-
+    
     // inline
     // double fastSqrt(double n)
     //{
@@ -63,7 +63,7 @@ namespace {
     //    }
     //}
     //
-
+    
     inline uint32_t alphaBlend2(uint32_t pix1, uint32_t pix2, double alpha) {
         return (redMask &
                 static_cast<uint32_t>((pix1 & redMask) * alpha + (pix2 & redMask) * (1 - alpha))) |
@@ -72,24 +72,27 @@ namespace {
                (blueMask &
                 static_cast<uint32_t>((pix1 & blueMask) * alpha + (pix2 & blueMask) * (1 - alpha)));
     }
-
+    
     uint32_t* byteAdvance(uint32_t* ptr, int bytes) {
         return reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(ptr) + bytes);
     }
+    
     const uint32_t* byteAdvance(const uint32_t* ptr, int bytes) {
         return reinterpret_cast<const uint32_t*>(reinterpret_cast<const char*>(ptr) + bytes);
     }
-
-    // fill block  with the given color
+    
+    // fill block with the given color
     inline void fillBlock(uint32_t* trg, int pitch, uint32_t col, int blockWidth, int blockHeight) {
         // for (int y = 0; y < blockHeight; ++y, trg = byteAdvance(trg, pitch))
         //    std::fill(trg, trg + blockWidth, col);
-
-        for (int y = 0; y < blockHeight; ++y, trg = byteAdvance(trg, pitch))
-            for (int x = 0; x < blockWidth; ++x)
+        
+        for (int y = 0; y < blockHeight; ++y, trg = byteAdvance(trg, pitch)) {
+            for (int x = 0; x < blockWidth; ++x) {
                 trg[x] = col;
+            }
+        }
     }
-
+    
     inline void fillBlock(uint32_t* trg, int pitch, uint32_t col, int n) {
         fillBlock(trg, pitch, col, n, n);
     }
@@ -102,22 +105,24 @@ namespace {
 #define FORCE_INLINE inline
 #endif
 
-    enum RotationDegree // clock-wise
-    { ROT_0,
-      ROT_90,
-      ROT_180,
-      ROT_270 };
-
+    /// clock-wise:
+    enum RotationDegree {
+        ROT_0,
+        ROT_90,
+        ROT_180,
+        ROT_270
+    };
+    
     // calculate input matrix coordinates after rotation at compile time
     template <RotationDegree rotDeg, size_t I, size_t J, size_t N>
     struct MatrixRotation;
-
+    
     template <size_t I, size_t J, size_t N>
     struct MatrixRotation<ROT_0, I, J, N> {
         static const size_t I_old = I;
         static const size_t J_old = J;
     };
-
+    
     template <RotationDegree rotDeg, size_t I, size_t J,
               size_t N> //(i, j) = (row, col) indices, N = size of (square) matrix
     struct MatrixRotation {
@@ -127,32 +132,32 @@ namespace {
         static const size_t J_old =
             MatrixRotation<static_cast<RotationDegree>(rotDeg - 1), I, J, N>::I_old; //
     };
-
+    
     template <size_t N, RotationDegree rotDeg>
     class OutputMatrix {
-    public:
-        OutputMatrix(uint32_t* out, int outWidth)
-            : // access matrix area, top-left at position "out" for image with given width
-            out_(out)
-            , outWidth_(outWidth) {}
-
-        template <size_t I, size_t J>
-        uint32_t& ref() const {
-            static const size_t I_old = MatrixRotation<rotDeg, I, J, N>::I_old;
-            static const size_t J_old = MatrixRotation<rotDeg, I, J, N>::J_old;
-            return *(out_ + J_old + I_old * outWidth_);
-        }
-
-    private:
-        uint32_t* out_;
-        const int outWidth_;
+        public:
+            
+            // access matrix area, top-left at position "out" for image with given width
+            OutputMatrix(uint32_t* out, int outWidth)
+                :out_(out)
+                ,outWidth_(outWidth)
+                {}
+                
+            template <size_t I, size_t J>
+            uint32_t& ref() const {
+                static const size_t I_old = MatrixRotation<rotDeg, I, J, N>::I_old;
+                static const size_t J_old = MatrixRotation<rotDeg, I, J, N>::J_old;
+                return *(out_ + J_old + I_old * outWidth_);
+            }
+        
+        private:
+            uint32_t* out_;
+            const int outWidth_;
     };
-
-    template <class T>
-    inline T square(T value) {
-        return value * value;
-    }
-
+    
+    template <class T> inline
+    T square(T value) { return value * value; }
+    
     /*
     inline
     void rgbtoLuv(uint32_t c, double& L, double& u, double& v)
@@ -190,7 +195,7 @@ namespace {
         if ( var_Y > 0.008856 ) var_Y = pow(var_Y , 1.0/3 );
         else                    var_Y =  7.787 * var_Y  +  16.0 / 116;
 
-        const double ref_X =  95.047;        //Observer= 2°, Illuminant= D65
+        const double ref_X =  95.047;        //Observer= 2^, Illuminant= D65
         const double ref_Y = 100.000;
         const double ref_Z = 108.883;
 
@@ -202,7 +207,7 @@ namespace {
         v = 13 * L * ( var_V - ref_V );
     }
     */
-
+    
     inline void rgbtoLab(uint32_t c, unsigned char& L, signed char& A, signed char& B) {
         // code: http://www.easyrgb.com/index.php?X=MATH
         // test: http://www.workwithcolor.com/color-converter-01.htm
@@ -210,49 +215,48 @@ namespace {
         double r = getRed(c) / 255.0;
         double g = getGreen(c) / 255.0;
         double b = getBlue(c) / 255.0;
-
+        
         r = r > 0.04045 ? pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
         r = g > 0.04045 ? pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
         r = b > 0.04045 ? pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
-
+        
         r *= 100;
         g *= 100;
         b *= 100;
-
+        
         double x = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
         double y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
         double z = 0.0193339 * r + 0.1191920 * g + 0.9503041 * b;
-        //------XYZ to Lab------
+        
+        /// ------XYZ to Lab------
         const double refX = 95.047;   //
-        const double refY = 100.000;  // Observer= 2°, Illuminant= D65
+        const double refY = 100.000;  // Observer= 2^, Illuminant= D65
         const double refZ  = 108.883; //
         double       var_X = x / refX;
         double       var_Y = y / refY;
         double       var_Z = z / refZ;
-
+        
         var_X = var_X > 0.008856 ? pow(var_X, 1.0 / 3) : 7.787 * var_X + 4.0 / 29;
         var_Y = var_Y > 0.008856 ? pow(var_Y, 1.0 / 3) : 7.787 * var_Y + 4.0 / 29;
         var_Z = var_Z > 0.008856 ? pow(var_Z, 1.0 / 3) : 7.787 * var_Z + 4.0 / 29;
-
+        
         L = static_cast<unsigned char>(116 * var_Y - 16);
         A = static_cast<signed char>(500 * (var_X - var_Y));
         B = static_cast<signed char>(200 * (var_Y - var_Z));
     };
-
+    
     inline double distLAB(uint32_t pix1, uint32_t pix2) {
         unsigned char L1 = 0; //[0, 100]
         signed char   a1 = 0; //[-128, 127]
         signed char   b1 = 0; //[-128, 127]
         rgbtoLab(pix1, L1, a1, b1);
-
+        
         unsigned char L2 = 0;
         signed char   a2 = 0;
         signed char   b2 = 0;
         rgbtoLab(pix2, L2, a2, b2);
-
-        //-----------------------------
+        
         // http://www.easyrgb.com/index.php?X=DELT
-
         // Delta E/CIE76
         return sqrt(square(1.0 * L1 - L2) + square(1.0 * a1 - a2) + square(1.0 * b1 - b2));
     }
@@ -646,7 +650,7 @@ namespace {
                 // make sure there is no second blending in an adjacent rotation for this pixel:
                 // handles insular pixels, mario eyes
                 if (getTopR(blend) != BLEND_NONE &&
-                    !eq(e, g)) // but support double-blending for 90° corners
+                    !eq(e, g)) // but support double-blending for 90Â° corners
                     return false;
                 if (getBottomL(blend) != BLEND_NONE && !eq(e, c))
                     return false;
