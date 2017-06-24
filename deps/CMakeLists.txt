@@ -1,5 +1,6 @@
 
 add_subdirectory(crossguid)
+add_subdirectory(depixelate)
 add_subdirectory(docopt)
 add_subdirectory(imagecompression)
 # add_subdirectory(interpol)
