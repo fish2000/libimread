@@ -30,3 +30,7 @@ License
 - HQX is released under GNU Lesser General Public License version 2.1
 - XBRZ is releaed under GNU General Public License version 3
 - All the glue logic is released under MIT.
+
+Provenance
+--------
+[Original `depixelate` codebase](https://github.com/kstenerud/depixelate) by [Karl Stenerud](https://github.com/kstenerud). Updated `cmake`-based build system by [Alexander Böhn](https://github.com/fish2000), for use [within](https://github.com/fish2000/libimread/tree/master/deps/depixelate) the [libimread](https://github.com/fish2000/libimread) codebase.
