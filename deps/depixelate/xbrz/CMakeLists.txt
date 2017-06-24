@@ -2,7 +2,7 @@
 add_definitions(
     -Wall -Werror
     -Wno-unused-function
-    -std=gnu++0x -stdlib=libc++ -O3
+    -std=c++14 -stdlib=libc++ -O3
     -mtune=native -fstrict-aliasing
     -x c++)
 
