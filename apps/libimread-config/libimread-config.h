@@ -31,6 +31,7 @@ namespace im {
                 auto last = std::unique(incvec.begin(), incvec.end());
                 incvec.erase(last, incvec.end());
                 std::reverse(incvec.begin(), incvec.end());
+                outvec.reserve(incvec.size());
                 std::for_each(incvec.begin(), incvec.end(),
                     [&outvec](std::string const& p) { outvec.emplace_back(path::real(p).str()); });
                 return "-I" + pystring::join(" -I", outvec);
@@ -47,6 +48,7 @@ namespace im {
                 auto last = std::unique(libvec.begin(), libvec.end());
                 libvec.erase(last, libvec.end());
                 std::reverse(libvec.begin(), libvec.end());
+                outvec.reserve(libvec.size());
                 std::for_each(libvec.begin(), libvec.end(),
                     [&outvec](std::string const& p) {
                         /// N.B. this resolves library-versioning symlinks,
