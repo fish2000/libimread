@@ -696,7 +696,7 @@ namespace filesystem {
                         std::for_each(files.begin(),
                                       files.end(),
                            [&p, &out](std::string const& f) {
-                              out &= (p/f).remove();
+                              out &= bool(::unlink((p/f).c_str()) != -1);
                         });
                     }
                 });
@@ -705,11 +705,13 @@ namespace filesystem {
                 if (!dirs.empty()) {
                     std::reverse(dirs.begin(), dirs.end());         /// reverse directorylist --
                     std::for_each(dirs.begin(), dirs.end(),         /// -- removing uppermost directories top-down:
-                           [&out](path const& p) { out &= p.remove(); });
+                           [&out](path const& p) {
+                               out &= bool(::rmdir(p.c_str()) != -1);
+                    });
                 }
                 
                 /// return as per logical sum of `remove()` call successes
-                out &= remove();
+                out &= bool(::rmdir(c_str()) != -1);
                 return out;
             }
         }
