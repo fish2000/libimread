@@ -8,7 +8,7 @@ add_definitions(
     -Wall -Werror
     -Wno-unused-function
     -Wno-absolute-value
-    -std=gnu99 -O3
+    -std=gnu11 -O3
     -mtune=native -fstrict-aliasing
     -x c)
 
