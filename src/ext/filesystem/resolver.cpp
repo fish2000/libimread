@@ -41,6 +41,8 @@ namespace filesystem {
                             [](path const& p) { return p == path(); }), m_paths.end());
         }
     
+    resolver::~resolver() {}
+    
     resolver resolver::system()                         { return resolver(path::system()); }
     
     resolver::size_type resolver::size() const          { return m_paths.size(); }

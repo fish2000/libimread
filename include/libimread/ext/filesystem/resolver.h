@@ -30,6 +30,7 @@ namespace filesystem {
             explicit resolver(detail::pathvec_t const& paths);
             explicit resolver(detail::stringvec_t const& strings);
             explicit resolver(detail::pathlist_t list);
+            virtual ~resolver();
             
             static resolver system();
             
@@ -66,11 +67,11 @@ namespace filesystem {
             
             friend std::ostream& operator<<(std::ostream& os, resolver const& paths);
             
-        private:
+        protected:
             detail::pathvec_t m_paths;
     
     };
     
-}; /* namespace filesystem */
+} /* namespace filesystem */
 
 #endif /// LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_
