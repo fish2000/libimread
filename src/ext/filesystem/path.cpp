@@ -755,7 +755,7 @@ namespace filesystem {
         if (out && idx < max) {
             for (i = idx; i < max; ++i) {
                 result /= m_path[i];
-                out &= result.makedir();
+                out &= bool(::mkdir(result.c_str(), detail::mkdir_flags) != -1);
             }
         }
         
