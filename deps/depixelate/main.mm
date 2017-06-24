@@ -42,15 +42,18 @@ namespace scale {
     static bool hqx(const void* srcData, void* dstData, int width, int height, int scale) {
         hqxInit();
         switch (scale) {
-            case 2: hq2x_32(static_cast<uint32_t*>(const_cast<void*>(srcData)),
-                            static_cast<uint32_t*>(dstData),
-                            width, height);
-            case 3: hq3x_32(static_cast<uint32_t*>(const_cast<void*>(srcData)),
-                            static_cast<uint32_t*>(dstData),
-                            width, height);
-            case 4: hq4x_32(static_cast<uint32_t*>(const_cast<void*>(srcData)),
-                            static_cast<uint32_t*>(dstData),
-                            width, height);
+            case 2: { 
+                      hq2x_32(static_cast<uint32_t*>(const_cast<void*>(srcData)),
+                              static_cast<uint32_t*>(dstData),
+                              width, height); break; }
+            case 3: { 
+                      hq3x_32(static_cast<uint32_t*>(const_cast<void*>(srcData)),
+                              static_cast<uint32_t*>(dstData),
+                              width, height); break; }
+            case 4:
+            default:  hq4x_32(static_cast<uint32_t*>(const_cast<void*>(srcData)),
+                              static_cast<uint32_t*>(dstData),
+                              width, height);
         }
         return true;
     }
