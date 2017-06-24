@@ -1,7 +1,7 @@
 Depixelate
 ==========
 
-Implementation of various scaling/depixelating techbologies.
+Implementation of various scaling/depixelating technologies.
 
 This is very rough software that I threw together for my own amusement.
 Feel free to modify it and make it better.
