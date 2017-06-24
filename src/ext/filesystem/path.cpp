@@ -1,4 +1,4 @@
-/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2014-2017 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #include <sys/stat.h>
@@ -480,7 +480,7 @@ namespace filesystem {
         /// list files, filtered with a regex object
         detail::pathvec_t unfiltered = list(full_paths);
         detail::pathvec_t out;
-        if (unfiltered.size() == 0) { return out; }
+        if (unfiltered.empty()) { return out; }
         std::copy_if(unfiltered.begin(),
                      unfiltered.end(),
                      std::back_inserter(out),
@@ -905,11 +905,9 @@ namespace filesystem {
             imread_raise(FileSystemError,
                 "path::join() expects a relative-path RHS");
         }
-        if (!other.m_path.empty()) {
-            std::copy(other.m_path.begin(),
-                      other.m_path.end(),
-                      std::back_inserter(m_path));
-        }
+        std::copy(other.m_path.begin(),
+                  other.m_path.end(),
+                  std::back_inserter(m_path));
         return *this;
     }
     

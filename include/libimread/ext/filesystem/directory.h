@@ -1,4 +1,4 @@
-/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2014-2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_EXT_FILESYSTEM_DIRECTORY_H_

@@ -165,6 +165,7 @@ set(srcs
     ${srcs_dir}/ext/filesystem/nowait.cpp
     ${srcs_dir}/ext/filesystem/opaques.cpp
     ${srcs_dir}/ext/filesystem/path.cpp
+    ${srcs_dir}/ext/filesystem/resolver.cpp
     ${srcs_dir}/ext/filesystem/temporary.cpp
     ${srcs_dir}/ext/memory/fmemopen.cpp
     ${srcs_dir}/ext/memory/open_memstream.cpp

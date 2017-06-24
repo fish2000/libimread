@@ -1,6 +1,5 @@
-// Copyright 2015 Wenzel Jakob. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+/// Copyright 2014-2017 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_EXT_FILESYSTEM_PATH_H_
 #define LIBIMREAD_EXT_FILESYSTEM_PATH_H_
@@ -63,6 +62,7 @@ namespace filesystem {
         
         /// constant for null (nonexistent) inodes and devices:
         static const inode_t null_inode_v                   = { 0, 0 };
+        
     }
     
     /// The actual class for representing a path on the filesystem

@@ -1,24 +1,23 @@
-// Copyright 2015 Wenzel Jakob. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+/// Copyright 2014-2017 Alexander Böhn <fish2000@gmail.com>
+/// License: MIT (see COPYING.MIT file)
 
 #if !defined(LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_)
 #define LIBIMREAD_EXT_FILESYSTEM_RESOLVER_H_
 
 #include <libimread/ext/filesystem/path.h>
-#include <numeric>
 
 namespace filesystem {
     
     class resolver {
         
         public:
-            using iterator       = detail::pathvec_t::iterator;
-            using const_iterator = detail::pathvec_t::const_iterator;
+            using size_type         = detail::pathvec_t::size_type;
+            using iterator          = detail::pathvec_t::iterator;
+            using const_iterator    = detail::pathvec_t::const_iterator;
             
-            resolver()
-                :m_paths{ path::getcwd() }
-                {}
+            resolver();
+            resolver(resolver const&) = default;
+            resolver(resolver&&) noexcept = default;
             
             template <typename P,
                       typename = std::enable_if_t<
@@ -28,56 +27,24 @@ namespace filesystem {
                 :m_paths{ path(std::forward<P>(p)) }
                 {}
             
-            explicit resolver(detail::pathvec_t const& paths)
-                :m_paths(paths)
-                {
-                    m_paths.erase(
-                        std::remove_if(m_paths.begin(), m_paths.end(),
-                                    [](path const& p) { return p == path(); }),
-                        m_paths.end());
-                }
+            explicit resolver(detail::pathvec_t const& paths);
+            explicit resolver(detail::stringvec_t const& strings);
+            explicit resolver(detail::pathlist_t list);
             
-            explicit resolver(detail::stringvec_t const& strings)
-                :m_paths(strings.size())
-                {
-                    std::transform(strings.begin(), strings.end(),
-                                   std::back_inserter(m_paths),
-                                [](std::string const& s) { return path(s); });
-                    m_paths.erase(
-                        std::remove_if(m_paths.begin(), m_paths.end(),
-                                    [](path const& p) { return p == path(); }),
-                        m_paths.end());
-                }
+            static resolver system();
             
-            explicit resolver(detail::pathlist_t list)
-                :m_paths(list)
-                {
-                    m_paths.erase(
-                        std::remove_if(m_paths.begin(), m_paths.end(),
-                                    [](path const& p) { return p == path(); }),
-                        m_paths.end());
-                }
+            size_type size() const;
+            iterator begin();
+            iterator end();
+            const_iterator begin() const;
+            const_iterator end() const;
             
-            static resolver system()        { return resolver(path::system()); }
+            void erase(iterator);
+            void prepend(path const&);
+            void append(path const&);
             
-            std::size_t size() const        { return m_paths.size(); }
-            iterator begin()                { return m_paths.begin(); }
-            iterator end()                  { return m_paths.end(); }
-            const_iterator begin() const    { return m_paths.begin(); }
-            const_iterator end()   const    { return m_paths.end(); }
-            
-            void erase(iterator it)         { m_paths.erase(it); }
-            void prepend(path const& path)  { m_paths.insert(m_paths.begin(), path); }
-            void append(path const& path)   { m_paths.push_back(path); }
-            
-            path resolve_impl(path const& value) const {
-                if (m_paths.empty()) { return path(); }
-                for (const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
-                    path combined = *it / value;
-                    if (combined.exists()) { return combined; }
-                }
-                return path();
-            }
+            path resolve_impl(path const&) const;
+            detail::pathvec_t resolve_all_impl(path const&) const;
             
             template <typename P> inline
             path resolve(P&& p) const {
@@ -89,32 +56,15 @@ namespace filesystem {
                 return resolve_impl(path(std::forward<P>(p))) != path();
             }
             
-            detail::pathvec_t resolve_all_impl(path const& value) const {
-                detail::pathvec_t out;
-                if (m_paths.empty()) { return out; }
-                std::copy_if(m_paths.begin(), m_paths.end(),
-                             std::back_inserter(out),
-                             [&value](path const& p) { return (p/value).exists(); });
-                return out;
-            }
-            
             template <typename P> inline
             detail::pathvec_t resolve_all(P&& p) const {
                 return resolve_all_impl(path(std::forward<P>(p)));
             }
             
-            std::string to_string(std::string const& separator = ":",
-                                  std::string const& initial = "") const {
-                return std::accumulate(m_paths.begin(), m_paths.end(), initial,
-                                   [&](path const& lhs,
-                                       path const& rhs) {
-                    return lhs.str() + rhs.str() + (rhs == m_paths.back() ? "" : separator);
-                });
-            }
+            std::string to_string(std::string const& separator = std::string(1, path::sep),
+                                  std::string const& initial = "") const;
             
-            friend std::ostream& operator<<(std::ostream& out, resolver const& paths) {
-                return out << paths.to_string();
-            }
+            friend std::ostream& operator<<(std::ostream& os, resolver const& paths);
             
         private:
             detail::pathvec_t m_paths;
