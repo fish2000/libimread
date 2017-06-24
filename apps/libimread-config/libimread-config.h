@@ -20,7 +20,7 @@ namespace im {
         
         namespace {
             
-            inline std::string get_includes(std::string const& inclist) {
+            inline static std::string get_includes(std::string const& inclist) {
                 stringvec_t incvec, outvec;
                 pystring::split(
                     pystring::replace(inclist,
@@ -36,7 +36,7 @@ namespace im {
                 return "-I" + pystring::join(" -I", outvec);
             }
             
-            inline std::string get_libs(std::string const& liblist) {
+            inline static std::string get_libs(std::string const& liblist) {
                 stringvec_t libvec, outvec;
                 pystring::split(
                     pystring::replace(liblist,
