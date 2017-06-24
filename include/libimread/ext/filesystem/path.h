@@ -86,13 +86,6 @@ namespace filesystem {
             using const_reference = std::add_const_t<
                                     std::add_lvalue_reference_t<value_type>>;
             
-            enum path_type {
-                windows_path = 0,
-                posix_path = 1,
-                dotpath_path = 2,
-                native_path = posix_path
-            };
-            
             path();                                             /// Empty path constructor
             explicit path(bool);                                /// Empty but possibly absolute path constructor
             
@@ -683,10 +676,9 @@ namespace filesystem {
             static detail::stringvec_t tokenize(std::string const& source,
                                                 character_type const delim);
             
-            
-            path_type m_type = native_path;             /// What type of path are we?
-            detail::stringvec_t m_path;                 /// Where do we lead?
-            bool m_absolute = false;                    /// Do we lead there absolutely?
+        protected:
+            bool m_absolute = false;        /// Do we lead to our destination absolutely?
+            detail::stringvec_t m_path;     /// But to where, do we eventually indexically indicate?
     
     }; /* class path */
     

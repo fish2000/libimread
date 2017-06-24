@@ -178,13 +178,13 @@ namespace filesystem {
         {}
     
     path::path(path const& p)
-        :m_path(p.m_path)
-        ,m_absolute(p.m_absolute)
+        :m_absolute(p.m_absolute)
+        ,m_path(p.m_path)
         {}
     
     path::path(path&& p) noexcept
-        :m_path(std::move(p.m_path))
-        ,m_absolute(p.m_absolute)
+        :m_absolute(p.m_absolute)
+        ,m_path(std::move(p.m_path))
         {}
     
     path::path(char* st)              { set(st); }
