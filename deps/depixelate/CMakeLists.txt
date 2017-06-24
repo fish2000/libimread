@@ -16,8 +16,6 @@ pkg_search_module(IL REQUIRED IL)
 find_library(FOUNDATION_LIBRARY Foundation)
 find_library(APPKIT_LIBRARY AppKit)
 
-include_directories(${IL_INCLUDE_DIRS})
-
 add_definitions(
     -Wall -Werror -fstack-protector-all
     -fobjc-arc -fobjc-abi-version=3
