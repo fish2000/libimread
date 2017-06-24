@@ -665,8 +665,12 @@ namespace filesystem {
     bool path::remove() const {
         {
             detail::nowait_t nowait;
-            if (is_file_or_link()) { return bool(::unlink(make_absolute().c_str()) != -1); }
-            if (is_directory())    { return bool(::rmdir(make_absolute().c_str()) != -1); }
+            if (is_file_or_link()) {
+                return bool(::unlink(make_absolute().c_str()) != -1);
+            }
+            if (is_directory()) {
+                return bool(::rmdir(make_absolute().c_str()) != -1);
+            }
         }
         return false;
     }
@@ -674,7 +678,9 @@ namespace filesystem {
     bool path::rm_rf() const {
         {
             detail::nowait_t nowait;
-            if (is_file_or_link()) { return remove(); }
+            if (is_file_or_link()) {
+                return bool(::unlink(c_str()) != -1);
+            }
             if (is_directory()) {
                 bool out = true;
                 detail::pathvec_t dirs;
