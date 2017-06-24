@@ -23,8 +23,17 @@
 
 typedef unsigned long long pixel_t;
 
-pixel_t pixel_get(int x, int y, const unsigned char* pix, unsigned slice, unsigned pixel, int dx, int dy, int opt_tes);
-void pixel_put(int x, int y, unsigned char* pix, unsigned slice, unsigned pixel, int dx, int dy, pixel_t v);
+pixel_t pixel_get(int x, int y,
+                  const unsigned char* pix, unsigned slice,
+                  unsigned pixel,
+                  int dx, int dy,
+                  int opt_tes);
+
+void pixel_put(int x, int y,
+               unsigned char* pix, unsigned slice,
+               unsigned pixel,
+               int dx, int dy,
+               pixel_t v);
 
 #endif
 
