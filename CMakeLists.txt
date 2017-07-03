@@ -69,6 +69,9 @@ include(build_config)
 include(HalideProject)
 include(HalideGenerator)
 
+# Include the ansi_message(…) function, for color terminal output.
+include(ANSIMessage)
+
 # Include IodSymbolize.cmake from the iod-symbolizer Python tool,
 # exposing the cmake function IOD_SYMBOLIZE()
 include(IodSymbolize)
@@ -292,6 +295,27 @@ set(IM_HAVE_STRINGVIEW_HH       ${HAVE_STRINGVIEW_HH} CACHE BOOL "Is std::string
 set(IM_HAVE_SYS_SENDFILE_H      ${HAVE_SYS_SENDFILE_H} CACHE BOOL "Is sys/sendfile.h available?")
 set(IM_HAVE_AUTOFS_NOWAIT       ${HAVE_AUTOFS_NOWAIT} CACHE BOOL "Is /dev/autofs_nowait available?")
 set(IM_HAVE_AUTOFS_NOTRIGGER    ${HAVE_AUTOFS_NOTRIGGER} CACHE BOOL "Is /dev/autofs_notrigger available?")
+
+# message(STATUS "")
+ansi_message(STATUS "Compile-Time System Information:")
+
+ansi_message(STATUS "IM_HAVE_STRINGVIEW_HH = ${IM_HAVE_STRINGVIEW_HH}")
+ansi_message(STATUS "IM_HAVE_SYS_SENDFILE_H = ${IM_HAVE_SYS_SENDFILE_H}")
+ansi_message(STATUS "IM_HAVE_AUTOFS_NOWAIT = ${IM_HAVE_AUTOFS_NOWAIT}")
+ansi_message(STATUS "IM_HAVE_AUTOFS_NOTRIGGER = ${IM_HAVE_AUTOFS_NOTRIGGER}")
+
+# message(STATUS "")
+ansi_message(STATUS "Compile-Time Configuration Settings:")
+
+ansi_message(STATUS "IM_VERSION = ${IM_VERSION}")
+ansi_message(STATUS "IM_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+ansi_message(STATUS "IM_CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+ansi_message(STATUS "IM_COMPILE_OPTIONS = ${IM_COMPILE_OPTIONS}")
+ansi_message(STATUS "IM_COMPILE_FLAGS = ${IM_COMPILE_FLAGS}")
+ansi_message(STATUS "IM_INCLUDE_DIRECTORIES = ${IM_INCLUDE_DIRECTORIES}")
+ansi_message(STATUS "IM_LINK_DIRECTORIES = ${IM_LINK_DIRECTORIES}")
+ansi_message(STATUS "IM_LINK_FLAGS = ${IM_LINK_FLAGS}")
+ansi_message(STATUS "IM_DYLIB_SUFFIX = ${IM_DYLIB_SUFFIX}")
 
 # Configure and generate the compile-time project header file:
 set(PROJECT_HEADER
