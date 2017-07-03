@@ -480,7 +480,6 @@ namespace filesystem {
         /// list files, filtered with a regex object
         detail::pathvec_t unfiltered = list(full_paths);
         detail::pathvec_t out;
-        if (unfiltered.empty()) { return out; }
         std::copy_if(unfiltered.begin(),
                      unfiltered.end(),
                      std::back_inserter(out),
@@ -519,7 +518,6 @@ namespace filesystem {
         std::forward<detail::walk_visitor_t>(walk_visitor)(abspath, directories, files);
         
         /// recursively walk into subdirs
-        if (directories.empty()) { return; }
         std::for_each(directories.begin(),
                       directories.end(),
                   [&](std::string const& subdir) {
@@ -651,11 +649,9 @@ namespace filesystem {
             walk([&out](path const& p,
                         detail::stringvec_t& directories,
                         detail::stringvec_t& files) {
-                if (!files.empty()) {
-                    std::for_each(files.begin(),
-                                  files.end(),
-                       [&p, &out](std::string const& f) { out += (p/f).filesize(); });
-                }
+                std::for_each(files.begin(),
+                              files.end(),
+                   [&p, &out](std::string const& f) { out += (p/f).filesize(); });
             });
             return out;
         }
@@ -691,20 +687,16 @@ namespace filesystem {
                 walk([&out, &dirs](path const& p,
                                    detail::stringvec_t& directories,
                                    detail::stringvec_t& files) {
-                    if (!directories.empty()) {
-                        std::for_each(directories.begin(),
-                                      directories.end(),
-                          [&p, &dirs](std::string const& d) {
-                              dirs.emplace_back(p/d);
-                        });
-                    }
-                    if (!files.empty()) {
-                        std::for_each(files.begin(),
-                                      files.end(),
-                           [&p, &out](std::string const& f) {
-                              out &= bool(::unlink((p/f).c_str()) != -1);
-                        });
-                    }
+                    std::for_each(directories.begin(),
+                                  directories.end(),
+                      [&p, &dirs](std::string const& d) {
+                          dirs.emplace_back(p/d);
+                    });
+                    std::for_each(files.begin(),
+                                  files.end(),
+                       [&p, &out](std::string const& f) {
+                          out &= bool(::unlink((p/f).c_str()) != -1);
+                    });
                 });
                 
                 /// remove emptied directories per saved list
@@ -728,7 +720,7 @@ namespace filesystem {
         bool out = false;
         {
             detail::nowait_t nowait;
-            if (empty() || exists()) { return out; }
+            if (m_path.empty() || exists()) { return out; }
             out = bool(::mkdir(c_str(), detail::mkdir_flags) != -1);
         }
         return out;
@@ -739,7 +731,7 @@ namespace filesystem {
         detail::nowait_t nowait;
         
         /// sanity-check for empty or existant paths:
-        if (empty() || exists()) { return false; }
+        if (m_path.empty() || exists()) { return false; }
         
         /// boolean to hold logical sum of operations:
         bool out = true;
@@ -772,7 +764,7 @@ namespace filesystem {
     }
     
     std::string path::basename() const {
-        return empty() ? "" : m_path.back();
+        return m_path.empty() ? "" : m_path.back();
     }
     
     bool path::rename(path const& newpath) {
@@ -830,7 +822,7 @@ namespace filesystem {
     bool path::hardlink(std::string const& to) const { return hardlink(path(to)); }
     
     std::string path::extension() const {
-        if (empty()) { return ""; }
+        if (m_path.empty()) { return ""; }
         std::string const& last = m_path.back();
         size_type pos = last.find_last_of(path::extsep);
         if (pos == std::string::npos) { return ""; }
@@ -838,7 +830,7 @@ namespace filesystem {
     }
     
     std::string path::extensions() const {
-        if (empty()) { return ""; }
+        if (m_path.empty()) { return ""; }
         std::string const& last = m_path.back();
         size_type pos = last.find_first_of(path::extsep);
         if (pos == std::string::npos) { return ""; }
@@ -846,7 +838,7 @@ namespace filesystem {
     }
     
     path path::strip_extension() const {
-        if (empty()) { return path(); }
+        if (m_path.empty()) { return path(); }
         path result(m_path, m_absolute);
         std::string const& ext(extension());
         std::string& back(result.m_path.back());
@@ -855,7 +847,7 @@ namespace filesystem {
     }
     
     path path::strip_extensions() const {
-        if (empty()) { return path(); }
+        if (m_path.empty()) { return path(); }
         path result(m_path, m_absolute);
         std::string const& ext(extensions());
         std::string& back(result.m_path.back());
@@ -876,7 +868,8 @@ namespace filesystem {
                 imread_raise(FileSystemError,
                     "path::parent() makes no sense for empty absolute paths");
             } else {
-                result = detail::stringvec_t{ ".." };
+                // result = detail::stringvec_t{ ".." };
+                result = path::cwd().parent();
             }
         } else {
             result.m_absolute = m_absolute;
@@ -1034,14 +1027,14 @@ namespace filesystem {
     path& path::operator=(std::string const& str) { set(str); return *this; }
     path& path::operator=(char const* str)        { set(str); return *this; }
     path& path::operator=(path const& p) {
-        if (!compare(p)) {
+        if (hash() != p.hash()) {
             path(p).swap(*this);
         }
         return *this;
     }
     
     path& path::operator=(path&& p) noexcept {
-        if (!compare(p)) {
+        if (hash() != p.hash()) {
             m_absolute = p.m_absolute;
             m_path = std::move(p.m_path);
         }
@@ -1050,11 +1043,9 @@ namespace filesystem {
     
     path& path::operator=(detail::stringvec_t const& stringvec) {
         m_path = detail::stringvec_t{};
-        if (!stringvec.empty()) {
-            std::copy(stringvec.begin(),
-                      stringvec.end(),
-                      std::back_inserter(m_path));
-        }
+        std::copy(stringvec.begin(),
+                  stringvec.end(),
+                  std::back_inserter(m_path));
         return *this;
     }
     
