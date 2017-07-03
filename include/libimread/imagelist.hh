@@ -23,6 +23,7 @@ namespace im {
         using pointer_t      = std::add_pointer_t<Image>;
         using unique_t       = std::unique_ptr<Image>;
         using vector_t       = std::vector<pointer_t>;
+        using sizevec_t      = std::vector<int>;
         using pointerlist_t  = std::initializer_list<pointer_t>;
         using vector_size_t  = vector_t::size_type;
         using iterator       = vector_t::iterator;
@@ -35,25 +36,28 @@ namespace im {
         /// ... using boolean tag for first arg
         template <typename ...Pointers>
         explicit ImageList(bool pointerargs, Pointers ...pointers)
-            :content{ pointers... }
+            :images{ pointers... }
             {
-                content.erase(
-                    std::remove_if(content.begin(), content.end(),
-                                [](pointer_t p) { return p == nullptr; }),
-                    content.end());
+                images.erase(
+                    std::remove_if(images.begin(),
+                                   images.end(),
+                                [](pointer_t p) { return p == nullptr; }), images.end());
             }
         
         /// initializer list construction
-        explicit ImageList(pointerlist_t pointerlist);
+        explicit ImageList(pointerlist_t);
         
         /// move-construct from pointer vector
-        explicit ImageList(vector_t&& vector);
+        explicit ImageList(vector_t&&);
         
         /// noexcept move constructor
-        ImageList(ImageList&& other) noexcept;
+        ImageList(ImageList&&) noexcept;
         
         /// noexcept move assignment operator
-        ImageList& operator=(ImageList&& other) noexcept;
+        ImageList& operator=(ImageList&&) noexcept;
+        
+        /// virtual destructor
+        virtual ~ImageList();
         
         vector_size_t size() const;
         iterator begin();
@@ -61,36 +65,59 @@ namespace im {
         const_iterator begin() const;
         const_iterator end() const;
         
-        void erase(iterator it);
-        void prepend(pointer_t image);
-        void push_front(pointer_t image);
-        void append(pointer_t image);
-        void push_back(pointer_t image);
-        void push_back(unique_t unique);
+        void erase(iterator);
+        void prepend(pointer_t);
+        void push_front(pointer_t);
+        void append(pointer_t);
+        void push_back(pointer_t);
+        void push_back(unique_t);
         
-        pointer_t get(vector_size_t idx) const;
-        pointer_t at(vector_size_t idx) const;
-        unique_t yank(vector_size_t idx);
+        /// calculate and cache the width/height/planecount
+        /// dimensions, for the lists’ managed images
+        void compute_sizes() const;
+        
+        /// computed-dimension-value accessors
+        int width() const;
+        int height() const;
+        int planes() const;
+        
+        pointer_t get(vector_size_t) const;
+        pointer_t at(vector_size_t) const;
+        unique_t yank(vector_size_t);
         unique_t pop();
         void reset();
-        void reset(vector_t&& vector);
-        virtual ~ImageList();
+        void reset(vector_t&&);
         
         /// After calling release(), ownership of the content image ponters
         /// is transferred to the caller, who must figure out how to delete them.
         /// Also note that release() resets the internal vector.
         vector_t release();
+        vector_t release(vector_t&&);
         
         /// noexcept member swap
-        void swap(ImageList& other) noexcept;
+        void swap(ImageList&) noexcept;
         
         /// member hash method
         std::size_t hash(std::size_t seed = 0) const noexcept;
         
         private:
-            ImageList(const ImageList&);
-            ImageList &operator=(const ImageList&);
-            vector_t content;
+            /// copy construct/assign are invalid
+            ImageList(ImageList const&);
+            ImageList& operator=(ImageList const&);
+        
+        protected:
+            /// macro-defined dimensional compute member functions
+            int compute_width() const;
+            int compute_height() const;
+            int compute_planes() const;
+        
+        protected:
+            /// internal pointer vector
+            vector_t images;
+            /// computed dimension values
+            mutable int computed_width = -1,
+                       computed_height = -1,
+                       computed_planes = -1;
     };
     
 } /* namespace im */
@@ -98,7 +125,7 @@ namespace im {
 namespace std {
     
     template <>
-    void swap(im::ImageList& p0, im::ImageList& p1) noexcept;
+    void swap(im::ImageList&, im::ImageList&) noexcept;
     
     /// std::hash specialization for im::ImageList
     /// ... following the recipe found here:

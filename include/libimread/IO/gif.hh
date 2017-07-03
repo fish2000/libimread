@@ -17,6 +17,7 @@ namespace im {
     namespace detail {
         
         using gifholder = std::shared_ptr<gif::GIF>;
+        struct gifbuffer;
         
         template <typename G>
         struct gifdisposer {
@@ -77,7 +78,8 @@ namespace im {
             
         private:
             
-            void        write_impl(Image const& input, detail::gifholder& g);
+            void        write_impl(Image const& input, detail::gifholder& g,
+                                                       detail::gifbuffer& gbuf);
             
             #if defined(__APPLE__)
             ImageList   read_impl(byte_source* src,

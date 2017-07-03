@@ -30,19 +30,21 @@ namespace im {
             public:
                 explicit gifbuffer(int w, int h, int c = 3)
                     :width(w), height(h), channels(c)
-                    ,data_ptr(
-                     std::make_unique<byte[]>(width * height * channels))
-                    {}
+                    { allocate(); }
                 
                 virtual ~gifbuffer()            {}
+                void allocate()                 { data_ptr = 
+                                                  std::make_unique<byte[]>(size()); }
+                void clear()                    { std::memset(data_ptr.get(), 0, size()); }
                 byte* data() const              { return data_ptr.get(); }
                 operator unsigned char*() const { return data_ptr.get(); }
                 std::size_t size() const        { return width
                                                       * height
                                                     * channels; }
-                
+            
             public:
                 int width, height, channels;
+                gifbuffer(gifbuffer&&) noexcept = default;
             
             protected:
                 std::unique_ptr<byte[]> data_ptr;
@@ -50,22 +52,23 @@ namespace im {
             private:
                 gifbuffer(void);
                 gifbuffer(gifbuffer const&);
-                gifbuffer(gifbuffer&&);
                 gifbuffer& operator=(gifbuffer const&);
                 gifbuffer& operator=(gifbuffer&&);
+            
         };
-    }
     
-    void GIFFormat::write_impl(Image const& input, detail::gifholder& g) {
+    } /* namespace detail */
+    
+    void GIFFormat::write_impl(Image const& input, detail::gifholder& g,
+                                                   detail::gifbuffer& gbuf) {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
         const int channels = input.dim(2); /// should be 3
         const int bit_depth = input.nbits();
-        const int full_size = width * height * channels;
         
-        /// Allocate buffer
-        detail::gifbuffer gbuf(width, height, channels);
+        /// Zero gif byte-buffer
+        // gbuf.clear();
         
         /// Check bit depth
         if (bit_depth != 8) {
@@ -108,7 +111,10 @@ namespace im {
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(3);
-        write_impl(input, g);
+        detail::gifbuffer b = detail::gifbuffer(input.width(),
+                                                input.height(),
+                                                input.planes());
+        write_impl(input, g, b);
         
         bytevec_t out = gif::write(g.get());
         output->write(out);
@@ -121,11 +127,17 @@ namespace im {
     void GIFFormat::write_multi(ImageList& input,
                                 byte_sink* output,
                                 options_map const& opts) {
+        /// Pre-compute ImageList sizes
+        input.compute_sizes();
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(3);
+        detail::gifbuffer b = detail::gifbuffer(input.width(),
+                                                input.height(),
+                                                input.planes());
+        
         std::for_each(input.begin(), input.end(),
-                  [&](Image* image) { write_impl(*image, g); });
+                  [&](Image* image) { write_impl(*image, g, b); });
         
         bytevec_t out = gif::write(g.get());
         output->write(out);
