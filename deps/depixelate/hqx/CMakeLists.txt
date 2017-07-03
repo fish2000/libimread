@@ -1,8 +1,8 @@
 
-find_package(PkgConfig REQUIRED)
-pkg_search_module(IL REQUIRED IL)
+# find_package(PkgConfig REQUIRED)
+# pkg_search_module(IL REQUIRED IL)
 
-include_directories(${IL_INCLUDE_DIRS})
+# include_directories(${IL_INCLUDE_DIRS})
 
 add_definitions(
     -Wall -Werror
@@ -16,8 +16,9 @@ set(hqx_srcs
     "hq2x.c"
     "hq3x.c"
     "hq4x.c"
-    "hqx_init.c"
-    "hqx.c")
+    "hqx_init.c")
+
+#  N.B. forgoing "hqx.c" for now
 
 set(hqx_hdrs
     "hqx_common.h"

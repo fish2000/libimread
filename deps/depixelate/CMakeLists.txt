@@ -11,8 +11,8 @@ add_subdirectory(hqx)
 add_subdirectory(scale2x)
 add_subdirectory(xbrz)
 
-find_package(PkgConfig REQUIRED)
-pkg_search_module(IL REQUIRED IL)
+# find_package(PkgConfig REQUIRED)
+# pkg_search_module(IL REQUIRED IL)
 find_library(FOUNDATION_LIBRARY Foundation)
 find_library(APPKIT_LIBRARY AppKit)
 
@@ -62,12 +62,12 @@ set_target_properties(
     depixelate_static
     PROPERTIES ARCHIVE_OUTPUT_NAME "depixelate")
 
-target_link_libraries(depixelate_shared ${IL_LIBRARIES}
-                                        ${FOUNDATION_LIBRARY}
+# N.B. forgoing ${IL_LIBRARIES} for now
+
+target_link_libraries(depixelate_shared ${FOUNDATION_LIBRARY}
                                         ${APPKIT_LIBRARY})
 
-target_link_libraries(depixelate_static ${IL_LIBRARIES}
-                                        ${FOUNDATION_LIBRARY}
+target_link_libraries(depixelate_static ${FOUNDATION_LIBRARY}
                                         ${APPKIT_LIBRARY})
 
 # Install the shared and static library target outputs:
