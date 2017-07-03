@@ -56,7 +56,6 @@ namespace filesystem {
     void resolver::append(path const& p)                { m_paths.push_back(p); }
     
     path resolver::resolve_impl(path const& value) const {
-        if (m_paths.empty()) { return path(); }
         for (const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
             path combined = *it / value;
             if (combined.exists()) { return combined; }
@@ -66,7 +65,6 @@ namespace filesystem {
     
     detail::pathvec_t resolver::resolve_all_impl(path const& value) const {
         detail::pathvec_t out;
-        if (m_paths.empty()) { return out; }
         std::copy_if(m_paths.begin(),
                      m_paths.end(),
                      std::back_inserter(out),

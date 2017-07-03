@@ -133,8 +133,8 @@ namespace im {
                     destPtr[2*c_stride] = B(compand);
                     // destPtr[3*c_stride] = A(compand);
                     
-                    currentpixel++;
-                    destPtr++;
+                    ++currentpixel;
+                    ++destPtr;
                 }
             }
             

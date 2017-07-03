@@ -55,18 +55,6 @@ namespace store {
                                           CF_IDX(0), raw) }
         {}
     
-    // cfdict::cfdict(CFDictionaryRef raw)
-    //     :instance{ const_cast<__CFDictionary *>(
-    //               CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
-    //                                      CF_IDX(0), raw)) }
-    //     {}
-    
-    // cfdict::cfdict(CFMutableDictionaryRef raw)
-    //     :instance{ const_cast<__CFDictionary *>(
-    //               CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
-    //                                      CF_IDX(0), raw)) }
-    //     {}
-    
     cfdict::~cfdict() {}
     
     bool cfdict::has(std::string const& key) const {
