@@ -113,6 +113,7 @@ namespace im {
         ImageList::vector_size_t idx = 0,
                                  max = images.size();
         for (; idx != max; ++idx) { delete images[idx]; }
+        computed_width = computed_height = computed_planes = -1;
     }
     
     void ImageList::reset(ImageList::vector_t&& vector) {
@@ -123,17 +124,23 @@ namespace im {
     ImageList::vector_t ImageList::release() {
         ImageList::vector_t out;
         out.swap(images);
+        computed_width = computed_height = computed_planes = -1;
         return out;
     }
     
     ImageList::vector_t ImageList::release(ImageList::vector_t&& vector) {
         ImageList::vector_t out = std::move(vector);
         out.swap(images);
+        computed_width = computed_height = computed_planes = -1;
         return out;
     }
     
     void ImageList::swap(ImageList& other) noexcept {
-        images.swap(other.images);
+        using std::swap;
+        swap(images,          other.images);
+        swap(computed_width,  other.computed_width);
+        swap(computed_height, other.computed_height);
+        swap(computed_planes, other.computed_planes);
     }
     
     std::size_t ImageList::hash(std::size_t seed) const noexcept {
