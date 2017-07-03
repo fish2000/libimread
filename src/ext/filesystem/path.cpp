@@ -1027,23 +1027,23 @@ namespace filesystem {
     }
     
     void path::set(std::string const& str) {
-        m_path = tokenize(str, path::sep);
         m_absolute = !str.empty() && str[0] == path::sep;
+        m_path = tokenize(str, path::sep);
     }
     
     path& path::operator=(std::string const& str) { set(str); return *this; }
     path& path::operator=(char const* str)        { set(str); return *this; }
     path& path::operator=(path const& p) {
-        if (!compare(p, *this)) {
+        if (!compare(p)) {
             path(p).swap(*this);
         }
         return *this;
     }
     
     path& path::operator=(path&& p) noexcept {
-        if (!compare(p, *this)) {
-            m_path = std::move(p.m_path);
+        if (!compare(p)) {
             m_absolute = p.m_absolute;
+            m_path = std::move(p.m_path);
         }
         return *this;
     }
