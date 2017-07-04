@@ -15,7 +15,8 @@ namespace im {
     bool PVRTCFormat::match_format(byte_source* src) {
         /// Adapted from the standard match_format() case, using techniques found in
         /// PVRTexture::loadApplePVRTC() and PVRTexture::load(), from ext/pvr.cpp
-        bytevec_t headerbuf(sizeof(PVRHeader));
+        bytevec_t headerbuf;
+        headerbuf.reserve(sizeof(PVRHeader));
         const int bytesread = static_cast<int>(src->read(&headerbuf.front(), sizeof(PVRHeader)));
         src->seek_relative(-bytesread);
         PVRHeader* header = (PVRHeader*)&headerbuf.front();
