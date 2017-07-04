@@ -12,11 +12,12 @@
 
 namespace im {
     
-    bool match_magic(byte_source* src, char const* magic, std::size_t const n) {
-        std::vector<byte> buf(n);
-        const int n_read = static_cast<int>(src->read(&buf.front(), n));
-        src->seek_relative(-n_read);
-        return (n_read == n && std::memcmp(&buf.front(), magic, n) == 0);
+    bool match_magic(byte_source* src, char const* magic, std::size_t const len) {
+        bytevec_t bytevec(len);
+        const int bytesread = static_cast<int>(src->read(&bytevec.front(), len));
+        src->seek_relative(-bytesread);
+        return (bytesread == len &&
+               (std::memcmp(&bytevec.front(), magic, len) == 0));
     }
     
     bool match_magic(byte_source* src, std::string const& magic) {
