@@ -3,16 +3,15 @@
 
 #include <string>
 #include <vector>
-#include <hdf5.h>
-#include <H5LTpublic.h>
+#include <array>
 
 #include <iod/json.hh>
-
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
 #include <libimread/errors.hh>
 #include <libimread/IO/hdf5.hh>
+#include <H5LTpublic.h>
 
 #if H5Dcreate_vers == 2
 #define IM_H5D_CREATE(file_id, name, dtype, space_id)                   \
@@ -40,8 +39,8 @@
 #define IM_H5E_SET_AUTO(flag) H5Eset_auto(nullptr, nullptr)
 #endif
 
-#define IM_H5F_CREATE(filepath) H5Fcreate(filepath, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)
-
+#define IM_H5F_CREATE(filepath)     H5Fcreate(filepath, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)
+#define IM_H5S_CREATE(rank, dims)   H5Screate_simple(rank, dims, nullptr)
 
 namespace im {
     
@@ -52,6 +51,7 @@ namespace im {
     using namespace H5;
     
     class H5MemoryBuffer : public H5::H5File {
+        
         public:
             static const unsigned OPEN_RW      =  H5LT_FILE_IMAGE_OPEN_RW;
             static const unsigned DONT_COPY    =  H5LT_FILE_IMAGE_DONT_COPY;
@@ -86,9 +86,6 @@ namespace im {
         std::string name = opts.cast<std::string>("hdf5:name",
                                      std::string("imread-data"));
         
-        /// HDF5 error status
-        herr_t status;
-        
         /// Open a data buffer as an HDF5 store (née "file image") for fast reading:
         hid_t file_id = H5LTopen_file_image(&bytevec[0], bytevec.size(), kDefaultFlags);
         if (file_id < 0) {
@@ -107,21 +104,33 @@ namespace im {
         /// set up an array to hold the dimensions of the image,
         /// which we read in from the in-memory HDF5 store:
         constexpr std::size_t NDIMS = 3;
-        hid_t space_id = H5Dget_space(dataset_id);
-        hsize_t dims[NDIMS];
-        H5Sget_simple_extent_dims(space_id, dims, nullptr);
+        hid_t dataspace_id = H5Dget_space(dataset_id);
+        
+        std::array<hsize_t, NDIMS> dims;
+        H5Sget_simple_extent_dims(dataspace_id, dims.data(), nullptr);
+        
+        WTF("dims:",
+            FF("size: %i\n\t[0,1,2]: %i, %i, %i", dims.size(),
+                                                  dims[0],
+                                                  dims[1],
+                                                  dims[2]));
+        
+        // WTF("maxdims:",
+        //     FF("size: %i", maxdims.size()), FF("[0]: %i", maxdims[0]),
+        //                                     FF("[1]: %i", maxdims[1]),
+        //                                     FF("[2]: %i", maxdims[2]));
         
         /// Allocate a new unique-pointer-wrapped image instance:
         std::unique_ptr<Image> output = factory->create(8,  dims[0],
                                                             dims[1],
                                                             dims[2]);
         
-        /// read typed data into the internal data buffer
+        /// read H5T_NATIVE_UCHAR data into the internal data buffer
         /// of the new image, from the HDF5 dataset in question:
-        status = H5Dread(dataset_id, H5T_NATIVE_UCHAR,
-                                     H5S_ALL, H5S_ALL,
-                                     H5P_DEFAULT,
-                                     output->rowp_as<uint8_t>(0));
+        herr_t status = H5Dread(dataset_id, detail::typecode<byte>(),
+                                            H5S_ALL, H5S_ALL,
+                                            H5P_DEFAULT,
+                                            output->rowp_as<byte>(0));
         
         if (status < 0) {
             imread_raise(CannotReadError,
@@ -129,7 +138,7 @@ namespace im {
         }
         
         /// close HDF5 handles
-        H5Sclose(space_id);
+        H5Sclose(dataspace_id);
         H5Dclose(dataset_id);
         H5Fclose(file_id);
         
@@ -150,39 +159,43 @@ namespace im {
         /// what that is all about, really; it’s just here:
         IM_H5E_SET_AUTO(H5E_DEFAULT);
         
+        /// create a temporary HDF5 file for all writes to target:
         NamedTemporaryFile tf(".hdf5");
-        std::string tpth = tf.str();
-        herr_t status;
         
+        std::string tpth = tf.str();
         hid_t file_id = IM_H5F_CREATE(tpth.c_str());
         
         if (file_id < 0) {
             imread_raise(CannotWriteError,
-                "Error opening temporary HDF5 file for writing");
+                "Could not open a temporary file for writing with HDF5 file I/O");
         }
         
-        /// stow the image dimensions in an hsize_t array,
+        /// stow the input mage dimensions in an hsize_t array,
         /// and create two dataspaces based on that array:
         constexpr std::size_t NDIMS = 3;
         
-        hsize_t dimensions[NDIMS] = { static_cast<hsize_t>(input.dim(0)),
-                                      static_cast<hsize_t>(input.dim(1)),
-                                      static_cast<hsize_t>(input.dim(2)) };
+        std::array<hsize_t, NDIMS> dimensions{{
+            static_cast<hsize_t>(input.dim(0)),
+            static_cast<hsize_t>(input.dim(1)),
+            static_cast<hsize_t>(input.dim(2))
+        }};
         
-        hsize_t flattened[1] = { static_cast<hsize_t>(input.dim(0) *
-                                                      input.dim(1) *
-                                                      input.dim(2)) };
+        std::array<hsize_t, 1> flattened{{
+            static_cast<hsize_t>(input.dim(0) *
+                                 input.dim(1) *
+                                 input.dim(2))
+        }};
         
         /// space_id    --> “dataspace”: possibly strided dimensional data;
         /// memspace_id --> “memoryspace”: flattened 1-D view of dataspace;
         /// … the first arg to H5Screate_simple() is the rank (aka “ndims”)
-        hid_t space_id      = H5Screate_simple(NDIMS, dimensions, nullptr);
-        hid_t memspace_id   = H5Screate_simple(1,     flattened,  nullptr);
+        hid_t dataspace_id  = IM_H5S_CREATE(NDIMS, dimensions.data());
+        hid_t memspace_id   = IM_H5S_CREATE(1,     flattened.data());
         
         /// try creating a new dataset --
         hid_t dataset_id = IM_H5D_CREATE(file_id, name.c_str(),
-                                         H5T_NATIVE_UCHAR,
-                                         space_id);
+                                         detail::typecode<byte>(),
+                                         dataspace_id);
         
         /// -- and if that didn't work, try opening an existant one:
         if (dataset_id < 0) {
@@ -192,22 +205,23 @@ namespace im {
         /// --- if we *still* lack a valid dataset_id, throw it up:
         if (dataset_id < 0) {
             imread_raise(CannotWriteError,
-                "Could not create or open a file dataset while writing HDF5 data");
+                "Could not create or open an HDF5 dataset for writing with hyperslab I/O");
         }
         
-        /// create attributes to save metadata: nbits, ndims, dim(x), stride(x)
+        /// create a scalar dataspace to save basic image properties as HDF5 attributes:
+        /// nbits(), ndims(), dim({0,1,2}), stride({0,1,2})
         hid_t attspace_id = H5Screate(H5S_SCALAR);
         
         if (attspace_id < 0) {
             imread_raise(CannotWriteError,
-                "Error creating an attribute dataspace while writing HDF5 data");
+                "Could not create a scalar HDF5 dataspace for storing image attributes");
         }
         
         #define CreateAttribute(name, type)                                                     \
             H5Acreate(dataset_id, name, type, attspace_id, H5P_DEFAULT, H5P_DEFAULT)
         
         #define CreateIntAttribute(name)                                                        \
-            CreateAttribute(name, H5T_NATIVE_INT)
+            CreateAttribute(name, detail::typecode<int>())
         
         hid_t attr_nbits   = CreateIntAttribute("nbits");
         hid_t attr_ndims   = CreateIntAttribute("ndims");
@@ -231,10 +245,10 @@ namespace im {
         const int val_stride2 = input.stride(2);
         
         /// actually write the image data
-        status = H5Dwrite(dataset_id,   H5T_NATIVE_UCHAR,
-                          memspace_id,
-                          space_id,     H5P_DEFAULT,
-                          (const void *)input.rowp(0));
+        herr_t status = H5Dwrite(dataset_id,   detail::typecode<byte>(),
+                                 memspace_id,
+                                 dataspace_id, H5P_DEFAULT,
+                                 (const void*)input.rowp(0));
         
         if (status < 0) {
             imread_raise(CannotWriteError,
@@ -244,7 +258,7 @@ namespace im {
         /// write the attributes
         
         #define WriteIntAttribute(name)                                                         \
-            H5Awrite(attr_##name, H5T_NATIVE_INT, &val_##name)
+            H5Awrite(attr_##name, detail::typecode<int>(), &val_##name)
         
         WriteIntAttribute(nbits);
         WriteIntAttribute(ndims);
@@ -276,7 +290,7 @@ namespace im {
         
         /// close all HDF5 handles
         H5Sclose(memspace_id);
-        H5Sclose(space_id);
+        H5Sclose(dataspace_id);
         H5Dclose(dataset_id);
         H5Fclose(file_id);
         

@@ -5,6 +5,8 @@
 #define LIBIMREAD_IO_HDF5_HH_
 
 #include <H5Cpp.h>
+#include <hdf5.h>
+
 #include <memory>
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
@@ -14,58 +16,56 @@ namespace im {
     
     namespace detail {
         
-        using dtype = H5::PredType;
-        
         template <typename T> inline
-        dtype type();
+        hid_t typecode();
         
         template <> inline
-        dtype type<char>() { return dtype::NATIVE_CHAR; }
+        hid_t typecode<char>() { return H5T_NATIVE_CHAR; }
         
         template <> inline
-        dtype type<signed char>() { return dtype::NATIVE_SCHAR; }
+        hid_t typecode<signed char>() { return H5T_NATIVE_SCHAR; }
         
         template <> inline
-        dtype type<unsigned char>() { return dtype::NATIVE_UCHAR; }
+        hid_t typecode<byte>() { return H5T_NATIVE_UCHAR; }
         
         template <> inline
-        dtype type<short>() { return dtype::NATIVE_SHORT; }
+        hid_t typecode<short>() { return H5T_NATIVE_SHORT; }
         
         template <> inline
-        dtype type<unsigned short>() { return dtype::NATIVE_USHORT; }
+        hid_t typecode<unsigned short>() { return H5T_NATIVE_USHORT; }
         
         template <> inline
-        dtype type<int>() { return dtype::NATIVE_INT; }
+        hid_t typecode<int>() { return H5T_NATIVE_INT; }
         
         template <> inline
-        dtype type<unsigned int>() { return dtype::NATIVE_UINT; }
+        hid_t typecode<unsigned int>() { return H5T_NATIVE_UINT; }
         
         template <> inline
-        dtype type<long>() { return dtype::NATIVE_LONG; }
+        hid_t typecode<long>() { return H5T_NATIVE_LONG; }
         
         template <> inline
-        dtype type<unsigned long>() { return dtype::NATIVE_ULONG; }
+        hid_t typecode<unsigned long>() { return H5T_NATIVE_ULONG; }
         
         template <> inline
-        dtype type<long long>() { return dtype::NATIVE_LLONG; }
+        hid_t typecode<long long>() { return H5T_NATIVE_LLONG; }
         
         template <> inline
-        dtype type<unsigned long long>() { return dtype::NATIVE_ULLONG; }
+        hid_t typecode<unsigned long long>() { return H5T_NATIVE_ULLONG; }
         
         template <> inline
-        dtype type<float>() { return dtype::NATIVE_FLOAT; }
+        hid_t typecode<float>() { return H5T_NATIVE_FLOAT; }
         
         template <> inline
-        dtype type<double>() { return dtype::NATIVE_DOUBLE; }
+        hid_t typecode<double>() { return H5T_NATIVE_DOUBLE; }
         
         template <> inline
-        dtype type<long double>() { return dtype::NATIVE_LDOUBLE; }
+        hid_t typecode<long double>() { return H5T_NATIVE_LDOUBLE; }
         
         template <> inline
-        dtype type<bool>() { return dtype::NATIVE_HBOOL; }
+        hid_t typecode<bool>() { return H5T_NATIVE_HBOOL; }
         
         // template <> inline
-        // dtype type<CFTypeRef>() { return dtype::NATIVE_OPAQUE; }
+        // hid_t typecode<CFTypeRef>() { return H5T_NATIVE_OPAQUE; }
         
     }
     
