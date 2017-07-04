@@ -33,6 +33,13 @@ namespace im {
             hid_t    get()   const { return m_hid; }
             operator hid_t() const { return m_hid; }
             
+            herr_t release() const {
+                if (m_hid < 0) { return -1; }
+                herr_t out = m_releaser(m_hid);
+                if (out > 0) { m_hid = -1; }
+                return out;
+            }
+            
             protected:
                 static const releaser_f NOOp;
             
