@@ -18,8 +18,10 @@ namespace im {
     /// forward-declare im::Image
     class Image;
     
-    /// This class *owns* its members and will delete them if destroyed
+    /// The ImageList class *owns* the pointers it manages,
+    /// and it will delete them when it is destroyed
     struct ImageList {
+        
         using pointer_t      = std::add_pointer_t<Image>;
         using unique_t       = std::unique_ptr<Image>;
         using vector_t       = std::vector<pointer_t>;
@@ -42,6 +44,7 @@ namespace im {
                     std::remove_if(images.begin(),
                                    images.end(),
                                 [](pointer_t p) { return p == nullptr; }), images.end());
+                compute_sizes();
             }
         
         /// initializer list construction
@@ -114,6 +117,8 @@ namespace im {
         protected:
             /// internal pointer vector
             vector_t images;
+        
+        protected:
             /// computed dimension values
             mutable int computed_width = -1,
                        computed_height = -1,

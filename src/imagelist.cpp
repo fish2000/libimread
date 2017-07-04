@@ -39,6 +39,7 @@ namespace im {
             images.erase(
                 std::remove_if(images.begin(), images.end(),
                             [](ImageList::pointer_t p) { return p == nullptr; }), images.end());
+            compute_sizes();
         }
     
     ImageList::ImageList(ImageList::vector_t&& vector)
@@ -47,15 +48,22 @@ namespace im {
             images.erase(
                 std::remove_if(images.begin(), images.end(),
                             [](ImageList::pointer_t p) { return p == nullptr; }), images.end());
+            compute_sizes();
         }
     
     ImageList::ImageList(ImageList&& other) noexcept
         :images(std::move(other.release()))
+        ,computed_width(other.computed_width)
+        ,computed_height(other.computed_height)
+        ,computed_planes(other.computed_planes)
         {}
     
     ImageList& ImageList::operator=(ImageList&& other) noexcept {
         if (images != other.images) {
             images = std::move(other.release());
+            computed_width = other.computed_width;
+            computed_height = other.computed_height;
+            computed_planes = other.computed_planes;
         }
         return *this;
     }
