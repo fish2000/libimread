@@ -19,8 +19,11 @@ namespace im {
         const int bytesread = static_cast<int>(src->read(&headerbuf.front(), sizeof(PVRHeader)));
         src->seek_relative(-bytesread);
         PVRHeader* header = (PVRHeader*)&headerbuf.front();
-        return (bytesread == sizeof(PVRHeader) && header->magic == 0x21525650) ||
+        return (bytesread == sizeof(PVRHeader) &&
+                header->magic == PVRTCFormat::options.signatures[0]) ||
                (countBits(src->size()) == 1);
+        // return (bytesread == sizeof(PVRHeader) && header->magic == 0x21525650) ||
+        //        (countBits(src->size()) == 1);
     }
     
     std::unique_ptr<Image> PVRTCFormat::read(byte_source* src,
