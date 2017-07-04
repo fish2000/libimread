@@ -16,59 +16,153 @@ namespace im {
     
     namespace detail {
         
+        struct h5base {
+            
+            using releaser_f = std::function<herr_t(hid_t)>;
+            
+            explicit h5base(hid_t hid, releaser_f releaser)
+                :m_hid(hid)
+                ,m_releaser(releaser)
+                {}
+            
+            virtual ~h5base() {
+                /// call m_releaser on member HID:
+                if (m_hid > 0) { m_releaser(m_hid); }
+            }
+            
+            hid_t    get()   const { return m_hid; }
+            operator hid_t() const { return m_hid; }
+            
+            protected:
+                static const releaser_f NOOp;
+            
+            protected:
+                hid_t m_hid = -1;
+                releaser_f m_releaser = h5base::NOOp;
+            
+            private:
+                h5base(void);
+                h5base(h5base const&);
+                h5base(h5base&&);
+                h5base& operator=(h5base const&);
+                h5base& operator=(h5base&&);
+            
+        };
+        
+        struct h5t_t : public h5base {
+            
+            /// capitalization OCD:
+            using h5t_class_t = H5T_class_t;
+            
+            explicit h5t_t(hid_t hid)
+                :h5base(H5Tcopy(hid),
+                        H5Tclose)
+                {}
+            
+            explicit h5t_t(h5t_class_t cls, std::size_t size)
+                :h5base(H5Tcreate(cls, size),
+                        H5Tclose)
+                {}
+            
+            h5t_t(h5t_t const& other)
+                :h5base(H5Tcopy(other.m_hid),
+                                other.m_releaser)
+                {}
+            
+            h5t_t(h5t_t&& other) noexcept
+                :h5base(std::move(other.m_hid),
+                        std::move(other.m_releaser))
+                { other.m_hid = -1; }
+            
+            h5t_class_t cls() const {
+                return H5Tget_class(m_hid);
+            }
+            
+            h5t_t super() const {
+                return h5t_t(H5Tget_super(m_hid));
+            }
+            
+        };
+        
         template <typename T> inline
-        hid_t typecode();
+        h5t_t typecode();
         
         template <> inline
-        hid_t typecode<char>() { return H5T_NATIVE_CHAR; }
+        h5t_t typecode<char>() {
+            return h5t_t(H5T_NATIVE_CHAR);
+        }
         
         template <> inline
-        hid_t typecode<signed char>() { return H5T_NATIVE_SCHAR; }
+        h5t_t typecode<signed char>() {
+            return h5t_t(H5T_NATIVE_SCHAR);
+        }
         
         template <> inline
-        hid_t typecode<byte>() { return H5T_NATIVE_UCHAR; }
+        h5t_t typecode<byte>() {
+            return h5t_t(H5T_NATIVE_UCHAR);
+        }
         
         template <> inline
-        hid_t typecode<short>() { return H5T_NATIVE_SHORT; }
+        h5t_t typecode<short>() {
+            return h5t_t(H5T_NATIVE_SHORT);
+        }
         
         template <> inline
-        hid_t typecode<unsigned short>() { return H5T_NATIVE_USHORT; }
+        h5t_t typecode<unsigned short>() {
+            return h5t_t(H5T_NATIVE_USHORT);
+        }
         
         template <> inline
-        hid_t typecode<int>() { return H5T_NATIVE_INT; }
+        h5t_t typecode<int>() {
+            return h5t_t(H5T_NATIVE_INT);
+        }
         
         template <> inline
-        hid_t typecode<unsigned int>() { return H5T_NATIVE_UINT; }
+        h5t_t typecode<unsigned int>() {
+            return h5t_t(H5T_NATIVE_UINT);
+        }
         
         template <> inline
-        hid_t typecode<long>() { return H5T_NATIVE_LONG; }
+        h5t_t typecode<long>() {
+            return h5t_t(H5T_NATIVE_LONG);
+        }
         
         template <> inline
-        hid_t typecode<unsigned long>() { return H5T_NATIVE_ULONG; }
+        h5t_t typecode<unsigned long>() {
+            return h5t_t(H5T_NATIVE_ULONG);
+        }
         
         template <> inline
-        hid_t typecode<long long>() { return H5T_NATIVE_LLONG; }
+        h5t_t typecode<long long>() {
+            return h5t_t(H5T_NATIVE_LLONG);
+        }
         
         template <> inline
-        hid_t typecode<unsigned long long>() { return H5T_NATIVE_ULLONG; }
+        h5t_t typecode<unsigned long long>() {
+            return h5t_t(H5T_NATIVE_ULLONG);
+        }
         
         template <> inline
-        hid_t typecode<float>() { return H5T_NATIVE_FLOAT; }
+        h5t_t typecode<float>() {
+            return h5t_t(H5T_NATIVE_FLOAT);
+        }
         
         template <> inline
-        hid_t typecode<double>() { return H5T_NATIVE_DOUBLE; }
+        h5t_t typecode<double>() {
+            return h5t_t(H5T_NATIVE_DOUBLE);
+        }
         
         template <> inline
-        hid_t typecode<long double>() { return H5T_NATIVE_LDOUBLE; }
+        h5t_t typecode<long double>() {
+            return h5t_t(H5T_NATIVE_LDOUBLE);
+        }
         
         template <> inline
-        hid_t typecode<bool>() { return H5T_NATIVE_HBOOL; }
+        h5t_t typecode<bool>() {
+            return h5t_t(H5T_NATIVE_HBOOL);
+        }
         
-        // template <> inline
-        // hid_t typecode<CFTypeRef>() { return H5T_NATIVE_OPAQUE; }
-        
-    }
-    
+    } /* namespace detail */
     
     class HDF5Format : public ImageFormatBase<HDF5Format> {
         

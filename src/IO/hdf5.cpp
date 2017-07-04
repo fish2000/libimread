@@ -46,6 +46,8 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(HDF5Format);
     
+    const detail::h5base::releaser_f detail::h5base::NOOp = [](hid_t hid) -> herr_t { return -1; };
+    
     using filesystem::path;
     using filesystem::NamedTemporaryFile;
     using namespace H5;
@@ -106,14 +108,18 @@ namespace im {
         constexpr std::size_t NDIMS = 3;
         hid_t dataspace_id = H5Dget_space(dataset_id);
         
+        // std::array<hsize_t, NDIMS> dims, maxdims;
+        // H5Sget_simple_extent_dims(dataspace_id, dims.data(),
+        //                                      maxdims.data());
+        
         std::array<hsize_t, NDIMS> dims;
         H5Sget_simple_extent_dims(dataspace_id, dims.data(), nullptr);
         
-        WTF("dims:",
-            FF("size: %i\n\t[0,1,2]: %i, %i, %i", dims.size(),
-                                                  dims[0],
-                                                  dims[1],
-                                                  dims[2]));
+        // WTF("dims:",
+        //     FF("size: %i\n\t[0,1,2]: %i, %i, %i", dims.size(),
+        //                                           dims[0],
+        //                                           dims[1],
+        //                                           dims[2]));
         
         // WTF("maxdims:",
         //     FF("size: %i", maxdims.size()), FF("[0]: %i", maxdims[0]),
@@ -170,7 +176,7 @@ namespace im {
                 "Could not open a temporary file for writing with HDF5 file I/O");
         }
         
-        /// stow the input mage dimensions in an hsize_t array,
+        /// stow the input image dimensions in an hsize_t array,
         /// and create two dataspaces based on that array:
         constexpr std::size_t NDIMS = 3;
         
