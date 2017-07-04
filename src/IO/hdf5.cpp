@@ -46,8 +46,6 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(HDF5Format);
     
-    const detail::h5base::releaser_f detail::h5base::NOOp = [](hid_t hid) -> herr_t { return -1; };
-    
     using filesystem::path;
     using filesystem::NamedTemporaryFile;
     using namespace H5;
