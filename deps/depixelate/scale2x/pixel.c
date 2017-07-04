@@ -20,54 +20,53 @@
 
 #include "pixel.h"
 
-pixel_t pixel_get(int x, int y, const unsigned char* pix, unsigned slice, unsigned pixel, int dx, int dy, int opt_tes)
-{
+pixel_t pixel_get(int x, int y,
+                  const unsigned char* pix,
+                  unsigned slice,
+                  unsigned pixel,
+                  int dx, int dy,
+                  int opt_tes) {
     const unsigned char* p;
     unsigned i;
     pixel_t v;
-
+    
     if (opt_tes) {
-        if (x < 0)
-            x += dx;
-        if (x >= dx)
-            x -= dx;
-        if (y < 0)
-            y += dy;
-        if (y >= dy)
-            y -= dy;
+        if (x < 0)      { x += dx; }
+        if (x >= dx)    { x -= dx; }
+        if (y < 0)      { y += dy; }
+        if (y >= dy)    { y -= dy; }
     } else {
-        if (x < 0)
-            x = 0;
-        if (x >= dx)
-            x = dx - 1;
-        if (y < 0)
-            y = 0;
-        if (y >= dy)
-            y = dy - 1;
+        if (x < 0)      { x = 0; }
+        if (x >= dx)    { x = dx - 1; }
+        if (y < 0)      { y = 0; }
+        if (y >= dy)    { y = dy - 1; }
     }
-
+    
     p = pix + (y * slice) + (x * pixel);
-
     v = 0;
-    for(i=0;i<pixel;++i)
-        v |= ((pixel_t)p[i]) << (i*8);
-
+    
+    for (i = 0; i < pixel; ++i) {
+        v |= ((pixel_t)p[i]) << (i * 8);
+    }
+    
     return v;
 }
 
-void pixel_put(int x, int y, unsigned char* pix, unsigned slice, unsigned pixel, int dx, int dy, pixel_t v)
-{
+void pixel_put(int x, int y,
+               unsigned char* pix,
+               unsigned slice,
+               unsigned pixel,
+               int dx, int dy,
+               pixel_t v) {
     unsigned char* p;
     unsigned i;
-
-    if (x < 0 || x >= dx)
-        return;
-    if (y < 0 || y >= dy)
-        return;
-
+    
+    if (x < 0 || x >= dx) { return; }
+    if (y < 0 || y >= dy) { return; }
+    
     p = pix + (y * slice) + (x * pixel);
-
-    for(i=0;i<pixel;++i) {
-        p[i] = v >> (i*8);
+    
+    for (i = 0; i < pixel; ++i) {
+        p[i] = v >> (i * 8);
     }
 }
