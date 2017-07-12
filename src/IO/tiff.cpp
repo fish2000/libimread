@@ -314,7 +314,7 @@ namespace im {
                 /// Hardcoding uint8_t as the type for now
                 int c_stride = (depth == 1) ? 0 : output->stride(2);
                 
-                for (uint32_t r = 0; r != h; ++r) {
+                for (int r = 0; r != h; ++r) {
                     /// NB. This is highly specious
                     byte* ptr = output->rowp_as<byte>(r);
                     byte* dstPtr = output->rowp_as<byte>(r);
@@ -337,7 +337,7 @@ namespace im {
                 
                 WTF("About to enter 16-bit pixel loop...");
                 
-                for (uint32_t r = 0; r != h; ++r) {
+                for (int r = 0; r != h; ++r) {
                     byte* dstPtr = output->rowp_as<byte>(r);
                     if (TIFFReadScanline(t.tif, ptr16, r) == -1) {
                         std::free(ptr16);
@@ -477,7 +477,7 @@ namespace im {
             
         }
         
-        for (uint32_t rr = 0; rr != h; ++rr) {
+        for (int rr = 0; rr != h; ++rr) {
             // void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : input.rowp(rr);
             void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : input.rowp(rr);
             if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
@@ -519,7 +519,7 @@ namespace im {
             TIFFCreateDirectory(t.tif);
         }
         
-        for (unsigned i = 0; i != n_pages; ++i) {
+        for (int i = 0; i != n_pages; ++i) {
             Image* im = input.at(i);
             byte* __restrict__ bufp = 0;
             bool copy_data = opts.cast<bool>("tiff:copy-data", true);
@@ -623,7 +623,7 @@ namespace im {
                 }
             }
             
-            for (uint32_t rr = 0; rr != h; ++rr) {
+            for (int rr = 0; rr != h; ++rr) {
                 // void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : im->rowp(rr);
                 void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : im->rowp(rr);
                 if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
