@@ -110,7 +110,7 @@ namespace im {
                           options_map const& opts) {
         
         /// Do some GIF stuff
-        detail::gifholder g = detail::gifsink(3);
+        detail::gifholder g = detail::gifsink();
         detail::gifbuffer b = detail::gifbuffer(input.width(),
                                                 input.height(),
                                                 input.planes());
@@ -130,8 +130,11 @@ namespace im {
         /// Pre-compute ImageList sizes
         input.compute_sizes();
         
+        /// Sort out frame delay
+        int delay = opts.cast<int>("delay", GIFFormat::options.delay);
+        
         /// Do some GIF stuff
-        detail::gifholder g = detail::gifsink(3);
+        detail::gifholder g = detail::gifsink(delay);
         detail::gifbuffer b = detail::gifbuffer(input.width(),
                                                 input.height(),
                                                 input.planes());

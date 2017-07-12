@@ -45,7 +45,9 @@ namespace im {
                     SIGNATURE("\x47\x49\x46\x38", 4)
                 },
                 _suffixes = { "gif" },
-                _mimetype = "image/gif"
+                _mimetype = "image/gif",
+                _delay = 3      /// default delay between animated GIF frames,
+                                /// … I have no idea what unit that is in, btw
             );
             
             virtual std::unique_ptr<Image> read(byte_source* src,

@@ -102,7 +102,7 @@ namespace im {
             /// pixelbuffer: uint32_t[width * height]
             detail::pixbuf_t pixbuf = std::make_unique<uint32_t[]>(width * height);     /// pixels are 32-bit, for 4x 8-bit components
             
-            /// CGImageRef + pixelbuffer -> CGContextRef
+            /// pixelbuffer + CGColorSpaceRef + alpha flags -> CGContextRef
             detail::cfp_t<CGContextRef> context(
                           CGBitmapContextCreate(pixbuf.get(),
                                                 width, height,
@@ -116,13 +116,14 @@ namespace im {
             /// Create new im::Image instance using factory pointer:
             std::unique_ptr<Image> output = factory->create(8, height, width, 3);
             
-            /// Temporary values and pointers
+            /// Temporary values and pointers:
             uint32_t* currentpixel = pixbuf.get();
-            uint32_t  c_stride = (bpp == 1) ? 0 : output->stride(2); /// this is janky
+            uint32_t  c_stride = (bpp == 1) ? 0 : output->stride(2);                    /// this is janky
             uint32_t  x, y, compand;
             byte*     destPtr;
             
-            /// Read from pixel buffer, copy to newly created im::Image
+            /// Read from pixel buffer, copy to newly created im::Image --
+            /// N.B. this doesn’t yet handle alpha channels properly:
             for (y = 0; y < height; ++y) {
                 destPtr = output->rowp_as<byte>(y);
                 for (x = 0; x < width; ++x) {
@@ -138,10 +139,10 @@ namespace im {
                 }
             }
             
-            /// stow unique_ptr to new im::Image instance:
+            /// stow the unique_ptr to new im::Image instance:
             images.push_back(std::move(output));
             
-            /// increment image idx
+            /// increment image idx:
             ++idx;
             
         } while (is_multi && idx < count);
