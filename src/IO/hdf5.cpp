@@ -11,7 +11,11 @@
 #include <libimread/file.hh>
 #include <libimread/errors.hh>
 #include <libimread/IO/hdf5.hh>
+
+#include <H5Cpp.h>
+#include <hdf5.h>
 #include <H5LTpublic.h>
+#include <libimread/ext/h5deets.hh>
 
 #if H5Dcreate_vers == 2
 #define IM_H5D_CREATE(file_id, name, dtype, space_id)                   \
@@ -251,7 +255,7 @@ namespace im {
         herr_t status = H5Dwrite(dataset_id,   detail::typecode<byte>(),
                                  memspace_id,
                                  dataspace_id, H5P_DEFAULT,
-                                 (const void*)input.rowp(0));
+                                (const void*)input.rowp(0));
         
         if (status < 0) {
             imread_raise(CannotWriteError,
@@ -297,13 +301,11 @@ namespace im {
         H5Dclose(dataset_id);
         H5Fclose(file_id);
         
-        /// read all binary data back from the temporary file
+        /// read binary data back from the temporary file
         std::unique_ptr<FileSource> readback(new FileSource(tf.filepath));
-        bytevec_t reread_bytevec = readback->full_data();
         
         /// rewrite the binary data using the target output byte sink
-        output->write((const void*)&reread_bytevec[0],
-                                    reread_bytevec.size());
+        output->write(readback->data(), readback->size());
         output->flush();
     }
     

@@ -4,14 +4,10 @@
 #ifndef LIBIMREAD_IO_HDF5_HH_
 #define LIBIMREAD_IO_HDF5_HH_
 
-#include <H5Cpp.h>
-#include <hdf5.h>
-
 #include <memory>
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
-#include <libimread/ext/h5deets.hh>
 
 namespace im {
     

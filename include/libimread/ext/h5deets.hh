@@ -18,34 +18,30 @@ namespace im {
             
             using releaser_f = std::function<herr_t(hid_t)>;
             
-            explicit h5base(hid_t hid, releaser_f releaser)
-                :m_hid(hid)
-                ,m_releaser(releaser)
-                {}
+            /// explicit hid+releaser construction:
+            explicit h5base(hid_t hid, releaser_f releaser);
             
-            virtual ~h5base() {
-                /// call m_releaser on member HID:
-                if (m_hid > 0) { m_releaser(m_hid); }
-            }
+            /// virtual destructor:
+            virtual ~h5base();
             
-            hid_t    get()   const { return m_hid; }
-            operator hid_t() const { return m_hid; }
+            /// obtain the wrapped hid value:
+            hid_t    get()   const;
+            operator hid_t() const;
             
-            herr_t release() {
-                if (m_hid < 0) { return -1; }
-                herr_t out = m_releaser(m_hid);
-                if (out > 0) { m_hid = -1; }
-                return out;
-            }
+            /// call the wrapped releaser:
+            herr_t release();
             
             protected:
+                /// default no-op releaser function:
                 static const releaser_f NOOp;
             
             protected:
+                /// hid and releaser values:
                 hid_t m_hid = -1;
                 releaser_f m_releaser = h5base::NOOp;
             
             private:
+                /// NO DEFAULT CONSTRUCTION FROM THE BASE TYPE:
                 h5base(void);
                 h5base(h5base const&);
                 h5base(h5base&&);
@@ -59,33 +55,17 @@ namespace im {
             /// capitalization OCD:
             using h5t_class_t = H5T_class_t;
             
-            explicit h5t_t(hid_t hid)
-                :h5base(H5Tcopy(hid),
-                        H5Tclose)
-                {}
+            /// explicit type and class constructors
+            explicit h5t_t(hid_t hid);
+            explicit h5t_t(h5t_class_t cls, std::size_t size);
             
-            explicit h5t_t(h5t_class_t cls, std::size_t size)
-                :h5base(H5Tcreate(cls, size),
-                        H5Tclose)
-                {}
+            /// copy and move constructors: 
+            h5t_t(h5t_t const& other);
+            h5t_t(h5t_t&& other) noexcept;
             
-            h5t_t(h5t_t const& other)
-                :h5base(H5Tcopy(other.m_hid),
-                                other.m_releaser)
-                {}
-            
-            h5t_t(h5t_t&& other) noexcept
-                :h5base(std::move(other.m_hid),
-                        std::move(other.m_releaser))
-                { other.m_hid = -1; }
-            
-            h5t_class_t cls() const {
-                return H5Tget_class(m_hid);
-            }
-            
-            h5t_t super() const {
-                return h5t_t(H5Tget_super(m_hid));
-            }
+            /// convenience getters:
+            h5t_class_t cls() const;
+            h5t_t super() const;
             
         };
         
