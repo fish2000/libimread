@@ -27,47 +27,7 @@ namespace im {
             );
         }
         
-    }
-    
-    class STKFormat : public ImageFormatBase<STKFormat> {
-        
-        public:
-            
-            using can_read = std::true_type;
-            using can_read_multi = std::true_type;
-            
-            DECLARE_OPTIONS(
-                _signatures = {
-                    SIGNATURE("\x49\x49\x2a\x00", 4)
-                },
-                _suffixes = { "stk", "tif", "tiff" },
-                _mimetype = "image/stk",
-                _metadata = "<TIFF/STK METADATA STRING>",
-                _writeopts = detail::writeopts()
-            );
-            
-            virtual std::unique_ptr<Image> read(byte_source* src,
-                                                ImageFactory* factory,
-                                                options_map const& opts) override {
-                ImageList pages = this->do_read(src, factory, false, opts);
-                std::unique_ptr<Image> out = pages.pop();
-                return out;
-            }
-            
-            virtual ImageList read_multi(byte_source* src,
-                                         ImageFactory* factory,
-                                         options_map const& opts) override {
-                return this->do_read(src, factory, true, opts);
-            }
-            
-        private:
-            
-            ImageList do_read(byte_source* src,
-                              ImageFactory* factory,
-                              bool is_multi,
-                              options_map const& opts);
-        
-    };
+    } /* namespace detail */
     
     class TIFFFormat : public ImageFormatBase<TIFFFormat> {
         
@@ -75,10 +35,10 @@ namespace im {
             
             using can_read = std::true_type;
             using can_read_multi = std::true_type;
-            using can_read_metadata = std::true_type;
+            // using can_read_metadata = std::true_type;
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
-            using can_write_metadata = std::true_type;
+            // using can_write_metadata = std::true_type;
             
             DECLARE_OPTIONS(
                 _signatures = {
@@ -100,7 +60,7 @@ namespace im {
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
                                                 options_map const& opts) override {
-                ImageList pages = this->do_read(src, factory, false, opts);
+                ImageList pages = do_read(src, factory, false, opts);
                 std::unique_ptr<Image> out = pages.pop();
                 return out;
             }
@@ -108,11 +68,7 @@ namespace im {
             virtual ImageList read_multi(byte_source* src,
                                          ImageFactory* factory,
                                          options_map const& opts) override {
-                if (opts.cast<std::string>("format", "tif") == "stk") {
-                    std::unique_ptr<STKFormat> delegate = std::make_unique<STKFormat>();
-                    return delegate->read_multi(src, factory, opts);
-                }
-                return this->do_read(src, factory, true, opts);
+                return do_read(src, factory, true, opts);
             }
             
             virtual void write(Image& input,
@@ -136,13 +92,71 @@ namespace im {
                               options_map const& opts);
     };
     
+    class STKFormat : public ImageFormatBase<STKFormat> {
+        
+        public:
+            
+            using can_read = std::true_type;
+            using can_read_multi = std::true_type;
+            // using can_read_metadata = std::true_type;
+            using can_write = std::true_type;
+            using can_write_multi = std::true_type;
+            // using can_write_metadata = std::true_type;
+            
+            DECLARE_OPTIONS(
+                _signatures = {
+                    SIGNATURE("\x49\x49\x2a\x00", 4)
+                },
+                _suffixes = { "stk", "tif", "tiff" },
+                _mimetype = "image/stk",
+                _metadata = "<TIFF/STK METADATA STRING>",
+                _writeopts = detail::writeopts()
+            );
+            
+            virtual std::unique_ptr<Image> read(byte_source* src,
+                                                ImageFactory* factory,
+                                                options_map const& opts) override {
+                ImageList pages = do_read(src, factory, false, opts);
+                std::unique_ptr<Image> out = pages.pop();
+                return out;
+            }
+            
+            virtual ImageList read_multi(byte_source* src,
+                                         ImageFactory* factory,
+                                         options_map const& opts) override {
+                return do_read(src, factory, true, opts);
+            }
+            
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               options_map const& opts) override {
+                std::unique_ptr<TIFFFormat> delegate = std::make_unique<TIFFFormat>();
+                return delegate->write(input, output, opts);
+            }
+            
+            virtual void write_multi(ImageList& input,
+                                     byte_sink* output,
+                                     options_map const& opts) override {
+                std::unique_ptr<TIFFFormat> delegate = std::make_unique<TIFFFormat>();
+                return delegate->write_multi(input, output, opts);
+            }
+            
+        private:
+            
+            ImageList do_read(byte_source* src,
+                              ImageFactory* factory,
+                              bool is_multi,
+                              options_map const& opts);
+        
+    };
+    
     namespace format {
-        using STK = STKFormat;
         using TIFF = TIFFFormat;
+        using TIF = TIFFFormat;
+        using STK = STKFormat;
     }
     
-}
-
+} /* namespace im */
 
 
 #endif /// LIBIMREAD_IO_TIFF_HH_
