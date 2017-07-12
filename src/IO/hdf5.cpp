@@ -80,14 +80,13 @@ namespace im {
                                             options_map const& opts) {
         
         /// load the raw sources' full data, and set some options:
-        bytevec_t bytevec = src->full_data();
         path h5imagepath = opts.cast<path>("hdf5:path",
                                      path("/image/raster"));
         std::string name = opts.cast<std::string>("hdf5:name",
                                      std::string("imread-data"));
         
         /// Open a data buffer as an HDF5 store (née "file image") for fast reading:
-        hid_t file_id = H5LTopen_file_image(&bytevec[0], bytevec.size(), kDefaultFlags);
+        hid_t file_id = H5LTopen_file_image(src->data(), src->size(), kDefaultFlags);
         if (file_id < 0) {
             imread_raise(CannotReadError,
                 "Error opening HDF5 in-memory data as a file image for reading");
