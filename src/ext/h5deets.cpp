@@ -215,9 +215,8 @@ namespace im {
             ,m_idx(other.m_idx)
             ,m_name(std::move(other.m_name))
             {
-                /// increment refcount on the parent HID and dataspace
+                /// increment refcount on the parent HID
                 H5Iinc_ref(m_parent_hid);
-                m_dataspace.incref();
             }
         
         h5a_t::~h5a_t() {

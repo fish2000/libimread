@@ -143,8 +143,8 @@ namespace im {
             virtual ~h5a_t();
             
             /// API
-            herr_t read(void*) const;
-            herr_t read(void*, h5t_t const&) const;
+            herr_t  read(void*) const;
+            herr_t  read(void*, h5t_t const&) const;
             herr_t write(const void*);
             herr_t write(const void*, h5t_t const&);
             
