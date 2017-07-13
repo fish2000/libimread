@@ -19,7 +19,7 @@ namespace im {
             using releaser_f = std::function<herr_t(hid_t)>;
             
             /// explicit hid+releaser construction:
-            explicit h5base(hid_t hid, releaser_f releaser);
+            explicit h5base(hid_t, releaser_f);
             
             /// virtual destructor:
             virtual ~h5base();
@@ -31,14 +31,18 @@ namespace im {
             /// call the wrapped releaser:
             herr_t release();
             
+            bool operator==(h5base const&) const;
+            bool operator!=(h5base const&) const;
+            
             protected:
-                /// default no-op releaser function:
+                /// no-op and generic releaser functions:
+                static const releaser_f deref;
                 static const releaser_f NOOp;
             
             protected:
                 /// hid and releaser values:
                 hid_t m_hid = -1;
-                releaser_f m_releaser = h5base::NOOp;
+                releaser_f m_releaser = h5base::deref;
             
             private:
                 /// NO DEFAULT CONSTRUCTION FROM THE BASE TYPE:
@@ -56,12 +60,14 @@ namespace im {
             using h5t_class_t = H5T_class_t;
             
             /// explicit type and class constructors
-            explicit h5t_t(hid_t hid);
-            explicit h5t_t(h5t_class_t cls, std::size_t size);
+            explicit h5t_t(hid_t);
+            explicit h5t_t(h5t_class_t, std::size_t);
             
-            /// copy and move constructors: 
-            h5t_t(h5t_t const& other);
-            h5t_t(h5t_t&& other) noexcept;
+            /// copy/move construct/assign:
+            h5t_t(h5t_t const&);
+            h5t_t(h5t_t&&) noexcept;
+            h5t_t& operator=(h5t_t const&);
+            h5t_t& operator=(h5t_t&&) noexcept;
             
             /// convenience getters:
             h5t_class_t cls() const;
@@ -146,6 +152,63 @@ namespace im {
         h5t_t typecode<bool>() {
             return h5t_t(H5T_NATIVE_HBOOL);
         }
+        
+        struct h5a_t : public h5base {
+            
+            /// explicit by-index and by-name constructors:
+            explicit h5a_t(hid_t parent_hid, std::size_t idx);
+            explicit h5a_t(hid_t parent_hid, std::string const& name);
+            
+            /// explicit create-from-scratch constructor:
+            explicit h5a_t(hid_t parent_hid, std::string const& name,
+                           hid_t dataspace_hid,
+                           h5t_t datatype);
+            
+            /// move constructor:
+            h5a_t(h5a_t&& other) noexcept;
+            
+            /// virtual destructor:
+            virtual ~h5a_t();
+            
+            /// API
+            herr_t read(void*) const;
+            herr_t read(void*, h5t_t const&) const;
+            herr_t write(const void*);
+            herr_t write(const void*, h5t_t const&);
+            
+            template <typename ToType>
+            ToType typed_read() const {
+                ToType value{};
+                this->read(&value, typecode<ToType>());
+                return value;
+            }
+            
+            template <typename FromType>
+            void typed_write(FromType&& value) {
+                this->write(&std::forward<FromType>(value),
+                                 typecode<FromType>());
+            }
+            
+            h5t_t const& memorytype() const;
+            h5t_t const& memorytype(h5t_t const&);
+            hid_t parent() const;
+            hid_t dataspace() const;
+            std::size_t idx() const;
+            std::string name() const;
+            // std::string name(std::string const&);
+            
+            protected:
+                h5t_t m_memorytype = h5t_t(H5T_NATIVE_UCHAR);
+                hid_t m_parent_hid = -1;
+                hid_t m_dataspace_hid = -1;
+                std::size_t m_idx = 0;
+                mutable std::string m_name = NULL_STR;
+            
+            private:
+                h5a_t(h5a_t const&);                /// NO COPYING!
+                h5a_t& operator=(h5a_t const&);     /// OF ANY SORT!
+        };
+        
         
     } /* namespace detail */
     
