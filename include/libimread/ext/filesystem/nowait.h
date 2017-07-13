@@ -93,13 +93,13 @@ namespace filesystem {
             std::atomic<int> __typename__::retaincount{ 0 };            \
                                                                         \
             __typename__::__typename__() {                              \
-                if (retaincount.fetch_add(1) == 1) {                    \
+                if (retaincount.fetch_add(1) == 0) {                    \
                     descriptor.store(::open(__device__, 0));            \
                 }                                                       \
             }                                                           \
                                                                         \
             __typename__::~__typename__() {                             \
-                if (retaincount.fetch_sub(1) == 0) {                    \
+                if (retaincount.fetch_sub(1) == 1) {                    \
                     if (::close(descriptor.load()) == 0) {              \
                         descriptor.store(-1);                           \
                     }                                                   \

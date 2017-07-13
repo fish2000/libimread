@@ -260,10 +260,9 @@ namespace filesystem {
     bool TemporaryDirectory::create() {
         /// Create a new path in the temporary directory,
         /// suffixed properly for mkdtemp()
+        tplpath = path::tmp().join(tpl);
         if (!pystring::endswith(tpl, "XXX")) {
-            tplpath = path::tmp().join(tpl).append("-XXXXXX");
-        } else {
-            tplpath = path::tmp().join(tpl);
+            tplpath += "-XXXXXX";
         }
         
         /// Actually create the temporary directory
@@ -285,10 +284,10 @@ namespace filesystem {
     }
     
     bool TemporaryDirectory::exists() { return dirpath.is_directory(); }
-    bool TemporaryDirectory::remove() { return dirpath.remove(); }
+    bool TemporaryDirectory::remove() { return clean(); }
     
     TemporaryDirectory::~TemporaryDirectory() {
-        if (cleanup)    { clean(); remove(); }
+        if (cleanup)    { clean(); }
         if (deallocate) { std::free(tpl); }
     }
     

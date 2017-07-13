@@ -5,6 +5,7 @@ namespace im {
     
     namespace detail {
         
+        #pragma mark - h5base methods
         
         h5base::h5base(hid_t hid, releaser_f releaser)
             :m_hid(hid)
@@ -17,7 +18,7 @@ namespace im {
         }
         
         
-        hid_t    h5base::get()   const { return m_hid; }
+        hid_t      h5base::get() const { return m_hid; }
         h5base::operator hid_t() const { return m_hid; }
         
         herr_t h5base::release() {
@@ -29,6 +30,8 @@ namespace im {
         
         /// NO-Op h5base releaser function:
         const h5base::releaser_f h5base::NOOp = [](hid_t hid) -> herr_t { return -1; };
+        
+        #pragma mark - h5t_t methods
         
         h5t_t::h5t_t(hid_t hid)
             :h5base(H5Tcopy(hid),
