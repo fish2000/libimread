@@ -128,8 +128,8 @@ namespace im {
         //                                     FF("[2]: %i", maxdims[2]));
         
         /// Allocate a new unique-pointer-wrapped image instance:
-        std::unique_ptr<Image> output = factory->create(8,  dims[0],
-                                                            dims[1],
+        std::unique_ptr<Image> output = factory->create(8,  dims[1],
+                                                            dims[0],
                                                             dims[2]);
         
         /// read H5T_NATIVE_UCHAR data into the internal data buffer
@@ -254,7 +254,8 @@ namespace im {
         /// actually write the image data
         herr_t status = H5Dwrite(dataset_id,   detail::typecode<byte>(),
                                  memspace_id,
-                                 dataspace_id, H5P_DEFAULT,
+                                 dataspace_id,
+                                 H5P_DEFAULT,
                                 (const void*)input.rowp(0));
         
         if (status < 0) {

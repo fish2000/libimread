@@ -12,7 +12,6 @@
 #include <vector>
 
 #include <libimread/libimread.hpp>
-// #include <libimread/errors.hh>
 
 namespace store {
     
