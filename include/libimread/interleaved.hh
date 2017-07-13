@@ -24,6 +24,7 @@
 #include <libimread/pixels.hh>
 #include <libimread/file.hh>
 #include <libimread/image.hh>
+#include <libimread/metadata.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/formats.hh>
 #include <libimread/options.hh>

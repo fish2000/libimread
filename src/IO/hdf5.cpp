@@ -10,6 +10,7 @@
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
 #include <libimread/errors.hh>
+#include <libimread/metadata.hh>
 #include <libimread/IO/hdf5.hh>
 
 #include <H5Cpp.h>
@@ -158,24 +159,24 @@ namespace im {
             h5a_t stride1(dataset_id, "stride1");
             h5a_t stride2(dataset_id, "stride2");
             
-            const int val_nbits   = nbits.typed_read<int>();
-            const int val_ndims   = ndims.typed_read<int>();
-            const int val_dim0    = dim0.typed_read<int>();
-            const int val_dim1    = dim1.typed_read<int>();
-            const int val_dim2    = dim2.typed_read<int>();
-            const int val_stride0 = stride0.typed_read<int>();
-            const int val_stride1 = stride1.typed_read<int>();
-            const int val_stride2 = stride2.typed_read<int>();
+            int val_nbits   = nbits.typed_read<int>();
+            int val_ndims   = ndims.typed_read<int>();
+            int val_dim0    = dim0.typed_read<int>();
+            int val_dim1    = dim1.typed_read<int>();
+            int val_dim2    = dim2.typed_read<int>();
+            int val_stride0 = stride0.typed_read<int>();
+            int val_stride1 = stride1.typed_read<int>();
+            int val_stride2 = stride2.typed_read<int>();
             
-            WTF("Reading attributes:",
-                FF("\tnbits: %i",   val_nbits),
-                FF("\tndims: %i",   val_ndims),
-                FF("\tdim0: %i",    val_dim0),
-                FF("\tdim1: %i",    val_dim1),
-                FF("\tdim2: %i",    val_dim2),
-                FF("\tstride0: %i", val_stride0),
-                FF("\tstride1: %i", val_stride1),
-                FF("\tstride2: %i", val_stride2));
+            // WTF("Reading attributes:",
+            //     FF("\tnbits: %i",   val_nbits),
+            //     FF("\tndims: %i",   val_ndims),
+            //     FF("\tdim0: %i",    val_dim0),
+            //     FF("\tdim1: %i",    val_dim1),
+            //     FF("\tdim2: %i",    val_dim2),
+            //     FF("\tstride0: %i", val_stride0),
+            //     FF("\tstride1: %i", val_stride1),
+            //     FF("\tstride2: %i", val_stride2));
             
         }
         
@@ -257,23 +258,14 @@ namespace im {
             
             attspace_t attspace = attspace_t::scalar();
             
-            h5a_t nbits(dataset_id,   "nbits",      attspace, detail::typecode<int>());
-            h5a_t ndims(dataset_id,   "ndims",      attspace, detail::typecode<int>());
-            h5a_t dim0(dataset_id,    "dim0",       attspace, detail::typecode<int>());
-            h5a_t dim1(dataset_id,    "dim1",       attspace, detail::typecode<int>());
-            h5a_t dim2(dataset_id,    "dim2",       attspace, detail::typecode<int>());
-            h5a_t stride0(dataset_id, "stride0",    attspace, detail::typecode<int>());
-            h5a_t stride1(dataset_id, "stride1",    attspace, detail::typecode<int>());
-            h5a_t stride2(dataset_id, "stride2",    attspace, detail::typecode<int>());
-            
-            int val_nbits   = input.nbits();
-            int val_ndims   = input.ndims();
-            int val_dim0    = input.dim(0);
-            int val_dim1    = input.dim(1);
-            int val_dim2    = input.dim(2);
-            int val_stride0 = input.stride(0);
-            int val_stride1 = input.stride(1);
-            int val_stride2 = input.stride(2);
+            h5a_t nbits(dataset_id,     "nbits",      attspace,   detail::typecode<int>());
+            h5a_t ndims(dataset_id,     "ndims",      attspace,   detail::typecode<int>());
+            h5a_t dim0(dataset_id,      "dim0",       attspace,   detail::typecode<int>());
+            h5a_t dim1(dataset_id,      "dim1",       attspace,   detail::typecode<int>());
+            h5a_t dim2(dataset_id,      "dim2",       attspace,   detail::typecode<int>());
+            h5a_t stride0(dataset_id,   "stride0",    attspace,   detail::typecode<int>());
+            h5a_t stride1(dataset_id,   "stride1",    attspace,   detail::typecode<int>());
+            h5a_t stride2(dataset_id,   "stride2",    attspace,   detail::typecode<int>());
             
             /// actually write the image data
             herr_t status = H5Dwrite(dataset_id,   detail::typecode<byte>(),
@@ -287,43 +279,24 @@ namespace im {
             }
             
             // WTF("Writing attributes:",
-            //     FF("\tnbits: %i",   nbits.typed_write(val_nbits)),
-            //     FF("\tndims: %i",   ndims.typed_write(val_ndims)),
-            //     FF("\tdim0: %i",    dim0.typed_write(val_dim0)),
-            //     FF("\tdim1: %i",    dim1.typed_write(val_dim1)),
-            //     FF("\tdim2: %i",    dim2.typed_write(val_dim2)),
-            //     FF("\tstride0: %i", stride0.typed_write(val_stride0)),
-            //     FF("\tstride1: %i", stride1.typed_write(val_stride1)),
-            //     FF("\tstride2: %i", stride2.typed_write(val_stride2)));
+            //     FF("\tnbits: %i",   nbits.typed_write(input.nbits())),
+            //     FF("\tndims: %i",   ndims.typed_write(input.ndims())),
+            //     FF("\tdim0: %i",    dim0.typed_write(input.dim(0))),
+            //     FF("\tdim1: %i",    dim1.typed_write(input.dim(1))),
+            //     FF("\tdim2: %i",    dim2.typed_write(input.dim(2))),
+            //     FF("\tstride0: %i", stride0.typed_write(input.stride(0))),
+            //     FF("\tstride1: %i", stride1.typed_write(input.stride(1))),
+            //     FF("\tstride2: %i", stride2.typed_write(input.stride(2))));
             
-            nbits.typed_write(val_nbits);
-            ndims.typed_write(val_ndims);
-            dim0.typed_write(val_dim0);
-            dim1.typed_write(val_dim1);
-            dim2.typed_write(val_dim2);
-            stride0.typed_write(val_stride0);
-            stride1.typed_write(val_stride1);
-            stride2.typed_write(val_stride2);
+            nbits.typed_write(input.nbits());
+            ndims.typed_write(input.ndims());
+            dim0.typed_write(input.dim(0));
+            dim1.typed_write(input.dim(1));
+            dim2.typed_write(input.dim(2));
+            stride0.typed_write(input.stride(0));
+            stride1.typed_write(input.stride(1));
+            stride2.typed_write(input.stride(2));
             
-            // herr_t wat_nbits = nbits.write(&val_nbits);
-            // herr_t wat_ndims = ndims.write(&val_ndims);
-            // herr_t wat_dim0 = dim0.write(&val_dim0);
-            // herr_t wat_dim1 = dim1.write(&val_dim1);
-            // herr_t wat_dim2 = dim2.write(&val_dim2);
-            // herr_t wat_stride0 = stride0.write(&val_stride0);
-            // herr_t wat_stride1 = stride1.write(&val_stride1);
-            // herr_t wat_stride2 = stride2.write(&val_stride2);
-            
-            // WTF("Written return values:",
-            //     FF("\tnbits: %i",   wat_nbits),
-            //     FF("\tndims: %i",   wat_ndims),
-            //     FF("\tdim0: %i",    wat_dim0),
-            //     FF("\tdim1: %i",    wat_dim1),
-            //     FF("\tdim2: %i",    wat_dim2),
-            //     FF("\tstride0: %i", wat_stride0),
-            //     FF("\tstride1: %i", wat_stride1),
-            //     FF("\tstride2: %i", wat_stride2));
-        
         } /// end of ATTRIBUTES! scope exit closes all the things!
         
         /// close all HDF5 handles

@@ -5,6 +5,7 @@
 
 #include <iod/json.hh>
 #include <libimread/errors.hh>
+#include <libimread/metadata.hh>
 #include <libimread/IO/tiff.hh>
 #include <libimread/pixels.hh>
 

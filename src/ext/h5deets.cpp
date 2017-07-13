@@ -223,7 +223,6 @@ namespace im {
             }
         
         h5a_t::~h5a_t() {
-            // WTF("About to decref parent of attribute: ", name());
             H5Idec_ref(m_parent_hid);
         }
         

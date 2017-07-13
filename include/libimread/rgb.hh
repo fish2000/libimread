@@ -7,6 +7,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/image.hh>
+#include <libimread/metadata.hh>
 #include <libimread/ext/valarray.hh>
 
 #define UNCOMPAND(x)    ((x) & 0xFF)

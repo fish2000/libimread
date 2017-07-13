@@ -21,6 +21,7 @@
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 #include <libimread/image.hh>
+#include <libimread/metadata.hh>
 #include <libimread/imagelist.hh>
 #include <libimread/formats.hh>
 

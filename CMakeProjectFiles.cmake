@@ -141,6 +141,7 @@ set(hdrs
     ${hdrs_dir}/interleaved.hh
     ${hdrs_dir}/iterators.hh
     ${hdrs_dir}/memory.hh
+    ${hdrs_dir}/metadata.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/palette.hh
     ${hdrs_dir}/pixels.hh
@@ -219,6 +220,7 @@ set(srcs
     # ${srcs_dir}/interleaved.cpp
     ${srcs_dir}/iterators.cpp
     ${srcs_dir}/memory.cpp
+    ${srcs_dir}/metadata.cpp
     ${srcs_dir}/options.cpp
     # ${srcs_dir}/palette.cpp
     # ${srcs_dir}/pixels.cpp

@@ -17,6 +17,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/image.hh>
+#include <libimread/metadata.hh>
 #include <libimread/options.hh>
 #include "check.hh"
 

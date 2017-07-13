@@ -9,6 +9,7 @@
 #include <iod/json.hh>
 
 #include <libimread/base.hh>
+#include <libimread/metadata.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/IO/png.hh>
 #include <libimread/pixels.hh>

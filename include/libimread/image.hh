@@ -1,4 +1,4 @@
-/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// Copyright 2012-2017 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_IMAGE_HH_
@@ -136,33 +136,6 @@ namespace im {
             virtual unique_t create(int nbits,
                     int d0, int d1, int d2,
                     int d3=-1, int d4=-1) = 0;
-    };
-    
-    class ImageWithMetadata {
-        
-        public:
-            
-            ImageWithMetadata();
-            ImageWithMetadata(std::string const& m);
-            virtual ~ImageWithMetadata();
-            
-            bool has_meta() const;
-            std::string const& get_meta() const;
-            std::string const& set_meta(std::string const&);
-            
-            bool has_icc_name() const;
-            std::string const& get_icc_name() const;
-            std::string const& set_icc_name(std::string const&);
-            
-            bool has_icc_data() const;
-            bytevec_t const& get_icc_data() const;
-            bytevec_t const& set_icc_data(bytevec_t const&);
-            bytevec_t const& set_icc_data(byte*, std::size_t);
-            
-        protected:
-            std::string meta;
-            std::string icc_name;
-            bytevec_t icc_data;
     };
     
 } /* namespace im */

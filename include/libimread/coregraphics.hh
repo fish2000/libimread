@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <libimread/corefoundation.hh>
 #include <libimread/image.hh>
+#include <libimread/metadata.hh>
 
 #import  <CoreFoundation/CoreFoundation.h>
 #import  <CoreVideo/CoreVideo.h>
