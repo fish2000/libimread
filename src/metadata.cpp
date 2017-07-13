@@ -3,6 +3,7 @@
 
 #include <numeric>
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/metadata.hh>
 
 /// Shortcut to std::string{ NULL_STR } value
@@ -20,6 +21,25 @@ namespace im {
     
     Metadata::~Metadata() {}
     
+    Metadata::Metadata(Metadata const& other)
+        :values()
+        { store::value_copy(other.values, values); }
+    
+    Metadata::Metadata(Metadata&& other) noexcept
+        :values(std::move(other.values))
+        {}
+    
+    Metadata& Metadata::operator=(Metadata const& other) {
+        values = store::stringmap{};
+        store::value_copy(other.values, values);
+        return *this;
+    }
+    
+    Metadata& Metadata::operator=(Metadata&& other) noexcept {
+        values = std::exchange(other.values, store::stringmap{});
+        return *this;
+    }
+    
     bool Metadata::has_meta() const { return values.get("meta") != STRINGNULL(); }
     std::string const& Metadata::get_meta() const { return values.get("meta"); }
     std::string const& Metadata::set_meta(std::string const& m) { values.set("meta", m); return values.get("meta"); }
@@ -34,7 +54,6 @@ namespace im {
         std::string const& datum = values.get("icc_data");
         bytevec_t out;
         out.reserve(datum.size());
-        /// previously this used std::back_inserter(out):
         std::copy(datum.begin(),
                   datum.end(),
                   out.begin());
@@ -53,14 +72,11 @@ namespace im {
                   icc.end(),
                   datum.begin());
         return set_icc_data(datum);
-        // return get_icc_data();
     }
     
     std::string const& Metadata::set_icc_data(byte* data, std::size_t len) {
         std::string datum(data, data + len);
         return set_icc_data(datum);
-        // return get_icc_data();
     }
-    
     
 } /* namespace im */

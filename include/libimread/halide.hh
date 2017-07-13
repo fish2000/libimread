@@ -70,6 +70,7 @@ namespace im {
     template <typename pT,
               typename hT = HalImage<pT>>
     class HybridImage : public hT, public Image, public Metadata {
+        
         public:
             using pixel_t = pT;
             using halide_image_t = hT;
@@ -96,6 +97,18 @@ namespace im {
             
             HybridImage(buffer_t const* b, std::string const& name="")
                 :halide_image_t(b, name), Image(), Metadata(name)
+                {}
+            
+            HybridImage(HybridImage const& other)
+                :halide_image_t(dynamic_cast<halide_image_t const&>(other))
+                ,Image(dynamic_cast<Image const&>(other))
+                ,Metadata(dynamic_cast<Metadata const&>(other))
+                {}
+            
+            HybridImage(HybridImage&& other) noexcept
+                :halide_image_t(dynamic_cast<halide_image_t&&>(other))
+                ,Image(dynamic_cast<Image&&>(other))
+                ,Metadata(dynamic_cast<Metadata&&>(other))
                 {}
             
             using halide_image_t::operator();

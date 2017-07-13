@@ -145,7 +145,7 @@ namespace im {
                 "Error reading bytes into image from HDF5 dataset");
         }
         
-        {
+        if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
             /// ATTRIBUTES!
             // using detail::attspace_t;
             using detail::h5a_t;
@@ -177,6 +177,15 @@ namespace im {
             //     FF("\tstride0: %i", val_stride0),
             //     FF("\tstride1: %i", val_stride1),
             //     FF("\tstride2: %i", val_stride2));
+            
+            meta->set("nbits",   std::to_string(val_nbits));
+            meta->set("ndims",   std::to_string(val_ndims));
+            meta->set("dim0",    std::to_string(val_dim0));
+            meta->set("dim1",    std::to_string(val_dim1));
+            meta->set("dim2",    std::to_string(val_dim2));
+            meta->set("stride0", std::to_string(val_stride0));
+            meta->set("stride1", std::to_string(val_stride1));
+            meta->set("stride2", std::to_string(val_stride2));
             
         }
         

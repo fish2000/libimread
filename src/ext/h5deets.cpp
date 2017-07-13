@@ -1,6 +1,6 @@
 
 #include <libimread/ext/h5deets.hh>
-#include <libimread/errors.hh>
+// #include <libimread/errors.hh>
 
 namespace im {
     
