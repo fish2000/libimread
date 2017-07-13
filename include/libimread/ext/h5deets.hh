@@ -31,18 +31,23 @@ namespace im {
             /// call the wrapped releaser:
             herr_t release();
             
+            /// boolean comparitors:
             bool operator==(h5base const&) const;
             bool operator!=(h5base const&) const;
             
+            /// refcount shortcuts:
+            int incref();
+            int decref();
+            
             protected:
                 /// no-op and generic releaser functions:
-                static const releaser_f deref;
+                static const releaser_f unref;
                 static const releaser_f NOOp;
             
             protected:
                 /// hid and releaser values:
                 hid_t m_hid = -1;
-                releaser_f m_releaser = h5base::deref;
+                releaser_f m_releaser = h5base::unref;
             
             private:
                 /// NO DEFAULT CONSTRUCTION FROM THE BASE TYPE:
@@ -153,6 +158,26 @@ namespace im {
             return h5t_t(H5T_NATIVE_HBOOL);
         }
         
+        struct attspace_t : public h5base {
+            
+            /// construct empty wrapper:
+            attspace_t(void);
+            
+            /// construct from hid and take ownership:
+            explicit attspace_t(hid_t);
+            
+            /// create new dataspaces:
+            static attspace_t scalar();
+            static attspace_t simple();
+            
+            /// copy/move construct/assign:
+            attspace_t(attspace_t const&);
+            attspace_t(attspace_t&&) noexcept;
+            attspace_t& operator=(attspace_t const&);
+            attspace_t& operator=(attspace_t&&) noexcept;
+            
+        };
+        
         struct h5a_t : public h5base {
             
             /// explicit by-index and by-name constructors:
@@ -189,18 +214,17 @@ namespace im {
                                  typecode<FromType>());
             }
             
+            hid_t parent() const;
             h5t_t const& memorytype() const;
             h5t_t const& memorytype(h5t_t const&);
-            hid_t parent() const;
-            hid_t dataspace() const;
+            attspace_t dataspace() const;
             std::size_t idx() const;
             std::string name() const;
-            // std::string name(std::string const&);
             
             protected:
-                h5t_t m_memorytype = h5t_t(H5T_NATIVE_UCHAR);
                 hid_t m_parent_hid = -1;
-                hid_t m_dataspace_hid = -1;
+                h5t_t m_memorytype = h5t_t(H5T_NATIVE_UCHAR);
+                attspace_t m_dataspace;
                 std::size_t m_idx = 0;
                 mutable std::string m_name = NULL_STR;
             

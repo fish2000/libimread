@@ -31,20 +31,27 @@ namespace im {
         bool h5base::operator==(h5base const& rhs) const {
             return m_hid ==  rhs.m_hid &&
              &m_releaser == &rhs.m_releaser;
-            // return m_hid == rhs.m_hid;
         }
         
         bool h5base::operator!=(h5base const& rhs) const {
             return m_hid !=  rhs.m_hid ||
              &m_releaser != &rhs.m_releaser;
-            // return m_hid != rhs.m_hid;
         }
         
-        const h5base::releaser_f h5base::deref = [](hid_t hid) -> herr_t {
+        int h5base::incref() {
+            return m_hid > 0 ? H5Iinc_ref(m_hid) : -1;
+        }
+        
+        int h5base::decref() {
+            return m_hid > 0 ? H5Idec_ref(m_hid) : -1;
+        }
+        
+        /// generic reference-count-based releaser function:
+        const h5base::releaser_f h5base::unref = [](hid_t hid) -> herr_t {
             return hid > 0 ? H5Idec_ref(hid) : -1;
         };
         
-        /// NO-Op h5base releaser function:
+        /// NO-Op releaser function:
         const h5base::releaser_f h5base::NOOp = [](hid_t hid) -> herr_t {
             return -1;
         };
@@ -96,14 +103,64 @@ namespace im {
             return h5t_t(H5Tget_super(m_hid));
         }
         
+        #pragma mark - HDF5 attribute-dataspace wrapper (attspace_t) methods
+        
+        attspace_t::attspace_t(void)
+            :h5base(-1, H5Sclose)
+            {}
+        
+        attspace_t::attspace_t(hid_t hid)
+            :h5base(hid, H5Sclose)
+            {}
+        
+        attspace_t attspace_t::scalar() {
+            return attspace_t(H5Screate(H5S_SCALAR));
+        }
+        
+        attspace_t attspace_t::simple() {
+            return attspace_t(H5Screate(H5S_SIMPLE));
+        }
+        
+        attspace_t::attspace_t(attspace_t const& other)
+            :h5base(other.m_hid,
+                    other.m_releaser)
+            {
+                incref();
+            }
+        
+        attspace_t::attspace_t(attspace_t&& other) noexcept
+            :h5base(std::move(other.m_hid),
+                    std::move(other.m_releaser))
+            {
+                incref();
+            }
+        
+        attspace_t& attspace_t::operator=(attspace_t const& other) {
+            if (other != *this) {
+                m_hid = other.m_hid;
+                m_releaser = other.m_releaser;
+                incref();
+            }
+            return *this;
+        }
+        
+        attspace_t& attspace_t::operator=(attspace_t&& other) noexcept {
+            if (other != *this) {
+                m_hid = std::move(other.m_hid);
+                m_releaser = std::move(other.m_releaser);
+                incref();
+            }
+            return *this;
+        }
+        
         #pragma mark - HDF5 attribute wrapper (h5a_t) methods
         
         h5a_t::h5a_t(hid_t parent_hid, std::size_t idx)
             :h5base(H5Aopen_idx(parent_hid, idx),
                     H5Aclose)
-            ,m_memorytype(H5Aget_type(m_hid))
             ,m_parent_hid(parent_hid)
-            ,m_dataspace_hid(H5Aget_space(m_hid))
+            ,m_memorytype(H5Aget_type(m_hid))
+            ,m_dataspace(H5Aget_space(m_hid))
             ,m_idx(idx)
             {
                 /// increment refcount on the parent HID
@@ -121,9 +178,9 @@ namespace im {
         h5a_t::h5a_t(hid_t parent_hid, std::string const& name)
             :h5base(H5Aopen_name(parent_hid, name.c_str()),
                     H5Aclose)
-            ,m_memorytype(H5Aget_type(m_hid))
             ,m_parent_hid(parent_hid)
-            ,m_dataspace_hid(H5Aget_space(m_hid))
+            ,m_memorytype(H5Aget_type(m_hid))
+            ,m_dataspace(H5Aget_space(m_hid))
             ,m_name(name)
             {
                 /// increment refcount on the parent HID
@@ -139,33 +196,32 @@ namespace im {
                                           dataspace_hid,
                                           H5P_DEFAULT, H5P_DEFAULT),
                     H5Aclose)
-            ,m_memorytype(datatype)
             ,m_parent_hid(parent_hid)
-            ,m_dataspace_hid(dataspace_hid)
+            ,m_memorytype(datatype)
+            ,m_dataspace(dataspace_hid)
             ,m_name(name)
             {
                 /// increment refcount on the parent HID and dataspace
                 H5Iinc_ref(m_parent_hid);
-                H5Iinc_ref(m_dataspace_hid);
+                m_dataspace.incref();
             }
         
         h5a_t::h5a_t(h5a_t&& other) noexcept
             :h5base(std::move(other.m_hid),
                     std::move(other.m_releaser))
-            ,m_memorytype(std::move(other.m_memorytype))
             ,m_parent_hid(std::move(other.m_parent_hid))
-            ,m_dataspace_hid(std::move(other.m_dataspace_hid))
+            ,m_memorytype(std::move(other.m_memorytype))
+            ,m_dataspace(std::move(other.m_dataspace))
             ,m_idx(other.m_idx)
             ,m_name(std::move(other.m_name))
             {
                 /// increment refcount on the parent HID and dataspace
                 H5Iinc_ref(m_parent_hid);
-                H5Iinc_ref(m_dataspace_hid);
+                m_dataspace.incref();
             }
         
         h5a_t::~h5a_t() {
             H5Idec_ref(m_parent_hid);
-            H5Idec_ref(m_dataspace_hid);
         }
         
         herr_t h5a_t::read(void* buffer) const {
@@ -205,8 +261,9 @@ namespace im {
             return m_parent_hid;
         }
         
-        hid_t h5a_t::dataspace() const {
-            return m_dataspace_hid;
+        attspace_t h5a_t::dataspace() const {
+            attspace_t out(m_dataspace);
+            return out;
         }
         
         std::size_t h5a_t::idx() const {
@@ -225,11 +282,6 @@ namespace im {
             }
             return m_name;
         }
-        
-        // std::string h5a_t::name(std::string const& n) {
-        //     m_name = n;
-        //     return m_name;
-        // }
         
     } /* namespace detail */
     
