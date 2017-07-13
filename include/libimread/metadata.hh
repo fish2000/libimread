@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/store.hh>
 
 namespace im {
     
@@ -29,14 +30,13 @@ namespace im {
             std::string const& set_icc_name(std::string const&);
             
             bool has_icc_data() const;
-            bytevec_t const& get_icc_data() const;
-            bytevec_t const& set_icc_data(bytevec_t const&);
-            bytevec_t const& set_icc_data(byte*, std::size_t);
+            bytevec_t get_icc_data() const;
+            std::string const& set_icc_data(std::string const&);
+            std::string const& set_icc_data(bytevec_t const&);
+            std::string const& set_icc_data(byte*, std::size_t);
             
-        protected:
-            std::string meta;
-            std::string icc_name;
-            bytevec_t icc_data;
+        public:
+            store::stringmap values;
     };
     
 } /* namespace im */
