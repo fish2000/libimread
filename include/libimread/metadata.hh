@@ -13,12 +13,12 @@
 
 namespace im {
     
-    class ImageWithMetadata {
+    class Metadata {
         
         public:
-            ImageWithMetadata();
-            ImageWithMetadata(std::string const& m);
-            virtual ~ImageWithMetadata();
+            Metadata();
+            Metadata(std::string const& m);
+            virtual ~Metadata();
             
             bool has_meta() const;
             std::string const& get_meta() const;

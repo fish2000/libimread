@@ -129,12 +129,11 @@ namespace im {
 //     /// so that we don't have to muck around with templates when
 //     /// working with arbitrary NumPy dtype values.
 //     using HalBase = Halide::Runtime::Buffer<>;
-    using MetaImage = ImageWithMetadata;
 //
 //     /// forward-declare factory class
 //     class HybridFactory;
 //
-//     class HalideNumpyImage : public HalBase, public PythonBufferImage, public MetaImage {
+//     class HalideNumpyImage : public HalBase, public PythonBufferImage, public Metadata {
 //
 //         public:
 //             using factory_t = HybridFactory;

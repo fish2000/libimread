@@ -18,10 +18,9 @@
 
 namespace im {
     
-    using MetaImage = ImageWithMetadata;
     using bytearray_t = std::valarray<byte>;
     
-    class ByteArray : public Image, public MetaImage {
+    class ByteArray : public Image, public Metadata {
         
         public:
             

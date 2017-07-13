@@ -66,37 +66,36 @@ namespace im {
     
     template <typename T>
     using HalImage = Halide::Buffer<std::decay_t<T>>;
-    using MetaImage = ImageWithMetadata;
     
     template <typename pT,
               typename hT = HalImage<pT>>
-    class HybridImage : public hT, public Image, public MetaImage {
+    class HybridImage : public hT, public Image, public Metadata {
         public:
             using pixel_t = pT;
             using halide_image_t = hT;
             
             HybridImage()
-                :halide_image_t(), Image(), MetaImage()
+                :halide_image_t(), Image(), Metadata()
                 {}
             
             HybridImage(int x, int y, int z, int w, std::string const& name="")
-                :halide_image_t(x, y, z, w), Image(), MetaImage(name)
+                :halide_image_t(x, y, z, w), Image(), Metadata(name)
                 {}
             
             HybridImage(int x, int y, int z, std::string const& name="")
-                :halide_image_t(x, y, z), Image(), MetaImage(name)
+                :halide_image_t(x, y, z), Image(), Metadata(name)
                 {}
             
             HybridImage(int x, int y, std::string const& name="")
-                :halide_image_t(x, y), Image(), MetaImage(name)
+                :halide_image_t(x, y), Image(), Metadata(name)
                 {}
             
             HybridImage(int x, std::string const& name="")
-                :halide_image_t(x), Image(), MetaImage(name)
+                :halide_image_t(x), Image(), Metadata(name)
                 {}
             
             HybridImage(buffer_t const* b, std::string const& name="")
-                :halide_image_t(b, name), Image(), MetaImage(name)
+                :halide_image_t(b, name), Image(), Metadata(name)
                 {}
             
             using halide_image_t::operator();

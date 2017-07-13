@@ -39,21 +39,21 @@ namespace cg {
     
     using im::Image;
     using im::ImageFactory;
-    using MetaImage = im::ImageWithMetadata;
+    using im::Metadata;
     using im::detail::cfp_t;
     using im::detail::pixbuf_t;
     using cvpref_t = cfp_t<CVPixelBufferRef>;
     
-    class PixelBuffer : public Image, public MetaImage {
+    class PixelBuffer : public Image, public Metadata {
         
         public:
             
             PixelBuffer()
-                :Image(), MetaImage()
+                :Image(), Metadata()
                 {}
             
             PixelBuffer(PixelBuffer&& other) noexcept
-                :Image(), MetaImage(dynamic_cast<MetaImage&&>(other).get_meta())
+                :Image(), Metadata(dynamic_cast<Metadata&&>(other).get_meta())
                 ,width(other.width), height(other.height), channels(other.channels)
                 ,bpc(8), bpp(bpc * channels), bpr(width * channels * (bpc / 8))
                 ,internal(std::move(other.internal))
@@ -65,7 +65,7 @@ namespace cg {
                 }
             
             PixelBuffer(int x, int y, int z, int w, std::string const& name="")
-                :Image(), MetaImage(name)
+                :Image(), Metadata(name)
                 ,width(x), height(y), channels(z)
                 ,bpc(8), bpp(bpc * channels), bpr(width * channels * (bpc / 8))
                 ,pixels(std::make_unique<uint32_t[]>(width * height))
@@ -86,7 +86,7 @@ namespace cg {
                 }
             
             PixelBuffer(int x, int y, int z, std::string const& name="")
-                :Image(), MetaImage(name)
+                :Image(), Metadata(name)
                 ,width(x), height(y), channels(z)
                 ,bpc(8), bpp(bpc * channels), bpr(width * channels * (bpc / 8))
                 ,pixels(std::make_unique<uint32_t[]>(width * height))
@@ -107,7 +107,7 @@ namespace cg {
                 }
             
             PixelBuffer(int x, int y, std::string const& name="")
-                :Image(), MetaImage(name)
+                :Image(), Metadata(name)
                 ,width(x), height(y)
                 ,bpc(8), bpp(bpc * channels), bpr(width * channels * (bpc / 8))
                 ,pixels(std::make_unique<uint32_t[]>(width * height))
@@ -128,7 +128,7 @@ namespace cg {
                 }
             
             PixelBuffer(int x, std::string const& name="")
-                :Image(), MetaImage(name)
+                :Image(), Metadata(name)
                 ,width(x), height(1)
                 ,bpc(8), bpp(bpc * channels), bpr(width * channels * (bpc / 8))
                 ,pixels(std::make_unique<uint32_t[]>(width * height))

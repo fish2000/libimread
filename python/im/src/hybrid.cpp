@@ -138,38 +138,38 @@ namespace im {
     }
     
 //     HalideNumpyImage::HalideNumpyImage()
-//         :HalBase(), PythonBufferImage(), MetaImage()
+//         :HalBase(), PythonBufferImage(), Metadata()
 //         ,dtype_(NPY_UINT8)
 //         {}
 //
 //     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
-//         :HalBase(detail::for_dtype(d), *b), PythonBufferImage(), MetaImage(name)
+//         :HalBase(detail::for_dtype(d), *b), PythonBufferImage(), Metadata(name)
 //         ,dtype_(d)
 //         {}
 //
 //     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
-//         :HalBase(detail::for_dtype(d), x, y, z, w), PythonBufferImage(), MetaImage(name)
+//         :HalBase(detail::for_dtype(d), x, y, z, w), PythonBufferImage(), Metadata(name)
 //         ,dtype_(d)
 //         {}
 //
 //     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, int z, std::string const& name)
-//         :HalBase(detail::for_dtype(d), x, y, z, 0), PythonBufferImage(), MetaImage(name)
+//         :HalBase(detail::for_dtype(d), x, y, z, 0), PythonBufferImage(), Metadata(name)
 //         ,dtype_(d)
 //         {}
 //
 //     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, int y, std::string const& name)
-//         :HalBase(detail::for_dtype(d), x, y, 0, 0), PythonBufferImage(), MetaImage(name)
+//         :HalBase(detail::for_dtype(d), x, y, 0, 0), PythonBufferImage(), Metadata(name)
 //         ,dtype_(d)
 //         {}
 //
 //     HalideNumpyImage::HalideNumpyImage(NPY_TYPES d, int x, std::string const& name)
-//         :HalBase(detail::for_dtype(d), x, 0, 0, 0), PythonBufferImage(), MetaImage(name)
+//         :HalBase(detail::for_dtype(d), x, 0, 0, 0), PythonBufferImage(), Metadata(name)
 //         ,dtype_(d)
 //         {}
 //
 //     HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& other, int const zidx, std::string const& name)
 //         :HalBase(other.type(), other.dim(0), other.dim(1), 1, 0)
-//         ,PythonBufferImage(), MetaImage(name)
+//         ,PythonBufferImage(), Metadata(name)
 //         ,dtype_(other.dtype())
 //         {
 //             /// rely on Halide's use of planar image strides
@@ -187,7 +187,7 @@ namespace im {
 //
 //     HalideNumpyImage::HalideNumpyImage(HalideNumpyImage const& basis, HalideNumpyImage const& etc, std::string const& name)
 //         :HalBase(basis.type(), basis.dim(0), basis.dim(1), basis.dim(2) + etc.dim(2), 0)
-//         ,PythonBufferImage(), MetaImage(name)
+//         ,PythonBufferImage(), Metadata(name)
 //         ,dtype_(basis.dtype())
 //         {
 //             /// rely on Halide's use of planar image strides
@@ -340,7 +340,7 @@ namespace im {
 // #undef xDEPTH
     
     ArrayImage::ArrayImage()
-        :PythonBufferImage(), MetaImage()
+        :PythonBufferImage(), Metadata()
         ,array(nullptr), buffer(nullptr)
         {}
     
@@ -354,7 +354,7 @@ namespace im {
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wmissing-braces"
     ArrayImage::ArrayImage(NPY_TYPES d, buffer_t const* b, std::string const& name)
-        :PythonBufferImage(), MetaImage(name)
+        :PythonBufferImage(), Metadata(name)
         ,array(nullptr)
         ,buffer(im::buffer::heapcopy(b))
         ,deallocate(true)
@@ -432,7 +432,7 @@ namespace im {
         }
     
     ArrayImage::ArrayImage(NPY_TYPES d, int x, int y, int z, int w, std::string const& name)
-        :PythonBufferImage(), MetaImage(name)
+        :PythonBufferImage(), Metadata(name)
         ,array(nullptr)
         ,buffer(nullptr)
         ,deallocate(true)
@@ -464,7 +464,7 @@ namespace im {
         }
     
     ArrayImage::ArrayImage(NPY_TYPES d, int x, int y, int z, std::string const& name)
-        :PythonBufferImage(), MetaImage(name)
+        :PythonBufferImage(), Metadata(name)
         ,array(nullptr)
         ,buffer(nullptr)
         ,deallocate(true)
@@ -496,7 +496,7 @@ namespace im {
         }
     
     ArrayImage::ArrayImage(NPY_TYPES d, int x, int y, std::string const& name)
-        :PythonBufferImage(), MetaImage(name)
+        :PythonBufferImage(), Metadata(name)
         ,array(nullptr)
         ,buffer(nullptr)
         ,deallocate(true)
@@ -527,7 +527,7 @@ namespace im {
         }
     
     ArrayImage::ArrayImage(NPY_TYPES d, int x, std::string const& name)
-        :PythonBufferImage(), MetaImage(name)
+        :PythonBufferImage(), Metadata(name)
         ,array(nullptr)
         ,buffer(nullptr)
         ,deallocate(true)
@@ -558,7 +558,7 @@ namespace im {
     #pragma clang diagnostic pop
     
     ArrayImage::ArrayImage(ArrayImage const& other)
-        :PythonBufferImage(), MetaImage(other.get_meta())
+        :PythonBufferImage(), Metadata(other.get_meta())
         ,array(reinterpret_cast<PyArrayObject*>(
                PyArray_NewLikeArray(other.array, NPY_KEEPORDER, nullptr, 0)))
         ,buffer(im::buffer::heapcopy(other.buffer))
@@ -571,7 +571,7 @@ namespace im {
         }
     
     ArrayImage::ArrayImage(ArrayImage&& other) noexcept
-        :PythonBufferImage(), MetaImage(std::move(other.get_meta()))
+        :PythonBufferImage(), Metadata(std::move(other.get_meta()))
         ,array(reinterpret_cast<PyArrayObject*>(
                PyArray_NewLikeArray(other.array, NPY_KEEPORDER, nullptr, 0)))
         ,buffer(std::move(other.buffer))
@@ -587,7 +587,7 @@ namespace im {
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wmissing-braces"
     ArrayImage::ArrayImage(ArrayImage const& other, int const zidx, std::string const& name)
-        :PythonBufferImage(), MetaImage(name)
+        :PythonBufferImage(), Metadata(name)
         ,array(nullptr)
         ,buffer(nullptr)
         ,deallocate(true)
@@ -633,7 +633,7 @@ namespace im {
         }
     
     ArrayImage::ArrayImage(ArrayImage const& basis, ArrayImage const& etc, std::string const& name)
-        :PythonBufferImage(), MetaImage(name)
+        :PythonBufferImage(), Metadata(name)
         ,array(nullptr)
         ,buffer(nullptr)
         ,deallocate(true)

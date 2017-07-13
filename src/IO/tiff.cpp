@@ -268,7 +268,7 @@ namespace im {
             moved->shift(z * raw_strip_size);
             std::unique_ptr<Image> output(factory->create(bits_per_sample, h, w, depth));
             
-            if (ImageWithMetadata* metaout = dynamic_cast<ImageWithMetadata*>(output.get())) {
+            if (Metadata* metaout = dynamic_cast<Metadata*>(output.get())) {
                 std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
                 metaout->set_meta(description);
             }
@@ -306,7 +306,7 @@ namespace im {
         do {
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
-            if (ImageWithMetadata* meta = dynamic_cast<ImageWithMetadata*>(output.get())) {
+            if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
                 std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
                 meta->set_meta(description);
             }
@@ -411,7 +411,7 @@ namespace im {
             }
         }
         
-        /// NB. Get this from Image object ImageWithMetadata ancestor -- or else
+        /// NB. Get this from Image object Metadata ancestor -- or else
         /// why the fuck are we even using that shit?
         if (opts.cast<bool>("tiff:metadata", false)) {
             std::string meta = opts.cast<std::string>(
@@ -553,7 +553,7 @@ namespace im {
                 }
             }
             
-            /// NB. Get this from Image object ImageWithMetadata ancestor -- or else
+            /// NB. Get this from Image object Metadata ancestor -- or else
             /// why the fuck are we even using that shit?
             if (opts.cast<bool>("tiff:metadata", false)) {
                 std::string meta = opts.cast<std::string>(

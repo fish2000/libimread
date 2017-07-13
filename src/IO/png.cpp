@@ -230,7 +230,7 @@ namespace im {
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         
         /// GET METADATA (just ICC data for now)
-        if (ImageWithMetadata* meta = dynamic_cast<ImageWithMetadata*>(output.get())) {
+        if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
             if (png_get_valid(p.png_ptr, p.png_info, PNG_INFO_iCCP)) {
                 /// extract the embedded ICC profile
                 int compression;

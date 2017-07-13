@@ -31,8 +31,6 @@
 
 namespace im {
     
-    using MetaImage = ImageWithMetadata;
-    
     template <std::size_t Dimensions = 3>
     struct Index {
         static constexpr std::size_t D = Dimensions;
@@ -49,7 +47,7 @@ namespace im {
             :indices{ 0 }
             {}
         
-        explicit Index(const idx_t* indexes, std::size_t nd = 0)
+        explicit Index(idx_t const* indexes, std::size_t nd = 0)
             :indices{ 0 }
             {
                 if (nd == 0) { nd = D; }
@@ -58,7 +56,7 @@ namespace im {
                 assign_impl(indexes, sequence_t());
             }
         
-        explicit Index(const array_t& indexes)
+        explicit Index(array_t const& indexes)
             :indices{ 0 }
             {
                 imread_assert(indexes.size() == D,
@@ -267,7 +265,7 @@ namespace im {
             {}
         
         template <typename SourceColor>
-        Meta(const Meta<SourceColor>& source)
+        Meta(Meta<SourceColor> const& source)
             :Meta(source.extents[0],
                   source.extents[1],
                   SourceColor::Meta::channel_count,
@@ -278,7 +276,7 @@ namespace im {
             return size_impl(sequence_t());
         }
         
-        bool contains(const index_t& idx) const {
+        bool contains(index_t const& idx) const {
             return idx <= max_idx;
         }
         
@@ -293,7 +291,7 @@ namespace im {
     
     template <typename Color = color::RGBA,
               std::size_t Dimensions = 3>
-    class InterleavedImage : public Image, public MetaImage {
+    class InterleavedImage : public Image, public Metadata {
         
         public:
             static constexpr std::size_t C      = Color::Meta::channel_count;
@@ -433,21 +431,21 @@ namespace im {
             
             /// default constructor
             InterleavedImage(void)
-                :Image(), MetaImage()
+                :Image(), Metadata()
                 {}
             
             explicit InterleavedImage(int x, int y)
-                :Image(), MetaImage(), meta()
+                :Image(), Metadata(), meta()
                 {
                     init(x, y);
                 }
             
             explicit InterleavedImage(Contents c, Meta m)
-                :Image(), MetaImage(), contents(c), meta(m)
+                :Image(), Metadata(), contents(c), meta(m)
                 {}
             
             InterleavedImage(InterleavedImage const& other)
-                :Image(), MetaImage(), contents(other.contents), meta(other.meta)
+                :Image(), Metadata(), contents(other.contents), meta(other.meta)
                 {}
             
             /// NB: is this really necessary?
@@ -487,7 +485,7 @@ namespace im {
             }
             
             explicit InterleavedImage(channel_t vals[])
-                :Image(), MetaImage()
+                :Image(), Metadata()
                 {
                     init(sizeof(vals) / sizeof(channel_t), 1);
                     for (int idx = 0; idx < sizeof(vals); idx++) {
@@ -496,7 +494,7 @@ namespace im {
                 }
             
             explicit InterleavedImage(composite_list_t list)
-                :Image(), MetaImage()
+                :Image(), Metadata()
                 {
                     int idx = 0;
                     init(list.size(), 1);
@@ -508,7 +506,7 @@ namespace im {
                 }
             
             explicit InterleavedImage(channel_listlist_t list)
-                :Image(), MetaImage()
+                :Image(), Metadata()
                 {
                     int idx = 0;
                     init(list.size(), 1, C);
