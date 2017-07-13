@@ -4,7 +4,9 @@
 #ifndef LIBIMREAD_EXT_H5DEETS_HH_
 #define LIBIMREAD_EXT_H5DEETS_HH_
 
+#include <string>
 #include <functional>
+#include <type_traits>
 #include <libimread/libimread.hpp>
 
 #include <H5Cpp.h>
@@ -151,14 +153,19 @@ namespace im {
             template <typename ToType>
             ToType typed_read() const {
                 ToType value{};
-                this->read(&value, typecode<ToType>());
+                this->read(&value, typecode<
+                           std::remove_cv_t<
+                    std::remove_reference_t<ToType>>>());
                 return value;
             }
             
             template <typename FromType>
-            void typed_write(FromType&& value) {
-                this->write(&std::forward<FromType>(value),
-                                 typecode<FromType>());
+            FromType typed_write(FromType&& value) {
+                FromType out{ std::forward<FromType>(value) };
+                this->write(&out, typecode<
+                          std::remove_cv_t<
+                   std::remove_reference_t<FromType>>>());
+                return out;
             }
             
             hid_t parent() const;
@@ -170,7 +177,7 @@ namespace im {
             
             protected:
                 hid_t m_parent_hid = -1;
-                h5t_t m_memorytype = h5t_t(H5T_NATIVE_UCHAR);
+                h5t_t m_memorytype = h5t_t(H5T_NATIVE_INT);
                 attspace_t m_dataspace;
                 std::size_t m_idx = 0;
                 mutable std::string m_name = NULL_STR;

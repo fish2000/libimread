@@ -5,14 +5,15 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/halide.hh>
-#include <libimread/ext/filesystem/mode.h>
+// #include <libimread/ext/filesystem/mode.h>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/filesystem/directory.h>
-#include <libimread/ext/filesystem/resolver.h>
+// #include <libimread/ext/filesystem/directory.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 #include <libimread/IO/hdf5.hh>
+
+#include "helpers/collect.hh"
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
@@ -59,10 +60,12 @@ namespace {
             CHECK(hdf.dim(1) == images[np]->dim(1));
             CHECK(hdf.dim(2) == images[np]->dim(2));
             CHECK(hdf.size() == images[np]->size());
+            
             // CHECK(std::equal(data.begin(),     data.end(),
             //                  fulldata.begin(), fulldata.end(),
             //                  std::equal_to<byte>()));
             
+            CHECK(COLLECT(np));
         });
         
         std::for_each(images.begin(), images.end(), [](auto const& kv) { delete kv.second; });

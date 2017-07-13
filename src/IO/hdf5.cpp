@@ -144,6 +144,41 @@ namespace im {
                 "Error reading bytes into image from HDF5 dataset");
         }
         
+        {
+            /// ATTRIBUTES!
+            // using detail::attspace_t;
+            using detail::h5a_t;
+            
+            h5a_t nbits(dataset_id,   "nbits");
+            h5a_t ndims(dataset_id,   "ndims");
+            h5a_t dim0(dataset_id,    "dim0");
+            h5a_t dim1(dataset_id,    "dim1");
+            h5a_t dim2(dataset_id,    "dim2");
+            h5a_t stride0(dataset_id, "stride0");
+            h5a_t stride1(dataset_id, "stride1");
+            h5a_t stride2(dataset_id, "stride2");
+            
+            const int val_nbits   = nbits.typed_read<int>();
+            const int val_ndims   = ndims.typed_read<int>();
+            const int val_dim0    = dim0.typed_read<int>();
+            const int val_dim1    = dim1.typed_read<int>();
+            const int val_dim2    = dim2.typed_read<int>();
+            const int val_stride0 = stride0.typed_read<int>();
+            const int val_stride1 = stride1.typed_read<int>();
+            const int val_stride2 = stride2.typed_read<int>();
+            
+            WTF("Reading attributes:",
+                FF("\tnbits: %i",   val_nbits),
+                FF("\tndims: %i",   val_ndims),
+                FF("\tdim0: %i",    val_dim0),
+                FF("\tdim1: %i",    val_dim1),
+                FF("\tdim2: %i",    val_dim2),
+                FF("\tstride0: %i", val_stride0),
+                FF("\tstride1: %i", val_stride1),
+                FF("\tstride2: %i", val_stride2));
+            
+        }
+        
         /// close HDF5 handles
         H5Sclose(dataspace_id);
         H5Dclose(dataset_id);
@@ -215,86 +250,81 @@ namespace im {
                 "Could not create or open an HDF5 dataset for writing with hyperslab I/O");
         }
         
-        /// create a scalar dataspace to save basic image properties as HDF5 attributes:
-        /// nbits(), ndims(), dim({0,1,2}), stride({0,1,2})
-        hid_t attspace_id = H5Screate(H5S_SCALAR);
+        {
+            /// ATTRIBUTES!
+            using detail::attspace_t;
+            using detail::h5a_t;
+            
+            attspace_t attspace = attspace_t::scalar();
+            
+            h5a_t nbits(dataset_id,   "nbits",      attspace, detail::typecode<int>());
+            h5a_t ndims(dataset_id,   "ndims",      attspace, detail::typecode<int>());
+            h5a_t dim0(dataset_id,    "dim0",       attspace, detail::typecode<int>());
+            h5a_t dim1(dataset_id,    "dim1",       attspace, detail::typecode<int>());
+            h5a_t dim2(dataset_id,    "dim2",       attspace, detail::typecode<int>());
+            h5a_t stride0(dataset_id, "stride0",    attspace, detail::typecode<int>());
+            h5a_t stride1(dataset_id, "stride1",    attspace, detail::typecode<int>());
+            h5a_t stride2(dataset_id, "stride2",    attspace, detail::typecode<int>());
+            
+            int val_nbits   = input.nbits();
+            int val_ndims   = input.ndims();
+            int val_dim0    = input.dim(0);
+            int val_dim1    = input.dim(1);
+            int val_dim2    = input.dim(2);
+            int val_stride0 = input.stride(0);
+            int val_stride1 = input.stride(1);
+            int val_stride2 = input.stride(2);
+            
+            /// actually write the image data
+            herr_t status = H5Dwrite(dataset_id,   detail::typecode<byte>(),
+                                     memspace_id,
+                                     dataspace_id, H5P_DEFAULT,
+                                    (const void*)input.rowp(0));
+            
+            if (status < 0) {
+                imread_raise(CannotWriteError,
+                    "Error writing HDF5 dataset bytes (via memory dataspaces) to disk");
+            }
+            
+            // WTF("Writing attributes:",
+            //     FF("\tnbits: %i",   nbits.typed_write(val_nbits)),
+            //     FF("\tndims: %i",   ndims.typed_write(val_ndims)),
+            //     FF("\tdim0: %i",    dim0.typed_write(val_dim0)),
+            //     FF("\tdim1: %i",    dim1.typed_write(val_dim1)),
+            //     FF("\tdim2: %i",    dim2.typed_write(val_dim2)),
+            //     FF("\tstride0: %i", stride0.typed_write(val_stride0)),
+            //     FF("\tstride1: %i", stride1.typed_write(val_stride1)),
+            //     FF("\tstride2: %i", stride2.typed_write(val_stride2)));
+            
+            nbits.typed_write(val_nbits);
+            ndims.typed_write(val_ndims);
+            dim0.typed_write(val_dim0);
+            dim1.typed_write(val_dim1);
+            dim2.typed_write(val_dim2);
+            stride0.typed_write(val_stride0);
+            stride1.typed_write(val_stride1);
+            stride2.typed_write(val_stride2);
+            
+            // herr_t wat_nbits = nbits.write(&val_nbits);
+            // herr_t wat_ndims = ndims.write(&val_ndims);
+            // herr_t wat_dim0 = dim0.write(&val_dim0);
+            // herr_t wat_dim1 = dim1.write(&val_dim1);
+            // herr_t wat_dim2 = dim2.write(&val_dim2);
+            // herr_t wat_stride0 = stride0.write(&val_stride0);
+            // herr_t wat_stride1 = stride1.write(&val_stride1);
+            // herr_t wat_stride2 = stride2.write(&val_stride2);
+            
+            // WTF("Written return values:",
+            //     FF("\tnbits: %i",   wat_nbits),
+            //     FF("\tndims: %i",   wat_ndims),
+            //     FF("\tdim0: %i",    wat_dim0),
+            //     FF("\tdim1: %i",    wat_dim1),
+            //     FF("\tdim2: %i",    wat_dim2),
+            //     FF("\tstride0: %i", wat_stride0),
+            //     FF("\tstride1: %i", wat_stride1),
+            //     FF("\tstride2: %i", wat_stride2));
         
-        if (attspace_id < 0) {
-            imread_raise(CannotWriteError,
-                "Could not create a scalar HDF5 dataspace for storing image attributes");
-        }
-        
-        #define CreateAttribute(name, type)                                                     \
-            H5Acreate(dataset_id, name, type, attspace_id, H5P_DEFAULT, H5P_DEFAULT)
-        
-        #define CreateIntAttribute(name)                                                        \
-            CreateAttribute(name, detail::typecode<int>())
-        
-        hid_t attr_nbits   = CreateIntAttribute("nbits");
-        hid_t attr_ndims   = CreateIntAttribute("ndims");
-        hid_t attr_dim0    = CreateIntAttribute("dim0");
-        hid_t attr_dim1    = CreateIntAttribute("dim1");
-        hid_t attr_dim2    = CreateIntAttribute("dim2");
-        hid_t attr_stride0 = CreateIntAttribute("stride0");
-        hid_t attr_stride1 = CreateIntAttribute("stride1");
-        hid_t attr_stride2 = CreateIntAttribute("stride2");
-        
-        #undef CreateAttribute
-        #undef CreateIntAttribute
-        
-        const int val_nbits   = input.nbits();
-        const int val_ndims   = input.ndims();
-        const int val_dim0    = input.dim(0);
-        const int val_dim1    = input.dim(1);
-        const int val_dim2    = input.dim(2);
-        const int val_stride0 = input.stride(0);
-        const int val_stride1 = input.stride(1);
-        const int val_stride2 = input.stride(2);
-        
-        /// actually write the image data
-        herr_t status = H5Dwrite(dataset_id,   detail::typecode<byte>(),
-                                 memspace_id,
-                                 dataspace_id,
-                                 H5P_DEFAULT,
-                                (const void*)input.rowp(0));
-        
-        if (status < 0) {
-            imread_raise(CannotWriteError,
-                "Error writing HDF5 dataset bytes (via memory dataspaces) to disk");
-        }
-        
-        /// write the attributes
-        
-        #define WriteIntAttribute(name)                                                         \
-            H5Awrite(attr_##name, detail::typecode<int>(), &val_##name)
-        
-        WriteIntAttribute(nbits);
-        WriteIntAttribute(ndims);
-        WriteIntAttribute(dim0);
-        WriteIntAttribute(dim1);
-        WriteIntAttribute(dim2);
-        WriteIntAttribute(stride0);
-        WriteIntAttribute(stride1);
-        WriteIntAttribute(stride2);
-        
-        #undef WriteIntAttribute
-        
-        /// close attribute dataspace and attribute handles
-        H5Sclose(attspace_id);
-        
-        #define CloseAttribute(name)                                                            \
-            H5Aclose(attr_##name)
-        
-        CloseAttribute(nbits);
-        CloseAttribute(ndims);
-        CloseAttribute(dim0);
-        CloseAttribute(dim1);
-        CloseAttribute(dim2);
-        CloseAttribute(stride0);
-        CloseAttribute(stride1);
-        CloseAttribute(stride2);
-        
-        #undef CloseAttribute
+        } /// end of ATTRIBUTES! scope exit closes all the things!
         
         /// close all HDF5 handles
         H5Sclose(memspace_id);

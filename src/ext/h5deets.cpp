@@ -1,5 +1,6 @@
 
 #include <libimread/ext/h5deets.hh>
+#include <libimread/errors.hh>
 
 namespace im {
     
@@ -14,6 +15,8 @@ namespace im {
         
         h5base::~h5base() {
             /// call m_releaser on member HID:
+            // WTF("[h5base] About to call releaser function on primary HID ", m_hid,
+            //     "[h5base] Primary HID has refcount: ", H5Iget_ref(m_hid));
             if (m_hid > 0) { m_releaser(m_hid); }
         }
         
@@ -191,10 +194,10 @@ namespace im {
         h5a_t::h5a_t(hid_t parent_hid, std::string const& name,
                      hid_t dataspace_hid,
                      h5t_t datatype)
-            :h5base(H5Acreate(parent_hid, name.c_str(),
-                                          datatype.get(),
-                                          dataspace_hid,
-                                          H5P_DEFAULT, H5P_DEFAULT),
+            :h5base(H5Acreate2(parent_hid, name.c_str(),
+                                           datatype.get(),
+                                           dataspace_hid,
+                                           H5P_DEFAULT, H5P_DEFAULT),
                     H5Aclose)
             ,m_parent_hid(parent_hid)
             ,m_memorytype(datatype)
@@ -220,29 +223,30 @@ namespace im {
             }
         
         h5a_t::~h5a_t() {
+            // WTF("About to decref parent of attribute: ", name());
             H5Idec_ref(m_parent_hid);
         }
         
         herr_t h5a_t::read(void* buffer) const {
-            return H5Aread(m_parent_hid,
+            return H5Aread(m_hid,
                            m_memorytype.get(),
                            buffer);
         }
         
         herr_t h5a_t::read(void* buffer, h5t_t const& valuetype) const {
-            return H5Aread(m_parent_hid,
+            return H5Aread(m_hid,
                            valuetype.get(),
                            buffer);
         }
         
         herr_t h5a_t::write(const void* buffer) {
-            return H5Awrite(m_parent_hid,
+            return H5Awrite(m_hid,
                             m_memorytype.get(),
                             buffer);
         }
         
         herr_t h5a_t::write(const void* buffer, h5t_t const& valuetype) {
-            return H5Awrite(m_parent_hid,
+            return H5Awrite(m_hid,
                             valuetype.get(),
                             buffer);
         }
