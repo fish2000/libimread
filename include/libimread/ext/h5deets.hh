@@ -83,80 +83,27 @@ namespace im {
         template <typename T> inline
         h5t_t typecode();
         
-        template <> inline
-        h5t_t typecode<char>() {
-            return h5t_t(H5T_NATIVE_CHAR);
-        }
+        #define DECLARE_TYPECODE(__typename__, __hdf5type__)                            \
+            template <> inline                                                          \
+            h5t_t typecode<__typename__>() { return h5t_t(__hdf5type__); }
         
-        template <> inline
-        h5t_t typecode<signed char>() {
-            return h5t_t(H5T_NATIVE_SCHAR);
-        }
+        DECLARE_TYPECODE(char,                  H5T_NATIVE_CHAR);
+        DECLARE_TYPECODE(signed char,           H5T_NATIVE_SCHAR);
+        DECLARE_TYPECODE(byte,                  H5T_NATIVE_UCHAR);
+        DECLARE_TYPECODE(short,                 H5T_NATIVE_SHORT);
+        DECLARE_TYPECODE(unsigned short,        H5T_NATIVE_USHORT);
+        DECLARE_TYPECODE(int,                   H5T_NATIVE_INT);
+        DECLARE_TYPECODE(unsigned int,          H5T_NATIVE_UINT);
+        DECLARE_TYPECODE(long,                  H5T_NATIVE_LONG);
+        DECLARE_TYPECODE(unsigned long,         H5T_NATIVE_ULONG);
+        DECLARE_TYPECODE(long long,             H5T_NATIVE_LLONG);
+        DECLARE_TYPECODE(unsigned long long,    H5T_NATIVE_ULLONG);
+        DECLARE_TYPECODE(float,                 H5T_NATIVE_FLOAT);
+        DECLARE_TYPECODE(double,                H5T_NATIVE_DOUBLE);
+        DECLARE_TYPECODE(long double,           H5T_NATIVE_LDOUBLE);
+        DECLARE_TYPECODE(bool,                  H5T_NATIVE_HBOOL);
         
-        template <> inline
-        h5t_t typecode<byte>() {
-            return h5t_t(H5T_NATIVE_UCHAR);
-        }
-        
-        template <> inline
-        h5t_t typecode<short>() {
-            return h5t_t(H5T_NATIVE_SHORT);
-        }
-        
-        template <> inline
-        h5t_t typecode<unsigned short>() {
-            return h5t_t(H5T_NATIVE_USHORT);
-        }
-        
-        template <> inline
-        h5t_t typecode<int>() {
-            return h5t_t(H5T_NATIVE_INT);
-        }
-        
-        template <> inline
-        h5t_t typecode<unsigned int>() {
-            return h5t_t(H5T_NATIVE_UINT);
-        }
-        
-        template <> inline
-        h5t_t typecode<long>() {
-            return h5t_t(H5T_NATIVE_LONG);
-        }
-        
-        template <> inline
-        h5t_t typecode<unsigned long>() {
-            return h5t_t(H5T_NATIVE_ULONG);
-        }
-        
-        template <> inline
-        h5t_t typecode<long long>() {
-            return h5t_t(H5T_NATIVE_LLONG);
-        }
-        
-        template <> inline
-        h5t_t typecode<unsigned long long>() {
-            return h5t_t(H5T_NATIVE_ULLONG);
-        }
-        
-        template <> inline
-        h5t_t typecode<float>() {
-            return h5t_t(H5T_NATIVE_FLOAT);
-        }
-        
-        template <> inline
-        h5t_t typecode<double>() {
-            return h5t_t(H5T_NATIVE_DOUBLE);
-        }
-        
-        template <> inline
-        h5t_t typecode<long double>() {
-            return h5t_t(H5T_NATIVE_LDOUBLE);
-        }
-        
-        template <> inline
-        h5t_t typecode<bool>() {
-            return h5t_t(H5T_NATIVE_HBOOL);
-        }
+        #undef DECLARE_TYPECODE
         
         struct attspace_t : public h5base {
             
