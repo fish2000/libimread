@@ -431,18 +431,18 @@ namespace im {
         
         // Standard Gamma
         png_set_gAMA(p.png_ptr, p.png_info,
-                     PNGFormat::options.standard_gamma);
+                     options.standard_gamma);
         
         // Primary Chromaticities white_xy, red_xy, blue_xy, green_xy, in that order.
         png_set_cHRM(p.png_ptr, p.png_info,
-                     PNGFormat::options.primary_cromacities.white.xx,
-                     PNGFormat::options.primary_cromacities.white.yy,
-                     PNGFormat::options.primary_cromacities.red.xx,
-                     PNGFormat::options.primary_cromacities.red.yy,
-                     PNGFormat::options.primary_cromacities.blue.xx,
-                     PNGFormat::options.primary_cromacities.blue.yy,
-                     PNGFormat::options.primary_cromacities.green.xx,
-                     PNGFormat::options.primary_cromacities.green.yy);
+                     options.primary_cromacities.white.xx,
+                     options.primary_cromacities.white.yy,
+                     options.primary_cromacities.red.xx,
+                     options.primary_cromacities.red.yy,
+                     options.primary_cromacities.blue.xx,
+                     options.primary_cromacities.blue.yy,
+                     options.primary_cromacities.green.xx,
+                     options.primary_cromacities.green.yy);
         
         // Apple's PNGs have an sRGB intent of 0.
         png_set_sRGB(p.png_ptr, p.png_info, 0);
