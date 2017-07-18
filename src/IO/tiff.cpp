@@ -6,6 +6,7 @@
 #include <iod/json.hh>
 #include <libimread/errors.hh>
 #include <libimread/metadata.hh>
+#include <libimread/ext/base64.hh>
 #include <libimread/IO/tiff.hh>
 #include <libimread/pixels.hh>
 
@@ -230,7 +231,6 @@ namespace im {
         
     } /// namespace
     
-    
     ImageList STKFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
                                  options_map const& opts) {
         
@@ -289,6 +289,14 @@ namespace im {
         TIFFClose(t.tif);
         
         return images;
+    }
+    
+    bool TIFFFormat::match_format(byte_source* src) {
+        /// Match either second or third four-byte magic signature:
+        return match_magic(src, base64::decode(options.signatures[1].bytes).get(), 
+                                               options.signatures[1].length) ||
+               match_magic(src, base64::decode(options.signatures[2].bytes).get(), 
+                                               options.signatures[2].length);
     }
     
     ImageList TIFFFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,

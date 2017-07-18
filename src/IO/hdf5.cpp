@@ -53,51 +53,53 @@ namespace im {
     
     using filesystem::path;
     using filesystem::NamedTemporaryFile;
-    using namespace H5;
     
     class H5MemoryBuffer : public H5::H5File {
         
         public:
-            static const unsigned OPEN_RW      =  H5LT_FILE_IMAGE_OPEN_RW;
-            static const unsigned DONT_COPY    =  H5LT_FILE_IMAGE_DONT_COPY;
-            static const unsigned DONT_RELEASE =  H5LT_FILE_IMAGE_DONT_RELEASE;
+            static constexpr std::size_t OPEN_RW      =  H5LT_FILE_IMAGE_OPEN_RW;
+            static constexpr std::size_t DONT_COPY    =  H5LT_FILE_IMAGE_DONT_COPY;
+            static constexpr std::size_t DONT_RELEASE =  H5LT_FILE_IMAGE_DONT_RELEASE;
         
         public:
-            H5MemoryBuffer(void* buffer, std::size_t size, unsigned flags)
+            H5MemoryBuffer(void* buffer, std::size_t size,
+                                         std::size_t flags)
                 :H5File()
                 {
                     hid_t idx = H5LTopen_file_image(buffer, size, flags);
                     if (idx < 0) {
                         imread_raise(HDF5IOError,
-                            "H5MemoryBuffer constructor:",
-                            "H5LTopen_file_image failed.");
+                            "H5MemoryBuffer:",
+                            "H5LTopen_file_image() failed");
                     }
                     p_setId(idx);
                 }
     };
     
-    const unsigned kDefaultFlags = H5MemoryBuffer::OPEN_RW &
-                                   H5MemoryBuffer::DONT_COPY &
-                                   H5MemoryBuffer::DONT_RELEASE;
+    constexpr std::size_t kDefaultFlags = H5LT_FILE_IMAGE_OPEN_RW &
+                                          H5LT_FILE_IMAGE_DONT_COPY &
+                                          H5LT_FILE_IMAGE_DONT_RELEASE;
     
     std::unique_ptr<Image> HDF5Format::read(byte_source* src,
                                             ImageFactory* factory,
                                             options_map const& opts) {
         
-        /// load the raw sources' full data, and set some options:
+        /// Internal options for our HDF5 data storage:
         path h5imagepath = opts.cast<path>("hdf5:path",
                                      path("/image/raster"));
         std::string name = opts.cast<std::string>("hdf5:name",
                                      std::string("imread-data"));
         
-        /// Open a data buffer as an HDF5 store (née "file image") for fast reading:
-        hid_t file_id = H5LTopen_file_image(src->data(), src->size(), kDefaultFlags);
+        /// Open data buffer as an HDF5 memory store (née "file image"):
+        hid_t file_id = H5LTopen_file_image(src->data(),
+                                            src->size(),
+                                            kDefaultFlags);
         if (file_id < 0) {
             imread_raise(CannotReadError,
                 "Error opening HDF5 in-memory data as a file image for reading");
         }
         
-        /// Open the image dataset within the HDF5 store:
+        /// Open the image dataset within the HDF5 memory store:
         hid_t dataset_id = IM_H5D_OPEN(file_id, name.c_str());
         
         if (dataset_id < 0) {
@@ -105,8 +107,8 @@ namespace im {
                 "Error opening named HDF5 dataset for reading from in-memory HDF5 image");
         }
         
-        /// set up an array to hold the dimensions of the image,
-        /// which we read in from the in-memory HDF5 store:
+        /// Set up a std::array to hold the dimensions of the image,
+        /// which we read in from the HDF5 memory store:
         constexpr std::size_t NDIMS = 3;
         hid_t dataspace_id = H5Dget_space(dataset_id);
         
@@ -117,23 +119,12 @@ namespace im {
         std::array<hsize_t, NDIMS> dims;
         H5Sget_simple_extent_dims(dataspace_id, dims.data(), nullptr);
         
-        // WTF("dims:",
-        //     FF("size: %i\n\t[0,1,2]: %i, %i, %i", dims.size(),
-        //                                           dims[0],
-        //                                           dims[1],
-        //                                           dims[2]));
-        
-        // WTF("maxdims:",
-        //     FF("size: %i", maxdims.size()), FF("[0]: %i", maxdims[0]),
-        //                                     FF("[1]: %i", maxdims[1]),
-        //                                     FF("[2]: %i", maxdims[2]));
-        
-        /// Allocate a new unique-pointer-wrapped image instance:
+        /// Allocate a new unique-pointer-wrapped im::Image instance:
         std::unique_ptr<Image> output = factory->create(8,  dims[1],
                                                             dims[0],
                                                             dims[2]);
         
-        /// read H5T_NATIVE_UCHAR data into the internal data buffer
+        /// Read H5T_NATIVE_UCHAR data into the internal data buffer
         /// of the new image, from the HDF5 dataset in question:
         herr_t status = H5Dread(dataset_id, detail::typecode<byte>(),
                                             H5S_ALL, H5S_ALL,
@@ -145,9 +136,10 @@ namespace im {
                 "Error reading bytes into image from HDF5 dataset");
         }
         
+        /// If our newly-created im::Image supports metadata,
+        /// read and store HDF5 attributes as such:
         if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
             /// ATTRIBUTES!
-            // using detail::attspace_t;
             using detail::h5a_t;
             
             h5a_t nbits(dataset_id,   "nbits");
@@ -189,12 +181,12 @@ namespace im {
             
         }
         
-        /// close HDF5 handles
+        /// Close HDF5 hid_t handle types:
         H5Sclose(dataspace_id);
         H5Dclose(dataset_id);
         H5Fclose(file_id);
         
-        /// return the image pointer
+        /// Return the im::Image
         return output;
     }
     
@@ -207,7 +199,7 @@ namespace im {
         std::string name = opts.cast<std::string>("hdf5:name",
                                      std::string("imread-data"));
         
-        /// this wraps a call to H5Eset_auto(…), which I am not sure
+        /// This wraps a call to H5Eset_auto(…), which I am not sure
         /// what that is all about, really; it’s just here:
         IM_H5E_SET_AUTO(H5E_DEFAULT);
         
@@ -222,8 +214,8 @@ namespace im {
                 "Could not open a temporary file for writing with HDF5 file I/O");
         }
         
-        /// stow the input image dimensions in an hsize_t array,
-        /// and create two dataspaces based on that array:
+        /// Stow the input image dimensions in an hsize_t std::array,
+        /// and create two HDF5 dataspaces based on that array:
         constexpr std::size_t NDIMS = 3;
         
         std::array<hsize_t, NDIMS> dimensions{{
@@ -244,37 +236,42 @@ namespace im {
         hid_t dataspace_id  = IM_H5S_CREATE(NDIMS, dimensions.data());
         hid_t memspace_id   = IM_H5S_CREATE(1,     flattened.data());
         
-        /// try creating a new dataset --
+        /// Try creating a new dataset --
         hid_t dataset_id = IM_H5D_CREATE(file_id, name.c_str(),
                                          detail::typecode<byte>(),
                                          dataspace_id);
         
-        /// -- and if that didn't work, try opening an existant one:
+        /// -- If that didn't work, try opening an existant one:
         if (dataset_id < 0) {
             dataset_id = IM_H5D_OPEN(file_id, name.c_str());
         }
         
-        /// --- if we *still* lack a valid dataset_id, throw it up:
+        /// --- If we *still* lack a valid dataset_id, throw it up:
         if (dataset_id < 0) {
             imread_raise(CannotWriteError,
                 "Could not create or open an HDF5 dataset for writing with hyperslab I/O");
         }
         
+        /// Store some basic im::Image properties of our image
+        /// as HDF5 scalar integer-attributes, attached to the
+        /// image dataset handle:
         {
             /// ATTRIBUTES!
             using detail::attspace_t;
+            using detail::h5t_t;
             using detail::h5a_t;
             
             attspace_t attspace = attspace_t::scalar();
+            h5t_t tc = detail::typecode<int>();
             
-            h5a_t nbits(dataset_id,     "nbits",      attspace,   detail::typecode<int>());
-            h5a_t ndims(dataset_id,     "ndims",      attspace,   detail::typecode<int>());
-            h5a_t dim0(dataset_id,      "dim0",       attspace,   detail::typecode<int>());
-            h5a_t dim1(dataset_id,      "dim1",       attspace,   detail::typecode<int>());
-            h5a_t dim2(dataset_id,      "dim2",       attspace,   detail::typecode<int>());
-            h5a_t stride0(dataset_id,   "stride0",    attspace,   detail::typecode<int>());
-            h5a_t stride1(dataset_id,   "stride1",    attspace,   detail::typecode<int>());
-            h5a_t stride2(dataset_id,   "stride2",    attspace,   detail::typecode<int>());
+            h5a_t nbits(dataset_id,   "nbits",   attspace, tc);
+            h5a_t ndims(dataset_id,   "ndims",   attspace, tc);
+            h5a_t dim0(dataset_id,    "dim0",    attspace, tc);
+            h5a_t dim1(dataset_id,    "dim1",    attspace, tc);
+            h5a_t dim2(dataset_id,    "dim2",    attspace, tc);
+            h5a_t stride0(dataset_id, "stride0", attspace, tc);
+            h5a_t stride1(dataset_id, "stride1", attspace, tc);
+            h5a_t stride2(dataset_id, "stride2", attspace, tc);
             
             /// actually write the image data
             herr_t status = H5Dwrite(dataset_id,   detail::typecode<byte>(),
@@ -308,16 +305,16 @@ namespace im {
             
         } /// end of ATTRIBUTES! scope exit closes all the things!
         
-        /// close all HDF5 handles
+        /// Close all HDF5 hid_t handle types:
         H5Sclose(memspace_id);
         H5Sclose(dataspace_id);
         H5Dclose(dataset_id);
         H5Fclose(file_id);
         
-        /// read binary data back from the temporary file
+        /// Read binary data back from the temporary file:
         std::unique_ptr<FileSource> readback(new FileSource(tf.filepath));
         
-        /// rewrite the binary data using the target output byte sink
+        /// Rewrite all binary data using the target output byte sink:
         output->write(readback->data(), readback->size());
         output->flush();
     }

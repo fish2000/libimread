@@ -59,6 +59,9 @@ namespace {
             CHECK(hdf.dim(0) == images[np]->dim(0));
             CHECK(hdf.dim(1) == images[np]->dim(1));
             CHECK(hdf.dim(2) == images[np]->dim(2));
+            CHECK(hdf.stride(0) == images[np]->stride(0));
+            CHECK(hdf.stride(1) == images[np]->stride(1));
+            CHECK(hdf.stride(2) == images[np]->stride(2));
             CHECK(hdf.size() == images[np]->size());
             
             // CHECK(std::equal(data.begin(),     data.end(),
@@ -74,11 +77,17 @@ namespace {
             CHECK(hdf.dim(0) == std::stoi(meta->get("dim0")));
             CHECK(hdf.dim(1) == std::stoi(meta->get("dim1")));
             CHECK(hdf.dim(2) == std::stoi(meta->get("dim2")));
+            CHECK(hdf.stride(0) == std::stoi(meta->get("stride0")));
+            CHECK(hdf.stride(1) == std::stoi(meta->get("stride1")));
+            CHECK(hdf.stride(2) == std::stoi(meta->get("stride2")));
             
             /// comparing as std::string:
             CHECK(std::to_string(hdf.dim(0)) == meta->get("dim0"));
             CHECK(std::to_string(hdf.dim(1)) == meta->get("dim1"));
             CHECK(std::to_string(hdf.dim(2)) == meta->get("dim2"));
+            CHECK(std::to_string(hdf.stride(0)) == meta->get("stride0"));
+            CHECK(std::to_string(hdf.stride(1)) == meta->get("stride1"));
+            CHECK(std::to_string(hdf.stride(2)) == meta->get("stride2"));
             
             // WTF("Values: ", meta->values.to_string());
             

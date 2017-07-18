@@ -52,10 +52,8 @@ namespace im {
                 _writeopts = detail::writeopts()
             );
             
-            static bool match_format(byte_source* src) {
-                return match_magic(src, "\x4d\x4d\x00\x2a", 4) ||
-                       match_magic(src, "\x4d\x4d\x00\x2b", 4);
-            }
+            /// Custom match_format() using the latter two byte signatures:
+            static bool match_format(byte_source* src);
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
