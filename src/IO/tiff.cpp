@@ -242,8 +242,8 @@ namespace im {
         
         const uint32_t h                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
         const uint32_t w                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
-        const uint16_t nr_samples           = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, 1);
-        const uint16_t bits_per_sample      = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE, 8);
+        const uint16_t nr_samples           = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, options.readopts.samples_per_pixel);
+        const uint16_t bits_per_sample      = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE, options.readopts.bits_per_sample);
         
         const int depth = nr_samples > 1 ? nr_samples : 1;
         const int strip_size = TIFFStripSize(t.tif);
@@ -269,7 +269,8 @@ namespace im {
             std::unique_ptr<Image> output(factory->create(bits_per_sample, h, w, depth));
             
             if (Metadata* metaout = dynamic_cast<Metadata*>(output.get())) {
-                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
+                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
+                                                                   options.metadata);
                 metaout->set_meta(description);
             }
             
@@ -315,7 +316,8 @@ namespace im {
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
             if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
-                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION, "");
+                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
+                                                                   options.metadata);
                 meta->set_meta(description);
             }
             
@@ -389,7 +391,9 @@ namespace im {
         
         bytevec_t bufdata;
         byte* __restrict__ bufp = 0;
-        bool copy_data = opts.cast<bool>("tiff:copy-data", true);
+        bool copy_data = opts.cast<bool>(
+                         "tiff:copy-data",
+                         options.writeopts.copy_data);
         const uint32_t w = input.dim(0);
         const uint32_t h = input.dim(1);
         const uint32_t ch = input.dim(2);
@@ -406,14 +410,18 @@ namespace im {
         TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
         TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
         
-        if (opts.cast<bool>("tiff:compress", true)) {
+        if (opts.cast<bool>(
+            "tiff:compress",
+            options.writeopts.compress)) {
             TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
             // For 8 bit images, prediction defaults to false; for 16 bit images,
             // it defaults to true. This is because compression of raw 16 bit
             // images is often counter-productive without this flag. See the
             // discusssion at http://www.asmail.be/msg0055176395.html
             const bool prediction_default = input.nbits() != 8;
-            if (opts.cast<bool>("tiff:horizontal-predictor", prediction_default)) {
+            if (opts.cast<bool>(
+                "tiff:horizontal-predictor",
+                options.writeopts.horizontal_predictor)) {
                 TIFFSetField(t.tif, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
                 if (!copy_data) { copy_data = true; }
             }
@@ -421,25 +429,33 @@ namespace im {
         
         /// NB. Get this from Image object Metadata ancestor -- or else
         /// why the fuck are we even using that shit?
-        if (opts.cast<bool>("tiff:metadata", false)) {
+        if (opts.cast<bool>(
+            "tiff:metadata",
+            options.writeopts.metadata)) {
             std::string meta = opts.cast<std::string>(
-                "metadata",
-                "<TIFF METADATA STRING>");
+                               "metadata",
+                               options.metadata);
             std::string ssig = opts.cast<std::string>(
-                "tiff:software-signature",
-                "libimread (OST-MLOBJ/747)");
+                               "tiff:software-signature",
+                               options.writeopts.software_signature);
             
             TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta.c_str());
             TIFFSetField(t.tif, TIFFTAG_SOFTWARE, ssig.c_str());
             
             TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,
-                opts.cast<int>("tiff:x-resolution", 72));
+                opts.cast<int>(
+                "tiff:x-resolution",
+                options.writeopts.x_resolution));
             TIFFSetField(t.tif, TIFFTAG_YRESOLUTION,
-                opts.cast<int>("tiff:y-resolution", 72));
+                opts.cast<int>(
+                "tiff:y-resolution",
+                options.writeopts.y_resolution));
             TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT,
-                opts.cast<int>("tiff:resolution-unit", RESUNIT_INCH));
+                opts.cast<int>(
+                "tiff:resolution-unit", RESUNIT_INCH));
             TIFFSetField(t.tif, TIFFTAG_ORIENTATION,
-                opts.cast<int>("tiff:orientation", ORIENTATION_TOPLEFT));
+                opts.cast<int>(
+                "tiff:orientation", ORIENTATION_TOPLEFT));
         }
         
         if (copy_data) {
@@ -531,7 +547,9 @@ namespace im {
         for (int i = 0; i != n_pages; ++i) {
             Image* im = input.at(i);
             byte* __restrict__ bufp = 0;
-            bool copy_data = opts.cast<bool>("tiff:copy-data", true);
+            bool copy_data = opts.cast<bool>(
+                             "tiff:copy-data",
+                             options.writeopts.copy_data);
             const uint32_t w = im->dim(0);
             const uint32_t h = im->dim(1);
             const uint32_t ch = im->dim(2);
@@ -548,14 +566,18 @@ namespace im {
             TIFFSetField(t.tif, TIFFTAG_PHOTOMETRIC,        static_cast<uint16_t>(photometric));
             TIFFSetField(t.tif, TIFFTAG_PLANARCONFIG,       PLANARCONFIG_CONTIG);
             
-            if (opts.cast<bool>("tiff:compress", true)) {
+            if (opts.cast<bool>(
+                "tiff:compress",
+                options.writeopts.compress)) {
                 TIFFSetField(t.tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
                 // For 8 bit images, prediction defaults to false; for 16 bit images,
                 // it defaults to true. This is because compression of raw 16 bit
                 // images is often counter-productive without this flag. See the
                 // discusssion at http://www.asmail.be/msg0055176395.html
                 const bool prediction_default = im->nbits() != 8;
-                if (opts.cast<bool>("tiff:horizontal-predictor", prediction_default)) {
+                if (opts.cast<bool>(
+                    "tiff:horizontal-predictor",
+                    options.writeopts.horizontal_predictor)) {
                     TIFFSetField(t.tif, TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
                     if (!copy_data) { copy_data = true; }
                 }
@@ -563,25 +585,33 @@ namespace im {
             
             /// NB. Get this from Image object Metadata ancestor -- or else
             /// why the fuck are we even using that shit?
-            if (opts.cast<bool>("tiff:metadata", false)) {
+            if (opts.cast<bool>(
+                "tiff:metadata",
+                options.writeopts.metadata)) {
                 std::string meta = opts.cast<std::string>(
-                    "metadata",
-                    "<TIFF METADATA STRING>");
+                                   "metadata",
+                                   options.metadata);
                 std::string ssig = opts.cast<std::string>(
-                    "tiff:software-signature",
-                    "libimread (OST-MLOBJ/747)");
+                                   "tiff:software-signature",
+                                   options.writeopts.software_signature);
                     
                 TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta.c_str());
                 TIFFSetField(t.tif, TIFFTAG_SOFTWARE, ssig.c_str());
                 
                 TIFFSetField(t.tif, TIFFTAG_XRESOLUTION,
-                    opts.cast<int>("tiff:x-resolution", 72));
+                    opts.cast<int>(
+                    "tiff:x-resolution",
+                    options.writeopts.x_resolution));
                 TIFFSetField(t.tif, TIFFTAG_YRESOLUTION,
-                    opts.cast<int>("tiff:y-resolution", 72));
+                    opts.cast<int>(
+                    "tiff:y-resolution",
+                    options.writeopts.y_resolution));
                 TIFFSetField(t.tif, TIFFTAG_RESOLUTIONUNIT,
-                    opts.cast<int>("tiff:resolution-unit", RESUNIT_INCH));
+                    opts.cast<int>(
+                    "tiff:resolution-unit", RESUNIT_INCH));
                 TIFFSetField(t.tif, TIFFTAG_ORIENTATION,
-                    opts.cast<int>("tiff:orientation", ORIENTATION_TOPLEFT));
+                    opts.cast<int>(
+                    "tiff:orientation", ORIENTATION_TOPLEFT));
             }
             
             if (is_multi) {

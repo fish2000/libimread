@@ -14,9 +14,17 @@ namespace im {
     
     namespace detail {
         
+        inline decltype(auto) readopts() {
+            return D(
+                _samples_per_pixel = 1,
+                _bits_per_sample = 8
+            );
+        }
+        
         inline decltype(auto) writeopts() {
             return D(
                 _compress = true,
+                _copy_data = true,
                 _horizontal_predictor = false,
                 _metadata = false,
                 _software_signature = "libimread (OST-MLOBJ/747)",
@@ -49,6 +57,7 @@ namespace im {
                 _suffixes = { "tif", "tiff" },
                 _mimetype = "image/tiff",
                 _metadata = "<TIFF METADATA STRING>",
+                _readopts = detail::readopts(),
                 _writeopts = detail::writeopts()
             );
             
@@ -108,6 +117,7 @@ namespace im {
                 _suffixes = { "stk", "tif", "tiff" },
                 _mimetype = "image/stk",
                 _metadata = "<TIFF/STK METADATA STRING>",
+                _readopts = detail::readopts(),
                 _writeopts = detail::writeopts()
             );
             
