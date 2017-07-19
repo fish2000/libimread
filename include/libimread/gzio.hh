@@ -59,8 +59,8 @@ namespace im {
             virtual std::size_t seek_relative(int delta) override;
             virtual std::size_t seek_end(int delta) override;
             
-            virtual std::size_t read(byte* buffer, std::size_t n) override;
-            virtual bytevec_t full_data() override;
+            virtual std::size_t read(byte* buffer, std::size_t n) const override;
+            virtual bytevec_t full_data() const override;
             virtual std::size_t size() const override;
             virtual std::size_t write(const void* buffer, std::size_t n) override;
             virtual std::size_t write(bytevec_t const&) override;

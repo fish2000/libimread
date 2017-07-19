@@ -15,8 +15,8 @@ namespace im {
     
     memory_source::~memory_source() {}
     
-    std::size_t memory_source::read(byte* buffer, std::size_t n) {
-        if (pos + n > length) { n = length-pos; }
+    std::size_t memory_source::read(byte* buffer, std::size_t n) const {
+        if (pos + n > length) { n = length - pos; }
         /// FYI, std::memmove() actually copies bytes, rather
         /// than 'moving' them (whatever that might mean)
         std::memmove(buffer, data + pos, n);
@@ -29,7 +29,7 @@ namespace im {
     std::size_t memory_source::seek_relative(int delta) { return pos += delta; }
     std::size_t memory_source::seek_end(int delta) { return pos = (length-delta-1); }
     
-    bytevec_t memory_source::full_data() {
+    bytevec_t memory_source::full_data() const {
         bytevec_t result(length);
         std::memcpy(&result[0], data, length);
         return result;

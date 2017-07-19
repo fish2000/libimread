@@ -101,7 +101,7 @@ namespace im {
     /// SEEK_END is, according to the zlib manual, UNSUPPORTED:
     std::size_t gzio_source_sink::seek_end(int delta) { return ::gzseek(gzhandle, delta, SEEK_END); }
     
-    std::size_t gzio_source_sink::read(byte* buffer, std::size_t n) {
+    std::size_t gzio_source_sink::read(byte* buffer, std::size_t n) const {
         int out = ::gzread(gzhandle, buffer, n);
         if (out == -1) {
             imread_raise(GZipIOError,
@@ -154,7 +154,7 @@ namespace im {
     
     void gzio_source_sink::flush() { ::gzflush(gzhandle, Z_SYNC_FLUSH); }
     
-    bytevec_t gzio_source_sink::full_data() {
+    bytevec_t gzio_source_sink::full_data() const {
         /// grab uncompressed size and store initial seek position
         std::size_t fsize = uncompressed_byte_size();
         if (fsize == 0) {
@@ -192,8 +192,7 @@ namespace im {
     
     void* gzio_source_sink::readmap(std::size_t pageoffset) const {
         if (mapped.empty()) {
-            /// I realize the next line is the smelliest code since goto
-            mapped = const_cast<gzio_source_sink*>(this)->full_data();
+            mapped = full_data();
         }
         off_t offset = pageoffset ? pageoffset * ::getpagesize() : 0;
         return static_cast<void*>(mapped.data() + offset);

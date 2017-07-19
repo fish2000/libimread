@@ -200,17 +200,15 @@ namespace im {
                     :s(s), shift_(0)
                     {}
                 
-                virtual std::size_t read(byte* buf, std::size_t n) { return s->read(buf, n); }
+                virtual std::size_t read(byte* buf, std::size_t n) const { return s->read(buf, n); }
                 virtual std::size_t seek_absolute(std::size_t pos) { return s->seek_absolute(pos + shift_)-shift_; }
                 virtual std::size_t seek_relative(int n) { return s->seek_relative(n)-shift_; }
                 virtual std::size_t seek_end(int n) { return s->seek_end(n+shift_)-shift_; }
                 
                 /// delegate these fully, to avoid using naive implementations:
-                virtual bytevec_t full_data() { return s->full_data(); }
-                virtual std::size_t size() { return s->size(); }
-                virtual void* readmap(std::size_t pageoffset = 0) const {
-                    return s->readmap(pageoffset);
-                }
+                virtual bytevec_t full_data() const { return s->full_data(); }
+                virtual std::size_t size() const { return s->size(); }
+                virtual void* readmap(std::size_t pageoffset = 0) const { return s->readmap(pageoffset); }
                 
                 void shift(int nshift) {
                     s->seek_relative(nshift - shift_);

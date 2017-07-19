@@ -27,7 +27,7 @@ namespace im {
     std::size_t handle_source_sink::seek_relative(int delta) { std::fseek(handle, delta, SEEK_CUR); return std::ftell(handle); }
     std::size_t handle_source_sink::seek_end(int delta) { std::fseek(handle, delta, SEEK_END); return std::ftell(handle); }
     
-    std::size_t handle_source_sink::read(byte* buffer, std::size_t n) {
+    std::size_t handle_source_sink::read(byte* buffer, std::size_t n) const {
         std::size_t out = std::fread(buffer, sizeof(byte), n, handle);
         if (out == -1) {
             imread_raise(CannotReadError,
@@ -65,7 +65,7 @@ namespace im {
     
     void handle_source_sink::flush() { std::fflush(handle); }
     
-    bytevec_t handle_source_sink::full_data() {
+    bytevec_t handle_source_sink::full_data() const {
         /// grab stat struct and store initial seek position:
         detail::stat_t info = this->stat();
         std::size_t fsize = info.st_size * sizeof(byte);

@@ -25,7 +25,7 @@ namespace im {
     
     byte_source::~byte_source() {}
     
-    bytevec_t byte_source::full_data() {
+    bytevec_t byte_source::full_data() const {
         bytevec_t result;
         std::size_t n;
         byte buffer[4096];

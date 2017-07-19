@@ -16,12 +16,12 @@ namespace im {
             memory_source(const byte* c, const int len);
             virtual ~memory_source();
             
-            virtual std::size_t read(byte* buffer, std::size_t n);
+            virtual std::size_t read(byte* buffer, std::size_t n) const;
             virtual bool can_seek() const noexcept;
             virtual std::size_t seek_absolute(std::size_t p);
             virtual std::size_t seek_relative(int delta);
             virtual std::size_t seek_end(int delta);
-            virtual bytevec_t full_data();
+            virtual bytevec_t full_data() const;
             virtual std::size_t size() const;
             
             virtual void* readmap(std::size_t pageoffset = 0) const;
@@ -29,7 +29,7 @@ namespace im {
         private:
             const byte* data;
             const std::size_t length;
-            std::size_t pos;
+            mutable std::size_t pos;
     };
     
     class memory_sink : public byte_sink {

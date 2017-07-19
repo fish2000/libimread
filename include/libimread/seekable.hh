@@ -56,9 +56,9 @@ namespace im {
         
         public:
             virtual ~byte_source();
-            virtual std::size_t read(byte*, std::size_t) warn_unused = 0;
+            virtual std::size_t read(byte*, std::size_t) const warn_unused = 0;
             virtual void* readmap(std::size_t pageoffset = 0) const = 0;
-            virtual bytevec_t full_data();
+            virtual bytevec_t full_data() const;
             virtual std::size_t size() const;
             bool empty() const;
             byte* data() const;
