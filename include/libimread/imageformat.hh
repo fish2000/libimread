@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/ext/iod.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/seekable.hh>
@@ -64,7 +65,7 @@ namespace im {
                                               D(_capacity = format::capacity))));      \
         }                                                                              \
         std::size_t format::hash() const {                                             \
-            static std::hash<std::string> hasher;                                      \
+            std::hash<std::string> hasher;                                             \
             return hasher(format::classname);                                          \
         }                                                                              \
         namespace {                                                                    \
@@ -172,6 +173,9 @@ namespace im {
             virtual bool format_can_write_metadata() const noexcept;
             
             static registry_t& registry();
+            
+            bool operator==(ImageFormat const&) const;
+            bool operator!=(ImageFormat const&) const;
     
     };
     
@@ -232,28 +236,62 @@ namespace im {
             virtual bool format_can_write() const noexcept override          { return FormatType::can_write::value;          }
             virtual bool format_can_write_multi() const noexcept override    { return FormatType::can_write_multi::value;    }
             virtual bool format_can_write_metadata() const noexcept override { return FormatType::can_write_metadata::value; }
-            
-            /// LONGCAT IS LOOOOOOOOOONG erm I mean
-            /// SAME CLASS IS SAME
-            template <typename OtherFormatType,
-                      typename X = std::enable_if_t<
-                                   std::is_base_of<ImageFormat, OtherFormatType>::value>> inline
-            bool operator==(OtherFormatType const&) const noexcept {
-                return std::is_same<std::remove_cv_t<FormatType>,
-                                    std::remove_cv_t<OtherFormatType>>::value;
-            }
-            
-            template <typename OtherFormatType,
-                      typename X = std::enable_if_t<
-                                   std::is_base_of<ImageFormat, OtherFormatType>::value>> inline
-            bool operator!=(OtherFormatType const&) const noexcept {
-                return !std::is_same<std::remove_cv_t<FormatType>,
-                                     std::remove_cv_t<OtherFormatType>>::value;
-            }
     
     };
-
+    
+    namespace detail {
+        
+        /// “all_of” bit based on http://stackoverflow.com/q/13562823/298171
+        template <bool ...booleans>
+        struct static_all_of;
+        
+        /// derive recursively, if the first argument is true:
+        template <bool ...tail>
+        struct static_all_of<true, tail...> : static_all_of<tail...>
+        {};
+        
+        /// end recursion: false, if first argument is false:
+        template <bool ...tail>
+        struct static_all_of<false, tail...> : std::false_type
+        {};
+        
+        /// end recursion: true, if all arguments have been exhausted:
+        template <>
+        struct static_all_of<> : std::true_type
+        {};
+        
+        template <bool ...booleans>
+        using static_all_of_t = typename static_all_of<booleans...>::type;
+        
+        template <bool ...booleans>
+        constexpr bool static_all_of_v = static_all_of<booleans...>::value;
+        
+        template <typename Type, typename ...Requirements>
+        struct are_bases_of : static_all_of_t<std::is_base_of<Type,
+                                              std::decay_t<Requirements>>::value...>
+        {};
+    }
+    
+    template <typename ...Types>
+    struct is_imageformat : detail::are_bases_of<im::ImageFormat, Types...>::type
+    {};
+    
+    template <typename ...Types>
+    constexpr bool is_imageformat_v = is_imageformat<Types...>::value;
+    
 }
+
+template <typename T, typename U>
+std::enable_if_t<
+  im::is_imageformat_v<T, U>,
+    bool> operator==(T&& lhs, U&& rhs) {
+      return std::forward<T>(lhs).hash() == std::forward<U>(rhs).hash(); }
+
+template <typename T, typename U>
+std::enable_if_t<
+  im::is_imageformat_v<T, U>,
+    bool> operator!=(T&& lhs, U&& rhs) {
+      return std::forward<T>(lhs).hash() != std::forward<U>(rhs).hash(); }
 
 namespace std {
     

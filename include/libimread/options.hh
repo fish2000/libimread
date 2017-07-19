@@ -1,8 +1,8 @@
-/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// Copyright 2012-2017 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef IMREAD_OPTIONS_HH
-#define IMREAD_OPTIONS_HH
+#ifndef IMREAD_OPTIONS_HH_
+#define IMREAD_OPTIONS_HH_
 
 #include <string>
 #include <sstream>
@@ -69,4 +69,4 @@ namespace im {
     
 }
 
-#endif /// IMREAD_OPTIONS_HH
+#endif /// IMREAD_OPTIONS_HH_

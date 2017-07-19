@@ -97,6 +97,14 @@ namespace im {
         return registry_impl;
     }
     
+    bool ImageFormat::operator==(ImageFormat const& other) const {
+        return hash() == other.hash();
+    }
+    
+    bool ImageFormat::operator!=(ImageFormat const& other) const {
+        return hash() != other.hash();
+    }
+    
 } /* namespace im */
 
 namespace std {

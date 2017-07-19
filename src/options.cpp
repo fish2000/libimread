@@ -6,7 +6,6 @@
 
 namespace im {
     
-    
     Options::Options()
         :Json()
         { mkobject(); }
