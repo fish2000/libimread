@@ -28,8 +28,7 @@ namespace im {
                                              ImageFactory* factory,
                                              options_map const& opts)  {
         PVRTexture pvr;
-        bytevec_t data = src->full_data();
-        ePVRLoadResult result = pvr.load(&data[0], data.size());
+        ePVRLoadResult result = pvr.load(src->data(), src->size());
         
         if (result) {
             imread_raise(CannotReadError,
