@@ -51,49 +51,27 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(HDF5Format);
     
+    namespace detail {
+        constexpr std::size_t kDefaultFlags = H5LT_FILE_IMAGE_OPEN_RW &
+                                              H5LT_FILE_IMAGE_DONT_COPY &
+                                              H5LT_FILE_IMAGE_DONT_RELEASE;
+    }
+    
     using filesystem::path;
     using filesystem::NamedTemporaryFile;
-    
-    class H5MemoryBuffer : public H5::H5File {
-        
-        public:
-            static constexpr std::size_t OPEN_RW      =  H5LT_FILE_IMAGE_OPEN_RW;
-            static constexpr std::size_t DONT_COPY    =  H5LT_FILE_IMAGE_DONT_COPY;
-            static constexpr std::size_t DONT_RELEASE =  H5LT_FILE_IMAGE_DONT_RELEASE;
-        
-        public:
-            H5MemoryBuffer(void* buffer, std::size_t size,
-                                         std::size_t flags)
-                :H5File()
-                {
-                    hid_t idx = H5LTopen_file_image(buffer, size, flags);
-                    if (idx < 0) {
-                        imread_raise(HDF5IOError,
-                            "H5MemoryBuffer:",
-                            "H5LTopen_file_image() failed");
-                    }
-                    p_setId(idx);
-                }
-    };
-    
-    constexpr std::size_t kDefaultFlags = H5LT_FILE_IMAGE_OPEN_RW &
-                                          H5LT_FILE_IMAGE_DONT_COPY &
-                                          H5LT_FILE_IMAGE_DONT_RELEASE;
     
     std::unique_ptr<Image> HDF5Format::read(byte_source* src,
                                             ImageFactory* factory,
                                             options_map const& opts) {
         
         /// Internal options for our HDF5 data storage:
-        path h5imagepath = opts.cast<path>("hdf5:path",
-                                     path("/image/raster"));
-        std::string name = opts.cast<std::string>("hdf5:name",
-                                     std::string("imread-data"));
+        path h5imagepath = opts.cast<path>("hdf5:path", path(options.datapath));
+        std::string name = opts.cast<std::string>("hdf5:name", options.dataname);
         
         /// Open data buffer as an HDF5 memory store (née "file image"):
         hid_t file_id = H5LTopen_file_image(src->data(),
                                             src->size(),
-                                            kDefaultFlags);
+                                            detail::kDefaultFlags);
         if (file_id < 0) {
             imread_raise(CannotReadError,
                 "Error opening HDF5 in-memory data as a file image for reading");
@@ -178,7 +156,6 @@ namespace im {
             meta->set("stride0", std::to_string(val_stride0));
             meta->set("stride1", std::to_string(val_stride1));
             meta->set("stride2", std::to_string(val_stride2));
-            
         }
         
         /// Close HDF5 hid_t handle types:
@@ -194,17 +171,16 @@ namespace im {
                            byte_sink* output,
                            options_map const& opts) {
         
-        path h5imagepath = opts.cast<path>("hdf5:path",
-                                     path("/image/raster"));
-        std::string name = opts.cast<std::string>("hdf5:name",
-                                     std::string("imread-data"));
+        /// Internal options for our HDF5 data storage:
+        path h5imagepath = opts.cast<path>("hdf5:path", path(options.datapath));
+        std::string name = opts.cast<std::string>("hdf5:name", options.dataname);
         
         /// This wraps a call to H5Eset_auto(…), which I am not sure
         /// what that is all about, really; it’s just here:
         IM_H5E_SET_AUTO(H5E_DEFAULT);
         
         /// create a temporary HDF5 file for all writes to target:
-        NamedTemporaryFile tf(".hdf5");
+        NamedTemporaryFile tf(suffix(true)); /// period = true
         
         std::string tpth = tf.str();
         hid_t file_id = IM_H5F_CREATE(tpth.c_str());

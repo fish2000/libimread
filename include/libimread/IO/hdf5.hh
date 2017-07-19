@@ -24,7 +24,9 @@ namespace im {
                     SIGNATURE("\x89\x48\x44\x46", 4)
                 },
                 _suffixes = { "hdf5", "h5", "hdf" },
-                _mimetype = "image/hdf5"
+                _mimetype = "image/hdf5",
+                _dataname = "imread-data",
+                _datapath = "/image/raster"
             );
             
             virtual std::unique_ptr<Image> read(byte_source* src,
