@@ -157,7 +157,11 @@ namespace im {
     bytevec_t gzio_source_sink::full_data() {
         /// grab uncompressed size and store initial seek position
         std::size_t fsize = uncompressed_byte_size();
-        if (fsize == 0) { return byte_source::full_data(); }
+        if (fsize == 0) {
+            bytevec_t out = byte_source::full_data();
+            uncompressed_byte_size(out.size());
+            return out;
+        }
         std::size_t orig = ::gzseek(gzhandle, 0, SEEK_CUR);
         
         /// allocate output vector per uncompressed data size
@@ -166,26 +170,33 @@ namespace im {
         /// start as you mean to go on
         ::gzseek(gzhandle, 0, SEEK_SET);
         
-        /// read directly from gzhandle:
+        /// read directly from gzhandle
         if (::gzread(gzhandle, &result[0], fsize) == -1) {
             imread_raise(CannotReadError,
-                "fd_source_sink::full_data():",
-                "read() returned -1", std::strerror(errno));
+                "gzio_source_sink::full_data():",
+                "gzread() returned -1", std::strerror(errno));
         }
         
-        /// reset descriptor position before returning
+        /// reset handle seek position before returning
         ::gzseek(gzhandle, orig, SEEK_SET);
         return result;
     }
     
     std::size_t gzio_source_sink::size() const {
-        detail::stat_t info = this->stat();
-        return info.st_size * sizeof(byte);
+        std::size_t fsize = uncompressed_byte_size();
+        if (fsize == 0) {
+            return uncompressed_byte_size(byte_source::size());
+        }
+        return fsize;
     }
     
     void* gzio_source_sink::readmap(std::size_t pageoffset) const {
-        /// HOW IS COMPRES MMAP FORMED
-        imread_raise_default(NotImplementedError);
+        if (mapped.empty()) {
+            /// I realize the next line is the smelliest code since goto
+            mapped = const_cast<gzio_source_sink*>(this)->full_data();
+        }
+        off_t offset = pageoffset ? pageoffset * ::getpagesize() : 0;
+        return static_cast<void*>(mapped.data() + offset);
     }
     
     std::string gzio_source_sink::xattr(std::string const& name) const {

@@ -92,6 +92,7 @@ namespace im {
         private:
             int descriptor = -1;
             mutable detail::gzhandle_t gzhandle;
+            mutable bytevec_t mapped;
             bool external = false;
     };
     
