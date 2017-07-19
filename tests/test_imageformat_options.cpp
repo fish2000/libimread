@@ -3,6 +3,7 @@
 #include <vector>
 #include <numeric>
 #include <algorithm>
+#include <unordered_set>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
@@ -20,37 +21,38 @@ namespace {
     using im::options_map;
     using bytevec_t = std::vector<byte>;
     using stringvec_t = std::vector<std::string>;
-    
+    using formatset_t = std::unordered_set<ImageFormat>;
     
     TEST_CASE("[imageformat-options] Check registered formats",
               "[imageformat-options-check-registered-formats]")
     {
         auto DMV = ImageFormat::registry();
-        stringvec_t formats;
+        formatset_t formats;
+        stringvec_t names;
         std::string joined;
         int idx = 0,
             max = 0;
         
-        std::transform(DMV.begin(), DMV.end(),
-                       std::back_inserter(formats),
-                    [](auto const& registrant) {
-            return std::string(registrant.first);
-        });
+        std::transform(DMV.begin(),
+                       DMV.end(),
+                       std::back_inserter(names),
+                    [](auto const& registrant) { return registrant.first; });
         
-        joined = std::accumulate(formats.begin(), formats.end(),
+        joined = std::accumulate(names.begin(),
+                                 names.end(),
                                  std::string{},
-                      [&formats](std::string const& lhs,
+                        [&names](std::string const& lhs,
                                  std::string const& rhs) {
-            return lhs + rhs + (rhs == formats.back() ? "" : ", ");
+            return lhs + rhs + (rhs == names.back() ? "" : ", ");
         });
         
         // WTF("",
         //     "REGISTRY:",
-        //     FF("\t contains %i formats:", max = formats.size()),
+        //     FF("\t contains %i formats:", max = names.size()),
         //     FF("\t %s", joined.c_str()));
         
-        for (auto it = formats.begin();
-            it != formats.end() && idx < max;
+        for (auto it = names.begin();
+            it != names.end() && idx < max;
             ++it) { std::string const& format = *it;
                 auto format_ptr = ImageFormat::named(format);
                 options_map opts = format_ptr->get_options();

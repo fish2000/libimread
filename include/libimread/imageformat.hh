@@ -238,7 +238,7 @@ namespace im {
             template <typename OtherFormatType,
                       typename X = std::enable_if_t<
                                    std::is_base_of<ImageFormat, OtherFormatType>::value>> inline
-            bool operator==(OtherFormatType const& other) const noexcept {
+            bool operator==(OtherFormatType const&) const noexcept {
                 return std::is_same<std::remove_cv_t<FormatType>,
                                     std::remove_cv_t<OtherFormatType>>::value;
             }
@@ -246,7 +246,7 @@ namespace im {
             template <typename OtherFormatType,
                       typename X = std::enable_if_t<
                                    std::is_base_of<ImageFormat, OtherFormatType>::value>> inline
-            bool operator!=(OtherFormatType const& other) const noexcept {
+            bool operator!=(OtherFormatType const&) const noexcept {
                 return !std::is_same<std::remove_cv_t<FormatType>,
                                      std::remove_cv_t<OtherFormatType>>::value;
             }
