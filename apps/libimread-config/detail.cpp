@@ -1,15 +1,16 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef APPS_LIBIMREAD_CONFIG_H_
-#define APPS_LIBIMREAD_CONFIG_H_
-
 #include <string>
 #include <vector>
+#include <numeric>
 #include <algorithm>
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/pystring.hh>
+
+#include "detail.hh"
 
 namespace im {
     
@@ -20,7 +21,41 @@ namespace im {
         
         namespace detail {
             
-            inline static std::string get_includes(std::string const& inclist) {
+            /*
+                std::for_each(incvec.begin(), incvec.end(),
+                    [&outvec](std::string const& pp) {
+                    // outvec.emplace_back(path::absolute(p).c_str());
+                    // if (path::exists(p)) {
+                    //     outvec.emplace_back(path::real(p).str());
+                    // }
+                        // path intermediate = path("/") / p.substr(1);
+                        
+                        // path intermediate(true);
+                        // intermediate.set(p);
+                        path intermediate = pp;
+                        
+                        stringvec_t parts = intermediate.components();
+                        
+                        std::string joined = std::accumulate(parts.begin(),
+                                                             parts.end(),
+                                                             std::string{},
+                                                    [&parts](std::string const& lhs,
+                                                             std::string const& rhs) {
+                            return lhs + rhs + (rhs.c_str() == parts.back().c_str() ? "" : ", ");
+                        });
+                        
+                        WTF("PATH:",
+                            FF("string: %s", pp.c_str()),
+                            FF("inpath: %s", intermediate.str().c_str()),
+                            FF("cparts: %u", parts.size()),
+                            FF("joined: %s", joined.c_str()));
+                        
+                        // outvec.emplace_back(intermediate.str());
+                        outvec.push_back(pp);
+                });
+            */
+            
+            std::string get_includes(std::string const& inclist) {
                 stringvec_t incvec, outvec;
                 pystring::split(
                     pystring::replace(inclist,
@@ -34,14 +69,17 @@ namespace im {
                 outvec.reserve(incvec.size());
                 std::for_each(incvec.begin(), incvec.end(),
                     [&outvec](std::string const& p) {
-                    if (path::is_directory(p)) {
+                    if (pystring::endswith(p, "include") && path::is_directory(p)) {
                         outvec.emplace_back(path::real(p).str());
+                    } else {
+                        outvec.emplace_back(p);
                     }
                 });
+                
                 return "-I" + pystring::join(" -I", outvec);
             }
             
-            inline static std::string get_libs(std::string const& liblist) {
+            std::string get_libs(std::string const& liblist) {
                 stringvec_t libvec, outvec;
                 pystring::split(
                     pystring::replace(liblist,
@@ -68,22 +106,6 @@ namespace im {
             
         }
         
-        const std::string version(IM_VERSION);
-        
-        const std::string prefix(IM_INSTALL_PREFIX);
-        const std::string exec_prefix(IM_INSTALL_PREFIX);
-        const std::string includes = detail::get_includes(IM_INCLUDE_DIRECTORIES);
-        const std::string libs = detail::get_libs(IM_LINK_LIBRARIES);
-        
-        const std::string cflags = std::string(IM_COMPILE_OPTIONS) + " "
-                                 + std::string(IM_COMPILE_FLAGS) + " "
-                                 + includes;
-        
-        const std::string ldflags = std::string(IM_LINK_FLAGS) + " " + libs;
-        
-    };
+    } /* namespace config */
     
-};
-
-
-#endif /// APPS_LIBIMREAD_CONFIG_H_
+} /* namespace im */

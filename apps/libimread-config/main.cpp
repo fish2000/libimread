@@ -2,7 +2,8 @@
 #include <map>
 #include <utility>
 #include <iostream>
-#include "libimread-config.h"
+#include <libimread/ext/pystring.hh>
+#include "libimread-config.hh"
 #include "docopt.h"
 
 static const char USAGE[] = R"(Configuration information tool for libimread

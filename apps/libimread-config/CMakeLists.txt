@@ -27,8 +27,12 @@ set(EXTRA_LIBS
     imread_static
     docopt_static)
 
-set(hdrs "libimread-config.h")
-set(srcs "main.cpp")
+set(hdrs
+    "detail.hh"
+    "libimread-config.hh")
+set(srcs
+    "detail.cpp"
+    "main.cpp")
 
 add_executable("imread-config" ${srcs} ${hdrs})
 target_link_libraries("imread-config" ${EXTRA_LIBS})
