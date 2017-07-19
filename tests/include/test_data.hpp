@@ -22,23 +22,21 @@ namespace im { namespace test {
     
     static const std::string basedir = "/Users/fish/Dropbox/libimread/tests/data";
     
-    static const int num_jpg = 47;
+    static const int num_jpg = 51;
     static const std::string jpg[] = {
         "10350540_10152447396343587_37416966729730477_n.jpg",
+        "10632004_1534049053478864_274950921_n.jpg",
+        "10784794_626214094153760_1682042407_n.jpg",
         "10954288_342637995941364_1354507656_n.jpg",
-        "1a08b088d-2163-470e-aa18-1b0ad1d37298.jpg",
-        "1a199abf5-64ff-4582-b68f-47118589250c-2.jpg",
-        "1a48fc3ce-be47-4d81-beba-e147ca9083d4.jpg",
-        "1a6e4d1dd-f75d-4fbe-be8e-7e50aa23ab9a.jpg",
-        "1a95f1603-8937-4e83-9cfb-2e1bc463afb3-2.jpg",
-        "1a98f95cf-6005-4d8b-881c-9c44f5648350.jpg",
-        "1acad38a0-747f-485b-a6e5-4c02cca8f804.jpg",
-        "1aef1426f-848d-455f-8ea5-c143c7eb5139.jpg",
-        "1b031bc60-e67d-4904-92da-433b1057ed29.jpg",
-        "1b4ca8c13-288f-43ab-8ebb-dc0f00196cb9-2.jpg",
-        "1b74c6b88-9b36-43ae-a2ee-dc4ca29cddf2-2.jpg",
-        "1b7eefeff-2cb5-401e-b344-0a89ff47f0b7.jpg",
+        "11267697_435543873289573_208622370_n.jpg",
+        "13694753_189263628155625_1457060035_n.jpg",
+        "14145460_1101980163221760_1805788797_n.jpg",
+        "14712002_926002110863805_7214626870581526528_n.jpg",
+        "15826032_10211365161872908_3691842715293840053_n.jpg",
+        "16906646_1858944137716393_6865305734310002688_n.jpg",
+        "17932228_1840427066220690_4734820359981760512_n-2.jpg",
         "2340367304_19afc284dd_o.jpg",
+        "270642616_21cb3acfb7_o.jpg",
         "4592101968_4fd8106161_o-SMALL.jpg",
         "4592101968_4fd8106161_o-SMALLER.jpg",
         "4592101968_4fd8106161_o-SMALLEST.jpg",
@@ -52,14 +50,18 @@ namespace im { namespace test {
         "butterflies-in-stomach.jpg",
         "c64error.jpg",
         "CBS-FOX-VIDEO.jpg",
+        "cheese.jpg",
         "columbia-tristar-monochromatic.jpg",
         "CUBE-MY-BUTTON.jpg",
         "Cube_Quest_-_1983_-_Simutrek.jpg",
         "cube_quest_arcade.jpg",
+        "cx-6288-013.jpg",
+        "cx-6636-002.jpg",
         "Destruct_sequence_engaged.jpg",
         "DIET-PEPSI-UH-HUH-EXCLAMAITION-MARK.jpg",
         "DROWNED-CAT-IS-VERY-UPSET.jpg",
         "environ-ctr-PURGE.jpg",
+        "forth_on_the_atari.jpg",
         "GLOVE-OF-NINTENDO-POWER-PLUS-ONE.jpg",
         "HANG-IN-THERE.jpg",
         "hang_in_there_baby_by_bytor137-d5u6r1q.jpg",
@@ -68,13 +70,16 @@ namespace im { namespace test {
         "keep-your-power-gloves-off-her-OK.jpg",
         "operation-operation.jpg",
         "Rd4lKZq.jpg",
+        "sneakers-passport-100066366-large-6c.jpg",
+        "TA-640x353.jpg",
         "tumblr_l2l22khbRq1qc2qvmo1_1280.jpg",
         "tumblr_mgq73sTl6z1qb9r7fo1_r1_500.jpg",
         "Z0064246.jpg"
     };
     
-    static const int num_jpeg = 3;
+    static const int num_jpeg = 4;
     static const std::string jpeg[] = {
+        "378969.jpeg",
         "IMG_7333.jpeg",
         "tara-bruno-NO-YOU-DONT-SEE-ME-almost-two-years-ago.jpeg",
         "taylor-omg.jpeg"
