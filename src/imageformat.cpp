@@ -69,7 +69,7 @@ namespace im {
     }
     
     Options ImageFormat::read_metadata(byte_source* src,
-                                           Options const& opts) {
+                                       Options const& opts) {
         imread_raise_default(NotImplementedError);
     }
     

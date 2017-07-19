@@ -61,7 +61,7 @@ namespace im {
         const format::capacity_t format::capacity = format::CAPACITY();                \
         Options format::get_options() const {                                          \
             return Options::parse(iod::json_encode(iod::cat(format::options,           \
-                                                  D(_capacity = format::capacity))));  \
+                                              D(_capacity = format::capacity))));      \
         }                                                                              \
         std::size_t format::hash() const {                                             \
             static std::hash<std::string> hasher;                                      \
