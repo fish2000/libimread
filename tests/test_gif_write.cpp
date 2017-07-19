@@ -158,6 +158,12 @@ namespace {
             outlist.push_back(halim);
         });
         
+        /// confirm lack of pre-computed image sizes:
+        CHECK(outlist.width() == -1);
+        CHECK(outlist.height() == -1);
+        CHECK(outlist.planes() == -1);
+        
+        /// GIFFormat::write_multi(ilist) calls ilist.compute_sizes():
         im::halide::write_multi(outlist, composite.str());
         REQUIRE(composite.pathname.is_file());
         
@@ -176,13 +182,9 @@ namespace {
         CHECK(inlist.width() == -1);
         CHECK(inlist.height() == -1);
         CHECK(inlist.planes() == -1);
-        // CHECK(outlist.width() == -1);
-        // CHECK(outlist.height() == -1);
-        // CHECK(outlist.planes() == -1);
         
         /// check computed image sizes:
         inlist.compute_sizes();
-        // outlist.compute_sizes();
         
         CHECK(inlist.width() == outlist.width());
         CHECK(inlist.height() == outlist.height());
