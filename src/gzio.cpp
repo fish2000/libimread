@@ -154,6 +154,30 @@ namespace im {
     
     void gzio_source_sink::flush() { ::gzflush(gzhandle, Z_SYNC_FLUSH); }
     
+    bytevec_t gzio_source_sink::full_data() {
+        /// grab uncompressed size and store initial seek position
+        std::size_t fsize = uncompressed_byte_size();
+        if (fsize == 0) { return byte_source::full_data(); }
+        std::size_t orig = ::gzseek(gzhandle, 0, SEEK_CUR);
+        
+        /// allocate output vector per uncompressed data size
+        bytevec_t result(fsize);
+        
+        /// start as you mean to go on
+        ::gzseek(gzhandle, 0, SEEK_SET);
+        
+        /// read directly from gzhandle:
+        if (::gzread(gzhandle, &result[0], fsize) == -1) {
+            imread_raise(CannotReadError,
+                "fd_source_sink::full_data():",
+                "read() returned -1", std::strerror(errno));
+        }
+        
+        /// reset descriptor position before returning
+        ::gzseek(gzhandle, orig, SEEK_SET);
+        return result;
+    }
+    
     std::size_t gzio_source_sink::size() const {
         detail::stat_t info = this->stat();
         return info.st_size * sizeof(byte);
