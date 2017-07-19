@@ -10,22 +10,22 @@ namespace py {
     
     namespace options {
         
-        using im::options_map;
-        using im::options_list;
+        using im::Options;
+        using im::OptionsList;
         
         bool truth(PyObject* value) noexcept;
         char const* get_blob(PyObject* data, std::size_t& len) noexcept;
         char const* get_cstring(PyObject* stro) noexcept;
         Json convert(PyObject* value);
         
-        options_list parse_list(PyObject* list);
-        options_list parse_set(PyObject* set);
-        options_map parse(PyObject* dict);
+        OptionsList parse_list(PyObject* list);
+        OptionsList parse_set(PyObject* set);
+        Options parse(PyObject* dict);
         
         PyObject* revert(Json const& value);
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject *kwargs,
-                       options_map const& opts);
+                       Options const& opts);
         
     }
     

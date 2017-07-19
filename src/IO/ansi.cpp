@@ -114,12 +114,12 @@ namespace im {
     
     void ANSIFormat::write(Image &input,
                            byte_sink *output,
-                           const options_map &opts) {
+                           const Options &opts) {
     }
     
     void ANSIFormat::write_multi(ImageList &input,
                                  byte_sink *output,
-                                 const options_map &opts) {
+                                 const Options &opts) {
     }
     
 }

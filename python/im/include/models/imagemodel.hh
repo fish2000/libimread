@@ -77,7 +77,7 @@ namespace py {
     namespace ext {
         
         using im::byte;
-        using im::options_map;
+        using im::Options;
         using im::Image;
         using im::ImageFormat;
         using im::Histogram;
@@ -655,17 +655,17 @@ namespace py {
                 return py::convert(scaled);
             }
             
-            options_map readopts() {
+            Options readopts() {
                 return py::options::parse(readoptDict);
             }
             
-            options_map writeopts() {
+            Options writeopts() {
                 return py::options::parse(writeoptDict);
             }
             
-            bool load(char const* source, options_map const& opts) {
+            bool load(char const* source, Options const& opts) {
                 FactoryType factory;
-                options_map default_opts;
+                Options default_opts;
                 std::unique_ptr<ImageFormat> format;
                 std::unique_ptr<FileSource> input;
                 std::unique_ptr<Image> output;
@@ -705,17 +705,17 @@ namespace py {
                 return py::SystemError("Shouldn't have arrived here", false);
             }
             
-            bool load(Py_buffer const& view, options_map const& opts) {
+            bool load(Py_buffer const& view, Options const& opts) {
                 py::buffer::source source(view);
                 return load(source.str().c_str(), opts);
             }
             
-            bool loadfilelike(PyObject* file, options_map const& opts) {
+            bool loadfilelike(PyObject* file, Options const& opts) {
                 FactoryType factory;
                 std::unique_ptr<ImageFormat> format;
                 typename py::gil::with::source_t input;
                 std::unique_ptr<Image> output;
-                options_map default_opts;
+                Options default_opts;
                 bool can_read = false;
                 
                 try {
@@ -742,12 +742,12 @@ namespace py {
                 return py::ValueError("Bad I/O format pointer returned for blob data", false);
             }
             
-            bool loadblob(Py_buffer const& view, options_map const& opts) {
+            bool loadblob(Py_buffer const& view, Options const& opts) {
                 FactoryType factory;
                 std::unique_ptr<ImageFormat> format;
                 std::unique_ptr<py::buffer::source> input;
                 std::unique_ptr<Image> output;
-                options_map default_opts;
+                Options default_opts;
                 bool can_read = false;
                 
                 try {
@@ -774,9 +774,9 @@ namespace py {
                 return py::ValueError("Bad I/O format pointer returned for blob data", false);
             }
             
-            bool save(char const* destination, options_map const& opts) {
+            bool save(char const* destination, Options const& opts) {
                 std::unique_ptr<ImageFormat> format;
-                options_map default_opts;
+                Options default_opts;
                 bool exists = false,
                      can_write = false,
                      overwrite = true;
@@ -820,11 +820,11 @@ namespace py {
                 return true;
             }
             
-            bool savefilelike(PyObject* file, options_map const& opts) {
+            bool savefilelike(PyObject* file, Options const& opts) {
                 std::unique_ptr<ImageFormat> format;
                 typename py::gil::with::sink_t output;
                 std::string ext;
-                options_map default_opts;
+                Options default_opts;
                 bool can_write = false;
                 
                 if (!opts.has("format")) {
@@ -859,11 +859,11 @@ namespace py {
                 return py::SystemError("Shouldn't have arrived here", false);
             }
             
-            PyObject* saveblob(options_map const& opts) {
+            PyObject* saveblob(Options const& opts) {
                 std::unique_ptr<ImageFormat> format;
                 std::vector<byte> data;
                 std::string ext, pth;
-                options_map default_opts;
+                Options default_opts;
                 bool can_write = false,
                      exists = false,
                      removed = false,

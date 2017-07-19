@@ -221,7 +221,7 @@ namespace py {
                 PyObject* options = nullptr;
                 PyObject* file = nullptr;
                 Py_buffer view;
-                options_map opts;
+                Options opts;
                 char const* keywords[] = { "source", "file", "is_blob", "options", nullptr };
                 bool is_blob = false;
                 bool did_load = false;
@@ -471,7 +471,7 @@ namespace py {
                     return py::SystemError("Dictionary update failure");
                 }
                 
-                options_map opts = pyim->writeopts();
+                Options opts = pyim->writeopts();
                 Py_DECREF(options);
                 
                 if (as_blob || use_file) {

@@ -45,7 +45,7 @@ namespace py {
         }
         
         using im::byte;
-        using im::options_map;
+        using im::Options;
         using im::Image;
         using im::ImageList;
         using ImageBufferView = im::buffer::View;
@@ -661,22 +661,22 @@ namespace py {
                 return out;
             }
             
-            options_map readopts() {
+            Options readopts() {
                 return py::options::parse(readoptDict);
             }
             
-            options_map writeopts() {
+            Options writeopts() {
                 return py::options::parse(writeoptDict);
             }
             
-            bool load(char const* source, options_map const& opts) { return true; }
-            bool load(Py_buffer const& view, options_map const& opts) { return true; }
-            bool loadfilelike(PyObject* file, options_map const& opts) { return true; }
-            bool loadblob(Py_buffer const& view, options_map const& opts) { return true; }
+            bool load(char const* source, Options const& opts) { return true; }
+            bool load(Py_buffer const& view, Options const& opts) { return true; }
+            bool loadfilelike(PyObject* file, Options const& opts) { return true; }
+            bool loadblob(Py_buffer const& view, Options const& opts) { return true; }
             
-            bool save(char const* destination, options_map const& opts) {
+            bool save(char const* destination, Options const& opts) {
                 std::unique_ptr<ImageFormat> format;
-                options_map default_opts;
+                Options default_opts;
                 bool exists = false,
                      can_write = false,
                      overwrite = true;
@@ -719,11 +719,11 @@ namespace py {
                 return true;
             }
             
-            bool savefilelike(PyObject* file, options_map const& opts) {
+            bool savefilelike(PyObject* file, Options const& opts) {
                 std::unique_ptr<ImageFormat> format;
                 typename py::gil::with::sink_t output;
                 std::string ext;
-                options_map default_opts;
+                Options default_opts;
                 bool can_write = false;
                 
                 if (!opts.has("format")) {
@@ -758,11 +758,11 @@ namespace py {
                 return false;
             }
             
-            PyObject* saveblob(options_map const& opts) {
+            PyObject* saveblob(Options const& opts) {
                 std::unique_ptr<ImageFormat> format;
                 std::vector<byte> data;
                 std::string ext, pth;
-                options_map default_opts;
+                Options default_opts;
                 bool can_write = false,
                      exists = false,
                      removed = false,

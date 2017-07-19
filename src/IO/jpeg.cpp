@@ -232,7 +232,7 @@ namespace im {
     
     std::unique_ptr<Image> JPEGFormat::read(byte_source* src,
                                             ImageFactory* factory,
-                                            options_map const& opts)  {
+                                            Options const& opts)  {
         
         jpeg_source_adaptor adaptor(src);
         jpeg_decompress_holder decompressor;
@@ -290,12 +290,12 @@ namespace im {
     }
     
     
-    options_map JPEGFormat::read_metadata(byte_source* src,
-                                          options_map const& opts) {
+    Options JPEGFormat::read_metadata(byte_source* src,
+                                          Options const& opts) {
         using easyexif::EXIFInfo;
         using im::byte_iterator;
         
-        options_map out;
+        Options out;
         // src->seek_absolute(0);
         
         byte_iterator result = std::search(src->begin(),   src->end(),
@@ -356,13 +356,13 @@ namespace im {
                                                                  /// 4: multi-spot
                                                                  /// 5: multi-segment
         
-        /// return the options_map full of metadata:
+        /// return the Options full of metadata:
         return out;
     }
     
     void JPEGFormat::write(Image& input,
                            byte_sink* output,
-                           options_map const& opts) {
+                           Options const& opts) {
         
         /// sanity-check input bit depth
         if (input.nbits() != 8) {

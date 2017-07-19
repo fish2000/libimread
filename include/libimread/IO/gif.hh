@@ -52,7 +52,7 @@ namespace im {
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                options_map const& opts) override {
+                                                Options const& opts) override {
                 #if defined(__APPLE__)
                     ImageList pages = this->read_impl(src, factory, false, opts);
                     std::unique_ptr<Image> out = pages.pop();
@@ -63,7 +63,7 @@ namespace im {
             
             virtual ImageList read_multi(byte_source* src,
                                          ImageFactory* factory,
-                                         options_map const& opts) override {
+                                         Options const& opts) override {
                 #if defined(__APPLE__)
                     return this->read_impl(src, factory, true, opts);
                 #endif
@@ -72,11 +72,11 @@ namespace im {
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               options_map const& opts) override;
+                               Options const& opts) override;
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     options_map const& opts) override;
+                                     Options const& opts) override;
             
         private:
             
@@ -87,7 +87,7 @@ namespace im {
             ImageList   read_impl(byte_source* src,
                                   ImageFactory* factory,
                                   bool is_multi,
-                                  options_map const& opts);
+                                  Options const& opts);
             #endif
     };
     

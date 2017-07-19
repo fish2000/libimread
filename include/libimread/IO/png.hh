@@ -41,15 +41,15 @@ namespace im {
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                options_map const& opts) override;
+                                                Options const& opts) override;
             virtual void write(Image& input,
                                byte_sink* output,
-                               options_map const& opts) override;
+                               Options const& opts) override;
             
             /// NOT AN OVERRIDE:
             virtual void write_ios(Image& input,
                                    byte_sink* output,
-                                   options_map const& opts);
+                                   Options const& opts);
     };
     
     namespace format {

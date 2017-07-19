@@ -18,7 +18,7 @@ namespace {
     
     using im::byte;
     using im::ImageFormat;
-    using im::options_map;
+    using im::Options;
     using bytevec_t = std::vector<byte>;
     using stringvec_t = std::vector<std::string>;
     using formatset_t = std::unordered_set<ImageFormat>;
@@ -55,7 +55,7 @@ namespace {
             it != names.end() && idx < max;
             ++it) { std::string const& format = *it;
                 auto format_ptr = ImageFormat::named(format);
-                options_map opts = format_ptr->get_options();
+                Options opts = format_ptr->get_options();
                 
                 // WTF("",
                 //     FF("FORMAT: %s", format.c_str()),

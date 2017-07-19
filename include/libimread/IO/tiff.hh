@@ -66,7 +66,7 @@ namespace im {
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                options_map const& opts) override {
+                                                Options const& opts) override {
                 ImageList pages = do_read(src, factory, false, opts);
                 std::unique_ptr<Image> out = pages.pop();
                 return out;
@@ -74,29 +74,29 @@ namespace im {
             
             virtual ImageList read_multi(byte_source* src,
                                          ImageFactory* factory,
-                                         options_map const& opts) override {
+                                         Options const& opts) override {
                 return do_read(src, factory, true, opts);
             }
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               options_map const& opts) override;
+                               Options const& opts) override;
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     options_map const& opts) override;
+                                     Options const& opts) override;
             
         private:
             
             ImageList do_read(byte_source* src,
                               ImageFactory* factory,
                               bool is_multi,
-                              options_map const& opts);
+                              Options const& opts);
             
             void     do_write(ImageList& input,
                               byte_sink* output,
                               bool is_multi,
-                              options_map const& opts);
+                              Options const& opts);
     };
     
     class STKFormat : public ImageFormatBase<STKFormat> {
@@ -123,7 +123,7 @@ namespace im {
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                options_map const& opts) override {
+                                                Options const& opts) override {
                 ImageList pages = do_read(src, factory, false, opts);
                 std::unique_ptr<Image> out = pages.pop();
                 return out;
@@ -131,20 +131,20 @@ namespace im {
             
             virtual ImageList read_multi(byte_source* src,
                                          ImageFactory* factory,
-                                         options_map const& opts) override {
+                                         Options const& opts) override {
                 return do_read(src, factory, true, opts);
             }
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               options_map const& opts) override {
+                               Options const& opts) override {
                 std::unique_ptr<TIFFFormat> delegate = std::make_unique<TIFFFormat>();
                 return delegate->write(input, output, opts);
             }
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     options_map const& opts) override {
+                                     Options const& opts) override {
                 std::unique_ptr<TIFFFormat> delegate = std::make_unique<TIFFFormat>();
                 return delegate->write_multi(input, output, opts);
             }
@@ -154,7 +154,7 @@ namespace im {
             ImageList do_read(byte_source* src,
                               ImageFactory* factory,
                               bool is_multi,
-                              options_map const& opts);
+                              Options const& opts);
         
     };
     

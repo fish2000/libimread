@@ -6,9 +6,9 @@
 
 namespace im {
     
-    options_map options_map::parse(std::string const& str) {
+    Options Options::parse(std::string const& str) {
         std::istringstream is(str);
-        options_map parsed(is);
+        Options parsed(is);
         if (is.peek() == std::char_traits<char>::eof()) { return parsed; }
         while (std::isspace(is.get()))
             /* skip */;
@@ -17,23 +17,23 @@ namespace im {
     }
     
     
-    std::string           get_optional_string(options_map const& opts,
+    std::string           get_optional_string(Options const& opts,
                                               std::string const& key) {
         return opts.cast<std::string>(key, "");
     }
     
-    char const*           get_optional_cstring(options_map const& opts,
+    char const*           get_optional_cstring(Options const& opts,
                                                std::string const& key) {
         return opts.cast<char const*>(key, "");
     }
     
-    int                   get_optional_int(options_map const& opts,
+    int                   get_optional_int(Options const& opts,
                                            std::string const& key,
                                            int const default_value) {
         return opts.cast<int>(key, default_value);
     }
     
-    bool                  get_optional_bool(options_map const& opts,
+    bool                  get_optional_bool(Options const& opts,
                                             std::string const& key,
                                             bool const default_value) {
         return opts.cast<int>(key, static_cast<int>(default_value));

@@ -30,7 +30,7 @@ namespace py {
     namespace ext {
         
         using im::byte;
-        using im::options_map;
+        using im::Options;
         
         template <typename BufferType = buffer_t>
         struct BufferModelBase : public ModelBase<BufferModelBase<BufferType>, true> {

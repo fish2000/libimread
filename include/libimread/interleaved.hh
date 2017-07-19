@@ -750,11 +750,11 @@ namespace im {
         
         template <typename Color = color::RGBA>
         InterleavedImage<Color> read(std::string const& filename,
-                                     options_map const& opts = options_map()) {
+                                     Options const& opts = Options()) {
             InterleavedFactory factory(filename);
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
-            options_map default_opts = format->add_options(opts);
+            Options default_opts = format->add_options(opts);
             std::shared_ptr<Image> output(format->read(input.get(), &factory, default_opts));
             
             try {
@@ -775,41 +775,41 @@ namespace im {
         template <typename Color = color::RGBA> inline
         void write(InterleavedImage<Color>* input,
                    std::string const& filename,
-                   options_map const& opts = options_map()) {
+                   Options const& opts = Options()) {
             if (input->dim(2) > 3) { return; }
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            options_map default_opts = format->add_options(opts);
+            Options default_opts = format->add_options(opts);
             format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
         }
         
         template <typename Color = color::RGBA> inline
         void write(std::unique_ptr<Image> input,
                    std::string const& filename,
-                   options_map const& opts = options_map()) {
+                   Options const& opts = Options()) {
             write<Color>(dynamic_cast<InterleavedImage<Color>>(input.get()),
                          filename, opts);
         }
         
         inline void write_multi(ImageList& input,
                                 std::string const& filename,
-                                options_map const& opts = options_map()) {
+                                Options const& opts = Options()) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
-            options_map default_opts = format->add_options(opts);
+            Options default_opts = format->add_options(opts);
             format->write_multi(input, output.get(), default_opts);
         }
         
         template <typename Format, typename Color = color::RGBA> inline
         std::string tmpwrite(InterleavedImage<Color>& input,
-                             options_map const& opts) {
+                             Options const& opts) {
             // if (input.dim(2) > 3) { return ""; }
             using filesystem::NamedTemporaryFile;
             NamedTemporaryFile tf(Format::suffix(true), false); /// cleanup on scope exit
             tf.remove();
             std::unique_ptr<ImageFormat> format(new Format);
             std::unique_ptr<FileSink> output(new FileSink(tf.str()));
-            options_map default_opts = format->add_options(opts);
+            Options default_opts = format->add_options(opts);
             format->write(dynamic_cast<Image&>(input), output.get(), default_opts);
             return tf.str();
         }

@@ -170,7 +170,7 @@ namespace im {
         
     } /* namespace (anon.) */
     
-    std::unique_ptr<Image> PNGFormat::read(byte_source* src, ImageFactory* factory, options_map const& opts) {
+    std::unique_ptr<Image> PNGFormat::read(byte_source* src, ImageFactory* factory, Options const& opts) {
         png_holder p(png_holder::read_mode);
         png_set_read_fn(p.png_ptr, src, read_from_source);
         p.create_info();
@@ -305,7 +305,7 @@ namespace im {
         return output;
     }
     
-    void PNGFormat::write(Image& input, byte_sink* output, options_map const& opts) {
+    void PNGFormat::write(Image& input, byte_sink* output, Options const& opts) {
         png_holder p(png_holder::write_mode);
         p.create_info();
         png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
@@ -387,7 +387,7 @@ namespace im {
     
     
     /// ADAPTED FROM PINCRUSH - FREAKY REFORMATTED PNG FOR IOS
-    void PNGFormat::write_ios(Image& input, byte_sink* output, options_map const& opts) {
+    void PNGFormat::write_ios(Image& input, byte_sink* output, Options const& opts) {
         /// immediately write the header, 
         /// before initializing the holder
         output->write(base64::decode(options.signatures[0].bytes).get(),

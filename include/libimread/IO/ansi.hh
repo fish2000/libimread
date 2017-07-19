@@ -24,11 +24,11 @@ namespace im {
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               const options_map& opts) override;
+                               const Options& opts) override;
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     const options_map& opts) override;
+                                     const Options& opts) override;
     };
     
     namespace format {

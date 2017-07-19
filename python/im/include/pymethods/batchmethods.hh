@@ -19,7 +19,7 @@ namespace py {
     namespace ext {
         
         using im::byte;
-        using im::options_map;
+        using im::Options;
         
         namespace batch {
             
@@ -416,7 +416,7 @@ namespace py {
                     return py::SystemError("Dictionary update failure");
                 }
                 
-                options_map opts = batch->writeopts();
+                Options opts = batch->writeopts();
                 Py_DECREF(options);
                 
                 if (as_blob || use_file) {

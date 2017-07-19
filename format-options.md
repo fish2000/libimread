@@ -60,7 +60,7 @@ const char *meta = get_optional_cstring(opts, "metadata");
 if (meta) {
     TIFFSetField(t.tif, TIFFTAG_IMAGEDESCRIPTION, meta);
 }
-options_map::const_iterator x_iter = opts.find("tiff:XResolution");
+Options::const_iterator x_iter = opts.find("tiff:XResolution");
 if (x_iter != opts.end()) {
     double d;
     int i;
@@ -75,7 +75,7 @@ if (x_iter != opts.end()) {
     TIFFSetField(t.tif, TIFFTAG_XRESOLUTION, value);
 }
 
-options_map::const_iterator y_iter = opts.find("tiff:YResolution");
+Options::const_iterator y_iter = opts.find("tiff:YResolution");
 if (y_iter != opts.end()) {
     double d;
     int i;
@@ -102,7 +102,7 @@ if (resolution_unit != uint16_t(-1)) {
             png_set_compression_level(p.png_ptr, compression_level);
         }
         
-        options_map::const_iterator qiter = opts.find("jpeg:quality");
+        Options::const_iterator qiter = opts.find("jpeg:quality");
         if (qiter != opts.end()) {
             int quality;
             if (qiter->second.get_int(quality)) {

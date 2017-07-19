@@ -234,7 +234,7 @@ namespace im {
     } /// namespace
     
     ImageList STKFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
-                                 options_map const& opts) {
+                                 Options const& opts) {
         
         stk_extend ext;
         tiff_warn_error twe;
@@ -305,7 +305,7 @@ namespace im {
     }
     
     ImageList TIFFFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
-                                  options_map const& opts) {
+                                  Options const& opts) {
         tiff_warn_error twe;
         tif_holder t = read_client(src);
         ImageList images;
@@ -381,7 +381,7 @@ namespace im {
         return images;
     }
     
-    void TIFFFormat::write(Image& input, byte_sink* output, options_map const& opts) {
+    void TIFFFormat::write(Image& input, byte_sink* output, Options const& opts) {
         tiff_warn_error twe;
         tif_holder t = TIFFClientOpen(
                         "internal",
@@ -520,11 +520,11 @@ namespace im {
         TIFFClose(t.tif);
     }
     
-    void TIFFFormat::write_multi(ImageList& input, byte_sink* output, options_map const& opts) {
+    void TIFFFormat::write_multi(ImageList& input, byte_sink* output, Options const& opts) {
         do_write(input, output, true, opts);
     }
     
-    void TIFFFormat::do_write(ImageList& input, byte_sink* output, bool is_multi, options_map const& opts) {
+    void TIFFFormat::do_write(ImageList& input, byte_sink* output, bool is_multi, Options const& opts) {
         tiff_warn_error twe;
         tiff_read_f read_function = dynamic_cast<byte_source*>(output) ?
                                     tiff_read_from_writer :

@@ -546,7 +546,7 @@ namespace py {
         }
         
         using im::ImageFormat;
-        using im::options_map;
+        using im::Options;
         
         stringvec_t& formats_as_vector() {
             static stringvec_t out;
@@ -615,7 +615,7 @@ namespace py {
                  it != formats.end() && idx < max;
                  ++it) { std::string const& format = *it;
                          if (format.size() > 0) {
-                             options_map opts;
+                             Options opts;
                              {
                                  py::gil::release nogil;
                                  auto format_ptr = ImageFormat::named(format);

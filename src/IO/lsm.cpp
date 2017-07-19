@@ -164,7 +164,7 @@ namespace im {
             
             void PrintSelf(std::ostream& os, const char* indent = "");
             std::unique_ptr<Image> read(ImageFactory* factory,
-                                        const options_map&);
+                                        const Options&);
             void readHeader();
             
             int GetChannelColorComponent(int, int);
@@ -1104,7 +1104,7 @@ namespace im {
         }
         
         std::unique_ptr<Image> LSMReader::read(ImageFactory* factory,
-                                               const options_map& opts) {
+                                               Options const& opts) {
             this->readHeader();
             
             const int dataType = this->GetDataTypeForChannel(0); // This could vary by channel!
@@ -1151,7 +1151,7 @@ namespace im {
     
     std::unique_ptr<Image> LSMFormat::read(byte_source* src,
                                            ImageFactory* factory,
-                                           options_map const& opts)  {
+                                           Options const& opts)  {
         LSMReader reader(src);
         return reader.read(factory, opts);
     }

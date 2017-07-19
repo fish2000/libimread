@@ -26,7 +26,7 @@ namespace im {
     
     std::unique_ptr<Image> PVRTCFormat::read(byte_source* src,
                                              ImageFactory* factory,
-                                             options_map const& opts)  {
+                                             Options const& opts)  {
         PVRTexture pvr;
         ePVRLoadResult result = pvr.load(src->data(), src->size());
         

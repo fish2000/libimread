@@ -43,7 +43,7 @@ namespace im {
     
     #define DECLARE_OPTIONS(...)                                                       \
         DECLARE_BASE_OPTIONS(__VA_ARGS__);                                             \
-        virtual options_map get_options() const override;                              \
+        virtual Options get_options() const override;                                  \
         virtual std::size_t hash() const override;
     
     #define SIGNATURE(bytes, length)                                                   \
@@ -59,8 +59,8 @@ namespace im {
         const std::string format::classname = #format;                                 \
         const format::options_t format::options = format::OPTS();                      \
         const format::capacity_t format::capacity = format::CAPACITY();                \
-        options_map format::get_options() const {                                      \
-            return options_map::parse(iod::json_encode(iod::cat(format::options,       \
+        Options format::get_options() const {                                          \
+            return Options::parse(iod::json_encode(iod::cat(format::options,           \
                                                   D(_capacity = format::capacity))));  \
         }                                                                              \
         std::size_t format::hash() const {                                             \
@@ -139,30 +139,30 @@ namespace im {
             
             /// SPOILER ALERT:
             /// static-const options_t member 'options' declared by DECLARE_OPTIONS()
-            virtual options_map get_options() const;
-            virtual options_map add_options(options_map const& opts) const;
+            virtual Options get_options() const;
+            virtual Options add_options(Options const& opts) const;
             virtual std::size_t hash() const;
             
             virtual ~ImageFormat();
             
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
-                                                options_map const& opts);
+                                                Options const& opts);
             
             virtual ImageList read_multi(byte_source* src,
                                          ImageFactory* factory,
-                                         options_map const& opts);
+                                         Options const& opts);
             
-            virtual options_map read_metadata(byte_source* src,
-                                              options_map const& opts);
+            virtual Options read_metadata(byte_source* src,
+                                              Options const& opts);
             
             virtual void write(Image& input,
                                byte_sink* output,
-                               options_map const& opts);
+                               Options const& opts);
             
             virtual void write_multi(ImageList& input,
                                      byte_sink* output,
-                                     options_map const& opts);
+                                     Options const& opts);
             
             virtual bool format_can_read() const noexcept;
             virtual bool format_can_read_multi() const noexcept;
@@ -222,7 +222,7 @@ namespace im {
                 return FormatType::options.mimetype;
             }
             
-            virtual options_map add_options(options_map const& opts) const override {
+            virtual Options add_options(Options const& opts) const override {
                 return get_options().update(opts);
             }
             

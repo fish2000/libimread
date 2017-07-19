@@ -26,7 +26,7 @@ namespace {
     using filesystem::TemporaryDirectory;
     using filesystem::path;
     
-    using Options = im::options_map;
+    using Options = im::Options;
     using HybridImage = im::HybridImage<uint8_t>;
     using HalideFactory = im::HalideFactory<uint8_t>;
     

@@ -10,68 +10,68 @@
 
 namespace im {
     
-    struct options_map : public Json {
+    struct Options : public Json {
         public:
             using Json::set;
             using Json::null;
             using Json::undefined;
             
-            options_map()
+            Options()
                 :Json()
                 { mkobject(); }
             
-            options_map(Json const& other)
+            Options(Json const& other)
                 :Json(other)
                 {}
-            options_map(Json&& other) noexcept
+            Options(Json&& other) noexcept
                 :Json(other)
                 {}
             
-            options_map(std::istream& is, bool full = true)
+            Options(std::istream& is, bool full = true)
                 :Json(is, full)
                 {}
             
             template <typename ConvertibleType,
                       typename = decltype(&ConvertibleType::to_json)>
-            options_map(ConvertibleType const& convertible)
+            Options(ConvertibleType const& convertible)
                 :Json(convertible.to_json())
                 {}
             
-            static options_map parse(std::string const&);
-            static options_map parse(char const* json) { return parse(std::string(json)); }
+            static Options parse(std::string const&);
+            static Options parse(char const* json) { return parse(std::string(json)); }
             
     };
     
-    struct options_list : public Json {
+    struct OptionsList : public Json {
         public:
             using Json::set;
             using Json::null;
             using Json::undefined;
             
-            options_list()
+            OptionsList()
                 :Json()
                 { mkarray(); }
             
-            options_list(Json const& other)
+            OptionsList(Json const& other)
                 :Json(other)
                 {}
-            options_list(Json&& other) noexcept
+            OptionsList(Json&& other) noexcept
                 :Json(other)
                 {}
             
             template <typename ConvertibleType,
                       typename = decltype(&ConvertibleType::to_json)>
-            options_list(ConvertibleType const& convertible)
+            OptionsList(ConvertibleType const& convertible)
                 :Json(convertible.to_json())
                 {}
     };
     
-    std::string get_optional_string(options_map const& opts,  std::string const& key);
-    const char* get_optional_cstring(options_map const& opts, std::string const& key);
+    std::string get_optional_string(Options const& opts,  std::string const& key);
+    const char* get_optional_cstring(Options const& opts, std::string const& key);
     
-    int get_optional_int(options_map const& opts,
+    int get_optional_int(Options const& opts,
                          std::string const& key,    int const default_value = 0);
-    bool get_optional_bool(options_map const& opts,
+    bool get_optional_bool(Options const& opts,
                            std::string const& key, bool const default_value = false);
     
 }

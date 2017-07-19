@@ -50,7 +50,7 @@ namespace py {
             } else if (PyAnySet_Check(value)) {
                 return py::options::parse_set(value);
             } else if (value == Py_None) {
-                return options_map::null;
+                return Options::null;
             } else if (PyBool_Check(value)) {
                 return py::options::truth(value);
             } else if (PyLong_Check(value)) {
@@ -86,7 +86,7 @@ namespace py {
                        BatchIterator_Check(value)) {
                 return py::ValueError(
                     "Illegal data found",
-                    options_map::undefined);
+                    Options::undefined);
             } else if (PyObject_CheckBuffer(value)) {
                 Py_buffer view;
                 PyObject_GetBuffer(value, &view, PyBUF_SIMPLE);
@@ -101,13 +101,13 @@ namespace py {
             if (!c) {
                 return py::KeyError(
                     "Misparsed map value",
-                    options_map::undefined);
+                    Options::undefined);
             }
             return c;
         }
         
-        options_list parse_list(PyObject* list) {
-            options_list out;
+        OptionsList parse_list(PyObject* list) {
+            OptionsList out;
             if (!list) { return out; }
             if (!PySequence_Check(list)) { return out; }
             py::ref sequence = PySequence_Fast(list, "Sequence expected");
@@ -122,20 +122,20 @@ namespace py {
                 return py::IOError(
                     py::ErrorName() +
                         " occurred while iterating list: " + py::ErrorMessage(),
-                    options_list::undefined);
+                    OptionsList::undefined);
             }
             return out;
         }
         
-        options_list parse_set(PyObject* set) {
-            options_list out;
+        OptionsList parse_set(PyObject* set) {
+            OptionsList out;
             if (!set) { return out; }
             if (!PyAnySet_Check(set)) { return out; }
             py::ref iterator = PyObject_GetIter(set);
             if (iterator.empty()) {
                 return py::ValueError(
                     "Set object not iterable",
-                    options_list::undefined);
+                    OptionsList::undefined);
             }
             while (py::ref item = PyIter_Next(iterator)) {
                 out.append(item.to_json());
@@ -144,13 +144,13 @@ namespace py {
                 return py::IOError(
                     py::ErrorName() +
                         " occurred while iterating set: " + py::ErrorMessage(),
-                    options_list::undefined);
+                    OptionsList::undefined);
             }
             return out;
         }
         
-        options_map parse(PyObject* dict) {
-            options_map out;
+        Options parse(PyObject* dict) {
+            Options out;
             if (!dict) { return out; }
             if (!PyMapping_Check(dict)) { return out; }
             py::ref key(false);
@@ -163,7 +163,7 @@ namespace py {
                 return py::IOError(
                     py::ErrorName() +
                         " occurred while parsing dictionary: " + py::ErrorMessage(),
-                    options_map::undefined);
+                    Options::undefined);
             }
             return out;
         }
@@ -215,7 +215,7 @@ namespace py {
         }
         
         PyObject* dump(PyObject* self, PyObject* args, PyObject* kwargs,
-                       options_map const& opts) {
+                       Options const& opts) {
             py::ref py_overwrite(false);
             py::ref py_tempfile(false);
             char const* keywords[] = { "destination", "overwrite", "tempfile", nullptr };

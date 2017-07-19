@@ -119,7 +119,7 @@ namespace im {
     
     
     std::unique_ptr<Image> TGAFormat::read(byte_source* src, ImageFactory* factory,
-                                           options_map const& opts) {
+                                           Options const& opts) {
         
         std::unique_ptr<Image> output = factory->create(bit_depth, height, width, channels);
         return output;
@@ -127,7 +127,7 @@ namespace im {
     
     
     void TGAFormat::write(Image& input, byte_sink* output,
-                          options_map const& opts) {
+                          Options const& opts) {
         /// DO IT DOUG
         bool dither = opts.cast<bool>("tga:dither", false);
         bool use_rle = opts.cast<bool>("tga:compress", false);

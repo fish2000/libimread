@@ -62,7 +62,7 @@ namespace im {
     
     std::unique_ptr<Image> HDF5Format::read(byte_source* src,
                                             ImageFactory* factory,
-                                            options_map const& opts) {
+                                            Options const& opts) {
         
         /// Internal options for our HDF5 data storage:
         path h5imagepath = opts.cast<path>("hdf5:path", path(options.datapath));
@@ -159,7 +159,7 @@ namespace im {
     
     void HDF5Format::write(Image& input,
                            byte_sink* output,
-                           options_map const& opts) {
+                           Options const& opts) {
         
         /// Internal options for our HDF5 data storage:
         path h5imagepath = opts.cast<path>("hdf5:path", path(options.datapath));

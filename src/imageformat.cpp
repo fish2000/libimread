@@ -50,7 +50,7 @@ namespace im {
     /// -- some macro called `user_error` I believe -- that won't compile.
     /// So this next method must be defined out-of-line, in a TU set up to safely call
     /// `iod::json_encode()` (as the aforementioned conflicty include file declares it)
-    options_map ImageFormat::add_options(options_map const& opts) const {
+    Options ImageFormat::add_options(Options const& opts) const {
         return ImageFormat::get_options().update(opts);
     }
     
@@ -58,30 +58,30 @@ namespace im {
     
     std::unique_ptr<Image> ImageFormat::read(byte_source* src,
                                              ImageFactory* factory,
-                                             options_map const& opts) {
+                                             Options const& opts) {
         imread_raise_default(NotImplementedError);
     }
     
     ImageList ImageFormat::read_multi(byte_source* src,
                                       ImageFactory* factory,
-                                      options_map const& opts) {
+                                      Options const& opts) {
         imread_raise_default(NotImplementedError);
     }
     
-    options_map ImageFormat::read_metadata(byte_source* src,
-                                           options_map const& opts) {
+    Options ImageFormat::read_metadata(byte_source* src,
+                                           Options const& opts) {
         imread_raise_default(NotImplementedError);
     }
     
     void ImageFormat::write(Image& input,
                             byte_sink* output,
-                            options_map const& opts) {
+                            Options const& opts) {
         imread_raise_default(NotImplementedError);
     }
     
     void ImageFormat::write_multi(ImageList& input,
                                   byte_sink* output,
-                                  options_map const& opts) {
+                                  Options const& opts) {
         imread_raise_default(NotImplementedError);
     }
     

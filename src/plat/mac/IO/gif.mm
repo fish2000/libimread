@@ -17,7 +17,7 @@ namespace im {
     ImageList GIFFormat::read_impl(byte_source* src,
                                    ImageFactory* factory,
                                    bool is_multi,
-                                   options_map const& opts) {
+                                   Options const& opts) {
         
         /// byte_source* src -> CFDataRef
         /// N.B. using kCFAllocatorNull as the fourth parameter ensures that no deallocator

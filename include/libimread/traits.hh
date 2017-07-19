@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <libimread/libimread.hpp>
 
-//#define TEST_ARGS byte_source*, ImageFactory*, const options_map&
+//#define TEST_ARGS byte_source*, ImageFactory*, const Options&
 #define TEST_ARGS T
 
 namespace im {

@@ -107,7 +107,7 @@ namespace im {
     
     void GIFFormat::write(Image& input,
                           byte_sink* output,
-                          options_map const& opts) {
+                          Options const& opts) {
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink();
@@ -126,7 +126,7 @@ namespace im {
     
     void GIFFormat::write_multi(ImageList& input,
                                 byte_sink* output,
-                                options_map const& opts) {
+                                Options const& opts) {
         /// Pre-compute ImageList sizes
         input.compute_sizes();
         
