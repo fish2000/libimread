@@ -202,7 +202,8 @@ namespace im {
             
             Halide::Type type()                                 { return factory_type; }
             std::string const& name()                           { return factory_name; }
-            std::string const& name(std::string const& nm)      { factory_name = nm; return name(); }
+            std::string const& name(std::string const& nm)      { factory_name = nm;
+                                                                  return factory_name; }
             
         protected:
             virtual unique_t create(int nbits,
@@ -218,12 +219,12 @@ namespace im {
     
     namespace halide {
         
-        static const options_map halide_default_opts;
+        static const options_map empty_opts;
         
         template <typename T = byte> inline
         HybridImage<T> read(std::string const& filename,
-                            options_map const& opts = halide_default_opts) {
-            HalideFactory<T> factory(filename);
+                            options_map const& opts = empty_opts) {
+            HalideFactory<T> factory;
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
             std::unique_ptr<Image> output = format->read(input.get(), &factory,
@@ -235,20 +236,19 @@ namespace im {
         
         template <typename T = byte> inline
         std::unique_ptr<Image> unique(std::string const& filename,
-                                      options_map const& opts = halide_default_opts) {
-            HalideFactory<T> factory(filename);
+                                      options_map const& opts = empty_opts) {
+            HalideFactory<T> factory;
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
             std::unique_ptr<Image> out = format->read(input.get(), &factory,
                                                       format->add_options(opts));
-            // out->set_host_dirty();
             return out;
         }
         
         template <typename T = byte> inline
         ImageList read_multi(std::string const& filename,
-                             options_map const& opts = halide_default_opts) {
-            HalideFactory<T> factory(filename);
+                             options_map const& opts = empty_opts) {
+            HalideFactory<T> factory;
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSource> input(new FileSource(filename));
             return format->read_multi(input.get(), &factory,
@@ -257,7 +257,7 @@ namespace im {
         
         template <typename T = byte> inline
         void write(HybridImage<T>& input, std::string const& filename,
-                                          options_map const& opts = halide_default_opts) {
+                                          options_map const& opts = empty_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write(dynamic_cast<Image&>(input), output.get(),
@@ -265,7 +265,7 @@ namespace im {
         }
         
         inline void write_multi(ImageList& input, std::string const& filename,
-                                                  options_map const& opts = halide_default_opts) {
+                                                  options_map const& opts = empty_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<FileSink> output(new FileSink(filename));
             format->write_multi(input, output.get(),
@@ -273,20 +273,20 @@ namespace im {
         }
         
         inline void write_multi_handle(ImageList& input, std::string const& filename,
-                                                  options_map const& opts = halide_default_opts) {
+                                                         options_map const& opts = empty_opts) {
             std::unique_ptr<ImageFormat> format(for_filename(filename));
             std::unique_ptr<handle::sink> output(new handle::sink(filename));
             format->write_multi(input, output.get(),
                                 format->add_options(opts));
         }
         
-        template <typename Format, typename T = byte> inline
+        template <typename FormatType, typename T = byte> inline
         std::string tmpwrite(HybridImage<T>& input,
-                             options_map const& opts = halide_default_opts) {
+                             options_map const& opts = empty_opts) {
             using filesystem::TemporaryName;
-            TemporaryName tn(Format::suffix(true), false); /// cleanup on scope exit
+            TemporaryName tn(FormatType::suffix(true), false); /// cleanup on scope exit
             std::string out = tn.do_not_destroy();
-            std::unique_ptr<ImageFormat> format(new Format);
+            std::unique_ptr<ImageFormat> format(new FormatType);
             std::unique_ptr<FileSink> output(new FileSink(out));
             format->write(dynamic_cast<Image&>(input), output.get(),
                           format->add_options(opts));

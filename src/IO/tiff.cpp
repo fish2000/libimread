@@ -19,6 +19,8 @@ namespace im {
     DECLARE_FORMAT_OPTIONS(STKFormat);
     DECLARE_FORMAT_OPTIONS(TIFFFormat);
     
+    using tiff_read_f = std::add_pointer_t<tsize_t(thandle_t, void*, tsize_t)>;
+    
     namespace {
         
         void show_tiff_warning(const char* module, const char* fmt, va_list ap) {
@@ -110,17 +112,17 @@ namespace im {
         struct tiff_warn_error {
             /// Newer versions of TIFF seem to call this TIFFWarningHandler,
             /// but older versions do not have this type
-            using tiff_handler_type = std::add_pointer_t<void(char const* module,
-                                                              char const* fmt,
-                                                              va_list ap)>;
+            using tiff_handler_f = std::add_pointer_t<void(char const* module,
+                                                           char const* fmt,
+                                                           va_list ap)>;
             
-            tiff_handler_type warning_handle;
-            tiff_handler_type error_handle;
+            tiff_handler_f warning_handle;
+            tiff_handler_f error_handle;
             
             tiff_warn_error()
                 :warning_handle(TIFFSetWarningHandler(show_tiff_warning))
                 ,error_handle(TIFFSetErrorHandler(tiff_error))
-            { }
+                {}
             
             ~tiff_warn_error() {
                 TIFFSetWarningHandler(warning_handle);
@@ -243,7 +245,7 @@ namespace im {
         const uint32_t h                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
         const uint32_t w                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGEWIDTH);
         const uint16_t nr_samples           = tiff_get<uint16_t>(t, TIFFTAG_SAMPLESPERPIXEL, options.readopts.samples_per_pixel);
-        const uint16_t bits_per_sample      = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE, options.readopts.bits_per_sample);
+        const uint16_t bits_per_sample      = tiff_get<uint16_t>(t, TIFFTAG_BITSPERSAMPLE,   options.readopts.bits_per_sample);
         
         const int depth = nr_samples > 1 ? nr_samples : 1;
         const int strip_size = TIFFStripSize(t.tif);
@@ -271,7 +273,9 @@ namespace im {
             if (Metadata* metaout = dynamic_cast<Metadata*>(output.get())) {
                 std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
                                                                    options.metadata);
-                metaout->set_meta(description);
+                if (description.size()) {
+                    metaout->set_meta(description);
+                }
             }
             
             byte* start = output->rowp_as<byte>(0);
@@ -318,7 +322,9 @@ namespace im {
             if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
                 std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
                                                                    options.metadata);
-                meta->set_meta(description);
+                if (description.size()) {
+                    meta->set_meta(description);
+                }
             }
             
             if (bits_per_sample == 8) {
@@ -520,10 +526,9 @@ namespace im {
     
     void TIFFFormat::do_write(ImageList& input, byte_sink* output, bool is_multi, options_map const& opts) {
         tiff_warn_error twe;
-        tsize_t (*read_function)(thandle_t, void*, tsize_t) =
-             (dynamic_cast<byte_source*>(output) ?
-                                tiff_read_from_writer :
-                                tiff_no_read);
+        tiff_read_f read_function = dynamic_cast<byte_source*>(output) ?
+                                    tiff_read_from_writer :
+                                    tiff_no_read;
         
         tif_holder t = TIFFClientOpen(
                         "internal",

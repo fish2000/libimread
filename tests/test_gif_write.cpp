@@ -152,8 +152,6 @@ namespace {
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
-        // std::size_t sequence_count = sequence.size();
-        
         std::for_each(sequence.begin(), sequence.end(),
                   [&](path const& p) {
             HybridImage* halim = new HybridImage(im::halide::read((basedir/p).str()));
@@ -168,8 +166,27 @@ namespace {
             inlist = gif_format->read_multi(source.get(),
                                             factory.get(),
                                             gif_format->add_options(read_options));
-            REQUIRE(inlist.size() == sequence.size());
         }
+        
+        /// confirm the frame counts match:
+        REQUIRE(inlist.size() == sequence.size());
+        REQUIRE(inlist.size() == outlist.size());
+        
+        /// confirm lack of pre-computed image sizes:
+        CHECK(inlist.width() == -1);
+        CHECK(inlist.height() == -1);
+        CHECK(inlist.planes() == -1);
+        // CHECK(outlist.width() == -1);
+        // CHECK(outlist.height() == -1);
+        // CHECK(outlist.planes() == -1);
+        
+        /// check computed image sizes:
+        inlist.compute_sizes();
+        // outlist.compute_sizes();
+        
+        CHECK(inlist.width() == outlist.width());
+        CHECK(inlist.height() == outlist.height());
+        CHECK(inlist.planes() == outlist.planes());
         
     }
     
