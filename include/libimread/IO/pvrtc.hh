@@ -16,7 +16,6 @@ namespace im {
             using can_read = std::true_type;
             
             /// PVRTC "magic" tag is internal
-            /// SIGNATURE("4\x00\x00\x00", 4)
             DECLARE_OPTIONS(
                 _signatures = { 0x21525650 },
                 _suffixes = { "pvr", "pvrtc" },
