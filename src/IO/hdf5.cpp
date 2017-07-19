@@ -138,16 +138,6 @@ namespace im {
             int val_stride1 = stride1.typed_read<int>();
             int val_stride2 = stride2.typed_read<int>();
             
-            // WTF("Reading attributes:",
-            //     FF("\tnbits: %i",   val_nbits),
-            //     FF("\tndims: %i",   val_ndims),
-            //     FF("\tdim0: %i",    val_dim0),
-            //     FF("\tdim1: %i",    val_dim1),
-            //     FF("\tdim2: %i",    val_dim2),
-            //     FF("\tstride0: %i", val_stride0),
-            //     FF("\tstride1: %i", val_stride1),
-            //     FF("\tstride2: %i", val_stride2));
-            
             meta->set("nbits",   std::to_string(val_nbits));
             meta->set("ndims",   std::to_string(val_ndims));
             meta->set("dim0",    std::to_string(val_dim0));
@@ -259,16 +249,6 @@ namespace im {
                 imread_raise(CannotWriteError,
                     "Error writing HDF5 dataset bytes (via memory dataspaces) to disk");
             }
-            
-            // WTF("Writing attributes:",
-            //     FF("\tnbits: %i",   nbits.typed_write(input.nbits())),
-            //     FF("\tndims: %i",   ndims.typed_write(input.ndims())),
-            //     FF("\tdim0: %i",    dim0.typed_write(input.dim(0))),
-            //     FF("\tdim1: %i",    dim1.typed_write(input.dim(1))),
-            //     FF("\tdim2: %i",    dim2.typed_write(input.dim(2))),
-            //     FF("\tstride0: %i", stride0.typed_write(input.stride(0))),
-            //     FF("\tstride1: %i", stride1.typed_write(input.stride(1))),
-            //     FF("\tstride2: %i", stride2.typed_write(input.stride(2))));
             
             nbits.typed_write(input.nbits());
             ndims.typed_write(input.ndims());
