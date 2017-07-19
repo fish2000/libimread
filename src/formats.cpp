@@ -6,16 +6,7 @@
 #include <libimread/errors.hh>
 #include <libimread/formats.hh>
 
-#include <libimread/IO/bmp.hh>
-#include <libimread/IO/gif.hh>
-#include <libimread/IO/hdf5.hh>
-#include <libimread/IO/jpeg.hh>
-#include <libimread/IO/lsm.hh>
-#include <libimread/IO/png.hh>
-#include <libimread/IO/ppm.hh>
-#include <libimread/IO/pvrtc.hh>
-#include <libimread/IO/tiff.hh>
-#include <libimread/IO/webp.hh>
+#include <libimread/IO/all.hh>
 
 namespace im {
     

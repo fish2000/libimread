@@ -12,6 +12,8 @@
 #include <libimread/symbols.hh>
 #include <iod/json.hh>
 
+#include <libimread/IO/all.hh>
+
 #include "include/catch.hpp"
 
 namespace {

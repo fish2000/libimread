@@ -100,6 +100,7 @@ set(hdrs
     ${hdrs_dir}/ext/valarray.hh
     ${hdrs_dir}/ext/WriteGIF.hh
     
+    ${hdrs_dir}/IO/all.hh
     ${hdrs_dir}/IO/ansi.hh
     ${hdrs_dir}/IO/bmp.hh
     ${hdrs_dir}/IO/gif.hh
