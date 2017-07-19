@@ -18,7 +18,7 @@ namespace im {
         using stringvec_t = std::vector<std::string>;
         using filesystem::path;
         
-        namespace {
+        namespace detail {
             
             inline static std::string get_includes(std::string const& inclist) {
                 stringvec_t incvec, outvec;
@@ -33,7 +33,11 @@ namespace im {
                 std::reverse(incvec.begin(), incvec.end());
                 outvec.reserve(incvec.size());
                 std::for_each(incvec.begin(), incvec.end(),
-                    [&outvec](std::string const& p) { outvec.emplace_back(path::real(p).str()); });
+                    [&outvec](std::string const& p) {
+                    if (path::is_directory(p)) {
+                        outvec.emplace_back(path::real(p).str());
+                    }
+                });
                 return "-I" + pystring::join(" -I", outvec);
             }
             
@@ -60,12 +64,12 @@ namespace im {
             
         }
         
-        const std::string version = IM_VERSION;
+        const std::string version(IM_VERSION);
         
-        const std::string prefix = IM_INSTALL_PREFIX;
-        const std::string exec_prefix = IM_INSTALL_PREFIX;
-        const std::string includes = get_includes(IM_INCLUDE_DIRECTORIES);
-        const std::string libs = get_libs(IM_LINK_LIBRARIES);
+        const std::string prefix(IM_INSTALL_PREFIX);
+        const std::string exec_prefix(IM_INSTALL_PREFIX);
+        const std::string includes = detail::get_includes(IM_INCLUDE_DIRECTORIES);
+        const std::string libs = detail::get_libs(IM_LINK_LIBRARIES);
         
         const std::string cflags = std::string(IM_COMPILE_OPTIONS) + " "
                                  + std::string(IM_COMPILE_FLAGS) + " "

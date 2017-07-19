@@ -1,5 +1,8 @@
+#!/usr/bin/env python
 
 import numpy
+# from PIL.Image import Image as PILImage
+# from PIL import Image.Image as PILImage
 from PIL.Image import Image as PILImage
 
 from im.im import (
@@ -22,10 +25,23 @@ types = (HybridImage,
          PILImage,
          numpy.ndarray)
 
+constraints = {}
+
+class ConstraintRegistrar(type):
+    
+    DEFAULT = u'constraint'
+    
+    def __new__(cls, name, bases, attrs):
+        json_name = attrs.get('json_name', cls.DEFAULT)
+        if json_name != cls.DEFAULT:
+            constraints.update({ json_name : cls })
+        return super(ConstraintRegistrar, cls).__new__(name, bases, attrs)
 
 class ConstraintBase(object):
     
-    json_name = u'constraint'
+    __metaclass__ = ConstraintRegistrar
+    
+    json_name = ConstraintRegistrar.DEFAULT
     valid_modifiers = [None]
     
     @property
@@ -46,46 +62,53 @@ class TypeConstraintList(ConstraintBase):
 
 class BatchSizeConstraint(ConstraintBase):
     json_name = u'batch_size'
-    valid_modifiers = ['lt', 'gt', 'lte', 'gte', None]
+    valid_modifiers = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', None]
 
 class WidthConstraint(ConstraintBase):
     json_name = u'width'
-    valid_modifiers = ['lt', 'gt', 'lte', 'gte', None]
+    valid_modifiers = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', None]
 
 class HeightConstraint(ConstraintBase):
     json_name = u'height'
-    valid_modifiers = ['lt', 'gt', 'lte', 'gte', None]
+    valid_modifiers = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', None]
 
 class PlanesConstraint(ConstraintBase):
     json_name = u'planes'
-    valid_modifiers = ['lt', 'gt', 'lte', 'gte', None]
+    valid_modifiers = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', None]
 
 class SizeConstraint(ConstraintBase):
     json_name = u'size'
-    valid_modifiers = ['lt', 'gt', 'lte', 'gte', None]
+    valid_modifiers = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', None]
 
 class DimensionsConstraint(ConstraintBase):
     json_name = u'dimensions'
-    valid_modifiers = ['lt', 'gt', 'lte', 'gte', None]
+    valid_modifiers = ['eq', 'ne', 'lt', 'gt', 'lte', 'gte', None]
 
 class constrain(object):
     """ Declarative constraint operator. """
+    
+    __declarative__ = True
     
     class StipulationError(Exception):
         """ Raised when a nonsensical constraint stipulation is parsed.
         """
         pass
     
-    NOTIONS = ('item_type', 'item_types',
+    NOTIONS = ('size',
                'batch_size',
+               'item_type', 'item_types',
                'width', 'height', 'planes', 'size', 'dimensions',
-               'input_format', 'input_formats',
+               'input_format',  'input_formats',
                'output_format', 'output_formats',
                'unique_items',
                'value',
-               'alpha')
+               'alpha', None)
     
-    MODIFIERS = ('not', 'lt', 'gt', 'lte', 'gte', None)
+    MODIFIERS = ('not',
+                 'eq',  'ne',
+                 'lt',  'gt',
+                 'lte', 'gte', None)
+    
     DIVIDER = '__'
     
     @staticmethod
@@ -103,7 +126,8 @@ class constrain(object):
             segments = stipulation.count(self.DIVIDER)
             if (segments == 0):
                 notion = stipulation
-                custom_value = modifier = None
+                custom_value = None
+                modifier = None
             elif (segments == 1):
                 notion, modifier = stipulation.split(self.DIVIDER)
                 custom_value = None
@@ -141,7 +165,20 @@ class constrain(object):
 
 
 class Constrainer(type):
-    pass
+    
+    def __new__(cls, name, bases, attrs):
+        # from copy import deepcopy
+        super_new = super(Constrainer, cls).__new__
+        notions = {}
+        notional = []
+        for name, attr in attrs.items():
+            if name:
+                if type(attr) == constrain:
+                    notions.update(attr.all())
+                    notional.append(name)
+        for name in notional:
+            del attrs[name]
+        return super_new(name, bases, attrs)
 
 class ConstrainedBatch(NativeBatch, object):
     __metaclass__ = Constrainer

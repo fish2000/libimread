@@ -96,9 +96,9 @@ namespace im {
          srsly(char const* title, ansi::ANSI const& color,
                char const* file, int line, Args&& ...args) {
         std::cerr  << color << im::stringify(title) << ansi::reset
-          << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
+          << "[ "  << ansi::yellow << im::stringify(file) << ansi::reset
           << " : " << ansi::red << im::stringify(line) << ansi::reset
-          << " ]:" << std::endl
+          << " ]"  << std::endl
                    << im::stringmerge(std::forward<Args>(args)...)
                    << std::endl;
     }
@@ -109,9 +109,9 @@ namespace im {
                char const* file, int line, Args&& ...args) {
         std::ostringstream errstream;
         errstream  << color << im::stringify(title) << ansi::reset
-          << " [ " << ansi::yellow << im::stringify(file) << ansi::reset
+          << "[ "  << ansi::yellow << im::stringify(file) << ansi::reset
           << " : " << ansi::red << im::stringify(line) << ansi::reset
-          << " ]:" << std::endl
+          << " ]"  << std::endl
                    << im::stringmerge(std::forward<Args>(args)...)
                    << std::endl;
         return errstream.str();
@@ -155,8 +155,8 @@ namespace im {
     if (!(condition)) {                                                                 \
         im::srsly("\n(ASSERT FAILURE) [ " ST(condition) " ]\n",                         \
             ansi::lightyellow, __FILE__, __LINE__,                                      \
-                FF("\tIn function: %s%s%s",                                             \
-                    ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),      \
+                FF("    In function: %s %s %s\n",                                       \
+                    ansi::yellow.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),    \
                 __VA_ARGS__);                                                           \
         std::exit(-1);                                                                  \
     }
@@ -166,8 +166,8 @@ namespace im {
 #define imread_raise_default(Exception)                                                 \
     throw im::Exception(im::emerg("\n[ ERROR > " ST(Exception) " ]\n",                  \
         ansi::lightred, __FILE__, __LINE__,                                             \
-            FF("\tIn function: %s%s%s",                                                 \
-                ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),          \
+            FF("    In function: %s %s %s\n",                                           \
+                ansi::red.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),           \
             FF("\t%s", im::Exception::default_message)));
 #endif /// imread_raise_default
 
@@ -175,8 +175,8 @@ namespace im {
 #define imread_raise(Exception, ...)                                                    \
     throw im::Exception(im::emerg("\n[ ERROR > " ST(Exception) " ]\n",                  \
         ansi::lightred, __FILE__, __LINE__,                                             \
-            FF("\tIn function: %s%s%s",                                                 \
-                ansi::bold.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),          \
+            FF("    In function: %s %s %s\n",                                           \
+                ansi::red.c_str(), __PRETTY_FUNCTION__, ansi::reset.c_str()),           \
             __VA_ARGS__));
 #endif /// imread_raise
 

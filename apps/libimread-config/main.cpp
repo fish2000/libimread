@@ -8,14 +8,14 @@
 static const char USAGE[] = R"(Configuration information tool for libimread
 
     Usage:
-      libimread-config (--prefix          |
-                        --exec_prefix     |
-                        --includes        |
-                        --libs            |
-                        --cflags          |
-                        --ldflags)
-      libimread-config (-h | --help)
-      libimread-config --version
+      imread-config (--prefix          |
+                     --exec_prefix     |
+                     --includes        |
+                     --libs            |
+                     --cflags          |
+                     --ldflags)
+      imread-config (-h | --help)
+      imread-config --version
     
     Options:
       --prefix        Show install prefix e.g. /usr/local.
@@ -31,7 +31,7 @@ static const char USAGE[] = R"(Configuration information tool for libimread
 
 )";
 
-static const std::string VERSION = "libimread-config ";
+static const std::string VERSION = "imread-config ";
 
 #define MATCH_CONFIG_FLAG(flagname)                         \
     if (arg.first == "--" # flagname) {                     \
