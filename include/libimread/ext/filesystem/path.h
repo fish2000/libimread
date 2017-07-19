@@ -734,6 +734,6 @@ namespace std {
         
     };
     
-}; /* namespace std */
+} /* namespace std */
 
 #endif /// LIBIMREAD_EXT_FILESYSTEM_PATH_H_

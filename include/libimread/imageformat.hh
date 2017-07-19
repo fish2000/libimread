@@ -43,7 +43,8 @@ namespace im {
     
     #define DECLARE_OPTIONS(...)                                                       \
         DECLARE_BASE_OPTIONS(__VA_ARGS__);                                             \
-        virtual options_map get_options() const override;
+        virtual options_map get_options() const override;                              \
+        virtual std::size_t hash() const override;
     
     #define SIGNATURE(bytes, length)                                                   \
         D(_bytes    = base64::encode(bytes, length),                                   \
@@ -62,10 +63,14 @@ namespace im {
             return options_map::parse(iod::json_encode(iod::cat(format::options,       \
                                                   D(_capacity = format::capacity))));  \
         }                                                                              \
+        std::size_t format::hash() const {                                             \
+            std::hash<std::string> hasher;                                             \
+            return hasher(format::classname);                                          \
+        }                                                                              \
         namespace {                                                                    \
             ImageFormat::Registrar<format> format##Registrar(                          \
                                            format::options.suffixes[0]);               \
-        };
+        }
     
     /// ... those macros also set your format up to register its class (see below).
     
@@ -136,6 +141,7 @@ namespace im {
             /// static-const options_t member 'options' declared by DECLARE_OPTIONS()
             virtual options_map get_options() const;
             virtual options_map add_options(options_map const& opts) const;
+            virtual std::size_t hash() const;
             
             virtual ~ImageFormat();
             
@@ -248,5 +254,23 @@ namespace im {
     };
 
 }
+
+namespace std {
+    
+    /// std::hash specialization for im::ImageFormat
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<im::ImageFormat> {
+        
+        typedef im::ImageFormat argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const&) const;
+        
+    };
+    
+} /* namespace std */
 
 #endif /// LIBIMREAD_IMAGEFORMAT_HH_

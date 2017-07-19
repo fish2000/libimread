@@ -96,4 +96,17 @@ namespace im {
         static ImageFormat::registry_t registry_impl;
         return registry_impl;
     }
-}
+    
+} /* namespace im */
+
+namespace std {
+    
+    using format_hasher_t = std::hash<im::ImageFormat>;
+    using format_arg_t = format_hasher_t::argument_type;
+    using format_out_t = format_hasher_t::result_type;
+    
+    format_out_t format_hasher_t::operator()(format_arg_t const& format) const {
+        return static_cast<format_out_t>(format.hash());
+    }
+    
+} /* namespace std */

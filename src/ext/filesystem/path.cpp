@@ -1143,4 +1143,4 @@ namespace std {
         return seed;
     }
     
-}; /* namespace std */
+} /* namespace std */
