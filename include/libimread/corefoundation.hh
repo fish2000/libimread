@@ -70,7 +70,6 @@ namespace store {
             cfdict(cfdict const&);
             cfdict(cfdict&&) noexcept;
             explicit cfdict(CFDictionaryRef);
-            // explicit cfdict(CFMutableDictionaryRef);
             virtual ~cfdict();
         
         protected:
