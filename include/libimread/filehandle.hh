@@ -33,6 +33,7 @@ namespace im {
             
             /// im::seekable methods
             virtual bool can_seek() const noexcept override;
+            virtual bool can_store() const noexcept override;
             virtual std::size_t seek_absolute(std::size_t pos) override;
             virtual std::size_t seek_relative(int delta) override;
             virtual std::size_t seek_end(int delta) override;

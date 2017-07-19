@@ -63,6 +63,7 @@ namespace im {
     fd_source_sink::~fd_source_sink() { close(); }
     
     bool fd_source_sink::can_seek() const noexcept { return true; }
+    bool fd_source_sink::can_store() const noexcept { return true; }
     
     std::size_t fd_source_sink::seek_absolute(std::size_t pos) { return ::lseek(descriptor, pos, SEEK_SET); }
     std::size_t fd_source_sink::seek_relative(int delta) { return ::lseek(descriptor, delta, SEEK_CUR); }

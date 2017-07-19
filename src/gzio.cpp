@@ -93,6 +93,7 @@ namespace im {
     gzio_source_sink::~gzio_source_sink() { close(); }
     
     bool gzio_source_sink::can_seek() const noexcept { return true; } /// -ish (see SEEK_END note below)
+    bool gzio_source_sink::can_store() const noexcept { return true; }
     
     std::size_t gzio_source_sink::seek_absolute(std::size_t pos) { return ::gzseek(gzhandle, pos, SEEK_SET); }
     std::size_t gzio_source_sink::seek_relative(int delta) { return ::gzseek(gzhandle, delta, SEEK_CUR); }
