@@ -64,7 +64,7 @@ namespace im {
                                                   D(_capacity = format::capacity))));  \
         }                                                                              \
         std::size_t format::hash() const {                                             \
-            std::hash<std::string> hasher;                                             \
+            static std::hash<std::string> hasher;                                      \
             return hasher(format::classname);                                          \
         }                                                                              \
         namespace {                                                                    \
