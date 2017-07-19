@@ -1121,4 +1121,26 @@ namespace std {
         p0.swap(p1);
     }
     
+    using path_hasher_t = std::hash<filesystem::path>;
+    using path_arg_t = path_hasher_t::argument_type;
+    using path_out_t = path_hasher_t::result_type;
+    
+    path_out_t path_hasher_t::operator()(path_arg_t const& p) const {
+        return static_cast<path_out_t>(p.hash());
+    }
+    
+    using inode_hasher_t = std::hash<filesystem::detail::inode_t>;
+    using inode_arg_t = inode_hasher_t::argument_type;
+    using inode_out_t = inode_hasher_t::result_type;
+    
+    /// adapted from boost methodology for std::pair<…> hashing -- q.v. sub.
+    /// http://www.boost.org/doc/libs/1_64_0/doc/html/hash/reference.html#idp509100048-bb
+    inode_out_t inode_hasher_t::operator()(inode_arg_t const& inode) const {
+        using namespace ::hash;
+        inode_out_t seed = 0;
+        rehash(seed, inode.first);
+        rehash(seed, inode.second);
+        return seed;
+    }
+    
 }; /* namespace std */

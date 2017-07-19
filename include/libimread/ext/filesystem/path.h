@@ -720,9 +720,17 @@ namespace std {
         typedef filesystem::path argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type const& p) const {
-            return static_cast<result_type>(p.hash());
-        }
+        result_type operator()(argument_type const&) const;
+        
+    };
+    
+    template <>
+    struct hash<filesystem::detail::inode_t> {
+        
+        typedef filesystem::detail::inode_t argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const&) const;
         
     };
     
