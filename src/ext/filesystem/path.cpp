@@ -101,7 +101,7 @@ namespace filesystem {
             return std::string(pbuf, res);
         }
         
-        uint64_t execstarttime() noexcept {
+        timepoint_t execstarttime() noexcept {
             /// Returns the calling process’ startup time as a UNIX timestamp,
             /// using getpid(), sysctl(), `struct kinfo_proc`, and `struct timeval` --
             /// Adapted from https://github.com/ibireme/tmp/blob/master/snippet/app_startup.m:
@@ -119,11 +119,11 @@ namespace filesystem {
                                   &kinfo, &size,
                                   nullptr, 0);
             
-            if (result != 0) { return 0; } /// ERROR!
+            if (result != 0) { return clock_t::from_time_t(0); } /// ERROR!
             
             timeval_t* tv = &kinfo.kp_proc.p_un.__p_starttime;
             uint64_t ts = (tv->tv_sec * static_cast<uint64_t>(1000)) + (tv->tv_usec / 1000);
-            return ts;
+            return clock_t::from_time_t(ts);
         }
         
         ssize_t copyfile(char const* source, char const* destination) {
@@ -526,8 +526,8 @@ namespace filesystem {
         });
     }
     
-    bool path::operator==(path const& other) const { return compare(other); }
-    bool path::operator!=(path const& other) const { return !compare(other); }
+    bool path::operator==(path const& other) const { return bool(hash() == other.hash()); }
+    bool path::operator!=(path const& other) const { return bool(hash() != other.hash()); }
     
     bool path::exists() const {
         return ::access(c_str(), F_OK) != -1;
@@ -1036,7 +1036,7 @@ namespace filesystem {
     path& path::operator=(path&& p) noexcept {
         if (hash() != p.hash()) {
             m_absolute = p.m_absolute;
-            m_path = std::move(p.m_path);
+            m_path = std::exchange(p.m_path, detail::stringvec_t{});
         }
         return *this;
     }
@@ -1073,8 +1073,8 @@ namespace filesystem {
     
     void path::swap(path& other) noexcept {
         using std::swap;
-        swap(m_path,     other.m_path);
         swap(m_absolute, other.m_absolute);
+        swap(m_path,     other.m_path);
     }
     
     detail::stringvec_t path::components() const {

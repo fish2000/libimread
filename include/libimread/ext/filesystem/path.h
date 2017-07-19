@@ -21,23 +21,24 @@ namespace filesystem {
     
     namespace detail {
         
-        std::string tmpdir() noexcept;
-        std::string userdir() noexcept;
-        std::string syspaths() noexcept;
-        std::string execpath() noexcept;
-        uint64_t execstarttime() noexcept;
-        ssize_t copyfile(char const*, char const*);
-        
-        /// return type for path::list(), when called with a detail::list_separate_t tag
+        /// public path-related types
         using pathvec_t = std::vector<path>;
         using pathlist_t = std::initializer_list<path>;
         using stringvec_t = std::vector<std::string>;
         using stringlist_t = std::initializer_list<std::string>;
-        using vector_pair_t = std::pair<stringvec_t, stringvec_t>;
+        using vector_pair_t = std::pair<stringvec_t, stringvec_t>;      /// return type for path::list(detail::list_separate_t{})
         using clock_t = std::chrono::system_clock;
         using timepoint_t = std::chrono::time_point<clock_t>;
         using time_triple_t = std::tuple<timepoint_t, timepoint_t, timepoint_t>;
         using inode_t = std::pair<uint64_t, uint64_t>;
+        
+        /// utility functions that wrap system calls
+        std::string tmpdir() noexcept;
+        std::string userdir() noexcept;
+        std::string syspaths() noexcept;
+        std::string execpath() noexcept;
+        timepoint_t execstarttime() noexcept;
+        ssize_t copyfile(char const*, char const*);
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
         /// instead of plain ol' pathvec_t
@@ -639,10 +640,10 @@ namespace filesystem {
             operator char const*() const;
             
             /// less-than operator -- allows the use of filesystem::path in e.g. std::map
-            bool operator<(path const& rhs) const noexcept;
+            bool operator<(path const&) const noexcept;
             
             /// Set and tokenize the path using a std::string (mainly used internally)
-            void set(std::string const& str);
+            void set(std::string const&);
             
             /// ... and here, we have the requisite assign operators
             path& operator=(std::string const&);
@@ -654,7 +655,7 @@ namespace filesystem {
             path& operator=(detail::stringlist_t);
             
             /// Stringify the path to an ostream
-            friend std::ostream& operator<<(std::ostream& os, path const& p);
+            friend std::ostream& operator<<(std::ostream&, path const&);
             
             /// calculate the hash value for the path
             size_type hash() const noexcept;
@@ -666,7 +667,7 @@ namespace filesystem {
             }
             
             /// no-except member swap
-            void swap(path& other) noexcept;
+            void swap(path&) noexcept;
             
             /// path component vector
             detail::stringvec_t components() const;
@@ -707,7 +708,7 @@ namespace filesystem {
 namespace std {
     
     template <>
-    void swap(filesystem::path& p0, filesystem::path& p1) noexcept;
+    void swap(filesystem::path&, filesystem::path&) noexcept;
     
     /// std::hash specialization for filesystem::path
     /// ... following the recipe found here:
