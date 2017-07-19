@@ -59,7 +59,7 @@ namespace im {
                 stringvec_t incvec, outvec;
                 pystring::split(
                     pystring::replace(inclist,
-                                      IM_CMAKE_BINARY_DIR,
+                                      path(IM_CMAKE_BINARY_DIR).parent().str(),
                                       IM_INSTALL_PREFIX),
                                       incvec, ";");
                 std::sort(incvec.begin(), incvec.end());
@@ -83,7 +83,7 @@ namespace im {
                 stringvec_t libvec, outvec;
                 pystring::split(
                     pystring::replace(liblist,
-                                      IM_CMAKE_BINARY_DIR,
+                                      path(IM_CMAKE_BINARY_DIR).parent().str(),
                                       IM_INSTALL_PREFIX),
                                       libvec, ";");
                 std::sort(libvec.begin(), libvec.end());
