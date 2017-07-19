@@ -55,9 +55,13 @@ namespace im {
                 outvec.reserve(libvec.size());
                 std::for_each(libvec.begin(), libvec.end(),
                     [&outvec](std::string const& p) {
-                        /// N.B. this resolves library-versioning symlinks,
-                        /// which may be undesirable:
-                        outvec.emplace_back(pystring::endswith(p, IM_DYLIB_SUFFIX) ? path::real(p).str() : p);
+                    /// N.B. this resolves library-versioning symlinks,
+                    /// which may be undesirable:
+                    if (pystring::endswith(p, IM_DYLIB_SUFFIX) && path::is_file(p)) {
+                        outvec.emplace_back(path::real(p).str());
+                    } else {
+                        outvec.emplace_back(p);
+                    }
                 });
                 return "-l" + pystring::join(" -l", outvec);
             }
