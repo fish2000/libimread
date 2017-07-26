@@ -6,10 +6,18 @@
 
 #include <string>
 #include <sstream>
+#include <unordered_set>
+#include <unordered_map>
+#include <initializer_list>
+
 #include <libimread/ext/JSON/json11.h>
 #include <libimread/store.hh>
 
 using detail::stringvec_t;
+using prefixset_t  = std::unordered_set<std::string>;
+using prefixgram_t = std::unordered_map<std::string, std::size_t>;
+using string_init_t = std::initializer_list<std::string>;
+using stringpair_init_t = std::initializer_list<std::pair<std::string, std::string>>;
 
 namespace im {
     
@@ -33,6 +41,7 @@ namespace im {
             Options(Json const&);
             Options(Json&&) noexcept;
             Options(std::istream& is, bool full = true);
+            Options(stringpair_init_t);
             virtual ~Options();
             
         public:
@@ -58,6 +67,17 @@ namespace im {
                           virtual bool del(std::string const&);
                    virtual std::size_t count() const;
                    virtual stringvec_t list() const;
+        
+        public:
+            virtual std::size_t count(std::string const& prefix,
+                                      std::string const& separator) const;
+            virtual std::size_t prefixcount(std::string const& prefix,
+                                            std::string const& separator = ":") const;
+        
+        public:
+            prefixset_t   prefixset(std::string const& separator = ":") const;
+            prefixgram_t prefixgram(std::string const& separator = ":") const;
+        
     };
     
     struct OptionsList final : public Json {
@@ -71,6 +91,7 @@ namespace im {
             OptionsList(Json const& other);
             OptionsList(Json&& other) noexcept;
             OptionsList(std::istream& is, bool full = true);
+            OptionsList(string_init_t);
             virtual ~OptionsList();
             
         public:
