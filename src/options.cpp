@@ -7,6 +7,8 @@
 #include <libimread/libimread.hpp>
 #include <libimread/options.hh>
 
+#define STRINGNULL() stringmapper::base_t::null_value()
+
 namespace im {
     
     using patternmap_t = std::unordered_map<std::string, std::regex>;
@@ -18,23 +20,96 @@ namespace im {
         :Json()
         { mkobject(); }
     
-    Options::Options(Json const& other)
-        :Json(other)
+    Options::Options(stringmap_t const& stringmap) {
+        mkobject();
+        cache = stringmap_t(stringmap.begin(),
+                            stringmap.end());
+    }
+    
+    Options::Options(stringmap_t&& stringmap) noexcept {
+        mkobject();
+        cache = std::move(stringmap);
+    }
+    
+    Options::Options(Json const& json)
+        :Json(json)
         {}
-    Options::Options(Json&& other) noexcept
-        :Json(std::move(other))
+    
+    Options::Options(Json&& json) noexcept
+        :Json(std::move(json))
         {}
+    
+    Options::Options(Options const& other)
+        :Options(other.cache)
+        {
+            Node* node = other.root;
+            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        }
+    
+    Options::Options(Options&& other) noexcept
+        :Options(std::move(other.cache))
+        {
+            Node* node = std::exchange(other.root, root);
+            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        }
     
     Options::Options(std::istream& is, bool full)
         :Json(is, full)
         {}
     
     Options::Options(stringpair_init_t stringpair_init)
-        :Json(Json::jsonmap_t(stringpair_init.begin(),
-                              stringpair_init.end()))
-        {}
+        :Options(stringmap_t(stringpair_init.begin(),
+                             stringpair_init.end()))
+        {
+            Json::jsonmap_t jsonmap(stringpair_init.begin(),
+                                    stringpair_init.end());
+            Json json(jsonmap);
+            Node* node = std::exchange(json.root, root);
+            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        }
     
     Options::~Options() {}
+    
+    void Options::swap(Options& other) noexcept {
+        using std::swap;
+        swap(cache, other.cache);
+        swap(root,  other.root);
+    }
+    
+    void swap(Options& lhs, Options& rhs) noexcept {
+        lhs.swap(rhs);
+    }
+    
+    Options& Options::operator=(stringpair_init_t stringpair_init) {
+        Options(stringpair_init).swap(*this);
+        return *this;
+    }
+    
+    Options& Options::operator=(Json const& json) {
+        Options(json).swap(*this);
+        return *this;
+    }
+    
+    Options& Options::operator=(Json&& json) noexcept {
+        Node* node = std::exchange(json.root, root);
+        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        cache.clear();
+        return *this;
+    }
+    
+    Options& Options::operator=(Options const& other) {
+        Options(other).swap(*this);
+        return *this;
+    }
+    
+    Options& Options::operator=(Options&& other) noexcept {
+        Node* node = std::exchange(other.root, root);
+        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        cache = std::exchange(other.cache, decltype(cache){});
+        return *this;
+    }
+    
+    bool Options::can_store() const noexcept { return true; }
     
     Options Options::parse(std::string const& str) {
         std::istringstream is(str);
@@ -47,12 +122,14 @@ namespace im {
     }
     
     bool Options::set(std::string const& key, std::string const& value) {
+        if (key == STRINGNULL()) { return Options::del(key); }
         cache[key] = value;
         Json::set(key, value);
         return Json::has(key);
     }
     
     bool Options::set(std::string const& key, Json const& value) {
+        if (key == STRINGNULL()) { return Options::del(key); }
         cache[key] = std::string(value);
         Json::set(key, value);
         return Json::has(key);
@@ -60,14 +137,20 @@ namespace im {
     
     std::string& Options::get(std::string const& key) {
         if (cache.find(key) != cache.end()) { return cache[key]; }
-        cache[key] = Json::cast<std::string>(key);
-        return cache[key];
+        if (has(key)) {
+            cache[key] = Json::cast<std::string>(key);
+            return cache[key];
+        }
+        return STRINGNULL();
     }
     
     std::string const& Options::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) { return cache[key]; }
-        cache[key] = Json::cast<std::string>(key);
-        return cache[key];
+        if (has(key)) {
+            cache[key] = Json::cast<std::string>(key);
+            return cache[key];
+        }
+        return STRINGNULL();
     }
     
     bool Options::has(std::string const& key) const {
@@ -78,10 +161,6 @@ namespace im {
         if (cache.find(key) != cache.end()) { cache.erase(key); }
         return Json::remove(key);
     }
-    
-    // Json         update(Json const& other) const { return Json::update(other); }
-    // Json         pop(std::string const& key) { return Json::pop(key); }
-    // Json         pop(std::string const& key, Json const& default_value) { return Json::pop(key, default_value); }
     
     std::size_t Options::count() const { return Json::size(); }
     stringvec_t Options::list() const { return Json::keys(); }
@@ -116,7 +195,8 @@ namespace im {
         /// cut the strings in the vector down to just the prefix:
         std::transform(prefixvec.begin(), prefixvec.end(),
                        prefixvec.begin(),
-                   [&](std::string const& s) { return s.substr(0, s.find_first_of(separator[0])); });
+                   [&](std::string const& s) { return s.substr(0,
+                                                      s.find_first_of(separator[0])); });
         
         /// uniquify the contents of the prefix string vector:
         std::sort(prefixvec.begin(), prefixvec.end());
@@ -134,7 +214,6 @@ namespace im {
     }
     
     prefixgram_t Options::prefixgram(std::string const& separator) const {
-        // prefixset_t  prefixes = Options::prefixset(separator);
         prefixpair_t prefixpair = Options::prefixset(separator);
         const prefixset_t prefixes = std::move(prefixpair.first);
         const stringvec_t keys = std::move(prefixpair.second);
@@ -145,20 +224,20 @@ namespace im {
         patterns.reserve(prefixes.size());
         std::transform(prefixes.begin(),       prefixes.end(),
                        std::inserter(patterns, patterns.end()),
-                   [&](std::string const& s) { return std::make_pair(std::move(s),
-                                                                     std::regex("^" + s + separator,
-                                                                     std::regex::extended)); });
+                   [&](std::string const& s) {
+            std::regex re("^" + s + separator,  std::regex::extended);
+            return std::make_pair(std::move(s), std::move(re));
+        });
         
-        /// count each pattern’s matches against a string vector
+        /// count each pattern’s matches against the string vector
         /// containing a set of all keys, using a prefix histogram:
-        // stringvec_t keys = Options::list();
         prefixgram.reserve(patterns.size());
         std::for_each(patterns.begin(),
                       patterns.end(),
                   [&](auto const& kv) {
                       prefixgram[kv.first] = std::count_if(keys.begin(), keys.end(),
                                                        [&](std::string const& s) {
-                return std::regex_search(s, kv.second);
+                return std::regex_search(s, kv.second, std::regex_constants::match_default);
             });
         });
         

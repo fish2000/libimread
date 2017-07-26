@@ -14,7 +14,7 @@ EXISTING SYMBOLS
 * `tiff:YResolution` (?)
 * `tiff:XResolutionUnit` (?)
 
-        JPEGFormat::write() -> (int)            'jpeg:quality'              ;
+        JPEGFormat::write() -> (int)            'jpg:quality'               ;
         PNGFormat::write()  -> (int)            'png:compression_level'     ;
         TIFFFormat::write() -> (bool)           'tiff:compress'             ;
         TIFFFormat::write() -> (bool)           'tiff:horizontal-predictor' ;  /// depends on tiff:compress

@@ -14,6 +14,7 @@
 #include <libimread/store.hh>
 
 using detail::stringvec_t;
+using stringmap_t = store::stringmapper::stringmap_t;
 using prefixset_t  = std::unordered_set<std::string>;
 using prefixgram_t = std::unordered_map<std::string, std::size_t>;
 using stringpair_t = std::pair<std::string, std::string>;
@@ -32,6 +33,8 @@ namespace im {
         public:
             using Json::null;
             using Json::undefined;
+            using Json::root;
+            using store::stringmapper::cache;
         
         public:
             /// Here, we must exclude our template untyped-method
@@ -44,12 +47,28 @@ namespace im {
         
         public:
             Options();
+            Options(stringmap_t const&);
+            Options(stringmap_t&&) noexcept;
             Options(Json const&);
             Options(Json&&) noexcept;
+            Options(Options const&);
+            Options(Options&&) noexcept;
             Options(std::istream& is, bool full = true);
             Options(stringpair_init_t);
             virtual ~Options();
-            
+        
+        public:
+            void swap(Options&) noexcept;
+            friend void swap(Options&, Options&) noexcept;
+            Options& operator=(stringpair_init_t);
+            Options& operator=(Json const&);
+            Options& operator=(Json&&) noexcept;
+            Options& operator=(Options const&);
+            Options& operator=(Options&&) noexcept;
+        
+        public:
+            virtual bool can_store() const noexcept;
+        
         public:
             template <typename ConvertibleType,
                       typename = decltype(&ConvertibleType::to_json)>
@@ -75,8 +94,10 @@ namespace im {
                    virtual stringvec_t list() const;
         
         public:
-            virtual std::size_t count(std::string const& prefix,
-                                      std::string const& separator) const;
+            /// Count values whose keys have a given prefix:
+            virtual std::size_t       count(std::string const& prefix,
+                                            std::string const& separator) const;
+            
             virtual std::size_t prefixcount(std::string const& prefix,
                                             std::string const& separator = detail::kDefaultSep) const;
         

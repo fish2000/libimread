@@ -69,10 +69,20 @@ namespace tc {
     
 }
 
+namespace im {
+    struct Options;
+}
+
+namespace store {
+    class stringmapper;
+}
 
 class Json {
     
-    private:
+    friend struct im::Options;
+    friend class store::stringmapper;
+    
+    protected:
         /// Schema is forward-declared:
         struct Schema;
         
@@ -94,7 +104,7 @@ class Json {
         using traverser_t       = std::add_pointer_t<void(Node const*)>;
         using named_traverser_t = std::add_pointer_t<void(Node const*, char const*)>;
         
-    private:
+    protected:
         struct Node {
             static constexpr Type typecode = Type::JSNULL;
             unsigned refcnt;
@@ -347,10 +357,12 @@ class Json {
         static int level;                    /// for pretty printing
         static int indent;                   /// for pretty printing
         
+    protected:
         Json(Node* node) {
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
         }
         
+    protected:
         Node* root;
         
     public:
