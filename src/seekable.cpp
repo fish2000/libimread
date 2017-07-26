@@ -29,7 +29,7 @@ namespace im {
         bytevec_t result;
         byte_source::size_type n;
         byte buffer[4096];
-        while ((n = this->read(buffer, sizeof(buffer)))) {
+        while ((n = read(buffer, sizeof(buffer)))) {
             result.insert(result.end(), buffer, buffer + n);
         }
         if (!__sized) {
@@ -46,7 +46,7 @@ namespace im {
             bytevec_t all_of_it;
             byte_source::size_type n;
             byte buffer[4096];
-            while ((n = this->read(buffer, sizeof(buffer)))) {
+            while ((n = read(buffer, sizeof(buffer)))) {
                 all_of_it.insert(all_of_it.end(), buffer, buffer + n);
             }
             __siz = all_of_it.size();
