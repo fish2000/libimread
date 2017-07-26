@@ -32,6 +32,10 @@ namespace im {
         while ((n = this->read(buffer, sizeof(buffer)))) {
             result.insert(result.end(), buffer, buffer + n);
         }
+        if (!__sized) {
+            __siz = result.size();
+            __sized = true;
+        }
         return result;
     }
     

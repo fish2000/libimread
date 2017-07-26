@@ -185,7 +185,10 @@ namespace im {
     std::size_t gzio_source_sink::size() const {
         std::size_t fsize = uncompressed_byte_size();
         if (fsize == 0) {
-            return uncompressed_byte_size(byte_source::size());
+            if (mapped.empty()) {
+                mapped = full_data();
+            }
+            return uncompressed_byte_size(mapped.size());
         }
         return fsize;
     }
