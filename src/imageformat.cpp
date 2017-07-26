@@ -37,14 +37,16 @@ namespace im {
     }
     
     void ImageFormat::registrate(std::string const& name, ImageFormat::create_t fp) {
+        registry_t& reg = registry();
         if (name.size() > 0) {
-            registry()[name] = fp;
+            reg[name] = fp;
         }
     }
     
     ImageFormat::unique_t ImageFormat::named(std::string const& name) {
-        auto it = registry().find(name);
-        return it == registry().end() ? nullptr : (it->second)();
+        registry_t& reg = registry();
+        auto it = reg.find(name);
+        return it == reg.end() ? nullptr : (it->second)();
     }
     
     /// including <iod/json.hh> along with Halide.h will cause a conflict --
