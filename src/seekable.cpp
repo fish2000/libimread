@@ -46,8 +46,7 @@ namespace im {
             bytevec_t all_of_it;
             std::size_t n;
             byte buffer[4096];
-            byte_source* mutablethis = const_cast<byte_source*>(this);
-            while ((n = mutablethis->read(buffer, sizeof(buffer)))) {
+            while ((n = this->read(buffer, sizeof(buffer)))) {
                 all_of_it.insert(all_of_it.end(), buffer, buffer + n);
             }
             __siz = all_of_it.size();
