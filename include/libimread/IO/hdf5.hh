@@ -14,6 +14,9 @@ namespace im {
     class HDF5Format : public ImageFormatBase<HDF5Format> {
         
         public:
+            static constexpr std::size_t kDimensions = 3;
+        
+        public:
             using can_read = std::true_type;
             using can_write = std::true_type;
             
@@ -26,7 +29,8 @@ namespace im {
                 _suffixes = { "hdf5", "h5", "hdf" },
                 _mimetype = "image/hdf5",
                 _dataname = "imread-data",
-                _datapath = "/image/raster"
+                _datapath = "/image/raster",
+                _dimensions = kDimensions
             );
             
             virtual std::unique_ptr<Image> read(byte_source* src,

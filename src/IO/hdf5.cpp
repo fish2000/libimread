@@ -87,14 +87,13 @@ namespace im {
         
         /// Set up a std::array to hold the dimensions of the image,
         /// which we read in from the HDF5 memory store:
-        constexpr std::size_t NDIMS = 3;
         hid_t dataspace_id = H5Dget_space(dataset_id);
         
-        // std::array<hsize_t, NDIMS> dims, maxdims;
+        // std::array<hsize_t, kDimensions> dims, maxdims;
         // H5Sget_simple_extent_dims(dataspace_id, dims.data(),
         //                                      maxdims.data());
         
-        std::array<hsize_t, NDIMS> dims;
+        std::array<hsize_t, kDimensions> dims;
         H5Sget_simple_extent_dims(dataspace_id, dims.data(), nullptr);
         
         /// Allocate a new unique-pointer-wrapped im::Image instance:
@@ -129,23 +128,14 @@ namespace im {
             h5a_t stride1(dataset_id, "stride1");
             h5a_t stride2(dataset_id, "stride2");
             
-            int val_nbits   = nbits.typed_read<int>();
-            int val_ndims   = ndims.typed_read<int>();
-            int val_dim0    = dim0.typed_read<int>();
-            int val_dim1    = dim1.typed_read<int>();
-            int val_dim2    = dim2.typed_read<int>();
-            int val_stride0 = stride0.typed_read<int>();
-            int val_stride1 = stride1.typed_read<int>();
-            int val_stride2 = stride2.typed_read<int>();
-            
-            meta->set("nbits",   std::to_string(val_nbits));
-            meta->set("ndims",   std::to_string(val_ndims));
-            meta->set("dim0",    std::to_string(val_dim0));
-            meta->set("dim1",    std::to_string(val_dim1));
-            meta->set("dim2",    std::to_string(val_dim2));
-            meta->set("stride0", std::to_string(val_stride0));
-            meta->set("stride1", std::to_string(val_stride1));
-            meta->set("stride2", std::to_string(val_stride2));
+            meta->set("nbits",   std::to_string(nbits.typed_read<int>()));
+            meta->set("ndims",   std::to_string(ndims.typed_read<int>()));
+            meta->set("dim0",    std::to_string(dim0.typed_read<int>()));
+            meta->set("dim1",    std::to_string(dim1.typed_read<int>()));
+            meta->set("dim2",    std::to_string(dim2.typed_read<int>()));
+            meta->set("stride0", std::to_string(stride0.typed_read<int>()));
+            meta->set("stride1", std::to_string(stride1.typed_read<int>()));
+            meta->set("stride2", std::to_string(stride2.typed_read<int>()));
         }
         
         /// Close HDF5 hid_t handle types:
@@ -171,9 +161,12 @@ namespace im {
         
         /// create a temporary HDF5 file for all writes to target:
         NamedTemporaryFile tf(suffix(true)); /// period = true
+        hid_t file_id = -1;
         
-        std::string tpth = tf.str();
-        hid_t file_id = IM_H5F_CREATE(tpth.c_str());
+        {
+            std::string tpth = tf.str();
+            file_id = IM_H5F_CREATE(tpth.c_str());
+        }
         
         if (file_id < 0) {
             imread_raise(CannotWriteError,
@@ -182,9 +175,8 @@ namespace im {
         
         /// Stow the input image dimensions in an hsize_t std::array,
         /// and create two HDF5 dataspaces based on that array:
-        constexpr std::size_t NDIMS = 3;
         
-        std::array<hsize_t, NDIMS> dimensions{{
+        std::array<hsize_t, kDimensions> dimensions{{
             static_cast<hsize_t>(input.dim(0)),
             static_cast<hsize_t>(input.dim(1)),
             static_cast<hsize_t>(input.dim(2))
@@ -199,8 +191,8 @@ namespace im {
         /// space_id    --> “dataspace”: possibly strided dimensional data;
         /// memspace_id --> “memoryspace”: flattened 1-D view of dataspace;
         /// … the first arg to H5Screate_simple() is the rank (aka “ndims”)
-        hid_t dataspace_id  = IM_H5S_CREATE(NDIMS, dimensions.data());
-        hid_t memspace_id   = IM_H5S_CREATE(1,     flattened.data());
+        hid_t dataspace_id = IM_H5S_CREATE(kDimensions, dimensions.data());
+        hid_t memspace_id  = IM_H5S_CREATE(1,           flattened.data());
         
         /// Try creating a new dataset --
         hid_t dataset_id = IM_H5D_CREATE(file_id, name.c_str(),
