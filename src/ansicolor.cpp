@@ -55,5 +55,5 @@ namespace ansi {
     }
     
     ANSI::operator std::string() const { return str(); }
-    ANSI::operator const char*() const { return c_str(); }
+    ANSI::operator const char*() const { return str().c_str(); }
 }
