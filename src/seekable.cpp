@@ -11,15 +11,15 @@ namespace im {
     
     bool seekable::can_seek() const noexcept { return false; }
     
-    std::size_t seekable::seek_absolute(std::size_t) {
+    seekable::size_type seekable::seek_absolute(seekable::size_type) {
         imread_raise_default(NotImplementedError);
     }
     
-    std::size_t seekable::seek_relative(int) {
+    seekable::size_type seekable::seek_relative(int) {
         imread_raise_default(NotImplementedError);
     }
     
-    std::size_t seekable::seek_end(int) {
+    seekable::size_type seekable::seek_end(int) {
         imread_raise_default(NotImplementedError);
     }
     
@@ -27,7 +27,7 @@ namespace im {
     
     bytevec_t byte_source::full_data() const {
         bytevec_t result;
-        std::size_t n;
+        byte_source::size_type n;
         byte buffer[4096];
         while ((n = this->read(buffer, sizeof(buffer)))) {
             result.insert(result.end(), buffer, buffer + n);
@@ -39,12 +39,12 @@ namespace im {
         return result;
     }
     
-    std::size_t byte_source::size() const {
+    byte_source::size_type byte_source::size() const {
         /// super-naive implementation...
         /// OVERRIDE THIS HORRIDNESS, DOGG
         if (!__sized) {
             bytevec_t all_of_it;
-            std::size_t n;
+            byte_source::size_type n;
             byte buffer[4096];
             while ((n = this->read(buffer, sizeof(buffer)))) {
                 all_of_it.insert(all_of_it.end(), buffer, buffer + n);
@@ -97,7 +97,8 @@ namespace im {
     
     byte_sink::~byte_sink() {}
     
-    std::size_t byte_sink::write(bytevec_t const& bytevec) {
+    byte_sink::size_type byte_sink::write(bytevec_t const& bytevec) {
+        if (bytevec.empty()) { return 0; }
         return write(static_cast<const void*>(&bytevec[0]), bytevec.size());
     }
     

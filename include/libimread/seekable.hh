@@ -33,9 +33,9 @@ namespace im {
         
         virtual ~seekable();
         virtual bool can_seek() const noexcept;
-        virtual std::size_t seek_absolute(std::size_t);
-        virtual std::size_t seek_relative(int);
-        virtual std::size_t seek_end(int);
+        virtual size_type seek_absolute(size_type);
+        virtual size_type seek_relative(int);
+        virtual size_type seek_end(int);
         
     };
     
@@ -56,10 +56,10 @@ namespace im {
         
         public:
             virtual ~byte_source();
-            virtual std::size_t read(byte*, std::size_t) const warn_unused = 0;
-            virtual void* readmap(std::size_t pageoffset = 0) const = 0;
+            virtual size_type read(byte*, size_type) const warn_unused = 0;
+            virtual void* readmap(size_type pageoffset = 0) const = 0;
             virtual bytevec_t full_data() const;
-            virtual std::size_t size() const;
+            virtual size_type size() const;
             bool empty() const;
             byte* data() const;
             
@@ -95,14 +95,14 @@ namespace im {
             
         public:
             virtual ~byte_sink();
-            virtual std::size_t write(const void*, std::size_t) = 0;
-            virtual std::size_t write(bytevec_t const&);
+            virtual size_type write(const void*, size_type) = 0;
+            virtual size_type write(bytevec_t const&);
             virtual void flush();
             
         public:
             template <typename ...Args>
             __attribute__((nonnull (2)))
-            std::size_t writef(char const* format, Args... args) {
+            size_type writef(char const* format, Args... args) {
                 char buffer[1024];
                 std::snprintf(buffer, 1024, format, args...);
                 return this->write(buffer, std::strlen(
