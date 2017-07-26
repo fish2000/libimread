@@ -21,6 +21,14 @@ namespace im {
     
     Metadata::~Metadata() {}
     
+    bool operator==(Metadata const& lhs, Metadata const& rhs) {
+        return &lhs == &rhs;
+    }
+    
+    bool operator!=(Metadata const& lhs, Metadata const& rhs) {
+        return &lhs != &rhs;
+    }
+    
     Metadata::Metadata(Metadata const& other)
         :values()
         { store::value_copy(other.values, values); }
@@ -30,13 +38,17 @@ namespace im {
         {}
     
     Metadata& Metadata::operator=(Metadata const& other) {
-        values = store::stringmap{};
-        store::value_copy(other.values, values);
+        if (other != *this) {
+            values = store::stringmap{};
+            store::value_copy(other.values, values);
+        }
         return *this;
     }
     
     Metadata& Metadata::operator=(Metadata&& other) noexcept {
-        values = std::exchange(other.values, store::stringmap{});
+        if (other != *this) {
+            values = std::exchange(other.values, store::stringmap{});
+        }
         return *this;
     }
     

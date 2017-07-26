@@ -240,39 +240,7 @@ namespace im {
     
     };
     
-    namespace detail {
-        
-        /// “all_of” bit based on http://stackoverflow.com/q/13562823/298171
-        template <bool ...booleans>
-        struct static_all_of;
-        
-        /// derive recursively, if the first argument is true:
-        template <bool ...tail>
-        struct static_all_of<true, tail...> : static_all_of<tail...>
-        {};
-        
-        /// end recursion: false, if first argument is false:
-        template <bool ...tail>
-        struct static_all_of<false, tail...> : std::false_type
-        {};
-        
-        /// end recursion: true, if all arguments have been exhausted:
-        template <>
-        struct static_all_of<> : std::true_type
-        {};
-        
-        template <bool ...booleans>
-        using static_all_of_t = typename static_all_of<booleans...>::type;
-        
-        template <bool ...booleans>
-        constexpr bool static_all_of_v = static_all_of<booleans...>::value;
-        
-        template <typename Type, typename ...Requirements>
-        struct are_bases_of : static_all_of_t<std::is_base_of<Type,
-                                              std::decay_t<Requirements>>::value...>
-        {};
-    }
-    
+    /// based on im::detail::are_bases_of<…> in traits.hh:
     template <typename ...Types>
     struct is_imageformat : detail::are_bases_of<im::ImageFormat, Types...>::type
     {};

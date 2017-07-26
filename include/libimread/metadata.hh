@@ -21,11 +21,17 @@ namespace im {
             Metadata(std::string const& m);
             virtual ~Metadata();
             
+        public:
+            friend bool operator==(Metadata const&, Metadata const&);
+            friend bool operator!=(Metadata const&, Metadata const&);
+            
+        public:
             Metadata(Metadata const&);
             Metadata(Metadata&&) noexcept;
             Metadata& operator=(Metadata const&);
             Metadata& operator=(Metadata&&) noexcept;
             
+        public:
             inline std::string&       get(std::string const& key) { return values.get(key); };
             inline std::string const& get(std::string const& key) const { return values.get(key); };
             inline bool set(std::string const& key, std::string const& value) { return values.set(key, value); };
@@ -33,6 +39,7 @@ namespace im {
             inline std::size_t count() const { return values.count(); };
             inline store::stringmap::stringvec_t list() const { return values.list(); };
             
+        public:
             bool has_meta() const;
             std::string const& get_meta() const;
             std::string const& set_meta(std::string const&);
