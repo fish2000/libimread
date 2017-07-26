@@ -28,8 +28,8 @@ namespace filesystem {
         }
         
         inline int dm(mode m) noexcept {
-            return m == mode::READ ? O_RDWR | O_NONBLOCK :
-                                     O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
+            return m == mode::READ ? O_RDWR | O_NONBLOCK | O_CLOEXEC :
+                                     O_RDWR | O_NONBLOCK | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC;
         }
         
         filesystem::file ffopen(std::string const& s, mode m) {

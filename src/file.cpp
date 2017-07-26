@@ -213,7 +213,7 @@ namespace im {
             descriptor = open_write(spath.c_str());
             if (descriptor < 0) {
                 imread_raise(CannotWriteError, "descriptor open-to-write failure:",
-                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
+                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }
@@ -221,7 +221,7 @@ namespace im {
             descriptor = open_read(spath.c_str());
             if (descriptor < 0) {
                 imread_raise(CannotReadError, "descriptor open-to-read failure:",
-                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC)", spath.c_str()),
+                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC | O_CLOEXEC)", spath.c_str()),
                     FF("\treturned negative value: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }

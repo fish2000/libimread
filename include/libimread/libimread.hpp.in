@@ -42,6 +42,10 @@
 #define __CPP1z__                       1
 #endif
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
+
 namespace im {
     
     /// `byte` is a way better token than `uint8_t` from, like,

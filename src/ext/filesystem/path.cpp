@@ -131,8 +131,8 @@ namespace filesystem {
             /// Adapted from http://stackoverflow.com/a/2180157/298171
             int input, output; /// file descriptors
             
-            if ((input  = ::open(source,      O_RDONLY)) == -1) { return -1; }
-            if ((output = ::open(destination, O_RDWR | O_CREAT, 0644)) == -1) {
+            if ((input  = ::open(source,      O_RDONLY | O_CLOEXEC)) == -1) { return -1; }
+            if ((output = ::open(destination, O_RDWR | O_CLOEXEC | O_CREAT, 0644)) == -1) {
                 ::close(input);
                 return -1;
             }

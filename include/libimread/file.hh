@@ -27,8 +27,8 @@ namespace im {
     class fd_source_sink : public byte_source, public byte_sink, public store::xattrmap {
         
         protected:
-            static constexpr int kReadFlags         = O_RDWR | O_NONBLOCK;
-            static constexpr int kWriteFlags        = O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL | O_TRUNC;
+            static constexpr int kReadFlags         = O_RDWR | O_NONBLOCK | O_CLOEXEC;
+            static constexpr int kWriteFlags        = O_RDWR | O_NONBLOCK | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC;
             static constexpr int kWriteCreateMask   = 0644;
             
             static int open_read(char const* p);

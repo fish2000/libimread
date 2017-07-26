@@ -77,9 +77,9 @@ namespace im {
             {}
         
         h5t_t::h5t_t(h5t_t&& other) noexcept
-            :h5base(std::move(other.m_hid),
-                    std::move(other.m_releaser))
-            { other.m_hid = -1; }
+            :h5base(std::exchange(other.m_hid, -1),
+                                  other.m_releaser)
+            {}
         
         h5t_t& h5t_t::operator=(h5t_t const& other) {
             if (other != *this) {
@@ -91,9 +91,8 @@ namespace im {
         
         h5t_t& h5t_t::operator=(h5t_t&& other) noexcept {
             if (other != *this) {
-                m_hid = std::move(other.m_hid);
-                m_releaser = std::move(other.m_releaser);
-                other.m_hid = -1;
+                m_hid = std::exchange(other.m_hid, -1);
+                m_releaser = other.m_releaser;
             }
             return *this;
         }
@@ -132,11 +131,9 @@ namespace im {
             }
         
         attspace_t::attspace_t(attspace_t&& other) noexcept
-            :h5base(std::move(other.m_hid),
-                    std::move(other.m_releaser))
-            {
-                incref();
-            }
+            :h5base(std::exchange(other.m_hid, -1),
+                                  other.m_releaser)
+            {}
         
         attspace_t& attspace_t::operator=(attspace_t const& other) {
             if (other != *this) {
@@ -149,9 +146,8 @@ namespace im {
         
         attspace_t& attspace_t::operator=(attspace_t&& other) noexcept {
             if (other != *this) {
-                m_hid = std::move(other.m_hid);
-                m_releaser = std::move(other.m_releaser);
-                incref();
+                m_hid = std::exchange(other.m_hid, -1);
+                m_releaser = other.m_releaser;
             }
             return *this;
         }
@@ -204,23 +200,19 @@ namespace im {
             ,m_dataspace(dataspace_hid)
             ,m_name(name)
             {
-                /// increment refcount on the parent HID and dataspace
+                /// increment refcount on the parent HID
                 H5Iinc_ref(m_parent_hid);
-                m_dataspace.incref();
             }
         
         h5a_t::h5a_t(h5a_t&& other) noexcept
-            :h5base(std::move(other.m_hid),
-                    std::move(other.m_releaser))
-            ,m_parent_hid(std::move(other.m_parent_hid))
+            :h5base(std::exchange(other.m_hid, -1),
+                                  other.m_releaser)
+            ,m_parent_hid(std::exchange(other.m_parent_hid, -1))
             ,m_memorytype(std::move(other.m_memorytype))
             ,m_dataspace(std::move(other.m_dataspace))
             ,m_idx(other.m_idx)
             ,m_name(std::move(other.m_name))
-            {
-                /// increment refcount on the parent HID
-                H5Iinc_ref(m_parent_hid);
-            }
+            {}
         
         h5a_t::~h5a_t() {
             H5Idec_ref(m_parent_hid);
