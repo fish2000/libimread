@@ -7,6 +7,8 @@
 
 namespace im {
     
+    constexpr seekable::size_type seekable::kBufferSize;
+    
     seekable::~seekable() {}
     
     bool seekable::can_seek() const noexcept { return false; }
@@ -23,12 +25,16 @@ namespace im {
         imread_raise_default(NotImplementedError);
     }
     
+    seekable::size_type seekable::buffer_size() const noexcept {
+        return kBufferSize;
+    }
+    
     byte_source::~byte_source() {}
     
     bytevec_t byte_source::full_data() const {
         bytevec_t result;
         byte_source::size_type n;
-        byte buffer[4096];
+        byte buffer[kBufferSize];
         while ((n = read(buffer, sizeof(buffer)))) {
             result.insert(result.end(), buffer, buffer + n);
         }
@@ -45,7 +51,7 @@ namespace im {
         if (!__sized) {
             bytevec_t all_of_it;
             byte_source::size_type n;
-            byte buffer[4096];
+            byte buffer[kBufferSize];
             while ((n = read(buffer, sizeof(buffer)))) {
                 all_of_it.insert(all_of_it.end(), buffer, buffer + n);
             }

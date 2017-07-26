@@ -17,29 +17,42 @@ namespace im {
     
     struct seekable {
         
-        using value_type = byte;
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
+        public:
+            using value_type = byte;
+            using difference_type = std::ptrdiff_t;
+            using size_type = std::size_t;
         
-        using reference_type = std::add_lvalue_reference_t<value_type>;
-        using reference = std::add_lvalue_reference_t<value_type>;
-        using const_reference = std::add_const_t<reference>;
-        using pointer = std::add_pointer_t<value_type>;
+        protected:
+            static constexpr size_type kBufferSize = 4096;
         
-        using iterator = byte_iterator;
-        using const_iterator = byte_iterator;
-        using reverse_iterator = std::reverse_iterator<iterator>;
-        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+        public:
+            using reference_type = std::add_lvalue_reference_t<value_type>;
+            using reference = std::add_lvalue_reference_t<value_type>;
+            using const_reference = std::add_const_t<reference>;
+            using pointer = std::add_pointer_t<value_type>;
         
-        virtual ~seekable();
-        virtual bool can_seek() const noexcept;
-        virtual size_type seek_absolute(size_type);
-        virtual size_type seek_relative(int);
-        virtual size_type seek_end(int);
+        public:
+            using iterator = byte_iterator;
+            using const_iterator = byte_iterator;
+            using reverse_iterator = std::reverse_iterator<iterator>;
+            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+        
+        public:
+            virtual ~seekable();
+            virtual bool can_seek() const noexcept;
+            virtual size_type seek_absolute(size_type);
+            virtual size_type seek_relative(int);
+            virtual size_type seek_end(int);
+        
+        public:
+            virtual size_type buffer_size() const noexcept;
         
     };
     
     class byte_source : virtual public seekable {
+        
+        protected:
+            using seekable::kBufferSize;
         
         public:
             using seekable::value_type;
@@ -80,6 +93,9 @@ namespace im {
     
     class byte_sink : virtual public seekable {
         
+        protected:
+            using seekable::kBufferSize;
+        
         public:
             using seekable::value_type;
             using seekable::difference_type;
@@ -101,12 +117,12 @@ namespace im {
             
         public:
             template <typename ...Args>
-            __attribute__((nonnull (2)))
+            __attribute__((nonnull(2)))
             size_type writef(char const* format, Args... args) {
-                char buffer[1024];
-                std::snprintf(buffer, 1024, format, args...);
-                return this->write(buffer, std::strlen(
-                              static_cast<char const*>(buffer)));
+                char buffer[kBufferSize];
+                std::snprintf(buffer, sizeof(buffer), format, args...);
+                return write(buffer, std::strlen(
+                        static_cast<char const*>(buffer)));
             }
     };
 
