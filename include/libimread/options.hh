@@ -16,10 +16,15 @@
 using detail::stringvec_t;
 using prefixset_t  = std::unordered_set<std::string>;
 using prefixgram_t = std::unordered_map<std::string, std::size_t>;
+using stringpair_t = std::pair<std::string, std::string>;
 using string_init_t = std::initializer_list<std::string>;
-using stringpair_init_t = std::initializer_list<std::pair<std::string, std::string>>;
+using stringpair_init_t = std::initializer_list<stringpair_t>;
 
 namespace im {
+    
+    namespace detail {
+        using store::detail::kDefaultSep;
+    }
     
     struct Options final : public Json, public store::stringmapper {
         
@@ -72,11 +77,11 @@ namespace im {
             virtual std::size_t count(std::string const& prefix,
                                       std::string const& separator) const;
             virtual std::size_t prefixcount(std::string const& prefix,
-                                            std::string const& separator = ":") const;
+                                            std::string const& separator = detail::kDefaultSep) const;
         
         public:
-            prefixset_t   prefixset(std::string const& separator = ":") const;
-            prefixgram_t prefixgram(std::string const& separator = ":") const;
+            prefixset_t   prefixset(std::string const& separator = detail::kDefaultSep) const;
+            prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
         
     };
     

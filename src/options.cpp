@@ -93,13 +93,6 @@ namespace im {
         stringvec_t keys = Options::list();
         return std::count_if(keys.begin(), keys.end(),
                          [&](std::string const& key) { return std::regex_search(key, prefix_re); });
-        // std::size_t tally = 0;
-        // for (std::string const& key : Options::list()) {
-        //     if () {
-        //         ++tally;
-        //     }
-        // }
-        // return tally;
     }
     
     std::size_t Options::prefixcount(std::string const& prefix,

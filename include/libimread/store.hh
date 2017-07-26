@@ -17,6 +17,8 @@ namespace store {
     
     namespace detail {
         
+        constexpr char kDefaultSep[] = ":";
+        
         template <typename ValueType> inline
         auto value_for_null() -> ValueType&;
         
@@ -198,7 +200,7 @@ namespace store {
     
     template <typename T, typename U>
     void prefix_copy(T&& from, U&& to, std::string const& prefix,
-                                       std::string const& sep = ":") {
+                                       std::string const& sep = store::detail::kDefaultSep) {
         static_assert(store::is_stringmapper_v<T, U>,
                      "store::prefix_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
@@ -210,7 +212,7 @@ namespace store {
     
     template <typename T, typename U>
     void defix_copy(T&& from, U&& to, std::string const& prefix,
-                                      std::string const& sep = ":") {
+                                      std::string const& sep = store::detail::kDefaultSep) {
         static_assert(store::is_stringmapper_v<T, U>,
                      "store::defix_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
@@ -241,7 +243,7 @@ namespace store {
                   typename X = typename std::enable_if_t<                                       \
                                         store::is_stringmapper_v<T>, void>>                     \
         X prefix(T&& from, std::string const& prefix,                                           \
-                           std::string const& sep = ":") {                                      \
+                           std::string const& sep = store::detail::kDefaultSep) {               \
             store::prefix_copy(std::forward<T>(from), *this, prefix, sep);                      \
         }                                                                                       \
                                                                                                 \
@@ -249,7 +251,7 @@ namespace store {
                   typename X = typename std::enable_if_t<                                       \
                                         store::is_stringmapper_v<T>, void>>                     \
         X defix(T&& from, std::string const& prefix,                                            \
-                          std::string const& sep = ":") {                                       \
+                          std::string const& sep = store::detail::kDefaultSep) {                \
             store::defix_copy(std::forward<T>(from), *this, prefix, sep);                       \
         }
     
@@ -277,7 +279,7 @@ namespace store {
                   typename X = typename std::enable_if_t<                                       \
                                         store::is_stringmapper_v<T>, void>>                     \
         explicit __typename__(T&& from, std::string const& prefix,                              \
-                                        std::string const& sep = ":",                           \
+                                        std::string const& sep = store::detail::kDefaultSep,    \
                                         store::tag::prefix tag = store::tag::prefix{})          \
             :__typename__()                                                                     \
             {                                                                                   \

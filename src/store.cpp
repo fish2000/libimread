@@ -17,6 +17,8 @@ namespace store {
     #pragma mark -
     #pragma mark serialization helper implementations
     
+    // DECLARE_CONSTEXPR_CHAR(detail::kDefaultSep, ":");
+    
     namespace detail {
         
         static void json_map_impl(Json const& jsonmap, stringmapper* stringmap_ptr) {
