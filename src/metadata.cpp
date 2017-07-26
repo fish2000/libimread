@@ -52,6 +52,13 @@ namespace im {
         return *this;
     }
     
+    std::string&       Metadata::get(std::string const& key)               { return values.get(key);           };
+    std::string const& Metadata::get(std::string const& key) const         { return values.get(key);           };
+    bool Metadata::set(std::string const& key, std::string const& value)   { return values.set(key, value);    };
+    bool Metadata::del(std::string const& key)                             { return values.del(key);           };
+    std::size_t Metadata::count() const                                    { return values.count();            };
+    store::stringmap::stringvec_t Metadata::list() const                   { return values.list();             };
+    
     bool Metadata::has_meta() const { return values.get("meta") != STRINGNULL(); }
     std::string const& Metadata::get_meta() const { return values.get("meta"); }
     std::string const& Metadata::set_meta(std::string const& m) { values.set("meta", m); return values.get("meta"); }

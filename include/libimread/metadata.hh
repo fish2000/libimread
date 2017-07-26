@@ -5,20 +5,20 @@
 #define LIBIMREAD_METADATA_HH_
 
 #include <vector>
-#include <memory>
 #include <string>
-#include <type_traits>
 
 #include <libimread/libimread.hpp>
 #include <libimread/store.hh>
 
 namespace im {
     
+    using stringvec_t = std::vector<std::string>;
+    
     class Metadata {
         
         public:
             Metadata();
-            Metadata(std::string const& m);
+            Metadata(std::string const&);
             virtual ~Metadata();
             
         public:
@@ -32,12 +32,12 @@ namespace im {
             Metadata& operator=(Metadata&&) noexcept;
             
         public:
-            inline std::string&       get(std::string const& key)               { return values.get(key);           };
-            inline std::string const& get(std::string const& key) const         { return values.get(key);           };
-            inline bool set(std::string const& key, std::string const& value)   { return values.set(key, value);    };
-            inline bool del(std::string const& key)                             { return values.del(key);           };
-            inline std::size_t count() const                                    { return values.count();            };
-            inline store::stringmap::stringvec_t list() const                   { return values.list();             };
+            std::string&       get(std::string const&);
+            std::string const& get(std::string const&) const;
+            bool set(std::string const&, std::string const&);
+            bool del(std::string const&);
+            std::size_t count() const;
+            stringvec_t list() const;
             
         public:
             bool has_meta() const;
