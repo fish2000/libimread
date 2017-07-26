@@ -32,12 +32,12 @@ namespace im {
             Metadata& operator=(Metadata&&) noexcept;
             
         public:
-            inline std::string&       get(std::string const& key) { return values.get(key); };
-            inline std::string const& get(std::string const& key) const { return values.get(key); };
-            inline bool set(std::string const& key, std::string const& value) { return values.set(key, value); };
-            inline bool del(std::string const& key) { return values.del(key); };
-            inline std::size_t count() const { return values.count(); };
-            inline store::stringmap::stringvec_t list() const { return values.list(); };
+            inline std::string&       get(std::string const& key)               { return values.get(key);           };
+            inline std::string const& get(std::string const& key) const         { return values.get(key);           };
+            inline bool set(std::string const& key, std::string const& value)   { return values.set(key, value);    };
+            inline bool del(std::string const& key)                             { return values.del(key);           };
+            inline std::size_t count() const                                    { return values.count();            };
+            inline store::stringmap::stringvec_t list() const                   { return values.list();             };
             
         public:
             bool has_meta() const;
