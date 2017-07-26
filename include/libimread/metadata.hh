@@ -6,7 +6,6 @@
 
 #include <vector>
 #include <string>
-
 #include <libimread/libimread.hpp>
 #include <libimread/store.hh>
 

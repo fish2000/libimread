@@ -14,6 +14,9 @@
 
 namespace store {
     
+    #pragma mark -
+    #pragma mark serialization helper implementations
+    
     namespace detail {
         
         static void json_map_impl(Json const& jsonmap, stringmapper* stringmap_ptr) {
@@ -143,7 +146,8 @@ namespace store {
         
     }
     
-    #pragma mark - base class store::stringmapper default methods
+    #pragma mark -
+    #pragma mark base class store::stringmapper default methods
     
     void stringmapper::with_json(std::string const& jsonstr) {
         Json json = Json::parse(jsonstr);
@@ -230,7 +234,8 @@ namespace store {
         return static_cast<std::size_t>(get(key) == STRINGNULL());
     }
     
-    #pragma mark - store::xattrmap methods
+    #pragma mark -
+    #pragma mark store::xattrmap methods
     
     bool xattrmap::can_store() const noexcept { return true; }
     
@@ -277,7 +282,8 @@ namespace store {
         return xattrs();
     }
     
-    #pragma mark - store::stringmap methods
+    #pragma mark -
+    #pragma mark store::stringmap methods
     
     bool stringmap::can_store() const noexcept { return true; }
     

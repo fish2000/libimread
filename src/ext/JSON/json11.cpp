@@ -315,6 +315,10 @@ Json::Array* Json::mkarray() const {
     return static_cast<Array*>(root);
 }
 
+Type        Json::type() const { return root->type(); }
+char const* Json::typestr() const { return root->typestr(); }
+std::string Json::typestring() const { return root->typestr(); }
+
 Json& Json::operator<<(Json const& that) {
     if (that.root->contains(root)) {
         imread_raise(JSONUseError,
@@ -399,7 +403,7 @@ int Json::index(Json const& other) const {
 
 Json Json::at(int idx) const {
     try {
-        return Json(mkarray()->list.at(idx));
+        return Json(mkarray()->at(idx));
     } catch (std::out_of_range const&) {}
     return Json(null);
 }
@@ -556,30 +560,34 @@ Json::Property::Property(Node* node, std::string const& key)
     {
         if (node->type() != Type::OBJECT) {
             imread_raise(JSONUseError,
-                "Json::Property::Property(node, key) method not applicable",
+                "Json::Property::Property(Node*, std::string) method not applicable",
              FF("\tnode->type() == Type::%s", node->typestr()),
                 "\t(Requires Type::OBJECT)");
         }
     }
 
 Json::Property::Property(Node* node, int idx)
-    :host(node), key(""), kidx(idx)
+    :host(node), key{}, kidx(idx)
     {
         if (node->type() != Type::ARRAY) {
             imread_raise(JSONUseError,
-                "Json::Property::Property(node, idx) method not applicable",
+                "Json::Property::Property(Node*, int) method not applicable",
              FF("\tnode->type() == Type::%s", node->typestr()),
                 "(Requires Type::ARRAY)");
         }
     }
 
 Json Json::Property::target() const {
-    if (host->type() == Type::OBJECT) { return static_cast<Object*>(host)->get(key); }
-    if (host->type() == Type::ARRAY)  { return static_cast<Array*>(host)->list.at(kidx); }
-    imread_raise(JSONLogicError,
-        "Property::operator Json() conversion-operator logic error:",
-     FF("\tConverstion attempt made on Property object of Type::%s", host->typestr()),
-        "\tConverted Property object should be Type::OBJECT or Type::ARRAY");
+    switch (host->type()) {
+        case Type::OBJECT: return static_cast<Object*>(host)->get(key);
+        case Type::ARRAY:   return static_cast<Array*>(host)->at(kidx);
+        default: {
+            imread_raise(JSONLogicError,
+                "Property::operator Json() conversion-operator logic error:",
+             FF("\tConverstion attempt made on Property object of Type::%s", host->typestr()),
+                "\tProperty object must be Type::OBJECT or Type::ARRAY");
+        }
+    }
 }
 
 detail::stringvec_t Json::keys() const {
@@ -835,6 +843,14 @@ void Json::Array::repl(int idx, Node* v) {
     v->refcnt++;
 }
 
+Json::Node* Json::Array::at(int idx) const {
+    if (idx < 0) { idx = list.size(); }
+    if (idx < 0 || idx >= (int)list.size()) {
+        imread_raise_default(JSONOutOfRange);
+    }
+    return list.at(idx);
+}
+
 std::ostream& operator<<(std::ostream& out, Json const& json) {
     json.root->print(out);
     return out;
@@ -1032,6 +1048,10 @@ out:
         if (in.eof()) { return; }
         throw parse_error("excess text not parsed", in);
     }
+}
+
+std::string Json::stringify() const {
+    return format();
 }
 
 std::string Json::format() const {
@@ -1328,6 +1348,11 @@ Json::operator bool() const {
 bool Json::operator==(Json const& that) const {
     if (root == that.root) { return true; }
     return *root == *that.root;
+}
+
+bool Json::operator!=(Json const& that) const {
+    return root !=  that.root &&
+        !(*root == *that.root);
 }
 
 template <>

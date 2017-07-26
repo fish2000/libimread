@@ -6,6 +6,9 @@
 
 namespace im {
     
+    #pragma mark -
+    #pragma mark method implementations for im::Options
+    
     Options::Options()
         :Json()
         { mkobject(); }
@@ -33,9 +36,48 @@ namespace im {
         throw Json::parse_error("JSON im::Options format error", is);
     }
     
-    Options Options::parse(char const* json) {
-        return parse(std::string(json));
+    bool Options::set(std::string const& key, std::string const& value) {
+        cache[key] = value;
+        Json::set(key, value);
+        return Json::has(key);
     }
+    
+    bool Options::set(std::string const& key, Json const& value) {
+        cache[key] = std::string(value);
+        Json::set(key, value);
+        return Json::has(key);
+    }
+    
+    std::string& Options::get(std::string const& key) {
+        if (cache.find(key) != cache.end()) { return cache[key]; }
+        cache[key] = Json::cast<std::string>(key);
+        return cache[key];
+    }
+    
+    std::string const& Options::get(std::string const& key) const {
+        if (cache.find(key) != cache.end()) { return cache[key]; }
+        cache[key] = Json::cast<std::string>(key);
+        return cache[key];
+    }
+    
+    bool Options::has(std::string const& key) const {
+        return cache.find(key) != cache.end() || Json::has(key);
+    }
+    
+    bool Options::del(std::string const& key) {
+        if (cache.find(key) != cache.end()) { cache.erase(key); }
+        return Json::remove(key);
+    }
+    
+    // Json         update(Json const& other) const { return Json::update(other); }
+    // Json         pop(std::string const& key) { return Json::pop(key); }
+    // Json         pop(std::string const& key, Json const& default_value) { return Json::pop(key, default_value); }
+    
+    std::size_t Options::count() const { return Json::size(); }
+    stringvec_t Options::list() const { return Json::keys(); }
+    
+    #pragma mark -
+    #pragma mark method implementations for im::OptionsList
     
     OptionsList::OptionsList()
         :Json()
@@ -65,9 +107,8 @@ namespace im {
         throw Json::parse_error("JSON im::OptionsList format error", is);
     }
     
-    OptionsList OptionsList::parse(char const* json) {
-        return parse(std::string(json));
-    }
+    #pragma mark -
+    #pragma mark im::get_optional_{string,cstring,int,bool} legacy methods
     
     std::string           get_optional_string(Options const& opts,
                                               std::string const& key) {

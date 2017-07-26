@@ -240,6 +240,7 @@ class Json {
             void ins(int, Node*);
             void del(int);
             void repl(int, Node*);
+            Node* at(int) const;
             void traverse(traverser_t traverser) const override;
             void traverse(named_traverser_t traverser,
                           char const* name = nullptr) const override;
@@ -315,6 +316,7 @@ class Json {
                 explicit Property(Node* n, const char* c)
                     :Property(n, std::string(c))
                     {}
+                
                 // operator Json() const           { return target(); }
                 operator int()                  { return target(); }
                 operator float()                { return target(); }
@@ -333,7 +335,6 @@ class Json {
                 bool operator!=(Json const& js) const { return !(*this == js); }
                 detail::stringvec_t keys() { return target().keys(); }
                 bool has(std::string const& key) const { return target().has(key); }
-                bool has(char const* key) const { return target().has(std::string(key)); }
             
             friend std::ostream& operator<<(std::ostream& out, Property const& p) {
                 return out << (Json)p;
@@ -421,14 +422,14 @@ class Json {
             {}
         
         /// dynamic type info
+        bool is_integer() const;
         Array* mkarray();
         Array* mkarray() const;
         Object* mkobject();
         Object* mkobject() const;
-        Type type() const                   { return root->type(); }
-        const char* typestr() const         { return root->typestr(); }
-        std::string typestring() const      { return root->typestr(); }
-        bool is_integer() const;
+        Type type() const;
+        char const* typestr() const;
+        std::string typestring() const;
         
         /// conversion operators
         operator int() const;
@@ -505,14 +506,12 @@ class Json {
         /// subscripting
         std::size_t size() const;
         Json::Property operator[](std::string const&);
-        Json::Property operator[](const char* k) { return (*this)[std::string(k)]; }
         Json::Property operator[](int);
         Json::Property operator[](std::string const&) const;
-        Json::Property operator[](const char* k) const { return (*this)[std::string(k)]; }
         Json::Property operator[](int) const;
         
         /// stringification
-        std::string stringify() const { return format(); }
+        std::string stringify() const;
         std::string format() const;
         friend std::ostream& operator<<(std::ostream&, Json const&);
         friend std::istream& operator>>(std::istream&, Json&);
@@ -522,7 +521,7 @@ class Json {
         
         /// boolean comparison
         bool operator==(Json const&) const;
-        bool operator!=(Json const& that) const { return !(*this == that); }
+        bool operator!=(Json const& that) const;
     
         /// schema hooks
         bool to_schema(std::string* reason);
