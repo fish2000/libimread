@@ -202,9 +202,9 @@ set(srcs
     # ${srcs_dir}/process/jitresize.cpp
     # ${srcs_dir}/process/neuquant.cpp
     
-    # ${srcs_dir}/ansicolor.cpp
     # ${srcs_dir}/base.cpp
     # ${srcs_dir}/color.cpp
+    ${srcs_dir}/ansicolor.cpp
     ${srcs_dir}/env.cpp
     ${srcs_dir}/errors.cpp
     ${srcs_dir}/file.cpp

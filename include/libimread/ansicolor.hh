@@ -4,27 +4,16 @@
 #ifndef LIBIMREAD_ANSICOLORS_HH_
 #define LIBIMREAD_ANSICOLORS_HH_
 
-#include <cstring>
 #include <string>
 #include <iostream>
-#include <libimread/libimread.hpp>
-
-#ifndef IM_COLOR_TRACE
-#define IM_COLOR_TRACE 0
-#endif
 
 namespace ansi {
     
-    enum ANSICode {
+    enum class code : std::size_t {
         FM_RESET            = 0,
         FM_BOLD             = 1,
         FM_DIM              = 2,
         FM_UNDERLINE        = 4,
-        
-        // FM_BOLD_OFF      = 1,
-        // FM_DIM_OFF       = 2,
-        // FM_UNDERLINE_OFF = 4,
-        
         FG_BLACK            = 30,
         FG_RED              = 31,
         FG_GREEN            = 32,
@@ -48,71 +37,53 @@ namespace ansi {
         FG_WHITE            = 97
     };
     
-    class ANSI {
-        private:
-            ANSICode code;
+    class ANSI final {
         
         public:
-            explicit constexpr ANSI(ANSICode c)
-                :code(c)
-                {}
+            explicit ANSI(code);
             
-            friend std::ostream& operator<<(std::ostream& os, ANSI const& ansi) {
-                #if IM_COLOR_TRACE == 1
-                    return os << "\033[" << ansi.code << "m";
-                #else
-                    return os;
-                #endif
-            }
-            
-            std::string str() const {
-                #if IM_COLOR_TRACE == 1
-                    return "\033[" + std::to_string(code) + "m";
-                #else
-                    return "";
-                #endif
-            }
-            
-            const char* c_str() const {
-                #if IM_COLOR_TRACE == 1
-                    return str().c_str();
-                #else
-                    return "";
-                #endif
-            }
-            
-            inline operator std::string() const { return str(); }
-            inline operator const char*() const { return c_str(); }
+        public:
+            friend std::ostream& operator<<(std::ostream&, ANSI const&);
+        
+        public:
+            std::string str() const;
+            std::string str(std::string const&) const;
+            const char* c_str() const;
+            operator std::string() const;
+            operator const char*() const;
+        
+        public:
+            std::size_t code_value() const;
+        
+        private:
+            code m_code;
+        
     };
     
-    const ANSI reset            = ANSI(FM_RESET);
-    const ANSI termdefault      = ANSI(FG_DEFAULT_COLOR);
+    const ANSI reset            = ANSI(code::FM_RESET);
+    const ANSI termdefault      = ANSI(code::FG_DEFAULT_COLOR);
     
-    const ANSI bold             = ANSI(FM_BOLD);
-    const ANSI dim              = ANSI(FM_DIM);
-    const ANSI underline        = ANSI(FM_UNDERLINE);
+    const ANSI bold             = ANSI(code::FM_BOLD);
+    const ANSI dim              = ANSI(code::FM_DIM);
+    const ANSI underline        = ANSI(code::FM_UNDERLINE);
     
-    // const ANSI bold_off      = ANSI(FM_BOLD);
-    // const ANSI dim_off       = ANSI(FM_DIM);
-    // const ANSI underline_off = ANSI(FM_UNDERLINE);
+    const ANSI red              = ANSI(code::FG_RED);
+    const ANSI green            = ANSI(code::FG_GREEN);
+    const ANSI yellow           = ANSI(code::FG_YELLOW);
+    const ANSI blue             = ANSI(code::FG_BLUE);
+    const ANSI magenta          = ANSI(code::FG_MAGENTA);
+    const ANSI cyan             = ANSI(code::FG_CYAN);
     
-    const ANSI red              = ANSI(FG_RED);
-    const ANSI green            = ANSI(FG_GREEN);
-    const ANSI yellow           = ANSI(FG_YELLOW);
-    const ANSI blue             = ANSI(FG_BLUE);
-    const ANSI magenta          = ANSI(FG_MAGENTA);
-    const ANSI cyan             = ANSI(FG_CYAN);
+    const ANSI lightred         = ANSI(code::FG_LIGHTRED);
+    const ANSI lightgreen       = ANSI(code::FG_LIGHTGREEN);
+    const ANSI lightyellow      = ANSI(code::FG_LIGHTYELLOW);
+    const ANSI lightblue        = ANSI(code::FG_LIGHTBLUE);
+    const ANSI lightmagenta     = ANSI(code::FG_LIGHTMAGENTA);
+    const ANSI lightcyan        = ANSI(code::FG_LIGHTCYAN);
     
-    const ANSI lightred         = ANSI(FG_LIGHTRED);
-    const ANSI lightgreen       = ANSI(FG_LIGHTGREEN);
-    const ANSI lightyellow      = ANSI(FG_LIGHTYELLOW);
-    const ANSI lightblue        = ANSI(FG_LIGHTBLUE);
-    const ANSI lightmagenta     = ANSI(FG_LIGHTMAGENTA);
-    const ANSI lightcyan        = ANSI(FG_LIGHTCYAN);
-    
-    const ANSI lightgray        = ANSI(FG_LIGHTGRAY);
-    const ANSI darkgray         = ANSI(FG_DARKGRAY);
-    const ANSI white            = ANSI(FG_WHITE);
+    const ANSI lightgray        = ANSI(code::FG_LIGHTGRAY);
+    const ANSI darkgray         = ANSI(code::FG_DARKGRAY);
+    const ANSI white            = ANSI(code::FG_WHITE);
     
 }
 

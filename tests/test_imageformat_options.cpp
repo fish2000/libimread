@@ -8,6 +8,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/ansicolor.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/options.hh>
 #include <libimread/symbols.hh>
@@ -210,7 +211,7 @@ namespace {
                                  std::string{},
                         [&names](std::string const& lhs,
                                  std::string const& rhs) {
-            return lhs + rhs + (rhs == names.back() ? "" : ", ");
+            return lhs + rhs + (rhs.c_str() == names.back().c_str() ? "" : ", ");
         });
         
         WTF("",
@@ -218,19 +219,25 @@ namespace {
             FF("\t contains %i formats:", max = names.size()),
             FF("\t %s", joined.c_str()));
         
+        std::string asterisks(80, '*');
+        
         for (auto it = names.begin();
             it != names.end() && idx < max;
             ++it) { std::string const& format = *it;
                 auto format_ptr = ImageFormat::named(format);
                 Options opts = format_ptr->get_options();
                 
+                /// ansi::bold.str()
+                
                 WTF("",
-                    FF("FORMAT: %s", format.c_str()),
-                    "As JSON:",
-                    opts.format(), "",
-                    "As encoded IOD:",
-                    iod::json_encode(format_ptr->options),
-                    iod::json_encode(format_ptr->capacity));
+                    ansi::white.str("Format name: " + format),
+                    ansi::lightred.str("As formatted JSON:"),
+                    FF("\n%s\n%s\n%s", asterisks.c_str(),
+                                       opts.format().c_str(),
+                                       asterisks.c_str()),
+                    ansi::lightred.str("As encoded IOD:"),
+                    FF("OPTIONS  » %s", iod::json_encode(format_ptr->options).c_str()),
+                    FF("CAPACITY » %s", iod::json_encode(format_ptr->capacity).c_str()));
                 
             ++idx; }
         
