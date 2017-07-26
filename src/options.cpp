@@ -16,29 +16,36 @@ namespace im {
     #pragma mark -
     #pragma mark method implementations for im::Options
     
+    /// default constructor -- calls Json::mkobject, which
+    /// initializes the root node as a Json::Object:
     Options::Options()
         :Json()
         { mkobject(); }
     
+    /// protected delegate stringmap_t copy constructor:
     Options::Options(stringmap_t const& stringmap) {
         mkobject();
         cache = stringmap_t(stringmap.begin(),
                             stringmap.end());
     }
     
+    /// protected delegate stringmap_t move constructor:
     Options::Options(stringmap_t&& stringmap) noexcept {
         mkobject();
         cache = std::move(stringmap);
     }
     
+    /// Copy-construct from a JSON value:
     Options::Options(Json const& json)
         :Json(json)
         {}
     
+    /// Move-construct from a JSON value:
     Options::Options(Json&& json) noexcept
         :Json(std::move(json))
         {}
     
+    /// Copy-constructor:
     Options::Options(Options const& other)
         :Options(other.cache)
         {
@@ -46,6 +53,7 @@ namespace im {
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
         }
     
+    /// Move constructor:
     Options::Options(Options&& other) noexcept
         :Options(std::move(other.cache))
         {
@@ -53,10 +61,25 @@ namespace im {
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
         }
     
+    /// Input-stream constructor, for JSON stream-parsing:
     Options::Options(std::istream& is, bool full)
         :Json(is, full)
         {}
     
+    /// initializer-list constructor -- allows “literals” e.g.
+    /// 
+    /// Options opts = {
+    ///     {   "yo", "dogg" },
+    ///     {    "i", "heard" },
+    ///     {  "you", "like" },
+    ///     { "list", "initialization" }
+    /// };
+    ///
+    /// … the argument type is actually std::initializer_list<
+    ///                                             std::pair<std::string,
+    ///                                                       std::string>>
+    /// … N.B. we need to add a version that accepts Json values,
+    ///        in place of the pairs’ second std::string
     Options::Options(stringpair_init_t stringpair_init)
         :Options(stringmap_t(stringpair_init.begin(),
                              stringpair_init.end()))
@@ -70,12 +93,14 @@ namespace im {
     
     Options::~Options() {}
     
+    /// member swap
     void Options::swap(Options& other) noexcept {
         using std::swap;
         swap(cache, other.cache);
         swap(root,  other.root);
     }
     
+    /// friend swap
     void swap(Options& lhs, Options& rhs) noexcept {
         lhs.swap(rhs);
     }

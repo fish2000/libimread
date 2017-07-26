@@ -47,8 +47,17 @@ namespace im {
         
         public:
             Options();
+            
+        protected:
+            /// These hidden constructors are delegates, designed to
+            /// receive a reference to the cache of the object from which
+            /// we’re copying or moving. I don’t like having that specific
+            /// implementation detail hanging out for everyone to see,
+            /// and/or abuse, so they’re not available for public access.
             Options(stringmap_t const&);
             Options(stringmap_t&&) noexcept;
+            
+        public:
             Options(Json const&);
             Options(Json&&) noexcept;
             Options(Options const&);
