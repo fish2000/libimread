@@ -11,8 +11,9 @@
 
 #include <libimread/errors.hh>
 #include <libimread/IO/jpeg.hh>
-#include <libimread/pixels.hh>
 #include <libimread/seekable.hh>
+#include <libimread/options.hh>
+#include <libimread/pixels.hh>
 #include <libimread/ext/exif.hh>
 
 extern "C" {

@@ -9,6 +9,8 @@
 
 #include <iod/json.hh>
 #include <libimread/IO/ppm.hh>
+#include <libimread/seekable.hh>
+#include <libimread/options.hh>
 #include <libimread/ext/memory/fmemopen.hh>
 #include <libimread/base.hh>
 #include <libimread/pixels.hh>

@@ -14,7 +14,6 @@
 #include <libimread/errors.hh>
 #include <libimread/ext/iod.hh>
 #include <libimread/ext/base64.hh>
-#include <libimread/seekable.hh>
 #include <libimread/symbols.hh>
 #include <libimread/options.hh>
 #include <libimread/traits.hh>
@@ -25,6 +24,8 @@ namespace im {
     class Image;
     class ImageFactory;
     struct ImageList;
+    struct byte_source;
+    struct byte_sink;
     
     bool match_magic(byte_source*, char const*, std::size_t const);
     bool match_magic(byte_source*, std::string const&);
@@ -155,7 +156,7 @@ namespace im {
                                          Options const& opts);
             
             virtual Options read_metadata(byte_source* src,
-                                              Options const& opts);
+                                          Options const& opts);
             
             virtual void write(Image& input,
                                byte_sink* output,

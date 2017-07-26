@@ -8,6 +8,8 @@
 #include <iod/json.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
+#include <libimread/seekable.hh>
+#include <libimread/options.hh>
 #include <libimread/file.hh>
 #include <libimread/errors.hh>
 #include <libimread/metadata.hh>

@@ -2,6 +2,8 @@
 // License: MIT (see COPYING.MIT file)
 
 #include <libimread/IO/gif.hh>
+#include <libimread/seekable.hh>
+#include <libimread/options.hh>
 #include <libimread/corefoundation.hh>
 #include <libimread/coregraphics.hh>
 

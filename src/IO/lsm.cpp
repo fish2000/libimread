@@ -46,6 +46,8 @@
 #include <iod/json.hh>
 #include <libimread/errors.hh>
 #include <libimread/IO/lsm.hh>
+#include <libimread/seekable.hh>
+#include <libimread/options.hh>
 #include <libimread/ext/lzw.hh>
 #include <libimread/pixels.hh>
 

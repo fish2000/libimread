@@ -4,6 +4,8 @@
 #include <iod/json.hh>
 #include <libimread/errors.hh>
 #include <libimread/IO/webp.hh>
+#include <libimread/seekable.hh>
+#include <libimread/options.hh>
 #include <webp/decode.h>
 
 namespace im {

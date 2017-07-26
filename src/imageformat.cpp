@@ -5,6 +5,7 @@
 #include <vector>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
+#include <libimread/seekable.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/image.hh>
 #include <libimread/imagelist.hh>

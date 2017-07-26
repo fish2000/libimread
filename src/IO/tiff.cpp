@@ -8,6 +8,8 @@
 #include <libimread/metadata.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/IO/tiff.hh>
+#include <libimread/seekable.hh>
+#include <libimread/options.hh>
 #include <libimread/pixels.hh>
 
 extern "C" {

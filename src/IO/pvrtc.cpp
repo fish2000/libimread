@@ -5,6 +5,8 @@
 #include <cstring>
 #include <iod/json.hh>
 #include <libimread/IO/pvrtc.hh>
+#include <libimread/seekable.hh>
+#include <libimread/options.hh>
 #include <libimread/errors.hh>
 #include <libimread/ext/pvr.hh>
 
