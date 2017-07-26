@@ -86,29 +86,18 @@ namespace {
         rvalues.insert(std::move(tiff));
         rvalues.insert(std::move(webp));
         
-        // rvalues.insert(bmp);
-        // rvalues.insert(gif);
-        // rvalues.insert(hdf5);
-        // rvalues.insert(jpg);
-        // rvalues.insert(lsm);
-        // rvalues.insert(png);
-        // rvalues.insert(ppm);
-        // rvalues.insert(pvr);
-        // rvalues.insert(tiff);
-        // rvalues.insert(webp);
-        
         CHECK(lvalues.size() == 10);
         CHECK(rvalues.size() == 10);
         
         // CHECK(lvalues != rvalues);
         
-        WTF("LOAD FACTORS:",
-            FF("lvalues: %f", lvalues.load_factor()),
-            FF("rvalues: %f", rvalues.load_factor()));
+        // WTF("LOAD FACTORS:",
+        //     FF("lvalues: %f", lvalues.load_factor()),
+        //     FF("rvalues: %f", rvalues.load_factor()));
         
-        WTF("BUCKETS:",
-            FF("lvalues: %u (max %u)", lvalues.bucket_count(), lvalues.max_bucket_count()),
-            FF("rvalues: %u (max %u)", rvalues.bucket_count(), rvalues.max_bucket_count()));
+        // WTF("BUCKETS:",
+        //     FF("lvalues: %u (max %u)", lvalues.bucket_count(), lvalues.max_bucket_count()),
+        //     FF("rvalues: %u (max %u)", rvalues.bucket_count(), rvalues.max_bucket_count()));
         
         {
             im::BMPFormat   nbmp;
@@ -125,67 +114,23 @@ namespace {
             auto lhasher = lvalues.hash_function();
             auto rhasher = rvalues.hash_function();
             
-            // CHECK(lvalues.find(nbmp) != lvalues.end());
-            // CHECK(lvalues.find(ngif) != lvalues.end());
-            // CHECK(lvalues.find(nhdf5) != lvalues.end());
-            // CHECK(lvalues.find(njpg) != lvalues.end());
-            // CHECK(lvalues.find(nlsm) != lvalues.end());
-            // CHECK(lvalues.find(npng) != lvalues.end());
-            // CHECK(lvalues.find(nppm) != lvalues.end());
-            // CHECK(lvalues.find(npvr) != lvalues.end());
-            // CHECK(lvalues.find(ntiff) != lvalues.end());
-            // CHECK(lvalues.find(nwebp) != lvalues.end());
-            
-            // CHECK(rvalues.find(nbmp) != rvalues.end());
-            // CHECK(rvalues.find(ngif) != rvalues.end());
-            // CHECK(rvalues.find(nhdf5) != rvalues.end());
-            // CHECK(rvalues.find(njpg) != rvalues.end());
-            // CHECK(rvalues.find(nlsm) != rvalues.end());
-            // CHECK(rvalues.find(npng) != rvalues.end());
-            // CHECK(rvalues.find(nppm) != rvalues.end());
-            // CHECK(rvalues.find(npvr) != rvalues.end());
-            // CHECK(rvalues.find(ntiff) != rvalues.end());
-            // CHECK(rvalues.find(nwebp) != rvalues.end());
-            
-            WTF("HASHES:",
-                FF("  BMPFormat: %0u, %0u, %0u",   nbmp.hash(), lhasher(nbmp),  rhasher(bmp)),
-                FF("  GIFFormat: %0u, %0u, %0u",   ngif.hash(), lhasher(ngif),  rhasher(gif)),
-                FF(" HDF5Format: %0u, %0u, %0u",  nhdf5.hash(), lhasher(nhdf5), rhasher(hdf5)),
-                FF(" JPEGFormat: %0u, %0u, %0u",   njpg.hash(), lhasher(njpg),  rhasher(jpg)),
-                FF("  LSMFormat: %0u, %0u, %0u",   nlsm.hash(), lhasher(nlsm),  rhasher(lsm)),
-                FF("  PNGFormat: %0u, %0u, %0u",   npng.hash(), lhasher(npng),  rhasher(png)),
-                FF("  PPMFormat: %0u, %0u, %0u",   nppm.hash(), lhasher(nppm),  rhasher(ppm)),
-                FF("PVRTCFormat: %0u, %0u, %0u",   npvr.hash(), lhasher(npvr),  rhasher(pvr)),
-                FF(" TIFFFormat: %0u, %0u, %0u",  ntiff.hash(), lhasher(ntiff), rhasher(tiff)),
-                FF(" WebPFormat: %0u, %0u, %0u",  nwebp.hash(), lhasher(nwebp), rhasher(webp)));
+            // WTF("HASHES:",
+            //     FF("  BMPFormat: %0u, %0u, %0u",   nbmp.hash(), lhasher(nbmp),  rhasher(bmp)),
+            //     FF("  GIFFormat: %0u, %0u, %0u",   ngif.hash(), lhasher(ngif),  rhasher(gif)),
+            //     FF(" HDF5Format: %0u, %0u, %0u",  nhdf5.hash(), lhasher(nhdf5), rhasher(hdf5)),
+            //     FF(" JPEGFormat: %0u, %0u, %0u",   njpg.hash(), lhasher(njpg),  rhasher(jpg)),
+            //     FF("  LSMFormat: %0u, %0u, %0u",   nlsm.hash(), lhasher(nlsm),  rhasher(lsm)),
+            //     FF("  PNGFormat: %0u, %0u, %0u",   npng.hash(), lhasher(npng),  rhasher(png)),
+            //     FF("  PPMFormat: %0u, %0u, %0u",   nppm.hash(), lhasher(nppm),  rhasher(ppm)),
+            //     FF("PVRTCFormat: %0u, %0u, %0u",   npvr.hash(), lhasher(npvr),  rhasher(pvr)),
+            //     FF(" TIFFFormat: %0u, %0u, %0u",  ntiff.hash(), lhasher(ntiff), rhasher(tiff)),
+            //     FF(" WebPFormat: %0u, %0u, %0u",  nwebp.hash(), lhasher(nwebp), rhasher(webp)));
             
             std::hash<std::string> hasher;
             
-            WTF("STRING HASHES:",
-                FF(" empty string: %u", hasher("")),
-                FF("“ImageFormat”: %u", hasher("ImageFormat")));
-            
-            // CHECK(lvalues.equal_range(nbmp).first != lvalues.end());
-            // CHECK(lvalues.equal_range(ngif).first != lvalues.end());
-            // CHECK(lvalues.equal_range(nhdf5).first != lvalues.end());
-            // CHECK(lvalues.equal_range(njpg).first != lvalues.end());
-            // CHECK(lvalues.equal_range(nlsm).first != lvalues.end());
-            // CHECK(lvalues.equal_range(npng).first != lvalues.end());
-            // CHECK(lvalues.equal_range(nppm).first != lvalues.end());
-            // CHECK(lvalues.equal_range(npvr).first != lvalues.end());
-            // CHECK(lvalues.equal_range(ntiff).first != lvalues.end());
-            // CHECK(lvalues.equal_range(nwebp).first != lvalues.end());
-            
-            // CHECK(rvalues.count(nbmp) != 0);
-            // CHECK(rvalues.count(ngif) != 0);
-            // CHECK(rvalues.count(nhdf5) != 0);
-            // CHECK(rvalues.count(njpg) != 0);
-            // CHECK(rvalues.count(nlsm) != 0);
-            // CHECK(rvalues.count(npng) != 0);
-            // CHECK(rvalues.count(nppm) != 0);
-            // CHECK(rvalues.count(npvr) != 0);
-            // CHECK(rvalues.count(ntiff) != 0);
-            // CHECK(rvalues.count(nwebp) != 0);
+            // WTF("STRING HASHES:",
+            //     FF(" empty string: %u", hasher("")),
+            //     FF("“ImageFormat”: %u", hasher("ImageFormat")));
         
         }
         
@@ -227,21 +172,20 @@ namespace {
                 auto format_ptr = ImageFormat::named(format);
                 Options opts = format_ptr->get_options();
                 
-                WTF("",
-                    ansi::lightred.str("Format name: " + format),
-                    ansi::red.str("As formatted JSON:"),
-                    FF("\n%s\n%s\n%s", asterisks.c_str(),
-                                       opts.format().c_str(),
-                                       asterisks.c_str()));
+                // WTF("",
+                //     ansi::lightred.str("Format name: " + format),
+                //     ansi::red.str("As formatted JSON:"),
+                //     FF("\n%s\n%s\n%s", asterisks.c_str(),
+                //                        opts.format().c_str(),
+                //                        asterisks.c_str()));
                 
-                WTF("",
-                    ansi::lightred.str("Format name: " + format),
-                    ansi::red.str("As encoded IOD:"),
-                    FF("OPTIONS  » %s", iod::json_encode(format_ptr->options).c_str()),
-                    FF("CAPACITY » %s", iod::json_encode(format_ptr->capacity).c_str()));
+                // WTF("",
+                //     ansi::lightred.str("Format name: " + format),
+                //     ansi::red.str("As encoded IOD:"),
+                //     FF("OPTIONS  » %s", iod::json_encode(format_ptr->options).c_str()),
+                //     FF("CAPACITY » %s", iod::json_encode(format_ptr->capacity).c_str()));
                     
             ++idx; }
-        
         
     }
     

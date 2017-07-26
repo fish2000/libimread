@@ -102,7 +102,7 @@ namespace im {
         return Options::count(prefix, separator);
     }
     
-    prefixset_t Options::prefixset(std::string const& separator) const {
+    prefixpair_t Options::prefixset(std::string const& separator) const {
         stringvec_t keys = Options::list();
         stringvec_t prefixvec;
         prefixset_t prefixes;
@@ -127,11 +127,17 @@ namespace im {
         prefixes.reserve(prefixvec.size());
         std::copy(prefixvec.begin(),     prefixvec.end(),
                   std::inserter(prefixes, prefixes.end()));
-        return prefixes;
+        
+        // return prefixes;
+        return make_pair(std::move(prefixes),
+                         std::move(keys));
     }
     
     prefixgram_t Options::prefixgram(std::string const& separator) const {
-        prefixset_t  prefixes = Options::prefixset(separator);
+        // prefixset_t  prefixes = Options::prefixset(separator);
+        prefixpair_t prefixpair = Options::prefixset(separator);
+        const prefixset_t prefixes = std::move(prefixpair.first);
+        const stringvec_t keys = std::move(prefixpair.second);
         patternmap_t patterns;
         prefixgram_t prefixgram;
         
@@ -139,18 +145,19 @@ namespace im {
         patterns.reserve(prefixes.size());
         std::transform(prefixes.begin(),       prefixes.end(),
                        std::inserter(patterns, patterns.end()),
-                   [&](std::string const& s) { return std::make_pair(s, std::regex("^" + s + separator,
-                                                                        std::regex::extended)); });
+                   [&](std::string const& s) { return std::make_pair(std::move(s),
+                                                                     std::regex("^" + s + separator,
+                                                                     std::regex::extended)); });
         
         /// count each pattern’s matches against a string vector
         /// containing a set of all keys, using a prefix histogram:
-        stringvec_t keys = Options::list();
+        // stringvec_t keys = Options::list();
         prefixgram.reserve(patterns.size());
         std::for_each(patterns.begin(),
                       patterns.end(),
                   [&](auto const& kv) {
-                       prefixgram[kv.first] = std::count_if(keys.begin(), keys.end(),
-                                                        [&](std::string const& s) { 
+                      prefixgram[kv.first] = std::count_if(keys.begin(), keys.end(),
+                                                       [&](std::string const& s) {
                 return std::regex_search(s, kv.second);
             });
         });

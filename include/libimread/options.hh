@@ -19,6 +19,7 @@ using prefixgram_t = std::unordered_map<std::string, std::size_t>;
 using stringpair_t = std::pair<std::string, std::string>;
 using string_init_t = std::initializer_list<std::string>;
 using stringpair_init_t = std::initializer_list<stringpair_t>;
+using prefixpair_t = std::pair<prefixset_t, stringvec_t>;
 
 namespace im {
     
@@ -80,7 +81,7 @@ namespace im {
                                             std::string const& separator = detail::kDefaultSep) const;
         
         public:
-            prefixset_t   prefixset(std::string const& separator = detail::kDefaultSep) const;
+            prefixpair_t  prefixset(std::string const& separator = detail::kDefaultSep) const;
             prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
         
     };
