@@ -228,10 +228,6 @@ namespace im {
                 return FormatType::options.mimetype;
             }
             
-            // virtual Options add_options(Options const& opts) const override {
-            //     return get_options().update(opts);
-            // }
-            
             virtual bool format_can_read() const noexcept override           { return FormatType::can_read::value;           }
             virtual bool format_can_read_multi() const noexcept override     { return FormatType::can_read_multi::value;     }
             virtual bool format_can_read_metadata() const noexcept override  { return FormatType::can_read_metadata::value;  }

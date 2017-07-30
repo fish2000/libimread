@@ -406,9 +406,6 @@ X operator!=(T const& lhs,
 
 namespace std {
     
-    // template <>
-    // void swap(store::stringmap&, store::stringmap&) noexcept;
-    
     /// std::hash specialization for store::stringmap
     /// ... following the recipe found here:
     ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
