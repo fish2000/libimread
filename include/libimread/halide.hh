@@ -24,6 +24,7 @@
 #include <libimread/metadata.hh>
 #include <libimread/imagelist.hh>
 #include <libimread/formats.hh>
+#include <libimread/options.hh>
 
 namespace im {
     

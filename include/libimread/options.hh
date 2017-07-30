@@ -1,8 +1,8 @@
 /// Copyright 2012-2017 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef IMREAD_OPTIONS_HH_
-#define IMREAD_OPTIONS_HH_
+#ifndef IMREAD_INCLUDE_OPTIONS_HH_
+#define IMREAD_INCLUDE_OPTIONS_HH_
 
 #include <string>
 #include <sstream>
@@ -34,12 +34,13 @@ namespace im {
             using Json::null;
             using Json::undefined;
             using Json::root;
+            using Json::hash;
             using store::stringmapper::cache;
         
         public:
             /// Here, we must exclude our template untyped-method
-            /// declaration macro, because the a method named “update”
-            /// is one of the template methods it declares – which
+            /// declaration macro, because one of the template methods
+            /// it declares is a method named “update” – which
             /// conflicts with the existing non-virtual non-template
             /// base class method `Json::update(…)`.
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(Options);
@@ -114,6 +115,11 @@ namespace im {
             prefixpair_t  prefixset(std::string const& separator = detail::kDefaultSep) const;
             prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
         
+        public:
+            Options subset(std::string const& prefix,
+                           std::string const& separator = detail::kDefaultSep,
+                                             bool defix = false) const;
+        
     };
     
     struct OptionsList final : public Json {
@@ -121,6 +127,8 @@ namespace im {
         public:
             using Json::null;
             using Json::undefined;
+            using Json::root;
+            using Json::hash;
         
         public:
             OptionsList();
@@ -129,6 +137,10 @@ namespace im {
             OptionsList(std::istream& is, bool full = true);
             OptionsList(string_init_t);
             virtual ~OptionsList();
+        
+        public:
+            void swap(OptionsList&) noexcept;
+            friend void swap(OptionsList&, OptionsList&) noexcept;
             
         public:
             template <typename ConvertibleType,
@@ -148,4 +160,47 @@ namespace im {
     
 }
 
-#endif /// IMREAD_OPTIONS_HH_
+namespace std {
+    
+    #ifndef IMREAD_INCLUDE_OPTIONS_HH_SWAP_
+    #define IMREAD_INCLUDE_OPTIONS_HH_SWAP_
+    
+    template <>
+    void swap(im::Options&, im::Options&) noexcept;
+    
+    // template <>
+    // void swap(im::OptionsList&, im::OptionsList&) noexcept;
+    
+    #endif /// IMREAD_INCLUDE_OPTIONS_HH_SWAP_
+    
+    /// std::hash specialization for im::Options and im::OptionsList
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<im::Options> {
+        
+        typedef im::Options argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& opts) const {
+            return static_cast<result_type>(opts.hash());
+        }
+        
+    };
+    
+    template <>
+    struct hash<im::OptionsList> {
+        
+        typedef im::OptionsList argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& optlist) const {
+            return static_cast<result_type>(optlist.hash());
+        }
+        
+    };
+    
+} /* namespace std */
+
+#endif /// IMREAD_INCLUDE_OPTIONS_HH_

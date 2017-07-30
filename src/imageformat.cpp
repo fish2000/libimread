@@ -7,6 +7,7 @@
 #include <libimread/errors.hh>
 #include <libimread/seekable.hh>
 #include <libimread/imageformat.hh>
+#include <libimread/options.hh>
 #include <libimread/image.hh>
 #include <libimread/imagelist.hh>
 #include <iod/json.hh>
@@ -54,7 +55,7 @@ namespace im {
     /// So this next method must be defined out-of-line, in a TU set up to safely call
     /// `iod::json_encode()` (as the aforementioned conflicty include file declares it)
     Options ImageFormat::add_options(Options const& opts) const {
-        return ImageFormat::get_options().update(opts);
+        return get_options().update(opts);
     }
     
     ImageFormat::~ImageFormat() {}

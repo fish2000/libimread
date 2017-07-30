@@ -1,8 +1,8 @@
 /// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#ifndef LIBIMREAD_IMAGEFORMAT_HH_
-#define LIBIMREAD_IMAGEFORMAT_HH_
+#ifndef LIBIMREAD_INCLUDE_IMAGEFORMAT_HH_
+#define LIBIMREAD_INCLUDE_IMAGEFORMAT_HH_
 
 #include <cstdint>
 #include <string>
@@ -15,7 +15,6 @@
 #include <libimread/ext/iod.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/symbols.hh>
-#include <libimread/options.hh>
 #include <libimread/traits.hh>
 
 namespace im {
@@ -26,6 +25,8 @@ namespace im {
     struct ImageList;
     struct byte_source;
     struct byte_sink;
+    struct Options;
+    struct OptionsList;
     
     bool match_magic(byte_source*, char const*, std::size_t const);
     bool match_magic(byte_source*, std::string const&);
@@ -227,9 +228,9 @@ namespace im {
                 return FormatType::options.mimetype;
             }
             
-            virtual Options add_options(Options const& opts) const override {
-                return get_options().update(opts);
-            }
+            // virtual Options add_options(Options const& opts) const override {
+            //     return get_options().update(opts);
+            // }
             
             virtual bool format_can_read() const noexcept override           { return FormatType::can_read::value;           }
             virtual bool format_can_read_multi() const noexcept override     { return FormatType::can_read_multi::value;     }
@@ -248,7 +249,7 @@ namespace im {
     template <typename ...Types>
     constexpr bool is_imageformat_v = is_imageformat<Types...>::value;
     
-}
+} /* namespace im */
 
 template <typename T, typename U>
 std::enable_if_t<
@@ -280,4 +281,4 @@ namespace std {
     
 } /* namespace std */
 
-#endif /// LIBIMREAD_IMAGEFORMAT_HH_
+#endif /// LIBIMREAD_INCLUDE_IMAGEFORMAT_HH_

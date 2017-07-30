@@ -368,9 +368,9 @@ class Json {
     public:
         /// constructors
         Json() { (root = &Node::null)->refcnt++; }
-        Json(Json const& that);
-        Json(Json&& that) noexcept;
-        Json(std::istream&, bool full=true); /// parse
+        Json(Json const&);
+        Json(Json&&) noexcept;
+        Json(std::istream&, bool full = true); /// parse
         virtual ~Json();
         
         /// assignment
@@ -459,13 +459,13 @@ class Json {
         explicit operator void*() const;
         
         /// dictionary operations (or "object properties" in JS-Ville)
-        Json& set(std::string const& key, Json const& value);
-        Json  get(std::string const& key) const;
-        bool  has(std::string const& key) const;
-        bool  remove(std::string const& key);
-        Json  update(Json const& other) const;
-        Json  pop(std::string const& key);
-        Json  pop(std::string const& key, Json const& default_value);
+        Json& set(std::string const&, Json const&);
+        Json  get(std::string const&) const;
+        bool  has(std::string const&) const;
+        bool  remove(std::string const&);
+        Json  update(Json const&) const;
+        Json  pop(std::string const&);
+        Json  pop(std::string const&, Json const&);
         
         detail::stringvec_t keys() const;
         static detail::stringvec_t allkeys(); /// return a copy of the keyset
@@ -506,13 +506,13 @@ class Json {
         
         /// array operations
         Json& operator<<(Json const&);
-        Json&  insert(int idx, Json const&);
-        Json&   erase(int idx);
-        Json& replace(int idx, Json const&);
+        Json&  insert(int, Json const&);
+        Json&   erase(int);
+        Json& replace(int, Json const&);
         Json  extend(Json const&) const;
         Json& append(Json const&);
         int    index(Json const&) const;
-        Json      at(int idx) const;
+        Json      at(int) const;
         Json     pop();
         
         /// subscripting
@@ -533,7 +533,7 @@ class Json {
         
         /// boolean comparison
         bool operator==(Json const&) const;
-        bool operator!=(Json const& that) const;
+        bool operator!=(Json const&) const;
     
         /// schema hooks
         bool to_schema(std::string* reason);
@@ -556,7 +556,7 @@ class Json {
         };
         
         struct use_error : std::exception {
-            use_error(std::string const& msg)
+            use_error(std::string const&)
                 :std::exception()
                 {}
         };
@@ -593,6 +593,6 @@ namespace std {
         
     };
     
-}; /* namespace std */
+} /* namespace std */
 
 #endif /// LIBIMREAD_EXT_JSON_JSON11_H_

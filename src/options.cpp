@@ -38,17 +38,18 @@ namespace im {
     /// Copy-construct from a JSON value:
     Options::Options(Json const& json)
         :Json(json)
-        {}
+        { mkobject(); }
     
     /// Move-construct from a JSON value:
     Options::Options(Json&& json) noexcept
         :Json(std::move(json))
-        {}
+        { mkobject(); }
     
     /// Copy-constructor:
     Options::Options(Options const& other)
         :Options(other.cache)
         {
+            root->unref();
             Node* node = other.root;
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
         }
@@ -233,9 +234,8 @@ namespace im {
         std::copy(prefixvec.begin(),     prefixvec.end(),
                   std::inserter(prefixes, prefixes.end()));
         
-        // return prefixes;
-        return make_pair(std::move(prefixes),
-                         std::move(keys));
+        return std::make_pair(std::move(prefixes),
+                              std::move(keys));
     }
     
     prefixgram_t Options::prefixgram(std::string const& separator) const {
@@ -260,14 +260,36 @@ namespace im {
         std::for_each(patterns.begin(),
                       patterns.end(),
                   [&](auto const& kv) {
-                      prefixgram[kv.first] = std::count_if(keys.begin(), keys.end(),
+                      prefixgram[kv.first] = std::count_if(keys.begin(),
+                                                           keys.end(),
                                                        [&](std::string const& s) {
-                return std::regex_search(s, kv.second, std::regex_constants::match_default);
+                /// N.B. without that third argument, this call doesn’t compile;
+                /// it errors out with a mass of ambiguous overload mismatches:
+                return std::regex_search(s, kv.second,
+                       std::regex_constants::match_default);
             });
         });
         
         /// return the prefix histogram (née “prefixgram”):
         return prefixgram;
+    }
+    
+    Options Options::subset(std::string const& prefix,
+                            std::string const& separator,
+                                          bool defix) const {
+        Options out;
+        /// return the count of how many keys have this prefix:
+        std::regex prefix_re("^" + prefix + separator, std::regex::extended);
+        stringvec_t keys = Options::list();
+        stringvec_t pks;
+        std::copy_if(keys.begin(), keys.end(),
+                     std::back_inserter(pks),
+                 [&](std::string const& key) { return std::regex_search(key, prefix_re,
+                                                      std::regex_constants::match_default); });
+        for (auto const& pk : pks) {
+            out.set(pk, Json::cast<std::string>(pk));
+        }
+        return out;
     }
     
     #pragma mark -
@@ -306,6 +328,17 @@ namespace im {
         throw Json::parse_error("JSON im::OptionsList format error", is);
     }
     
+    /// member swap
+    void OptionsList::swap(OptionsList& other) noexcept {
+        using std::swap;
+        swap(root,  other.root);
+    }
+    
+    /// friend swap
+    void swap(OptionsList& lhs, OptionsList& rhs) noexcept {
+        lhs.swap(rhs);
+    }
+    
     #pragma mark -
     #pragma mark im::get_optional_{string,cstring,int,bool} legacy methods
     
@@ -331,4 +364,21 @@ namespace im {
         return opts.cast<int>(key, static_cast<int>(default_value));
     }
     
-}
+} /* namespace im */
+
+#pragma mark -
+#pragma mark std::swap<…>() specializations for im::Options and im::OptionsList
+
+namespace std {
+    
+    template <>
+    void swap(im::Options& lhs, im::Options& rhs) noexcept {
+        lhs.swap(rhs);
+    }
+    
+    // template <>
+    // void swap(im::OptionsList& lhs, im::OptionsList& rhs) noexcept {
+    //     lhs.swap(rhs);
+    // }
+    
+} /* namespace std */

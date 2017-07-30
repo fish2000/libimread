@@ -9,6 +9,7 @@
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/JSON/json11.h>
 #include <libimread/store.hh>
+#include <libimread/rehash.hh>
 
 #define STRINGNULL() stringmapper::base_t::null_value()
 
@@ -155,8 +156,11 @@ namespace store {
     }
     
     void stringmapper::warm_cache() const {
-        /// call get() for each key to warm the cache:
-        for (std::string const& key : list()) { get(key); }
+        stringvec_t keys(list());
+        if (cache.size() < keys.size()) {
+            /// call get() for each key to warm the cache
+            for (std::string const& key : keys) { get(key); }
+        }
     }
     
     stringmapper::stringmap_t& stringmapper::mapping() const {
@@ -200,6 +204,12 @@ namespace store {
     
     std::size_t stringmapper::max_size() const noexcept {
         return stringvec_t().max_size();
+    }
+    
+    std::size_t stringmapper::hash(std::size_t H) const {
+        warm_cache();
+        hash::rehash<std::string>(H, Json(cache).format());
+        return H;
     }
     
     void stringmapper::clear() {
@@ -313,6 +323,11 @@ namespace store {
         /// warming it just wastes a bunch of ops
     }
     
+    void stringmap::swap(stringmap& other) noexcept {
+        using std::swap;
+        swap(cache, other.cache);
+    }
+    
     std::string& stringmap::get(std::string const& key) {
         if (cache.find(key) != cache.end()) { return cache[key]; }
         return STRINGNULL();
@@ -347,3 +362,15 @@ namespace store {
     }
     
 } /// namespace store
+
+#pragma mark -
+#pragma mark std::swap<…>() specializations for store::stringmap
+
+// namespace std {
+//
+//     template <>
+//     void swap(store::stringmap& lhs, store::stringmap& rhs) noexcept {
+//         lhs.swap(rhs);
+//     }
+//
+// } /* namespace std */

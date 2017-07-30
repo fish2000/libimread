@@ -59,6 +59,31 @@ namespace {
         CHECK(opts.get("list") == "initialization");
         CHECK(opts.get("WAT") == std::string{ NULL_STR });
         CHECK(opts.count() == 4);
+        
+        {
+            store::stringmap optcopy(opts);
+            
+            CHECK(optcopy.count() == 4);
+            CHECK(optcopy.get("yo") == "dogg");
+            CHECK(optcopy.get("i") == "heard");
+            CHECK(optcopy.get("you") == "like");
+            CHECK(optcopy.get("list") == "initialization");
+            CHECK(optcopy.get("WAT") == std::string{ NULL_STR });
+            CHECK(optcopy.count() == 4);
+        }
+        
+        {
+            store::stringmap optfix(opts, "prefix");
+            
+            CHECK(optfix.count() == 4);
+            CHECK(optfix.get("prefix:yo") == "dogg");
+            CHECK(optfix.get("prefix:i") == "heard");
+            CHECK(optfix.get("prefix:you") == "like");
+            CHECK(optfix.get("prefix:list") == "initialization");
+            CHECK(optfix.get("prefix:WAT") == std::string{ NULL_STR });
+            CHECK(optfix.count() == 4);
+        }
+        
     }
     
     TEST_CASE("[options-container] Calculate a prefix histogram from an im::Options instance",

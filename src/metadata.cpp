@@ -21,6 +21,17 @@ namespace im {
     
     Metadata::~Metadata() {}
     
+    /// member swap
+    void Metadata::swap(Metadata& other) noexcept {
+        using std::swap;
+        swap(values,  other.values);
+    }
+    
+    /// friend swap
+    void swap(Metadata& lhs, Metadata& rhs) noexcept {
+        lhs.swap(rhs);
+    }
+    
     bool operator==(Metadata const& lhs, Metadata const& rhs) {
         return &lhs == &rhs;
     }
@@ -100,4 +111,20 @@ namespace im {
         return set_icc_data(datum);
     }
     
+    std::size_t Metadata::hash(std::size_t H) const {
+        return values.hash(H);
+    }
+    
 } /* namespace im */
+
+#pragma mark -
+#pragma mark std::swap<…>() specializations for im::Metadata
+
+namespace std {
+    
+    template <>
+    void swap(im::Metadata& lhs, im::Metadata& rhs) noexcept {
+        lhs.swap(rhs);
+    }
+    
+} /* namespace std */

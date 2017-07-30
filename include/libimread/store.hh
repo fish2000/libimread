@@ -39,6 +39,7 @@ namespace store {
             using mapped_type = Mapped;
             using value_type = Value;
             using size_type = std::size_t;
+            using hash_type = std::size_t;
             using difference_type = std::ptrdiff_t;
             
             using reference = std::add_lvalue_reference_t<value_type>;
@@ -74,6 +75,7 @@ namespace store {
             virtual bool empty() const = 0;
             virtual size_type size() const = 0;
             virtual size_type max_size() const noexcept = 0;
+            virtual hash_type hash(hash_type) const = 0;
             
             virtual void clear() = 0;
             virtual bool insert(rvalue_reference) = 0;
@@ -132,6 +134,7 @@ namespace store {
             virtual bool empty() const override;
             virtual std::size_t size() const override;
             virtual std::size_t max_size() const noexcept override;
+            virtual std::size_t hash(std::size_t H = 0) const override;
             
             virtual void clear() override;
             virtual bool insert(std::pair<const std::string, std::string>&& item) override;
@@ -216,8 +219,8 @@ namespace store {
         static_assert(store::is_stringmapper_v<T, U>,
                      "store::defix_copy() operands must derive from store::stringmapper");
         stringmapper::stringvec_t froms(std::forward<T>(from).list());
-        std::regex defix_re("^" + prefix + sep, std::regex::extended);
         if (!froms.empty()) {
+            std::regex defix_re("^" + prefix + sep, std::regex::extended);
             for (std::string const& name : froms) { std::forward<U>(to).set(
                                                     std::regex_replace(name, defix_re, ""),
                                                     std::forward<T>(from).get(name)); }
@@ -356,6 +359,9 @@ namespace store {
         
         public:
             virtual void warm_cache() const override;           /// override with no-op
+            
+        public:
+            virtual void swap(stringmap&) noexcept;             /// member no-except swap
         
         public:
             /// implementation of the stringmapper API, in terms of std::unordered_map<…> API
@@ -397,5 +403,28 @@ template <typename T,
                        bool>>
 X operator!=(T const& lhs,
              U const& rhs) { return !(operator==<T, U>(lhs, rhs)); }
+
+namespace std {
+    
+    // template <>
+    // void swap(store::stringmap&, store::stringmap&) noexcept;
+    
+    /// std::hash specialization for store::stringmap
+    /// ... following the recipe found here:
+    ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
+    
+    template <>
+    struct hash<store::stringmap> {
+        
+        typedef store::stringmap argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& strmap) const {
+            return static_cast<result_type>(strmap.hash());
+        }
+        
+    };
+    
+} /* namespace std */
 
 #endif /// LIBIMREAD_INCLUDE_STORE_HH_
