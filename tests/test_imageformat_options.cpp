@@ -192,9 +192,10 @@ namespace {
                 
                 WTF("SUBGROUPS:", join(subgroups));
                 
-                for (std::string const& subgroup : subgroups) {
-                    opts.regroup(subgroup);
-                }
+                // for (std::string const& subgroup : subgroups) {
+                //     opts.regroup(subgroup);
+                // }
+                opts.flatten();
                 
                 WTF("",
                     ansi::lightred.str("Format name: " + format),

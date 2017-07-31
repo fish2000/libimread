@@ -553,11 +553,21 @@ namespace im {
         if (fix == detail::kDefaultRep) {
             fix = subgroupname;
         }
-        Options sub = subgroup(subgroupname);
+        Options sub = Options::subgroup(subgroupname);
         Options::del(subgroupname);
         for (std::string const& key : sub.list()) {
             Json::set(fix + separator + key, sub.value(key));
         }
+        return *this;
+    }
+    
+    Options& Options::flatten(std::string const& separator) {
+        do {
+            for (std::string const& group : Json::subgroups()) {
+                Options::regroup(group, detail::kDefaultRep,
+                                 separator);
+            }
+        } while (Json::subgroups().size());
         return *this;
     }
     

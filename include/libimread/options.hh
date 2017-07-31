@@ -215,6 +215,7 @@ namespace im {
             Options& regroup(std::string const& subgroupname,
                                        std::string const& prefix = detail::kDefaultRep,                     /// defaults to the subgroup name
                                     std::string const& separator = detail::kDefaultSep);
+            Options& flatten(std::string const& separator = detail::kDefaultSep);
             
         public:
             OptionsList keylist() const;
