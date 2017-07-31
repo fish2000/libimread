@@ -195,6 +195,7 @@ namespace im {
                     ratios_t ratios(std::string const& separator = detail::kDefaultSep) const;
         
         public:
+            Options subgroup(std::string const&) const;
             Options subset(std::regex const& pattern, bool defix = true,
                                   std::string const& replacement = detail::kDefaultRep) const;
             Options subset(std::string const& prefix, bool defix = true,

@@ -34,8 +34,8 @@ namespace im {
                                                 ImageFactory* factory,
                                                 Options const& opts) override;
             
-            virtual Options read_metadata(byte_source* src,
-                                              Options const& opts) override;
+            virtual Metadata read_metadata(byte_source* src,
+                                           Options const& opts) override;
             
             virtual void write(Image& input,
                                byte_sink* output,

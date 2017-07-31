@@ -5,7 +5,7 @@ SYMBOLIZE.
 EXISTING SYMBOLS
 -----------------------------
 
-* `jpeg:quality`
+* `jpg:quality`
 * `png:compression_level`
 * `tiff:compress`
 * `tiff:horizontal-predictor`

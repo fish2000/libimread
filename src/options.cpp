@@ -460,6 +460,16 @@ namespace im {
                                                     total_count);
     }
     
+    Options Options::subgroup(std::string const& name) const {
+        if (Json::has(name)) {
+            Json sg(Json::get(name));
+            if (sg.type() == Type::OBJECT) {
+                return Options(std::move(sg));
+            }
+        }
+        return Options::null;
+    }
+    
     Options Options::subset(std::regex const& pattern,
                                          bool defix,
                            std::string const& replacement) const {

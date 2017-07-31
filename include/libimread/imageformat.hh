@@ -22,6 +22,7 @@ namespace im {
     /// forward declarations
     class Image;
     class ImageFactory;
+    class Metadata;
     struct ImageList;
     struct byte_source;
     struct byte_sink;
@@ -156,8 +157,8 @@ namespace im {
                                          ImageFactory* factory,
                                          Options const& opts);
             
-            virtual Options read_metadata(byte_source* src,
-                                          Options const& opts);
+            virtual Metadata read_metadata(byte_source* src,
+                                           Options const& opts);
             
             virtual void write(Image& input,
                                byte_sink* output,

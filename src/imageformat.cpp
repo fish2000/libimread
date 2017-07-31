@@ -9,6 +9,7 @@
 #include <libimread/imageformat.hh>
 #include <libimread/options.hh>
 #include <libimread/image.hh>
+#include <libimread/metadata.hh>
 #include <libimread/imagelist.hh>
 #include <iod/json.hh>
 
@@ -72,8 +73,8 @@ namespace im {
         imread_raise_default(NotImplementedError);
     }
     
-    Options ImageFormat::read_metadata(byte_source* src,
-                                       Options const& opts) {
+    Metadata ImageFormat::read_metadata(byte_source* src,
+                                        Options const& opts) {
         imread_raise_default(NotImplementedError);
     }
     

@@ -13,6 +13,7 @@
 #include <libimread/IO/jpeg.hh>
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
+#include <libimread/metadata.hh>
 #include <libimread/pixels.hh>
 #include <libimread/ext/exif.hh>
 
@@ -86,7 +87,7 @@ namespace im {
         }
         
         jpeg_source_adaptor::jpeg_source_adaptor(byte_source* s)
-            :s(s) 
+            :s(s)
             {
                 buf = new byte[buffer_size];
                 mgr.next_input_byte = buf;
@@ -290,19 +291,18 @@ namespace im {
         return output;
     }
     
-    
-    Options JPEGFormat::read_metadata(byte_source* src,
-                                          Options const& opts) {
+    Metadata JPEGFormat::read_metadata(byte_source* src,
+                                       Options const& opts) {
         using easyexif::EXIFInfo;
         using im::byte_iterator;
         
-        Options out;
+        Metadata meta;
         // src->seek_absolute(0);
         
         byte_iterator result = std::search(src->begin(),   src->end(),
                                            marker.begin(), marker.end());
         bool has_exif = result != src->end();
-        if (!has_exif) { return out; }
+        if (!has_exif) { return meta; }
         
         bytevec_t data;
         uint16_t size = parse_size(result);
@@ -316,49 +316,49 @@ namespace im {
         if (exif.parseFromEXIFSegment(&data[0], data.size()) != PARSE_EXIF_SUCCESS) {
             imread_raise(MetadataReadError,
                 "Error parsing JPEG EXIF metadata");
-            // return out;
+            // return meta;
         }
         
         /// strings
-        out.set("ImageDescription",     exif.ImageDescription);
-        out.set("Make",                 exif.Make);
-        out.set("Model",                exif.Model);
-        out.set("Software",             exif.Software);
-        out.set("DateTime",             exif.DateTime);
-        out.set("DateTimeOriginal",     exif.DateTimeOriginal);
-        out.set("DateTimeDigitized",    exif.DateTimeDigitized);
-        out.set("SubSecTimeOriginal",   exif.SubSecTimeOriginal);
-        out.set("Copyright",            exif.Copyright);
+        meta.set("ImageDescription",     exif.ImageDescription);
+        meta.set("Make",                 exif.Make);
+        meta.set("Model",                exif.Model);
+        meta.set("Software",             exif.Software);
+        meta.set("DateTime",             exif.DateTime);
+        meta.set("DateTimeOriginal",     exif.DateTimeOriginal);
+        meta.set("DateTimeDigitized",    exif.DateTimeDigitized);
+        meta.set("SubSecTimeOriginal",   exif.SubSecTimeOriginal);
+        meta.set("Copyright",            exif.Copyright);
         
         /// numbers
-        out.set("BitsPerSample",        exif.BitsPerSample);
-        out.set("ExosureTime",          exif.ExposureTime);
-        out.set("FNumber",              exif.FNumber);
-        out.set("ISOSpeedRatings",      exif.ISOSpeedRatings);
-        out.set("ShutterSpeedValue",    exif.ShutterSpeedValue);
-        out.set("ExposureBiasValue",    exif.ExposureBiasValue);
-        out.set("SubjectDistance",      exif.SubjectDistance);
-        out.set("FocalLength",          exif.FocalLength);
-        out.set("FocalLengthIn35mm",    exif.FocalLengthIn35mm);
-        out.set("ImageWidth",           exif.ImageWidth);
-        out.set("ImageHeight",          exif.ImageHeight);
+        meta.set("BitsPerSample",        std::to_string(exif.BitsPerSample));
+        meta.set("ExosureTime",          std::to_string(exif.ExposureTime));
+        meta.set("FNumber",              std::to_string(exif.FNumber));
+        meta.set("ISOSpeedRatings",      std::to_string(exif.ISOSpeedRatings));
+        meta.set("ShutterSpeedValue",    std::to_string(exif.ShutterSpeedValue));
+        meta.set("ExposureBiasValue",    std::to_string(exif.ExposureBiasValue));
+        meta.set("SubjectDistance",      std::to_string(exif.SubjectDistance));
+        meta.set("FocalLength",          std::to_string(exif.FocalLength));
+        meta.set("FocalLengthIn35mm",    std::to_string(exif.FocalLengthIn35mm));
+        meta.set("ImageWidth",           std::to_string(exif.ImageWidth));
+        meta.set("ImageHeight",          std::to_string(exif.ImageHeight));
         
         /// “enums”
-        out.set("Orientation",          exif.Orientation);       /// 0: unspecified in EXIF data
+        meta.set("Orientation",          std::to_string(exif.Orientation));      /// 0: unspecified in EXIF data
                                                                  /// 1: upper left of image
                                                                  /// 3: lower right of image
                                                                  /// 6: upper right of image
                                                                  /// 8: lower left of image
                                                                  /// 9: undefined
-        out.set("Flash",                exif.Flash);             /// 0: no flash, 1: flash
-        out.set("MeteringMode",         exif.MeteringMode);      /// 1: average
+        meta.set("Flash",                std::to_string(exif.Flash));            /// 0: no flash, 1: flash
+        meta.set("MeteringMode",         std::to_string(exif.MeteringMode));     /// 1: average
                                                                  /// 2: center weighted average
                                                                  /// 3: spot
                                                                  /// 4: multi-spot
                                                                  /// 5: multi-segment
         
-        /// return the Options full of metadata:
-        return out;
+        /// return the metadata instance:
+        return meta;
     }
     
     void JPEGFormat::write(Image& input,
