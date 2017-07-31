@@ -27,6 +27,8 @@ namespace {
     using im::OptionsList;
     using bytevec_t = std::vector<byte>;
     using stringvec_t = std::vector<std::string>;
+    using ::prefixgram_t;
+    using ::ratios_t;
     
     TEST_CASE("[options-container] Check store::is_stringmapper_v values for im::Options instances",
               "[options-container-check-store-is_stringmapper_v-values-im-options-instances]")
@@ -61,6 +63,8 @@ namespace {
         CHECK(opts.get("WAT") == std::string{ NULL_STR });
         CHECK(opts.count() == 4);
         
+        SECTION("[options-container] » Confirm count()/get() after copying im::Options to a store::stringmap instance, "
+                                      "internally using store::value_copy<…>()")
         {
             store::stringmap optcopy(opts);
             
@@ -73,6 +77,8 @@ namespace {
             CHECK(optcopy.count() == 4);
         }
         
+        SECTION("[options-container] » Confirm count()/get() after copying im::Options to a store::stringmap instance, "
+                                      "internally using store::prefix_copy<…>()")
         {
             store::stringmap optfix(opts, "prefix");
             
@@ -100,7 +106,7 @@ namespace {
             {  "png:compression_level",     std::to_string(9)               }, /// png = 1
             {  "tiff:compress",             booleanizer(true)               }, /// tiff = 1
             {  "tiff:horizontal-predictor", booleanizer(false)              }, /// tiff = 2
-            {  "metadata",                  std::string(large_data)         }, /// <none>
+            {  "metadata",                  std::string(large_data)         }, /// <none> 1 *
             {  "tiff:XResolution",          std::to_string(72)              }, /// tiff = 3
             {  "tiff:YResolution",          std::to_string(72)              }, /// tiff = 4
             {  "tiff:XResolutionUnit",      std::to_string(RESUNIT_INCH)    }, /// tiff = 5 *
@@ -122,34 +128,54 @@ namespace {
         /// for counting keys without prefixes:
         CHECK(typical.prefixcount() == 1);
         
+        SECTION("[options-container] » Confirm total values by examining a `ratio_t` tuple, "
+                                      "using im::Options::ratios()")
         {
-            auto ratios_tuple = typical.ratios();
+            ratios_t ratios_tuple = typical.ratios();
             
             // WTF("RATIOS:",
+            //     FF("\n\tunprefixed: %i\n\tprefixed: %i\n\ttotal: %i", std::get<2>(ratios_tuple),
+            //                                                           std::get<3>(ratios_tuple),
+            //                                                           std::get<4>(ratios_tuple)),
             //     FF("\n\tunprefixed: %f\n\tprefixed: %f\n\ttotal: %i", std::get<0>(ratios_tuple),
             //                                                           std::get<1>(ratios_tuple),
-            //                                                           std::get<2>(ratios_tuple)),
+            //                                                           std::get<4>(ratios_tuple)),
             // FF("\n\tunprefixed: %i%%\n\tprefixed: %i%%\n\ttotal: %i", static_cast<int>(std::get<0>(ratios_tuple) * 100),
             //                                                           static_cast<int>(std::get<1>(ratios_tuple) * 100),
-            //                                                           std::get<2>(ratios_tuple))
-            //                                                           );
+            //                                                           std::get<4>(ratios_tuple))
+            // ); /// end of WTF
             
-            CHECK(std::get<2>(ratios_tuple) == 14);
-            CHECK(std::get<2>(ratios_tuple) == typical.count());
+            CHECK(std::get<4>(ratios_tuple) == 14);
+            CHECK(std::get<4>(ratios_tuple) == typical.count());
             
-            /// These next two int-percentage results were figured out by uncommentding the above
-            /// block call to WTF(…) and observing the results.
+            CHECK(std::get<2>(ratios_tuple) == 1);
+            CHECK(std::get<2>(ratios_tuple) == typical.prefixcount());
+            CHECK(std::get<3>(ratios_tuple) == 13);
+            CHECK(std::get<3>(ratios_tuple) == (typical.count() - typical.prefixcount()));
+            
+            /// These next two int-percentage results were figured out by un-commenting-out the above
+            /// block call to WTF(…) and observing the printed results.
             CHECK(static_cast<int>(std::get<0>(ratios_tuple) * 100) == 7);   ///  7% unprefixed
             CHECK(static_cast<int>(std::get<1>(ratios_tuple) * 100) == 92);  /// 92% prefixed
         }
         
-        prefixgram_t prefixgram = typical.prefixgram();
-        
-        CHECK(prefixgram["md"] == 5);
-        CHECK(prefixgram["tiff"] == 5);
-        CHECK(prefixgram["png"] == 2);
-        CHECK(prefixgram["jpg"] == 1);
-        CHECK(prefixgram["WAT"] == 0);
+        SECTION("[options-container] » Confirm per-prefix counts by examining a `prefixgram_t` hash map, "
+                                      "using im::Options::prefixgram()")
+        {
+            prefixgram_t prefixgram = typical.prefixgram();
+            
+            CHECK(prefixgram["md"] == 5);
+            CHECK(prefixgram["tiff"] == 5);
+            CHECK(prefixgram["png"] == 2);
+            CHECK(prefixgram["jpg"] == 1);
+            CHECK(prefixgram["WAT"] == 0);
+            
+            CHECK(prefixgram["md"]   == typical.prefixcount("md"));
+            CHECK(prefixgram["tiff"] == typical.prefixcount("tiff"));
+            CHECK(prefixgram["png"]  == typical.prefixcount("png"));
+            CHECK(prefixgram["jpg"]  == typical.prefixcount("jpg"));
+            CHECK(prefixgram["WAT"]  == typical.prefixcount("WAT"));
+        }
     }
     
 } /* namespace (anon.) */

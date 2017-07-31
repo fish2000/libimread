@@ -25,13 +25,74 @@ using string_init_t = std::initializer_list<std::string>;
 using stringpair_init_t = std::initializer_list<stringpair_t>;
 using prefixpair_t = std::pair<prefixset_t, stringvec_t>;
 using patternmap_t = std::unordered_map<std::string, std::regex>;
-using ratios_t = std::tuple<double, double, int>;
+using ratios_t = std::tuple<double, double, int, int, int>;
 
 namespace im {
     
     namespace detail {
         using store::detail::kDefaultSep;
         static constexpr std::string::value_type kDefaultSepChar = kDefaultSep[0];
+    }
+    
+    struct Options;
+    
+    struct OptionsList final : public Json {
+        
+        public:
+            using Json::null;
+            using Json::undefined;
+            using Json::root;
+            using Json::hash;
+            using Json::operator[];
+        
+        public:
+            OptionsList();
+            
+        protected:
+            OptionsList(stringvec_t const&);
+            OptionsList(stringvec_t&&) noexcept;
+            
+        public:
+            OptionsList(Json const& other);
+            OptionsList(Json&& other) noexcept;
+            explicit OptionsList(Options const&);
+            explicit OptionsList(Options&&) noexcept;
+            OptionsList(OptionsList const&);
+            OptionsList(OptionsList&&) noexcept;
+            OptionsList(std::istream& is, bool full = true);
+            OptionsList(string_init_t);
+            OptionsList(stringpair_init_t);
+            virtual ~OptionsList();
+        
+        public:
+            void swap(OptionsList&) noexcept;
+            friend void swap(OptionsList&, OptionsList&) noexcept;
+            OptionsList& operator=(string_init_t);
+            OptionsList& operator=(stringpair_init_t);
+            OptionsList& operator=(Json const&);
+            OptionsList& operator=(Json&&) noexcept;
+            OptionsList& operator=(OptionsList const&);
+            OptionsList& operator=(OptionsList&&) noexcept;
+        
+        public:
+            virtual bool can_store() const noexcept;
+            
+        public:
+            template <typename ConvertibleType,
+                      typename = decltype(&ConvertibleType::to_json)>
+            OptionsList(ConvertibleType const& convertible)
+                :Json(convertible.to_json())
+                {}
+        
+        public:
+            static OptionsList parse(std::string const&);
+            
+        public:
+            std::size_t count() const;
+    };
+    
+    namespace detail {
+        using listpair_t = std::pair<OptionsList, OptionsList>;
     }
     
     struct Options final : public Json, public store::stringmapper {
@@ -41,6 +102,10 @@ namespace im {
             using Json::undefined;
             using Json::root;
             using Json::hash;
+            
+        public:
+            using store::stringmapper::empty;
+            using store::stringmapper::clear;
             using store::stringmapper::cache;
         
         public:
@@ -71,6 +136,7 @@ namespace im {
             Options(Options&&) noexcept;
             Options(std::istream& is, bool full = true);
             Options(stringpair_init_t);
+            Options(detail::listpair_t);
             virtual ~Options();
         
         public:
@@ -129,37 +195,6 @@ namespace im {
         
     };
     
-    struct OptionsList final : public Json {
-        
-        public:
-            using Json::null;
-            using Json::undefined;
-            using Json::root;
-            using Json::hash;
-        
-        public:
-            OptionsList();
-            OptionsList(Json const& other);
-            OptionsList(Json&& other) noexcept;
-            OptionsList(std::istream& is, bool full = true);
-            OptionsList(string_init_t);
-            virtual ~OptionsList();
-        
-        public:
-            void swap(OptionsList&) noexcept;
-            friend void swap(OptionsList&, OptionsList&) noexcept;
-            
-        public:
-            template <typename ConvertibleType,
-                      typename = decltype(&ConvertibleType::to_json)>
-            OptionsList(ConvertibleType const& convertible)
-                :Json(convertible.to_json())
-                {}
-        
-        public:
-            static OptionsList parse(std::string const&);
-    };
-    
      std::string get_optional_string(Options const& opts, std::string const& key);
     const char* get_optional_cstring(Options const& opts, std::string const& key);
                 int get_optional_int(Options const& opts, std::string const& key,   int const default_value = 0);
@@ -169,14 +204,6 @@ namespace im {
 
 namespace std {
     
-    // #ifndef IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
-    // #define IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
-    //
-    // template <>
-    // void swap(im::Options&, im::Options&) noexcept;
-    //
-    // #endif /// IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
-    //
     // #ifndef IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
     // #define IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
     //
@@ -185,18 +212,17 @@ namespace std {
     //
     // #endif /// IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
     
-    /// std::hash specialization for im::Options and im::OptionsList
+    // #ifndef IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
+    // #define IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
+    //
+    // template <>
+    // void swap(im::Options&, im::Options&) noexcept;
+    //
+    // #endif /// IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
+    
+    /// std::hash specialization for im::OptionsList and im::Options
     /// ... following the recipe found here:
     ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
-    
-    template <>
-    struct hash<im::Options> {
-        
-        typedef im::Options argument_type;
-        typedef std::size_t result_type;
-        
-        result_type operator()(argument_type const& opts) const;
-    };
     
     template <>
     struct hash<im::OptionsList> {
@@ -205,6 +231,15 @@ namespace std {
         typedef std::size_t result_type;
         
         result_type operator()(argument_type const& optlist) const;
+    };
+    
+    template <>
+    struct hash<im::Options> {
+        
+        typedef im::Options argument_type;
+        typedef std::size_t result_type;
+        
+        result_type operator()(argument_type const& opts) const;
     };
     
 } /* namespace std */

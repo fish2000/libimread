@@ -71,6 +71,7 @@ namespace tc {
 
 namespace im {
     struct Options;
+    struct OptionsList;
 }
 
 namespace store {
@@ -80,6 +81,7 @@ namespace store {
 class Json {
     
     friend struct im::Options;
+    friend struct im::OptionsList;
     friend class store::stringmapper;
     
     protected:

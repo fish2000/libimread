@@ -9,6 +9,138 @@
 namespace im {
     
     #pragma mark -
+    #pragma mark method implementations for im::OptionsList
+    
+    OptionsList::OptionsList()
+        :Json()
+        { mkarray(); }
+    
+    OptionsList::OptionsList(stringvec_t const& stringvec) {
+        Json::Array* array_ptr = mkarray();
+        for (std::string const& string : stringvec) {
+            Json jstring(string);
+            array_ptr->add(jstring.root);
+        }
+    }
+    
+    OptionsList::OptionsList(stringvec_t&& stringvec) noexcept {
+        Json::Array* array_ptr = mkarray();
+        for (std::string const& string : stringvec) {
+            Json jstring(string);
+            array_ptr->add(jstring.root);
+        }
+    }
+    
+    OptionsList::OptionsList(Json const& other)
+        :Json(other)
+        { mkarray(); }
+    
+    OptionsList::OptionsList(Json&& other) noexcept
+        :Json(std::move(other))
+        { mkarray(); }
+    
+    /// convert from `im::Options const&`: use only the key list
+    OptionsList::OptionsList(Options const& other)
+        :OptionsList(other.list())
+        {}
+    
+    /// convert from `im::Options&&`: use only the key list
+    OptionsList::OptionsList(Options&& other) noexcept
+        :OptionsList(other.list())
+        {}
+    
+    OptionsList::OptionsList(OptionsList const& other)
+        :OptionsList()
+        {
+            root->unref();
+            Node* node = other.root;
+            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        }
+    
+    OptionsList::OptionsList(OptionsList&& other) noexcept
+        :OptionsList()
+        {
+            Node* node = std::exchange(other.root, root);
+            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        }
+    
+    OptionsList::OptionsList(std::istream& is, bool full)
+        :Json(is, full)
+        { mkarray(); }
+    
+    OptionsList::OptionsList(string_init_t string_init)
+        :OptionsList(stringvec_t(string_init.begin(),
+                                 string_init.end()))
+        {}
+    
+    /// using the initializer list type meant for `im::Options`:
+    OptionsList::OptionsList(stringpair_init_t stringpair_init)
+        :OptionsList(Options(stringpair_init))
+        {}
+    
+    OptionsList::~OptionsList() {}
+    
+    /// member swap
+    void OptionsList::swap(OptionsList& other) noexcept {
+        using std::swap;
+        swap(root, other.root);
+    }
+    
+    /// friend swap
+    void swap(OptionsList& lhs, OptionsList& rhs) noexcept {
+        lhs.swap(rhs);
+    }
+    
+    OptionsList& OptionsList::operator=(string_init_t string_init) {
+        OptionsList(string_init).swap(*this);
+        return *this;
+    }
+    
+    /// using the initializer list type meant for `im::Options`:
+    OptionsList& OptionsList::operator=(stringpair_init_t stringpair_init) {
+        OptionsList(stringpair_init).swap(*this);
+        return *this;
+    }
+    
+    OptionsList& OptionsList::operator=(Json const& json) {
+        OptionsList(json).swap(*this);
+        return *this;
+    }
+    
+    OptionsList& OptionsList::operator=(Json&& json) noexcept {
+        Node* node = std::exchange(json.root, root);
+        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        return *this;
+    }
+    
+    OptionsList& OptionsList::operator=(OptionsList const& other) {
+        OptionsList(other).swap(*this);
+        return *this;
+    }
+    
+    OptionsList& OptionsList::operator=(OptionsList&& other) noexcept {
+        Node* node = std::exchange(other.root, root);
+        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        return *this;
+    }
+    
+    bool OptionsList::can_store() const noexcept { return false; }
+    
+    OptionsList OptionsList::parse(std::string const& str) {
+        std::istringstream is(str);
+        OptionsList parsed(is);
+        if (is.peek() == std::char_traits<char>::eof()) { return parsed; }
+        while (std::isspace(is.get()))
+            /* skip */;
+        if (is.eof()) { return parsed; }
+        throw Json::parse_error("JSON im::OptionsList format error", is);
+    }
+    
+    std::size_t OptionsList::count() const {
+        return Json::size();
+    }
+    
+    #pragma mark -
     #pragma mark method implementations for im::Options
     
     /// default constructor -- calls Json::mkobject, which
@@ -85,6 +217,19 @@ namespace im {
             Json json(jsonmap);
             Node* node = std::exchange(json.root, root);
             (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        }
+    
+    Options::Options(detail::listpair_t listpair)
+        :Options()
+        {
+            OptionsList keys(std::move(listpair.first));
+            OptionsList values(std::move(listpair.second));
+            if (keys.count() != values.count()) { return; }
+            std::size_t idx = 0,
+                        max = keys.count();
+            for (; idx < max; ++idx) {
+                Options::set(keys[idx], static_cast<Json&&>(values[idx]));
+            }
         }
     
     Options::~Options() {}
@@ -288,25 +433,24 @@ namespace im {
     
     ratios_t Options::ratios(std::string const& separator) const {
         stringvec_t keys = Json::keys();
-        std::size_t unprefixed_count = std::count_if(keys.begin(),
+                int total_count = static_cast<int>(keys.size());
+                int unprefixed_count = std::count_if(keys.begin(),
                                                      keys.end(),
-                                                 [&](std::string const& key) {
-            return bool(key.find(separator[0]) == std::string::npos);
-        });
-        int total_count = static_cast<int>(keys.size());
-        double total = static_cast<double>(total_count);
-        double unprefixed = static_cast<double>(unprefixed_count);
-        double prefixed = static_cast<double>(total_count -
-                          static_cast<int>(unprefixed_count));
+                                                 [&](std::string const& key) { return bool(key.find(separator[0]) == std::string::npos); });
+                int prefixed_count = total_count - static_cast<int>(unprefixed_count);
+             double total = static_cast<double>(total_count);
+             double unprefixed = static_cast<double>(unprefixed_count);
+             double prefixed = static_cast<double>(prefixed_count);
         if (total == 0.00) { return { -1.0, -1.0, 0.0 }; }
-        double unprefixed_ratio = unprefixed == 0.00 ? 0.0 : (unprefixed / total);
-        double prefixed_ratio = prefixed == 0.00 ? 0.0 : (prefixed / total);
-        return std::make_tuple(unprefixed_ratio,
-                                 prefixed_ratio,
-                                    total_count);
+             double unprefixed_ratio = unprefixed == 0.00 ? 0.0 : (unprefixed / total);
+             double prefixed_ratio = prefixed == 0.00 ? 0.0 : (prefixed / total);
+        return std::make_tuple(unprefixed_ratio, prefixed_ratio,
+                               unprefixed_count, prefixed_count,
+                                                    total_count);
     }
     
-    Options Options::subset(std::regex const& pattern, bool defix) const {
+    Options Options::subset(std::regex const& pattern,
+                                         bool defix) const {
         stringvec_t keys = Options::list();
         stringvec_t pks;
         std::copy_if(keys.begin(), keys.end(),
@@ -320,12 +464,13 @@ namespace im {
         if (pks.empty()) { return out; }
         if (defix) {
             for (std::string const& pk : pks) {
-                out.set(pk, std::regex_replace(Json::cast<std::string>(pk), /// strip pattern from key string
-                                               pattern, ""));
+                out.set(pk, std::regex_replace(             /// strip pattern from key string
+                            Json::cast<std::string>(pk),
+                                          pattern, ""));
             }
         } else {
             for (std::string const& pk : pks) {
-                out.set(pk, Json::cast<std::string>(pk));                   /// use key string as-is
+                out.set(pk, Json::cast<std::string>(pk));   /// use key string as-is
             }
         }
         return out;
@@ -336,53 +481,6 @@ namespace im {
                             std::string const& separator) const {
         std::regex prefix_re("^" + prefix + separator, std::regex::extended);
         return Options::subset(prefix_re, defix);
-    }
-    
-    #pragma mark -
-    #pragma mark method implementations for im::OptionsList
-    
-    OptionsList::OptionsList()
-        :Json()
-        { mkarray(); }
-    
-    OptionsList::OptionsList(Json const& other)
-        :Json(other)
-        {}
-    
-    OptionsList::OptionsList(Json&& other) noexcept
-        :Json(std::move(other))
-        {}
-    
-    OptionsList::OptionsList(std::istream& is, bool full)
-        :Json(is, full)
-        {}
-    
-    OptionsList::OptionsList(string_init_t string_init)
-        :Json(Json::jsonvec_t(string_init.begin(),
-                              string_init.end()))
-        {}
-    
-    OptionsList::~OptionsList() {}
-    
-    OptionsList OptionsList::parse(std::string const& str) {
-        std::istringstream is(str);
-        OptionsList parsed(is);
-        if (is.peek() == std::char_traits<char>::eof()) { return parsed; }
-        while (std::isspace(is.get()))
-            /* skip */;
-        if (is.eof()) { return parsed; }
-        throw Json::parse_error("JSON im::OptionsList format error", is);
-    }
-    
-    /// member swap
-    void OptionsList::swap(OptionsList& other) noexcept {
-        using std::swap;
-        swap(root,  other.root);
-    }
-    
-    /// friend swap
-    void swap(OptionsList& lhs, OptionsList& rhs) noexcept {
-        lhs.swap(rhs);
     }
     
     #pragma mark -
@@ -413,27 +511,19 @@ namespace im {
 } /* namespace im */
 
 #pragma mark -
-#pragma mark std::swap<…>() and std::hash<…> specializations for im::Options and im::OptionsList
+#pragma mark std::swap<…>() and std::hash<…> specializations for im::OptionsList and im::Options
 
 namespace std {
-    
-    // template <>
-    // void swap(im::Options& lhs, im::Options& rhs) noexcept {
-    //     lhs.swap(rhs);
-    // }
     
     // template <>
     // void swap(im::OptionsList& lhs, im::OptionsList& rhs) noexcept {
     //     lhs.swap(rhs);
     // }
     
-    using opts_hasher_t = std::hash<im::Options>;
-    using opts_arg_t = opts_hasher_t::argument_type;
-    using opts_out_t = opts_hasher_t::result_type;
-    
-    opts_out_t opts_hasher_t::operator()(opts_arg_t const& o) const {
-        return static_cast<opts_out_t>(o.hash());
-    }
+    // template <>
+    // void swap(im::Options& lhs, im::Options& rhs) noexcept {
+    //     lhs.swap(rhs);
+    // }
     
     using optlist_hasher_t = std::hash<im::OptionsList>;
     using optlist_arg_t = optlist_hasher_t::argument_type;
@@ -441,6 +531,14 @@ namespace std {
     
     optlist_out_t optlist_hasher_t::operator()(optlist_arg_t const& os) const {
         return static_cast<optlist_out_t>(os.hash());
+    }
+    
+    using opts_hasher_t = std::hash<im::Options>;
+    using opts_arg_t = opts_hasher_t::argument_type;
+    using opts_out_t = opts_hasher_t::result_type;
+    
+    opts_out_t opts_hasher_t::operator()(opts_arg_t const& o) const {
+        return static_cast<opts_out_t>(o.hash());
     }
     
 } /* namespace std */
