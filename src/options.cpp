@@ -520,12 +520,12 @@ namespace im {
     }
     
     Options Options::underscores_to_dashes() const {
-        std::regex underscore_re("_", std::regex::extended);
+        static const std::regex underscore_re("_", std::regex::extended);
         return Options::replace(underscore_re, true, "-");
     }
     
     Options Options::dashes_to_underscores() const {
-        std::regex dash_re("-", std::regex::extended);
+        static const std::regex dash_re("-", std::regex::extended);
         return Options::replace(dash_re, true, "_");
     }
     
