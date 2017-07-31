@@ -52,7 +52,7 @@ namespace store {
     
     cfdict::cfdict(CFDictionaryRef raw)
         :instance{ CFDictionaryCreateMutableCopy(kCFAllocatorDefault,
-                                          CF_IDX(0), raw) }
+                                                 CF_IDX(0), raw) }
         {}
     
     cfdict::~cfdict() {}

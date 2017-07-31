@@ -54,7 +54,7 @@ namespace im {
                                                 ImageFactory* factory,
                                                 Options const& opts) override {
                 #if defined(__APPLE__)
-                    ImageList pages = this->read_impl(src, factory, false, opts);
+                    ImageList pages = read_impl(src, factory, false, opts);
                     std::unique_ptr<Image> out = pages.pop();
                     return out;
                 #endif
@@ -65,7 +65,7 @@ namespace im {
                                          ImageFactory* factory,
                                          Options const& opts) override {
                 #if defined(__APPLE__)
-                    return this->read_impl(src, factory, true, opts);
+                    return read_impl(src, factory, true, opts);
                 #endif
                 imread_raise_default(NotImplementedError);
             }

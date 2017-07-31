@@ -620,6 +620,66 @@ Json Json::values() const {
     return out;
 }
 
+Type Json::Node::type() const {
+    return Type::JSNULL;
+}
+
+NodeType Json::Node::nodetype() const {
+    return NodeType::LEAF;
+}
+
+Type Json::Bool::type() const {
+    return Type::BOOLEAN;
+}
+
+Type Json::Number::type() const {
+    return Type::NUMBER;
+}
+
+Type Json::String::type() const {
+    return Type::STRING;
+}
+
+Type Json::Pointer::type() const {
+    return Type::POINTER;
+}
+
+Type Json::Schema::type() const {
+    return Type::SCHEMA;
+}
+
+void Json::Node::print(std::ostream& out) const {
+    out << "null";
+}
+
+void Json::Node::traverse(traverser_t traverser, bool is_root) const {
+    traverser(this, this->type(), is_root ? NodeType::ROOT : this->nodetype());
+}
+
+void Json::Node::traverse(named_traverser_t named_traverser, char const* name) const {
+    named_traverser(this, name);
+}
+
+bool Json::Node::contains(Node const* that) const {
+    return this == that;
+}
+
+bool Json::Node::operator==(Node const& that) const {
+    return this == &that;
+}
+
+bool Json::Node::is_schema() const {
+    return false;
+}
+
+bool Json::Schema::is_schema() const {
+    return true;
+}
+
+char const* Json::Node::typestr() const {
+    return tc::typestr(this->type());
+}
+
 bool Json::String::operator==(Node const& that) const {
     return this == &that || (
             that.type() == Type::STRING &&
@@ -653,12 +713,22 @@ void Json::Pointer::print(std::ostream& out) const {
     out << "#" << (unsigned long)value << "";
 }
 
-void Json::Object::traverse(Json::traverser_t traverser) const {
+Type Json::Object::type() const {
+    return Type::OBJECT;
+}
+
+NodeType Json::Object::nodetype() const {
+    return map.empty() ? NodeType::LEAF : NodeType::STEM;
+}
+
+void Json::Object::traverse(Json::traverser_t traverser, bool is_root) const {
+    traverser(this, this->type(), is_root ? NodeType::ROOT : this->nodetype());
     for (auto it : map) { it.second->traverse(traverser); }
 }
 
 void Json::Object::traverse(Json::named_traverser_t named_traverser,
                             char const* name) const {
+    named_traverser(this, name);
     for (auto const& it : map) {
         it.second->traverse(
             named_traverser,
@@ -666,23 +736,34 @@ void Json::Object::traverse(Json::named_traverser_t named_traverser,
     }
 }
 
-void Json::Array::traverse(Json::traverser_t traverser) const {
+Type Json::Array::type() const {
+    return Type::ARRAY;
+}
+
+NodeType Json::Array::nodetype() const {
+    return list.empty() ? NodeType::LEAF : NodeType::STEM;
+}
+
+void Json::Array::traverse(Json::traverser_t traverser, bool is_root) const {
+    traverser(this, this->type(), is_root ? NodeType::ROOT : this->nodetype());
     for (auto it : list) { it->traverse(traverser); }
 }
 
 void Json::Array::traverse(Json::named_traverser_t named_traverser,
                            char const* name) const {
     std::size_t idx = 0;
+    named_traverser(this, name);
     for (auto it : list) {
-        it->traverse(
-            named_traverser,
-            std::to_string(idx).c_str());
+        std::string nametag = std::string(name == nullptr ? "<nullptr>" : name) + ":" +
+                              std::to_string(idx);
+        it->traverse(named_traverser,
+                     nametag.c_str());
         ++idx;
     }
 }
 
 void Json::traverse(Json::traverser_t traverser) const {
-    root->traverse(traverser);
+    root->traverse(traverser, true);
 }
 
 void Json::traverse(Json::named_traverser_t named_traverser) const {

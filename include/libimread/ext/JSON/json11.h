@@ -17,6 +17,7 @@
 #include <string>
 #include <ostream>
 #include <exception>
+#include <functional>
 #include <type_traits>
 #include <initializer_list>
 
@@ -37,6 +38,7 @@ class Json;
 class Schema;
 
 enum Type : BaseType { JSNULL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT, POINTER, SCHEMA };
+enum NodeType : BaseType { ROOT, LEAF, STEM };
 
 namespace tc {
     
@@ -54,13 +56,13 @@ namespace tc {
         template <Type t>
         struct helper;
         
-        template <> struct helper<Type::JSNULL>  { using value_type = Json; };
+        template <> struct helper<Type::JSNULL>  { using value_type = std::nullptr_t; };
         template <> struct helper<Type::BOOLEAN> { using value_type = bool; };
         template <> struct helper<Type::NUMBER>  { using value_type = long double; };
         template <> struct helper<Type::STRING>  { using value_type = std::string; };
-        template <> struct helper<Type::ARRAY>   { using value_type = Json; };
-        template <> struct helper<Type::OBJECT>  { using value_type = Json; };
-        template <> struct helper<Type::POINTER> { using value_type = void*; };
+        template <> struct helper<Type::ARRAY>   { using value_type = std::vector<Json>; };
+        template <> struct helper<Type::OBJECT>  { using value_type = std::map<std::string, Json>; };
+        template <> struct helper<Type::POINTER> { using value_type = std::add_pointer_t<void>; };
         template <> struct helper<Type::SCHEMA>  { using value_type = Schema; };
         
         template <Type t>
@@ -87,14 +89,20 @@ class Json {
     protected:
         /// Schema is forward-declared:
         struct Schema;
+        friend struct Schema;
         
         /// Node is forward-declared too,
         /// for the function-pointer signatures that follow:
         struct Node;
+        friend struct Node;
         using nodevec_t  = std::vector<Node*>;
         using nodecvec_t = std::vector<Node const*>;
         using nodemap_t  = std::map<std::string const*, Node*>;
         using nodepair_t = std::pair<std::string const*, Node*>;
+        
+        /// Property is also forward-declared, and friendly:
+        class Property;
+        friend class Property;
     
     public:
         using jsonlist_t = std::initializer_list<Json>;
@@ -103,8 +111,8 @@ class Json {
         using jsonpair_t = std::pair<std::string, Json>;
         
         /// Originally this was declared as: `void (*f)(Node const*)` ...
-        using traverser_t       = std::add_pointer_t<void(Node const*)>;
-        using named_traverser_t = std::add_pointer_t<void(Node const*, char const*)>;
+        using traverser_t       = std::function<void(Node const*, Type, NodeType)>;
+        using named_traverser_t = std::function<void(Node const*, char const*)>;
         
     protected:
         struct Node {
@@ -112,32 +120,34 @@ class Json {
             unsigned refcnt;
             Node(unsigned init = 0);
             virtual ~Node();
-            virtual Type type() const { return Type::JSNULL; }
-            virtual void print(std::ostream& out) const { out << "null"; }
-            virtual void traverse(traverser_t traverser) const      { traverser(this); }
-            virtual void traverse(named_traverser_t named_traverser,
-                                  char const* name = nullptr) const { named_traverser(this, name); }
-            virtual bool contains(Node const* that) const   { return this == that; }
-            virtual bool operator==(Node const& that) const { return this == &that; }
+            virtual Type type() const;
+            virtual NodeType nodetype() const;
+            virtual void print(std::ostream& out) const;
+            virtual void traverse(traverser_t traverser, bool is_root = false) const;
+            virtual void traverse(named_traverser_t named_traverser, char const* name = nullptr) const;
+            virtual bool contains(Node const* that) const;
+            virtual bool operator==(Node const& that) const;
             virtual void validate(Schema const& schema, nodecvec_t&) const;
-            virtual bool is_schema() const { return false; }
+            virtual bool is_schema() const;
             void unref();
-            char const* typestr() const { return tc::typestr(this->type()); }
+            char const* typestr() const;
             static Node null, undefined;
         };
         
+    protected:
         struct Bool : Node {
             static constexpr Type typecode = Type::BOOLEAN;
-            Type type() const override { return Type::BOOLEAN; }
+            Type type() const override;
             Bool(bool x) { refcnt = 1; }
             void print(std::ostream& out) const override;
             static Bool T;
             static Bool F;
         };
         
+    protected:
         struct Number : Node {
             static constexpr Type typecode = Type::NUMBER;
-            Type type() const override { return Type::NUMBER; }
+            Type type() const override;
             long double value;
             int prec = -1;
             Number(int x)
@@ -183,9 +193,10 @@ class Json {
             void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
+    protected:
         struct String : Node {
             static constexpr Type typecode = Type::STRING;
-            Type type() const override { return Type::STRING; }
+            Type type() const override;
             std::string value;
             String(std::string const& s)
                 :value(s)
@@ -199,9 +210,10 @@ class Json {
             void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
+    protected:
         struct Pointer : Node {
             static constexpr Type typecode = Type::POINTER;
-            Type type() const override { return Type::POINTER; }
+            Type type() const override;
             void* value = nullptr;
             bool destroy = false;
             explicit Pointer(void* voidptr)
@@ -241,10 +253,12 @@ class Json {
             void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
+    protected:
         struct Array : Node {
             static constexpr Type typecode = Type::ARRAY;
-            Type type() const override { return Type::ARRAY; }
             nodevec_t list;
+            Type type() const override;
+            NodeType nodetype() const override;
             virtual ~Array();
             void print(std::ostream&) const override;
             void add(Node*);
@@ -253,37 +267,38 @@ class Json {
             void del(int);
             void repl(int, Node*);
             Node* at(int) const;
-            void traverse(traverser_t traverser) const override;
-            void traverse(named_traverser_t traverser,
-                          char const* name = nullptr) const override;
+            void traverse(traverser_t traverser, bool is_root = false) const override;
+            void traverse(named_traverser_t traverser, char const* name = nullptr) const override;
             bool contains(Node const*) const override;
             bool operator==(Node const& that) const override;
             void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
+    protected:
         struct Object : Node {
             static constexpr Type typecode = Type::OBJECT;
-            Type type() const override { return Type::OBJECT; }
             nodemap_t map;
+            Type type() const override;
+            NodeType nodetype() const override;
             virtual ~Object();
             void print(std::ostream&) const override;
             Node* get(std::string const&) const;
             void  set(std::string const&, Node*);
             bool  del(std::string const&);
             Node* pop(std::string const&);
-            void traverse(traverser_t traverser) const override;
-            void traverse(named_traverser_t traverser,
-                          char const* name = nullptr) const override;
+            void traverse(traverser_t traverser, bool is_root = false) const override;
+            void traverse(named_traverser_t traverser, char const* name = nullptr) const override;
             bool contains(Node const*) const override;
             bool operator==(Node const& that) const override;
             void validate(Schema const& schema, nodecvec_t&) const override;
         };
         
+    protected:
         struct Schema : Node {
             using schemavec_t = std::vector<Schema*>;
             static constexpr Type typecode = Type::SCHEMA;
-            Type type() const override { return Type::SCHEMA; }
-            bool is_schema() const override { return true; }
+            Type type() const override;
+            bool is_schema() const override;
             Schema(Node*);
             virtual ~Schema();
             std::string uri;
@@ -316,19 +331,28 @@ class Json {
             Node* deflt = nullptr;
         };
         
+    protected:
         class Property {
-            Node* host;
-            std::string key;
-            int kidx;
-            Json target() const;
+            
+            friend class ::Json;
+            
+            protected:
+                Node* host;
+                std::string key;
+                int kidx;
+                
+            protected:
+                Json target() const;
             
             public:
                 Property(Node*, std::string const&);
                 Property(Node*, int);
+                
                 explicit Property(Node* n, const char* c)
                     :Property(n, std::string(c))
                     {}
                 
+            public:
                 // operator Json() const           { return target(); }
                 operator int()                  { return target(); }
                 operator float()                { return target(); }
@@ -338,23 +362,29 @@ class Json {
                 explicit operator long long()   { return static_cast<long long>(target()); }
                 explicit operator double()      { return static_cast<double>(target()); }
                 explicit operator long double() { return static_cast<long double>(target()); }
+                
+            public:
                 Property operator[](std::string const& k) { return target()[k]; }
                 Property operator[](const char* k) { return (*this)[std::string(k)]; }
                 Property operator[](int i) { return target()[i]; }
+                
+            public:
                 Json operator=(Json const&);
                 Json operator=(Property const&);
+                
+            public:
                 bool operator==(Json const& js) const { return (Json)(*this) == js; }
                 bool operator!=(Json const& js) const { return !(*this == js); }
                 detail::stringvec_t keys() { return target().keys(); }
                 bool has(std::string const& key) const { return target().has(key); }
             
-            friend std::ostream& operator<<(std::ostream& out, Property const& p) {
-                return out << (Json)p;
-            }
-            
-            friend Json;
+            public:
+                friend std::ostream& operator<<(std::ostream& out, Property const& p) {
+                    return out << (Json)p;
+                }
         };
         
+    protected:
         static detail::stringset_t keyset;   /// all propery names
         static int level;                    /// for pretty printing
         static int indent;                   /// for pretty printing
@@ -380,6 +410,7 @@ class Json {
         Json& operator=(Json&&) noexcept;
         Json& reset(); /// reassigns `null` to root node
         
+    public:
         /// more constructors
         Json(int x)                 { (root = new Number(x))->refcnt++; }
         Json(float x)               { (root = new Number(x))->refcnt++; }
@@ -408,6 +439,7 @@ class Json {
         /// ... I stole this one weird trick from the other json11: 
         ///     https://github.com/dropbox/json11/blob/master/json11.hpp#L92-L94
         
+    public:
         template <typename ConvertibleType,
                   typename = decltype(&ConvertibleType::to_json)>
         Json(ConvertibleType const& convertible)
@@ -418,6 +450,7 @@ class Json {
         /// templates are also stolen from the other json11 (as above).
         /// ... after all I steal from the best like always dogg you know it
         
+    public:
         template <typename Vector,
                   typename std::enable_if_t<
                            std::is_constructible<Json,        typename Vector::value_type>::value,
@@ -435,6 +468,7 @@ class Json {
             :Json(jsonmap_t(mapping.begin(), mapping.end()))
             {}
         
+    public:
         /// dynamic type info
         bool is_integer() const;
         Array* mkarray();
@@ -445,6 +479,7 @@ class Json {
         char const* typestr() const;
         std::string typestring() const;
         
+    public:
         /// conversion operators
         operator int() const;
         operator float() const;
@@ -460,6 +495,7 @@ class Json {
         explicit operator long double() const;
         explicit operator void*() const;
         
+    public:
         /// dictionary operations (or "object properties" in JS-Ville)
         Json& set(std::string const&, Json const&);
         Json  get(std::string const&) const;
@@ -469,15 +505,18 @@ class Json {
         Json  pop(std::string const&);
         Json  pop(std::string const&, Json const&);
         
+    public:
         detail::stringvec_t keys() const;
         static detail::stringvec_t allkeys(); /// return a copy of the keyset
         Json  values() const;     /// returned object is typed as an array
         
+    public:
         /// traversal
         using JSONNode = Node; /// legacy
         void traverse(traverser_t) const;
         void traverse(named_traverser_t) const;
         
+    public:
         /// cast operations
         template <typename T> inline
         std::remove_reference_t<T> cast(std::string const& key) const {
@@ -506,6 +545,7 @@ class Json {
             return json_cast<t>(key);
         }
         
+    public:
         /// array operations
         Json& operator<<(Json const&);
         Json&  insert(int, Json const&);
@@ -517,6 +557,7 @@ class Json {
         Json      at(int) const;
         Json     pop();
         
+    public:
         /// subscripting
         std::size_t size() const;
         Json::Property operator[](std::string const&);
@@ -524,46 +565,54 @@ class Json {
         Json::Property operator[](std::string const&) const;
         Json::Property operator[](int) const;
         
+    public:
         /// stringification
         std::string stringify() const;
         std::string format() const;
         friend std::ostream& operator<<(std::ostream&, Json const&);
         friend std::istream& operator>>(std::istream&, Json&);
         
+    public:
         /// hashing
         std::size_t hash(std::size_t H = 0) const;
         
+    public:
         /// boolean comparison
         bool operator==(Json const&) const;
         bool operator!=(Json const&) const;
     
+    public:
         /// schema hooks
         bool to_schema(std::string* reason);
         bool valid(Json& schema, std::string* reason = nullptr);
         
+    public:
         /// input parsing
         static Json null, undefined;
         static Json parse(std::string const&);
         static Json array() { return new Array(); }    // returns empty array
         static Json object() { return new Object(); }  // returns empty object
         
+    public:
         /// file I/O: dump and load
         Json const& dump(std::string const& dest, bool overwrite = false) const;
         std::string dumptmp() const;
         static Json load(std::string const& source);
         
+    public:
         struct parse_error : std::runtime_error {
             unsigned line = 0, col = 0;
             parse_error(std::string const& msg, std::istream& in);
         };
         
+    public:
         struct use_error : std::exception {
             use_error(std::string const&)
                 :std::exception()
                 {}
         };
-        
-};
+    
+}; /* class Json */
 
 template <>
 filesystem::path    Json::cast<filesystem::path>(std::string const& key) const;

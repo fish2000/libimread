@@ -195,6 +195,9 @@ namespace im {
                     ratios_t ratios(std::string const& separator = detail::kDefaultSep) const;
         
         public:
+            stringvec_t subgroups() const;
+        
+        public:
             Options subgroup(std::string const&) const;
             Options subset(std::regex const& pattern, bool defix = true,
                                   std::string const& replacement = detail::kDefaultRep) const;
@@ -204,6 +207,14 @@ namespace im {
                                   std::string const& replacement = detail::kDefaultRep) const;
             Options underscores_to_dashes() const;
             Options dashes_to_underscores() const;
+            
+        public:
+            /// in-place regroup: pull a subgroup down and prefix it:
+            Options& regroup(std::string const& subgroupname,
+                                       std::string const& prefix = detail::kDefaultRep,                     /// defaults to the subgroup name
+                                    std::string const& separator = detail::kDefaultSep);
+            
+        public:
             OptionsList keylist() const;
             OptionsList valuelist() const;
             detail::listpair_t items() const;

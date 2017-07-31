@@ -36,12 +36,6 @@ namespace im {
         detail::cfp_t<CFDictionaryRef> options(nullptr);                            /// empty dictionary ref ptr
         
         {
-            /// Deal with metadata:
-            // detail::cfp_t<CFDictionaryRef> metadata(const_cast<__CFDictionary *>(
-            //      CGImageSourceCopyPropertiesAtIndex(source.get(),
-            //                                         CF_IDX(0),
-            //                                         nullptr)));
-            
             /// Deal with options, as passed to CGImageSourceCreateImageAtIndex(…):
             const void* keys[]      = { kCGImageSourceShouldCache,
                                         kCGImageSourceShouldAllowFloat,
@@ -64,7 +58,7 @@ namespace im {
         detail::cfp_t<CGImageSourceRef> source(
                    CGImageSourceCreateWithData(sourcedata.get(),                    /// CFDataRef
                                                options.get()));                     /// CFDictionaryRef
-            
+        
         /// CGColorSpaceRef: destination colorspace
         detail::cfp_t<CGColorSpaceRef> deviceRGB(CGColorSpaceCreateDeviceRGB());    /// Device (destination) colorspace
         
@@ -77,6 +71,16 @@ namespace im {
         ImageList images;
         
         do {
+            
+            {
+                /// Deal with image metadata:
+                store::cfdict metadata(const_cast<__CFDictionary *>(
+                                 CGImageSourceCopyPropertiesAtIndex(source.get(),
+                                                                    CF_IDX(idx),
+                                                                    nullptr)));
+            
+            
+            }
             
             /// CGImageSourceRef -> CGImageRef
             detail::cfp_t<CGImageRef> image(

@@ -136,6 +136,15 @@ namespace {
         
     }
     
+    static std::string join(stringvec_t const& strings) {
+        return std::accumulate(strings.begin(),
+                               strings.end(),
+                               std::string{},
+                    [&strings](std::string const& lhs,
+                               std::string const& rhs) {
+            return lhs + rhs + (rhs.c_str() == strings.back().c_str() ? "" : ", ");
+        });
+    }
     
     TEST_CASE("[imageformat-options] Check registered formats",
               "[imageformat-options-check-registered-formats]")
@@ -151,13 +160,7 @@ namespace {
                        std::back_inserter(names),
                     [](auto const& registrant) { return registrant.first; });
         
-        joined = std::accumulate(names.begin(),
-                                 names.end(),
-                                 std::string{},
-                        [&names](std::string const& lhs,
-                                 std::string const& rhs) {
-            return lhs + rhs + (rhs.c_str() == names.back().c_str() ? "" : ", ");
-        });
+        joined = join(names);
         
         WTF("",
             "REGISTRY:",
@@ -171,22 +174,26 @@ namespace {
             ++it) { std::string const& format = *it;
                 auto format_ptr = ImageFormat::named(format);
                 Options opts = format_ptr->get_options();
+                stringvec_t subgroups = opts.subgroups();
                 
-                // WTF("",
-                //     ansi::lightred.str("Format name: " + format),
-                //     ansi::red.str("As formatted JSON:"),
-                //     FF("\n%s\n%s\n%s", asterisks.c_str(),
-                //                        opts.format().c_str(),
-                //                        asterisks.c_str()));
+                WTF("",
+                    ansi::lightred.str("Format name: " + format),
+                    ansi::red.str("As formatted JSON:"),
+                    FF("\n%s\n%s\n%s", asterisks.c_str(),
+                                       opts.format().c_str(),
+                                       asterisks.c_str()),
+                    FF("\nSubgroups: %s", join(subgroups).c_str()));
                 
                 // WTF("",
                 //     ansi::lightred.str("Format name: " + format),
                 //     ansi::red.str("As encoded IOD:"),
                 //     FF("OPTIONS  » %s", iod::json_encode(format_ptr->options).c_str()),
                 //     FF("CAPACITY » %s", iod::json_encode(format_ptr->capacity).c_str()));
-                    
-            ++idx; }
-        
+                
+                
+                
+                WTF("SUBGROUPS:", join(subgroups));
+    ++idx; }
     }
     
     
