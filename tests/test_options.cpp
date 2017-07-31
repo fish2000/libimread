@@ -63,6 +63,22 @@ namespace {
         CHECK(opts.get("WAT") == std::string{ NULL_STR });
         CHECK(opts.count() == 4);
         
+        SECTION("[options-container] » Confirm count()/get() after initializing im::Options with two im::OptionsList instances")
+        {
+            OptionsList keylist = { "yo",   "i",     "you",  "list"             };
+            OptionsList vallist = { "dogg", "heard", "like", "initialization"   };
+            Options optcopy(std::make_pair(std::move(keylist),
+                                           std::move(vallist)));
+            
+            CHECK(optcopy.count() == 4);
+            CHECK(optcopy.get("yo") == "dogg");
+            CHECK(optcopy.get("i") == "heard");
+            CHECK(optcopy.get("you") == "like");
+            CHECK(optcopy.get("list") == "initialization");
+            CHECK(optcopy.get("WAT") == std::string{ NULL_STR });
+            CHECK(optcopy.count() == 4);
+        }
+        
         SECTION("[options-container] » Confirm count()/get() after copying im::Options to a store::stringmap instance, "
                                       "internally using store::value_copy<…>()")
         {
@@ -128,7 +144,7 @@ namespace {
         /// for counting keys without prefixes:
         CHECK(typical.prefixcount() == 1);
         
-        SECTION("[options-container] » Confirm total values by examining a `ratio_t` tuple, "
+        SECTION("[options-container] » Confirm total values by examining a `ratios_t` tuple, "
                                       "using im::Options::ratios()")
         {
             ratios_t ratios_tuple = typical.ratios();
