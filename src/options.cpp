@@ -386,6 +386,7 @@ namespace im {
         std::copy_if(keys.begin(), keys.end(),
                      std::back_inserter(prefixvec),
                  [&](std::string const& s) { return bool(s.find(separator[0]) != std::string::npos); });
+        prefixvec.shrink_to_fit();
         
         /// cut the strings in the vector down to just the prefix:
         std::transform(prefixvec.begin(), prefixvec.end(),
@@ -489,13 +490,13 @@ namespace im {
         Options out;
         if (pks.empty()) { return out; }
         if (defix) {
-            for (std::string const& pk : pks) {
-                out.set(std::regex_replace(pk, pattern, replacement),
-                            Json::cast<std::string>(pk));   /// strip pattern from key string
+            for (std::string const& pkey : pks) {
+                out.set(std::regex_replace(pkey, pattern, replacement),
+                        Json::get(pkey));           /// strip pattern from key string
             }
         } else {
-            for (std::string const& pk : pks) {
-                out.set(pk, Json::cast<std::string>(pk));   /// use key string as-is
+            for (std::string const& pkey : pks) {
+                out.set(pkey, Json::get(pkey));     /// use key string as-is
             }
         }
         
@@ -519,13 +520,13 @@ namespace im {
         stringvec_t list = Options::list();
         if (list.empty()) { return out; }
         if (defix) {
-            for (std::string const& pk : list) {
-                out.set(std::regex_replace(pk, pattern, replacement),
-                            Json::cast<std::string>(pk));   /// strip pattern from key string
+            for (std::string const& pkey : list) {
+                out.set(std::regex_replace(pkey, pattern, replacement),
+                        Json::get(pkey));           /// strip pattern from key string
             }
         } else {
-            for (std::string const& pk : list) {
-                out.set(pk, Json::cast<std::string>(pk));   /// use key string as-is
+            for (std::string const& pkey : list) {
+                out.set(pkey, Json::get(pkey));     /// use key string as-is
             }
         }
         
@@ -561,6 +562,21 @@ namespace im {
         return *this;
     }
     
+    Options& Options::hoist(std::string const& subsetname,
+                            std::string const& prefix,
+                            std::string const& separator) {
+        std::string fix(prefix);
+        if (fix == detail::kDefaultRep) {
+            fix = subsetname;
+        }
+        Options sub = Options::subset(subsetname, true, separator);
+        for (std::string const& key : sub.list()) {
+            Options::del(fix + separator + key);
+        }
+        Json::set(subsetname, sub);
+        return *this;
+    }
+    
     Options& Options::flatten(std::string const& separator) {
         do {
             for (std::string const& group : Json::subgroups()) {
@@ -568,6 +584,16 @@ namespace im {
                                  separator);
             }
         } while (Json::subgroups().size());
+        return *this;
+    }
+    
+    Options& Options::extrude(std::string const& separator) {
+        do {
+            for (std::string const& prefix : Options::prefixset().first) {
+                Options::hoist(prefix, detail::kDefaultRep,
+                               separator);
+            }
+        } while (Options::prefixset().first.size());
         return *this;
     }
     

@@ -215,7 +215,19 @@ namespace im {
             Options& regroup(std::string const& subgroupname,
                                        std::string const& prefix = detail::kDefaultRep,                     /// defaults to the subgroup name
                                     std::string const& separator = detail::kDefaultSep);
+            
+            /// in-place hoist: pull out a subset and hoist it into a subgroup:
+            Options& hoist(std::string const& subsetname,
+                                       std::string const& prefix = detail::kDefaultRep,                     /// defaults to the subgroup name
+                                    std::string const& separator = detail::kDefaultSep);
+            
+            /// in-place “regroup all”: regroup with current subgroup names,
+            /// over and over again, until none are left:
             Options& flatten(std::string const& separator = detail::kDefaultSep);
+            
+            /// in-place “hoist all”: hoist each current prefix into its own
+            /// subgroup, over and over again, until none are left:
+            Options& extrude(std::string const& separator = detail::kDefaultSep);
             
         public:
             OptionsList keylist() const;
