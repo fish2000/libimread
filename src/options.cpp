@@ -488,6 +488,19 @@ namespace im {
         return Options::subset(prefix_re, defix);
     }
     
+    OptionsList Options::keylist() const {
+        OptionsList out(Options::list());
+        return out;
+    }
+    
+    OptionsList Options::valuelist() const {
+        OptionsList out;
+        for (std::string const& s : Options::list()) {
+            out.append(Json::get(s));
+        }
+        return out;
+    }
+    
     #pragma mark -
     #pragma mark im::get_optional_{string,cstring,int,bool} legacy methods
     

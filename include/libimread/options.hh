@@ -48,7 +48,7 @@ namespace im {
         public:
             OptionsList();
             
-        protected:
+        public:
             OptionsList(stringvec_t const&);
             OptionsList(stringvec_t&&) noexcept;
             
@@ -193,6 +193,8 @@ namespace im {
             Options subset(std::regex const& pattern, bool defix = true) const;
             Options subset(std::string const& prefix, bool defix = true,
                                     std::string const& separator = detail::kDefaultSep) const;
+            OptionsList keylist() const;
+            OptionsList valuelist() const;
         
     };
     

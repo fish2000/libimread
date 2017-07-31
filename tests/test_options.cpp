@@ -63,7 +63,21 @@ namespace {
         CHECK(opts.get("WAT") == std::string{ NULL_STR });
         CHECK(opts.count() == 4);
         
-        SECTION("[options-container] » Confirm count()/get() after initializing im::Options with two im::OptionsList instances")
+        SECTION("[options-container] » Confirm count()/get() after initializing im::Options with two im::OptionsList temporaries")
+        {
+            Options optcopy(opts.keylist(),
+                            opts.valuelist());
+            
+            CHECK(optcopy.count() == 4);
+            CHECK(optcopy.get("yo") == "dogg");
+            CHECK(optcopy.get("i") == "heard");
+            CHECK(optcopy.get("you") == "like");
+            CHECK(optcopy.get("list") == "initialization");
+            CHECK(optcopy.get("WAT") == std::string{ NULL_STR });
+            CHECK(optcopy.count() == 4);
+        }
+        
+        SECTION("[options-container] » Confirm count()/get() after initializing im::Options with two im::OptionsList literals")
         {
             OptionsList keylist = { "yo",   "i",     "you",  "list"             };
             OptionsList vallist = { "dogg", "heard", "like", "initialization"   };
