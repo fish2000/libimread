@@ -67,8 +67,8 @@ namespace {
         {
             OptionsList keylist = { "yo",   "i",     "you",  "list"             };
             OptionsList vallist = { "dogg", "heard", "like", "initialization"   };
-            Options optcopy(std::make_pair(std::move(keylist),
-                                           std::move(vallist)));
+            Options optcopy(std::move(keylist),
+                            std::move(vallist));
             
             CHECK(optcopy.count() == 4);
             CHECK(optcopy.get("yo") == "dogg");

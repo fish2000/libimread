@@ -232,6 +232,11 @@ namespace im {
             }
         }
     
+    Options::Options(OptionsList&& keys, OptionsList&& values)
+        :Options(std::make_pair(std::move(keys),
+                                std::move(values)))
+        {}
+    
     Options::~Options() {}
     
     /// member swap

@@ -137,6 +137,7 @@ namespace im {
             Options(std::istream& is, bool full = true);
             Options(stringpair_init_t);
             Options(detail::listpair_t);
+            explicit Options(OptionsList&&, OptionsList&&);
             virtual ~Options();
         
         public:
