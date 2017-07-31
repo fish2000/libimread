@@ -196,6 +196,7 @@ namespace im {
     std::size_t Options::count(std::string const& prefix,
                                std::string const& separator) const {
         /// return the count of how many keys have this prefix:
+        if (prefix.empty()) { return Options::prefixcount(separator[0]); }
         std::regex prefix_re("^" + prefix + separator, std::regex::extended);
         return Options::count(prefix_re);
     }
@@ -204,8 +205,17 @@ namespace im {
                                      std::string const& separator) const {
         /// convenience function to call Options::count(prefix, separator)
         /// with “the default separator” which is ":" and/or ':', depending:
+        if (prefix.empty()) { return Options::prefixcount(separator[0]); }
         std::regex prefix_re("^" + prefix + separator, std::regex::extended);
         return Options::count(prefix_re);
+    }
+    
+    std::size_t Options::prefixcount(std::string::value_type sep) const {
+        /// Count only the NON-prefixed keys in this version -- which means,
+        /// count those keys that do not contain the separator of choice, yes!
+        stringvec_t keys = Options::list();
+        return std::count_if(keys.begin(), keys.end(),
+                         [&](std::string const& key) { return bool(key.find(sep) == std::string::npos); });
     }
     
     prefixpair_t Options::prefixset(std::string const& separator) const {
@@ -276,6 +286,26 @@ namespace im {
         return prefixgram;
     }
     
+    ratios_t Options::ratios(std::string const& separator) const {
+        stringvec_t keys = Json::keys();
+        std::size_t unprefixed_count = std::count_if(keys.begin(),
+                                                     keys.end(),
+                                                 [&](std::string const& key) {
+            return bool(key.find(separator[0]) == std::string::npos);
+        });
+        int total_count = static_cast<int>(keys.size());
+        double total = static_cast<double>(total_count);
+        double unprefixed = static_cast<double>(unprefixed_count);
+        double prefixed = static_cast<double>(total_count -
+                          static_cast<int>(unprefixed_count));
+        if (total == 0.00) { return { -1.0, -1.0, 0.0 }; }
+        double unprefixed_ratio = unprefixed == 0.00 ? 0.0 : (unprefixed / total);
+        double prefixed_ratio = prefixed == 0.00 ? 0.0 : (prefixed / total);
+        return std::make_tuple(unprefixed_ratio,
+                                 prefixed_ratio,
+                                    total_count);
+    }
+    
     Options Options::subset(std::regex const& pattern, bool defix) const {
         stringvec_t keys = Options::list();
         stringvec_t pks;
@@ -290,12 +320,12 @@ namespace im {
         if (pks.empty()) { return out; }
         if (defix) {
             for (std::string const& pk : pks) {
-                out.set(pk, std::regex_replace(Json::cast<std::string>(pk),     /// strip prefix from key string value
+                out.set(pk, std::regex_replace(Json::cast<std::string>(pk), /// strip pattern from key string
                                                pattern, ""));
             }
         } else {
             for (std::string const& pk : pks) {
-                out.set(pk, Json::cast<std::string>(pk));                       /// use key string as-is
+                out.set(pk, Json::cast<std::string>(pk));                   /// use key string as-is
             }
         }
         return out;

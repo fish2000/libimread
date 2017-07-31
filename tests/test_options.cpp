@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <unordered_set>
 #include <functional>
+#include <tuple>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
@@ -109,13 +110,38 @@ namespace {
             {  "md:xmp-sidecar",            booleanizer(true)               }, /// md = 3
             {  "md:exif",                   std::string(large_data)         }, /// md = 4
             {  "md:thumbnail",              std::string(large_data)         }  /// md = 5   *
-        };
+        };                                                                     /// TOTAL = 14
         
         CHECK(typical.prefixcount("md") == 5);
         CHECK(typical.prefixcount("tiff") == 5);
         CHECK(typical.prefixcount("png") == 2);
         CHECK(typical.prefixcount("jpg") == 1);
         CHECK(typical.prefixcount("WAT") == 0);
+        
+        /// special overload,
+        /// for counting keys without prefixes:
+        CHECK(typical.prefixcount() == 1);
+        
+        {
+            auto ratios_tuple = typical.ratios();
+            
+            // WTF("RATIOS:",
+            //     FF("\n\tunprefixed: %f\n\tprefixed: %f\n\ttotal: %i", std::get<0>(ratios_tuple),
+            //                                                           std::get<1>(ratios_tuple),
+            //                                                           std::get<2>(ratios_tuple)),
+            // FF("\n\tunprefixed: %i%%\n\tprefixed: %i%%\n\ttotal: %i", static_cast<int>(std::get<0>(ratios_tuple) * 100),
+            //                                                           static_cast<int>(std::get<1>(ratios_tuple) * 100),
+            //                                                           std::get<2>(ratios_tuple))
+            //                                                           );
+            
+            CHECK(std::get<2>(ratios_tuple) == 14);
+            CHECK(std::get<2>(ratios_tuple) == typical.count());
+            
+            /// These next two int-percentage results were figured out by uncommentding the above
+            /// block call to WTF(…) and observing the results.
+            CHECK(static_cast<int>(std::get<0>(ratios_tuple) * 100) == 7);   ///  7% unprefixed
+            CHECK(static_cast<int>(std::get<1>(ratios_tuple) * 100) == 92);  /// 92% prefixed
+        }
         
         prefixgram_t prefixgram = typical.prefixgram();
         

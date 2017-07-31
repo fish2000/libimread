@@ -597,6 +597,7 @@ detail::stringvec_t Json::keys() const {
     for (auto const& it : op->map) {
         out.emplace_back(*it.first);
     }
+    out.shrink_to_fit();
     return out;
 }
 

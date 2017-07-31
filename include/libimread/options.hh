@@ -6,6 +6,7 @@
 
 #include <string>
 #include <regex>
+#include <tuple>
 #include <sstream>
 #include <utility>
 #include <unordered_set>
@@ -24,11 +25,13 @@ using string_init_t = std::initializer_list<std::string>;
 using stringpair_init_t = std::initializer_list<stringpair_t>;
 using prefixpair_t = std::pair<prefixset_t, stringvec_t>;
 using patternmap_t = std::unordered_map<std::string, std::regex>;
+using ratios_t = std::tuple<double, double, int>;
 
 namespace im {
     
     namespace detail {
         using store::detail::kDefaultSep;
+        static constexpr std::string::value_type kDefaultSepChar = kDefaultSep[0];
     }
     
     struct Options final : public Json, public store::stringmapper {
@@ -107,16 +110,17 @@ namespace im {
                    virtual stringvec_t list() const;
         
         public:
-            /// Count values whose keys match a given pattern:
-                   virtual std::size_t count(std::regex const& pattern) const;
-                  virtual std::size_t count(std::string const& prefix,
+                   virtual std::size_t count(std::regex const& pattern) const;                              /// #keys matching a given pattern
+                  virtual std::size_t count(std::string const& prefix,                                      /// #keys with a given prefix
                                             std::string const& separator) const;
             virtual std::size_t prefixcount(std::string const& prefix,
-                                            std::string const& separator = detail::kDefaultSep) const;
+                                            std::string const& separator = detail::kDefaultSep) const;      /// #keys with a given prefix
+             virtual std::size_t prefixcount(std::string::value_type sep = detail::kDefaultSepChar) const;  /// #keys SANS prefix (per separator)
         
         public:
              prefixpair_t prefixset(std::string const& separator = detail::kDefaultSep) const;
             prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
+                    ratios_t ratios(std::string const& separator = detail::kDefaultSep) const;
         
         public:
             Options subset(std::regex const& pattern, bool defix = true) const;
