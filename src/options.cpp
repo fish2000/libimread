@@ -511,19 +511,9 @@ namespace im {
 } /* namespace im */
 
 #pragma mark -
-#pragma mark std::swap<…>() and std::hash<…> specializations for im::OptionsList and im::Options
+#pragma mark std::hash<…> specializations for im::OptionsList and im::Options
 
 namespace std {
-    
-    // template <>
-    // void swap(im::OptionsList& lhs, im::OptionsList& rhs) noexcept {
-    //     lhs.swap(rhs);
-    // }
-    
-    // template <>
-    // void swap(im::Options& lhs, im::Options& rhs) noexcept {
-    //     lhs.swap(rhs);
-    // }
     
     using optlist_hasher_t = std::hash<im::OptionsList>;
     using optlist_arg_t = optlist_hasher_t::argument_type;

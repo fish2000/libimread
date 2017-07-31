@@ -200,25 +200,9 @@ namespace im {
                 int get_optional_int(Options const& opts, std::string const& key,   int const default_value = 0);
               bool get_optional_bool(Options const& opts, std::string const& key,  bool const default_value = false);
     
-}
+} /* namespace im */
 
 namespace std {
-    
-    // #ifndef IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
-    // #define IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
-    //
-    // template <>
-    // void swap(im::OptionsList&, im::OptionsList&) noexcept;
-    //
-    // #endif /// IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
-    
-    // #ifndef IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
-    // #define IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
-    //
-    // template <>
-    // void swap(im::Options&, im::Options&) noexcept;
-    //
-    // #endif /// IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
     
     /// std::hash specialization for im::OptionsList and im::Options
     /// ... following the recipe found here:
