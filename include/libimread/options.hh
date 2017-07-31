@@ -31,6 +31,7 @@ namespace im {
     
     namespace detail {
         using store::detail::kDefaultSep;
+        using store::detail::kDefaultRep;
         static constexpr std::string::value_type kDefaultSepChar = kDefaultSep[0];
     }
     
@@ -194,12 +195,12 @@ namespace im {
                     ratios_t ratios(std::string const& separator = detail::kDefaultSep) const;
         
         public:
-             Options subset(std::regex const& pattern, bool defix = true,
-                                   std::string const& replacement = "") const;
-             Options subset(std::string const& prefix, bool defix = true,
-                                     std::string const& separator = detail::kDefaultSep) const;
-            Options replace(std::regex const& pattern, bool defix = true,
-                                   std::string const& replacement = "") const;
+            Options subset(std::regex const& pattern, bool defix = true,
+                                  std::string const& replacement = detail::kDefaultRep) const;
+            Options subset(std::string const& prefix, bool defix = true,
+                                    std::string const& separator = detail::kDefaultSep) const;
+           Options replace(std::regex const& pattern, bool defix = true,
+                                  std::string const& replacement = detail::kDefaultRep) const;
             Options underscores_to_dashes() const;
             Options dashes_to_underscores() const;
             OptionsList keylist() const;

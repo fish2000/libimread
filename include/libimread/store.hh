@@ -18,6 +18,7 @@ namespace store {
     namespace detail {
         
         constexpr char kDefaultSep[] = ":";
+        constexpr char kDefaultRep[] = "";
         
         template <typename ValueType> inline
         auto value_for_null() -> ValueType&;
