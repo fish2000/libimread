@@ -38,6 +38,8 @@ namespace im {
     
     struct OptionsList final : public Json {
         
+        friend struct Options;
+        
         public:
             using Json::null;
             using Json::undefined;
@@ -48,7 +50,7 @@ namespace im {
         public:
             OptionsList();
             
-        public:
+        protected:
             OptionsList(stringvec_t const&);
             OptionsList(stringvec_t&&) noexcept;
             
@@ -96,6 +98,8 @@ namespace im {
     }
     
     struct Options final : public Json, public store::stringmapper {
+        
+        friend struct OptionsList;
         
         public:
             using Json::null;
