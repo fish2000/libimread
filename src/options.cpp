@@ -467,7 +467,7 @@ namespace im {
                 return Options(std::move(sg));
             }
         }
-        return Options::null;
+        return Options();
     }
     
     Options Options::subset(std::regex const& pattern,
