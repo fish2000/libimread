@@ -206,6 +206,10 @@ namespace im {
             Options underscores_to_dashes() const;
             Options dashes_to_underscores() const;
             
+        protected:
+            /// Pass-through call to Json::get() -- not for public use:
+            Json value(std::string const&) const;
+            
         public:
             /// in-place regroup: pull a subgroup down and prefix it:
             Options& regroup(std::string const& subgroupname,

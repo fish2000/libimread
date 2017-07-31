@@ -191,6 +191,18 @@ namespace {
                 //     FF("CAPACITY » %s", iod::json_encode(format_ptr->capacity).c_str()));
                 
                 WTF("SUBGROUPS:", join(subgroups));
+                
+                for (std::string const& subgroup : subgroups) {
+                    opts.regroup(subgroup);
+                }
+                
+                WTF("",
+                    ansi::lightred.str("Format name: " + format),
+                    ansi::red.str("As formatted JSON:"),
+                    FF("\n%s\n%s\n%s", asterisks.c_str(),
+                                       opts.format().c_str(),
+                                       asterisks.c_str()));
+                
     ++idx; }
     }
     

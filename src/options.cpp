@@ -542,6 +542,25 @@ namespace im {
         return Options::replace(dash_re, true, "_");
     }
     
+    Json Options::value(std::string const& key) const {
+        return Json::get(key);
+    }
+    
+    Options& Options::regroup(std::string const& subgroupname,
+                              std::string const& prefix,
+                              std::string const& separator) {
+        std::string fix(prefix);
+        if (fix == detail::kDefaultRep) {
+            fix = subgroupname;
+        }
+        Options sub = subgroup(subgroupname);
+        Options::del(subgroupname);
+        for (std::string const& key : sub.list()) {
+            Json::set(fix + separator + key, sub.value(key));
+        }
+        return *this;
+    }
+    
     OptionsList Options::keylist() const {
         OptionsList out(Options::list());
         return out;
