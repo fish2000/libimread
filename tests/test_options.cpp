@@ -171,7 +171,7 @@ namespace {
         SECTION("[options-container] » Examine subsets, "
                                       "using im::Options::subset(«prefix»)")
         {
-            Options mds = typical.subset("md");                                         /// defix = true -- defixes by default
+            Options mds = typical.subset("md").dashes_to_underscores();                 /// defix = true -- defixes by default
             
             CHECK(mds.count()               == 5);
             CHECK(mds.count()               == typical.prefixcount("md"));
@@ -179,8 +179,8 @@ namespace {
             CHECK(mds.prefixcount()         == typical.prefixcount("md"));
             
             CHECK(mds.get("icc")            == typical.get("md:icc"));
-            CHECK(mds.get("xmp-data")       == typical.get("md:xmp-data"));
-            CHECK(mds.get("xmp-sidecar")    == typical.get("md:xmp-sidecar"));
+            CHECK(mds.get("xmp_data")       == typical.get("md:xmp-data"));
+            CHECK(mds.get("xmp_sidecar")    == typical.get("md:xmp-sidecar"));
             CHECK(mds.get("exif")           == typical.get("md:exif"));
             CHECK(mds.get("thumbnail")      == typical.get("md:thumbnail"));
             
