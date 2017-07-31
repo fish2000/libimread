@@ -171,7 +171,7 @@ namespace {
         SECTION("[options-container] » Examine subsets, "
                                       "using im::Options::subset(«prefix»)")
         {
-            Options mds = typical.subset("md"); /// defixes by default
+            Options mds = typical.subset("md");                 /// defix = true -- defixes by default
             
             CHECK(mds.count()               == 5);
             CHECK(mds.count()               == typical.prefixcount("md"));
@@ -183,6 +183,19 @@ namespace {
             CHECK(mds.get("xmp-sidecar")    == typical.get("md:xmp-sidecar"));
             CHECK(mds.get("exif")           == typical.get("md:exif"));
             CHECK(mds.get("thumbnail")      == typical.get("md:thumbnail"));
+            
+            Options tiffs = typical.subset("tiff", false);      /// defix = false -- leave prefixes intact
+            
+            CHECK(tiffs.count()             == 5);
+            CHECK(tiffs.count()             == typical.prefixcount("tiff"));
+            CHECK(tiffs.prefixcount("tiff") == 5);
+            CHECK(tiffs.prefixcount("tiff") == typical.prefixcount("tiff"));
+            
+            CHECK(tiffs.get("tiff:compress")                == typical.get("tiff:compress"));
+            CHECK(tiffs.get("tiff:horizontal-predictor")    == typical.get("tiff:horizontal-predictor"));
+            CHECK(tiffs.get("tiff:XResolution")             == typical.get("tiff:XResolution"));
+            CHECK(tiffs.get("tiff:YResolution")             == typical.get("tiff:YResolution"));
+            CHECK(tiffs.get("tiff:XResolutionUnit")         == typical.get("tiff:XResolutionUnit"));
         }
         
         SECTION("[options-container] » Confirm total values by examining a `ratios_t` tuple, "
