@@ -81,6 +81,16 @@ namespace {
         {
             OptionsList keylist = { "yo",   "i",     "you",  "list"             };
             OptionsList vallist = { "dogg", "heard", "like", "initialization"   };
+            
+            /// some rather pointless OptionsList checks,
+            /// while we are in the position to do so:
+            CHECK(!keylist.can_store());
+            CHECK(!vallist.can_store());
+            CHECK(keylist.count() == 4);
+            CHECK(vallist.count() == 4);
+            CHECK(keylist.count() == opts.count());
+            CHECK(vallist.count() == opts.count());
+            
             Options optcopy(std::move(keylist),
                             std::move(vallist));
             
