@@ -5,7 +5,9 @@
 #define IMREAD_INCLUDE_OPTIONS_HH_
 
 #include <string>
+#include <regex>
 #include <sstream>
+#include <utility>
 #include <unordered_set>
 #include <unordered_map>
 #include <initializer_list>
@@ -21,6 +23,7 @@ using stringpair_t = std::pair<std::string, std::string>;
 using string_init_t = std::initializer_list<std::string>;
 using stringpair_init_t = std::initializer_list<stringpair_t>;
 using prefixpair_t = std::pair<prefixset_t, stringvec_t>;
+using patternmap_t = std::unordered_map<std::string, std::regex>;
 
 namespace im {
     
@@ -104,21 +107,21 @@ namespace im {
                    virtual stringvec_t list() const;
         
         public:
-            /// Count values whose keys have a given prefix:
-            virtual std::size_t       count(std::string const& prefix,
+            /// Count values whose keys match a given pattern:
+                   virtual std::size_t count(std::regex const& pattern) const;
+                  virtual std::size_t count(std::string const& prefix,
                                             std::string const& separator) const;
-            
             virtual std::size_t prefixcount(std::string const& prefix,
                                             std::string const& separator = detail::kDefaultSep) const;
         
         public:
-            prefixpair_t  prefixset(std::string const& separator = detail::kDefaultSep) const;
+             prefixpair_t prefixset(std::string const& separator = detail::kDefaultSep) const;
             prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
         
         public:
-            Options subset(std::string const& prefix,
-                           std::string const& separator = detail::kDefaultSep,
-                                             bool defix = false) const;
+            Options subset(std::regex const& pattern, bool defix = true) const;
+            Options subset(std::string const& prefix, bool defix = true,
+                                    std::string const& separator = detail::kDefaultSep) const;
         
     };
     
@@ -153,25 +156,30 @@ namespace im {
             static OptionsList parse(std::string const&);
     };
     
-    std::string get_optional_string(Options const& opts,  std::string const& key);
+     std::string get_optional_string(Options const& opts, std::string const& key);
     const char* get_optional_cstring(Options const& opts, std::string const& key);
-            int get_optional_int(Options const& opts,     std::string const& key,   int const default_value = 0);
-           bool get_optional_bool(Options const& opts,    std::string const& key,  bool const default_value = false);
+                int get_optional_int(Options const& opts, std::string const& key,   int const default_value = 0);
+              bool get_optional_bool(Options const& opts, std::string const& key,  bool const default_value = false);
     
 }
 
 namespace std {
     
-    #ifndef IMREAD_INCLUDE_OPTIONS_HH_SWAP_
-    #define IMREAD_INCLUDE_OPTIONS_HH_SWAP_
-    
-    template <>
-    void swap(im::Options&, im::Options&) noexcept;
-    
+    // #ifndef IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
+    // #define IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
+    //
+    // template <>
+    // void swap(im::Options&, im::Options&) noexcept;
+    //
+    // #endif /// IMREAD_INCLUDE_OPTIONS_HH_OPTIONS_SWAP_
+    //
+    // #ifndef IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
+    // #define IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
+    //
     // template <>
     // void swap(im::OptionsList&, im::OptionsList&) noexcept;
-    
-    #endif /// IMREAD_INCLUDE_OPTIONS_HH_SWAP_
+    //
+    // #endif /// IMREAD_INCLUDE_OPTIONS_HH_OPTIONSLIST_SWAP_
     
     /// std::hash specialization for im::Options and im::OptionsList
     /// ... following the recipe found here:
@@ -183,10 +191,7 @@ namespace std {
         typedef im::Options argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type const& opts) const {
-            return static_cast<result_type>(opts.hash());
-        }
-        
+        result_type operator()(argument_type const& opts) const;
     };
     
     template <>
@@ -195,10 +200,7 @@ namespace std {
         typedef im::OptionsList argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type const& optlist) const {
-            return static_cast<result_type>(optlist.hash());
-        }
-        
+        result_type operator()(argument_type const& optlist) const;
     };
     
 } /* namespace std */

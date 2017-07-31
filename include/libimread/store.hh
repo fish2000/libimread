@@ -416,9 +416,7 @@ namespace std {
         typedef store::stringmap argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type const& strmap) const {
-            return static_cast<result_type>(strmap.hash());
-        }
+        result_type operator()(argument_type const& strmap) const;
         
     };
     

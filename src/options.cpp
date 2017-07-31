@@ -1,17 +1,12 @@
 /// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
-#include <regex>
-#include <utility>
-
 #include <libimread/libimread.hpp>
 #include <libimread/options.hh>
 
 #define STRINGNULL() stringmapper::base_t::null_value()
 
 namespace im {
-    
-    using patternmap_t = std::unordered_map<std::string, std::regex>;
     
     #pragma mark -
     #pragma mark method implementations for im::Options
@@ -191,20 +186,26 @@ namespace im {
     std::size_t Options::count() const { return Json::size(); }
     stringvec_t Options::list() const { return Json::keys(); }
     
+    std::size_t Options::count(std::regex const& pattern) const {
+        stringvec_t keys = Options::list();
+        return std::count_if(keys.begin(), keys.end(),
+                         [&](std::string const& key) { return std::regex_search(key, pattern,
+                                                              std::regex_constants::match_default); });
+    }
+    
     std::size_t Options::count(std::string const& prefix,
                                std::string const& separator) const {
         /// return the count of how many keys have this prefix:
         std::regex prefix_re("^" + prefix + separator, std::regex::extended);
-        stringvec_t keys = Options::list();
-        return std::count_if(keys.begin(), keys.end(),
-                         [&](std::string const& key) { return std::regex_search(key, prefix_re); });
+        return Options::count(prefix_re);
     }
     
     std::size_t Options::prefixcount(std::string const& prefix,
                                      std::string const& separator) const {
         /// convenience function to call Options::count(prefix, separator)
         /// with “the default separator” which is ":" and/or ':', depending:
-        return Options::count(prefix, separator);
+        std::regex prefix_re("^" + prefix + separator, std::regex::extended);
+        return Options::count(prefix_re);
     }
     
     prefixpair_t Options::prefixset(std::string const& separator) const {
@@ -251,7 +252,8 @@ namespace im {
                        std::inserter(patterns, patterns.end()),
                    [&](std::string const& s) {
             std::regex re("^" + s + separator,  std::regex::extended);
-            return std::make_pair(std::move(s), std::move(re));
+            return std::make_pair(std::move(s),
+                                  std::move(re));
         });
         
         /// count each pattern’s matches against the string vector
@@ -274,22 +276,36 @@ namespace im {
         return prefixgram;
     }
     
-    Options Options::subset(std::string const& prefix,
-                            std::string const& separator,
-                                          bool defix) const {
-        Options out;
-        /// return the count of how many keys have this prefix:
-        std::regex prefix_re("^" + prefix + separator, std::regex::extended);
+    Options Options::subset(std::regex const& pattern, bool defix) const {
         stringvec_t keys = Options::list();
         stringvec_t pks;
         std::copy_if(keys.begin(), keys.end(),
                      std::back_inserter(pks),
-                 [&](std::string const& key) { return std::regex_search(key, prefix_re,
+                 [&](std::string const& key) { return std::regex_search(key, pattern,
                                                       std::regex_constants::match_default); });
-        for (auto const& pk : pks) {
-            out.set(pk, Json::cast<std::string>(pk));
+        /// fill an ouput Options instance, per “defix”, with either:
+        /// value copies for “de-fixed” keys (the default), or:
+        /// value copies for identical keys, matching the original.
+        Options out;
+        if (pks.empty()) { return out; }
+        if (defix) {
+            for (std::string const& pk : pks) {
+                out.set(pk, std::regex_replace(Json::cast<std::string>(pk),     /// strip prefix from key string value
+                                               pattern, ""));
+            }
+        } else {
+            for (std::string const& pk : pks) {
+                out.set(pk, Json::cast<std::string>(pk));                       /// use key string as-is
+            }
         }
         return out;
+    }
+    
+    Options Options::subset(std::string const& prefix,
+                                          bool defix,
+                            std::string const& separator) const {
+        std::regex prefix_re("^" + prefix + separator, std::regex::extended);
+        return Options::subset(prefix_re, defix);
     }
     
     #pragma mark -
@@ -367,18 +383,34 @@ namespace im {
 } /* namespace im */
 
 #pragma mark -
-#pragma mark std::swap<…>() specializations for im::Options and im::OptionsList
+#pragma mark std::swap<…>() and std::hash<…> specializations for im::Options and im::OptionsList
 
 namespace std {
     
-    template <>
-    void swap(im::Options& lhs, im::Options& rhs) noexcept {
-        lhs.swap(rhs);
-    }
+    // template <>
+    // void swap(im::Options& lhs, im::Options& rhs) noexcept {
+    //     lhs.swap(rhs);
+    // }
     
     // template <>
     // void swap(im::OptionsList& lhs, im::OptionsList& rhs) noexcept {
     //     lhs.swap(rhs);
     // }
+    
+    using opts_hasher_t = std::hash<im::Options>;
+    using opts_arg_t = opts_hasher_t::argument_type;
+    using opts_out_t = opts_hasher_t::result_type;
+    
+    opts_out_t opts_hasher_t::operator()(opts_arg_t const& o) const {
+        return static_cast<opts_out_t>(o.hash());
+    }
+    
+    using optlist_hasher_t = std::hash<im::OptionsList>;
+    using optlist_arg_t = optlist_hasher_t::argument_type;
+    using optlist_out_t = optlist_hasher_t::result_type;
+    
+    optlist_out_t optlist_hasher_t::operator()(optlist_arg_t const& os) const {
+        return static_cast<optlist_out_t>(os.hash());
+    }
     
 } /* namespace std */

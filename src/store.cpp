@@ -366,11 +366,19 @@ namespace store {
 #pragma mark -
 #pragma mark std::swap<…>() specializations for store::stringmap
 
-// namespace std {
-//
-//     template <>
-//     void swap(store::stringmap& lhs, store::stringmap& rhs) noexcept {
-//         lhs.swap(rhs);
-//     }
-//
-// } /* namespace std */
+namespace std {
+    
+    // template <>
+    // void swap(store::stringmap& lhs, store::stringmap& rhs) noexcept {
+    //     lhs.swap(rhs);
+    // }
+    
+    using store_hasher_t = std::hash<store::stringmap>;
+    using store_arg_t = store_hasher_t::argument_type;
+    using store_out_t = store_hasher_t::result_type;
+    
+    store_out_t store_hasher_t::operator()(store_arg_t const& s) const {
+        return static_cast<store_out_t>(s.hash());
+    }
+    
+} /* namespace std */
