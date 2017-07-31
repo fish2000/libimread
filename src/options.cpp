@@ -463,37 +463,6 @@ namespace im {
                                                     total_count);
     }
     
-    // stringvec_t Options::subgroups() const {
-    //     stringvec_t out;
-    //     stringvec_t keys = Json::keys();
-    //     Json::traverse([&](Json::Node const* node,
-    //                                  Type objtype,
-    //                              NodeType nodetype) {
-    //         if (objtype == Type::OBJECT &&
-    //             nodetype == NodeType::ROOT && node != nullptr) {
-    //             // WTF("FOUND ROOT");
-    //             Json::Object const* object_ptr = static_cast<Json::Object const*>(node);
-    //             object_ptr->traverse([&](Json::Node const* node0,
-    //                                            char const* name0) {
-    //                 // WTF("TRAVERSING WITH A NAMED TRAVERSER...");
-    //                 if (node0 != nullptr && name0 != nullptr) {
-    //                     std::string nameS = std::string(name0);
-    //                     if (node0->type() == Type::OBJECT && nameS != "root") {
-    //                         // WTF(FF("FOUND A NON-ROOT OBJECT: %s", name0));
-    //                         Json::Object const* object_ptr0 = static_cast<Json::Object const*>(node0);
-    //                         if (object_ptr0->nodetype() == NodeType::STEM) {
-    //                             if (std::find(keys.begin(), keys.end(), nameS) != keys.end()) {
-    //                                 out.push_back(name0);
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             });
-    //         }
-    //     });
-    //     return out;
-    // }
-    
     Options Options::subgroup(std::string const& name) const {
         if (Json::has(name)) {
             Json sg(Json::get(name));

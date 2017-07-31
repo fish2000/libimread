@@ -195,9 +195,6 @@ namespace im {
             prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
                     ratios_t ratios(std::string const& separator = detail::kDefaultSep) const;
         
-        // public:
-        //     stringvec_t subgroups() const;
-        
         public:
             Options subgroup(std::string const&) const;
             Options subset(std::regex const& pattern, bool defix = true,
