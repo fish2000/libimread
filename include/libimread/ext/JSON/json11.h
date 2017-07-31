@@ -507,6 +507,7 @@ class Json {
         
     public:
         detail::stringvec_t keys() const;
+        detail::stringvec_t subgroups() const;
         static detail::stringvec_t allkeys(); /// return a copy of the keyset
         Json  values() const;     /// returned object is typed as an array
         

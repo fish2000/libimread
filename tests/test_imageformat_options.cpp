@@ -176,21 +176,19 @@ namespace {
                 Options opts = format_ptr->get_options();
                 stringvec_t subgroups = opts.subgroups();
                 
-                WTF("",
-                    ansi::lightred.str("Format name: " + format),
-                    ansi::red.str("As formatted JSON:"),
-                    FF("\n%s\n%s\n%s", asterisks.c_str(),
-                                       opts.format().c_str(),
-                                       asterisks.c_str()),
-                    FF("\nSubgroups: %s", join(subgroups).c_str()));
+                // WTF("",
+                //     ansi::lightred.str("Format name: " + format),
+                //     ansi::red.str("As formatted JSON:"),
+                //     FF("\n%s\n%s\n%s", asterisks.c_str(),
+                //                        opts.format().c_str(),
+                //                        asterisks.c_str()),
+                //     FF("\nSubgroups: %s", join(subgroups).c_str()));
                 
                 // WTF("",
                 //     ansi::lightred.str("Format name: " + format),
                 //     ansi::red.str("As encoded IOD:"),
                 //     FF("OPTIONS  » %s", iod::json_encode(format_ptr->options).c_str()),
                 //     FF("CAPACITY » %s", iod::json_encode(format_ptr->capacity).c_str()));
-                
-                
                 
                 WTF("SUBGROUPS:", join(subgroups));
     ++idx; }

@@ -597,6 +597,19 @@ detail::stringvec_t Json::keys() const {
     for (auto const& it : op->map) {
         out.emplace_back(*it.first);
     }
+    return out;
+}
+
+detail::stringvec_t Json::subgroups() const {
+    Object* op = mkobject();
+    detail::stringvec_t out;
+    out.reserve(op->map.size());
+    for (auto const& it : op->map) {
+        if (it.second->type() == Type::OBJECT &&
+            it.second->nodetype() == NodeType::STEM) {
+            out.emplace_back(*it.first);
+        }
+    }
     out.shrink_to_fit();
     return out;
 }
