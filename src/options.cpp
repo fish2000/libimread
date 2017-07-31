@@ -461,7 +461,8 @@ namespace im {
     }
     
     Options Options::subset(std::regex const& pattern,
-                                         bool defix) const {
+                                         bool defix,
+                           std::string const& replacement) const {
         stringvec_t keys = Options::list();
         stringvec_t pks;
         std::copy_if(keys.begin(), keys.end(),
@@ -476,7 +477,7 @@ namespace im {
         if (pks.empty()) { return out; }
         if (defix) {
             for (std::string const& pk : pks) {
-                out.set(std::regex_replace(pk, pattern, ""),
+                out.set(std::regex_replace(pk, pattern, replacement),
                             Json::cast<std::string>(pk));   /// strip pattern from key string
             }
         } else {
@@ -493,6 +494,39 @@ namespace im {
                             std::string const& separator) const {
         std::regex prefix_re("^" + prefix + separator, std::regex::extended);
         return Options::subset(prefix_re, defix);
+    }
+    
+    Options Options::replace(std::regex const& pattern,
+                                          bool defix,
+                            std::string const& replacement) const {
+        /// fill an ouput Options instance, per “defix”, with either:
+        /// value copies for “de-fixed” keys (the default), or:
+        /// value copies for identical keys, matching the original.
+        Options out;
+        stringvec_t list = Options::list();
+        if (list.empty()) { return out; }
+        if (defix) {
+            for (std::string const& pk : list) {
+                out.set(std::regex_replace(pk, pattern, replacement),
+                            Json::cast<std::string>(pk));   /// strip pattern from key string
+            }
+        } else {
+            for (std::string const& pk : list) {
+                out.set(pk, Json::cast<std::string>(pk));   /// use key string as-is
+            }
+        }
+        
+        return out;
+    }
+    
+    Options Options::underscores_to_dashes() const {
+        std::regex prefix_re("_", std::regex::extended);
+        return Options::replace(prefix_re, true, "-");
+    }
+    
+    Options Options::dashes_to_underscores() const {
+        std::regex prefix_re("-", std::regex::extended);
+        return Options::replace(prefix_re, true, "_");
     }
     
     OptionsList Options::keylist() const {
