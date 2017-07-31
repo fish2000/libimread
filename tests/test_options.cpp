@@ -168,6 +168,23 @@ namespace {
         /// for counting keys without prefixes:
         CHECK(typical.prefixcount() == 1);
         
+        SECTION("[options-container] » Examine subsets, "
+                                      "using im::Options::subset(«prefix»)")
+        {
+            Options mds = typical.subset("md"); /// defixes by default
+            
+            CHECK(mds.count()               == 5);
+            CHECK(mds.count()               == typical.prefixcount("md"));
+            CHECK(mds.prefixcount()         == 5);
+            CHECK(mds.prefixcount()         == typical.prefixcount("md"));
+            
+            CHECK(mds.get("icc")            == typical.get("md:icc"));
+            CHECK(mds.get("xmp-data")       == typical.get("md:xmp-data"));
+            CHECK(mds.get("xmp-sidecar")    == typical.get("md:xmp-sidecar"));
+            CHECK(mds.get("exif")           == typical.get("md:exif"));
+            CHECK(mds.get("thumbnail")      == typical.get("md:thumbnail"));
+        }
+        
         SECTION("[options-container] » Confirm total values by examining a `ratios_t` tuple, "
                                       "using im::Options::ratios()")
         {

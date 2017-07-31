@@ -147,7 +147,9 @@ namespace im {
     /// initializes the root node as a Json::Object:
     Options::Options()
         :Json()
-        { mkobject(); }
+        {
+            mkobject();
+        }
     
     /// protected delegate stringmap_t copy constructor:
     Options::Options(stringmap_t const& stringmap) {
@@ -165,12 +167,16 @@ namespace im {
     /// Copy-construct from a JSON value:
     Options::Options(Json const& json)
         :Json(json)
-        { mkobject(); }
+        {
+            mkobject();
+        }
     
     /// Move-construct from a JSON value:
     Options::Options(Json&& json) noexcept
         :Json(std::move(json))
-        { mkobject(); }
+        {
+            mkobject();
+        }
     
     /// Copy-constructor:
     Options::Options(Options const& other)
@@ -276,7 +282,7 @@ namespace im {
     Options& Options::operator=(Options&& other) noexcept {
         Node* node = std::exchange(other.root, root);
         (root = (node == nullptr ? &Node::null : node))->refcnt++;
-        cache = std::exchange(other.cache, decltype(cache){});
+        cache = std::exchange(other.cache, cache);
         return *this;
     }
     
@@ -462,6 +468,7 @@ namespace im {
                      std::back_inserter(pks),
                  [&](std::string const& key) { return std::regex_search(key, pattern,
                                                       std::regex_constants::match_default); });
+        
         /// fill an ouput Options instance, per “defix”, with either:
         /// value copies for “de-fixed” keys (the default), or:
         /// value copies for identical keys, matching the original.
@@ -469,15 +476,15 @@ namespace im {
         if (pks.empty()) { return out; }
         if (defix) {
             for (std::string const& pk : pks) {
-                out.set(pk, std::regex_replace(             /// strip pattern from key string
-                            Json::cast<std::string>(pk),
-                                          pattern, ""));
+                out.set(std::regex_replace(pk, pattern, ""),
+                            Json::cast<std::string>(pk));   /// strip pattern from key string
             }
         } else {
             for (std::string const& pk : pks) {
                 out.set(pk, Json::cast<std::string>(pk));   /// use key string as-is
             }
         }
+        
         return out;
     }
     
