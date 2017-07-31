@@ -195,6 +195,7 @@ namespace im {
                                     std::string const& separator = detail::kDefaultSep) const;
             OptionsList keylist() const;
             OptionsList valuelist() const;
+            detail::listpair_t items() const;
         
     };
     

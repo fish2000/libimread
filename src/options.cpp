@@ -501,6 +501,16 @@ namespace im {
         return out;
     }
     
+    detail::listpair_t Options::items() const {
+        stringvec_t list = Options::list();
+        OptionsList values;
+        for (std::string const& s : list) {
+            values.append(Json::get(s));
+        }
+        return std::make_pair(OptionsList(list),
+                              std::move(values));
+    }
+    
     #pragma mark -
     #pragma mark im::get_optional_{string,cstring,int,bool} legacy methods
     
