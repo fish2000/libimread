@@ -7,6 +7,8 @@
 #include <libimread/options.hh>
 
 #define STRINGNULL() stringmapper::base_t::null_value()
+#define STRINGFOUND(__expr__) (__expr__ != std::string::npos)
+#define STRINGUNFOUND(__expr__) (__expr__ == std::string::npos)
 
 namespace im {
     
@@ -373,7 +375,7 @@ namespace im {
         /// count those keys that do not contain the separator of choice, yes!
         stringvec_t keys = Options::list();
         return std::count_if(keys.begin(), keys.end(),
-                         [&](std::string const& key) { return bool(key.find(sep) == std::string::npos); });
+                         [&](std::string const& key) { return STRINGUNFOUND(key.find(sep)); });
     }
     
     prefixpair_t Options::prefixset(std::string const& separator) const {
@@ -385,7 +387,7 @@ namespace im {
         prefixvec.reserve(keys.size());
         std::copy_if(keys.begin(), keys.end(),
                      std::back_inserter(prefixvec),
-                 [&](std::string const& s) { return bool(s.find(separator[0]) != std::string::npos); });
+                 [&](std::string const& s) { return STRINGFOUND(s.find(separator[0])); });
         prefixvec.shrink_to_fit();
         
         /// cut the strings in the vector down to just the prefix:
@@ -446,12 +448,13 @@ namespace im {
     }
     
     ratios_t Options::ratios(std::string const& separator) const {
-        
         stringvec_t keys = Json::keys();
                 int total_count = static_cast<int>(keys.size());
                 int unprefixed_count = std::count_if(keys.begin(),
                                                      keys.end(),
-                                                 [&](std::string const& key) { return bool(key.find(separator[0]) == std::string::npos); });
+                                                 [&](std::string const& key) {
+                        return STRINGUNFOUND(key.find(separator[0]));
+                    });
                 int prefixed_count = total_count - static_cast<int>(unprefixed_count);
              double total = static_cast<double>(total_count);
              double unprefixed = static_cast<double>(unprefixed_count);
