@@ -108,6 +108,7 @@ SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(CROSSGUID_DIR "${DEPS_DIR}/crossguid")
 SET(DEPIXELATE_DIR "${DEPS_DIR}/depixelate")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
+SET(INICPP_DIR "${DEPS_DIR}/inicpp")
 # SET(INTERPOL_DIR "${DEPS_DIR}/interpol")
 SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
 # SET(LIBBF_DIR "${DEPS_DIR}/libbf/src")
@@ -182,6 +183,7 @@ include_directories("${CROSSGUID_DIR}")
 include_directories("${DEPIXELATE_DIR}")
 include_directories("${DOCOPT_DIR}")
 include_directories("${IMAGECOMPRESSION_DIR}")
+include_directories("${INICPP_DIR}/include")
 # include_directories("${INTERPOL_DIR}")
 # include_directories("${LIBBF_DIR}")
 include_directories("${LMDBXX_DIR}")
@@ -218,6 +220,7 @@ add_dependencies(imread "project_header")
 add_dependencies(imread "guid")
 add_dependencies(imread "depixelate")
 add_dependencies(imread "imagecompression")
+add_dependencies(imread "inicpp")
 # add_dependencies(imread "interpol")
 # add_dependencies(imread "libbf")
 # add_dependencies(imread "vdb")
@@ -241,6 +244,7 @@ set_target_properties(imread_static
 # for-reals building up in all this:
 target_link_libraries(imread_shared
     z png guid
+    inicpp
     # libbf interpol
     depixelate_shared
     imagecompression_shared
@@ -258,6 +262,7 @@ target_link_libraries(imread_shared
 
 target_link_libraries(imread_static
     z png guid
+    inicpp_static
     # libbf interpol
     depixelate_static
     imagecompression_static
@@ -382,11 +387,12 @@ if(IM_TESTS)
     # Link the `imread_tests` executable
     target_link_libraries(imread_tests
         imread_shared
-        imagecompression_shared
-        depixelate_shared
-        # libbf interpol
-        # vdb-client
         guid png z
+        inicpp
+        imagecompression_shared
+        # libbf interpol
+        depixelate_shared
+        # vdb-client
         ${EXTRA_LIBS}
         ${TIFF_LIBRARIES}
         ${JPEG_LIBRARIES}
