@@ -244,7 +244,7 @@ set_target_properties(imread_static
 # for-reals building up in all this:
 target_link_libraries(imread_shared
     z png guid
-    inicpp
+    inicpp_shared
     # libbf interpol
     depixelate_shared
     imagecompression_shared
@@ -388,7 +388,7 @@ if(IM_TESTS)
     target_link_libraries(imread_tests
         imread_shared
         guid png z
-        inicpp
+        inicpp_shared
         imagecompression_shared
         # libbf interpol
         depixelate_shared

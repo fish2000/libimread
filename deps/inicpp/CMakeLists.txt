@@ -1,9 +1,15 @@
 
-cmake_minimum_required(VERSION 2.8)
-project(inicpp)
+cmake_minimum_required(VERSION 3.0)
+project(inicpp LANGUAGES C CXX)
 
 set(SRC_DIR src)
 set(INCLUDE_DIR include/inicpp)
+
+# Compilation options:
+add_definitions(
+    -Wall -Werror
+    -std=c++14 -stdlib=libc++ -O3
+    -mtune=native -fstrict-aliasing)
 
 set(SOURCE_FILES
     ${INCLUDE_DIR}/config.h
@@ -29,27 +35,44 @@ set(SOURCE_FILES
 )
 
 # Find header files in include directory
-# include_directories(${INCLUDE_DIR})
 include_directories(include)
 
-# Set options to disable build of shared and static library
-option(BUILD_SHARED "Specifies if shared library is build." ON)
-option(BUILD_STATIC "Specifies if static library is build." ON)
+# Add an “OBJECT” library target called “inicpp”:
+add_library(
+    inicpp
+    OBJECT ${SOURCE_FILES})
+set_target_properties(
+    inicpp
+    PROPERTIES LIBRARY_OUTPUT_NAME "inicpp")
+set_property(
+    TARGET inicpp
+    PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-# Compile dynamic library
-if(BUILD_SHARED)
-    add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
-endif()
+# Add shared and static library targets, based on the “OBJECT” library,
+# respectively  called “inicpp_shared” and “inicpp_static”:
+add_library(
+    inicpp_shared
+    SHARED $<TARGET_OBJECTS:inicpp>)
+add_library(
+    inicpp_static
+    STATIC $<TARGET_OBJECTS:inicpp>)
 
-# Compile static library
-if(BUILD_STATIC)
-    add_library(${PROJECT_NAME}_static STATIC ${SOURCE_FILES})
-endif()
+set_target_properties(
+    inicpp_shared
+    PROPERTIES LIBRARY_OUTPUT_NAME "inicpp")
+set_target_properties(
+    inicpp_shared
+    PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(
+    inicpp_static
+    PROPERTIES ARCHIVE_OUTPUT_NAME "inicpp")
+set_target_properties(
+    inicpp_static
+    PROPERTIES LINKER_LANGUAGE CXX)
 
-# Use C++14 features
-if(UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++ -Wall")
-endif()
+target_link_libraries(inicpp_shared)
+target_link_libraries(inicpp_static)
+
 
 # Set up google testing framework (not compile by default)
 # set(gtest_force_shared_crt ON CACHE BOOL "Use shared (DLL) run-time lib even when Google Test is built as static lib.")
@@ -61,53 +84,13 @@ endif()
 # Add examples programs
 # add_subdirectory(examples EXCLUDE_FROM_ALL)
 
-# MS Visual C++ specialities
-# if(MSVC)
-#     # set different preprocessor macros
-#     if(BUILD_SHARED)
-#         # set preprocessor macro for windows exporting of symbols
-#         set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_DEFINITIONS "INICPP_DLL;INICPP_EXPORT")
-#     endif()
-# endif()
-
 # Install the header files:
 install(DIRECTORY   include/inicpp/
         DESTINATION include/inicpp
         FILES_MATCHING PATTERN "*.h")
 
-# Install the library target(s):
-install(TARGETS     ${PROJECT_NAME} LIBRARY
-        DESTINATION lib
-        COMPONENT library)
-
-
-# ========== Install targets - 'sudo make install' ==========
-# include(InstallRequiredSystemLibraries)
-# if(UNIX)
-#     install(DIRECTORY ${INCLUDE_DIR} DESTINATION /usr/include)
-#     install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION /usr/lib COMPONENT library)
-# elseif(MSVC)
-#     install(DIRECTORY ${INCLUDE_DIR} DESTINATION include)
-#     install(TARGETS ${PROJECT_NAME} DESTINATION lib COMPONENT library)
-# else()
-#     install(DIRECTORY ${INCLUDE_DIR} DESTINATION inicpp/include)
-#     install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION inicpp/lib COMPONENT library)
-# endif()
-
-
-# ========== Formatting ==========
-# file(GLOB_RECURSE ALL_SOURCE_FILES src/*.cpp src/*.h tests/*.cpp tests/*.h include/inicpp/*.h)
-# if(UNIX)
-#     add_custom_target(format
-#             COMMAND clang-format --style=file -i ${ALL_SOURCE_FILES}
-#             COMMENT "Running clang-format"
-#             VERBATIM
-#     )
-#
-#     # Count sum of lines in source files
-#     add_custom_target(lines
-#             COMMAND echo -n "Total lines of code: " && cat ${ALL_SOURCE_FILES} | wc -l
-#             COMMENT "Counting lines"
-#             VERBATIM
-#     )
-# endif()
+# Install the shared and static library target outputs:
+install(TARGETS     inicpp_shared
+        DESTINATION lib)
+install(TARGETS     inicpp_static
+        DESTINATION lib)
