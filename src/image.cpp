@@ -9,32 +9,35 @@
 
 namespace im {
     
+    Image::~Image() {}
+    
     void* Image::rowp() const {
-        return this->rowp(0);
+        return rowp(0);
     }
     
     int Image::nbytes() const {
-        const int bits = this->nbits();
+        const int bits = nbits();
         return (bits / 8) + bool(bits % 8);
     }
     
-    int Image::min(int dim) const {
+    int Image::min(int dimension) const {
+        /// default implementation: DOES NOTHING
         return 0;
     }
     
-    int Image::dim_or(int dim, int default_value) const {
-        if (dim >= this->ndims()) { return default_value; }
-        return this->dim(dim);
+    int Image::dim_or(int dimension, int default_value) const {
+        if (dim >= ndims()) { return default_value; }
+        return dim(dimension);
     }
     
-    int Image::stride_or(int dim, int default_value) const {
-        if (dim >= this->ndims()) { return default_value; }
-        return this->stride(dim);
+    int Image::stride_or(int dimension, int default_value) const {
+        if (dim >= ndims()) { return default_value; }
+        return stride(dimension);
     }
     
-    int Image::min_or(int dim, int default_value) const {
-        if (dim >= this->ndims()) { return default_value; }
-        return this->min(dim);
+    int Image::min_or(int dimension, int default_value) const {
+        if (dim >= ndims()) { return default_value; }
+        return min(dimension);
     }
     
     int Image::width() const {

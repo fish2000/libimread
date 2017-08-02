@@ -29,12 +29,15 @@ namespace im {
             using const_weak_image_t   = std::weak_ptr<Image const>;
             using const_image_ptr_t    = std::add_pointer_t<Image const>;
             
-            virtual ~Image() {}
+        public:
+            virtual ~Image();
             
+        public:
             virtual void* rowp(int r) const = 0;
             virtual void* rowp() const;
             virtual int nbits() const = 0;
             
+        public:
             virtual int nbytes() const;
             virtual int ndims() const = 0;
             virtual int dim(int) const = 0;
@@ -43,10 +46,12 @@ namespace im {
             virtual bool is_signed() const = 0;
             virtual bool is_floating_point() const = 0;
             
-            virtual int dim_or(int dim, int default_value = 1) const;
-            virtual int stride_or(int dim, int default_value = 1) const;
-            virtual int min_or(int dim, int default_value = 0) const;
+        public:
+            virtual int dim_or(int dimension, int default_value = 1) const;
+            virtual int stride_or(int dimension, int default_value = 1) const;
+            virtual int min_or(int dimension, int default_value = 0) const;
             
+        public:
             virtual int width() const;
             virtual int height() const;
             virtual int planes() const;
@@ -56,10 +61,12 @@ namespace im {
             virtual int top() const;
             virtual int bottom() const;
             
+        public:
             virtual Histogram histogram() const;
             virtual float entropy() const;
             virtual int otsu() const;
             
+        public:
             template <typename T> inline
             T* rowp_as(const int r) const {
                 return static_cast<T*>(this->rowp(r));
@@ -131,8 +138,10 @@ namespace im {
             using unique_t = std::unique_ptr<image_t>;
             using shared_t = std::shared_ptr<image_t>;
             
+        public:
             virtual ~ImageFactory();
             
+        public:
             virtual unique_t create(int nbits,
                     int d0, int d1, int d2,
                     int d3=-1, int d4=-1) = 0;
