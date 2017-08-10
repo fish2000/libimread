@@ -23,10 +23,10 @@ namespace im {
         
         /// byte_source* src -> CFDataRef
         /// N.B. using kCFAllocatorNull as the fourth parameter ensures that no deallocator
-        /// will be invoked upon the CFDataRef’s destruction (which is what we want, as we’re)
+        /// will be invoked upon the CFDataRef’s destruction (which is what we want, as we’re
         /// only referencing the bytes from the byte_source* `src`; these could be the backing
         /// store of a std::vector, an mmapped file descriptor, a transient memory buffer, or
-        /// whatever the fuck other shit, by design I would not know, actually
+        /// whatever the fuck other shit, by design I would not know, actually)
         detail::cfp_t<CFDataRef> sourcedata(const_cast<__CFData *>(
                 CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
                                             src->data(),
