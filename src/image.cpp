@@ -26,17 +26,17 @@ namespace im {
     }
     
     int Image::dim_or(int dimension, int default_value) const {
-        if (dim >= ndims()) { return default_value; }
+        if (dimension >= ndims()) { return default_value; }
         return dim(dimension);
     }
     
     int Image::stride_or(int dimension, int default_value) const {
-        if (dim >= ndims()) { return default_value; }
+        if (dimension >= ndims()) { return default_value; }
         return stride(dimension);
     }
     
     int Image::min_or(int dimension, int default_value) const {
-        if (dim >= ndims()) { return default_value; }
+        if (dimension >= ndims()) { return default_value; }
         return min(dimension);
     }
     
