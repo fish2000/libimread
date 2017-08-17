@@ -151,6 +151,7 @@ set(hdrs
     ${hdrs_dir}/rocks.hh
     ${hdrs_dir}/seekable.hh
     ${hdrs_dir}/store.hh
+    ${hdrs_dir}/stringnormatives.hh
     ${hdrs_dir}/symbols.hh
     ${IOD_SYMBOLS_HEADER}
     ${hdrs_dir}/traits.hh
