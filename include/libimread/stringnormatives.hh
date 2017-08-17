@@ -6,13 +6,12 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <functional>
 #include <type_traits>
-#include <iostream>
-#include <sstream>
 
 #include <libimread/libimread.hpp>
 #include <libimread/traits.hh>

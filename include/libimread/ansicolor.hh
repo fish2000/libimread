@@ -6,9 +6,10 @@
 
 #include <string>
 #include <iostream>
+#include <tuple>
+#include <utility>
 
 #include <libimread/libimread.hpp>
-#include <libimread/stringnormatives.hh>
 
 namespace ansi {
     

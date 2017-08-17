@@ -6,11 +6,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <string>
-#include <tuple>
-#include <utility>
 #include <functional>
-#include <type_traits>
 #include <iostream>
 #include <sstream>
 #include <exception>
