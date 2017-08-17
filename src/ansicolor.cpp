@@ -87,4 +87,29 @@ namespace ansi {
         return codeformat.first + text + codeformat.second;
     }
     
+    const ANSI reset            = ANSI(code_t::FM_RESET);
+    const ANSI termdefault      = ANSI(code_t::FG_DEFAULT_COLOR);
+    
+    const ANSI bold             = ANSI(code_t::FM_BOLD);
+    const ANSI dim              = ANSI(code_t::FM_DIM);
+    const ANSI underline        = ANSI(code_t::FM_UNDERLINE);
+    
+    const ANSI red              = ANSI(code_t::FG_RED);
+    const ANSI green            = ANSI(code_t::FG_GREEN);
+    const ANSI yellow           = ANSI(code_t::FG_YELLOW);
+    const ANSI blue             = ANSI(code_t::FG_BLUE);
+    const ANSI magenta          = ANSI(code_t::FG_MAGENTA);
+    const ANSI cyan             = ANSI(code_t::FG_CYAN);
+    
+    const ANSI lightred         = ANSI(code_t::FG_LIGHTRED);
+    const ANSI lightgreen       = ANSI(code_t::FG_LIGHTGREEN);
+    const ANSI lightyellow      = ANSI(code_t::FG_LIGHTYELLOW);
+    const ANSI lightblue        = ANSI(code_t::FG_LIGHTBLUE);
+    const ANSI lightmagenta     = ANSI(code_t::FG_LIGHTMAGENTA);
+    const ANSI lightcyan        = ANSI(code_t::FG_LIGHTCYAN);
+    
+    const ANSI lightgray        = ANSI(code_t::FG_LIGHTGRAY);
+    const ANSI darkgray         = ANSI(code_t::FG_DARKGRAY);
+    const ANSI white            = ANSI(code_t::FG_WHITE);
+    
 }

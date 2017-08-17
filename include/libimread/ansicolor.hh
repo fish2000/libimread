@@ -88,30 +88,30 @@ namespace ansi {
         
     };
     
-    const ANSI reset            = ANSI(code_t::FM_RESET);
-    const ANSI termdefault      = ANSI(code_t::FG_DEFAULT_COLOR);
+    extern const ANSI reset;
+    extern const ANSI termdefault;
     
-    const ANSI bold             = ANSI(code_t::FM_BOLD);
-    const ANSI dim              = ANSI(code_t::FM_DIM);
-    const ANSI underline        = ANSI(code_t::FM_UNDERLINE);
+    extern const ANSI bold;
+    extern const ANSI dim;
+    extern const ANSI underline;
     
-    const ANSI red              = ANSI(code_t::FG_RED);
-    const ANSI green            = ANSI(code_t::FG_GREEN);
-    const ANSI yellow           = ANSI(code_t::FG_YELLOW);
-    const ANSI blue             = ANSI(code_t::FG_BLUE);
-    const ANSI magenta          = ANSI(code_t::FG_MAGENTA);
-    const ANSI cyan             = ANSI(code_t::FG_CYAN);
+    extern const ANSI red;
+    extern const ANSI green;
+    extern const ANSI yellow;
+    extern const ANSI blue;
+    extern const ANSI magenta;
+    extern const ANSI cyan;
     
-    const ANSI lightred         = ANSI(code_t::FG_LIGHTRED);
-    const ANSI lightgreen       = ANSI(code_t::FG_LIGHTGREEN);
-    const ANSI lightyellow      = ANSI(code_t::FG_LIGHTYELLOW);
-    const ANSI lightblue        = ANSI(code_t::FG_LIGHTBLUE);
-    const ANSI lightmagenta     = ANSI(code_t::FG_LIGHTMAGENTA);
-    const ANSI lightcyan        = ANSI(code_t::FG_LIGHTCYAN);
+    extern const ANSI lightred;
+    extern const ANSI lightgreen;
+    extern const ANSI lightyellow;
+    extern const ANSI lightblue;
+    extern const ANSI lightmagenta;
+    extern const ANSI lightcyan;
     
-    const ANSI lightgray        = ANSI(code_t::FG_LIGHTGRAY);
-    const ANSI darkgray         = ANSI(code_t::FG_DARKGRAY);
-    const ANSI white            = ANSI(code_t::FG_WHITE);
+    extern const ANSI lightgray;
+    extern const ANSI darkgray;
+    extern const ANSI white;
     
 }
 
