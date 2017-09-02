@@ -85,7 +85,7 @@ namespace store {
             
             virtual mapped_reference at(key_const_reference) = 0;
             virtual mapped_const_reference at(key_const_reference) const = 0;
-            virtual mapped_reference operator[](key_const_reference) = 0;
+            virtual mapped_reference operator[](key_const_reference) { return null_value(); }
             virtual mapped_reference operator[](key_rvalue_reference) { return null_value(); }
             virtual size_type count(key_const_reference) const = 0;
     };
@@ -142,8 +142,8 @@ namespace store {
             virtual std::size_t erase(std::string const& key) override;
             virtual std::string& at(std::string const& key) override;
             virtual std::string const& at(std::string const& key) const override;
-            virtual std::string& operator[](std::string const& key) override;
-            virtual std::string& operator[](std::string&& key) override;
+            // virtual std::string& operator[](std::string const& key) override;
+            // virtual std::string& operator[](std::string&& key) override;
             virtual std::size_t count(std::string const& key) const override;
         
         protected:

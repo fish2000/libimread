@@ -232,13 +232,13 @@ namespace store {
         return get(key);
     }
     
-    std::string& stringmapper::operator[](std::string const& key) {
-        return get(key);
-    }
+    // std::string& stringmapper::operator[](std::string const& key) {
+    //     return get(key);
+    // }
     
-    std::string& stringmapper::operator[](std::string&& key) {
-        return get(key);
-    }
+    // std::string& stringmapper::operator[](std::string&& key) {
+    //     return get(key);
+    // }
     
     std::size_t stringmapper::count(std::string const& key) const {
         return static_cast<std::size_t>(get(key) == STRINGNULL());
