@@ -22,7 +22,7 @@
 
 #endif /// define PXALINUX
 
-#define ENUMBASE(enumclass) (enumclass)0
+#define ENUMBASE(__enumclass__) (static_cast<__enumclass__>(0))
 
 namespace filesystem {
     

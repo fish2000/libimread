@@ -500,7 +500,7 @@ namespace filesystem {
                     bool exists = false;
                     ssize_t error_value;
                     if (descriptor > 0) {
-                        status = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
+                        error_value = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
                     }
                     if (error_value >= 0) {
                         exists = true;
