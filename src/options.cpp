@@ -238,7 +238,8 @@ namespace im {
             std::size_t idx = 0,
                         max = keys.count();
             for (; idx < max; ++idx) {
-                Options::set(keys[idx], static_cast<Json&&>(values[idx]));
+                Options::set(static_cast<std::string>(keys[idx]),
+                             static_cast<Json&&>(values[idx]));
             }
         }
     

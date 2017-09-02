@@ -1098,7 +1098,7 @@ Json::Json(std::istream& in, bool full) {
                 throw parse_error("colon expected", in);
             }
             Json obj(in, false);
-            set(key, obj);
+            set(static_cast<std::string>(key), obj);
             in >> c;
             if (c == ',') { continue; }
             in.putback(c);

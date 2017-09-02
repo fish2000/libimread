@@ -354,9 +354,9 @@ class Json {
                 
             public:
                 // operator Json() const           { return target(); }
-                operator int()                  { return target(); }
-                operator float()                { return target(); }
-                operator std::string() const    { return target(); }
+                explicit operator int()                  { return static_cast<int>(target()); }
+                explicit operator float()                { return static_cast<float>(target()); }
+                explicit operator std::string() const    { return static_cast<std::string>(target()); }
                 explicit operator bool()        { return static_cast<bool>(target()); }
                 explicit operator long()        { return static_cast<long>(target()); }
                 explicit operator long long()   { return static_cast<long long>(target()); }
@@ -481,9 +481,9 @@ class Json {
         
     public:
         /// conversion operators
-        operator int() const;
-        operator float() const;
-        operator std::string() const;
+        explicit operator int() const;
+        explicit operator float() const;
+        explicit operator std::string() const;
         explicit operator bool() const;
         explicit operator uint8_t() const;
         explicit operator uint16_t() const;

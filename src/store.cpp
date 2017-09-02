@@ -24,7 +24,7 @@ namespace store {
             if (stringmap_ptr == nullptr)       { return; }     /// `stringmap_ptr` must be a valid pointer
             if (jsonmap.type() != Type::OBJECT) { return; }     /// `jsonmap` must be a JSON map (née “Object”)
             for (std::string const& key : jsonmap.keys()) {
-                stringmap_ptr->set(key, jsonmap.get(key));
+                stringmap_ptr->set(key, static_cast<std::string>(jsonmap.get(key)));
             }
         }
         
