@@ -963,7 +963,7 @@ namespace filesystem {
     }
     
     path::size_type path::rank(std::string const& ext) const {
-        /// I can't remember from whence I stole this implementation
+        /// I can't remember from whence I stole this implementation:
         std::string thispath = str();
         if (thispath.size() >= ext.size() &&
             thispath.compare(thispath.size() - ext.size(), ext.size(), ext) == 0) {
@@ -978,6 +978,10 @@ namespace filesystem {
             }
         }
         return 0;
+    }
+    
+    path::size_type path::rank() const {
+        return path::rank(path::extension());
     }
     
     std::string path::xattr(std::string const& name) const {

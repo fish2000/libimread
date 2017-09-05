@@ -608,15 +608,43 @@ namespace filesystem {
             int xattrcount() const;
             detail::stringvec_t xattrs() const;
             
+            /// Static forwarders for path::xattr<P, S>(p, s) and path::rank<P, S, Q>(p, s, q)
+            // template <typename P, typename S> inline
+            // static std::string xattr(P&& p, S&& s) {
+            //     return path(std::forward<P>(p)).xattr(std::forward<S>(s));
+            // }
+            
+            // template <typename P, typename S, typename Q> inline
+            // static std::string xattr(P&& p, S&& s, Q&& q) {
+            //     return path(std::forward<P>(p)).xattr(std::forward<S>(s),
+            //                                           std::forward<Q>(q));
+            // }
+            
+            /// Static forwarders for path::xattrcount<P>(p) and path::xattrs<P>(p)
+            template <typename P> inline
+            static int xattrcount(P&& p) {
+                return path(std::forward<P>(p)).xattrcount();
+            }
+            
+            template <typename P> inline
+            static detail::stringvec_t xattrs(P&& p) {
+                return path(std::forward<P>(p)).xattrs();
+            }
+            
             /// Path rank value per extension
             size_type rank(std::string const&) const;
+            size_type rank() const;
             
-            /// Static forwarder for path::rank<P, S>(p, s)
+            /// Static forwarders for path::rank<P, S>(p, s) and path::rank<P>(p)
             template <typename P, typename S> inline
             static size_type rank(P&& p, S&& s) {
                 return path(std::forward<P>(p)).rank(std::forward<S>(s));
             }
             
+            template <typename P> inline
+            static size_type rank(P&& p) {
+                return path(std::forward<P>(p)).rank();
+            }
             
             /// Static functions to retrieve the current directory, the system temporary directory,
             /// user/home directories, and the current running executable/program name and full path.
