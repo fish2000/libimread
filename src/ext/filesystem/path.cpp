@@ -130,7 +130,6 @@ namespace filesystem {
             /// Copy a file from source to destination
             /// Adapted from http://stackoverflow.com/a/2180157/298171
             int input, output; /// file descriptors
-            
             if ((input  = ::open(source,      O_RDONLY | O_CLOEXEC)) == -1) { return -1; }
             if ((output = ::open(destination, O_RDWR | O_CLOEXEC | O_CREAT, 0644)) == -1) {
                 ::close(input);
@@ -142,22 +141,24 @@ namespace filesystem {
                 ::copyfile_flags_t flags = COPYFILE_SECURITY;
                 if (copy_attributes) { flags |= COPYFILE_XATTR; }
                 flags |= COPYFILE_DATA;
-                ssize_t result = ::fcopyfile(input, output, 0, flags);
+                ssize_t result = ::fcopyfile(input, output, nullptr, flags);
                 copy_attributes = false; /// don’t manually copy xattrs
+            
             #else
                 /// sendfile() will work with non-socket output
                 /// -- i.e. regular files -- on Linux 2.6.33+
-                off_t bytescopied = 0;
+                off_t offset = 0;
                 stat_t source_info = { 0 };
                 ::fstat(input, &source_info);
-                ssize_t result = ::sendfile(output, input, &bytescopied, source_info.st_size);
+                ssize_t result = ::sendfile(output, input,
+                                                   &offset,
+                                                    source_info.st_size);
+            
             #endif
             
             if (copy_attributes) {
                 if (attribute::fdcount(input) > 0) {
-                    stat_t destination_info = { 0 };
-                    ::fstat(output, &destination_info);
-                    if (result == destination_info.st_size) {
+                    if (::access(destination, R_OK | W_OK) != -1) {
                         for (std::string const& name : attribute::fdlist(input)) {
                             attribute::fdset(output, name,
                             attribute::fdget(input, name));
