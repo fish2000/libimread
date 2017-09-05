@@ -149,7 +149,7 @@ namespace filesystem {
                 ssize_t result = ::sendfile(output, input, &bytescopied, fileinfo.st_size);
             #endif
             
-            if (copy_attributes) {
+            if (result > 0 && copy_attributes) {
                 int attcount = attribute::fdcount(input);
                 if (attcount > 0) {
                     for (std::string name : attribute::fdlist(input)) {
