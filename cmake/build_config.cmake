@@ -40,7 +40,7 @@ check_include_file(pwd.h                                HAVE_PWD_H)
 check_include_file(glob.h                               HAVE_GLOB_H)
 check_include_file(wordexp.h                            HAVE_WORDEXP_H)
 check_include_file_cxx(cxxabi.h                         HAVE_CXXABI_HH)
-check_include_file_cxx(string_view                      HAVE_STRINGVIEW_HH)
+check_include_file_cxx(experimental/string_view         HAVE_STRINGVIEW_HH)
 check_include_file_cxx(experimental/array               HAVE_EXPERIMENTAL_ARRAY_HH)
 
 check_include_file(sys/ioctl.h                          HAVE_SYS_IOCTL_H)
@@ -65,14 +65,17 @@ else(APPLE)
         CACHE INTERNAL
         "<copyfile.h> presence"
         FORCE)
+    
     set(HAVE_MACHO_DYLD_H NO
         CACHE INTERNAL
         "<mach-o/dyld.h> presence"
         FORCE)
+    
     set(HAVE_OBJC_MESSAGE_H NO
         CACHE INTERNAL
         "<objc/message.h> presence"
         FORCE)
+    
     set(HAVE_OBJC_RUNTIME_H NO
         CACHE INTERNAL
         "<objc/runtime.h> presence"

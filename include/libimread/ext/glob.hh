@@ -39,15 +39,19 @@
 #define LIBIMREAD_INCLUDE_EXT_GLOB_HH_
 
 #include <experimental/string_view>
+#include <functional>
 
 namespace glob {
     
-    bool match(std::experimental::string_view pattern,
-               std::experimental::string_view target);
+    bool  match(std::experimental::string_view pattern,
+                std::experimental::string_view target);
     
     bool imatch(std::experimental::string_view pattern,
                 std::experimental::string_view target);
-
+    
+    std::function<bool(std::experimental::string_view)>  matcher(std::experimental::string_view pattern);
+    std::function<bool(std::experimental::string_view)> imatcher(std::experimental::string_view pattern);
+    
 }
 
 #endif /// LIBIMREAD_INCLUDE_EXT_GLOB_HH_
