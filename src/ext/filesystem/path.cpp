@@ -150,9 +150,8 @@ namespace filesystem {
             #endif
             
             if (result > 0 && copy_attributes) {
-                int attcount = attribute::fdcount(input);
-                if (attcount > 0) {
-                    for (std::string name : attribute::fdlist(input)) {
+                if (attribute::fdcount(input) > 0) {
+                    for (std::string const& name : attribute::fdlist(input)) {
                         attribute::fdset(output, name,
                         attribute::fdget(input, name));
                     }
