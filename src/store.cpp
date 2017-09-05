@@ -357,32 +357,36 @@ namespace store {
     stringmap stringmap::load_map(std::string const& source) {
         /// load_map() is a static function, there is no `this`:
         stringmap out;
-        stringmapper::formatter format = stringmapper::for_path(source);
-        if (format == stringmapper::formatter::plist) {
-            PList::Dictionary dict;
-            try {
-                auto d = detail::plist_load(source);
-                dict = d;
-            } catch (im::FileSystemError&) {
-                return out;
-            } catch (im::PListIOError&) {
-                return out;
-            }
-            detail::plist_impl(dict, &out);
-            return out;
-        }
-        {
-            /// default: JSON
-            Json loadee = Json::null;
-            try {
-                loadee = Json::load(source);
-            } catch (im::FileSystemError&) {
-                return out;
-            } catch (im::JSONIOError&) {
+        switch (stringmapper::for_path(source)) {
+            case stringmapper::formatter::plist: {
+                PList::Dictionary dict;
+                try {
+                    /// PList::Dictionary::operator=(…) isn’t overloaded
+                    /// for rvalue refs, hence this idiotic value do-si-do:
+                    auto d = detail::plist_load(source);
+                    dict = d;
+                } catch (im::FileSystemError&) {
+                    return out;
+                } catch (im::PListIOError&) {
+                    return out;
+                }
+                detail::plist_impl(dict, &out);
                 return out;
             }
-            detail::json_impl(loadee, &out);
-            return out;
+            case stringmapper::formatter::undefined:
+            case stringmapper::formatter::json:
+            default: {
+                Json loadee = Json::null;
+                try {
+                    loadee = Json::load(source);
+                } catch (im::FileSystemError&) {
+                    return out;
+                } catch (im::JSONIOError&) {
+                    return out;
+                }
+                detail::json_impl(loadee, &out);
+                return out;
+            }
         }
     }
     
