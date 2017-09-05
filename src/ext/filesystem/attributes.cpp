@@ -698,7 +698,7 @@ namespace filesystem {
             if (descriptor < 0) { return out; }
             detail::stringvec_t strings = attribute::fdlist(descriptor, options, domain);
             if (!strings.empty()) {
-                std::string pthstr = filesystem::path(descriptor).str();
+                std::string pthstr = filesystem::path(descriptor).make_absolute().str();
                 out.reserve(strings.size());
                 std::for_each(strings.begin(),
                               strings.end(),
@@ -710,7 +710,7 @@ namespace filesystem {
         accessor_t::accessvec_t accessor_t::list(filesystem::path const& pth,
                                                  attribute::flags options,
                                                  attribute::ns domain) {
-            std::string pthstr(pth.str());
+            std::string pthstr(pth.make_absolute().str());
             detail::stringvec_t strings = attribute::list(pthstr, options, domain);
             accessor_t::accessvec_t out{};
             if (!strings.empty()) {
@@ -739,7 +739,7 @@ namespace filesystem {
         accessor_t::accessor_t(int descriptor,
                                std::string const& name,
                                attribute::ns domain)
-            :m_pathstring(filesystem::path(descriptor).str())
+            :m_pathstring(filesystem::path(descriptor).make_absolute().str())
             ,m_name(name)
             ,m_descriptor(descriptor)
             ,m_domain(domain)
@@ -748,7 +748,7 @@ namespace filesystem {
         accessor_t::accessor_t(filesystem::path const& pth,
                                std::string const& name,
                                attribute::ns domain)
-            :m_pathstring(pth.str())
+            :m_pathstring(pth.make_absolute().str())
             ,m_name(name)
             ,m_domain(domain)
             {}
@@ -836,7 +836,7 @@ namespace filesystem {
         int accessor_t::descriptor(int fd) {
             if (fd > 0) {
                 m_descriptor = fd;
-                m_pathstring = filesystem::path(m_descriptor).str();
+                m_pathstring = filesystem::path(m_descriptor).make_absolute().str();
             }
             return m_descriptor;
         }

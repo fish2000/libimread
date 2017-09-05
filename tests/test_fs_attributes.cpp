@@ -22,11 +22,13 @@ namespace {
     
     using filesystem::path;
     // using filesystem::switchdir;
+    using filesystem::TemporaryName;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
     
     using filesystem::detail::nowait_t;
     using filesystem::detail::stringvec_t;
+    // using filesystem::detail::copyfile;
     using filesystem::attribute::detail::nullstring;
     
     using im::FileSource;
@@ -114,6 +116,10 @@ namespace {
     {
         NamedTemporaryFile tf(".txt");
         
+        tf.open();
+        tf.stream << "YO DOGG";
+        tf.close();
+        
         {
             FileSource fdb(tf.filepath);
             fdb.set("yo-dogg", "I heard you like xattr writes");
@@ -126,6 +132,26 @@ namespace {
             CHECK(fdb.path().xattr("yo-dogg") == "I heard you like xattr writes");
             CHECK(fdb.path().xattr("dogg-yo") == "So we put some strings in your strings");
             CHECK(fdb.path().xattr("dogg-NO") == nullstring);
+        }
+        
+        {
+            TemporaryName tn(".md");
+            std::string source = tf.filepath.str();
+            std::string destination = tn.pathname.str();
+            
+            REQUIRE(tf.filepath.exists());
+            REQUIRE(tf.filepath.filesize() > 0);
+            filesystem::detail::copyfile(source.c_str(),
+                                         destination.c_str(),
+                                         true); /// copy_attributes = true
+            
+            REQUIRE(tn.pathname.exists());
+            CHECK(tn.pathname.xattr("yo-dogg") == "I heard you like xattr writes");
+            CHECK(tn.pathname.xattr("dogg-yo") == "So we put some strings in your strings");
+            CHECK(tn.pathname.xattr("dogg-NO") == nullstring);
+            CHECK(path::xattrget(destination, "yo-dogg") == "I heard you like xattr writes");
+            CHECK(path::xattrget(destination, "dogg-yo") == "So we put some strings in your strings");
+            CHECK(path::xattrget(destination, "dogg-NO") == nullstring);
         }
         
         CHECK(tf.filepath.xattr("yo-dogg") == "I heard you like xattr writes");

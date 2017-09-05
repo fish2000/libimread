@@ -610,12 +610,12 @@ namespace filesystem {
             
             /// Static forwarders for path::xattrset<P, S>(p, s) and path::xattrget<P, S, Q>(p, s, q)
             template <typename P, typename S> inline
-            static std::string xattrset(P&& p, S&& s) {
+            static std::string xattrget(P&& p, S&& s) {
                 return path(std::forward<P>(p)).xattr(std::forward<S>(s));
             }
             
             template <typename P, typename S, typename Q> inline
-            static std::string xattrget(P&& p, S&& s, Q&& q) {
+            static std::string xattrset(P&& p, S&& s, Q&& q) {
                 return path(std::forward<P>(p)).xattr(std::forward<S>(s),
                                                       std::forward<Q>(q));
             }

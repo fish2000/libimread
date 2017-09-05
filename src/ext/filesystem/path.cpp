@@ -139,21 +139,29 @@ namespace filesystem {
             
             #if defined(__APPLE__) || defined(__FreeBSD__)
                 /// fcopyfile() works on FreeBSD and OS X 10.5+ 
-                ssize_t result = ::fcopyfile(input, output, 0, COPYFILE_ALL);
+                ::copyfile_flags_t flags = COPYFILE_SECURITY;
+                if (copy_attributes) { flags |= COPYFILE_XATTR; }
+                flags |= COPYFILE_DATA;
+                ssize_t result = ::fcopyfile(input, output, 0, flags);
+                copy_attributes = false; /// don’t manually copy xattrs
             #else
                 /// sendfile() will work with non-socket output
                 /// -- i.e. regular files -- on Linux 2.6.33+
                 off_t bytescopied = 0;
-                stat_t fileinfo = { 0 };
-                ::fstat(input, &fileinfo);
-                ssize_t result = ::sendfile(output, input, &bytescopied, fileinfo.st_size);
+                stat_t source_info = { 0 };
+                ::fstat(input, &source_info);
+                ssize_t result = ::sendfile(output, input, &bytescopied, source_info.st_size);
             #endif
             
-            if (result > 0 && copy_attributes) {
+            if (copy_attributes) {
                 if (attribute::fdcount(input) > 0) {
-                    for (std::string const& name : attribute::fdlist(input)) {
-                        attribute::fdset(output, name,
-                        attribute::fdget(input, name));
+                    stat_t destination_info = { 0 };
+                    ::fstat(output, &destination_info);
+                    if (result == destination_info.st_size) {
+                        for (std::string const& name : attribute::fdlist(input)) {
+                            attribute::fdset(output, name,
+                            attribute::fdget(input, name));
+                        }
                     }
                 }
             }
@@ -905,7 +913,7 @@ namespace filesystem {
     path& path::adjoin(path const& other) {
         if (other.m_absolute) {
             imread_raise(FileSystemError,
-                "path::join() expects a relative-path RHS");
+                "path::adjoin() expects a relative-path RHS");
         }
         std::copy(other.m_path.begin(),
                   other.m_path.end(),

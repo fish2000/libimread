@@ -30,7 +30,7 @@
 #cmakedefine IM_TERMINATOR              1
 
 #define FILESYSTEM_TEMP_SUFFIX          ".imr"
-#define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXXX"
+#define FILESYSTEM_TEMP_FILENAME        "temporary-XXXXXXX"
 #define FILESYSTEM_TEMP_DIRECTORYNAME   "libimread-XXXXXXX"
 #define NULL_STR                        "\uFFFF"
 
