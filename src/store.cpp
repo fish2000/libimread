@@ -179,8 +179,7 @@ namespace store {
     }
     
     void stringmapper::with_plist(std::string const& xmlstr) {
-        PList::Dictionary dict = static_cast<PList::Dictionary>(
-                                             PList::Structure::FromXml(xmlstr));
+        PList::Dictionary dict = PList::Dictionary::FromXml(xmlstr);
         detail::plist_impl(dict, this);
     }
     
