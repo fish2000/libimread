@@ -126,7 +126,7 @@ namespace filesystem {
             return clock_t::from_time_t(ts);
         }
         
-        ssize_t copyfile(char const* source, char const* destination) {
+        ssize_t copyfile(char const* source, char const* destination, bool copy_attributes = true) {
             /// Copy a file from source to destination
             /// Adapted from http://stackoverflow.com/a/2180157/298171
             int input, output; /// file descriptors
@@ -148,6 +148,16 @@ namespace filesystem {
                 ::fstat(input, &fileinfo);
                 ssize_t result = ::sendfile(output, input, &bytescopied, fileinfo.st_size);
             #endif
+            
+            if (copy_attributes) {
+                int attcount = attribute::fdcount(input);
+                if (attcount > 0) {
+                    for (std::string name : attribute::fdlist(input)) {
+                        attribute::fdset(output, name,
+                        attribute::fdget(input, name));
+                    }
+                }
+            }
             
             ::close(input);
             ::close(output);

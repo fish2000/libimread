@@ -38,7 +38,7 @@ namespace filesystem {
         std::string syspaths() noexcept;
         std::string execpath() noexcept;
         timepoint_t execstarttime() noexcept;
-        ssize_t copyfile(char const*, char const*);
+        ssize_t copyfile(char const*, char const*, bool);
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
         /// instead of plain ol' pathvec_t
