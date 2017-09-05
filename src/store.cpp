@@ -8,6 +8,7 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/JSON/json11.h>
+#include <libimread/ext/pystring.hh>
 #include <libimread/store.hh>
 #include <libimread/rehash.hh>
 
@@ -173,6 +174,19 @@ namespace store {
     #pragma mark -
     #pragma mark base class store::stringmapper default methods
     
+    stringmapper::formatter stringmapper::for_path(std::string const& pth) {
+        using filesystem::path;
+        std::string ext = pystring::lower(path::extension(pth));
+        if (ext == "plist") {
+            return stringmapper::formatter::plist;
+        } else if (ext == "pickle") {
+            return stringmapper::formatter::pickle;
+        } else if (ext == "ini") {
+            return stringmapper::formatter::ini;
+        }
+        return stringmapper::default_format; /// JSON
+    }
+    
     void stringmapper::with_json(std::string const& jsonstr) {
         Json json = Json::parse(jsonstr);
         detail::json_impl(json, this);
@@ -331,23 +345,45 @@ namespace store {
     
     stringmap::stringmap() noexcept {}
     
-    stringmap::stringmap(std::string const& jsonstr) {
-        with_json(jsonstr);
+    stringmap::stringmap(std::string const& serialized,
+                         stringmapper::formatter format) {
+        if (format == stringmapper::formatter::plist) {
+            with_plist(serialized);
+        } else {
+            with_json(serialized);
+        }
     }
     
     stringmap stringmap::load_map(std::string const& source) {
         /// load_map() is a static function, there is no `this`:
-        Json loadee = Json::null;
         stringmap out;
-        try {
-            loadee = Json::load(source);
-        } catch (im::FileSystemError&) {
-            return out;
-        } catch (im::JSONIOError&) {
+        stringmapper::formatter format = stringmapper::for_path(source);
+        if (format == stringmapper::formatter::plist) {
+            PList::Dictionary dict;
+            try {
+                auto d = detail::plist_load(source);
+                dict = d;
+            } catch (im::FileSystemError&) {
+                return out;
+            } catch (im::PListIOError&) {
+                return out;
+            }
+            detail::plist_impl(dict, &out);
             return out;
         }
-        detail::json_impl(loadee, &out);
-        return out;
+        {
+            /// default: JSON
+            Json loadee = Json::null;
+            try {
+                loadee = Json::load(source);
+            } catch (im::FileSystemError&) {
+                return out;
+            } catch (im::JSONIOError&) {
+                return out;
+            }
+            detail::json_impl(loadee, &out);
+            return out;
+        }
     }
     
     void stringmap::warm_cache() const {
@@ -408,4 +444,4 @@ namespace std {
         return static_cast<store_out_t>(s.hash());
     }
     
-} /* namespace std */
+} /// namespace std

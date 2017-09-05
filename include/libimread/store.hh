@@ -110,6 +110,9 @@ namespace store {
             };
             
             static constexpr formatter default_format = formatter::json;
+            
+        public:
+            static formatter for_path(std::string const&);
         
         public:
             virtual std::string&       get(std::string const& key) = 0;
@@ -355,7 +358,8 @@ namespace store {
         
         public:
             stringmap() noexcept;                               /// default constructor
-            explicit stringmap(std::string const&);             /// decode from JSON string
+            explicit stringmap(std::string const&,              /// decode from serialized string (e.g JSON)
+                               stringmapper::formatter format = stringmapper::default_format);
         
         public:
             static stringmap load_map(std::string const&);      /// load from disk-based file
