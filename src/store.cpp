@@ -232,10 +232,14 @@ namespace store {
     bool stringmapper::dump(std::string const& destination, bool overwrite, formatter format) const {
         /// only JSON works for now:
         warm_cache();
-        if (format == formatter::plist) {
-            return detail::plist_dump(cache, destination, overwrite);
+        switch (format) {
+            case formatter::plist:
+                return detail::plist_dump(cache, destination, overwrite);
+            case formatter::undefined:
+            case formatter::json:
+            default:
+                return detail::json_dump(cache, destination, overwrite);
         }
-        return detail::json_dump(cache, destination, overwrite);
     }
     
     stringmapper::~stringmapper() {}
@@ -347,10 +351,15 @@ namespace store {
     
     stringmap::stringmap(std::string const& serialized,
                          stringmapper::formatter format) {
-        if (format == stringmapper::formatter::plist) {
-            with_plist(serialized);
-        } else {
-            with_json(serialized);
+        switch (format) {
+            case stringmapper::formatter::plist:
+                with_plist(serialized);
+                break;
+            case stringmapper::formatter::undefined:
+            case stringmapper::formatter::json:
+            default:
+                with_json(serialized);
+                break;
         }
     }
     
