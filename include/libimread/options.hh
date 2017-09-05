@@ -211,6 +211,22 @@ namespace im {
             Json value(std::string const&) const;
             
         public:
+            /// cast operations:
+            template <typename T> inline
+            std::remove_reference_t<T> cast(std::string const& key) const {
+                using rT = std::remove_reference_t<T>;
+                return static_cast<rT>(Json::get(key));
+            }
+            
+            template <typename T> inline
+            std::remove_reference_t<T> cast(std::string const& key,
+                                            T default_value) const {
+                using rT = std::remove_reference_t<T>;
+                if (!Json::has(key)) { return static_cast<rT>(default_value); }
+                return Json::cast<T>(key);
+            }
+        
+        public:
             /// in-place regroup: pull a subgroup down and prefix it:
             Options& regroup(std::string const& subgroupname,
                                        std::string const& prefix = detail::kDefaultRep,                     /// defaults to the subgroup name
