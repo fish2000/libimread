@@ -171,7 +171,8 @@ find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
 include(FindRocksDB)
 # find_package(RocksDB REQUIRED)
 
-pkg_search_module(LIBPLIST REQUIRED libplist)
+pkg_check_modules(LIBPLIST REQUIRED libplist)
+pkg_check_modules(LIBPLISTPP REQUIRED libplist++)
 
 # Include the project-specific `include` directories:
 include_directories(${${PROJECT_NAME}_include_dir})
@@ -206,7 +207,8 @@ include_directories(
     ${HALIDE_INCLUDE_DIR}
     ${LIBUNWIND_INCLUDE_DIR}
     ${HDF5_INCLUDE_DIRS}
-    ${LIBPLIST_INCLUDE_DIRS})
+    ${LIBPLIST_INCLUDE_DIRS}
+    ${LIBPLISTPP_INCLUDE_DIRS})
 
 # Set the source files and source-file-specific options
 # required to build the library:
@@ -258,7 +260,8 @@ target_link_libraries(imread_shared
     ${HDF5_HL_LIBRARIES}
     # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES}
-    ${LIBPLIST_LIBRARIES})
+    ${LIBPLIST_LIBRARIES}
+    ${LIBPLISTPP_LIBRARIES})
 
 target_link_libraries(imread_static
     z png guid
@@ -276,7 +279,8 @@ target_link_libraries(imread_static
     ${HDF5_HL_LIBRARIES}
     # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES}
-    ${LIBPLIST_STATIC_LIBRARIES})
+    ${LIBPLIST_STATIC_LIBRARIES}
+    ${LIBPLISTPP_STATIC_LIBRARIES})
 
 # Set and pass on compile-time config variable values:
 # get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS})
@@ -403,7 +407,8 @@ if(IM_TESTS)
         ${HDF5_HL_LIBRARIES}
         # ${CAPNP_LIBRARIES_LITE}
         ${ROCKSDB_LIBRARIES}
-        ${LIBPLIST_LIBRARIES})
+        ${LIBPLIST_LIBRARIES}
+        ${LIBPLISTPP_LIBRARIES})
     
     # Set up ctest and cdash:
     enable_testing()

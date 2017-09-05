@@ -155,6 +155,12 @@ namespace store {
         detail::json_impl(json, this);
     }
     
+    void stringmapper::with_plist(std::string const& xmlstr) {
+        PList::Dictionary dict = static_cast<PList::Dictionary>(
+                                             PList::Structure::FromXml(xmlstr));
+        detail::plist_impl(dict, this);
+    }
+    
     void stringmapper::warm_cache() const {
         stringvec_t keys(list());
         if (cache.size() < keys.size()) {
@@ -171,6 +177,15 @@ namespace store {
     std::string stringmapper::mapping_json() const {
         warm_cache();
         return Json(cache).format();
+    }
+    
+    std::string stringmapper::mapping_plist() const {
+        warm_cache();
+        PList::Dictionary dict;
+        for (auto const& item : cache) {
+            dict.Set(item.first, PList::String(item.second));
+        }
+        return dict.ToXml();
     }
     
     std::string stringmapper::to_string() const {
