@@ -20,6 +20,18 @@ namespace store {
     
     namespace detail {
         
+        static bool json_dump(stringmapper::stringmap_t const& cache, std::string const& destination, bool overwrite) {
+            Json dumpee(cache);
+            try {
+                dumpee.dump(destination, overwrite);
+            } catch (im::FileSystemError&) {
+                return false;
+            } catch (im::JSONIOError&) {
+                return false;
+            }
+            return true;
+        }
+        
         static void json_map_impl(Json const& jsonmap, stringmapper* stringmap_ptr) {
             if (stringmap_ptr == nullptr)       { return; }     /// `stringmap_ptr` must be a valid pointer
             if (jsonmap.type() != Type::OBJECT) { return; }     /// `jsonmap` must be a JSON map (née “Object”)
@@ -52,31 +64,39 @@ namespace store {
             }
         }
         
-        static void plist_dump(PList::Dictionary const& dict, std::string const& dest, bool overwrite = false) {
+        static bool plist_dump(stringmapper::stringmap_t const& cache, std::string const& dest, bool overwrite = false) {
             using filesystem::path;
             using filesystem::NamedTemporaryFile;
             std::string destination(dest);
             
+            PList::Dictionary dict;
+            for (auto const& item : cache) {
+                dict.Set(item.first, PList::String(item.second));
+            }
+            
             try {
                 destination = path::expand_user(dest).make_absolute().str();
             } catch (im::FileSystemError& exc) {
-                throw;
+                // throw;
+                return false;
             }
             
             if (path::exists(destination)) {
                 if (!overwrite) {
-                    imread_raise(PListIOError,
-                        "store::detail::plist_dump(destination, overwrite=false): existant destination",
-                     FF("\tdest        == %s", dest.c_str()),
-                     FF("\tdestination == %s", destination.c_str()),
-                        "\t(Requires overwrite=true or a unique destination)");
+                    // imread_raise(PListIOError,
+                    //     "store::detail::plist_dump(destination, overwrite=false): existant destination",
+                    //  FF("\tdest        == %s", dest.c_str()),
+                    //  FF("\tdestination == %s", destination.c_str()),
+                    //     "\t(Requires overwrite=true or a unique destination)");
+                    return false;
                 } else if (path::is_directory(destination)) {
-                    imread_raise(PListIOError,
-                        "store::detail::plist_dump(destination): directory as existant destination",
-                     FF("\toverwrite   == %s", overwrite ? "true" : "false"),
-                     FF("\tdest        == %s", dest.c_str()),
-                     FF("\tdestination == %s", destination.c_str()),
-                        "\t(Requires overwrite=true with a non-directory destination)");
+                    // imread_raise(PListIOError,
+                    //     "store::detail::plist_dump(destination): directory as existant destination",
+                    //  FF("\toverwrite   == %s", overwrite ? "true" : "false"),
+                    //  FF("\tdest        == %s", dest.c_str()),
+                    //  FF("\tdestination == %s", destination.c_str()),
+                    //     "\t(Requires overwrite=true with a non-directory destination)");
+                    return false;
                 }
             }
             
@@ -91,13 +111,16 @@ namespace store {
             
             path finalfile = tf.filepath.duplicate(destination);
             if (!finalfile.is_file()) {
-                imread_raise(PListIOError,
-                    "store::detail::plist_dump(destination, ...): failed writing to destination",
-                 FF("\toverwrite   == %s", overwrite ? "true" : "false"),
-                 FF("\tdest        == %s", dest.c_str()),
-                 FF("\tdestination == %s", destination.c_str()),
-                 FF("\tfinalfile   == %s", finalfile.c_str()));
+                // imread_raise(PListIOError,
+                //     "store::detail::plist_dump(destination, ...): failed writing to destination",
+                //  FF("\toverwrite   == %s", overwrite ? "true" : "false"),
+                //  FF("\tdest        == %s", dest.c_str()),
+                //  FF("\tdestination == %s", destination.c_str()),
+                //  FF("\tfinalfile   == %s", finalfile.c_str()));
+                return false;
             }
+            
+            return true;
         }
         
         static PList::Dictionary plist_load(std::string const& source) {
@@ -196,15 +219,10 @@ namespace store {
     bool stringmapper::dump(std::string const& destination, bool overwrite, formatter format) const {
         /// only JSON works for now:
         warm_cache();
-        Json dumpee(cache);
-        try {
-            dumpee.dump(destination, overwrite);
-        } catch (im::FileSystemError&) {
-            return false;
-        } catch (im::JSONIOError&) {
-            return false;
+        if (format == formatter::plist) {
+            return detail::plist_dump(cache, destination, overwrite);
         }
-        return true;
+        return detail::json_dump(cache, destination, overwrite);
     }
     
     stringmapper::~stringmapper() {}
