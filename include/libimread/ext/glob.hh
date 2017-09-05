@@ -43,14 +43,17 @@
 
 namespace glob {
     
-    bool  match(std::experimental::string_view pattern,
-                std::experimental::string_view target);
+    using stringview_t = std::experimental::string_view;
+    using glob_f = std::function<bool(stringview_t)>;
     
-    bool imatch(std::experimental::string_view pattern,
-                std::experimental::string_view target);
+    bool  match(stringview_t pattern,
+                stringview_t target);
     
-    std::function<bool(std::experimental::string_view)>  matcher(std::experimental::string_view pattern);
-    std::function<bool(std::experimental::string_view)> imatcher(std::experimental::string_view pattern);
+    bool imatch(stringview_t pattern,
+                stringview_t target);
+    
+    glob_f  matcher(stringview_t pattern);
+    glob_f imatcher(stringview_t pattern);
     
 }
 

@@ -47,8 +47,11 @@ namespace {
     {
         CHECK(std::count_if(strings.begin(), strings.end(),
                          [](std::string const& s) { return glob::match("*o", s); }) == 2);
+        CHECK(std::count_if(strings.begin(), strings.end(),
+                         [](std::string const& s) { return glob::match("*o*", s); }) == 5);
         
         CHECK(std::count_if(strings.begin(), strings.end(), glob::matcher("*o")) == 2);
+        CHECK(std::count_if(strings.begin(), strings.end(), glob::matcher("*o*")) == 5);
     }
     
 }

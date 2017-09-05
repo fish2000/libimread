@@ -32,6 +32,7 @@ namespace glob {
     
     using namespace std::placeholders;
     using stringview_t = std::experimental::string_view;
+    using glob_f = std::function<bool(stringview_t)>;
     
     namespace detail {
         
@@ -69,12 +70,12 @@ namespace glob {
                           [](int a, int b) { return std::tolower(a) == std::tolower(b); });
     }
     
-    std::function<bool(stringview_t)> matcher(stringview_t pattern) {
+    glob_f matcher(stringview_t pattern) {
         auto equal = [](int a, int b) { return a == b; };
         return std::bind(detail::match<decltype(equal)>, pattern, _1, equal);
     }
     
-    std::function<bool(stringview_t)> imatcher(stringview_t pattern) {
+    glob_f imatcher(stringview_t pattern) {
         auto equal = [](int a, int b) { return std::tolower(a) == std::tolower(b); };
         return std::bind(detail::match<decltype(equal)>, pattern, _1, equal);
     }
