@@ -5,11 +5,17 @@
 #define LIBIMREAD_INCLUDE_SERIALIZATION_HH_
 
 #include <string>
-#include <plist/plist++.h>
-
 #include <libimread/libimread.hpp>
 #include <libimread/store.hh>
+
+/// JSON (built-in)
 #include <libimread/ext/JSON/json11.h>
+
+/// libplist
+#include <plist/plist++.h>
+
+/// yaml-cpp
+#include "yaml-cpp/yaml.h"
 
 namespace store {
     

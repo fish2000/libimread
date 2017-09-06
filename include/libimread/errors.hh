@@ -225,6 +225,8 @@ DECLARE_IMREAD_ERROR_TYPE(JSONOutOfRange,           "JSON index value out of ran
 DECLARE_IMREAD_ERROR_TYPE(JSONBadCast,              "Error casting JSON value");
 DECLARE_IMREAD_ERROR_TYPE(JSONIOError,              "Error in JSON I/O");
 DECLARE_IMREAD_ERROR_TYPE(PListIOError,             "Error in Property List I/O");
+DECLARE_IMREAD_ERROR_TYPE(IniIOError,               "Error in Ini File I/O");
+DECLARE_IMREAD_ERROR_TYPE(YAMLIOError,              "Error in YAML I/O");
 
 DECLARE_IMREAD_ERROR_TYPE(HDF5IOError,              "Error in HDF5 I/O");
 DECLARE_IMREAD_ERROR_TYPE(PNGIOError,               "Error in PNG/libpng I/O");

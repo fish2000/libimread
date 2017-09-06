@@ -174,6 +174,8 @@ include(FindRocksDB)
 pkg_check_modules(LIBPLIST REQUIRED libplist)
 pkg_check_modules(LIBPLISTPP REQUIRED libplist++)
 
+pkg_check_modules(YAMLCPP REQUIRED yaml-cpp)
+
 # Include the project-specific `include` directories:
 include_directories(${${PROJECT_NAME}_include_dir})
 include_directories("${CMAKE_BINARY_DIR}/../include")
@@ -208,7 +210,8 @@ include_directories(
     ${LIBUNWIND_INCLUDE_DIR}
     ${HDF5_INCLUDE_DIRS}
     ${LIBPLIST_INCLUDE_DIRS}
-    ${LIBPLISTPP_INCLUDE_DIRS})
+    ${LIBPLISTPP_INCLUDE_DIRS}
+    ${YAMLCPP_INCLUDE_DIRS})
 
 # Set the source files and source-file-specific options
 # required to build the library:
@@ -261,7 +264,8 @@ target_link_libraries(imread_shared
     # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES}
     ${LIBPLIST_LIBRARIES}
-    ${LIBPLISTPP_LIBRARIES})
+    ${LIBPLISTPP_LIBRARIES}
+    ${YAMLCPP_LIBRARIES})
 
 target_link_libraries(imread_static
     z png guid
@@ -280,7 +284,8 @@ target_link_libraries(imread_static
     # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES}
     ${LIBPLIST_STATIC_LIBRARIES}
-    ${LIBPLISTPP_STATIC_LIBRARIES})
+    ${LIBPLISTPP_STATIC_LIBRARIES}
+    ${YAMLCPP_STATIC_LIBRARIES})
 
 # Set and pass on compile-time config variable values:
 # get_property(IM_COMPILE_OPTIONS GLOBAL PROPERTY ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS})
@@ -408,7 +413,8 @@ if(IM_TESTS)
         # ${CAPNP_LIBRARIES_LITE}
         ${ROCKSDB_LIBRARIES}
         ${LIBPLIST_LIBRARIES}
-        ${LIBPLISTPP_LIBRARIES})
+        ${LIBPLISTPP_LIBRARIES}
+        ${YAMLCPP_LIBRARIES})
     
     # Set up ctest and cdash:
     enable_testing()

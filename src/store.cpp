@@ -291,7 +291,7 @@ namespace store {
 } /// namespace store
 
 #pragma mark -
-#pragma mark std::swap<…>() specializations for store::stringmap
+#pragma mark std::hash<…> specializations for store::stringmap
 
 namespace std {
     

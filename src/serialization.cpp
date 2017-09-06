@@ -14,6 +14,9 @@ namespace store {
     
     namespace detail {
         
+        #pragma mark -
+        #pragma mark JSON serialization helpers
+        
         bool json_dump(store::stringmapper::stringmap_t const& cache, std::string const& destination, bool overwrite) {
             Json dumpee(cache);
             try {
@@ -57,6 +60,9 @@ namespace store {
                     return;
             }
         }
+        
+        #pragma mark -
+        #pragma mark Property list (plist) serialization helpers
         
         bool plist_dump(store::stringmapper::stringmap_t const& cache, std::string const& dest, bool overwrite) {
             using filesystem::path;
