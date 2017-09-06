@@ -28,6 +28,10 @@ namespace store {
         bool plist_dump(store::stringmapper::stringmap_t const&, std::string const&, bool overwrite = false);
         PList::Dictionary plist_load(std::string const&);
         void plist_impl(PList::Dictionary&, store::stringmapper*);
+        
+        bool yaml_dump(store::stringmapper::stringmap_t const&, std::string const&, bool overwrite = false);
+        YAML::Node yaml_load(std::string const&);
+        void yaml_impl(YAML::Node const&, store::stringmapper*);
     }
     
 }

@@ -77,25 +77,13 @@ namespace store {
             try {
                 destination = path::expand_user(dest).make_absolute().str();
             } catch (im::FileSystemError& exc) {
-                // throw;
                 return false;
             }
             
             if (path::exists(destination)) {
                 if (!overwrite) {
-                    // imread_raise(PListIOError,
-                    //     "store::detail::plist_dump(destination, overwrite=false): existant destination",
-                    //  FF("\tdest        == %s", dest.c_str()),
-                    //  FF("\tdestination == %s", destination.c_str()),
-                    //     "\t(Requires overwrite=true or a unique destination)");
                     return false;
                 } else if (path::is_directory(destination)) {
-                    // imread_raise(PListIOError,
-                    //     "store::detail::plist_dump(destination): directory as existant destination",
-                    //  FF("\toverwrite   == %s", overwrite ? "true" : "false"),
-                    //  FF("\tdest        == %s", dest.c_str()),
-                    //  FF("\tdestination == %s", destination.c_str()),
-                    //     "\t(Requires overwrite=true with a non-directory destination)");
                     return false;
                 }
             }
@@ -111,12 +99,6 @@ namespace store {
             
             path finalfile = tf.filepath.duplicate(destination);
             if (!finalfile.is_file()) {
-                // imread_raise(PListIOError,
-                //     "store::detail::plist_dump(destination, ...): failed writing to destination",
-                //  FF("\toverwrite   == %s", overwrite ? "true" : "false"),
-                //  FF("\tdest        == %s", dest.c_str()),
-                //  FF("\tdestination == %s", destination.c_str()),
-                //  FF("\tfinalfile   == %s", finalfile.c_str()));
                 return false;
             }
             
@@ -166,6 +148,95 @@ namespace store {
                                 kv.first,
                                 static_cast<PList::String*>(kv.second)->GetValue());
             });
+        }
+        
+        #pragma mark -
+        #pragma mark YAML serialization helpers
+        
+        bool yaml_dump(store::stringmapper::stringmap_t const& cache, std::string const& dest, bool overwrite) {
+            using filesystem::path;
+            using filesystem::NamedTemporaryFile;
+            std::string destination(dest);
+            
+            YAML::Emitter yamitter;
+            yamitter.SetIndent(4);
+            yamitter << YAML::BeginMap;
+            for (auto const& item : cache) {
+                yamitter << YAML::Key << item.first;
+                yamitter << YAML::Value << item.second;
+            }
+            yamitter << YAML::EndMap;
+            
+            try {
+                destination = path::expand_user(dest).make_absolute().str();
+            } catch (im::FileSystemError& exc) {
+                return false;
+            }
+            
+            if (path::exists(destination)) {
+                if (!overwrite) {
+                    return false;
+                } else if (path::is_directory(destination)) {
+                    return false;
+                }
+            }
+            
+            NamedTemporaryFile tf(".yml");
+            tf.open();
+            tf.stream << yamitter.c_str();
+            tf.close();
+            
+            if (path::exists(destination)) {
+                path::remove(destination);
+            }
+            
+            path finalfile = tf.filepath.duplicate(destination);
+            if (!finalfile.is_file()) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        YAML::Node yaml_load(std::string const& source) {
+            using filesystem::path;
+            
+            if (!path::exists(source)) {
+                imread_raise(YAMLIOError,
+                    "store::detail::yaml_load(source): nonexistant source file",
+                 FF("\tsource == %s", source.c_str()));
+            }
+            if (!path::is_file_or_link(source)) {
+                imread_raise(YAMLIOError,
+                    "store::detail::yaml_load(source): non-file-or-link source file",
+                 FF("\tsource == %s", source.c_str()));
+            }
+            if (!path::is_readable(source)) {
+                imread_raise(YAMLIOError,
+                    "store::detail::yaml_load(source): unreadable source file",
+                 FF("\tsource == %s", source.c_str()));
+            }
+            
+            YAML::Node out;
+            
+            try {
+                out = YAML::LoadFile(source);
+            } catch (...) {
+                imread_raise(YAMLIOError,
+                    "store::detail::yaml_load(source): couldn't read source with YAML::LoadFile()",
+                 FF("\tsource == %s", source.c_str()));
+            }
+            
+            /// return by value
+            return out;
+        }
+        
+        void yaml_impl(YAML::Node const& node, store::stringmapper* stringmap_ptr) {
+            if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
+            for (auto const& item : node) {
+                stringmap_ptr->set(item.first.as<std::string>(),
+                                   item.second.as<std::string>());
+            }
         }
         
     } /// namespace detail

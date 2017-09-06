@@ -43,6 +43,11 @@ namespace store {
         detail::plist_impl(dict, this);
     }
     
+    void stringmapper::with_yaml(std::string const& yamlstr) {
+        YAML::Node yaml = YAML::Load(yamlstr);
+        detail::yaml_impl(yaml, this);
+    }
+    
     void stringmapper::warm_cache() const {
         stringvec_t keys(list());
         if (cache.size() < keys.size()) {
@@ -70,6 +75,19 @@ namespace store {
         return dict.ToXml();
     }
     
+    std::string stringmapper::mapping_yaml() const {
+        warm_cache();
+        YAML::Emitter yamitter;
+        yamitter.SetIndent(4);
+        yamitter << YAML::BeginMap;
+        for (auto const& item : cache) {
+            yamitter << YAML::Key << item.first;
+            yamitter << YAML::Value << item.second;
+        }
+        yamitter << YAML::EndMap;
+        return yamitter.c_str();
+    }
+    
     std::string stringmapper::to_string() const {
         warm_cache();
         return Json(cache).format();
@@ -81,6 +99,8 @@ namespace store {
         switch (format) {
             case formatter::plist:
                 return detail::plist_dump(cache, destination, overwrite);
+            case formatter::yaml:
+                return detail::yaml_dump(cache, destination, overwrite);
             case formatter::undefined:
             case formatter::json:
             default:
@@ -201,6 +221,9 @@ namespace store {
             case stringmapper::formatter::plist:
                 with_plist(serialized);
                 break;
+            case stringmapper::formatter::yaml:
+                with_yaml(serialized);
+                break;
             case stringmapper::formatter::undefined:
             case stringmapper::formatter::json:
             default:
@@ -226,6 +249,18 @@ namespace store {
                     return out;
                 }
                 detail::plist_impl(dict, &out);
+                return out;
+            }
+            case stringmapper::formatter::yaml: {
+                YAML::Node yaml;
+                try {
+                    yaml = detail::yaml_load(source);
+                } catch (im::FileSystemError&) {
+                    return out;
+                } catch (im::YAMLIOError&) {
+                    return out;
+                }
+                detail::yaml_impl(yaml, &out);
                 return out;
             }
             case stringmapper::formatter::undefined:
