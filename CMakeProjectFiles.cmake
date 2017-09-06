@@ -150,6 +150,7 @@ set(hdrs
     ${hdrs_dir}/rehash.hh
     ${hdrs_dir}/rocks.hh
     ${hdrs_dir}/seekable.hh
+    ${hdrs_dir}/serialization.hh
     ${hdrs_dir}/store.hh
     ${hdrs_dir}/stringnormatives.hh
     ${hdrs_dir}/symbols.hh
@@ -228,6 +229,7 @@ set(srcs
     # ${srcs_dir}/pixels.cpp
     ${srcs_dir}/rocks.cpp
     ${srcs_dir}/seekable.cpp
+    ${srcs_dir}/serialization.cpp
     ${srcs_dir}/store.cpp
     # ${srcs_dir}/symbols.cpp
     ${preview_src}
