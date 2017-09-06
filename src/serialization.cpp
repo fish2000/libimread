@@ -149,7 +149,7 @@ namespace store {
                 return stringmapper::formatter::json;
             } else if (ext == "plist") {
                 return stringmapper::formatter::plist;
-            } else if (ext == "pickle") {
+            } else if (ext == "pkl" || ext == "pickle") {
                 return stringmapper::formatter::pickle;
             } else if (ext == "ini") {
                 return stringmapper::formatter::ini;
