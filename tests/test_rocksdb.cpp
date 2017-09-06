@@ -124,6 +124,11 @@ namespace {
                     CHECK(reconstituted.get(key) != reconstituted.null_value());
                 }
             }
+            
+            // WTF("RECONSTITUTED:",
+            //     reconstituted.mapping_json(),
+            //     reconstituted.mapping_plist(),
+            //     reconstituted.mapping_yaml());
         }
         
         SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr")
