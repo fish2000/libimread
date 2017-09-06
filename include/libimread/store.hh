@@ -278,7 +278,7 @@ namespace store {
         template <typename T,                                                                   \
                   typename X = typename std::enable_if_t<                                       \
                                         store::is_stringmapper_v<T>, void>>                     \
-        explicit __typename__(T&& from) noexcept                                                \
+        explicit __typename__(T&& from)                                                         \
             :__typename__()                                                                     \
             {                                                                                   \
                 store::value_copy(std::forward<T>(from), *this);                                \
