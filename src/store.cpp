@@ -177,7 +177,9 @@ namespace store {
     stringmapper::formatter stringmapper::for_path(std::string const& pth) {
         using filesystem::path;
         std::string ext = pystring::lower(path::extension(pth));
-        if (ext == "plist") {
+        if (ext == "json") {
+            return stringmapper::formatter::json;
+        } else if (ext == "plist") {
             return stringmapper::formatter::plist;
         } else if (ext == "pickle") {
             return stringmapper::formatter::pickle;
