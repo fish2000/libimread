@@ -49,10 +49,9 @@ namespace store {
     }
     
     void stringmapper::warm_cache() const {
-        stringvec_t keys(list());
-        if (cache.size() < keys.size()) {
+        if (cache.size() < count()) {
             /// call get() for each key to warm the cache
-            for (std::string const& key : keys) { get(key); }
+            for (std::string const& key : list()) { get(key); }
         }
     }
     
