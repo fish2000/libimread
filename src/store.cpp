@@ -94,7 +94,6 @@ namespace store {
     }
     
     bool stringmapper::dump(std::string const& destination, bool overwrite, formatter format) const {
-        /// only JSON works for now:
         warm_cache();
         switch (format) {
             case formatter::plist:
