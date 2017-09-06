@@ -27,6 +27,8 @@ namespace store {
             return stringmapper::formatter::pickle;
         } else if (ext == "ini") {
             return stringmapper::formatter::ini;
+        } else if (ext == "yml" || ext == "yaml") {
+            return stringmapper::formatter::yaml;
         }
         return stringmapper::default_format; /// JSON
     }
