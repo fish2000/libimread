@@ -106,7 +106,8 @@ namespace store {
                 json        = 0,
                 plist       = 1,
                 pickle      = 2,
-                ini         = 4
+                ini         = 4,
+                yaml        = 8
             };
             
             static constexpr formatter default_format = formatter::json;
