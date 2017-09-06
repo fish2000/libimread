@@ -111,9 +111,6 @@ namespace store {
             };
             
             static constexpr formatter default_format = formatter::json;
-            
-        public:
-            static formatter for_path(std::string const&);
         
         public:
             virtual std::string&       get(std::string const& key) = 0;

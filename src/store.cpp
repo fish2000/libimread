@@ -3,8 +3,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
-#include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/pystring.hh>
 #include <libimread/store.hh>
 #include <libimread/serialization.hh>
 #include <libimread/rehash.hh>
@@ -16,36 +14,16 @@ namespace store {
     #pragma mark -
     #pragma mark base class store::stringmapper default methods
     
-    stringmapper::formatter stringmapper::for_path(std::string const& pth) {
-        using filesystem::path;
-        std::string ext = pystring::lower(path::extension(pth));
-        if (ext == "json") {
-            return stringmapper::formatter::json;
-        } else if (ext == "plist") {
-            return stringmapper::formatter::plist;
-        } else if (ext == "pickle") {
-            return stringmapper::formatter::pickle;
-        } else if (ext == "ini") {
-            return stringmapper::formatter::ini;
-        } else if (ext == "yml" || ext == "yaml") {
-            return stringmapper::formatter::yaml;
-        }
-        return stringmapper::default_format; /// JSON
-    }
-    
     void stringmapper::with_json(std::string const& jsonstr) {
-        Json json = Json::parse(jsonstr);
-        detail::json_impl(json, this);
+        detail::json_impl(jsonstr, this);
     }
     
     void stringmapper::with_plist(std::string const& xmlstr) {
-        PList::Dictionary dict = PList::Dictionary::FromXml(xmlstr);
-        detail::plist_impl(dict, this);
+        detail::plist_impl(xmlstr, this);
     }
     
     void stringmapper::with_yaml(std::string const& yamlstr) {
-        YAML::Node yaml = YAML::Load(yamlstr);
-        detail::yaml_impl(yaml, this);
+        detail::yaml_impl(yamlstr, this);
     }
     
     void stringmapper::warm_cache() const {
@@ -62,47 +40,41 @@ namespace store {
     
     std::string stringmapper::mapping_json() const {
         warm_cache();
-        return Json(cache).format();
+        return detail::json_dumps(cache);
     }
     
     std::string stringmapper::mapping_plist() const {
         warm_cache();
-        PList::Dictionary dict;
-        for (auto const& item : cache) {
-            dict.Set(item.first, PList::String(item.second));
-        }
-        return dict.ToXml();
+        return detail::plist_dumps(cache);
     }
     
     std::string stringmapper::mapping_yaml() const {
         warm_cache();
-        YAML::Emitter yamitter;
-        yamitter.SetIndent(4);
-        yamitter << YAML::BeginMap;
-        for (auto const& item : cache) {
-            yamitter << YAML::Key << item.first;
-            yamitter << YAML::Value << item.second;
-        }
-        yamitter << YAML::EndMap;
-        return yamitter.c_str();
+        return detail::yaml_dumps(cache);
     }
     
     std::string stringmapper::to_string() const {
         warm_cache();
-        return Json(cache).format();
+        return detail::json_dumps(cache);
     }
     
     bool stringmapper::dump(std::string const& destination, bool overwrite, formatter format) const {
         warm_cache();
         switch (format) {
             case formatter::plist:
-                return detail::plist_dump(cache, destination, overwrite);
+                return detail::string_dump(detail::plist_dumps(cache),
+                                           destination,
+                                           overwrite);
             case formatter::yaml:
-                return detail::yaml_dump(cache, destination, overwrite);
+                return detail::string_dump(detail::yaml_dumps(cache),
+                                           destination,
+                                           overwrite);
             case formatter::undefined:
             case formatter::json:
             default:
-                return detail::json_dump(cache, destination, overwrite);
+                return detail::string_dump(detail::json_dumps(cache),
+                                           destination,
+                                           overwrite);
         }
     }
     
@@ -122,7 +94,7 @@ namespace store {
     
     std::size_t stringmapper::hash(std::size_t H) const {
         warm_cache();
-        hash::rehash<std::string>(H, Json(cache).format());
+        hash::rehash<std::string>(H, detail::json_dumps(cache));
         return H;
     }
     
@@ -233,46 +205,29 @@ namespace store {
     stringmap stringmap::load_map(std::string const& source) {
         /// load_map() is a static function, there is no `this`:
         stringmap out;
-        switch (stringmapper::for_path(source)) {
+        std::string serialized("");
+        
+        try {
+            serialized = detail::string_load(source);
+        } catch (im::FileSystemError&) {
+            return out;
+        } catch (im::CannotReadError&) {
+            return out;
+        }
+        
+        switch (detail::for_path(source)) {
             case stringmapper::formatter::plist: {
-                PList::Dictionary dict;
-                try {
-                    /// PList::Dictionary::operator=(…) isn’t overloaded
-                    /// for rvalue refs, hence this idiotic value do-si-do:
-                    auto d = detail::plist_load(source);
-                    dict = d;
-                } catch (im::FileSystemError&) {
-                    return out;
-                } catch (im::PListIOError&) {
-                    return out;
-                }
-                detail::plist_impl(dict, &out);
+                detail::plist_impl(serialized, &out);
                 return out;
             }
             case stringmapper::formatter::yaml: {
-                YAML::Node yaml;
-                try {
-                    yaml = detail::yaml_load(source);
-                } catch (im::FileSystemError&) {
-                    return out;
-                } catch (im::YAMLIOError&) {
-                    return out;
-                }
-                detail::yaml_impl(yaml, &out);
+                detail::yaml_impl(serialized, &out);
                 return out;
             }
             case stringmapper::formatter::undefined:
             case stringmapper::formatter::json:
             default: {
-                Json loadee = Json::null;
-                try {
-                    loadee = Json::load(source);
-                } catch (im::FileSystemError&) {
-                    return out;
-                } catch (im::JSONIOError&) {
-                    return out;
-                }
-                detail::json_impl(loadee, &out);
+                detail::json_impl(serialized, &out);
                 return out;
             }
         }

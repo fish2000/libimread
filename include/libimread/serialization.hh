@@ -8,30 +8,22 @@
 #include <libimread/libimread.hpp>
 #include <libimread/store.hh>
 
-/// JSON (built-in)
-#include <libimread/ext/JSON/json11.h>
-
-/// libplist
-#include <plist/plist++.h>
-
-/// yaml-cpp
-#include "yaml-cpp/yaml.h"
-
 namespace store {
     
     namespace detail {
         
-        bool json_dump(store::stringmapper::stringmap_t const&, std::string const&, bool);
-        void json_map_impl(Json const&, store::stringmapper*);
-        void json_impl(Json const&, store::stringmapper*);
+        std::string json_dumps(store::stringmapper::stringmap_t const&);
+        void json_impl(std::string const&, store::stringmapper*);
         
-        bool plist_dump(store::stringmapper::stringmap_t const&, std::string const&, bool overwrite = false);
-        PList::Dictionary plist_load(std::string const&);
-        void plist_impl(PList::Dictionary&, store::stringmapper*);
+        std::string plist_dumps(store::stringmapper::stringmap_t const&);
+        void plist_impl(std::string const&, store::stringmapper*);
         
-        bool yaml_dump(store::stringmapper::stringmap_t const&, std::string const&, bool overwrite = false);
-        YAML::Node yaml_load(std::string const&);
-        void yaml_impl(YAML::Node const&, store::stringmapper*);
+        std::string yaml_dumps(store::stringmapper::stringmap_t const&);
+        void yaml_impl(std::string const&, store::stringmapper*);
+        
+        store::stringmapper::formatter for_path(std::string const&);
+        std::string string_load(std::string const&);
+        bool string_dump(std::string const&, std::string const&, bool overwrite = false);
     }
     
 }
