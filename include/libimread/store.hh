@@ -121,11 +121,13 @@ namespace store {
             virtual stringvec_t list() const = 0;
         
         public:
+            virtual void with_ini(std::string const&);
             virtual void with_json(std::string const&);
             virtual void with_plist(std::string const&);
             virtual void with_yaml(std::string const&);
             virtual void warm_cache() const;
             virtual stringmap_t& mapping() const;
+            virtual std::string mapping_ini() const;
             virtual std::string mapping_json() const;
             virtual std::string mapping_plist() const;
             virtual std::string mapping_yaml() const;

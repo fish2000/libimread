@@ -57,9 +57,9 @@ int main(void) {
         for (auto& opt : sect) {
             std::cout << "    Option: '" << opt.get_name() << "' with value(s): ";
             if (!opt.is_list()) {
-                std::cout << "'" << opt.get<string_ini_t>() << "'";
+                std::cout << "'" << opt.get<inicpp::string_ini_t>() << "'";
             } else {
-                for (auto& list_item : opt.get_list<string_ini_t>())
+                for (auto& list_item : opt.get_list<inicpp::string_ini_t>())
                     std::cout << "'" << list_item << "' ";
             }
             std::cout << std::endl;

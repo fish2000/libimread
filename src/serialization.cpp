@@ -1,6 +1,7 @@
 /// Copyright 2017 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
+#include <sstream>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -17,12 +18,41 @@
 /// yaml-cpp
 #include "yaml-cpp/yaml.h"
 
+/// inicpp (bundled in deps/)
+#include "inicpp/inicpp.h"
+
 namespace store {
     
     #pragma mark -
     #pragma mark serialization helper implementations
     
     namespace detail {
+        
+        #pragma mark -
+        #pragma mark INI-file serialization helpers
+        
+        static const std::string secname("yo-dogg");
+        
+        std::string ini_dumps(store::stringmapper::stringmap_t const& cache) {
+            inicpp::config inimap;
+            inimap.add_section(secname);
+            for (auto const& item : cache) {
+                inimap.add_option<inicpp::string_ini_t>(secname, item.first,
+                                                                 item.second);
+            }
+            std::ostringstream stringerator;
+            stringerator << inimap;
+            return stringerator.str();
+        }
+        
+        void ini_impl(std::string const& inistr, store::stringmapper* stringmap_ptr) {
+            if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
+            inicpp::config inimap = inicpp::parser::load(inistr);
+            for (auto const& option : inimap[secname]) {
+                stringmap_ptr->set(option.get_name(),
+                                   option.get<inicpp::string_ini_t>());
+            }
+        }
         
         #pragma mark -
         #pragma mark JSON serialization helpers
@@ -79,10 +109,9 @@ namespace store {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             PList::Dictionary dict = PList::Dictionary::FromXml(xmlstr);
             std::for_each(dict.Begin(), dict.End(),
-                      [&](auto const& kv) {
-                            stringmap_ptr->set(
-                                kv.first,
-                                static_cast<PList::String*>(kv.second)->GetValue());
+                      [&](auto const& item) {
+                            stringmap_ptr->set(item.first,
+                   static_cast<PList::String*>(item.second)->GetValue());
             });
         }
         
@@ -173,7 +202,7 @@ namespace store {
             
             try {
                 destination = path::expand_user(dest).make_absolute().str();
-            } catch (im::FileSystemError& exc) {
+            } catch (im::FileSystemError&) {
                 return false;
             }
             

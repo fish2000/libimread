@@ -14,6 +14,10 @@ namespace store {
     #pragma mark -
     #pragma mark base class store::stringmapper default methods
     
+    void stringmapper::with_ini(std::string const& inistr) {
+        detail::ini_impl(inistr, this);
+    }
+    
     void stringmapper::with_json(std::string const& jsonstr) {
         detail::json_impl(jsonstr, this);
     }
@@ -36,6 +40,11 @@ namespace store {
     stringmapper::stringmap_t& stringmapper::mapping() const {
         warm_cache();
         return cache;
+    }
+    
+    std::string stringmapper::mapping_ini() const {
+        warm_cache();
+        return detail::ini_dumps(cache);
     }
     
     std::string stringmapper::mapping_json() const {
@@ -61,6 +70,10 @@ namespace store {
     bool stringmapper::dump(std::string const& destination, bool overwrite, formatter format) const {
         warm_cache();
         switch (format) {
+            case formatter::ini:
+                return detail::string_dump(detail::ini_dumps(cache),
+                                           destination,
+                                           overwrite);
             case formatter::plist:
                 return detail::string_dump(detail::plist_dumps(cache),
                                            destination,
@@ -188,6 +201,9 @@ namespace store {
     stringmap::stringmap(std::string const& serialized,
                          stringmapper::formatter format) {
         switch (format) {
+            case stringmapper::formatter::ini:
+                with_ini(serialized);
+                break;
             case stringmapper::formatter::plist:
                 with_plist(serialized);
                 break;
@@ -216,6 +232,10 @@ namespace store {
         }
         
         switch (detail::for_path(source)) {
+            case stringmapper::formatter::ini: {
+                detail::ini_impl(serialized, &out);
+                return out;
+            }
             case stringmapper::formatter::plist: {
                 detail::plist_impl(serialized, &out);
                 return out;
