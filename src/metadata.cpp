@@ -117,14 +117,25 @@ namespace im {
     
 } /* namespace im */
 
-#pragma mark -
-#pragma mark std::swap<…>() specializations for im::Metadata
-
 namespace std {
+    
+    #pragma mark -
+    #pragma mark std::swap<…>() specializations for im::Metadata
     
     template <>
     void swap(im::Metadata& lhs, im::Metadata& rhs) noexcept {
         lhs.swap(rhs);
+    }
+    
+    #pragma mark -
+    #pragma mark std::hash<…> specializations for im::Metadata
+    
+    using metadata_hasher_t = std::hash<im::Metadata>;
+    using metadata_arg_t = metadata_hasher_t::argument_type;
+    using metadata_out_t = metadata_hasher_t::result_type;
+    
+    metadata_out_t metadata_hasher_t::operator()(metadata_arg_t const& md) const {
+        return static_cast<metadata_out_t>(md.hash());
     }
     
 } /* namespace std */

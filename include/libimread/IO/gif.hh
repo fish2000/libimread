@@ -10,6 +10,7 @@
 #include <libimread/image.hh>
 #include <libimread/imageformat.hh>
 #include <libimread/imagelist.hh>
+#include <libimread/metadata.hh>
 #include <libimread/ext/WriteGIF.hh>
 
 namespace im {
@@ -36,6 +37,7 @@ namespace im {
             #if defined(__APPLE__)
             using can_read = std::true_type;
             using can_read_multi = std::true_type;
+            using can_read_metadata = std::true_type;
             #endif
             using can_write = std::true_type;
             using can_write_multi = std::true_type;
@@ -70,6 +72,14 @@ namespace im {
                 imread_raise_default(NotImplementedError);
             }
             
+            virtual Metadata read_metadata(byte_source* src,
+                                           Options const& opts) override {
+                #if defined(__APPLE__)
+                    return read_metadata_impl(src, opts);
+                #endif
+                imread_raise_default(NotImplementedError);
+            }
+            
             virtual void write(Image& input,
                                byte_sink* output,
                                Options const& opts) override;
@@ -88,6 +98,8 @@ namespace im {
                                   ImageFactory* factory,
                                   bool is_multi,
                                   Options const& opts);
+            
+            Metadata    read_metadata_impl(byte_source* src, Options const& opts);
             #endif
     };
     

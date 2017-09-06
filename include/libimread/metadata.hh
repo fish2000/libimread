@@ -79,9 +79,7 @@ namespace std {
         typedef im::Metadata argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type const& meta) const {
-            return static_cast<result_type>(meta.hash());
-        }
+        result_type operator()(argument_type const& meta) const;
         
     };
     

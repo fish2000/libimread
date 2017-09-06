@@ -4,6 +4,7 @@
 #include <libimread/IO/gif.hh>
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
+#include <libimread/metadata.hh>
 #include <libimread/corefoundation.hh>
 #include <libimread/coregraphics.hh>
 
@@ -71,16 +72,6 @@ namespace im {
         ImageList images;
         
         do {
-            
-            {
-                /// Deal with image metadata:
-                store::cfdict metadata(const_cast<__CFDictionary *>(
-                                 CGImageSourceCopyPropertiesAtIndex(source.get(),
-                                                                    CF_IDX(idx),
-                                                                    nullptr)));
-            
-            
-            }
             
             /// CGImageSourceRef -> CGImageRef
             detail::cfp_t<CGImageRef> image(
@@ -154,6 +145,66 @@ namespace im {
         
         /// return the ImageList:
         return images;
+    }
+    
+    Metadata GIFFormat::read_metadata_impl(byte_source* src, Options const& opts) {
+        
+        /// byte_source* src -> CFDataRef
+        detail::cfp_t<CFDataRef> sourcedata(const_cast<__CFData *>(
+                CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+                                            src->data(),
+                                            src->size(),
+                                            kCFAllocatorNull)));
+        
+        detail::cfp_t<CFDictionaryRef> options(nullptr);                            /// empty dictionary ref ptr
+        
+        {
+            /// Deal with options, as passed to CGImageSourceCreateImageAtIndex(…):
+            const void* keys[]      = { kCGImageSourceShouldCache,
+                                        kCGImageSourceShouldAllowFloat,
+                                        kCGImageSourceTypeIdentifierHint };
+            
+            const void* values[]    = { kCFBooleanTrue,                             /// YES CACHING;
+                                        kCFBooleanFalse,                            /// NO FLOATS;
+                                        kUTTypeGIF };                               /// ITS A GIF, DOGG
+            
+            /// CFDictionaryCreate() copies CFTypes from `keys` and `values`
+            /// N.B. consider using kCFCopyStringDictionaryKeyCallBacks
+            options.reset(const_cast<__CFDictionary *>(
+                                    CFDictionaryCreate(kCFAllocatorDefault,
+                                                       keys, values, CF_IDX(3),
+                                                      &kCFTypeDictionaryKeyCallBacks,
+                                                      &kCFTypeDictionaryValueCallBacks)));
+        }
+        
+        /// CFDataRef -> CGImageSourceRef
+        detail::cfp_t<CGImageSourceRef> source(
+                   CGImageSourceCreateWithData(sourcedata.get(),                    /// CFDataRef
+                                               options.get()));                     /// CFDictionaryRef
+        
+        /// CGImageSourceGetCount(…) will be 1 unless we are called
+        /// by `read_multi`, to read an animated GIF:
+        std::size_t count = CGImageSourceGetCount(source.get()),
+                    idx = 0;
+        
+        Metadata out;
+        
+        do {
+            
+            /// Deal with image metadata:
+            store::cfdict metadata(const_cast<__CFDictionary *>(
+                             CGImageSourceCopyPropertiesAtIndex(source.get(),
+                                                                CF_IDX(idx),
+                                                                options.get())));
+            
+            out.values.update(metadata);
+            
+            /// increment image idx:
+            ++idx;
+            
+        } while (idx < count);
+        
+        return out;
     }
     
 }
