@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-using namespace inicpp;
+// using namespace inicpp;
 using namespace std::literals;
 
 std::string get_config() {
@@ -46,9 +46,9 @@ std::string get_config() {
 int main(void) {
     std::cout << "Load and parse config from string" << std::endl;
     std::cout << "---------------------------------" << std::endl;
-    config example_conf = parser::load(get_config());
+    inicpp::config example_conf = inicpp::parser::load(get_config());
     std::cout << "done..." << std::endl << std::endl;
-
+    
     std::cout << "Iterate through whole config and print it" << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
     for (auto& sect : example_conf) {
@@ -70,10 +70,10 @@ int main(void) {
     std::cout << "Get number as signed_ini_t type" << std::endl;
     std::cout << "-------------------------------" << std::endl;
     try {
-        signed_ini_t number = example_conf["Numbers"]["num"].get<signed_ini_t>();
+        inicpp::signed_ini_t number = example_conf["Numbers"]["num"].get<inicpp::signed_ini_t>();
         std::cout << "  Item 'num' in 'Numbers' section casted to signed_ini_t type has value '"
                   << number << "'" << std::endl;
-    } catch (bad_cast_exception) {
+    } catch (inicpp::bad_cast_exception&) {
         std::cout << "  Item 'num' in 'Numbers' section cannot be casted to signed_ini_t type"
                   << std::endl;
     }
@@ -82,13 +82,13 @@ int main(void) {
     std::cout << "Change some values - could be properly typed" << std::endl;
     std::cout << "--------------------------------------------" << std::endl;
     // Make reference to the section
-    section& number_sect = example_conf["Numbers"];
+    inicpp::section& number_sect = example_conf["Numbers"];
     // Change some values
-    number_sect["num"].set<signed_ini_t>(42222);
-    signed_ini_t new_num = number_sect["num"].get<signed_ini_t>();
+    number_sect["num"].set<inicpp::signed_ini_t>(42222);
+    inicpp::signed_ini_t new_num = number_sect["num"].get<inicpp::signed_ini_t>();
     std::cout << "  Option 'num' in 'Numbers' section is '" << new_num << "'" << std::endl;
     // Following two lines are equivalent
-    number_sect["num_oct"].set<string_ini_t>("0756");
+    number_sect["num_oct"].set<inicpp::string_ini_t>("0756");
     number_sect["num_oct"] = "0756"s;
     std::cout << "  set method and assingment operator on option are equivalent" << std::endl;
     std::cout << "done..." << std::endl << std::endl;
@@ -96,10 +96,10 @@ int main(void) {
     std::cout << "Typed value can be casted to string" << std::endl;
     std::cout << "-----------------------------------" << std::endl;
     try {
-        string_ini_t str_number = example_conf["Numbers"]["num"].get<string_ini_t>();
+        inicpp::string_ini_t str_number = example_conf["Numbers"]["num"].get<inicpp::string_ini_t>();
         std::cout << "  Item 'num' in 'Numbers' section is signed_ini_t type, but string '"
                   << str_number << "' can be retrieved" << std::endl;
-    } catch (bad_cast_exception) {
+    } catch (inicpp::bad_cast_exception&) {
         std::cout << "  Item 'num' in 'Numbers' section cannot be casted to string_ini_t type"
                   << std::endl;
     }
@@ -107,8 +107,8 @@ int main(void) {
 
     std::cout << "Change single value to list and vice versa" << std::endl;
     std::cout << "------------------------------------------" << std::endl;
-    option& num_opt = number_sect["num"];
-    num_opt.add_to_list<signed_ini_t>(99);
+    inicpp::option& num_opt = number_sect["num"];
+    num_opt.add_to_list<inicpp::signed_ini_t>(99);
     if (num_opt.is_list()) {
         std::cout << "  'num' option in 'Numbers' section is list" << std::endl;
     } else {
@@ -122,7 +122,7 @@ int main(void) {
     } else {
         std::cout << "  'num' option in 'Numbers' section is single value" << std::endl;
     }
-    std::cout << "  'num' option value is '" << num_opt.get<signed_ini_t>() << "'" << std::endl;
+    std::cout << "  'num' option value is '" << num_opt.get<inicpp::signed_ini_t>() << "'" << std::endl;
     std::cout << "done..." << std::endl << std::endl;
 
     std::cout << "Save changes to ostream and print the result" << std::endl;

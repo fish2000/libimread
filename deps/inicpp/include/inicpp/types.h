@@ -18,15 +18,15 @@ namespace inicpp
         {
         }
         /** Constructor with initial value */
-        internal_enum_type(const std::string &value) : data_(value)
+        internal_enum_type(std::string const& value) : data_(value)
         {
         }
         /** Constructor with initial value */
-        internal_enum_type(const char *value) : data_(value)
+        internal_enum_type(char const* value) : data_(value)
         {
         }
         /** Copy constructor */
-        internal_enum_type(const internal_enum_type &other)
+        internal_enum_type(internal_enum_type const& other)
         {
             this->operator=(other);
         }
@@ -52,7 +52,7 @@ namespace inicpp
         }
 
         /** Assignment operator */
-        internal_enum_type &operator=(const internal_enum_type &other)
+        internal_enum_type& operator=(internal_enum_type const& other)
         {
             data_ = other.data_;
             return *this;
@@ -72,17 +72,17 @@ namespace inicpp
             throw std::runtime_error("Enum type cannot be converted to double");
         }
         /** Equality operator */
-        bool operator==(const internal_enum_type &other)
+        bool operator==(internal_enum_type const& other)
         {
             return data_ == other.data_;
         }
         /** Inequality operator */
-        bool operator!=(const internal_enum_type &other)
+        bool operator!=(internal_enum_type const& other)
         {
             return !(*this == other);
         }
         /** Comparation less operator */
-        bool operator<(const internal_enum_type &other)
+        bool operator<(internal_enum_type const& other)
         {
             return data_ < other.data_;
         }
