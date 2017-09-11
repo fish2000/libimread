@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <sstream>
+#include <algorithm>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
