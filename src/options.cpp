@@ -388,14 +388,14 @@ namespace im {
         prefixvec.reserve(keys.size());
         std::copy_if(keys.begin(), keys.end(),
                      std::back_inserter(prefixvec),
-                 [&](std::string const& s) { return STRINGFOUND(s.find(separator[0])); });
+                 [&](std::string const& key) { return STRINGFOUND(key.find(separator[0])); });
         prefixvec.shrink_to_fit();
         
         /// cut the strings in the vector down to just the prefix:
         std::transform(prefixvec.begin(), prefixvec.end(),
                        prefixvec.begin(),
-                   [&](std::string const& s) { return s.substr(0,
-                                                      s.find_first_of(separator[0])); });
+                   [&](std::string const& key) { return key.substr(0,
+                                                        key.find_first_of(separator[0])); });
         
         /// uniquify the contents of the prefix string vector:
         std::sort(prefixvec.begin(), prefixvec.end());
@@ -422,9 +422,9 @@ namespace im {
         patterns.reserve(prefixes.size());
         std::transform(prefixes.begin(),       prefixes.end(),
                        std::inserter(patterns, patterns.end()),
-                   [&](std::string const& s) {
-            std::regex re("^" + s + separator,  std::regex::extended);
-            return std::make_pair(std::move(s),
+                   [&](std::string const& prefix) {
+            std::regex re("^" + prefix + separator,  std::regex::extended);
+            return std::make_pair(std::move(prefix),
                                   std::move(re));
         });
         
@@ -436,10 +436,10 @@ namespace im {
                   [&](auto const& kv) {
                       prefixgram[kv.first] = std::count_if(keys.begin(),
                                                            keys.end(),
-                                                       [&](std::string const& s) {
+                                                       [&](std::string const& key) {
                 /// N.B. without that third argument, this call doesn’t compile;
                 /// it errors out with a mass of ambiguous overload mismatches:
-                return std::regex_search(s, kv.second,
+                return std::regex_search(key, kv.second,
                        std::regex_constants::match_default);
             });
         });
@@ -457,7 +457,7 @@ namespace im {
                                                  [&](std::string const& key) {
                         return STRINGUNFOUND(key.find(separator[0]));
                     });
-                int prefixed_count = total_count - static_cast<int>(unprefixed_count);
+                int prefixed_count = total_count - unprefixed_count;
              double total = static_cast<double>(total_count);
              double unprefixed = static_cast<double>(unprefixed_count);
              double prefixed = static_cast<double>(prefixed_count);
@@ -470,9 +470,9 @@ namespace im {
     
     Options Options::subgroup(std::string const& name) const {
         if (Json::has(name)) {
-            Json sg(Json::get(name));
-            if (sg.type() == Type::OBJECT) {
-                return Options(std::move(sg));
+            Json subgr(Json::get(name));
+            if (subgr.type() == Type::OBJECT) {
+                return Options(std::move(subgr));
             }
         }
         return Options();
@@ -608,8 +608,8 @@ namespace im {
     
     OptionsList Options::valuelist() const {
         OptionsList out;
-        for (std::string const& s : Options::list()) {
-            out.append(Json::get(s));
+        for (std::string const& key : Options::list()) {
+            out.append(Json::get(key));
         }
         return out;
     }
@@ -617,8 +617,8 @@ namespace im {
     detail::listpair_t Options::items() const {
         stringvec_t list = Options::list();
         OptionsList values;
-        for (std::string const& s : list) {
-            values.append(Json::get(s));
+        for (std::string const& key : list) {
+            values.append(Json::get(key));
         }
         return std::make_pair(OptionsList(list),
                               std::move(values));
