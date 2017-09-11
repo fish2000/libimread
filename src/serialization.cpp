@@ -161,29 +161,30 @@ namespace store {
         
         std::string string_load(std::string const& source) {
             using filesystem::path;
+            path sourcepath(source);
             
-            if (!path::exists(source)) {
+            if (!sourcepath.exists()) {
                 imread_raise(CannotReadError,
                     "store::detail::string_load(source): nonexistant source file",
-                 FF("\tsource == %s", source.c_str()));
+                 FF("\tsource == %s", sourcepath.c_str()));
             }
-            if (!path::is_file_or_link(source)) {
+            if (!sourcepath.is_file_or_link()) {
                 imread_raise(CannotReadError,
                     "store::detail::string_load(source): non-file-or-link source file",
-                 FF("\tsource == %s", source.c_str()));
+                 FF("\tsource == %s", sourcepath.c_str()));
             }
-            if (!path::is_readable(source)) {
+            if (!sourcepath.is_readable()) {
                 imread_raise(CannotReadError,
                     "store::detail::string_load(source): unreadable source file",
-                 FF("\tsource == %s", source.c_str()));
+                 FF("\tsource == %s", sourcepath.c_str()));
             }
             
             std::fstream stream;
-            stream.open(source, std::ios::in);
+            stream.open(sourcepath.str(), std::ios::in);
             if (!stream.is_open()) {
                 imread_raise(CannotReadError,
                     "store::detail::string_load(source): couldn't open a stream to read source file",
-                 FF("\tsource == %s", source.c_str()));
+                 FF("\tsource == %s", sourcepath.c_str()));
             }
             
             /// Adapted from https://stackoverflow.com/a/3203502/298171
@@ -199,14 +200,14 @@ namespace store {
             using filesystem::NamedTemporaryFile;
             std::string destination(dest);
             std::string ext;
+            path destpath;
             
             try {
-                destination = path::expand_user(dest).make_absolute().str();
+                destpath = path::expand_user(dest).make_absolute();
             } catch (im::FileSystemError&) {
                 return false;
             }
             
-            path destpath(destination);
             ext = pystring::lower(destpath.extension());
             if (ext == "") { ext = "tmp"; }
             
