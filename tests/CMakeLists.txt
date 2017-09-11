@@ -25,6 +25,7 @@ set(TEST_SOURCES ${TEST_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/test_options.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_refcount.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_rocksdb.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/test_serialization.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_sfinae.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_terminator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/test_tif_write_multi.cpp
