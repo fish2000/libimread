@@ -466,42 +466,6 @@ namespace im {
                                                     total_count);
     }
     
-    ratios_named_t Options::ratios_named(std::string const& separator) const {
-        stringvec_t keys = Json::keys();
-                int total_count = static_cast<int>(keys.size());
-        if (total_count == 0) { return namedtup::make_named_tuple(slot("unprefixed_ratio") = -1.0,
-                                                                    slot("prefixed_ratio") = -1.0,
-                                                                  slot("unprefixed_count") = 0,
-                                                                    slot("prefixed_count") = 0,
-                                                                       slot("total_count") = 0); }
-                int unprefixed_count = std::count_if(keys.begin(),
-                                                     keys.end(),
-                                                 [&](std::string const& key) { return STRINGUNFOUND(key.find(separator[0])); });
-        
-        if (unprefixed_count == total_count) { return namedtup::make_named_tuple(slot("unprefixed_ratio") = 1.0,
-                                                                                   slot("prefixed_ratio") = 0.0,
-                                                                                 slot("unprefixed_count") = total_count,
-                                                                                   slot("prefixed_count") = 0,
-                                                                                      slot("total_count") = total_count); }
-        
-        if (unprefixed_count == 0)           { return namedtup::make_named_tuple(slot("unprefixed_ratio") = 0.0,
-                                                                                   slot("prefixed_ratio") = 1.0,
-                                                                                 slot("unprefixed_count") = 0,
-                                                                                   slot("prefixed_count") = total_count,
-                                                                                      slot("total_count") = total_count); }
-        
-                int prefixed_count = total_count - unprefixed_count;
-             double total = static_cast<double>(total_count);
-             double unprefixed_ratio = static_cast<double>(unprefixed_count) / total;
-             double prefixed_ratio = static_cast<double>(prefixed_count) / total;
-        
-        return namedtup::make_named_tuple(slot("unprefixed_ratio") = unprefixed_ratio,
-                                            slot("prefixed_ratio") = prefixed_ratio,
-                                          slot("unprefixed_count") = unprefixed_count,
-                                            slot("prefixed_count") = prefixed_count,
-                                               slot("total_count") = total_count);
-    }
-    
     Options Options::subgroup(std::string const& name) const {
         if (Json::has(name)) {
             Json subgr(Json::get(name));

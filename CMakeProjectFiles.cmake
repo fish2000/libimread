@@ -94,6 +94,7 @@ set(hdrs
     ${hdrs_dir}/ext/h5deets.hh
     ${hdrs_dir}/ext/lzw.hh
     ${hdrs_dir}/ext/MurmurHash2.hh
+    ${hdrs_dir}/ext/namedtuple.hh
     ${hdrs_dir}/ext/iod.hh
     ${hdrs_dir}/ext/pvr.hh
     ${hdrs_dir}/ext/pystring.hh
