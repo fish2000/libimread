@@ -454,9 +454,7 @@ namespace im {
         if (total_count == 0) { return { -1.0, -1.0, 0, 0, 0 }; }
                 int unprefixed_count = std::count_if(keys.begin(),
                                                      keys.end(),
-                                                 [&](std::string const& key) {
-                        return STRINGUNFOUND(key.find(separator[0]));
-                    });
+                                                 [&](std::string const& key) { return STRINGUNFOUND(key.find(separator[0])); });
         if (unprefixed_count == total_count) { return { 1.0, 0.0, total_count, 0, total_count }; }
         if (unprefixed_count == 0)           { return { 0.0, 1.0, 0, total_count, total_count }; }
                 int prefixed_count = total_count - unprefixed_count;
