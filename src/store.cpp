@@ -116,7 +116,9 @@ namespace store {
     }
     
     bool stringmapper::insert(std::pair<const std::string, std::string>&& item) {
-        return (del(item.first) && set(item.first, item.second));
+        bool out = del(item.first);
+        out &= set(item.first, item.second);
+        return out;
     }
     
     std::size_t stringmapper::erase(std::string const& key) {
