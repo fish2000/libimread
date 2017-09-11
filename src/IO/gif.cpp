@@ -62,15 +62,13 @@ namespace im {
     } /* namespace detail */
     
     void GIFFormat::write_impl(Image const& input, detail::gifholder& g,
-                                                   detail::gifbuffer& gbuf) {
+                                                   detail::gifbuffer& gbuf,
+                                                   int framedelay) { /// framedelay = -1
         
         const int width = input.dim(0);
         const int height = input.dim(1);
         const int channels = input.dim(2); /// should be 3
         const int bit_depth = input.nbits();
-        
-        /// Zero gif byte-buffer
-        // gbuf.clear();
         
         /// Check bit depth
         if (bit_depth != 8) {
@@ -103,8 +101,10 @@ namespace im {
         
         /// DO IT DOUG
         gif::addFrame(
-            g.get(), gbuf.width, gbuf.height,
-            gbuf.data(), -1); /// delay=-1
+            g.get(),
+            gbuf.width, gbuf.height,
+            gbuf.data(),
+            framedelay);
     }
     
     void GIFFormat::write(Image& input,
@@ -142,7 +142,7 @@ namespace im {
                                                 input.planes());
         
         std::for_each(input.begin(), input.end(),
-                  [&](Image* image) { write_impl(*image, g, b); });
+                  [&](Image* image) { write_impl(*image, g, b, delay); });
         
         bytevec_t out = gif::write(g.get());
         output->write(out);

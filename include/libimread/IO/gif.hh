@@ -91,7 +91,8 @@ namespace im {
         private:
             
             void        write_impl(Image const& input, detail::gifholder& g,
-                                                       detail::gifbuffer& gbuf);
+                                                       detail::gifbuffer& gbuf,
+                                                       int framedelay = -1);
             
             #if defined(__APPLE__)
             ImageList   read_impl(byte_source* src,

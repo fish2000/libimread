@@ -161,7 +161,7 @@ namespace im {
     DEFINE_DIMENSION_COMPUTE_FN(height);
     DEFINE_DIMENSION_COMPUTE_FN(planes);
     
-}
+} /// namespace im
 
 namespace std {
     
@@ -170,4 +170,12 @@ namespace std {
         p0.swap(p1);
     }
     
-}; /* namespace std */
+    using imagelist_hasher_t = std::hash<im::ImageList>;
+    using imagelist_arg_t = imagelist_hasher_t::argument_type;
+    using imagelist_out_t = imagelist_hasher_t::result_type;
+    
+    imagelist_out_t imagelist_hasher_t::operator()(imagelist_arg_t const& list) const {
+        return static_cast<imagelist_out_t>(list.hash());
+    }
+    
+} /// namespace std

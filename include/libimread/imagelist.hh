@@ -142,9 +142,7 @@ namespace std {
         typedef im::ImageList argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type const& list) const {
-            return static_cast<result_type>(list.hash());
-        }
+        result_type operator()(argument_type const& list) const;
         
     };
     
