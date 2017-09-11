@@ -31,14 +31,14 @@ namespace store {
         #pragma mark -
         #pragma mark INI-file serialization helpers
         
-        static const std::string secname("yo-dogg");
+        static const std::string section_name("stringmapper");
         
         std::string ini_dumps(store::stringmapper::stringmap_t const& cache) {
             inicpp::config inimap;
-            inimap.add_section(secname);
+            inimap.add_section(section_name);
             for (auto const& item : cache) {
-                inimap.add_option<inicpp::string_ini_t>(secname, item.first,
-                                                                 item.second);
+                inimap.add_option<inicpp::string_ini_t>(section_name, item.first,
+                                                                      item.second);
             }
             std::ostringstream stringerator;
             stringerator << inimap;
@@ -48,7 +48,7 @@ namespace store {
         void ini_impl(std::string const& inistr, store::stringmapper* stringmap_ptr) {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             inicpp::config inimap = inicpp::parser::load(inistr);
-            for (auto const& option : inimap[secname]) {
+            for (auto const& option : inimap[section_name]) {
                 stringmap_ptr->set(option.get_name(),
                                    option.get<inicpp::string_ini_t>());
             }
@@ -206,13 +206,14 @@ namespace store {
                 return false;
             }
             
-            ext = pystring::lower(path::extension(destination));
+            path destpath(destination);
+            ext = pystring::lower(destpath.extension());
             if (ext == "") { ext = "tmp"; }
             
-            if (path::exists(destination)) {
+            if (destpath.exists()) {
                 if (!overwrite) {
                     return false;
-                } else if (path::is_directory(destination)) {
+                } else if (destpath.is_directory()) {
                     return false;
                 }
             }
@@ -222,11 +223,11 @@ namespace store {
             tf.stream << content;
             tf.close();
             
-            if (path::exists(destination)) {
-                path::remove(destination);
+            if (destpath.exists()) {
+                destpath.remove();
             }
             
-            path finalfile = tf.filepath.duplicate(destination);
+            path finalfile = tf.filepath.duplicate(destpath);
             if (!finalfile.is_file()) {
                 return false;
             }
