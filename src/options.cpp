@@ -457,6 +457,8 @@ namespace im {
                                                  [&](std::string const& key) {
                         return STRINGUNFOUND(key.find(separator[0]));
                     });
+        if (unprefixed_count == total_count) { return { 1.0, 0.0, total_count, 0, total_count }; }
+        if (unprefixed_count == 0) { return { 0.0, 1.0, 0, total_count, total_count }; }
                 int prefixed_count = total_count - unprefixed_count;
              double total = static_cast<double>(total_count);
              double unprefixed = static_cast<double>(unprefixed_count);
