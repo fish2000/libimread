@@ -451,6 +451,7 @@ namespace im {
     ratios_t Options::ratios(std::string const& separator) const {
         stringvec_t keys = Json::keys();
                 int total_count = static_cast<int>(keys.size());
+        if (total_count == 0) { return { -1.0, -1.0, 0, 0, 0 }; }
                 int unprefixed_count = std::count_if(keys.begin(),
                                                      keys.end(),
                                                  [&](std::string const& key) {
@@ -460,7 +461,6 @@ namespace im {
              double total = static_cast<double>(total_count);
              double unprefixed = static_cast<double>(unprefixed_count);
              double prefixed = static_cast<double>(prefixed_count);
-        if (total == 0.00) { return { -1.0, -1.0, 0.0 }; }
              double unprefixed_ratio = unprefixed == 0.00 ? 0.0 : (unprefixed / total);
              double prefixed_ratio = prefixed == 0.00 ? 0.0 : (prefixed / total);
         return std::make_tuple(unprefixed_ratio, prefixed_ratio,
