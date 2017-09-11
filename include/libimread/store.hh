@@ -340,6 +340,10 @@ namespace store {
             virtual stringvec_t xattrs() const = 0;
         
         public:
+            std::string&       get_force(std::string const&);
+            std::string const& get_force(std::string const&) const;
+        
+        public:
             /// implementation of the stringmapper API, in terms of xattr()/xattrcount()/xattrs()
             virtual std::string&       get(std::string const& key) override;
             virtual std::string const& get(std::string const& key) const override;

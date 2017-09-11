@@ -150,10 +150,7 @@ namespace store {
     
     bool xattrmap::can_store() const noexcept { return true; }
     
-    std::string& xattrmap::get(std::string const& key) {
-        if (cache.find(key) != cache.end()) {
-            return cache[key];
-        }
+    std::string& xattrmap::get_force(std::string const& key) {
         std::string val(xattr(key));
         if (val != STRINGNULL()) {
             cache[key] = val;
@@ -162,16 +159,27 @@ namespace store {
         return STRINGNULL();
     }
     
-    std::string const& xattrmap::get(std::string const& key) const {
-        if (cache.find(key) != cache.end()) {
-            return cache[key];
-        }
+    std::string const& xattrmap::get_force(std::string const& key) const {
         std::string val(xattr(key));
         if (val != STRINGNULL()) {
             cache[key] = val;
             return cache[key];
         }
         return STRINGNULL();
+    }
+    
+    std::string& xattrmap::get(std::string const& key) {
+        if (cache.find(key) != cache.end()) {
+            return cache[key];
+        }
+        return get_force(key);
+    }
+    
+    std::string const& xattrmap::get(std::string const& key) const {
+        if (cache.find(key) != cache.end()) {
+            return cache[key];
+        }
+        return get_force(key);
     }
     
     bool xattrmap::set(std::string const& key, std::string const& value) {
