@@ -14,6 +14,7 @@
 #include <initializer_list>
 
 #include <libimread/ext/JSON/json11.h>
+#include <libimread/ext/namedtuple.hh>
 #include <libimread/store.hh>
 
 using detail::stringvec_t;
@@ -26,6 +27,13 @@ using stringpair_init_t = std::initializer_list<stringpair_t>;
 using prefixpair_t = std::pair<prefixset_t, stringvec_t>;
 using patternmap_t = std::unordered_map<std::string, std::regex>;
 using ratios_t = std::tuple<double, double, int, int, int>;
+
+using ratios_named_t = DECLARE_NAMED_TUPLE(
+    SLOT_TYPE("unprefixed_ratio",   double),
+    SLOT_TYPE("prefixed_ratio",     double),
+    SLOT_TYPE("unprefixed_count",   int),
+    SLOT_TYPE("prefixed_count",     int),
+    SLOT_TYPE("total_count",        int));
 
 namespace im {
     
@@ -194,6 +202,7 @@ namespace im {
              prefixpair_t prefixset(std::string const& separator = detail::kDefaultSep) const;
             prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
                     ratios_t ratios(std::string const& separator = detail::kDefaultSep) const;
+        ratios_named_t ratios_named(std::string const& separator = detail::kDefaultSep) const;
         
         public:
             Options subgroup(std::string const&) const;
