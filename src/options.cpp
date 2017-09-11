@@ -461,10 +461,8 @@ namespace im {
         if (unprefixed_count == 0) { return { 0.0, 1.0, 0, total_count, total_count }; }
                 int prefixed_count = total_count - unprefixed_count;
              double total = static_cast<double>(total_count);
-             double unprefixed = static_cast<double>(unprefixed_count);
-             double prefixed = static_cast<double>(prefixed_count);
-             double unprefixed_ratio = unprefixed_count == 0 ? 0.0 : (unprefixed / total);
-             double prefixed_ratio = prefixed_count == 0 ? 0.0 : (prefixed / total);
+             double unprefixed_ratio = static_cast<double>(unprefixed_count) / total;
+             double prefixed_ratio =  static_cast<double>(prefixed_count) / total;
         return std::make_tuple(unprefixed_ratio, prefixed_ratio,
                                unprefixed_count, prefixed_count,
                                                     total_count);
