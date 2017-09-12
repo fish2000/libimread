@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <algorithm>
+#include <numeric>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -46,12 +47,22 @@ namespace store {
             return stringerator.str();
         }
         
+        static std::string ini_join(store::stringmapper::stringvec_t const& strings) {
+            return std::accumulate(strings.begin(),
+                                   strings.end(),
+                                   std::string{},
+                        [&strings](std::string const& lhs,
+                                   std::string const& rhs) {
+                return lhs + rhs + (rhs.c_str() == strings.back().c_str() ? "" : ", ");
+            });
+        }
+        
         void ini_impl(std::string const& inistr, store::stringmapper* stringmap_ptr) {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             inicpp::config inimap = inicpp::parser::load(inistr);
             for (auto const& option : inimap[section_name]) {
                 stringmap_ptr->set(option.get_name(),
-                                   option.get<inicpp::string_ini_t>());
+                          ini_join(option.get_list<inicpp::string_ini_t>()));
             }
         }
         

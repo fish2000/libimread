@@ -31,7 +31,7 @@ namespace {
         source.set("serialization", "and all of its methods");
         source.set("so",            "we put some");
         source.set("strings",       "in your strings so you can");
-        source.set("encode",        "while you decode and");
+        source.set("encode",        "while you decode, and");
         source.set("decode",        "while you encode");
         source.set("etc",           "and soforth");
         
@@ -80,7 +80,7 @@ namespace {
         source.set("serialization", "and all of its methods");
         source.set("so",            "we put some");
         source.set("strings",       "in your strings so you can");
-        source.set("encode",        "while you decode and");
+        source.set("encode",        "while you decode, and");
         source.set("decode",        "while you encode");
         source.set("etc",           "and soforth");
         
