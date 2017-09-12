@@ -141,4 +141,6 @@ namespace {
         DEFINE_SERIALIZATION_FORMAT_SECTION(yaml);
     }
     
+    #undef DEFINE_SERIALIZATION_FORMAT_SECTION
+    
 } /// namespace (anon.)
