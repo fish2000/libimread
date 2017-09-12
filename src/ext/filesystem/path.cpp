@@ -788,6 +788,7 @@ namespace filesystem {
     /// “normalizing” the path resolves and removes “.” and “..” path segments;
     /// the logic is a simplified adaptation of analagous code from TextMate:
     /// https://github.com/textmate/textmate/blob/353ae8839cf0b62dac08225a8240e9609bf0fb34/Frameworks/io/src/path.cc#L78-L112
+    /// … q.v. the “toSkip” counter and the manner by which it is decremented
     path path::normalize() const {
         path out(m_absolute);               /// output path
         std::size_t skip = 0,               /// segment skip counter
