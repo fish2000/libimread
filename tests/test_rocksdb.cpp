@@ -125,6 +125,7 @@ namespace {
                 }
             }
             
+            /// This seems to work:
             CHECK(database == reconstituted);
             
         }
