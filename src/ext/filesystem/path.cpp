@@ -785,14 +785,22 @@ namespace filesystem {
         return m_path.empty() ? "" : m_path.back();
     }
     
+    /// “normalizing” the path resolves and removes “.” and “..” path segments;
+    /// the logic is a simplified adaptation of analagous code from TextMate:
+    /// https://github.com/textmate/textmate/blob/353ae8839cf0b62dac08225a8240e9609bf0fb34/Frameworks/io/src/path.cc#L78-L112
     path path::normalize() const {
-        path out(m_absolute);
-        std::size_t skip = 0,
-                    max = m_path.size();
+        path out(m_absolute);               /// output path
+        std::size_t skip = 0,               /// segment skip counter
+                    max = m_path.size();    /// size of segment vector
         
+        /// start counting at the top of the path segment vector:
         int idx = static_cast<int>(max);
+        
+        /// initialize boolean vector for marking segemnts for copying:
         std::vector<bool> will_copy(max, false);
         
+        /// backtrack through path segments,
+        /// only marking those for copying if they don’t resolve:
         for (; idx > -1; --idx) {
             if (m_path[idx] == ".") {
                 /// noop
@@ -805,12 +813,16 @@ namespace filesystem {
             }
         }
         
-        // idx = 0;
+        /// reset the index:
+        idx = 0;
+        
+        /// copy the marked segments to the output path for return:
         std::copy_if(m_path.begin(),
                      m_path.end(),
                      std::back_inserter(out.m_path),
                  [&](std::string const& segment) { return will_copy[idx++]; });
         
+        /// return the output path:
         return out;
     }
     
