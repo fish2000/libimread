@@ -29,10 +29,14 @@ namespace im {
         protected:
             static constexpr int kReadFlags         = O_RDWR | O_NONBLOCK | O_CLOEXEC;
             static constexpr int kWriteFlags        = O_RDWR | O_NONBLOCK | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC;
+            static constexpr int kFIFOReadFlags     = O_RDONLY | O_CLOEXEC;
+            static constexpr int kFIFOWriteFlags    = O_WRONLY | O_CLOEXEC;
             static constexpr int kWriteCreateMask   = 0644;
             
             static int open_read(char const* p);
             static int open_write(char const* p, int mask = kWriteCreateMask);
+            static int fifo_open_read(char const* p);
+            static int fifo_open_write(char const* p);
         
         public:
             static std::size_t max_descriptor_count();
@@ -77,15 +81,12 @@ namespace im {
             virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ);
             virtual int close();
             
-        private:
+        protected:
             int descriptor = -1;
             mutable detail::mapped_t mapped;
     };
     
     class file_source_sink : public fd_source_sink {
-        private:
-            filesystem::path pth;
-            filesystem::mode md;
         
         public:
             file_source_sink(filesystem::mode fmode = filesystem::mode::READ);
@@ -104,6 +105,36 @@ namespace im {
             virtual bool exists() const noexcept override;
             filesystem::mode mode(filesystem::mode m);
             filesystem::mode mode() const;
+        
+        protected:
+            filesystem::path pth;
+            filesystem::mode md;
+    };
+    
+    class fifo_source_sink : public fd_source_sink {
+        
+        public:
+            fifo_source_sink(filesystem::mode fmode = filesystem::mode::READ);
+            fifo_source_sink(char* cpath,
+                             filesystem::mode fmode = filesystem::mode::READ);
+            fifo_source_sink(char const* ccpath,
+                             filesystem::mode fmode = filesystem::mode::READ);
+            fifo_source_sink(std::string& spath,
+                             filesystem::mode fmode = filesystem::mode::READ);
+            fifo_source_sink(std::string const& cspath,
+                             filesystem::mode fmode = filesystem::mode::READ);
+            fifo_source_sink(filesystem::path const& ppath,
+                             filesystem::mode fmode = filesystem::mode::READ);
+            
+            filesystem::path const& path() const;
+            virtual bool exists() const noexcept override;
+            virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ) override;
+            filesystem::mode mode(filesystem::mode m);
+            filesystem::mode mode() const;
+        
+        protected:
+            filesystem::path pth;
+            filesystem::mode md;
     };
     
     class FileSource final : public file_source_sink {
@@ -134,7 +165,34 @@ namespace im {
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FileSink);
     };
     
-
+    class FIFOSource final : public fifo_source_sink {
+        
+        public:
+            FIFOSource();
+            FIFOSource(char* cpath);
+            FIFOSource(char const* ccpath);
+            FIFOSource(std::string& spath);
+            FIFOSource(std::string const& cspath);
+            FIFOSource(filesystem::path const& ppath);
+            
+        public:
+            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSource);
+    };
+    
+    class FIFOSink final : public fifo_source_sink {
+        
+        public:
+            FIFOSink();
+            FIFOSink(char* cpath);
+            FIFOSink(char const* ccpath);
+            FIFOSink(std::string& spath);
+            FIFOSink(std::string const& cspath);
+            FIFOSink(filesystem::path const& ppath);
+            
+        public:
+            DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSink);
+    };
+    
 }
 
 #endif /// LIBIMREAD_FILE_HH_

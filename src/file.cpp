@@ -21,6 +21,8 @@ namespace im {
     
     constexpr int fd_source_sink::kReadFlags;
     constexpr int fd_source_sink::kWriteFlags;
+    constexpr int fd_source_sink::kFIFOReadFlags;
+    constexpr int fd_source_sink::kFIFOWriteFlags;
     constexpr int fd_source_sink::kWriteCreateMask;
     
     int fd_source_sink::open_read(char const* p) {
@@ -29,6 +31,14 @@ namespace im {
     
     int fd_source_sink::open_write(char const* p, int mask) {
         return ::open(p, kWriteFlags, mask);
+    }
+    
+    int fd_source_sink::fifo_open_read(char const* p) {
+        return ::open(p, kFIFOReadFlags);
+    }
+    
+    int fd_source_sink::fifo_open_write(char const* p) {
+        return ::open(p, kFIFOWriteFlags);
     }
     
     std::size_t fd_source_sink::max_descriptor_count() {
@@ -291,6 +301,77 @@ namespace im {
         return md;
     }
     
+    fifo_source_sink::fifo_source_sink(filesystem::mode fmode)
+        :fd_source_sink(), md(fmode)
+        {}
+    
+    fifo_source_sink::fifo_source_sink(char* cpath, filesystem::mode fmode)
+        :fd_source_sink(), pth(cpath), md(fmode)
+        {
+            if (!pth.exists()) { pth.makefifo(); }
+            fifo_source_sink::open(pth.str(), fmode);
+        }
+    
+    fifo_source_sink::fifo_source_sink(char const* ccpath, filesystem::mode fmode)
+        :fd_source_sink(), pth(ccpath), md(fmode)
+        {
+            if (!pth.exists()) { pth.makefifo(); }
+            fifo_source_sink::open(pth.str(), fmode);
+        }
+    
+    fifo_source_sink::fifo_source_sink(std::string& spath, filesystem::mode fmode)
+        :fifo_source_sink(spath.c_str(), fmode)
+        {}
+    
+    fifo_source_sink::fifo_source_sink(std::string const& cspath, filesystem::mode fmode)
+        :fifo_source_sink(cspath.c_str(), fmode)
+        {}
+    
+    fifo_source_sink::fifo_source_sink(filesystem::path const& ppath, filesystem::mode fmode)
+        :fd_source_sink(), pth(ppath), md(fmode)
+        {
+            if (!pth.exists()) { pth.makefifo(); }
+            fifo_source_sink::open(pth.str(), fmode);
+        }
+    
+    filesystem::path const& fifo_source_sink::path() const {
+        return pth;
+    }
+    
+    bool fifo_source_sink::exists() const noexcept {
+        return pth.exists();
+    }
+    
+    int fifo_source_sink::open(std::string const& spath,
+                               filesystem::mode fmode) {
+        if (fmode == filesystem::mode::WRITE) {
+            descriptor = fifo_open_write(spath.c_str());
+            if (descriptor < 0) {
+                imread_raise(CannotWriteError, "FIFO descriptor open-to-write failure:",
+                    FF("\t::open(\"%s\", O_WRONLY | O_CLOEXEC)", spath.c_str()),
+                    FF("\treturned negative value: %i", descriptor),
+                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+            }
+        } else {
+            descriptor = fifo_open_read(spath.c_str());
+            if (descriptor < 0) {
+                imread_raise(CannotReadError, "FIFO descriptor open-to-read failure:",
+                    FF("\t::open(\"%s\", O_RDONLY | O_CLOEXEC)", spath.c_str()),
+                    FF("\treturned negative value: %i", descriptor),
+                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+            }
+        }
+        return descriptor;
+    }
+    filesystem::mode fifo_source_sink::mode(filesystem::mode m) {
+        md = m;
+        return md;
+    }
+    
+    filesystem::mode fifo_source_sink::mode() const {
+        return md;
+    }
+    
     FileSource::FileSource()
         :file_source_sink()
         {}
@@ -337,6 +418,54 @@ namespace im {
     
     FileSink::FileSink(filesystem::path const& ppath)
         :file_source_sink(ppath, filesystem::mode::WRITE)
+        {}
+    
+    FIFOSource::FIFOSource()
+        :fifo_source_sink()
+        {}
+    
+    FIFOSource::FIFOSource(char* cpath)
+        :fifo_source_sink(cpath)
+        {}
+    
+    FIFOSource::FIFOSource(char const* ccpath)
+        :fifo_source_sink(ccpath)
+        {}
+    
+    FIFOSource::FIFOSource(std::string& spath)
+        :fifo_source_sink(spath)
+        {}
+    
+    FIFOSource::FIFOSource(std::string const& cspath)
+        :fifo_source_sink(cspath)
+        {}
+    
+    FIFOSource::FIFOSource(filesystem::path const& ppath)
+        :fifo_source_sink(ppath)
+        {}
+    
+    FIFOSink::FIFOSink()
+        :fifo_source_sink(filesystem::mode::WRITE)
+        {}
+    
+    FIFOSink::FIFOSink(char* cpath)
+        :fifo_source_sink(cpath, filesystem::mode::WRITE)
+        {}
+    
+    FIFOSink::FIFOSink(char const* ccpath)
+        :fifo_source_sink(ccpath, filesystem::mode::WRITE)
+        {}
+    
+    FIFOSink::FIFOSink(std::string& spath)
+        :fifo_source_sink(spath, filesystem::mode::WRITE)
+        {}
+    
+    FIFOSink::FIFOSink(std::string const& cspath)
+        :fifo_source_sink(cspath, filesystem::mode::WRITE)
+        {}
+    
+    FIFOSink::FIFOSink(filesystem::path const& ppath)
+        :fifo_source_sink(ppath, filesystem::mode::WRITE)
         {}
     
 }
