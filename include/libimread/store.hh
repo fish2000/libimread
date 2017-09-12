@@ -427,6 +427,28 @@ X operator!=(T const& lhs,
     return false;
 }
 
+/// operator<(stringmapper&, stringmapper&) is trivially defined,
+/// just to get e.g. std::map<stringmapper, …> to work:
+
+template <typename T,
+          typename U,
+          typename X = typename std::enable_if_t<
+                                store::is_stringmapper_v<T, U>,
+                       bool>>
+X operator<(T const& lhs,
+            U const& rhs) { return lhs.count() < rhs.count(); }
+
+/// operator>(stringmapper&, stringmapper&) is also trivially defined --
+/// mainly for reciprocality with operator<(…); it is not a meaningful operation:
+
+template <typename T,
+          typename U,
+          typename X = typename std::enable_if_t<
+                                store::is_stringmapper_v<T, U>,
+                       bool>>
+X operator>(T const& lhs,
+            U const& rhs) { return lhs.count() > rhs.count(); }
+
 namespace std {
     
     /// std::hash specialization for store::stringmap
@@ -434,12 +456,12 @@ namespace std {
     ///     http://en.cppreference.com/w/cpp/utility/hash#Examples
     
     template <>
-    struct hash<store::stringmap> {
+    struct hash<store::stringmapper> {
         
-        typedef store::stringmap argument_type;
+        typedef store::stringmapper argument_type;
         typedef std::size_t result_type;
         
-        result_type operator()(argument_type const& strmap) const;
+        result_type operator()(argument_type const&) const;
         
     };
     

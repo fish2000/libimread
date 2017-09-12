@@ -313,12 +313,12 @@ namespace store {
 
 namespace std {
     
-    using store_hasher_t = std::hash<store::stringmap>;
+    using store_hasher_t = std::hash<store::stringmapper>;
     using store_arg_t = store_hasher_t::argument_type;
     using store_out_t = store_hasher_t::result_type;
     
-    store_out_t store_hasher_t::operator()(store_arg_t const& s) const {
-        return static_cast<store_out_t>(s.hash());
+    store_out_t store_hasher_t::operator()(store_arg_t const& strmapper) const {
+        return static_cast<store_out_t>(strmapper.hash());
     }
     
 } /// namespace std
