@@ -79,8 +79,6 @@ namespace {
             CHECK(memcopy.get(key) != memcopy.null_value());        /// 3) that none of the values are std::string{ NULL_STR }.
         }
         
-        // Json(database.mapping()).dump(rocksjsonpth.str());
-        // Json(memcopy.mapping()).dump(memoryjsonpth.str());
         database.dump(rocksjsonpth);                                /// dump the databases to disk-based representations (currently JSON dicts)
         memcopy.dump(memoryjsonpth);
         
