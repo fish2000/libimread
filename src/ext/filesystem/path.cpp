@@ -928,7 +928,6 @@ namespace filesystem {
                 imread_raise(FileSystemError,
                     "path::parent() makes no sense for empty absolute paths");
             } else {
-                // result = detail::stringvec_t{ ".." };
                 result = path::cwd().parent();
             }
         } else {
