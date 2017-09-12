@@ -433,6 +433,15 @@ namespace filesystem {
                 return path(std::forward<P>(p)).basename();
             }
             
+            /// “normalize” the path -- resolve “.” and “..” path segments
+            path normalize() const;
+            
+            /// Static forwarder for path::normalize<P>(p)
+            template <typename P> inline
+            static path normalize(P&& p) {
+                return path(std::forward<P>(p)).normalize();
+            }
+            
             /// rename a file (using ::rename()),
             /// specifying the new name with a new path instance
             bool rename(path const& newpath);

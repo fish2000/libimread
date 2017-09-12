@@ -785,6 +785,41 @@ namespace filesystem {
         return m_path.empty() ? "" : m_path.back();
     }
     
+    path path::normalize() const {
+        path out(m_absolute);
+        std::size_t skip = 0,
+                    max = m_path.size();
+        int idx = static_cast<int>(max);
+        
+        // will_copy.reserve(max);
+        std::vector<bool> will_copy(max, false);
+        
+        for (; idx > -1; --idx) {
+            if (m_path[idx] == ".") {
+                // will_copy[idx] = false;
+            } else if (m_path[idx] == "..") {
+                ++skip;
+                // will_copy[idx] = false;
+                // if (idx > 0) {
+                //     will_copy[idx-skip] = false;
+                // }
+            } else if (skip) {
+                --skip;
+                // will_copy[idx] = false;
+            } else {
+                will_copy[idx] = true;
+            }
+        }
+        
+        idx = 0;
+        std::copy_if(m_path.begin(),
+                     m_path.end(),
+                     std::back_inserter(out.m_path),
+                 [&](std::string const& segment) { return will_copy[idx++]; });
+        
+        return out;
+    }
+    
     bool path::rename(path const& newpath) {
         if (!exists()) { return false; }
         if (newpath.exists()) {

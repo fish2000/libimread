@@ -355,6 +355,32 @@ namespace {
         CHECK((td.dirpath/"yo_yo_dogg_i_heard_you_like_directories").is_directory());
     }
     
+    TEST_CASE("[filesystem] Test the path::normalize() method",
+              "[fs-test-path-normalize]")
+    {
+        TemporaryDirectory td("test-normalize-td");
+        
+        /// makedir_p() called on rvalue,
+        /// with multiple target directories:
+        REQUIRE((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories").makedir_p());
+        CHECK((td.dirpath/"yo").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg"/"i-heard").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like").is_directory());
+        CHECK((td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories").is_directory());
+        
+        /// check normalization:
+        path yo = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories";
+        path ya = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"superfluous"/".."/"directories";
+        CHECK(yo == ya.normalize());
+        path yu = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"excessive"/"superfluous"/".."/".."/"directories";
+        CHECK(yo == yu.normalize());
+        path yi = td.dirpath/"yo"/"dogg"/"i-heard"/"."/"you-like"/"superfluous"/".."/"directories";
+        CHECK(yo == yi.normalize());
+        path ye = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories"/"that-just-trail-off"/"..";
+        CHECK(yo == ye.normalize());
+    }
+    
     // TEST_CASE("[filesystem] Test dotpath subclass",
     //           "[fs-test-dotpath-subclass]") {
     //     dotpath basepath("ost.basepath.ClassName:YoDogg");
