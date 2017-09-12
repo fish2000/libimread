@@ -9,6 +9,8 @@
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
+#define SERIALIZATION_PRINT_DUMPS 1
+
 namespace {
     
     using store::stringmap;
@@ -27,26 +29,37 @@ namespace {
         source.set("decode",        "while you encode");
         source.set("etc",           "and soforth");
         
-        #define DEFINE_SERIALIZATION_FORMAT_SECTION(__name__)                                                                           \
-                                                                                                                                        \
-            SECTION("[serialization] » Testing store::detail::" # __name__ "_dumps() and store::detail::" # __name__ "_impl()")         \
-            {                                                                                                                           \
-                stringmap destination;                                                                                                  \
-                std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
-                store::detail::__name__##_impl(dump, &destination);                                                                     \
-                CHECK(source.to_string() == destination.to_string());                                                                   \
-            }
+        #if(SERIALIZATION_PRINT_DUMPS)
+        std::string asterisks(120, '*');
+        
+            #define DEFINE_SERIALIZATION_FORMAT_SECTION(__name__)                                                                           \
+                                                                                                                                            \
+                SECTION("[serialization] » Testing store::detail::" # __name__ "_dumps() and store::detail::" # __name__ "_impl()")         \
+                {                                                                                                                           \
+                    stringmap destination;                                                                                                  \
+                    std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
+                    WTF("SERIALIZATION - " # __name__ " dump:", "\n" + asterisks + "\n" + dump + "\n" + asterisks);                         \
+                    store::detail::__name__##_impl(dump, &destination);                                                                     \
+                    CHECK(source.to_string() == destination.to_string());                                                                   \
+                }
+        
+        #else
+            #define DEFINE_SERIALIZATION_FORMAT_SECTION(__name__)                                                                           \
+                                                                                                                                            \
+                SECTION("[serialization] » Testing store::detail::" # __name__ "_dumps() and store::detail::" # __name__ "_impl()")         \
+                {                                                                                                                           \
+                    stringmap destination;                                                                                                  \
+                    std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
+                    store::detail::__name__##_impl(dump, &destination);                                                                     \
+                    CHECK(source.to_string() == destination.to_string());                                                                   \
+                }
+        
+        #endif
         
         DEFINE_SERIALIZATION_FORMAT_SECTION(ini);
-        
-        // SECTION("[serialization] » Testing store::detail::ini_dumps() and store::detail::ini_impl()")
-        // {
-        //     stringmap destination;
-        //     std::string dump = store::detail::ini_dumps(source.mapping());
-        //     store::detail::ini_impl(dump, &destination);
-        //     CHECK(source.to_string() == destination.to_string());
-        // }
-        
+        DEFINE_SERIALIZATION_FORMAT_SECTION(json);
+        DEFINE_SERIALIZATION_FORMAT_SECTION(plist);
+        DEFINE_SERIALIZATION_FORMAT_SECTION(yaml);
     }
     
 } /// namespace (anon.)
