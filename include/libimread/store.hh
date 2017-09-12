@@ -404,7 +404,7 @@ X operator==(T const& lhs,
                 (rhs.count() == keys.size()));
     if (!out) { return false; }
     for (std::string const& key : keys) {
-        out &= (lhs.get(key) == rhs.get(key));
+        out &= bool(lhs.get(key) == rhs.get(key));
     }
     return out;
 }
