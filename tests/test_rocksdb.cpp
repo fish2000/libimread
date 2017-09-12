@@ -127,7 +127,6 @@ namespace {
             
             /// This seems to work:
             CHECK(database == reconstituted);
-            
         }
         
         SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr")
@@ -148,6 +147,8 @@ namespace {
                 CHECK(database.get(key) == source.get(key));
                 CHECK(source.get(key) != source.null_value());
             }
+            /// This seems to work:
+            CHECK(database == source);
         }
         
         SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr with a NamedTemporaryFile")
@@ -162,6 +163,8 @@ namespace {
             }
             REQUIRE(tf.filepath.is_file());
             REQUIRE(tf.filepath.is_readable());
+            /// This seems to work:
+            CHECK(database == sink);
         }
         
         SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr with a TemporaryName")
@@ -175,6 +178,8 @@ namespace {
             }
             REQUIRE(tn.pathname.is_file());
             REQUIRE(tn.pathname.is_readable());
+            /// This seems to work:
+            CHECK(database == sink);
         }
         
     }
