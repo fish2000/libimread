@@ -789,29 +789,23 @@ namespace filesystem {
         path out(m_absolute);
         std::size_t skip = 0,
                     max = m_path.size();
-        int idx = static_cast<int>(max);
         
-        // will_copy.reserve(max);
+        int idx = static_cast<int>(max);
         std::vector<bool> will_copy(max, false);
         
         for (; idx > -1; --idx) {
             if (m_path[idx] == ".") {
-                // will_copy[idx] = false;
+                /// noop
             } else if (m_path[idx] == "..") {
                 ++skip;
-                // will_copy[idx] = false;
-                // if (idx > 0) {
-                //     will_copy[idx-skip] = false;
-                // }
             } else if (skip) {
                 --skip;
-                // will_copy[idx] = false;
             } else {
                 will_copy[idx] = true;
             }
         }
         
-        idx = 0;
+        // idx = 0;
         std::copy_if(m_path.begin(),
                      m_path.end(),
                      std::back_inserter(out.m_path),
