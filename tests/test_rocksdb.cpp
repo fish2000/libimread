@@ -125,10 +125,8 @@ namespace {
                 }
             }
             
-            // WTF("RECONSTITUTED:",
-            //     reconstituted.mapping_json(),
-            //     reconstituted.mapping_plist(),
-            //     reconstituted.mapping_yaml());
+            CHECK(database == reconstituted);
+            
         }
         
         SECTION("[rocksdb] » Copy the Rocks database using value_copy() and xattr")
