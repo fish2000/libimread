@@ -178,6 +178,7 @@ namespace filesystem {
         static constexpr int glob_pattern_flags                     = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
         static constexpr int wordexp_pattern_flags                  = WRDE_NOCMD | WRDE_DOOFFS;
         static constexpr mode_t mkdir_flags                         = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
+        static constexpr mode_t mkfifo_flags                        = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | S_IFIFO;
         
         static const std::string extsepstring(1, path::extsep);
         static const std::string sepstring(1, path::sep);
@@ -384,6 +385,7 @@ namespace filesystem {
                             if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
                         case DT_REG:
                         case DT_LNK:
+                        case DT_UNKNOWN:
                             out.emplace_back(abspath/entp->d_name);
                         default:
                             continue;
@@ -399,6 +401,7 @@ namespace filesystem {
                             if (std::strcmp(entp->d_name, "..") == 0)  { continue; }
                         case DT_REG:
                         case DT_LNK:
+                        case DT_UNKNOWN:
                             out.emplace_back(entp->d_name);
                         default:
                             continue;
@@ -431,6 +434,7 @@ namespace filesystem {
                         continue;
                     case DT_REG:
                     case DT_LNK:
+                    case DT_UNKNOWN:
                         files.emplace_back(entp->d_name);
                         continue;
                     default:
@@ -778,6 +782,16 @@ namespace filesystem {
         }
         
         /// return per the logical sum of operations:
+        return out;
+    }
+    
+    bool path::makefifo() const {
+        bool out = false;
+        {
+            detail::nowait_t nowait;
+            if (m_path.empty() || exists()) { return out; }
+            out = bool(::mkfifo(c_str(), detail::mkfifo_flags) != -1);
+        }
         return out;
     }
     

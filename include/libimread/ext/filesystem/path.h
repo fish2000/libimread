@@ -411,7 +411,7 @@ namespace filesystem {
             bool makedir() const;
             bool makedir_p() const;
             
-            /// Static forwarder for path::makedir<P>(p) and path::makedir_p<P>(p) --
+            /// Static forwarders for path::makedir<P>(p) and path::makedir_p<P>(p) --
             /// ... again, USE WITH CAUTION people
             template <typename P> inline
             static bool makedir(P&& p) {
@@ -421,6 +421,17 @@ namespace filesystem {
             template <typename P> inline
             static bool makedir_p(P&& p) {
                 return path(std::forward<P>(p)).makedir_p();
+            }
+            
+            /// attempt to create a FIFO pipe at this path. same USE-WITH-CAUTION caveats
+            /// apply as per `path::remove()` (q.v. note supra).
+            bool makefifo() const;
+            
+            /// Static forwarder for path::makefifo<P>(p) --
+            /// ... again, USE WITH CAUTION people
+            template <typename P> inline
+            static bool makefifo(P&& p) {
+                return path(std::forward<P>(p)).makefifo();
             }
             
             /// get the basename -- i.e. for path /yo/dogg/iheardyoulike/basenames.jpg
