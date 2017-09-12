@@ -46,7 +46,7 @@ namespace {
                     std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
                     WTF("SERIALIZATION - " # __name__ " dump:", "\n" + asterisks + "\n" + dump + "\n" + asterisks);                         \
                     store::detail::__name__##_impl(dump, &destination);                                                                     \
-                    CHECK(source.to_string() == destination.to_string());                                                                   \
+                    CHECK(source == destination);                                                                                           \
                 }
         
         #else
@@ -57,7 +57,7 @@ namespace {
                     stringmap destination;                                                                                                  \
                     std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
                     store::detail::__name__##_impl(dump, &destination);                                                                     \
-                    CHECK(source.to_string() == destination.to_string());                                                                   \
+                    CHECK(source == destination);                                                                                           \
                 }
         
         #endif
@@ -107,7 +107,7 @@ namespace {
                     CHECK(manual_load == auto_load);                                                                                        \
                     CHECK(manual_load == dump);                                                                                             \
                     CHECK(auto_load == dump);                                                                                               \
-                    CHECK(source.to_string() == destination.to_string());                                                                   \
+                    CHECK(source == destination);                                                                                           \
                 }
         
         #else
@@ -129,7 +129,7 @@ namespace {
                     CHECK(manual_load == auto_load);                                                                                        \
                     CHECK(manual_load == dump);                                                                                             \
                     CHECK(auto_load == dump);                                                                                               \
-                    CHECK(source.to_string() == destination.to_string());                                                                   \
+                    CHECK(source == destination);                                                                                           \
                 }
         
         #endif
