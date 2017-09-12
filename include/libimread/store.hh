@@ -399,14 +399,13 @@ X operator==(T const& lhs,
     lhs.warm_cache();
     rhs.warm_cache();
     store::stringmapper::stringvec_t keys = lhs.list();
-    bool out = ((lhs.count() == rhs.count()) &&
-                (lhs.count() == keys.size()) &&
-                (rhs.count() == keys.size()));
-    if (!out) { return false; }
+    if ((lhs.count() != rhs.count()) ||
+        (lhs.count() != keys.size()) ||
+        (rhs.count() != keys.size())) { return false; }
     for (std::string const& key : keys) {
-        out &= bool(lhs.get(key) == rhs.get(key));
+        if (bool(lhs.get(key) != rhs.get(key))) { return false; }
     }
-    return out;
+    return true;
 }
 
 template <typename T,
@@ -415,7 +414,18 @@ template <typename T,
                                 store::is_stringmapper_v<T, U>,
                        bool>>
 X operator!=(T const& lhs,
-             U const& rhs) { return !(operator==<T, U>(lhs, rhs)); }
+             U const& rhs) {
+    lhs.warm_cache();
+    rhs.warm_cache();
+    store::stringmapper::stringvec_t keys = lhs.list();
+    if ((lhs.count() != rhs.count()) ||
+        (lhs.count() != keys.size()) ||
+        (rhs.count() != keys.size())) { return true; }
+    for (std::string const& key : keys) {
+        if (bool(lhs.get(key) != rhs.get(key))) { return true; }
+    }
+    return false;
+}
 
 namespace std {
     
