@@ -4,6 +4,8 @@
 #include <sstream>
 #include <algorithm>
 #include <numeric>
+#include <memory>
+
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
@@ -109,6 +111,8 @@ namespace store {
         #pragma mark -
         #pragma mark Property list (plist) serialization helpers
         
+        using plist_dictptr_t = std::unique_ptr<PList::Dictionary>;
+        
         std::string plist_dumps(store::stringmapper::stringmap_t const& cache) {
             PList::Dictionary dict;
             for (auto const& item : cache) {
@@ -119,16 +123,17 @@ namespace store {
         
         void plist_impl(std::string const& xmlstr, store::stringmapper* stringmap_ptr) {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
-            PList::Dictionary* dict = static_cast<PList::Dictionary*>(
-                                                  PList::Structure::FromXml(xmlstr));
-            if (!dict) { return; }
+            plist_dictptr_t dict(static_cast<PList::Dictionary*>(
+                                             PList::Structure::FromXml(xmlstr)));
+            // plist_dictptr_t dict(PList::Structure::FromXml(xmlstr));
+            if (!dict.get()) { return; }
             std::for_each(dict->Begin(),
                           dict->End(),
                       [&](auto const& item) {
                             stringmap_ptr->set(item.first,
                    static_cast<PList::String*>(item.second)->GetValue());
             });
-            delete dict;
+            // delete dict;
         }
         
         #pragma mark -
@@ -167,7 +172,7 @@ namespace store {
                 return stringmapper::formatter::plist;
             } else if (ext == "pkl" || ext == "pickle") {
                 return stringmapper::formatter::pickle;
-            } else if (ext == "ini") {
+            } else if (ext == "ini" || ext == "cfg") {
                 return stringmapper::formatter::ini;
             } else if (ext == "yml" || ext == "yaml") {
                 return stringmapper::formatter::yaml;
