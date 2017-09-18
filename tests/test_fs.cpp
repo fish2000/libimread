@@ -371,12 +371,17 @@ namespace {
         
         /// check normalization:
         path yo = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories";
+        CHECK(yo == yo.normalize());
+        
         path ya = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"superfluous"/".."/"directories";
         CHECK(yo == ya.normalize());
+        
         path yu = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"excessive"/"superfluous"/".."/".."/"directories";
         CHECK(yo == yu.normalize());
+        
         path yi = td.dirpath/"yo"/"dogg"/"i-heard"/"."/"you-like"/"superfluous"/".."/"directories";
         CHECK(yo == yi.normalize());
+        
         path ye = td.dirpath/"yo"/"dogg"/"i-heard"/"you-like"/"directories"/"that-just-trail-off"/"..";
         CHECK(yo == ye.normalize());
     }

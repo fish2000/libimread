@@ -445,6 +445,7 @@ if(IM_TESTS)
     add_imread_test("sfinae")
     add_imread_test("terminator")
     add_imread_test("tif-write-multi")
+    add_imread_test("uri")
     add_imread_test("interleaved-io")
 
 endif(IM_TESTS)

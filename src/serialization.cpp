@@ -125,7 +125,6 @@ namespace store {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             plist_dictptr_t dict(static_cast<PList::Dictionary*>(
                                              PList::Structure::FromXml(xmlstr)));
-            // plist_dictptr_t dict(PList::Structure::FromXml(xmlstr));
             if (!dict.get()) { return; }
             std::for_each(dict->Begin(),
                           dict->End(),
@@ -133,7 +132,6 @@ namespace store {
                             stringmap_ptr->set(item.first,
                    static_cast<PList::String*>(item.second)->GetValue());
             });
-            // delete dict;
         }
         
         #pragma mark -

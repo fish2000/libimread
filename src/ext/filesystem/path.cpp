@@ -805,26 +805,36 @@ namespace filesystem {
     /// … q.v. the “toSkip” counter and the manner by which it is decremented
     path path::normalize() const {
         path out(m_absolute);               /// output path
-        std::size_t skip = 0,               /// segment skip counter
+        int skip = 0,               /// segment skip counter
+                    idx = 0,
                     max = m_path.size();    /// size of segment vector
         
         /// start counting at the top of the path segment vector:
-        int idx = static_cast<int>(max);
+        // int idx = static_cast<int>(max);
+                    int reverse_idx = max;
         
         /// initialize boolean vector for marking segemnts for copying:
         std::vector<bool> will_copy(max, false);
         
         /// backtrack through path segments,
         /// only marking those for copying if they don’t resolve:
-        for (; idx > -1; --idx) {
-            if (m_path[idx] == ".") {
+        // for (; idx != -1; --idx) {
+        for (; idx < max; ++idx,
+                    reverse_idx = max - (idx)) {
+            // std::string const& segment = m_path[reverse_idx];
+            std::string const& segment = m_path.at(reverse_idx);
+            // WTF("SEGMENT:", segment);
+            if (!segment.size()) {
                 /// noop
-            } else if (m_path[idx] == "..") {
+            } else if (segment == ".") {
+                /// noop
+            } else if (segment == "..") {
                 ++skip;
             } else if (skip) {
                 --skip;
             } else {
-                will_copy[idx] = true;
+                // will_copy[reverse_idx] = true;
+                will_copy.at(reverse_idx) = true;
             }
         }
         

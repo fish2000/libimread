@@ -98,6 +98,7 @@ set(hdrs
     ${hdrs_dir}/ext/iod.hh
     ${hdrs_dir}/ext/pvr.hh
     ${hdrs_dir}/ext/pystring.hh
+    ${hdrs_dir}/ext/uri.hh
     ${hdrs_dir}/ext/valarray.hh
     ${hdrs_dir}/ext/WriteGIF.hh
     
@@ -188,6 +189,7 @@ set(srcs
     ${srcs_dir}/ext/pvr.cpp
     ${srcs_dir}/ext/pvrtc.cpp
     ${srcs_dir}/ext/pystring.cpp
+    ${srcs_dir}/ext/uri.cpp
     ${srcs_dir}/ext/WriteGIF.cpp
 
     # ${srcs_dir}/IO/ansi.cpp
