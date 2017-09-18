@@ -114,7 +114,7 @@ namespace im {
             return out;
         }
         
-        std::string encode(const std::string& source) {
+        std::string encode(std::string const& source) {
             const unsigned char*       source_ptr = reinterpret_cast<const unsigned char*>(source.c_str());
             const int                  length     = source.length();
             unsigned char* const       start_ptr  = new unsigned char[length * 3];
