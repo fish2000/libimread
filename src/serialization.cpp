@@ -135,9 +135,9 @@ namespace store {
             std::transform(cache.begin(),
                            cache.end(),
                            std::back_inserter(pairs),
-                       [&](auto const& kv) { return uri::encode(kv.first)
-                                                  + "="
-                                                  + uri::encode(kv.second); });
+                        [](auto const& item) { return uri::encode(item.first)
+                                                    + "="
+                                                    + uri::encode(item.second); });
             return questionmark ? "?" + join(pairs, "&") : join(pairs, "&");
         }
         
@@ -146,14 +146,23 @@ namespace store {
             if (urlstr.size() == 0)       { return; }           /// `urlstr` cannot be zero-length
             std::string url = urlstr[0] == '?' ? std::string(urlstr.begin() + 1, urlstr.end()) : urlstr;
             if (url.size() == 0)          { return; }           /// `url` cannot be zero-length
-            store::stringmapper::stringvec_t pairs;
+            store::stringmapper::stringvec_t pairs, pairvec;
             pystring::split(url, pairs, "&");
             for (std::string const& pair : pairs) {
-                store::stringmapper::stringvec_t pairvec;
                 pystring::split(pair, pairvec, "=");
-                if (pairvec.size()) {
-                    stringmap_ptr->set(uri::decode(pairvec[0]),
-                                       uri::decode(pairvec[1]));
+                switch (pairvec.size()) {
+                    case 0: continue;
+                    case 1: {
+                        stringmap_ptr->set(uri::decode(pairvec[0]),
+                                           "true");
+                        continue;
+                    }
+                    case 2:
+                    default: {
+                        stringmap_ptr->set(uri::decode(pairvec[0]),
+                                           uri::decode(pairvec[1]));
+                        continue;
+                    }
                 }
             }
         }
@@ -259,9 +268,7 @@ namespace store {
             std::string out(std::istreambuf_iterator<char>(stream), {});
             stream.close();
             
-            /// Return the populated string by value,
-            /// stripping any extraneous leading or lagging whitespace:
-            // return pystring::strip(out);
+            /// Return the populated string by value:
             return out;
         }
         
@@ -297,11 +304,9 @@ namespace store {
             
             /// Create a temporary file,
             /// open its stream interface,
-            /// and add in the string the content,
-            /// sans any leading or lagging whitespace:
+            /// and add in the string the content:
             NamedTemporaryFile tf("." + ext);
             tf.open();
-            // tf.stream << pystring::strip(content);
             tf.stream << content;
             tf.close();
             
