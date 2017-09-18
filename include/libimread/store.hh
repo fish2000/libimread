@@ -105,9 +105,10 @@ namespace store {
                 undefined   = -1,
                 json        = 0,
                 plist       = 1,
-                pickle      = 2,
+                urlparam    = 2,
                 ini         = 4,
-                yaml        = 8
+                yaml        = 8,
+                pickle      = 16
             };
             
             static constexpr formatter default_format = formatter::json;
@@ -124,12 +125,14 @@ namespace store {
             virtual void with_ini(std::string const&);
             virtual void with_json(std::string const&);
             virtual void with_plist(std::string const&);
+            virtual void with_urlparam(std::string const&);
             virtual void with_yaml(std::string const&);
             virtual void warm_cache() const;
             virtual stringmap_t& mapping() const;
             virtual std::string mapping_ini() const;
             virtual std::string mapping_json() const;
             virtual std::string mapping_plist() const;
+            virtual std::string mapping_urlparam(bool questionmark = false) const;
             virtual std::string mapping_yaml() const;
             virtual std::string to_string() const;
             virtual bool dump(std::string const& destination,

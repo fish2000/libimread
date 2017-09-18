@@ -26,6 +26,10 @@ namespace store {
         detail::plist_impl(xmlstr, this);
     }
     
+    void stringmapper::with_urlparam(std::string const& urlstr) {
+        detail::urlparam_impl(urlstr, this);
+    }
+    
     void stringmapper::with_yaml(std::string const& yamlstr) {
         detail::yaml_impl(yamlstr, this);
     }
@@ -57,6 +61,11 @@ namespace store {
         return detail::plist_dumps(cache);
     }
     
+    std::string stringmapper::mapping_urlparam(bool questionmark) const {
+        warm_cache();
+        return detail::urlparam_dumps(cache, questionmark);
+    }
+    
     std::string stringmapper::mapping_yaml() const {
         warm_cache();
         return detail::yaml_dumps(cache);
@@ -80,6 +89,10 @@ namespace store {
                                            overwrite);
             case formatter::yaml:
                 return detail::string_dump(detail::yaml_dumps(cache),
+                                           destination,
+                                           overwrite);
+            case formatter::urlparam:
+                return detail::string_dump(detail::urlparam_dumps(cache),
                                            destination,
                                            overwrite);
             case formatter::undefined:
@@ -220,6 +233,9 @@ namespace store {
             case stringmapper::formatter::yaml:
                 with_yaml(serialized);
                 break;
+            case stringmapper::formatter::urlparam:
+                with_urlparam(serialized);
+                break;
             case stringmapper::formatter::undefined:
             case stringmapper::formatter::json:
             default:
@@ -252,6 +268,10 @@ namespace store {
             }
             case stringmapper::formatter::yaml: {
                 detail::yaml_impl(serialized, &out);
+                return out;
+            }
+            case stringmapper::formatter::urlparam: {
+                detail::urlparam_impl(serialized, &out);
                 return out;
             }
             case stringmapper::formatter::undefined:

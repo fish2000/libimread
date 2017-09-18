@@ -21,9 +21,13 @@ namespace store {
         std::string plist_dumps(store::stringmapper::stringmap_t const&);
         void plist_impl(std::string const&, store::stringmapper*);
         
+        std::string urlparam_dumps(store::stringmapper::stringmap_t const&, bool questionmark = false);
+        void urlparam_impl(std::string const&, store::stringmapper*);
+        
         std::string yaml_dumps(store::stringmapper::stringmap_t const&);
         void yaml_impl(std::string const&, store::stringmapper*);
         
+        std::string join(store::stringmapper::stringvec_t const&, std::string const& with = ", ");
         store::stringmapper::formatter for_path(std::string const&);
         std::string string_load(std::string const&);
         bool string_dump(std::string const&, std::string const&, bool overwrite = false);

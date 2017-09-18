@@ -11,6 +11,7 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/pystring.hh>
+#include <libimread/ext/uri.hh>
 #include <libimread/serialization.hh>
 
 /// JSON (built-in)
@@ -26,6 +27,8 @@
 #include "inicpp/inicpp.h"
 
 namespace store {
+    
+    using namespace im;
     
     #pragma mark -
     #pragma mark serialization helper implementations
@@ -49,22 +52,12 @@ namespace store {
             return stringerator.str();
         }
         
-        static std::string ini_join(store::stringmapper::stringvec_t const& strings) {
-            return std::accumulate(strings.begin(),
-                                   strings.end(),
-                                   std::string{},
-                        [&strings](std::string const& lhs,
-                                   std::string const& rhs) {
-                return lhs + rhs + (rhs.c_str() == strings.back().c_str() ? "" : ", ");
-            });
-        }
-        
         void ini_impl(std::string const& inistr, store::stringmapper* stringmap_ptr) {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             inicpp::config inimap = inicpp::parser::load(inistr);
             for (auto const& option : inimap[section_name]) {
                 stringmap_ptr->set(option.get_name(),
-                          ini_join(option.get_list<inicpp::string_ini_t>()));
+                              join(option.get_list<inicpp::string_ini_t>(), ", "));
             }
         }
         
@@ -135,6 +128,37 @@ namespace store {
         }
         
         #pragma mark -
+        #pragma mark URL parameter serialization helpers
+        
+        std::string urlparam_dumps(store::stringmapper::stringmap_t const& cache, bool questionmark) {
+            store::stringmapper::stringvec_t pairs;
+            std::transform(cache.begin(),
+                           cache.end(),
+                           std::back_inserter(pairs),
+                       [&](auto const& kv) { return uri::encode(kv.first)
+                                                  + "="
+                                                  + uri::encode(kv.second); });
+            return questionmark ? "?" + join(pairs, "&") : join(pairs, "&");
+        }
+        
+        void urlparam_impl(std::string const& urlstr, store::stringmapper* stringmap_ptr) {
+            if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
+            if (urlstr.size() == 0)       { return; }           /// `urlstr` cannot be zero-length
+            std::string url = urlstr[0] == '?' ? std::string(urlstr.begin() + 1, urlstr.end()) : urlstr;
+            if (url.size() == 0)          { return; }           /// `url` cannot be zero-length
+            store::stringmapper::stringvec_t pairs;
+            pystring::split(url, pairs, "&");
+            for (std::string const& pair : pairs) {
+                store::stringmapper::stringvec_t pairvec;
+                pystring::split(pair, pairvec, "=");
+                if (pairvec.size()) {
+                    stringmap_ptr->set(uri::decode(pairvec[0]),
+                                       uri::decode(pairvec[1]));
+                }
+            }
+        }
+        
+        #pragma mark -
         #pragma mark YAML serialization helpers
         
         std::string yaml_dumps(store::stringmapper::stringmap_t const& cache) {
@@ -161,7 +185,20 @@ namespace store {
         #pragma mark -
         #pragma mark Miscellaneous serialization helper functions
         
+        std::string join(store::stringmapper::stringvec_t const& strings, std::string const& with) {
+            /// Join a vector of strings using reduce (left-fold) as per std::accumulate(…):
+            return std::accumulate(strings.begin(),
+                                   strings.end(),
+                                   std::string{},
+                               [&](std::string const& lhs,
+                                   std::string const& rhs) {
+                return lhs + rhs + (rhs.c_str() == strings.back().c_str() ? "" : with);
+            });
+        }
+        
         store::stringmapper::formatter for_path(std::string const& pth) {
+            /// Return a formatter type (q.v the store::stringmapper:formatter enum)
+            /// appropriate for the file extension of a given filepath string:
             using filesystem::path;
             std::string ext = pystring::lower(path::extension(pth));
             if (ext == "json") {
@@ -172,6 +209,10 @@ namespace store {
                 return stringmapper::formatter::pickle;
             } else if (ext == "ini" || ext == "cfg") {
                 return stringmapper::formatter::ini;
+            } else if (ext == "url" || ext == "uri" ||
+                       ext == "urlparam"            ||
+                       ext == "uriparam") {
+                return stringmapper::formatter::urlparam;
             } else if (ext == "yml" || ext == "yaml") {
                 return stringmapper::formatter::yaml;
             }
@@ -182,6 +223,10 @@ namespace store {
             using filesystem::path;
             path sourcepath(source);
             
+            /// Examine the source filepath, and ensure
+            /// that it is properly dealt with, depending
+            /// on whether it already exists, and how this
+            /// function was called:
             if (!sourcepath.exists()) {
                 imread_raise(CannotReadError,
                     "store::detail::string_load(source): nonexistant source file",
@@ -198,6 +243,9 @@ namespace store {
                  FF("\tsource == %s", sourcepath.c_str()));
             }
             
+            /// Open a file stream for reading,
+            /// given the source filepath, and raising
+            /// an error if the open attempt fails:
             std::fstream stream;
             stream.open(sourcepath.str(), std::ios::in);
             if (!stream.is_open()) {
@@ -206,11 +254,14 @@ namespace store {
                  FF("\tsource == %s", sourcepath.c_str()));
             }
             
-            /// Adapted from https://stackoverflow.com/a/3203502/298171
+            /// Read in the contents of the file, to a string, via the stream --
+            /// This was adapted from https://stackoverflow.com/a/3203502/298171
             std::string out(std::istreambuf_iterator<char>(stream), {});
             stream.close();
             
-            /// return by value
+            /// Return the populated string by value,
+            /// stripping any extraneous leading or lagging whitespace:
+            // return pystring::strip(out);
             return out;
         }
         
@@ -221,15 +272,21 @@ namespace store {
             std::string ext;
             path destpath;
             
+            /// Properly “normalize” the destination filepath:
             try {
                 destpath = path::expand_user(dest).make_absolute();
             } catch (im::FileSystemError&) {
                 return false;
             }
             
+            /// Divine an appropriate extension for the file,
+            /// based on the putative destination filepath:
             ext = pystring::lower(destpath.extension());
             if (ext == "") { ext = "tmp"; }
             
+            /// Ensure that the destination filepath is
+            /// properly delt with, depending on whether
+            /// it exists and how this function was called:
             if (destpath.exists()) {
                 if (!overwrite) {
                     return false;
@@ -238,15 +295,24 @@ namespace store {
                 }
             }
             
+            /// Create a temporary file,
+            /// open its stream interface,
+            /// and add in the string the content,
+            /// sans any leading or lagging whitespace:
             NamedTemporaryFile tf("." + ext);
             tf.open();
+            // tf.stream << pystring::strip(content);
             tf.stream << content;
             tf.close();
             
+            /// At this point, we are clear to remove
+            /// any existant files at the destination filepath:
             if (destpath.exists()) {
                 destpath.remove();
             }
             
+            /// Duplicate the temporary file that holds our content
+            /// to the (now all-clear) destination filepath:
             path finalfile = tf.filepath.duplicate(destpath);
             if (!finalfile.is_file()) {
                 return false;
