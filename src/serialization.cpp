@@ -118,7 +118,7 @@ namespace store {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             plist_dictptr_t dict(static_cast<PList::Dictionary*>(
                                              PList::Structure::FromXml(xmlstr)));
-            if (!dict.get()) { return; }                        /// `xmlstr` must be a valid XML plist
+            if (!dict.get())              { return; }           /// `xmlstr` must be a valid XML plist
             std::for_each(dict->Begin(),
                           dict->End(),
                       [&](auto const& item) {
@@ -156,7 +156,7 @@ namespace store {
                     case 0: continue;
                     case 1: {
                         stringmap_ptr->set(uri::decode(pairvec[0]),
-                                           "true");
+                                           uri::decode(pairvec[0]));
                         continue;
                     }
                     case 2:
