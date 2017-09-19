@@ -80,27 +80,27 @@ namespace store {
         warm_cache();
         switch (format) {
             case formatter::ini:
-                return detail::string_dump(detail::ini_dumps(cache),
-                                           destination,
-                                           overwrite);
+                return detail::dump(detail::ini_dumps(cache),
+                                    destination,
+                                    overwrite);
             case formatter::plist:
-                return detail::string_dump(detail::plist_dumps(cache),
-                                           destination,
-                                           overwrite);
+                return detail::dump(detail::plist_dumps(cache),
+                                    destination,
+                                    overwrite);
             case formatter::yaml:
-                return detail::string_dump(detail::yaml_dumps(cache),
-                                           destination,
-                                           overwrite);
+                return detail::dump(detail::yaml_dumps(cache),
+                                    destination,
+                                    overwrite);
             case formatter::urlparam:
-                return detail::string_dump(detail::urlparam_dumps(cache),
-                                           destination,
-                                           overwrite);
+                return detail::dump(detail::urlparam_dumps(cache),
+                                    destination,
+                                    overwrite);
             case formatter::undefined:
             case formatter::json:
             default:
-                return detail::string_dump(detail::json_dumps(cache),
-                                           destination,
-                                           overwrite);
+                return detail::dump(detail::json_dumps(cache),
+                                    destination,
+                                    overwrite);
         }
     }
     
@@ -250,7 +250,7 @@ namespace store {
         std::string serialized("");
         
         try {
-            serialized = detail::string_load(source);
+            serialized = detail::load(source);
         } catch (im::FileSystemError&) {
             return out;
         } catch (im::CannotReadError&) {

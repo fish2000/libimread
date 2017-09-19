@@ -230,7 +230,7 @@ namespace store {
             return stringmapper::default_format; /// JSON
         }
         
-        std::string string_load(std::string const& source) {
+        std::string load(std::string const& source) {
             using filesystem::path;
             path sourcepath(source);
             
@@ -274,7 +274,7 @@ namespace store {
             return out;
         }
         
-        bool string_dump(std::string const& content, std::string const& dest, bool overwrite) {
+        bool dump(std::string const& content, std::string const& dest, bool overwrite) {
             using filesystem::path;
             using filesystem::NamedTemporaryFile;
             std::string destination(dest);

@@ -96,14 +96,14 @@ namespace {
                     NamedTemporaryFile tf("." # __name__);                                                                                  \
                     REQUIRE(tn.pathname != tf.filepath);                                                                                    \
                     std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
-                    CHECK(store::detail::string_dump(dump, tn.pathname.str()));                                                             \
+                    CHECK(store::detail::dump(dump, tn.pathname.str()));                                                                    \
                     tf.open();                                                                                                              \
                     tf.stream << dump;                                                                                                      \
                     tf.close();                                                                                                             \
                     WTF("SERIALIZATION - " # __name__ " dump:", "\n" + asterisks + "\n" + dump + "\n" + asterisks);                         \
                     WTF("SERIALIZATION - " # __name__ " file:", tn.pathname.str());                                                         \
-                    std::string manual_load = store::detail::string_load(tn.pathname.str());                                                \
-                    std::string auto_load = store::detail::string_load(tf.filepath.str());                                                  \
+                    std::string manual_load = store::detail::load(tn.pathname.str());                                                       \
+                    std::string auto_load = store::detail::load(tf.filepath.str());                                                         \
                     stringmap destination(auto_load, store::detail::for_path(tn.pathname.str()));                                           \
                     CHECK(manual_load == auto_load);                                                                                        \
                     CHECK(manual_load == dump);                                                                                             \
@@ -120,12 +120,12 @@ namespace {
                     NamedTemporaryFile tf("." # __name__);                                                                                  \
                     REQUIRE(tn.pathname != tf.filepath);                                                                                    \
                     std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
-                    CHECK(store::detail::string_dump(dump, tn.pathname.str()));                                                             \
+                    CHECK(store::detail::dump(dump, tn.pathname.str()));                                                                    \
                     tf.open();                                                                                                              \
                     tf.stream << dump;                                                                                                      \
                     tf.close();                                                                                                             \
-                    std::string manual_load = store::detail::string_load(tn.pathname.str());                                                \
-                    std::string auto_load = store::detail::string_load(tf.filepath.str());                                                  \
+                    std::string manual_load = store::detail::load(tn.pathname.str());                                                       \
+                    std::string auto_load = store::detail::load(tf.filepath.str());                                                         \
                     stringmap destination(auto_load, store::detail::for_path(tn.pathname.str()));                                           \
                     CHECK(manual_load == auto_load);                                                                                        \
                     CHECK(manual_load == dump);                                                                                             \

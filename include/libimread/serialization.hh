@@ -29,8 +29,8 @@ namespace store {
         
         std::string join(store::stringmapper::stringvec_t const&, std::string const& with = ", ");
         store::stringmapper::formatter for_path(std::string const&);
-        std::string string_load(std::string const&);
-        bool string_dump(std::string const&, std::string const&, bool overwrite = false);
+        std::string load(std::string const&);
+        bool dump(std::string const&, std::string const&, bool overwrite = false);
         
     }
     
