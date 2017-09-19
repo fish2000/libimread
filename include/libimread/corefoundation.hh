@@ -74,7 +74,7 @@ namespace im {
         template <typename SMMergeType = store::stringmap> inline
         store::stringmap bundlemap(SMMergeType&& mergeMap = SMMergeType{}) {
             static_assert(store::is_stringmapper_v<SMMergeType>,
-                         "im::detail::bundleMap(…) operand must derive from store::stringmapper");
+                         "im::detail::bundlemap(…) operand must derive from store::stringmapper");
             store::stringmap dict;
             initialize_stringmap(dict);
             dict.update(mergeMap);
