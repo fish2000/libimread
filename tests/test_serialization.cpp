@@ -154,12 +154,10 @@ namespace {
     TEST_CASE("[serialization] Inspect static “im::detail::master” stringmap",
               "[serialization-inspect-static-im-detail-master-stringmap]")
     {
-        // using namespace im::detail;
         
         store::stringmap map;
         im::detail::initialize_stringmap(map);
         
-        REQUIRE(map.count() > 0);
         REQUIRE(map.count() > 0);
         
         CHECK(map.get("CFBundleDevelopmentRegion") != STRINGNULL());

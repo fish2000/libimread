@@ -50,12 +50,10 @@ namespace im {
                                std::remove_pointer_t<CoreFoundationType>>,
                                           cfreleaser<CoreFoundationType>>;
         
-        // extern store::stringmap master;
-        // static void master_init(void) __attribute__((constructor));
-        
         template <typename S> inline
         static void initialize_stringmap(S&& stringmap) {
-            // WTF("INITIALIZING MASTER");
+            static_assert(store::is_stringmapper_v<S>,
+                         "im::detail::initialize_stringmap(…) operand must derive from store::stringmapper");
             std::forward<S>(stringmap).set("CFBundleDevelopmentRegion",     "en");
             std::forward<S>(stringmap).set("CFBundleExecutable",            "$(EXECUTABLE_NAME)");
             std::forward<S>(stringmap).set("CFBundleIdentifier",            "$(PRODUCT_BUNDLE_IDENTIFIER)");
@@ -71,13 +69,12 @@ namespace im {
             std::forward<S>(stringmap).set("NSPrincipalClass",              "NSApplication");
             std::forward<S>(stringmap).set("UILaunchStoryboardName",        "LaunchScreen");
             std::forward<S>(stringmap).set("UIMainStoryboardFile",          "Main");
-            // WTF("INITIALIZED MASTER:", "", master.mapping_plist());
         }
         
         template <typename SMMergeType = store::stringmap> inline
         store::stringmap bundlemap(SMMergeType&& mergeMap = SMMergeType{}) {
             static_assert(store::is_stringmapper_v<SMMergeType>,
-                         "im::detail::bundleMap(…) operands must derive from store::stringmapper");
+                         "im::detail::bundleMap(…) operand must derive from store::stringmapper");
             store::stringmap dict;
             initialize_stringmap(dict);
             dict.update(mergeMap);

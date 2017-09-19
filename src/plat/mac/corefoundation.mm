@@ -27,35 +27,6 @@ std::string CFStringGetSTLString(CFStringRef theString,
     return out;
 }
 
-namespace im {
-    
-    namespace detail {
-        
-        // static const store::stringmap master = {
-        //     { "CFBundleDevelopmentRegion",      "en"                                                    },
-        //     { "CFBundleExecutable",             "$(EXECUTABLE_NAME)"                                    },
-        //     { "CFBundleIdentifier",             "$(PRODUCT_BUNDLE_IDENTIFIER)"                          },
-        //     { "CFBundleInfoDictionaryVersion",  "6.0"                                                   },
-        //     { "CFBundleName",                   "$(PRODUCT_NAME)"                                       },
-        //     { "CFBundlePackageType",            "APPL"                                                  },
-        //     { "CFBundleShortVersionString",     "1.0"                                                   },
-        //     { "CFBundleVersion",                "1"                                                     },
-        //     { "LSMinimumSystemVersion",         "$(MACOSX_DEPLOYMENT_TARGET)"                           },
-        //     { "LSRequiresIPhoneOS",             "true"                                                  },
-        //     { "NSHumanReadableCopyright",       "Copyright © 2017 Alexander Böhn. All rights reserved." },
-        //     { "NSMainStoryboardFile",           "Main"                                                  },
-        //     { "NSPrincipalClass",               "NSApplication"                                         },
-        //     { "UILaunchStoryboardName",         "LaunchScreen"                                          },
-        //     { "UIMainStoryboardFile",           "Main"                                                  }
-        // };
-        
-        // store::stringmap master;
-        // static void master_init(void) {
-        
-    } /// namespace detail
-    
-} /// namespace im
-
 namespace store {
     
     bool cfdict::can_store() const noexcept { return true; }
