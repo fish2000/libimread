@@ -49,6 +49,40 @@ namespace im {
                       typename std::decay_t<
                                std::remove_pointer_t<CoreFoundationType>>,
                                           cfreleaser<CoreFoundationType>>;
+        
+        // extern store::stringmap master;
+        // static void master_init(void) __attribute__((constructor));
+        
+        template <typename S> inline
+        static void initialize_stringmap(S&& stringmap) {
+            // WTF("INITIALIZING MASTER");
+            std::forward<S>(stringmap).set("CFBundleDevelopmentRegion",     "en");
+            std::forward<S>(stringmap).set("CFBundleExecutable",            "$(EXECUTABLE_NAME)");
+            std::forward<S>(stringmap).set("CFBundleIdentifier",            "$(PRODUCT_BUNDLE_IDENTIFIER)");
+            std::forward<S>(stringmap).set("CFBundleInfoDictionaryVersion", "6.0");
+            std::forward<S>(stringmap).set("CFBundleName",                  "$(PRODUCT_NAME)");
+            std::forward<S>(stringmap).set("CFBundlePackageType",           "APPL");
+            std::forward<S>(stringmap).set("CFBundleShortVersionString",    "1.0");
+            std::forward<S>(stringmap).set("CFBundleVersion",               "1");
+            std::forward<S>(stringmap).set("LSMinimumSystemVersion",        "$(MACOSX_DEPLOYMENT_TARGET)");
+            std::forward<S>(stringmap).set("LSRequiresIPhoneOS",            "true");
+            std::forward<S>(stringmap).set("NSHumanReadableCopyright",      "Copyright © 2017 Alexander Böhn. All rights reserved.");
+            std::forward<S>(stringmap).set("NSMainStoryboardFile",          "Main");
+            std::forward<S>(stringmap).set("NSPrincipalClass",              "NSApplication");
+            std::forward<S>(stringmap).set("UILaunchStoryboardName",        "LaunchScreen");
+            std::forward<S>(stringmap).set("UIMainStoryboardFile",          "Main");
+            // WTF("INITIALIZED MASTER:", "", master.mapping_plist());
+        }
+        
+        template <typename SMMergeType = store::stringmap> inline
+        store::stringmap bundlemap(SMMergeType&& mergeMap = SMMergeType{}) {
+            static_assert(store::is_stringmapper_v<SMMergeType>,
+                         "im::detail::bundleMap(…) operands must derive from store::stringmapper");
+            store::stringmap dict;
+            initialize_stringmap(dict);
+            dict.update(mergeMap);
+            return dict;
+        }
     }
     
 }

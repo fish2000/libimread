@@ -9,6 +9,10 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 
+#ifdef __APPLE__
+#include <libimread/corefoundation.hh>
+#endif
+
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
@@ -143,5 +147,38 @@ namespace {
     }
     
     #undef DEFINE_SERIALIZATION_FORMAT_SECTION
+    
+    #ifdef __APPLE__
+    #define STRINGNULL() store::detail::value_for_null<std::string>()
+    
+    TEST_CASE("[serialization] Inspect static “im::detail::master” stringmap",
+              "[serialization-inspect-static-im-detail-master-stringmap]")
+    {
+        // using namespace im::detail;
+        
+        store::stringmap map;
+        im::detail::initialize_stringmap(map);
+        
+        REQUIRE(map.count() > 0);
+        REQUIRE(map.count() > 0);
+        
+        CHECK(map.get("CFBundleDevelopmentRegion") != STRINGNULL());
+        CHECK(map.get("CFBundleExecutable") != STRINGNULL());
+        CHECK(map.get("CFBundleIdentifier") != STRINGNULL());
+        CHECK(map.get("CFBundleInfoDictionaryVersion") != STRINGNULL());
+        CHECK(map.get("CFBundleName") != STRINGNULL());
+        CHECK(map.get("CFBundlePackageType") != STRINGNULL());
+        CHECK(map.get("CFBundleShortVersionString") != STRINGNULL());
+        CHECK(map.get("CFBundleVersion") != STRINGNULL());
+        CHECK(map.get("LSMinimumSystemVersion") != STRINGNULL());
+        CHECK(map.get("LSRequiresIPhoneOS") != STRINGNULL());
+        CHECK(map.get("NSHumanReadableCopyright") != STRINGNULL());
+        CHECK(map.get("NSMainStoryboardFile") != STRINGNULL());
+        CHECK(map.get("NSPrincipalClass") != STRINGNULL());
+        CHECK(map.get("UILaunchStoryboardName") != STRINGNULL());
+        CHECK(map.get("UIMainStoryboardFile") != STRINGNULL());
+        
+    }
+    #endif
     
 } /// namespace (anon.)
