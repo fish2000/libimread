@@ -155,7 +155,7 @@ namespace store {
     // }
     
     std::size_t stringmapper::count(std::string const& key) const {
-        return static_cast<std::size_t>(get(key) == STRINGNULL());
+        return static_cast<std::size_t>(get(key) != STRINGNULL());
     }
     
     #pragma mark -
