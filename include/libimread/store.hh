@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_INCLUDE_STORE_HH_
 #define LIBIMREAD_INCLUDE_STORE_HH_
 
+#include <initializer_list>
 #include <unordered_map>
 #include <type_traits>
 #include <utility>
@@ -373,23 +374,23 @@ namespace store {
             virtual bool can_store() const noexcept override;
         
         public:
-            stringmap() noexcept;                               /// default constructor
-            stringmap(stringpair_init_t);                       /// initializer list with string pairs
-            stringmap(stringmap const&) = default;
-            explicit stringmap(std::string const&,              /// decode from serialized string (e.g JSON)
+            stringmap() noexcept;                               /// default (empty) constructor
+            stringmap(stringpair_init_t);                       /// construct from initializer list of string pairs
+            stringmap(stringmap const&) = default;              /// default copy constructor
+            explicit stringmap(std::string const&,              /// construct from deserialized string (e.g JSON)
                                stringmapper::formatter format = stringmapper::default_format);
         
         public:
-            static stringmap load_map(std::string const&);      /// load from disk-based file
+            static stringmap load_map(std::string const&);      /// load from disk-based file and create anew
         
         public:
-            virtual void warm_cache() const override;           /// override with no-op
+            virtual void warm_cache() const override;           /// override with inexpensive no-op
             
         public:
-            virtual void swap(stringmap&) noexcept;             /// member no-except swap
-            stringmap& operator=(stringpair_init_t);
-            stringmap& operator=(stringmap const&);
-            stringmap& operator=(stringmap&&) noexcept;
+            virtual void swap(stringmap&) noexcept;             /// member-noexcept swap
+            stringmap& operator=(stringpair_init_t);            /// assign with initializer list of string pairs
+            stringmap& operator=(stringmap const&);             /// copy-and-swap copy-assign operator
+            stringmap& operator=(stringmap&&) noexcept;         /// cache-map value-exchange move-assign operator
         
         public:
             /// implementation of the stringmapper API, in terms of std::unordered_map<…> API
@@ -403,6 +404,11 @@ namespace store {
     };
     
 } /// namespace store
+
+/// operator==(stringmapper&, stringmapper&) and its evil twin,
+/// operator==(stringmapper&, stringmapper&) both short-circut as soon
+/// as an inequality is detected; first by checking the key counts, and
+/// then while enumerating the two mappers’ values for comparison.
 
 template <typename T,
           typename U,
@@ -480,6 +486,6 @@ namespace std {
         
     };
     
-} /* namespace std */
+} /// namespace std
 
 #endif /// LIBIMREAD_INCLUDE_STORE_HH_

@@ -11,7 +11,6 @@
 #include <utility>
 #include <unordered_set>
 #include <unordered_map>
-#include <initializer_list>
 
 #include <libimread/ext/JSON/json11.h>
 #include <libimread/ext/namedtuple.hh>
@@ -21,9 +20,6 @@ using detail::stringvec_t;
 using stringmap_t = store::stringmapper::stringmap_t;
 using prefixset_t  = std::unordered_set<std::string>;
 using prefixgram_t = std::unordered_map<std::string, std::size_t>;
-// using stringpair_t = std::pair<std::string, std::string>;
-// using string_init_t = std::initializer_list<std::string>;
-// using stringpair_init_t = std::initializer_list<stringpair_t>;
 using stringpair_t = store::stringmapper::stringpair_t;
 using string_init_t = store::stringmapper::string_init_t;
 using stringpair_init_t = store::stringmapper::stringpair_init_t;
