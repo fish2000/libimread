@@ -232,7 +232,10 @@ namespace store {
         
         std::string load(std::string const& source) {
             using filesystem::path;
-            path sourcepath(source);
+            
+            /// Properly “normalize” the source filepath --
+            /// N.B. this may raise im::FileSystemError:
+            path sourcepath = path::expand_user(source).make_absolute();
             
             /// Examine the source filepath, and ensure
             /// that it is properly dealt with, depending
@@ -240,17 +243,17 @@ namespace store {
             /// function was called:
             if (!sourcepath.exists()) {
                 imread_raise(CannotReadError,
-                    "store::detail::string_load(source): nonexistant source file",
+                    "store::detail::load(source): nonexistant source file",
                  FF("\tsource == %s", sourcepath.c_str()));
             }
             if (!sourcepath.is_file_or_link()) {
                 imread_raise(CannotReadError,
-                    "store::detail::string_load(source): non-file-or-link source file",
+                    "store::detail::load(source): non-file-or-link source file",
                  FF("\tsource == %s", sourcepath.c_str()));
             }
             if (!sourcepath.is_readable()) {
                 imread_raise(CannotReadError,
-                    "store::detail::string_load(source): unreadable source file",
+                    "store::detail::load(source): unreadable source file",
                  FF("\tsource == %s", sourcepath.c_str()));
             }
             
@@ -261,7 +264,7 @@ namespace store {
             stream.open(sourcepath.str(), std::ios::in);
             if (!stream.is_open()) {
                 imread_raise(CannotReadError,
-                    "store::detail::string_load(source): couldn't open a stream to read source file",
+                    "store::detail::load(source): couldn't open a stream to read source file",
                  FF("\tsource == %s", sourcepath.c_str()));
             }
             
@@ -306,7 +309,7 @@ namespace store {
             
             /// Create a temporary file,
             /// open its stream interface,
-            /// and add in the string the content:
+            /// and add the content:
             NamedTemporaryFile tf("." + ext);
             tf.open();
             tf.stream << content;
