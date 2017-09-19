@@ -221,6 +221,11 @@ namespace store {
     
     stringmap::stringmap() noexcept {}
     
+    stringmap::stringmap(stringpair_init_t stringpair_init) {
+        cache = store::stringmapper::stringmap_t(stringpair_init.begin(),
+                                                 stringpair_init.end());
+    }
+    
     stringmap::stringmap(std::string const& serialized,
                          stringmapper::formatter format) {
         switch (format) {
@@ -291,6 +296,21 @@ namespace store {
     void stringmap::swap(stringmap& other) noexcept {
         using std::swap;
         swap(cache, other.cache);
+    }
+    
+    stringmap& stringmap::operator=(stringpair_init_t stringpair_init) {
+        stringmap(stringpair_init).swap(*this);
+        return *this;
+    }
+    
+    stringmap& stringmap::operator=(stringmap const& other) {
+        stringmap(other).swap(*this);
+        return *this;
+    }
+    
+    stringmap& stringmap::operator=(stringmap&& other) noexcept {
+        cache = std::exchange(other.cache, cache);
+        return *this;
     }
     
     std::string& stringmap::get(std::string const& key) {

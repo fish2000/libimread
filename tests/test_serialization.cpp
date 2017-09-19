@@ -28,16 +28,16 @@ namespace {
     TEST_CASE("[serialization] Test store::detail::*_dumps() and store::detail::*_impl()",
               "[serialization-test-store-detail-dumps-store-detail-impl]")
     {
-        stringmap source;
-        
-        source.set("yo",            "dogg");
-        source.set("i_heard",       "you like");
-        source.set("serialization", "and all of its methods");
-        source.set("so",            "we put some");
-        source.set("strings",       "in your strings so you can");
-        source.set("encode",        "while you decode, and");
-        source.set("decode",        "while you encode");
-        source.set("etc",           "and soforth");
+        stringmap source = {
+            { "yo",             "dogg" },
+            { "i_heard",        "you like" },
+            { "serialization",  "and all of its methods" },
+            { "so",             "we put some" },
+            { "strings",        "in your strings so you can" },
+            { "encode",         "while you decode, and" },
+            { "decode",         "while you encode" },
+            { "etc",            "and soforth" }
+        };
         
         #if(SERIALIZATION_PRINT_DUMPS)
         std::string asterisks(120, '*');
@@ -78,16 +78,16 @@ namespace {
     TEST_CASE("[serialization] Test string I/O helper functions",
               "[serialization-test-string-io-helper-functions]")
     {
-        stringmap source;
-        
-        source.set("yo",            "dogg");
-        source.set("i_heard",       "you like");
-        source.set("serialization", "and all of its methods");
-        source.set("so",            "we put some");
-        source.set("strings",       "in your strings so you can");
-        source.set("encode",        "while you decode, and");
-        source.set("decode",        "while you encode");
-        source.set("etc",           "and soforth");
+        stringmap source = {
+            { "yo",             "dogg" },
+            { "i_heard",        "you like" },
+            { "serialization",  "and all of its methods" },
+            { "so",             "we put some" },
+            { "strings",        "in your strings so you can" },
+            { "encode",         "while you decode, and" },
+            { "decode",         "while you encode" },
+            { "etc",            "and soforth" }
+        };
         
         #if(SERIALIZATION_PRINT_DUMPS)
         std::string asterisks(120, '*');

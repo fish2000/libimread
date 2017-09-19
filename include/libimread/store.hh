@@ -97,6 +97,10 @@ namespace store {
             using stringvec_t = std::vector<std::string>;
             using stringmap_t = std::unordered_map<std::string, std::string>;
             
+            using stringpair_t = std::pair<std::string, std::string>;
+            using string_init_t = std::initializer_list<std::string>;
+            using stringpair_init_t = std::initializer_list<stringpair_t>;
+            
             using base_t::null_key;
             using base_t::null_value;
         
@@ -360,6 +364,9 @@ namespace store {
     class stringmap final : public stringmapper {
         
         public:
+            using stringmapper::cache;
+        
+        public:
             DECLARE_STRINGMAPPER_TEMPLATES(stringmap);
         
         public:
@@ -367,6 +374,8 @@ namespace store {
         
         public:
             stringmap() noexcept;                               /// default constructor
+            stringmap(stringpair_init_t);                       /// initializer list with string pairs
+            stringmap(stringmap const&) = default;
             explicit stringmap(std::string const&,              /// decode from serialized string (e.g JSON)
                                stringmapper::formatter format = stringmapper::default_format);
         
@@ -378,6 +387,9 @@ namespace store {
             
         public:
             virtual void swap(stringmap&) noexcept;             /// member no-except swap
+            stringmap& operator=(stringpair_init_t);
+            stringmap& operator=(stringmap const&);
+            stringmap& operator=(stringmap&&) noexcept;
         
         public:
             /// implementation of the stringmapper API, in terms of std::unordered_map<…> API
