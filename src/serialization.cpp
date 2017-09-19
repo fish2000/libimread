@@ -118,13 +118,12 @@ namespace store {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             plist_dictptr_t dict(static_cast<PList::Dictionary*>(
                                              PList::Structure::FromXml(xmlstr)));
-            if (!dict.get()) { return; }
+            if (!dict.get()) { return; }                        /// `xmlstr` must be a valid XML plist
             std::for_each(dict->Begin(),
                           dict->End(),
                       [&](auto const& item) {
                             stringmap_ptr->set(item.first,
-                   static_cast<PList::String*>(item.second)->GetValue());
-            });
+                   static_cast<PList::String*>(item.second)->GetValue()); });
         }
         
         #pragma mark -
@@ -138,13 +137,16 @@ namespace store {
                         [](auto const& item) { return uri::encode(item.first)
                                                     + "="
                                                     + uri::encode(item.second); });
-            return questionmark ? "?" + join(pairs, "&") : join(pairs, "&");
+            return questionmark ? "?" + join(pairs, "&")
+                                      : join(pairs, "&");
         }
         
         void urlparam_impl(std::string const& urlstr, store::stringmapper* stringmap_ptr) {
             if (stringmap_ptr == nullptr) { return; }           /// `stringmap_ptr` must be a valid pointer
             if (urlstr.size() == 0)       { return; }           /// `urlstr` cannot be zero-length
-            std::string url = urlstr[0] == '?' ? std::string(urlstr.begin() + 1, urlstr.end()) : urlstr;
+            std::string url = urlstr[0] == '?' ? std::string(urlstr.begin() + 1,
+                                                             urlstr.end())
+                                               : std::string(urlstr);
             if (url.size() == 0)          { return; }           /// `url` cannot be zero-length
             store::stringmapper::stringvec_t pairs, pairvec;
             pystring::split(url, pairs, "&");
