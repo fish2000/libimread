@@ -804,26 +804,23 @@ namespace filesystem {
     /// https://github.com/textmate/textmate/blob/353ae8839cf0b62dac08225a8240e9609bf0fb34/Frameworks/io/src/path.cc#L78-L112
     /// … q.v. the “toSkip” counter and the manner by which it is decremented
     path path::normalize() const {
-        path out(m_absolute);               /// output path
+        path out(m_absolute);       /// output path
         int skip = 0,               /// segment skip counter
-                    idx = 0,
-                    max = m_path.size();    /// size of segment vector
-        
-        /// start counting at the top of the path segment vector:
-        // int idx = static_cast<int>(max);
-                    int reverse_idx = max;
+            idx = m_path.size();    /// size of segment vector
         
         /// initialize boolean vector for marking segemnts for copying:
-        std::vector<bool> will_copy(max, false);
+        std::vector<bool> will_copy(idx, false);
         
         /// backtrack through path segments,
         /// only marking those for copying if they don’t resolve:
-        // for (; idx != -1; --idx) {
-        for (; idx < max; ++idx,
-                    reverse_idx = max - (idx)) {
-            // std::string const& segment = m_path[reverse_idx];
-            std::string const& segment = m_path.at(reverse_idx);
-            // WTF("SEGMENT:", segment);
+        for (; idx != -1; --idx) {
+            std::string segment;
+            try {
+                segment = m_path.at(idx);
+            } catch (std::out_of_range&) {
+                continue;
+            }
+            
             if (!segment.size()) {
                 /// noop
             } else if (segment == ".") {
@@ -833,8 +830,7 @@ namespace filesystem {
             } else if (skip) {
                 --skip;
             } else {
-                // will_copy[reverse_idx] = true;
-                will_copy.at(reverse_idx) = true;
+                will_copy[idx] = true;
             }
         }
         
