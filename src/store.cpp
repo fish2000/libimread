@@ -121,6 +121,7 @@ namespace store {
     std::size_t stringmapper::hash(std::size_t H) const {
         warm_cache();
         hash::rehash<std::string>(H, detail::json_dumps(cache));
+        hash::rehash<std::uintptr_t>(H, reinterpret_cast<std::uintptr_t>(this));
         return H;
     }
     
