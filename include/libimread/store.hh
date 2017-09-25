@@ -406,7 +406,7 @@ namespace store {
 } /// namespace store
 
 /// operator==(stringmapper&, stringmapper&) and its evil twin,
-/// operator==(stringmapper&, stringmapper&) both short-circut as soon
+/// operator!=(stringmapper&, stringmapper&) both short-circut as soon
 /// as an inequality is detected; first by checking the key counts, and
 /// then while enumerating the two mappers’ values for comparison.
 
