@@ -28,7 +28,7 @@ namespace {
     TEST_CASE("[serialization] Test store::detail::*_dumps() and store::detail::*_impl()",
               "[serialization-test-store-detail-dumps-store-detail-impl]")
     {
-        stringmap source = {
+        store::stringmap source = {
             { "yo",             "dogg" },
             { "i_heard",        "you like" },
             { "serialization",  "and all of its methods" },
@@ -46,7 +46,7 @@ namespace {
                                                                                                                                             \
                 SECTION("[serialization] » Testing store::detail::" # __name__ "_dumps() and store::detail::" # __name__ "_impl()")         \
                 {                                                                                                                           \
-                    stringmap destination;                                                                                                  \
+                    store::stringmap destination;                                                                                           \
                     std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
                     WTF("SERIALIZATION - " # __name__ " dump:", "\n" + asterisks + "\n" + dump + "\n" + asterisks);                         \
                     store::detail::__name__##_impl(dump, &destination);                                                                     \
@@ -58,13 +58,13 @@ namespace {
                                                                                                                                             \
                 SECTION("[serialization] » Testing store::detail::" # __name__ "_dumps() and store::detail::" # __name__ "_impl()")         \
                 {                                                                                                                           \
-                    stringmap destination;                                                                                                  \
+                    store::stringmap destination;                                                                                           \
                     std::string dump = store::detail::__name__##_dumps(source.mapping());                                                   \
                     store::detail::__name__##_impl(dump, &destination);                                                                     \
                     CHECK(source == destination);                                                                                           \
                 }
         
-        #endif
+        #endif /// SERIALIZATION_PRINT_DUMPS
         
         DEFINE_SERIALIZATION_FORMAT_SECTION(ini);
         DEFINE_SERIALIZATION_FORMAT_SECTION(json);
@@ -78,7 +78,7 @@ namespace {
     TEST_CASE("[serialization] Test string I/O helper functions",
               "[serialization-test-string-io-helper-functions]")
     {
-        stringmap source = {
+        store::stringmap source = {
             { "yo",             "dogg" },
             { "i_heard",        "you like" },
             { "serialization",  "and all of its methods" },
@@ -108,7 +108,7 @@ namespace {
                     WTF("SERIALIZATION - " # __name__ " file:", tn.pathname.str());                                                         \
                     std::string manual_load = store::detail::load(tn.pathname.str());                                                       \
                     std::string auto_load = store::detail::load(tf.filepath.str());                                                         \
-                    stringmap destination(auto_load, store::detail::for_path(tn.pathname.str()));                                           \
+                    store::stringmap destination(auto_load, store::detail::for_path(tn.pathname.str()));                                    \
                     CHECK(manual_load == auto_load);                                                                                        \
                     CHECK(manual_load == dump);                                                                                             \
                     CHECK(auto_load == dump);                                                                                               \
@@ -130,14 +130,14 @@ namespace {
                     tf.close();                                                                                                             \
                     std::string manual_load = store::detail::load(tn.pathname.str());                                                       \
                     std::string auto_load = store::detail::load(tf.filepath.str());                                                         \
-                    stringmap destination(auto_load, store::detail::for_path(tn.pathname.str()));                                           \
+                    store::stringmap destination(auto_load, store::detail::for_path(tn.pathname.str()));                                    \
                     CHECK(manual_load == auto_load);                                                                                        \
                     CHECK(manual_load == dump);                                                                                             \
                     CHECK(auto_load == dump);                                                                                               \
                     CHECK(source == destination);                                                                                           \
                 }
         
-        #endif
+        #endif /// SERIALIZATION_PRINT_DUMPS
         
         DEFINE_SERIALIZATION_FORMAT_SECTION(ini);
         DEFINE_SERIALIZATION_FORMAT_SECTION(json);
@@ -177,6 +177,6 @@ namespace {
         CHECK(map.get("UIMainStoryboardFile") != STRINGNULL());
         
     }
-    #endif
+    #endif /// __APPLE__
     
 } /// namespace (anon.)
