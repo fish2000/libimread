@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <utility>
 #include <string>
-// #include <map>
 #include <regex>
 #include <vector>
 
@@ -104,7 +103,6 @@ namespace store {
             using string_init_t = std::initializer_list<std::string>;
             using stringpair_init_t = std::initializer_list<stringpair_t>;
             using patternmap_t = std::unordered_map<std::string, std::regex>;
-            // using interpolationmap_t = std::map<std::regex, std::string>;
             
             using base_t::null_key;
             using base_t::null_value;
