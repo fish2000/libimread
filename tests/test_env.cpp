@@ -152,7 +152,27 @@ namespace {
     {
         store::env viron;
         store::stringmap bundle = im::detail::bundlemap();
+        std::string thisprogram = std::string(path::currentprogram()); /// NB. THIS ISN’T IDEMPOTENT????
         
+        // WTF("EXECUTABLE_NAME:", std::getenv("EXECUTABLE_NAME"));
+        // WTF("EXECUTABLE_NAME:", viron.get("EXECUTABLE_NAME"));
+        
+        // REQUIRE(viron.set("EXECUTABLE_NAME",             std::string(thisprogram)));
+        REQUIRE(viron.set("PRODUCT_BUNDLE_IDENTIFIER",  "ost.libimread.imread_tests"));
+        REQUIRE(viron.set("PRODUCT_NAME",               "libimread test-runner CLI"));
+        REQUIRE(viron.set("MACOSX_DEPLOYMENT_TARGET",   "10.10"));
+        
+        store::stringmap interpolated = bundle.interpolate(viron);
+        
+        // CHECK(interpolated.get("CFBundleExecutable") ==      std::string(thisprogram));
+        CHECK(interpolated.get("CFBundleIdentifier") ==     "ost.libimread.imread_tests");
+        CHECK(interpolated.get("CFBundleName") ==           "libimread test-runner CLI");
+        CHECK(interpolated.get("LSMinimumSystemVersion") == "10.10");
+        
+        // REQUIRE(viron.del("EXECUTABLE_NAME"));
+        REQUIRE(viron.del("PRODUCT_BUNDLE_IDENTIFIER"));
+        REQUIRE(viron.del("PRODUCT_NAME"));
+        REQUIRE(viron.del("MACOSX_DEPLOYMENT_TARGET"));
     }
     #endif /// __APPLE__
     

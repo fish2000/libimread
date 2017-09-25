@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <utility>
 #include <string>
+// #include <map>
 #include <regex>
 #include <vector>
 
@@ -103,7 +104,7 @@ namespace store {
             using string_init_t = std::initializer_list<std::string>;
             using stringpair_init_t = std::initializer_list<stringpair_t>;
             using patternmap_t = std::unordered_map<std::string, std::regex>;
-            using interpolationmap_t = std::unordered_map<std::regex, std::string>;
+            // using interpolationmap_t = std::map<std::regex, std::string>;
             
             using base_t::null_key;
             using base_t::null_value;
@@ -291,22 +292,23 @@ namespace store {
                                         store::is_stringmapper_v<T>, store::stringmap>>         \
         X interpolate(T&& source) {                                                             \
             stringmapper::stringmap_t const& sourcemap = std::forward<T>(source).mapping();     \
-            stringmapper::interpolationmap_t patterns;                                          \
+            stringmapper::patternmap_t patterns;                                                \
             std::transform(sourcemap.begin(),     sourcemap.end(),                              \
                            std::inserter(patterns, patterns.end()),                             \
                        [&](auto const& item) {                                                  \
-                std::regex  re(R"($()" + item.first + R"())", std::regex::extended);            \
+                std::regex  re(R"(\$\()" + item.first + R"(\))", std::regex::extended);         \
                 std::string text(item.second);                                                  \
-                return std::make_pair(std::move(re),                                            \
-                                      std::move(text)); });                                     \
+                return std::make_pair(std::move(text),                                          \
+                                      std::move(re)); });                                       \
             X out;                                                                              \
             for (std::string const& name : std::forward<__typename__>(*this).list()) {          \
-                std::string text = std::forward<__typename__>(*this).get(name);                 \
+                std::string text = std::string(std::forward<__typename__>(*this).get(name));    \
                 std::for_each(patterns.begin(),                                                 \
                               patterns.end(),                                                   \
-                          [&](auto const& item) { text = std::regex_replace(text,               \
-                                                                            item.first,         \
-                                                                            item.second); });   \
+                          [&](auto const& item) { if (std::regex_search(text, item.second,      \
+                                                      std::regex_constants::match_default)) {   \
+                          text = std::regex_replace(text, item.second, item.first); }           \
+                });                                                                             \
                 std::forward<X>(out).set(name, text);                                           \
             }                                                                                   \
             return out;                                                                         \
