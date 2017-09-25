@@ -249,10 +249,12 @@ set_target_properties(imread_static
 # for-reals building up in all this:
 target_link_libraries(imread_shared
     z png guid
-    inicpp_shared
+    $<TARGET_OBJECTS:inicpp>
     # libbf interpol
-    depixelate_shared
-    imagecompression_shared
+    $<TARGET_OBJECTS:depixelate_hqx>
+    $<TARGET_OBJECTS:depixelate_scale2x>
+    $<TARGET_OBJECTS:depixelate_xbrz>
+    $<TARGET_OBJECTS:imagecompression>
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -269,10 +271,12 @@ target_link_libraries(imread_shared
 
 target_link_libraries(imread_static
     z png guid
-    inicpp_static
+    $<TARGET_OBJECTS:inicpp>
     # libbf interpol
-    depixelate_static
-    imagecompression_static
+    $<TARGET_OBJECTS:depixelate_hqx>
+    $<TARGET_OBJECTS:depixelate_scale2x>
+    $<TARGET_OBJECTS:depixelate_xbrz>
+    $<TARGET_OBJECTS:imagecompression>
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -397,10 +401,8 @@ if(IM_TESTS)
     target_link_libraries(imread_tests
         imread_shared
         guid png z
-        inicpp_shared
-        imagecompression_shared
         # libbf interpol
-        depixelate_shared
+        # depixelate_shared
         # vdb-client
         ${EXTRA_LIBS}
         ${TIFF_LIBRARIES}

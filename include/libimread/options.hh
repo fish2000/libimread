@@ -24,7 +24,8 @@ using stringpair_t = store::stringmapper::stringpair_t;
 using string_init_t = store::stringmapper::string_init_t;
 using stringpair_init_t = store::stringmapper::stringpair_init_t;
 using prefixpair_t = std::pair<prefixset_t, stringvec_t>;
-using patternmap_t = std::unordered_map<std::string, std::regex>;
+// using patternmap_t = std::unordered_map<std::string, std::regex>;
+using patternmap_t = store::stringmapper::patternmap_t;
 using ratios_t = std::tuple<double, double, int, int, int>;
 
 namespace im {

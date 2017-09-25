@@ -49,7 +49,7 @@ set_property(
     PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 # Add shared and static library targets, based on the “OBJECT” library,
-# respectively  called “inicpp_shared” and “inicpp_static”:
+# respectively called “inicpp_shared” and “inicpp_static”:
 add_library(
     inicpp_shared
     SHARED $<TARGET_OBJECTS:inicpp>)
@@ -72,17 +72,6 @@ set_target_properties(
 
 target_link_libraries(inicpp_shared)
 target_link_libraries(inicpp_static)
-
-
-# Set up google testing framework (not compile by default)
-# set(gtest_force_shared_crt ON CACHE BOOL "Use shared (DLL) run-time lib even when Google Test is built as static lib.")
-# add_subdirectory(vendor/googletest EXCLUDE_FROM_ALL)
-
-# Add our very own unit tests (not compile by default)
-# add_subdirectory(tests EXCLUDE_FROM_ALL)
-
-# Add examples programs
-# add_subdirectory(examples EXCLUDE_FROM_ALL)
 
 # Install the header files:
 install(DIRECTORY   include/inicpp/

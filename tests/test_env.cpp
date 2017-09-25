@@ -8,6 +8,10 @@
 #include <libimread/store.hh>
 #include <libimread/env.hh>
 
+#ifdef __APPLE__
+#include <libimread/corefoundation.hh>
+#endif /// __APPLE__
+
 // #define COLLECT_TEMPORARIES 1
 #include "helpers/collect.hh"
 #include "include/catch.hpp"
@@ -141,5 +145,15 @@ namespace {
         // path memorypth = td.dirpath.join("memory-dump.json");
         
     }
+    
+    #ifdef __APPLE__
+    TEST_CASE("[environment] Interpolate environment variables into another store::stringmapper",
+              "[environment-interpolate-environment-variables-into-another-store-stringmapper]")
+    {
+        store::env viron;
+        store::stringmap bundle = im::detail::bundlemap();
+        
+    }
+    #endif /// __APPLE__
     
 } /// namespace (anon.)

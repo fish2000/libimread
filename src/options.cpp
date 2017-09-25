@@ -423,7 +423,7 @@ namespace im {
         std::transform(prefixes.begin(),       prefixes.end(),
                        std::inserter(patterns, patterns.end()),
                    [&](std::string const& prefix) {
-            std::regex re("^" + prefix + separator,  std::regex::extended);
+            std::regex re("^" + prefix + separator, std::regex::extended);
             return std::make_pair(std::move(prefix),
                                   std::move(re));
         });
