@@ -13,7 +13,7 @@ SET(C_OPTIONS
     -x c)
 
 SET(CXX_OPTIONS
-    -std=c++1z -stdlib=libc++
+    -std=c++17 -stdlib=libc++
     -x c++)
 
 # Extra options for Image IO code
