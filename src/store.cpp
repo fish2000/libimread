@@ -14,6 +14,45 @@ namespace store {
     #pragma mark -
     #pragma mark base class store::stringmapper default methods
     
+    bool stringmapper::operator+=(stringmapper::stringpair_t const& stringpair) {
+        return set(stringpair.first, stringpair.second);
+    }
+    
+    bool stringmapper::operator+=(stringmapper::stringpair_init_t stringpair_init) {
+        bool out = true;
+        for (stringmapper::stringpair_t const& stringpair : stringpair_init) {
+            out &= set(stringpair.first, stringpair.second);
+        }
+        return out;
+    }
+    
+    bool stringmapper::operator-=(stringmapper::stringpair_t const& stringpair) {
+        if (get(stringpair.first) == stringpair.second) {
+            return del(stringpair.first);
+        }
+        return false;
+    }
+    
+    bool stringmapper::operator-=(stringmapper::stringpair_init_t stringpair_init) {
+        bool out = true;
+        for (stringmapper::stringpair_t const& stringpair : stringpair_init) {
+            if (get(stringpair.first) == stringpair.second) {
+                out &= del(stringpair.first);
+            } else {
+                out &= false;
+            }
+        }
+        return out;
+    }
+    
+    bool stringmapper::operator-=(stringmapper::string_init_t string_init) {
+        bool out = true;
+        for (std::string const& key : string_init) {
+            out &= del(key);
+        }
+        return out;
+    }
+    
     void stringmapper::with_ini(std::string const& inistr) {
         detail::ini_impl(inistr, this);
     }

@@ -129,6 +129,13 @@ namespace store {
             virtual stringvec_t list() const = 0;
         
         public:
+            virtual bool operator+=(stringpair_t const&);
+            virtual bool operator+=(stringpair_init_t);
+            virtual bool operator-=(stringpair_t const&);
+            virtual bool operator-=(stringpair_init_t);
+            virtual bool operator-=(string_init_t);
+        
+        public:
             virtual void with_ini(std::string const&);
             virtual void with_json(std::string const&);
             virtual void with_plist(std::string const&);
