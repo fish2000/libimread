@@ -17,7 +17,7 @@ include_directories(
 
 add_definitions(
     -Wall -Werror -O3
-    -std=c++14 -stdlib=libc++
+    -std=c++17 -stdlib=libc++
     -fstrict-aliasing
     -fstack-protector-all
     -mtune=native)

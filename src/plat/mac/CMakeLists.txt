@@ -3,7 +3,7 @@ add_definitions(
     -fobjc-abi-version=3
     -fobjc-arc -fobjc-call-cxx-cdtors
     -fno-objc-arc-exceptions
-    -std=c++1z -stdlib=libc++
+    -std=c++17 -stdlib=libc++
     -x objective-c++
     -Wno-nullability-completeness
     -DWITH_SCHEMA
