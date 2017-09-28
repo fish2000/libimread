@@ -16,16 +16,16 @@
 #include <libimread/ext/namedtuple.hh>
 #include <libimread/store.hh>
 
-using detail::stringvec_t;
-using stringmap_t = store::stringmapper::stringmap_t;
-using prefixset_t  = std::unordered_set<std::string>;
-using prefixgram_t = std::unordered_map<std::string, std::size_t>;
-using stringpair_t = store::stringmapper::stringpair_t;
-using string_init_t = store::stringmapper::string_init_t;
-using stringpair_init_t = store::stringmapper::stringpair_init_t;
-using prefixpair_t = std::pair<prefixset_t, stringvec_t>;
-using patternmap_t = store::stringmapper::patternmap_t;
-using ratios_t = std::tuple<double, double, int, int, int>;
+using detail::stringvec_t;                                          /// = std::vector<std::string> (a scommon libimread idiom)
+using stringmap_t = store::stringmapper::stringmap_t;               /// = std::unordered_map<std::string, std::string>
+using prefixset_t  = std::unordered_set<std::string>;               /// q.v. Options::prefixset(…), Options::prefixgram(…) [ibid.]
+using prefixgram_t = std::unordered_map<std::string, std::size_t>;  /// prefixgram_t = “prefix histogram”
+using stringpair_t = store::stringmapper::stringpair_t;             /// = std::pair<std::string, std::regex>
+using string_init_t = store::stringmapper::string_init_t;           /// = std::initializer_list<std::string>
+using stringpair_init_t = store::stringmapper::stringpair_init_t;   /// = std::initializer_list<stringpair_t>
+using prefixpair_t = std::pair<prefixset_t, stringvec_t>;           /// convenience, for passing along the vector
+using patternmap_t = store::stringmapper::patternmap_t;             /// = std::unordered_map<std::string, std::regex>
+using ratios_t = std::tuple<double, double, int, int, int>;         /// q.v. Options::ratios(…) implementation, options.cpp (sub.)
 
 namespace im {
     
