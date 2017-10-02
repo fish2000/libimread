@@ -304,14 +304,14 @@ namespace im {
     }
     
     bool Options::set(std::string const& key, std::string const& value) {
-        if (key == STRINGNULL()) { return Options::del(key); }
+        if (value == STRINGNULL()) { return Options::del(key); }
         cache[key] = value;
         Json::set(key, value);
         return Json::has(key);
     }
     
     bool Options::set(std::string const& key, Json const& value) {
-        if (key == STRINGNULL()) { return Options::del(key); }
+        if (value == STRINGNULL()) { return Options::del(key); }
         cache[key] = std::string(value);
         Json::set(key, value);
         return Json::has(key);
