@@ -13,7 +13,6 @@
 #include <unordered_map>
 
 #include <libimread/ext/JSON/json11.h>
-#include <libimread/ext/namedtuple.hh>
 #include <libimread/store.hh>
 
 using detail::stringvec_t;                                          /// = std::vector<std::string> (a scommon libimread idiom)
