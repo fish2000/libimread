@@ -162,13 +162,8 @@ namespace im {
                     std::strerror(errno));
             }
             mapped = detail::mapped_t{ mapped_ptr, [fsize](void* mp) {
-                    if (::munmap(mp, fsize) != 0) {
-                        imread_raise(FileSystemError,
-                            "error unmapping file descriptor:",
-                            std::strerror(errno));
-                    }
-                }
-            };
+                ::munmap(mp, fsize);
+            }};
         }
         return mapped.get();
     }
@@ -244,12 +239,9 @@ namespace im {
         int out = -1;
         mapped.reset(nullptr);
         if (descriptor > 0) {
-            if (::close(descriptor) == -1) {
-                imread_raise(FileSystemError,
-                    "error closing file descriptor:",
-                    std::strerror(errno));
+            if (::close(descriptor) != -1) {
+                swap(out, descriptor);
             }
-            swap(out, descriptor);
         }
         return out;
     }
@@ -363,6 +355,7 @@ namespace im {
         }
         return descriptor;
     }
+    
     filesystem::mode fifo_source_sink::mode(filesystem::mode m) {
         md = m;
         return md;

@@ -119,13 +119,8 @@ namespace im {
                     std::strerror(errno));
             }
             mapped = detail::mapped_t{ mapped_ptr, [fsize](void* mp) {
-                    if (::munmap(mp, fsize) != 0) {
-                        imread_raise(FileSystemError,
-                            "error unmapping filehandle:",
-                            std::strerror(errno));
-                    }
-                }
-            };
+                ::munmap(mp, fsize);
+            }};
         }
         return mapped.get();
     }
@@ -195,12 +190,9 @@ namespace im {
         FILE* out = nullptr;
         mapped.reset(nullptr);
         if (handle && !external) {
-            if (std::fclose(handle) == -1) {
-                imread_raise(FileSystemError,
-                    "error closing filehandle:",
-                    std::strerror(errno));
+            if (std::fclose(handle) != -1) {
+                swap(out, handle);
             }
-            swap(out, handle);
         }
         return out;
     }
