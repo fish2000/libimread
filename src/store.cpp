@@ -259,8 +259,6 @@ namespace store {
     
     bool stringmap::can_store() const noexcept { return true; }
     
-    stringmap::stringmap() noexcept {}
-    
     stringmap::stringmap(stringpair_init_t stringpair_init) {
         cache = store::stringmapper::stringmap_t(stringpair_init.begin(),
                                                  stringpair_init.end());
@@ -344,11 +342,13 @@ namespace store {
     }
     
     stringmap& stringmap::operator=(stringmap const& other) {
+        if (this == std::addressof(other)) { return *this; }
         stringmap(other).swap(*this);
         return *this;
     }
     
     stringmap& stringmap::operator=(stringmap&& other) noexcept {
+        if (std::addressof(cache) == std::addressof(other.cache)) { return *this; }
         cache = std::exchange(other.cache, cache);
         return *this;
     }

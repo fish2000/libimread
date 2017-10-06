@@ -410,7 +410,7 @@ namespace store {
             virtual bool can_store() const noexcept override;
         
         public:
-            stringmap() noexcept;                               /// default (empty) constructor
+            stringmap() noexcept = default;                     /// default (empty) constructor
             stringmap(stringpair_init_t);                       /// construct from initializer list of string pairs
             stringmap(stringmap const&) = default;              /// default copy constructor
             explicit stringmap(std::string const&,              /// construct from deserialized string (e.g JSON)
