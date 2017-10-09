@@ -11,7 +11,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/mode.h>
-#include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/seekable.hh>
 #include <libimread/store.hh>
@@ -31,6 +30,7 @@ namespace im {
             
             virtual ~handle_source_sink();
             
+        public:
             /// im::seekable methods
             virtual bool can_seek() const noexcept override;
             virtual bool can_store() const noexcept override;
@@ -38,6 +38,7 @@ namespace im {
             virtual std::size_t seek_relative(int delta) override;
             virtual std::size_t seek_end(int delta) override;
             
+        public:
             /// im::byte_source and im::byte_sink methods
             virtual std::size_t read(byte* buffer, std::size_t n) const override;
             virtual bytevec_t full_data() const override;
@@ -49,31 +50,31 @@ namespace im {
             
             virtual void* readmap(std::size_t pageoffset = 0) const override;
             
+        public:
             /// Filesystem extended attribute (“xattr”) access
             virtual std::string xattr(std::string const&) const override;
             virtual std::string xattr(std::string const&, std::string const&) const override;
             virtual int xattrcount() const override;
             virtual filesystem::detail::stringvec_t xattrs() const override;
             
+        public:
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
             virtual FILE* fh() const noexcept;
             virtual void fh(FILE* fh) noexcept;
             
+        public:
             virtual bool exists() const noexcept;
             virtual FILE* open(char* cpath, filesystem::mode fmode = filesystem::mode::READ);
             virtual FILE* close();
             
-        private:
+        protected:
             mutable FILE* handle = nullptr;
             mutable detail::mapped_t mapped;
             bool external = false;
     };
     
     class filehandle_source_sink : public handle_source_sink {
-        private:
-            filesystem::path pth;
-            filesystem::mode md;
         
         public:
             filehandle_source_sink(filesystem::mode fmode = filesystem::mode::READ);
@@ -84,10 +85,15 @@ namespace im {
             filehandle_source_sink(std::string const& cspath, filesystem::mode fmode = filesystem::mode::READ);
             filehandle_source_sink(filesystem::path const& ppath, filesystem::mode fmode = filesystem::mode::READ);
             
+        public:
             filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
             filesystem::mode mode(filesystem::mode m);
             filesystem::mode mode() const;
+            
+        protected:
+            filesystem::path pth;
+            filesystem::mode md;
     };
     
     namespace handle {

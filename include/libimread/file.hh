@@ -33,6 +33,7 @@ namespace im {
             static constexpr int kFIFOWriteFlags    = O_WRONLY | O_CLOEXEC;
             static constexpr int kWriteCreateMask   = 0644;
             
+        protected:
             static int open_read(char const* p);
             static int open_write(char const* p, int mask = kWriteCreateMask);
             static int fifo_open_read(char const* p);
@@ -48,6 +49,7 @@ namespace im {
             
             virtual ~fd_source_sink();
             
+        public:
             /// im::seekable methods
             virtual bool can_seek() const noexcept override;
             virtual bool can_store() const noexcept override;
@@ -55,6 +57,7 @@ namespace im {
             virtual std::size_t seek_relative(int delta) override;
             virtual std::size_t seek_end(int delta) override;
             
+        public:
             /// im::byte_source and im::byte_sink methods
             virtual std::size_t read(byte* buffer, std::size_t n) const override;
             virtual bytevec_t full_data() const override;
@@ -66,17 +69,20 @@ namespace im {
             
             virtual void* readmap(std::size_t pageoffset = 0) const override;
             
+        public:
             /// Filesystem extended attribute (“xattr”) access
             virtual std::string xattr(std::string const&) const override;
             virtual std::string xattr(std::string const&, std::string const&) const override;
             virtual int xattrcount() const override;
             virtual filesystem::detail::stringvec_t xattrs() const override;
             
+        public:
             virtual int fd() const noexcept;
             virtual void fd(int fd) noexcept;
             virtual filesystem::file fh() const noexcept;
             virtual void fh(FILE* fh) noexcept;
             
+        public:
             virtual bool exists() const noexcept;
             virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ);
             virtual int close();
@@ -101,6 +107,7 @@ namespace im {
             file_source_sink(filesystem::path const& ppath,
                              filesystem::mode fmode = filesystem::mode::READ);
             
+        public:
             filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
             filesystem::mode mode(filesystem::mode m);
@@ -126,6 +133,7 @@ namespace im {
             fifo_source_sink(filesystem::path const& ppath,
                              filesystem::mode fmode = filesystem::mode::READ);
             
+        public:
             filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
             virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ) override;
