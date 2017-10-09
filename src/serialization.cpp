@@ -11,11 +11,13 @@
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/ext/pystring.hh>
-#include <libimread/ext/uri.hh>
 #include <libimread/serialization.hh>
 
 /// JSON (built-in)
 #include <libimread/ext/JSON/json11.h>
+
+/// URI (built-in)
+#include <libimread/ext/uri.hh>
 
 /// libplist
 #include <plist/plist++.h>

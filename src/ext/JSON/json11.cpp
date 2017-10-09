@@ -577,6 +577,10 @@ Json::Property::Property(Node* node, int idx)
         }
     }
 
+Json::Property::Property(Node* node, const char* ckey)
+    :Json::Property::Property(node, std::string(ckey))
+    {}
+
 Json Json::Property::target() const {
     switch (host->type()) {
         case Type::OBJECT: return static_cast<Object*>(host)->get(key);
@@ -1152,8 +1156,7 @@ std::string Json::stringify() const {
 std::string Json::format() const {
     std::ostringstream out;
     out << *this;
-    std::string outstr(out.str());
-    return outstr;
+    return out.str();
 }
 
 Json Json::parse(std::string const& str) {

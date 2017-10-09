@@ -347,10 +347,7 @@ class Json {
             public:
                 Property(Node*, std::string const&);
                 Property(Node*, int);
-                
-                explicit Property(Node* n, const char* c)
-                    :Property(n, std::string(c))
-                    {}
+                explicit Property(Node*, const char*);
                 
             public:
                 // operator Json() const           { return target(); }
