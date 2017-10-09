@@ -122,12 +122,12 @@ class Json {
             virtual ~Node();
             virtual Type type() const;
             virtual NodeType nodetype() const;
-            virtual void print(std::ostream& out) const;
-            virtual void traverse(traverser_t traverser, bool is_root = false) const;
-            virtual void traverse(named_traverser_t named_traverser, char const* name = nullptr) const;
-            virtual bool contains(Node const* that) const;
-            virtual bool operator==(Node const& that) const;
-            virtual void validate(Schema const& schema, nodecvec_t&) const;
+            virtual void print(std::ostream&) const;
+            virtual void traverse(traverser_t, bool is_root = false) const;
+            virtual void traverse(named_traverser_t, char const* name = nullptr) const;
+            virtual bool contains(Node const*) const;
+            virtual bool operator==(Node const&) const;
+            virtual void validate(Schema const&, nodecvec_t&) const;
             virtual bool is_schema() const;
             void unref();
             char const* typestr() const;
@@ -135,17 +135,17 @@ class Json {
         };
         
     protected:
-        struct Bool : Node {
+        struct Bool : public Node {
             static constexpr Type typecode = Type::BOOLEAN;
             Type type() const override;
             Bool(bool x) { refcnt = 1; }
-            void print(std::ostream& out) const override;
+            void print(std::ostream&) const override;
             static Bool T;
             static Bool F;
         };
         
     protected:
-        struct Number : Node {
+        struct Number : public Node {
             static constexpr Type typecode = Type::NUMBER;
             Type type() const override;
             long double value;
@@ -188,13 +188,13 @@ class Json {
                 {}
             Number(std::istream&);
             bool is_integer() const;
-            void print(std::ostream& out) const override;
-            bool operator==(Node const& that) const override;
-            void validate(Schema const& schema, nodecvec_t&) const override;
+            void print(std::ostream&) const override;
+            bool operator==(Node const&) const override;
+            void validate(Schema const&, nodecvec_t&) const override;
         };
         
     protected:
-        struct String : Node {
+        struct String : public Node {
             static constexpr Type typecode = Type::STRING;
             Type type() const override;
             std::string value;
@@ -205,13 +205,13 @@ class Json {
                 :value(cs)
                 {}
             String(std::istream&);
-            void print(std::ostream& out) const override;
-            bool operator==(Node const& that) const override;
-            void validate(Schema const& schema, nodecvec_t&) const override;
+            void print(std::ostream&) const override;
+            bool operator==(Node const&) const override;
+            void validate(Schema const&, nodecvec_t&) const override;
         };
         
     protected:
-        struct Pointer : Node {
+        struct Pointer : public Node {
             static constexpr Type typecode = Type::POINTER;
             Type type() const override;
             void* value = nullptr;
@@ -234,7 +234,7 @@ class Json {
                 {}
             Pointer(std::istream&);
             virtual ~Pointer();
-            void print(std::ostream& out) const override;
+            void print(std::ostream&) const override;
             bool  has() { return value != nullptr; }
             void* get() { return value; }
             void  set(void* v) { value = v; }
@@ -249,12 +249,12 @@ class Json {
                 return value ? reinterpret_cast<rT*>(value) :
                                reinterpret_cast<rT*>(default_value);
             }
-            bool operator==(Node const& that) const override;
-            void validate(Schema const& schema, nodecvec_t&) const override;
+            bool operator==(Node const&) const override;
+            void validate(Schema const&, nodecvec_t&) const override;
         };
         
     protected:
-        struct Array : Node {
+        struct Array : public Node {
             static constexpr Type typecode = Type::ARRAY;
             nodevec_t list;
             Type type() const override;
@@ -267,15 +267,15 @@ class Json {
             void del(int);
             void repl(int, Node*);
             Node* at(int) const;
-            void traverse(traverser_t traverser, bool is_root = false) const override;
-            void traverse(named_traverser_t traverser, char const* name = nullptr) const override;
+            void traverse(traverser_t, bool is_root = false) const override;
+            void traverse(named_traverser_t, char const* name = nullptr) const override;
             bool contains(Node const*) const override;
-            bool operator==(Node const& that) const override;
-            void validate(Schema const& schema, nodecvec_t&) const override;
+            bool operator==(Node const&) const override;
+            void validate(Schema const&, nodecvec_t&) const override;
         };
         
     protected:
-        struct Object : Node {
+        struct Object : public Node {
             static constexpr Type typecode = Type::OBJECT;
             nodemap_t map;
             Type type() const override;
@@ -286,15 +286,15 @@ class Json {
             void  set(std::string const&, Node*);
             bool  del(std::string const&);
             Node* pop(std::string const&);
-            void traverse(traverser_t traverser, bool is_root = false) const override;
-            void traverse(named_traverser_t traverser, char const* name = nullptr) const override;
+            void traverse(traverser_t, bool is_root = false) const override;
+            void traverse(named_traverser_t, char const* name = nullptr) const override;
             bool contains(Node const*) const override;
-            bool operator==(Node const& that) const override;
-            void validate(Schema const& schema, nodecvec_t&) const override;
+            bool operator==(Node const&) const override;
+            void validate(Schema const&, nodecvec_t&) const override;
         };
         
     protected:
-        struct Schema : Node {
+        struct Schema : public Node {
             using schemavec_t = std::vector<Schema*>;
             static constexpr Type typecode = Type::SCHEMA;
             Type type() const override;
