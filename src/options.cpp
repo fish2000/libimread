@@ -362,6 +362,11 @@ namespace im {
         return Options::count(prefix_re);
     }
     
+    std::size_t Options::count(std::string const& key) const {
+        return Options::prefixcount(key);   /// call without specifying the separator,
+                                            /// thus invoking it with the default
+    }
+    
     std::size_t Options::prefixcount(std::string const& prefix,
                                      std::string const& separator) const {
         /// convenience function to call Options::count(prefix, separator)

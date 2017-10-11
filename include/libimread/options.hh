@@ -183,10 +183,11 @@ namespace im {
         
         public:
                    virtual std::size_t count(std::regex const& pattern) const;                              /// #keys matching a given pattern
-                  virtual std::size_t count(std::string const& prefix,                                      /// #keys with a given prefix
-                                            std::string const& separator) const;
-            virtual std::size_t prefixcount(std::string const& prefix,
-                                            std::string const& separator = detail::kDefaultSep) const;      /// #keys with a given prefix
+                  virtual std::size_t count(std::string const& prefix,                                      /// #keys with a given prefix,
+                                            std::string const& separator) const;                            ///       and a specific separator
+                  virtual std::size_t count(std::string const& key) const;                                  /// #keys with a given prefix
+            virtual std::size_t prefixcount(std::string const& prefix,                                      /// #keys with a given prefix,
+                                            std::string const& separator = detail::kDefaultSep) const;      ///       optionally specifying separator
              virtual std::size_t prefixcount(std::string::value_type sep = detail::kDefaultSepChar) const;  /// #keys SANS prefix (per separator)
         
         public:
