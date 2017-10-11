@@ -78,7 +78,7 @@ namespace filesystem {
     
     char const* TemporaryName::do_not_destroy() {
         cleanup = false;
-        return filename;
+        return pathname.c_str();
     }
     
     TemporaryName::~TemporaryName() {
@@ -204,7 +204,7 @@ namespace filesystem {
     
     char const* NamedTemporaryFile::do_not_destroy() {
         cleanup = false;
-        return filepath.basename().c_str();
+        return filepath.c_str();
     }
     
     NamedTemporaryFile::~NamedTemporaryFile() {

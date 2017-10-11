@@ -11,42 +11,28 @@ matrix:
       compiler: clang
       env: COMPILER='clang++' BUILD_TYPE='Debug' CPP11=1
 
-    - os: osx
-      osx_image: xcode8
-      compiler: clang
-      env: COMPILER='clang++' BUILD_TYPE='Release' CPP11=1
+    # - os: osx
+    #   osx_image: xcode8
+    #   compiler: clang
+    #   env: COMPILER='clang++' BUILD_TYPE='Release' CPP11=1
 
+before_install:
+    brew tap homebrew/science
+    brew tap fish2000/praxa
+    brew update
+    brew install libevent pkg-config libunwind-headers
+    brew install libffi zlib szip xz snappy lz4
+    brew install autoconf automake libtool gflags
+    brew install curl gfortran open-mpi boost jemalloc
+    brew install jpeg openjpeg jasper libpng libtiff lcms lcms2 giflib gifsicle webp
+    brew install cmake python boost-python
+    brew install cython doxygen
+    brew install libplist yaml-cpp
+    brew install hdf5 --c++11 --with-mpi
+    brew install llvm
+    # pip install -U numpy pythonpy clint wheel
+    pip install -U docopt PyYAML iod-symbolize
+    brew install fish2000/halide
 
 install:
-  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      CMAKE_URL="http://www.cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz"
-      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      brew install libffi
-      brew install szip webp
-      brew install rocksdb capnp
-      brew tap homebrew/science
-      brew install hdf5
-      brew install llvm
-      brew install numpy
-      pip install -U pip
-      pip install -U setuptools
-      pip install -U wheel docopt PyYAML iod-symbolizer
-      brew tap fish2000/praxa
-      brew -v install halide --HEAD --with-metal --with-opengl --with-opengl-compute --without-python
-    fi
-
-before_script:
-  - export CXX=${COMPILER}
-  - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Wdev -DUSE_CPP11=${CPP11}
-  - cd Build
-
-script:
-  - make -j 2
-  - ctest -V -j 2
-
+    brew install fish2000/libimread
