@@ -21,16 +21,23 @@ before_install:
     brew tap fish2000/praxa
     brew update
     brew install libevent pkg-config libunwind-headers
-    brew install libffi zlib szip xz snappy lz4
-    brew install autoconf automake libtool gflags
-    brew install curl gfortran open-mpi boost jemalloc
-    brew install jpeg openjpeg jasper libpng libtiff lcms lcms2 giflib gifsicle webp
-    brew install cmake python boost-python
-    brew install cython doxygen
-    brew install libplist yaml-cpp
+    brew install libffi zlib szip xz lz4 pcre exiv2
+    brew install autoconf automake libtool makedepend cmake yasm
+    brew install lame x264 xvid
+    brew install gmp libmpc mpfr isl icu4c snappy openssl glib
+    brew install curl gcc open-mpi boost jemalloc doxygen gettext
+    brew install jpeg libpng libtiff giflib gifsicle webp ilmbase
+    brew install lcms lcms2 openjpeg jasper openexr eigen
+    brew install fontconfig freetype gtest gflags
+    brew install gd ufraw libraw dcraw zimg
+    brew install python python3 boost-python cython swig
+    brew install libplist yaml-cpp numpy ffmpeg
+    brew install opencolorio --with-python
     brew install hdf5 --c++11 --with-mpi
+    brew install cfitsio netcdf opencv
     brew install llvm
     # pip install -U numpy pythonpy clint wheel
+    pip install -U setuptools Pillow
     pip install -U docopt PyYAML iod-symbolize
     brew install fish2000/halide
 
