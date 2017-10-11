@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <iomanip>
+#include <iostream>
 #include <algorithm>
 
 #include <libimread/libimread.hpp>
