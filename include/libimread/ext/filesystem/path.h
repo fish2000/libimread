@@ -34,6 +34,7 @@ namespace filesystem {
         
         /// utility functions that wrap system calls
         std::string tmpdir() noexcept;
+        std::string username() noexcept;
         std::string userdir() noexcept;
         std::string syspaths() noexcept;
         std::string execpath() noexcept;
@@ -246,8 +247,12 @@ namespace filesystem {
             detail::timepoint_t modify_time() const;
             detail::timepoint_t status_time() const;
             
-            /// update the access and modification timestamps for the path
+            /// update the access and modification timestamps for the path -- calls ::utime():
             bool update_timestamps() const;
+            
+            /// POSIX-y logic reimplementation of the “touch” CLT:
+            bool touch() const;
+            bool touched() const;
             
             /// Static forwarder for path::timestamps<P>(p) and the other timestamp-related methods
             template <typename P> inline
@@ -273,6 +278,16 @@ namespace filesystem {
             template <typename P> inline
             static bool update_timestamps(P&& p) {
                 return path(std::forward<P>(p)).update_timestamps();
+            }
+            
+            template <typename P> inline
+            static bool touch(P&& p) {
+                return path(std::forward<P>(p)).touch();
+            }
+            
+            template <typename P> inline
+            static bool touched(P&& p) {
+                return path(std::forward<P>(p)).touched();
             }
             
             /// Convenience funcs for running a std::regex against the path in question:

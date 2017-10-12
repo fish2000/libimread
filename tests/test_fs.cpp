@@ -259,14 +259,38 @@ namespace {
         CHECK(dres.contains(path::currentprogram()));
     }
     
-    TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct",
-              "[fs-temporarydirectory-raii]")
+    TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct, path::makedir(), path::touch() and path::touched()",
+              "[fs-temporarydirectory-raii-makedir-touch-touched]")
     {
         TemporaryDirectory td("test-td");
-        (td.dirpath/"test-td-subdir0").makedir();
-        (td.dirpath/"test-td-subdir1").makedir();
-        REQUIRE((td.dirpath/"test-td-subdir0").is_listable());
-        REQUIRE((td.dirpath/"test-td-subdir1").is_listable());
+        
+        path sub0 = (td.dirpath/"test-td-subdir0");
+        path sub1 = (td.dirpath/"test-td-subdir1");
+        
+        sub0.makedir();
+        sub1.makedir();
+        REQUIRE(sub0.is_listable());
+        REQUIRE(sub1.is_listable());
+        
+        path f00 = sub0 / "file0.txt";
+        path f01 = sub0 / "file1.txt";
+        path f02 = sub0 / "file2.txt";
+        
+        REQUIRE(f00.touch());
+        REQUIRE(path::touch(f01));
+        CHECK(!f02.exists());
+        f02.touch();
+        REQUIRE(f02.exists());
+        
+        path f10 = sub1 / "file0.txt";
+        path f11 = sub1 / "file1.txt";
+        path f12 = sub1 / "file2.txt";
+        
+        REQUIRE(f10.touched());
+        REQUIRE(path::touched(f11));
+        CHECK(!f12.exists());
+        f12.touched();
+        REQUIRE(f12.exists());
     }
     
     TEST_CASE("[filesystem] Test the NamedTemporaryFile RAII struct's stream interface",

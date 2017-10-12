@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/sysctl.h>
+#include <unistd.h>
+#include <utime.h>
 #include <pwd.h>
 #include <glob.h>
 #include <wordexp.h>
@@ -64,22 +66,45 @@ namespace filesystem {
             return dirname;
         }
         
+        std::string username() noexcept {
+            /// Returns a std::string containing the users’ login name,
+            /// using either std::getenv() or, barring that, POSIX ::getlogin().
+            char const* username;
+            username = std::getenv("USER");
+            if (nullptr == username) { username = ::getlogin(); }
+            if (nullptr == username) { username = ""; }
+            return username;
+        }
+        
         std::string userdir() noexcept {
             /// Returns a std::string containing the users’ home directory,
-            /// using std::getenv() and some guesswork -- originally cribbed from boost
-            char const* dirname;
+            /// using std::getenv(), POSIX passwd-related calls, and some guesswork:
+            char const* dirname = nullptr;
+            passwd_t* pw = nullptr;
             dirname = std::getenv("HOME");
             if (nullptr == dirname) {
-                passwd_t* pw = ::getpwuid(::geteuid());
-                std::string dn(pw->pw_dir);
-                return dn;
+                std::string user = filesystem::detail::username();
+                pw = ::getpwnam(user.c_str());
+                if (pw && pw->pw_dir) {
+                    std::string dn(pw->pw_dir);
+                    ::endpwent(); /// release password-database-related resources
+                    return dn;
+                }
             }
-            return dirname;
+            if (nullptr == dirname) {
+                pw = ::getpwuid(::geteuid());
+                if (pw && pw->pw_dir) {
+                    std::string dn(pw->pw_dir);
+                    ::endpwent(); /// release password-database-related resources
+                    return dn;
+                }
+            }
+            return "";
         }
         
         std::string syspaths() noexcept {
             /// Returns a std::string containing the system paths (aka the $PATH variable),
-            /// using std::getenv() and some guesswork -- originally cribbed from boost
+            /// using std::getenv() with some sensible defaults:
             char const* paths;
             paths = std::getenv("PATH");
             if (nullptr == paths) { paths = "/bin:/usr/bin"; }
@@ -177,13 +202,17 @@ namespace filesystem {
         static constexpr std::regex::flag_type regex_flags_icase    = std::regex::extended | std::regex::icase;
         static constexpr int glob_pattern_flags                     = GLOB_ERR | GLOB_NOSORT | GLOB_DOOFFS;
         static constexpr int wordexp_pattern_flags                  = WRDE_NOCMD | WRDE_DOOFFS;
-        static constexpr mode_t mkdir_flags                         = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
-        static constexpr mode_t mkfifo_flags                        = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | S_IFIFO;
+        static constexpr mode_t mkfifo_flags                        = S_IRUSR  | S_IWUSR | S_IRGRP  | S_IWGRP   | S_IROTH | S_IWOTH | S_IFIFO;
+        static constexpr mode_t mkdir_flags                         = S_IRWXU  | S_IRWXG | S_IROTH  | S_IXOTH;
+        static constexpr int touch_open_flags                       = O_WRONLY | O_CREAT | O_NOCTTY | O_NONBLOCK;
+        static constexpr mode_t touch_open_mask                     = 0666;
+        static constexpr mode_t touch_update_flags                  = AT_SYMLINK_NOFOLLOW;
         
         static const std::string extsepstring(1, path::extsep);
         static const std::string sepstring(1, path::sep);
         static const std::string nulstring("");
-        static const std::regex  user_directory_re("^~", regex_flags);
+        static const std::regex  user_directory_re("^~" + sepstring, regex_flags);
+        static const std::regex  user_directory_prefix_re("^~([A-Za-z][A-Za-z0-9_]*)", regex_flags);
         
     } /* namespace detail */
     
@@ -661,6 +690,49 @@ namespace filesystem {
     bool path::update_timestamps() const {
         if (!exists()) return false;
         return ::utimes(c_str(), nullptr) != -1;
+    }
+    
+    /// Re-implementation of the logic behind the “touch” UNIX command-line tool,
+    /// as elucidated by someone named Chris, per this discursive analysis:
+    ///     http://chris-sharpe.blogspot.com/2013/05/better-than-systemtouch.html
+    /// My rewrite plugs the descriptor leak, and also avoids playing the race card
+    /// with regard to our path, qua the two system calls made.
+    bool path::touch() const {
+        /// Open and obtain a descriptor for our path -- using flags specifying that
+        /// the file is to be created in the event of its nonexistence:
+        int descriptor = ::open(c_str(),
+                                detail::touch_open_flags,
+                                detail::touch_open_mask);
+        
+        /// Bail if ::open() choked:
+        if (descriptor < 0) { return false; }
+        
+        // int status = ::utimensat(AT_FDCWD, c_str(),
+        //                                    nullptr,
+        //                                    detail::touch_update_flags);
+        
+        /// Update the timestamps for our freshly-opened file, through its descriptor --
+        /// A call to ::futimens() with the second arg (of type `const struct timespec*`)
+        /// value of `nullptr` means “set timestamsps to whatever the system clocks’ value
+        /// is for right now”:
+        int status = ::futimens(descriptor, nullptr);
+        
+        /// Close out the descriptor:
+        ::close(descriptor);
+        
+        /// Return, per the inverse of the status result of the ::futimens() call:
+        return !bool(status);
+    }
+    
+    /// The path::touch() method’s return value doesn’t reflect whether or not a file
+    /// was created -- only whether or not a given file’s timestamps could be successfully
+    /// updated via descriptor. The path::touched() method wraps path::touch(), only returing
+    /// “true” iff, in the course of its call, a file is created at the path in question --
+    /// a path at which, prior to said call, there wasn’t any kind of anything, filewise.
+    bool path::touched() const {
+        bool preexisting = path::exists();
+        path::touch();
+        return (!preexisting) && path::exists();
     }
     
     path::size_type path::total_size() const {
