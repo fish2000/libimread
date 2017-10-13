@@ -99,7 +99,8 @@ namespace filesystem {
                     return dn;
                 }
             }
-            return "";
+            if (nullptr == dirname) { dirname = ""; }
+            return dirname;
         }
         
         std::string syspaths() noexcept {
