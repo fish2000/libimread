@@ -56,8 +56,7 @@ namespace std {
 
 namespace glob {
     
-    // using namespace std::placeholders;
-    using stringview_t = std::experimental::string_view;
+    using stringview_t = std::string_view;
     using glob_f = std::function<bool(stringview_t)>;
     
     namespace detail {
