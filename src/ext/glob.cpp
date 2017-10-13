@@ -26,11 +26,37 @@
 */
 
 #include <libimread/ext/glob.hh>
+#include <type_traits>
 #include <cctype>
+
+/// The following empty struct, and subsequent specialization of std::is_placeholder<…>,
+/// set up a custom placeholder value marker for use with std::bind(…)... The librarys’
+/// stock placeholders, found in the predictably-named namespace std::placeholders,
+/// are all underscore-prefixed integers i.e. _1, _2 etc ad nauseum, which I find those
+/// to constitute enough of a typographic eyesore that doing the whole Streetcar Shuffle
+/// of customizing a one-off placeholder (and then of course writing up this whole ¶ to
+/// explain myself) was totally unequivocally worth it. Yes.
 
 namespace glob {
     
-    using namespace std::placeholders;
+    namespace detail {
+        
+        struct ARG {} arg;
+        
+    }
+    
+}
+
+namespace std {
+    
+    template <>
+    struct is_placeholder<glob::detail::ARG> : public std::integral_constant<int, 1> {};
+    
+}
+
+namespace glob {
+    
+    // using namespace std::placeholders;
     using stringview_t = std::experimental::string_view;
     using glob_f = std::function<bool(stringview_t)>;
     
@@ -72,12 +98,12 @@ namespace glob {
     
     glob_f matcher(stringview_t pattern) {
         auto equal = [](int a, int b) { return a == b; };
-        return std::bind(detail::match<decltype(equal)>, pattern, _1, equal);
+        return std::bind(detail::match<decltype(equal)>, pattern, detail::arg, equal);
     }
     
     glob_f imatcher(stringview_t pattern) {
         auto equal = [](int a, int b) { return std::tolower(a) == std::tolower(b); };
-        return std::bind(detail::match<decltype(equal)>, pattern, _1, equal);
+        return std::bind(detail::match<decltype(equal)>, pattern, detail::arg, equal);
     }
     
 } /// namespace glob
