@@ -58,7 +58,7 @@ namespace filesystem {
         std::string tmpdir() noexcept {
             /// Returns a std::string containing the temporary directory,
             /// using std::getenv() and some guesswork -- originally cribbed from boost
-            char const* dirname;
+            char const* dirname = nullptr;
             dirname = std::getenv("TMPDIR");
             if (nullptr == dirname) { dirname = std::getenv("TMP"); }
             if (nullptr == dirname) { dirname = std::getenv("TEMP"); }
@@ -69,10 +69,10 @@ namespace filesystem {
         std::string username() noexcept {
             /// Returns a std::string containing the users’ login name,
             /// using either std::getenv() or, barring that, POSIX ::getlogin().
-            char const* username;
+            char const* username = nullptr;
             username = std::getenv("USER");
             if (nullptr == username) { username = ::getlogin(); }
-            if (nullptr == username) { username = ""; }
+            if (nullptr == username) { username = "nobody"; }
             return username;
         }
         
@@ -99,14 +99,14 @@ namespace filesystem {
                     return dn;
                 }
             }
-            if (nullptr == dirname) { dirname = ""; }
+            if (nullptr == dirname) { dirname = "/dev/null"; }
             return dirname;
         }
         
         std::string syspaths() noexcept {
             /// Returns a std::string containing the system paths (aka the $PATH variable),
             /// using std::getenv() with some sensible defaults:
-            char const* paths;
+            char const* paths = nullptr;
             paths = std::getenv("PATH");
             if (nullptr == paths) { paths = "/bin:/usr/bin"; }
             return paths;
@@ -1160,8 +1160,9 @@ namespace filesystem {
     path path::gettmp()                 { return path(detail::tmpdir()); }
     path path::tmp()                    { return path(detail::tmpdir()); }
     path path::home()                   { return path(detail::userdir()); }
-    path path::user()                   { return path(detail::userdir()); }
+    path path::userdir()                { return path(detail::userdir()); }
     path path::executable()             { return path(detail::execpath()); }
+    std::string path::user()            { return detail::username(); }
     std::string path::currentprogram()  { return path::basename(detail::execpath()); }
     
     detail::stringvec_t path::system() {
@@ -1173,6 +1174,10 @@ namespace filesystem {
     
     bool path::operator<(path const& rhs) const noexcept {
         return status_time() < rhs.status_time();
+    }
+    
+    bool path::operator>(path const& rhs) const noexcept {
+        return status_time() > rhs.status_time();
     }
     
     void path::set(std::string const& str) {

@@ -681,15 +681,16 @@ namespace filesystem {
                 return path(std::forward<P>(p)).rank();
             }
             
-            /// Static functions to retrieve the current directory, the system temporary directory,
-            /// user/home directories, and the current running executable/program name and full path.
+            /// Static functions to retrieve the current working directory, the system temporary directory,
+            /// the user's name and home directory, and the current running program name and executable path.
             static path getcwd();
             static path cwd();
             static path gettmp();
             static path tmp();
             static path home();
-            static path user();
+            static path userdir();
             static path executable();
+            static std::string user();
             static std::string currentprogram();
             
             /// Return a vector of strings -- not paths -- corresponding to the components
@@ -704,6 +705,7 @@ namespace filesystem {
             
             /// less-than operator -- allows the use of filesystem::path in e.g. std::map
             bool operator<(path const&) const noexcept;
+            bool operator>(path const&) const noexcept;
             
             /// Set and tokenize the path using a std::string (mainly used internally)
             void set(std::string const&);
