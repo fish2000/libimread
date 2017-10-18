@@ -604,6 +604,8 @@ namespace py {
         //     return clamp(v, lo, hi, std::less<>());
         // }
         
+        using std::clamp;
+        
         /// polyfills for std::experimental::to_array()
         /// q.v. http://en.cppreference.com/w/cpp/experimental/to_array
         template <class T, std::size_t N, std::size_t ...I>

@@ -87,6 +87,7 @@ set(hdrs
     ${hdrs_dir}/ext/memory/open_memstream.hh
     ${hdrs_dir}/ext/memory/refcount.hh
     ${hdrs_dir}/ext/JSON/json11.h
+    ${hdrs_dir}/ext/arrayview.hh
     ${hdrs_dir}/ext/base64.hh
     ${hdrs_dir}/ext/butteraugli.hh
     ${hdrs_dir}/ext/exif.hh
