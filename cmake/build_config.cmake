@@ -41,7 +41,7 @@ check_include_file(glob.h                               HAVE_GLOB_H)
 check_include_file(wordexp.h                            HAVE_WORDEXP_H)
 check_include_file_cxx(cxxabi.h                         HAVE_CXXABI_HH)
 check_include_file_cxx(experimental/string_view         HAVE_STRINGVIEW_HH)
-check_include_file_cxx(experimental/array               HAVE_EXPERIMENTAL_ARRAY_HH)
+check_include_file_cxx(experimental/array_view          HAVE_ARRAYVIEW_HH)
 
 check_include_file(sys/ioctl.h                          HAVE_SYS_IOCTL_H)
 check_include_file(sys/types.h                          HAVE_SYS_TYPES_H)
