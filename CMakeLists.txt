@@ -424,6 +424,7 @@ if(IM_TESTS)
     
     # Set up individual test suites --
     # … the add_imread_test() macro is defined in tests/CMakeLists.txt:
+    add_imread_test("arrayview")
     add_imread_test("blockhash")
     add_imread_test("byte-source-gzio")
     add_imread_test("byte-source-iterators")
