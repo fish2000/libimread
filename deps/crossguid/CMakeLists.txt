@@ -13,7 +13,7 @@ set(libguid_VERSION_PATCH "5")
 
 add_definitions(
     -Wall -Werror
-    -std=c++14 -stdlib=libc++ -O3
+    -std=c++17 -stdlib=libc++ -O3
     -mtune=native -fstrict-aliasing)
 
 if(APPLE)

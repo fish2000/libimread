@@ -13,7 +13,7 @@ set(libdocopt_VERSION_PATCH "1")
 
 add_definitions(
     -Wall -Werror -fstack-protector-all
-    -std=c++14 -stdlib=libc++ -O3
+    -std=c++17 -stdlib=libc++ -O3
     -mtune=native -fstrict-aliasing)
 
 set(srcs

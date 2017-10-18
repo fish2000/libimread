@@ -40,7 +40,7 @@ endif(APPLE)
 add_definitions(
     -Wall -Werror
     -Wno-deprecated-declarations
-    -std=c++14 -stdlib=libc++ -O3
+    -std=c++17 -stdlib=libc++ -O3
     -mtune=native -fstrict-aliasing
     ${FLTK_CXX_FLAGS})
 

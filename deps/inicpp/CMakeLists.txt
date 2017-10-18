@@ -8,7 +8,7 @@ set(INCLUDE_DIR include/inicpp)
 # Compilation options:
 add_definitions(
     -Wall -Werror
-    -std=c++14 -stdlib=libc++ -O3
+    -std=c++17 -stdlib=libc++ -O3
     -mtune=native -fstrict-aliasing)
 
 set(SOURCE_FILES
