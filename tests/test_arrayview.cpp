@@ -2,29 +2,17 @@
 #include <array>
 #include <string>
 #include <vector>
-#include <memory>
 #include <numeric>
 #include <iostream>
 #include <algorithm>
 
 #include <libimread/libimread.hpp>
-#include <libimread/errors.hh>
-#include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/arrayview.hh>
 
-// #include <libimread/ext/exif.hh>
-// #include <libimread/file.hh>
-// #include <libimread/filehandle.hh>
-
-#include "include/test_data.hpp"
+// #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
 namespace {
-    
-    using im::byte;
-    using im::bytevec_t;
-    using filesystem::path;
-    using pathvec_t = std::vector<path>;
     
     template <std::size_t Rank>
     std::ostream& operator<<(std::ostream& os, av::offset<Rank> const& off) {
@@ -62,17 +50,17 @@ namespace {
     TEST_CASE("[arrayview] Bundled Tests: av::bounds size/contains",
               "[arrayview][bundled-tests][bounds-size-contains]")
     {
-        av::bounds<3> b = {2,3,4};
+        av::bounds<3> b = { 2, 3, 4 };
         
         CHECK(24 == b.size()); /// the lone size test
         
-        CHECK(b.contains({0,0,0}));
-        CHECK(b.contains({1,2,3}));
+        CHECK(b.contains({ 0, 0, 0 }));
+        CHECK(b.contains({ 1, 2, 3 }));
         
-        CHECK(!b.contains({1,2,4}));
-        CHECK(!b.contains({1,3,3}));
-        CHECK(!b.contains({2,2,3}));
-        CHECK(!b.contains({0,0,-1}));
+        CHECK(!b.contains({ 1, 2,  4 }));
+        CHECK(!b.contains({ 1, 3,  3 }));
+        CHECK(!b.contains({ 2, 2,  3 }));
+        CHECK(!b.contains({ 0, 0, -1 }));
         
     }
     
@@ -122,6 +110,9 @@ namespace {
     }
     
     /// FIXTURES:
+    /// FIXTURES:
+    /// FIXTURES:
+    
     namespace fixies {
     
         class ArrayViewTestFixture {
@@ -175,64 +166,71 @@ namespace {
                                                                 /// … even's only!
         }; /// class StridedDataTestFixture
     
-    } /// namespace fixie
+    } /// namespace fixies
     
     /// TEST FUNCTION TEMPLATES:
+    /// TEST FUNCTION TEMPLATES:
+    /// TEST FUNCTION TEMPLATES:
     
-    template <typename ArrayView>
-    void testSectioning(ArrayView const& av, av::bounds<3> const& testBounds,
-                                             av::offset<3> const& testOrigin,
-                                             av::offset<3> const& testStride) {
-        int start{};
-        for (int i = 0; i < 3; i++) {
-            start += testOrigin[i] * testStride[i];
-        }
-        
-        av::bounds_iterator<3> iter = std::begin(av.bounds());
-        for (int i = 0; i < testBounds[0]; ++i) {
-            for (int j = 0; j < testBounds[1]; ++j) {
-                for (int k = 0; k < testBounds[2]; ++k) {
-                    av::offset<3> idx = {i,j,k};
-                    CHECK(idx == *iter);
-                    int off{};
-                    for (int d = 0; d < 3; d++) {
-                        off += idx[d] * testStride[d];
+    namespace tmpl {
+    
+        template <typename ArrayView>
+        void subsectioning(ArrayView const& av, av::bounds<3> const& testBounds,
+                                                av::offset<3> const& testOrigin,
+                                                av::offset<3> const& testStride) {
+            int start{};
+            
+            for (int ix = 0; ix < 3; ix++) {
+                start += testOrigin[ix] * testStride[ix];
+            }
+            
+            av::bounds_iterator<3> iter = std::begin(av.bounds());
+            for (int ii = 0; ii < testBounds[0]; ++ii) {
+                for (int jj = 0; jj < testBounds[1]; ++jj) {
+                    for (int kk = 0; kk < testBounds[2]; ++kk) {
+                        av::offset<3> idx = { ii, jj, kk };
+                        CHECK(idx == *iter);
+                        int off{};
+                        for (int d = 0; d < 3; d++) {
+                            off += idx[d] * testStride[d];
+                        }
+                        CHECK((start + off) == av[*iter++]);
                     }
-                    CHECK((start + off) == av[*iter++]);
                 }
             }
         }
-    }
+        
+        template <typename ArrayView>
+        void dimensionslicing(ArrayView const& av, av::offset<3> const& testStride) {
+            // Slices always fix the most significant dimension
+            int x = 2;
+            av::strided_array_view<int, 2> sliced = av[x];
+            int start = testStride[0] * x;
+            for (av::bounds_iterator<2> iter = std::begin(sliced.bounds());
+                                        iter != std::end(sliced.bounds());
+                                      ++iter) {
+                CHECK(start == sliced[*iter]);
+                start += testStride[2];
+            }
+            
+            // Cascade slices
+            int y = 3;
+            av::strided_array_view<int, 1> sliced2 = av[x][y];
+            int start2 = testStride[0] * x + testStride[1] * y;
+            for (av::bounds_iterator<1> iter = std::begin(sliced2.bounds());
+                                        iter != std::end(sliced2.bounds());
+                                      ++iter) {
+                CHECK(start2 == sliced2[*iter]);
+                start2 += testStride[2];
+            }
+            
+            // Cascade to a single index
+            int z = 3;
+            int start3 = testStride[0] * x + testStride[1] * y + testStride[2] * z;
+            CHECK(start3 == av[x][y][z]);
+        }
     
-    template <typename ArrayView>
-    void testSlicing(ArrayView const& av, av::offset<3> const& testStride) {
-        // Slices always fix the most significant dimension
-        int x = 2;
-        av::strided_array_view<int, 2> sliced = av[x];
-        int start = testStride[0] * x;
-        for (av::bounds_iterator<2> iter = std::begin(sliced.bounds());
-                                    iter != std::end(sliced.bounds());
-                                  ++iter) {
-            CHECK(start == sliced[*iter]);
-            start += testStride[2];
-        }
-        
-        // Cascade slices
-        int y = 3;
-        av::strided_array_view<int, 1> sliced2 = av[x][y];
-        int start2 = testStride[0] * x + testStride[1] * y;
-        for (av::bounds_iterator<1> iter = std::begin(sliced2.bounds());
-                                    iter != std::end(sliced2.bounds());
-                                  ++iter) {
-            CHECK(start2 == sliced2[*iter]);
-            start2 += testStride[2];
-        }
-        
-        // Cascade to a single index
-        int z = 3;
-        int start3 = testStride[0] * x + testStride[1] * y + testStride[2] * z;
-        CHECK(start3 == av[x][y][z]);
-    }
+    } /// namespace tmpl
     
     TEST_CASE_METHOD(fixies::ArrayViewTestFixture,
                     "[arrayview] Bundled Tests: ArrayViewTest and constructors",
@@ -259,7 +257,7 @@ namespace {
                     "[arrayview] Bundled Tests: ArrayViewTest and slicing",
                     "[arrayview][bundled-tests][fixtures][ArrayViewTest-slicing]")
     {
-        testSlicing(av, testStride);
+        tmpl::dimensionslicing(av, testStride);
     }
     
     TEST_CASE_METHOD(fixies::ArrayViewTestFixture,
@@ -270,19 +268,19 @@ namespace {
         
         // section with new bounds
         av::bounds<3> newBounds{ 2, 3, 4 };
-        testSectioning(av.section(origin, newBounds),
-                                          newBounds,
-                                          origin,
-                                          testStride);
+        tmpl::subsectioning(av.section(origin, newBounds),
+                                       newBounds,
+                                       origin,
+                                       testStride);
         
         // section with bounds extending to extent of source view
         av::strided_array_view<int, 3> sectioned = av.section(origin);
         
         av::bounds<3> remainingBounds = testBounds - origin;
         CHECK(remainingBounds == sectioned.bounds());
-        testSectioning(sectioned, remainingBounds,
-                                  origin,
-                                  testStride);
+        tmpl::subsectioning(sectioned, remainingBounds,
+                                       origin,
+                                       testStride);
     }
     
     TEST_CASE_METHOD(fixies::StridedArrayViewTestFixture,
@@ -295,20 +293,20 @@ namespace {
         
         // From array_view
         av::strided_array_view<int, 3> sav2(av);
-        int ans{};
+        int iix{};
         for (av::bounds_iterator<3> iter = std::begin(sav2.bounds());
                                     iter != std::end(sav2.bounds());
                                   ++iter) {
-            CHECK(ans++ == sav2[*iter]);
+            CHECK(iix++ == sav2[*iter]);
         }
         
         // From strided_array_view
         av::strided_array_view<int, 3> sav3(sav2);
-        int ans2{};
+        int iiz{};
         for (av::bounds_iterator<3> iter = std::begin(sav3.bounds());
                                     iter != std::end(sav3.bounds());
                                   ++iter) {
-            CHECK(ans2++ == sav3[*iter]);
+            CHECK(iiz++ == sav3[*iter]);
         }
     }
     
@@ -325,7 +323,7 @@ namespace {
                     "[arrayview] Bundled Tests: StridedArrayViewTest and slicing",
                     "[arrayview][bundled-tests][fixtures][StridedArrayViewTest-slicing]")
     {
-        testSlicing(sav, testStride);
+        tmpl::dimensionslicing(sav, testStride);
     }
     
     TEST_CASE_METHOD(fixies::StridedArrayViewTestFixture,
@@ -336,19 +334,19 @@ namespace {
         
         // section with new bounds
         av::bounds<3> newBounds{ 2, 3, 4 };
-        testSectioning(sav.section(origin, newBounds),
-                                           newBounds,
-                                           origin,
-                                           testStride);
+        tmpl::subsectioning(sav.section(origin, newBounds),
+                                                newBounds,
+                                                origin,
+                                                testStride);
         
         // section with bounds extending to extent of source view
         av::strided_array_view<int, 3> sectioned = sav.section(origin);
         
         av::bounds<3> remainingBounds = testBounds - origin;
         CHECK(remainingBounds == sectioned.bounds());
-        testSectioning(sectioned, remainingBounds,
-                                  origin,
-                                  testStride);
+        tmpl::subsectioning(sectioned, remainingBounds,
+                                       origin,
+                                       testStride);
     }
     
     TEST_CASE_METHOD(fixies::StridedDataTestFixture,
@@ -380,7 +378,7 @@ namespace {
                     "[arrayview] Bundled Tests: StridedDataTest and slicing",
                     "[arrayview][bundled-tests][fixtures][StridedDataTest-slicing]")
     {
-        testSlicing(strided_sav, testStride);
+        tmpl::dimensionslicing(strided_sav, testStride);
     }
     
     TEST_CASE_METHOD(fixies::StridedDataTestFixture,
@@ -391,19 +389,19 @@ namespace {
         
         // section with new bounds
         av::bounds<3> newBounds{ 2, 3, 4 };
-        testSectioning(strided_sav.section(origin, newBounds),
-                                                   newBounds,
-                                                   origin,
-                                                   testStride);
+        tmpl::subsectioning(strided_sav.section(origin, newBounds),
+                                                        newBounds,
+                                                        origin,
+                                                        testStride);
         
         // section with bounds extending to extent of source view
         av::strided_array_view<int, 3> sectioned = strided_sav.section(origin);
         
         av::bounds<3> remainingBounds = testBounds - origin;
         CHECK(remainingBounds == sectioned.bounds());
-        testSectioning(sectioned, remainingBounds,
-                                  origin,
-                                  testStride);
+        tmpl::subsectioning(sectioned, remainingBounds,
+                                       origin,
+                                       testStride);
     }
     
     TEST_CASE("[arrayview] Bundled Tests: programming example",
@@ -415,7 +413,7 @@ namespace {
         
         std::vector<int> vec(X * Y * Z);
         av::bounds<3> extents = { X, Y, Z };
-        av::array_view<int,3> av(vec, extents);
+        av::array_view<int, 3> av(vec, extents);
         
         // Access an element for writing:
         av::offset<3> idx = { 5, 3, 2 };
