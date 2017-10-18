@@ -5,7 +5,8 @@
 cmake_minimum_required(VERSION 3.3)
 
 # Set a new CMake project
-project(libimread)
+project(libimread VERSION 0.2.0
+                  LANGUAGES C CXX)
 
 option(IM_TESTS             "Compile and run tests"                             ON)
 option(IM_APPS              "Compile companion apps"                            ON)
@@ -76,6 +77,10 @@ include(ANSIMessage)
 # Include IodSymbolize.cmake from the iod-symbolizer Python tool,
 # exposing the cmake function IOD_SYMBOLIZE()
 include(IodSymbolize)
+
+# Include ECMGeneratePkgConfigFile.cmake, in order to generate a pkg-config file.
+# include(GetCompilerFlags)
+include(ECMGeneratePkgConfigFile)
 
 # Set the location of the library configuration file if it has not already been
 # set. This allow the library to be used by an external project without
@@ -315,6 +320,9 @@ set(IM_HAVE_SYS_SENDFILE_H      ${HAVE_SYS_SENDFILE_H} CACHE BOOL "Is sys/sendfi
 set(IM_HAVE_AUTOFS_NOWAIT       ${HAVE_AUTOFS_NOWAIT} CACHE BOOL "Is /dev/autofs_nowait available?")
 set(IM_HAVE_AUTOFS_NOTRIGGER    ${HAVE_AUTOFS_NOTRIGGER} CACHE BOOL "Is /dev/autofs_notrigger available?")
 
+# set(IMREAD_FLAGS "")
+# GET_COMPILER_FLAGS(imread_shared IMREAD_FLAGS)
+
 # message(STATUS "")
 ansi_message(STATUS "Compile-Time System Information:")
 
@@ -329,6 +337,7 @@ ansi_message(STATUS "Compile-Time Configuration Settings:")
 ansi_message(STATUS "IM_VERSION = ${IM_VERSION}")
 ansi_message(STATUS "IM_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 ansi_message(STATUS "IM_CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+# ansi_message(STATUS "IMREAD_FLAGS = ${IMREAD_FLAGS}")
 ansi_message(STATUS "IM_COMPILE_OPTIONS = ${IM_COMPILE_OPTIONS}")
 ansi_message(STATUS "IM_COMPILE_FLAGS = ${IM_COMPILE_FLAGS}")
 ansi_message(STATUS "IM_INCLUDE_DIRECTORIES = ${IM_INCLUDE_DIRECTORIES}")
@@ -347,6 +356,23 @@ add_custom_target("project_header"
 set_source_files_properties(
     ${PROJECT_HEADER}
     PROPERTIES GENERATED TRUE)
+
+# Configure and generate the pkg-config file:
+ecm_generate_pkgconfig_file(BASE_NAME libimread
+                            LIB_NAME imread
+                            DEPS png z ${TIFF_LIBRARIES}
+                                       ${JPEG_LIBRARIES}
+                                       ${WEBP_LIBRARIES}
+                                       ${HALIDE_LIBRARIES}
+                                       ${HDF5_C_LIBRARIES}
+                                       ${HDF5_CXX_LIBRARIES}
+                                       ${HDF5_HL_LIBRARIES}
+                                       ${ROCKSDB_LIBRARIES}
+                                       ${LIBPLIST_LIBRARIES}
+                                       ${LIBPLISTPP_LIBRARIES}
+                                       ${YAMLCPP_LIBRARIES}
+                            DEFINES ${CMAKE_CXX_FLAGS}
+                            INSTALL)
 
 # Add the apps subdirectory, if we're building apps:
 if(IM_APPS)
