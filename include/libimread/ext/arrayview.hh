@@ -1,9 +1,61 @@
+/*
+ * array_view -- https://github.com/wardw/array_view -- by Tom Ward (wardw)
+ * 
+ * An implementation of the ISO C++ proposal [_Multidimensional bounds, offset
+ * and array_view_][1] by Mendakiewicz & Sutter.  This implements the original
+ * proposal [N3851][1] up to the last [revision 7][3].  As I understand it,
+ * the proposal was with an aim for inclusion in C++17 although is no longer
+ * under consideration in it's current form.  For later contributions, see
+ * the successive proposal [p0122r0][4] (and related [GSL][5] implementation),
+ * and alternative proposals such as [P0546][6].
+ * 
+ * This implementation follows the original proposal by Mendakiewicz & Sutter
+ * and subsequent revisions ([latest revision 7][7]). As noted in the proposal,
+ * the proposal itself builds on previous work by Callahan, Levanoni and Sutter
+ * for their work designing the original interfaces for C++ AMP.
+ * 
+ * [1]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3851.pdf
+ * [2]: https://msdn.microsoft.com/en-us/library/hh265137.aspx
+ * [3]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4512.html
+ * [4]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0122r0.pdf
+ * [5]: https://github.com/Microsoft/GSL
+ * [6]: https://github.com/kokkos/array_ref/blob/master/proposals/P0546.rst
+ * [7]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4512.html
+ *
+ * BSD 2-clause “Simplified” License
+ * 
+ * Copyright (c) 2015, Tom Ward
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * + Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * 
+ * + Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
 #pragma once
 
 #include <initializer_list>
 #include <iterator>
 #include <array>
 #include <cassert>
+
 
 /*
 template <std::size_t Rank>
