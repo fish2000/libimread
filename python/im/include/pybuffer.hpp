@@ -20,13 +20,13 @@ namespace py {
                 source(Py_buffer const& pb);
                 source(Py_buffer const& pb, bool r);
                 virtual ~source();
-                virtual std::size_t read(byte* buffer, std::size_t n);
+                virtual std::size_t read(byte* buffer, std::size_t n) const;
                 
                 virtual bool can_seek() const noexcept;
                 virtual std::size_t seek_absolute(std::size_t p);
                 virtual std::size_t seek_relative(int delta);
                 virtual std::size_t seek_end(int delta);
-                virtual std::vector<byte> full_data();
+                virtual std::vector<byte> full_data() const;
                 virtual std::size_t size() const;
                 virtual void* readmap(std::size_t pageoffset = 0) const;
                 

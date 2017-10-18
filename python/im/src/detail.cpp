@@ -204,7 +204,7 @@ namespace py {
      * THE IMPLEMENTATIONS: py::ref
      */
     
-    ref::ref() noexcept {}
+    // ref::ref() noexcept {}
     
     ref::ref(bool destruct) noexcept
         :destroy(destruct)
@@ -261,6 +261,7 @@ namespace py {
     
     ref const& ref::set(pyptr_t new_referent, bool new_destroy_value) {
         if (new_referent == referent) {
+            destroy = new_destroy_value;
             return *this;
         }
         if (referent && destroy) {
@@ -330,8 +331,9 @@ namespace py {
     }
     
     ref::pyptr_t ref::release() noexcept {
-        ref::pyptr_t out = referent;
-        referent = nullptr;
+        using std::swap;
+        ref::pyptr_t out = nullptr;
+        swap(referent, out);
         return out;
     }
     
@@ -357,7 +359,7 @@ namespace py {
     
     std::size_t ref::hash() const {
         if (empty()) { return 0; }
-        return std::size_t(PyObject_Hash(referent));
+        return static_cast<std::size_t>(PyObject_Hash(referent));
     }
     
     bool ref::empty() const noexcept {
@@ -433,7 +435,7 @@ namespace py {
     }
     
     ref::operator std::string() const {
-        return to_string();
+        return ref::to_string();
     }
     
     std::ostream& operator<<(std::ostream& os, ref const& r) {
@@ -445,49 +447,85 @@ namespace py {
     }
     
     ref::operator Json() const {
-        return to_json();
+        return ref::to_json();
     }
     
     bool ref::hasattr(std::string const& attr) const {
-        return PyObject_HasAttrString(referent, attr.c_str()) == 1;
+        return PyObject_HasAttrString(referent,
+                                      attr.c_str()) == 1;
     }
     
     bool ref::hasattr(ref const& attr) const {
-        return PyObject_HasAttr(referent, attr.inc().get()) == 1;
+        return PyObject_HasAttr(referent,
+                                attr.referent) == 1;
     }
     
     ref ref::getattr(std::string const& attr) const {
-        return PyObject_GetAttrString(referent, attr.c_str());
+        return PyObject_GetAttrString(referent,
+                                      attr.c_str());
     }
     
     ref ref::getattr(ref const& attr) const {
-        return PyObject_GetAttr(referent, attr.inc().get());
+        return PyObject_GetAttr(referent,
+                                attr.referent);
+    }
+    
+    bool ref::delattr(std::string const& attr) const {
+        return PyObject_DelAttrString(referent,
+                                      attr.c_str()) != -1;
+    }
+    
+    bool ref::delattr(ref const& attr) const {
+        return PyObject_DelAttr(referent,
+                                attr.referent) != -1;
+    }
+    
+    bool ref::setattr(std::string const& attr, ref const& value) const {
+        if (value.empty()) { return ref::delattr(attr); }
+        return PyObject_SetAttrString(referent,
+                                      attr.c_str(),
+                                      value.referent) != -1;
+    }
+    
+    bool ref::setattr(ref const& attr, ref const& value) const {
+        if (value.empty()) { return ref::delattr(attr); }
+        return PyObject_SetAttrString(referent,
+                                      attr.referent,
+                                      value.referent) != -1;
     }
     
     ref ref::getattr(std::string const& attr, ref::pyptr_t default_value) const {
-        PyObject* out = PyObject_GetAttrString(referent, attr.c_str());
-        if (!out) { return default_value; }
+        PyObject* out = PyObject_GetAttrString(referent,
+                                               attr.c_str());
+        if (!out) {
+            return py::asref(default_value);
+        }
         return out;
     }
     
     ref ref::getattr(ref const& attr, ref::pyptr_t default_value) const {
-        PyObject* out = PyObject_GetAttr(referent, attr.inc().get());
-        if (!out) { return default_value; }
+        PyObject* out = PyObject_GetAttr(referent,
+                                         attr.referent);
+        if (!out) {
+            return py::asref(default_value);
+        }
         return out;
     }
     
     ref ref::operator[](std::string const& attr) const {
-        return PyObject_GetAttrString(referent, attr.c_str());
+        return PyObject_GetAttrString(referent,
+                                      attr.c_str());
     }
     
     ref ref::operator[](ref const& attr) const {
-        return PyObject_GetAttr(referent, ref.inc().get());
+        return PyObject_GetAttr(referent,
+                                attr.referent);
     }
     
-    py::ref&& asref(PyObject* referent) {
-        py::ref out;
+    ref asref(ref::pyptr_t referent) {
+        ref out;
         out.set(referent);
-        return std::move(out);
+        return out;
     }
     
     namespace detail {

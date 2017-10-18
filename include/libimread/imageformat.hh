@@ -22,10 +22,11 @@ namespace im {
     /// forward declarations
     class Image;
     class ImageFactory;
-    class Metadata;
     struct ImageList;
-    struct byte_source;
-    struct byte_sink;
+    
+    class Metadata;
+    class byte_source;
+    class byte_sink;
     struct Options;
     struct OptionsList;
     

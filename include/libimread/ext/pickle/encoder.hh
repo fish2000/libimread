@@ -45,9 +45,9 @@ namespace store {
             
             protected:
                 /// I/O-related API:
-                virtual emit(char) = 0;
-                virtual emit(char const*) = 0;
-                virtual emit(std::string const&) = 0;
+                virtual void emit(char) = 0;
+                virtual void emit(char const*) = 0;
+                virtual void emit(std::string const&) = 0;
             
             private:
                 /// declare the opcode emitter methods:
@@ -206,7 +206,7 @@ namespace store {
                 template <typename ...Args>
                 using convertible = std::is_same<void,
                                     std::common_type_t<
-                                        decltype(encode(std::declval<Args>()))...>>;
+                                        decltype(std::declval<encoder>().encode(std::declval<Args>()))...>>;
                                                  
                 template <typename ...Args>
                 bool convertible_v = convertible<Args...>::value;

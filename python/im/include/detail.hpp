@@ -429,10 +429,10 @@ namespace py {
                                                        py::convert(std::declval<Args>()))...>>;
             
             /// default constructor, yields a nullptr referent
-            ref() noexcept;
+            constexpr ref() noexcept = default;
             
             /// explicit boolean constructor, for disabling destructor logic
-            explicit ref(bool) noexcept;
+            constexpr explicit ref(bool) noexcept;
             
             /// py::refs are moveable via construction/assignment
             /// ... but *not* copyable as you may note
@@ -461,9 +461,8 @@ namespace py {
                                py::ref::can_convert<RawType>::value,
                       int> = 0>
             ref& operator=(RawType&& raw) {
-                Py_XDECREF(referent);
-                referent = py::convert(std::forward<RawType>(raw));
-                return *this;
+                pyptr_t converted = py::convert(std::forward<RawType>(raw));
+                return ref::operator=(converted);
             }
             
             /// virtual destructor, Py_XDECREFs the referent pointer
@@ -534,6 +533,10 @@ namespace py {
             bool hasattr(ref const&) const;
             ref getattr(std::string const&) const;
             ref getattr(ref const&) const;
+            bool delattr(std::string const&) const;
+            bool delattr(ref const&) const;
+            bool setattr(std::string const&, ref const&) const;
+            bool setattr(ref const&, ref const&) const;
             ref getattr(std::string const&, pyptr_t) const;
             ref getattr(ref const&, pyptr_t) const;
             ref operator[](std::string const&) const;
@@ -570,7 +573,7 @@ namespace py {
     
     /// get a py::ref for a PyObject* after incrementing its refcount --
     /// useful for temporary and scope-based py::refs:
-    py::ref&& asref(PyObject*);
+    ref asref(ref::pyptr_t);
     
     namespace detail {
         
@@ -592,14 +595,14 @@ namespace py {
         
         /// pollyfills for C++17 std::clamp()
         /// q.v. http://ideone.com/IpcDt9, http://en.cppreference.com/w/cpp/algorithm/clamp
-        template <class T, class Compare>
-        constexpr const T& clamp(const T& v, const T& lo, const T& hi, Compare comp) {
-            return comp(v, hi) ? std::max(v, lo, comp) : std::min(v, hi, comp);
-        }
-        template <class T>
-        constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
-            return clamp(v, lo, hi, std::less<>());
-        }
+        // template <class T, class Compare>
+        // constexpr const T& clamp(const T& v, const T& lo, const T& hi, Compare comp) {
+        //     return comp(v, hi) ? std::max(v, lo, comp) : std::min(v, hi, comp);
+        // }
+        // template <class T>
+        // constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
+        //     return clamp(v, lo, hi, std::less<>());
+        // }
         
         /// polyfills for std::experimental::to_array()
         /// q.v. http://en.cppreference.com/w/cpp/experimental/to_array

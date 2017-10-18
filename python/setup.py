@@ -244,7 +244,7 @@ for key, sources in extensions.iteritems():
             '-O3',
             '-funroll-loops',
             '-mtune=native',
-            '-std=c++1z',
+            '-std=c++17',
             '-stdlib=libc++'
         ] + other_flags))
 
