@@ -8,6 +8,14 @@ namespace store {
     
     namespace pickle {
         
+        encoder::encoder(std::size_t protocol_level)
+            :protocol{ protocol_level }
+            {
+                if (protocol == 2) {
+                    
+                }
+            }
+        
         /// OPCODE METHODS: op_MARK() sends the opcode for MARK, etc.
         /// Method delcarations/definitions generated with regex: ([A-Z0-9_]+)\s+= '(\S+)',$
         
@@ -85,17 +93,41 @@ namespace store {
         void encoder::zero()    { emit('0'); }
         void encoder::one()     { emit('1'); }
         
-        void encoder::encode(std::nullptr_t) {
-            /// NO-OP
+        void encoder::put(std::size_t idx) {
+            op_PUT();
+            emit(std::to_string(idx));
+            newline();
         }
         
-        void encoder::encode(void) {
-            /// NO-OP
+        void encoder::put() {
+            op_PUT();
+            emit(std::to_string(put_index++));
+            newline();
         }
         
-        void encoder::encode(void* operand) {
-            /// ???
+        void encoder::binput(std::size_t idx) {
+            op_BINPUT();
+            emit(std::to_string(idx));
+            newline();
         }
+        
+        void encoder::binput() {
+            op_BINPUT();
+            emit(std::to_string(put_index++));
+            newline();
+        }
+        
+        // void encoder::encode(std::nullptr_t) {
+        //     /// NO-OP
+        // }
+        
+        // void encoder::encode(void) {
+        //     /// NO-OP
+        // }
+        
+        // void encoder::encode(void* operand) {
+        //     /// ???
+        // }
         
         void encoder::encode(bool operand) {
             op_INT();
@@ -190,51 +222,57 @@ namespace store {
             op_STRING();
             emit("'" + std::string(operand) + "'");
             newline();
+            put();
         }
         
         void encoder::encode(char const* operand) {
             op_STRING();
             emit("'" + std::string(operand) + "'");
             newline();
+            put();
         }
         
         void encoder::encode(std::string const& operand) {
             op_STRING();
             emit("'" + operand + "'");
             newline();
+            put();
         }
         
         void encoder::encode(char* operand, std::size_t siz) {
             op_STRING();
             emit("'" + std::string(operand, siz) + "'");
             newline();
+            put();
         }
         
         void encoder::encode(char const* operand, std::size_t siz) {
             op_STRING();
             emit("'" + std::string(operand, siz) + "'");
             newline();
+            put();
         }
         
         void encoder::encode(std::string const& operand, std::size_t siz) {
             op_STRING();
             emit("'" + operand.substr(siz) + "'");
             newline();
+            put();
         }
         
         void encoder::encode(std::wstring const& operand) {
             op_BINUNICODE();
             emit("'" + operand + "'");
             newline();
+            put();
         }
         
         void encoder::encode(std::wstring const& operand, std::size_t siz) {
             op_BINUNICODE();
             emit("'" + operand.substr(siz) + "'");
             newline();
+            put();
         }
-        
-        
         
     } /// namespace pickle
     

@@ -22,13 +22,6 @@ namespace store {
         
         namespace impl {
             
-            __attribute__((format(printf, 1, 2)))
-            void argcheck(const char *format, ...);
-            va_list&& argcompand(std::nullptr_t, ...);
-            
-            #define static_argcheck(disambiguate, ...) \
-                if (false) { impl::argcheck(__VA_ARGS__); }
-            
             template <typename Tuple>
             std::size_t tuple_size_v = std::tuple_size<Tuple>::value;
             
@@ -46,6 +39,9 @@ namespace store {
         } /// namespace impl
         
         class encoder {
+            
+            public:
+                explicit encoder(std::size_t); /// construct with protocol level
             
             protected:
                 /// I/O-related API:
@@ -124,15 +120,23 @@ namespace store {
                 #undef OPCODE
             
             private:
-                void newline(); /// emit a newline (\n)
-                void zero();    /// emit a zero (0)
-                void one();     /// emit a one (1)
+                void newline();             /// emit a newline (\n)
+                void zero();                /// emit a zero (0)
+                void one();                 /// emit a one (1)
+                void put(std::size_t);      /// emit “PUT <idx>” (using explicit index)
+                void put();                 /// emit “PUT <idx>” (using internal counter)
+                void binput(std::size_t);   /// emit “BINPUT <idx>” (using explicit index)
+                void binput();              /// emit “BINPUT <idx>” (using internal counter)
+                
+            protected:
+                std::size_t put_index = 0;
+                std::size_t protocol = 0;
             
             public:
                 /// void encode(…):
-                void encode(std::nullptr_t);
-                void encode(void);
-                void encode(void*);
+                // void encode(std::nullptr_t);
+                // void encode(void);
+                // void encode(void*);
                 void encode(bool);
                 void encode(std::size_t);
                 void encode(ssize_t);
@@ -187,7 +191,7 @@ namespace store {
                                                     std::is_arithmetic<Original>::value,
                           int> = 0> inline
                 void encode(Original orig) {
-                    store::pickle::encode(static_cast<Cast>(orig));
+                    encode(static_cast<Cast>(orig));
                 }
                 
                 template <typename Cast,
@@ -196,144 +200,170 @@ namespace store {
                                                     !std::is_arithmetic<Original>::value,
                           int> = 0> inline
                 void encode(Original orig) {
-                    store::pickle::encode(reinterpret_cast<Cast>(orig));
+                    encode(reinterpret_cast<Cast>(orig));
                 }
                 
                 template <typename ...Args>
                 using convertible = std::is_same<void,
                                     std::common_type_t<
-                                        decltype(
-                                        store::pickle::encode(std::declval<Args>()))...>>;
+                                        decltype(encode(std::declval<Args>()))...>>;
                                                  
                 template <typename ...Args>
-                bool convertible_v = store::pickle::convertible<Args...>::value;
-                
-                /* >>>>>>>>>>>>>>>>>>> PRINTF-ISH FORMAT STYLE <<<<<<<<<<<<<<<<<<<< */
-                
-                template <typename ...Args>
-                __attribute__((nonnull(1)))
-                void encode(char const* formatstring, bool disambiguate, Args&&... args) {
-                    /// trigger compile-time type checks for printf-style variadics
-                    /// -- this is a no-op at runtime:
-                    static_argcheck(disambiguate,
-                                    formatstring,
-                                    std::forward<Args>(args)...);
-                    
-                    /// dispatch using argument pack companded as a va_list:
-                    return store::pickle::encode(formatstring,
-                           store::pickle::impl::argcompand(nullptr, std::forward<Args>(args)...));
-                }
+                bool convertible_v = convertible<Args...>::value;
                 
                 /* >>>>>>>>>>>>>>>>>>> TUPLIZE <<<<<<<<<<<<<<<<<<<< */
                 
-                void tuplize();
+                void tuplize() {
+                    /// zero-element tuple
+                    op_MARK();
+                    op_TUPLE();
+                    // op_STOP();
+                }
                 
                 template <typename ListType,
-                          typename std::enable_if_t<
-                                    store::pickle::convertible<ListType>::value,
+                          typename std::enable_if_t<convertible<ListType>::value,
                           int> = 0>
                 void tuplize(std::initializer_list<ListType> list) {
-                    // Py_ssize_t idx = 0,
-                    //            max = list.size();
-                    // void tuple = PyTuple_New(max);
-                    // for (ListType const& item : list) {
-                    //     PyTuple_SET_ITEM(tuple, idx, store::pickle::encode(item));
-                    //     idx++;
-                    // }
-                    // return tuple;
+                    /// initializer list -> multi-element tuple
+                    op_MARK();
+                    for (ListType const& item : list) { encode(item); }
+                    op_TUPLE();
+                    put();
+                    // op_STOP();
                 }
                 
                 template <typename Args,
-                          typename std::enable_if_t<
-                                    store::pickle::convertible<Args>::value,
+                          typename std::enable_if_t<convertible<Args>::value,
                           int> = 0>
                 void tuplize(Args arg) {
-                    // return PyTuple_Pack(1,
-                    //     py::encode(std::forward<Args>(arg)));
+                    /// single-element tuple
+                    op_MARK();
+                    encode(arg);
+                    op_TUPLE();
+                    put();
+                    // op_STOP();
+                }
+                
+                template <typename Tuple, std::size_t ...I>
+                void tuplize(Tuple&& t, std::index_sequence<I...>) {
+                    /// tuple+index-seq -> initializer list
+                    tuplize({ std::get<I>(std::forward<Tuple>(t))... });
                 }
                 
                 template <typename ...Args>
                 void tuplize(Args&& ...args) {
-                    // static_assert(
-                    //     sizeof...(Args) > 1,
-                    //     "Can't tuplize a zero-length arglist");
-                    //
-                    // return PyTuple_Pack(
-                    //     sizeof...(Args),
-                    //     store::pickle::encode(std::forward<Args>(args))...);
+                    /// variadic -> tuple+index-seq
+                    using Indices = std::index_sequence_for<Args...>;
+                    static_assert(
+                        sizeof...(Args) > 1,
+                        "Can't tuplize a zero-length arglist");
+                    tuplize(std::forward_as_tuple(args...), Indices());
                 }
                 
                 /* >>>>>>>>>>>>>>>>>>> LISTIFY <<<<<<<<<<<<<<<<<<<< */
                 
-                void listify();
+                void listify() {
+                    /// zero-element list
+                    op_MARK();
+                    op_LIST();
+                    put();
+                    // op_STOP();
+                }
                 
                 template <typename ListType,
-                          typename std::enable_if_t<
-                                    store::pickle::convertible<ListType>::value,
+                          typename std::enable_if_t<convertible<ListType>::value,
                           int> = 0>
                 void listify(std::initializer_list<ListType> list) {
-                    // Py_ssize_t idx = 0,
-                    //            max = list.size();
-                    // void pylist = PyList_New(max);
-                    // for (ListType const& item : list) {
-                    //     PyList_SET_ITEM(pylist, idx, store::pickle::encode(item));
-                    //     idx++;
-                    // }
-                    // return pylist;
+                    /// initializer list -> multi-element list
+                    op_MARK();
+                    op_LIST();
+                    put();
+                    for (ListType const& item : list) {
+                        encode(item);
+                        op_APPEND();
+                    }
+                    // op_STOP();
                 }
                 
                 template <typename Args,
-                          typename std::enable_if_t<
-                                    store::pickle::convertible<Args>::value,
+                          typename std::enable_if_t<convertible<Args>::value,
                           int> = 0>
                 void listify(Args arg) {
-                    // void pylist = PyList_New(1);
-                    // PyList_SET_ITEM(pylist, 0,
-                    //     store::pickle::encode(std::forward<Args>(arg)));
-                    // return pylist;
+                    /// single-element list
+                    op_MARK();
+                    op_LIST();
+                    put();
+                    encode(arg);
+                    op_APPEND();
+                    // op_STOP();
                 }
                 
                 template <typename Tuple, std::size_t ...I>
                 void listify(Tuple&& t, std::index_sequence<I...>) {
-                    // void pylist = PyList_New(
-                    //     std::tuple_size<Tuple>::value);
-                    // unpack {
-                    //     PyList_SET_ITEM(pylist, I,
-                    //         store::pickle::encode(std::get<I>(std::forward<Tuple>(t))))...
-                    // };
-                    // return pylist;
+                    /// tuple+index-seq -> initializer list
+                    listify({ std::get<I>(std::forward<Tuple>(t))... });
                 }
                 
                 template <typename ...Args>
                 void listify(Args&& ...args) {
-                    // using Indices = std::index_sequence_for<Args...>;
-                    // static_assert(
-                    //     sizeof...(Args) > 1,
-                    //     "Can't listify a zero-length arglist");
-                    //
-                    // return store::pickle::listify(
-                    //     std::forward_as_tuple(args...),
-                    //     Indices());
+                    /// variadic -> tuple+index-seq
+                    using Indices = std::index_sequence_for<Args...>;
+                    static_assert(
+                        sizeof...(Args) > 1,
+                        "Can't listify a zero-length arglist");
+                    listify(std::forward_as_tuple(args...), Indices());
                 }
                 
                 /* >>>>>>>>>>>>>>>>>>> PAIR AND TUPLE CONVERTERS <<<<<<<<<<<<<<<<<<<< */
                 
                 template <typename First, typename Second>
                 void encode(std::pair<First, Second> pair) {
+                    using Pair = std::pair<First, Second>;
+                    using Indices = std::make_index_sequence<2>;
+                    impl::apply_impl(tuplize<First, Second>,
+                                     std::forward<Pair>(pair),
+                                     Indices());
                 }
                 
                 template <typename ...Args>
                 void encode(std::tuple<Args...> argtuple) {
+                    using Tuple = std::tuple<Args...>;
+                    using Indices = std::index_sequence_for<Args...>;
+                    if (py::impl::tuple_size_v<Tuple> == 0) {
+                        tuplize();
+                    } else {
+                        impl::apply_impl(tuplize<Args...>,
+                                         std::forward<Tuple>(argtuple),
+                                         Indices());
+                    }
                 }
                 
                 template <typename ...Args>
                 void encode(std::tuple<Args&&...> argtuple) {
+                    using Tuple = std::tuple<Args&&...>;
+                    using Indices = std::index_sequence_for<Args...>;
+                    if (py::impl::tuple_size_v<Tuple> == 0) {
+                        tuplize();
+                    } else {
+                        impl::apply_impl(tuplize<Args...>,
+                                         std::forward<Tuple>(argtuple),
+                                         Indices());
+                    }
                 }
                 
                 /* >>>>>>>>>>>>>>>>>>> GENERIC DECONTAINERIZERS <<<<<<<<<<<<<<<<<<<< */
                 
                 template <typename Vector, typename Value>
                 void encode(Vector const& vector) {
+                    /// vector-style container -> multi-element list
+                    op_MARK();
+                    op_LIST();
+                    put();
+                    for (Value const& item : vector) {
+                        encode(item);
+                        op_APPEND();
+                    }
+                    // op_STOP();
                 }
                 
                 template <typename Mapping, typename Value,
@@ -342,6 +372,16 @@ namespace store {
                                                          typename Mapping::key_type>::value,
                           int>>
                 void encode(Mapping const& mapping) {
+                    /// mapping-style container -> dict
+                    op_MARK();
+                    op_DICT();
+                    put();
+                    for (auto const& item : mapping) {
+                        encode(item.first);
+                        encode(item.second);
+                        op_SETITEM();
+                    }
+                    // op_STOP();
                 }
                 
         };
