@@ -30,9 +30,6 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# if(NOT CMAKE_CXX_STANDARD)
-#     set(CMAKE_CXX_STANDARD 17)
-# endif()
 
 if(IM_RESYMBOLIZE)
     execute_process(
@@ -59,8 +56,8 @@ endif()
 # first be searched for external CMake packages.
 set(CMAKE_MODULE_PATH ${cmake_directory})
 set(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
-    $ENV{LD_LIBRARY_PATH}
-    /usr/lib/system)
+                              $ENV{LD_LIBRARY_PATH}
+                              /usr/lib/system)
 
 # Include the library build configuration. This will also include the custom
 # macro defined for the project.
@@ -104,7 +101,6 @@ IOD_SYMBOLIZE(
 
 # Set variables for the deps and apps directories:
 SET(APPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/apps")
-# SET(CAPN_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/capn")
 SET(DEPS_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 SET(HALOGEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/halogen")
 
@@ -114,14 +110,12 @@ SET(IOD_TEST_DIR "${IOD_DIR}/tests")
 SET(CROSSGUID_DIR "${DEPS_DIR}/crossguid")
 SET(DEPIXELATE_DIR "${DEPS_DIR}/depixelate")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
+SET(GSL_DIR "${DEPS_DIR}/GSL")
 SET(INICPP_DIR "${DEPS_DIR}/inicpp")
-# SET(INTERPOL_DIR "${DEPS_DIR}/interpol")
 SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
-# SET(LIBBF_DIR "${DEPS_DIR}/libbf/src")
 SET(LMDBXX_DIR "${DEPS_DIR}/lmdbxx")
 SET(LRUCACHE11_DIR "${DEPS_DIR}/lrucache11")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
-# SET(VDB_DIR "${DEPS_DIR}/vdb")
 
 # Set variables for directories for the individual apps:
 SET(LIBIMREAD_CONFIG_DIR "${APPS_DIR}/libimread-config")
@@ -152,54 +146,35 @@ find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
 find_package(LibUnwind REQUIRED)
 find_package(PkgConfig REQUIRED)
-# find_package(CapnProto REQUIRED)
 
 set(HDF5_USE_STATIC_LIBRARIES false)
-# set(HDF5_ROOT /usr/local/opt/hdf5/)
-# set(HDF5_DIR  /usr/local/opt/hdf5/)
 set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE true)
 set(HDF5_COMPILER_NO_INTERROGATE true)
 
-# message(STATUS "find_package(): looking for HDF5 within HDF5_ROOT = ${HDF5_ROOT}")
-# find_package(HDF5 COMPONENTS C CXX HL NO_MODULE)
-# if(NOT HDF5_FOUND)
-#     message(STATUS "find_package(): couldn't find HDF5 cmake module configuration in ${HDF5_ROOT}")
-#     message(STATUS "find_package(): falling back to cmake/FindHDF5.cmake")
-#     include(FindHDF5)
-#     find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
-# endif()
-
 # include(FindHDF5)
 find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
-# find_package(HDF5 REQUIRED COMPONENTS CXX)
-# find_package(HDF5 REQUIRED COMPONENTS HL)
 
 include(FindRocksDB)
 # find_package(RocksDB REQUIRED)
 
 pkg_check_modules(LIBPLIST REQUIRED libplist)
 pkg_check_modules(LIBPLISTPP REQUIRED libplist++)
-
 pkg_check_modules(YAMLCPP REQUIRED yaml-cpp)
 
 # Include the project-specific `include` directories:
-include_directories(${${PROJECT_NAME}_include_dir})
-include_directories("${CMAKE_BINARY_DIR}/../include")
-include_directories("${CMAKE_BINARY_DIR}")
+include_directories(${${PROJECT_NAME}_include_dir})     # libimread/include/ (from a find_path() in libimreadConfig.cmake)
+include_directories("${CMAKE_BINARY_DIR}/include")      # generated headers e.g. “libimread.hpp” wind up include here
 
 # Include the `deps` library `include` directories:
 include_directories("${CROSSGUID_DIR}")
-include_directories("${DEPIXELATE_DIR}")
+# include_directories("${DEPIXELATE_DIR}")
 include_directories("${DOCOPT_DIR}")
-include_directories("${IMAGECOMPRESSION_DIR}")
+# include_directories("${IMAGECOMPRESSION_DIR}")
 include_directories("${INICPP_DIR}/include")
-# include_directories("${INTERPOL_DIR}")
-# include_directories("${LIBBF_DIR}")
-include_directories("${LMDBXX_DIR}")
-include_directories("${LRUCACHE11_DIR}")
+# include_directories("${LMDBXX_DIR}")
+# include_directories("${LRUCACHE11_DIR}")
 include_directories("${IOD_DIR}")
-include_directories("${SG14_DIR}")
-# include_directories("${VDB_DIR}/lib")
+# include_directories("${SG14_DIR}")
 
 # Ugh
 link_directories(/usr/lib)
@@ -227,15 +202,13 @@ include(CMakeProjectFiles.cmake)
 add_library(imread OBJECT ${srcs} ${hdrs})
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
+
 add_dependencies(imread "project_header")
 add_dependencies(imread "guid")
-add_dependencies(imread "depixelate")
-add_dependencies(imread "imagecompression")
+# add_dependencies(imread "depixelate")
+add_dependencies(imread "GSL")
+# add_dependencies(imread "imagecompression")
 add_dependencies(imread "inicpp")
-# add_dependencies(imread "interpol")
-# add_dependencies(imread "libbf")
-# add_dependencies(imread "vdb")
-# add_dependencies(imread "vdb-client-shared")
 add_dependencies(imread "iod_symbolize")
 
 # ... and build shared and static target libraries,
@@ -254,13 +227,13 @@ set_target_properties(imread_static
 # ... these two target_link_libraries() calls set up the actual
 # for-reals building up in all this:
 target_link_libraries(imread_shared
-    z png guid
-    $<TARGET_OBJECTS:inicpp>
-    # libbf interpol
-    $<TARGET_OBJECTS:depixelate_hqx>
-    $<TARGET_OBJECTS:depixelate_scale2x>
-    $<TARGET_OBJECTS:depixelate_xbrz>
-    $<TARGET_OBJECTS:imagecompression>
+    z png guid                              # shared libraries (dylib) linked normally
+    GSL                                     # “INTERFACE” (header-only) library
+    $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
+    # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
+    # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library
+    # $<TARGET_OBJECTS:depixelate_xbrz>       # merges objects from depixelate sub-library
+    # $<TARGET_OBJECTS:imagecompression>      # merges objects from depixelate sub-library
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -269,20 +242,19 @@ target_link_libraries(imread_shared
     ${HDF5_C_LIBRARIES}
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
-    # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES}
     ${LIBPLIST_LIBRARIES}
     ${LIBPLISTPP_LIBRARIES}
     ${YAMLCPP_LIBRARIES})
 
 target_link_libraries(imread_static
-    z png guid
-    $<TARGET_OBJECTS:inicpp>
-    # libbf interpol
-    $<TARGET_OBJECTS:depixelate_hqx>
-    $<TARGET_OBJECTS:depixelate_scale2x>
-    $<TARGET_OBJECTS:depixelate_xbrz>
-    $<TARGET_OBJECTS:imagecompression>
+    z png guid                              # static libraries (“.a” archive files) linked normally
+    GSL                                     # “INTERFACE” (header-only) library
+    $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
+    # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
+    # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library
+    # $<TARGET_OBJECTS:depixelate_xbrz>       # merges objects from depixelate sub-library
+    # $<TARGET_OBJECTS:imagecompression>      # merges objects from depixelate sub-library
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -291,7 +263,6 @@ target_link_libraries(imread_static
     ${HDF5_C_LIBRARIES}
     ${HDF5_CXX_LIBRARIES}
     ${HDF5_HL_LIBRARIES}
-    # ${CAPNP_LIBRARIES_LITE}
     ${ROCKSDB_LIBRARIES}
     ${LIBPLIST_STATIC_LIBRARIES}
     ${LIBPLISTPP_STATIC_LIBRARIES}
@@ -347,7 +318,7 @@ ansi_message(STATUS "IM_DYLIB_SUFFIX = ${IM_DYLIB_SUFFIX}")
 
 # Configure and generate the compile-time project header file:
 set(PROJECT_HEADER
-    "${PROJECT_BINARY_DIR}/libimread/libimread.hpp")
+    "${PROJECT_BINARY_DIR}/include/libimread/libimread.hpp")
 configure_file(
     "${hdrs_dir}/libimread.hpp.in"
     ${PROJECT_HEADER})
@@ -386,17 +357,6 @@ if(IM_TESTS)
     # ... this defines add_imread_test(), see below:
     add_subdirectory(${TEST_SOURCE_DIR})
     
-    # add_custom_command(
-    #     OUTPUT ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist
-    #     COMMAND ${TEST_SCRIPT_DIR}/generate-test-filemap.py > ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
-    # add_custom_target("test_data_plist"
-    #     DEPENDS ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
-    # set_target_properties("test_data_plist"
-    #     PROPERTIES GENERATED TRUE)
-    # set_target_properties("test_data_plist"
-    #     PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${APPS_DIR}/TestDataViewer/TestDataViewer/TestData.plist)
-    # add_dependencies("test_data_plist" imread)
-    
     # Generate the test data header, if necessary:
     add_custom_command(
         OUTPUT ${TEST_INCLUDE_DIR}/test_data.hpp
@@ -411,39 +371,11 @@ if(IM_TESTS)
     set(imread_tests "test_${PROJECT_NAME}")
     add_executable(imread_tests ${TEST_SOURCES})
     add_dependencies("test_data_header" imread)
-    add_dependencies(imread_tests "project_header")
-    add_dependencies(imread_tests "test_data_header")
-    add_dependencies(imread_tests "iod_symbolize")
-    add_dependencies(imread_tests "guid")
-    add_dependencies(imread_tests "depixelate")
-    add_dependencies(imread_tests "imagecompression")
-    # add_dependencies(imread_tests "interpol")
-    # add_dependencies(imread_tests "libbf")
-    # add_dependencies(imread_tests "vdb")
-    # add_dependencies(imread_tests "vdb-client-shared")
     add_dependencies(imread_tests "imread")
     link_directories(${CMAKE_BINARY_DIR})
     
     # Link the `imread_tests` executable
-    target_link_libraries(imread_tests
-        imread_shared
-        guid png z
-        # libbf interpol
-        # depixelate_shared
-        # vdb-client
-        ${EXTRA_LIBS}
-        ${TIFF_LIBRARIES}
-        ${JPEG_LIBRARIES}
-        ${WEBP_LIBRARIES}
-        ${HALIDE_LIBRARIES}
-        ${HDF5_C_LIBRARIES}
-        ${HDF5_CXX_LIBRARIES}
-        ${HDF5_HL_LIBRARIES}
-        # ${CAPNP_LIBRARIES_LITE}
-        ${ROCKSDB_LIBRARIES}
-        ${LIBPLIST_LIBRARIES}
-        ${LIBPLISTPP_LIBRARIES}
-        ${YAMLCPP_LIBRARIES})
+    target_link_libraries(imread_tests imread_shared)
     
     # Set up ctest and cdash:
     enable_testing()

@@ -68,9 +68,7 @@ endif(APPLE)
 
 # Project header files
 set(hdrs
-    # ${CAPN_DIR}/halide.capnp.h
-    # ${CAPN_DIR}/numpy.capnp.h
-    ${PROJECT_BINARY_DIR}/libimread/libimread.hpp
+    ${PROJECT_BINARY_DIR}/include/libimread/libimread.hpp
     ${hdrs_dir}/ext/errors/backtrace.hh
     ${hdrs_dir}/ext/errors/demangle.hh
     ${hdrs_dir}/ext/errors/terminator.hh
@@ -118,9 +116,7 @@ set(hdrs
     
     ${hdrs_dir}/private/buffer_t.h
     ${hdrs_dir}/private/image_io.h
-    # ${hdrs_dir}/private/singleton.hh
     ${hdrs_dir}/private/static_image.h
-    # ${hdrs_dir}/private/vpp_symbols.hh
     
     # ${hdrs_dir}/process/jitresize.hh
     ${hdrs_dir}/process/neuquant.hh
@@ -164,8 +160,6 @@ set(hdrs
 
 # Project source files
 set(srcs
-    # ${CAPN_DIR}/halide.capnp.c++
-    # ${CAPN_DIR}/numpy.capnp.c++
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/attributes.cpp
@@ -192,7 +186,7 @@ set(srcs
     ${srcs_dir}/ext/pystring.cpp
     ${srcs_dir}/ext/uri.cpp
     ${srcs_dir}/ext/WriteGIF.cpp
-
+    
     # ${srcs_dir}/IO/ansi.cpp
     ${srcs_dir}/IO/bmp.cpp
     ${srcs_dir}/IO/gif.cpp
@@ -217,25 +211,20 @@ set(srcs
     ${srcs_dir}/filehandle.cpp
     ${srcs_dir}/formats.cpp
     ${srcs_dir}/gzio.cpp
-    # ${srcs_dir}/halide.cpp
     ${srcs_dir}/hashing.cpp
     ${srcs_dir}/histogram.cpp
     ${srcs_dir}/image.cpp
     ${srcs_dir}/imageformat.cpp
     ${srcs_dir}/imagelist.cpp
     ${srcs_dir}/imageview.cpp
-    # ${srcs_dir}/interleaved.cpp
     ${srcs_dir}/iterators.cpp
     ${srcs_dir}/memory.cpp
     ${srcs_dir}/metadata.cpp
     ${srcs_dir}/options.cpp
-    # ${srcs_dir}/palette.cpp
-    # ${srcs_dir}/pixels.cpp
     ${srcs_dir}/rocks.cpp
     ${srcs_dir}/seekable.cpp
     ${srcs_dir}/serialization.cpp
     ${srcs_dir}/store.cpp
-    # ${srcs_dir}/symbols.cpp
     ${preview_src}
     ${additional_src}
 )
