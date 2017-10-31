@@ -162,8 +162,9 @@ pkg_check_modules(LIBPLISTPP REQUIRED libplist++)
 pkg_check_modules(YAMLCPP REQUIRED yaml-cpp)
 
 # Include the project-specific `include` directories:
-set(${PROJECT_NAME}_include_dir ${CMAKE_SOURCE_DIR}/include)
+# set(${PROJECT_NAME}_include_dir ${CMAKE_SOURCE_DIR}/include)
 include_directories(${${PROJECT_NAME}_include_dir})     # libimread/include/ (from a find_path() in libimreadConfig.cmake)
+include_directories(${${PROJECT_NAME}_include_dir}/..)  # parent directory of libimread/include/
 include_directories("${CMAKE_BINARY_DIR}/include")      # generated headers e.g. “libimread.hpp” wind up include here
 
 # Include the `deps` library `include` directories:
