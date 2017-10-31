@@ -319,16 +319,13 @@ ansi_message(STATUS "IM_LINK_FLAGS = ${IM_LINK_FLAGS}")
 ansi_message(STATUS "IM_DYLIB_SUFFIX = ${IM_DYLIB_SUFFIX}")
 
 # Configure and generate the compile-time project header file:
-set(PROJECT_HEADER
-    "${PROJECT_BINARY_DIR}/include/libimread/libimread.hpp")
-configure_file(
-    "${hdrs_dir}/libimread.hpp.in"
-    ${PROJECT_HEADER})
+set(PROJECT_HEADER "${PROJECT_BINARY_DIR}/include/libimread/libimread.hpp")
+configure_file("${hdrs_dir}/libimread.hpp.in"
+                ${PROJECT_HEADER})
 add_custom_target("project_header"
-    DEPENDS ${PROJECT_HEADER})
-set_source_files_properties(
-    ${PROJECT_HEADER}
-    PROPERTIES GENERATED TRUE)
+                   DEPENDS ${PROJECT_HEADER})
+set_source_files_properties(${PROJECT_HEADER}
+                              PROPERTIES GENERATED TRUE)
 
 # Configure and generate the pkg-config file:
 ecm_generate_pkgconfig_file(BASE_NAME libimread
@@ -417,7 +414,7 @@ endif(IM_TESTS)
 # Install the built libraries and header files, as appropriate:
 install(TARGETS imread_shared DESTINATION lib)
 install(TARGETS imread_static DESTINATION lib)
-install(DIRECTORY ${PROJECT_BINARY_DIR}/libimread/ DESTINATION include/libimread
+install(DIRECTORY ${PROJECT_BINARY_DIR}/include/libimread/ DESTINATION include/libimread
   FILES_MATCHING PATTERN "libimread.hpp")
 install(DIRECTORY include/libimread/private/ DESTINATION include/libimread/private
   FILES_MATCHING PATTERN "*.h")
