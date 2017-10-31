@@ -20,8 +20,6 @@ if(NOT libimread_FOUND)
     find_package_handle_standard_args(${lib_name} DEFAULT_MSG
                                       ${lib_name}_include_dir)
     
-    set(${lib_name}_include_dir ${CMAKE_SOURCE_DIR}/include/libimread PARENT_SCOPE)
-    
     # If the target have not already been added and if the project calling this
     # file is not the libimread CMakeLists.txt, add the library to the
     # build chain.
