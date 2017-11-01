@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_IMAGELIST_HH_
 #define LIBIMREAD_IMAGELIST_HH_
 
+#include <tuple>
 #include <vector>
 #include <memory>
 #include <string>
@@ -26,13 +27,15 @@ namespace im {
         using unique_t       = std::unique_ptr<Image>;
         using vector_t       = std::vector<pointer_t>;
         using sizevec_t      = std::vector<int>;
+        using sizes_t        = std::tuple<int, int, int>;
         using pointerlist_t  = std::initializer_list<pointer_t>;
         using vector_size_t  = vector_t::size_type;
         using iterator       = vector_t::iterator;
         using const_iterator = vector_t::const_iterator;
         
         /// default constructor
-        ImageList() noexcept = default;
+        // ImageList() noexcept = default;
+        ImageList();
         
         /// construct from multiple arguments
         /// ... using boolean tag for first arg
@@ -40,10 +43,10 @@ namespace im {
         explicit ImageList(bool pointerargs, Pointers ...pointers)
             :images{ pointers... }
             {
-                images.erase(
-                    std::remove_if(images.begin(),
-                                   images.end(),
-                                [](pointer_t p) { return p == nullptr; }), images.end());
+                images.erase(std::remove_if(images.begin(),
+                                            images.end(),
+                                         [](pointer_t p) { return p == nullptr; }),
+                                            images.end());
                 compute_sizes();
             }
         
@@ -58,6 +61,9 @@ namespace im {
         
         /// noexcept move assignment operator
         ImageList& operator=(ImageList&&) noexcept;
+        
+        /// “list literal” initializer-list assignment operator
+        ImageList& operator=(pointerlist_t);
         
         /// virtual destructor
         virtual ~ImageList();

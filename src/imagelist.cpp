@@ -21,34 +21,39 @@
         int base = images[0]->__dimension__();                                      \
         if (std::all_of(sizes.cbegin(),                                             \
                         sizes.cend(),                                               \
-                    [=](int size) { return size == base; })) {                      \
-            return base;                                                            \
-        }                                                                           \
+                 [base](int size) { return size == base; })) { return base; }       \
         return -1;                                                                  \
     }
 
 namespace im {
     
     namespace detail {
-        using rehasher_t = hash::rehasher<ImageList::pointer_t>;
+        using pointer_t = ImageList::pointer_t;
+        using rehasher_t = hash::rehasher<pointer_t>;
+        using nullchecker_f = std::add_pointer_t<bool(pointer_t)>;
+        
+        /// non-capturing lambda, converted inline to a function pointer:
+        static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
     }
+    
+    ImageList::ImageList() {}
     
     ImageList::ImageList(ImageList::pointerlist_t pointerlist)
         :images(pointerlist)
         {
-            images.erase(
-                std::remove_if(images.begin(), images.end(),
-                            [](ImageList::pointer_t p) { return p == nullptr; }), images.end());
-            compute_sizes();
+            // images.erase(std::remove_if(images.begin(),
+            //                             images.end(), detail::nullchecker),
+            //                             images.end());
+            // compute_sizes();
         }
     
     ImageList::ImageList(ImageList::vector_t&& vector)
         :images(std::move(vector))
         {
-            images.erase(
-                std::remove_if(images.begin(), images.end(),
-                            [](ImageList::pointer_t p) { return p == nullptr; }), images.end());
-            compute_sizes();
+            // images.erase(std::remove_if(images.begin(),
+            //                             images.end(), detail::nullchecker),
+            //                             images.end());
+            // compute_sizes();
         }
     
     ImageList::ImageList(ImageList&& other) noexcept
@@ -56,7 +61,11 @@ namespace im {
         ,computed_width(other.computed_width)
         ,computed_height(other.computed_height)
         ,computed_planes(other.computed_planes)
-        {}
+        {
+            // if (computed_width == -1    ||
+            //     computed_height == -1   ||
+            //     computed_planes == -1)  { compute_sizes(); }
+        }
     
     ImageList& ImageList::operator=(ImageList&& other) noexcept {
         if (images != other.images) {
@@ -64,7 +73,19 @@ namespace im {
             computed_width = other.computed_width;
             computed_height = other.computed_height;
             computed_planes = other.computed_planes;
+            // if (computed_width == -1    ||
+            //     computed_height == -1   ||
+            //     computed_planes == -1)  { compute_sizes(); }
         }
+        return *this;
+    }
+    
+    ImageList& ImageList::operator=(ImageList::pointerlist_t pointerlist) {
+        ImageList(pointerlist).swap(*this);
+        // images.erase(std::remove_if(images.begin(),
+        //                             images.end(), detail::nullchecker),
+        //                             images.end());
+        // compute_sizes();
         return *this;
     }
     
@@ -84,9 +105,9 @@ namespace im {
     void ImageList::push_back(ImageList::unique_t unique)     { images.push_back(unique.release()); }
     
     void ImageList::compute_sizes() const {
-        computed_width = compute_width();
-        computed_height = compute_height();
-        computed_planes = compute_planes();
+        compute_width();
+        compute_height();
+        compute_planes();
     }
     
     int ImageList::width() const  { return computed_width;  }

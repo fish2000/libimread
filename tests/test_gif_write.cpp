@@ -148,7 +148,8 @@ namespace {
         std::unique_ptr<HalideFactory> factory{ new HalideFactory };
         std::unique_ptr<formats::GIF> gif_format{ new formats::GIF };
         Options read_options;
-        ImageList outlist, inlist;
+        ImageList outlist;
+        ImageList inlist;
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
