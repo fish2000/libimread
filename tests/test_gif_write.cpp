@@ -2,8 +2,10 @@
 #include <regex>
 #include <vector>
 #include <memory>
+#include <new>
 
 #include <libimread/libimread.hpp>
+#include <libimread/errors.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/image.hh>
@@ -141,6 +143,35 @@ namespace {
         });
     }
     
+    TEST_CASE("[gif-write] WHAT THE HELL PEOPLE",
+              "[gif-write-what-the-hell-people]") {
+        ImageList what_the_hell_people, dogg_why_you_even_got_to_do_a_thing;
+        path basedir(im::test::basedir);
+        const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
+        std::for_each(sequence.begin(), sequence.end(),
+                  [&](path const& p) {
+            HybridImage* halim = new HybridImage(im::halide::read((basedir/p).str()));
+            what_the_hell_people.push_back(halim);
+        
+            /// confirm lack of pre-computed image sizes:
+            CHECK(what_the_hell_people.width() == -1);
+            CHECK(what_the_hell_people.height() == -1);
+            CHECK(what_the_hell_people.planes() == -1);
+            
+            try {
+                TemporaryName composite(".gif");
+                
+                /// GIFFormat::write_multi(ilist) calls ilist.compute_sizes():
+                im::halide::write_multi(what_the_hell_people, composite.str());
+                REQUIRE(composite.pathname.is_file());
+            } catch (std::bad_alloc& exc) {
+                WTF("BAD ALLOCATION:",
+                    FF("\t%s\n", exc.what()));
+            }
+            
+        });
+    }
+    
     TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file",
               "[gif-write-multi-animated]")
     {
@@ -148,8 +179,7 @@ namespace {
         std::unique_ptr<HalideFactory> factory{ new HalideFactory };
         std::unique_ptr<formats::GIF> gif_format{ new formats::GIF };
         Options read_options;
-        ImageList outlist;
-        ImageList inlist;
+        ImageList outlist, inlist;
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         

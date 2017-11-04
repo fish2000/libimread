@@ -21,7 +21,7 @@
         int base = images[0]->__dimension__();                                      \
         if (std::all_of(sizes.cbegin(),                                             \
                         sizes.cend(),                                               \
-                 [base](int size) { return size == base; })) { return base; }       \
+                    [=](int size) { return size == base; })) { return base; }       \
         return -1;                                                                  \
     }
 
@@ -30,13 +30,13 @@ namespace im {
     namespace detail {
         using pointer_t = ImageList::pointer_t;
         using rehasher_t = hash::rehasher<pointer_t>;
-        using nullchecker_f = std::add_pointer_t<bool(pointer_t)>;
+        // using nullchecker_f = std::add_pointer_t<bool(pointer_t)>;
         
         /// non-capturing lambda, converted inline to a function pointer:
-        static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
+        // static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
     }
     
-    ImageList::ImageList() {}
+    // ImageList::ImageList() {}
     
     ImageList::ImageList(ImageList::pointerlist_t pointerlist)
         :images(pointerlist)
@@ -80,14 +80,14 @@ namespace im {
         return *this;
     }
     
-    ImageList& ImageList::operator=(ImageList::pointerlist_t pointerlist) {
-        ImageList(pointerlist).swap(*this);
-        // images.erase(std::remove_if(images.begin(),
-        //                             images.end(), detail::nullchecker),
-        //                             images.end());
-        // compute_sizes();
-        return *this;
-    }
+    // ImageList& ImageList::operator=(ImageList::pointerlist_t pointerlist) {
+    //     ImageList(pointerlist).swap(*this);
+    //     images.erase(std::remove_if(images.begin(),
+    //                                 images.end(), detail::nullchecker),
+    //                                 images.end());
+    //     compute_sizes();
+    //     return *this;
+    // }
     
     ImageList::~ImageList() { reset(); }
     
