@@ -838,6 +838,7 @@ namespace filesystem {
         
         /// copy the existant base segments to a new path instance:
         path result(detail::stringvec_t{}, m_absolute);
+        result.m_path.reserve(idx);
         std::copy(m_path.begin(),
                   m_path.begin() + idx,
                   std::back_inserter(result.m_path));
@@ -879,7 +880,8 @@ namespace filesystem {
     path path::normalize() const {
         path out(m_absolute);       /// output path
         int skip = 0,               /// segment skip counter
-            idx = m_path.size();    /// size of segment vector
+            idx = m_path.size(),    /// size of segment vector
+            trues = 0;              /// how many true values the vector holds
         
         /// initialize boolean vector for marking segemnts for copying:
         std::vector<bool> will_copy(idx, false);
@@ -904,6 +906,7 @@ namespace filesystem {
                 --skip;
             } else {
                 will_copy[idx] = true;
+                ++trues;
             }
         }
         
@@ -911,6 +914,7 @@ namespace filesystem {
         idx = 0;
         
         /// copy the marked segments to the output path for return:
+        out.m_path.reserve(trues);
         std::copy_if(m_path.begin(),
                      m_path.end(),
                      std::back_inserter(out.m_path),
@@ -1025,6 +1029,7 @@ namespace filesystem {
             }
         } else {
             result.m_absolute = m_absolute;
+            result.m_path.reserve(m_path.size() - 1);
             std::copy(m_path.begin(),
                       m_path.end() - 1,
                       std::back_inserter(result.m_path));
@@ -1039,6 +1044,7 @@ namespace filesystem {
                 "path::join() expects a relative-path RHS");
         }
         path result(m_path, m_absolute);
+        result.m_path.reserve(m_path.size() + other.m_path.size());
         std::copy(other.m_path.begin(),
                   other.m_path.end(),
                   std::back_inserter(result.m_path));
@@ -1050,6 +1056,7 @@ namespace filesystem {
             imread_raise(FileSystemError,
                 "path::adjoin() expects a relative-path RHS");
         }
+        m_path.reserve(m_path.size() + other.m_path.size());
         std::copy(other.m_path.begin(),
                   other.m_path.end(),
                   std::back_inserter(m_path));
@@ -1204,6 +1211,7 @@ namespace filesystem {
     
     path& path::operator=(detail::stringvec_t const& stringvec) {
         m_path = detail::stringvec_t{};
+        m_path.reserve(stringvec.size());
         std::copy(stringvec.begin(),
                   stringvec.end(),
                   std::back_inserter(m_path));
@@ -1241,7 +1249,9 @@ namespace filesystem {
     detail::stringvec_t path::components() const {
         /// return path component vector
         detail::stringvec_t out;
-        std::copy(m_path.begin(), m_path.end(),
+        out.reserve(m_path.size());
+        std::copy(m_path.begin(),
+                  m_path.end(),
                   std::back_inserter(out));
         return out;
     }
