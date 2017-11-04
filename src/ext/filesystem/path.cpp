@@ -152,22 +152,32 @@ namespace filesystem {
             return clock_t::from_time_t(ts);
         }
         
+        static constexpr int    copyfile_source_flags           = O_RDONLY | O_CLOEXEC;
+        static constexpr int    copyfile_destination_flags      = O_RDWR   | O_CLOEXEC | O_CREAT;
+        static constexpr mode_t copyfile_destination_mode       = 0644;
+        
+        static constexpr copyfile_flags_t copy_with_xattrs      = COPYFILE_SECURITY | COPYFILE_XATTR | COPYFILE_DATA;
+        static constexpr copyfile_flags_t copy_without_xattrs   = COPYFILE_SECURITY | COPYFILE_DATA;
+        
         ssize_t copyfile(char const* source, char const* destination, bool copy_attributes = true) {
             /// Copy a file from source to destination
             /// Adapted from http://stackoverflow.com/a/2180157/298171
             int input, output; /// file descriptors
-            if ((input  = ::open(source,      O_RDONLY | O_CLOEXEC)) == -1) { return -1; }
-            if ((output = ::open(destination, O_RDWR | O_CLOEXEC | O_CREAT, 0644)) == -1) {
-                ::close(input);
-                return -1;
-            }
+            
+            if ((input  = ::open(source,
+                                 copyfile_source_flags)) == -1)     {   return -1; }
+            if ((output = ::open(destination,
+                                 copyfile_destination_flags,
+                                 copyfile_destination_mode)) == -1) { ::close(input);
+                                                                        return -1; }
             
             #if defined(__APPLE__) || defined(__FreeBSD__)
-                /// fcopyfile() works on FreeBSD and OS X 10.5+ 
-                ::copyfile_flags_t flags = COPYFILE_SECURITY;
-                if (copy_attributes) { flags |= COPYFILE_XATTR; }
-                flags |= COPYFILE_DATA;
-                ssize_t result = ::fcopyfile(input, output, nullptr, flags);
+                /// fcopyfile() works on FreeBSD and OS X 10.5+
+                ssize_t result = ::fcopyfile(input,
+                                             output,
+                                             nullptr,
+                                             copy_attributes ? copy_with_xattrs
+                                                             : copy_without_xattrs);
                 copy_attributes = false; /// don’t manually copy xattrs
             
             #else
@@ -176,9 +186,10 @@ namespace filesystem {
                 off_t offset = 0;
                 stat_t source_info = { 0 };
                 ::fstat(input, &source_info);
-                ssize_t result = ::sendfile(output, input,
-                                                   &offset,
-                                                    source_info.st_size);
+                ssize_t result = ::sendfile(output,
+                                            input,
+                                           &offset,
+                                            source_info.st_size);
             
             #endif
             
@@ -207,7 +218,6 @@ namespace filesystem {
         static constexpr mode_t mkdir_flags                         = S_IRWXU  | S_IRWXG | S_IROTH  | S_IXOTH;
         static constexpr int touch_open_flags                       = O_WRONLY | O_CREAT | O_NOCTTY | O_NONBLOCK;
         static constexpr mode_t touch_open_mask                     = 0666;
-        static constexpr mode_t touch_update_flags                  = AT_SYMLINK_NOFOLLOW;
         
         static const std::string extsepstring(1, path::extsep);
         static const std::string sepstring(1, path::sep);
@@ -708,13 +718,9 @@ namespace filesystem {
         /// Bail if ::open() choked:
         if (descriptor < 0) { return false; }
         
-        // int status = ::utimensat(AT_FDCWD, c_str(),
-        //                                    nullptr,
-        //                                    detail::touch_update_flags);
-        
         /// Update the timestamps for our freshly-opened file, through its descriptor --
         /// A call to ::futimens() with the second arg (of type `const struct timespec*`)
-        /// value of `nullptr` means “set timestamsps to whatever the system clocks’ value
+        /// value of `nullptr` means “set timestamps to whatever the system clocks’ value
         /// is for right now”:
         int status = ::futimens(descriptor, nullptr);
         
