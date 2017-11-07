@@ -30,10 +30,10 @@ namespace im {
     namespace detail {
         using pointer_t = ImageList::pointer_t;
         using rehasher_t = hash::rehasher<pointer_t>;
-        // using nullchecker_f = std::add_pointer_t<bool(pointer_t)>;
+        using nullchecker_f = std::add_pointer_t<bool(pointer_t)>;
         
         /// non-capturing lambda, converted inline to a function pointer:
-        // static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
+        static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
     }
     
     // ImageList::ImageList() {}
@@ -41,19 +41,19 @@ namespace im {
     ImageList::ImageList(ImageList::pointerlist_t pointerlist)
         :images(pointerlist)
         {
-            // images.erase(std::remove_if(images.begin(),
-            //                             images.end(), detail::nullchecker),
-            //                             images.end());
-            // compute_sizes();
+            images.erase(std::remove_if(images.begin(),
+                                        images.end(), detail::nullchecker),
+                                        images.end());
+            compute_sizes();
         }
     
     ImageList::ImageList(ImageList::vector_t&& vector)
         :images(std::move(vector))
         {
-            // images.erase(std::remove_if(images.begin(),
-            //                             images.end(), detail::nullchecker),
-            //                             images.end());
-            // compute_sizes();
+            images.erase(std::remove_if(images.begin(),
+                                        images.end(), detail::nullchecker),
+                                        images.end());
+            compute_sizes();
         }
     
     ImageList::ImageList(ImageList&& other) noexcept
@@ -62,9 +62,9 @@ namespace im {
         ,computed_height(other.computed_height)
         ,computed_planes(other.computed_planes)
         {
-            // if (computed_width == -1    ||
-            //     computed_height == -1   ||
-            //     computed_planes == -1)  { compute_sizes(); }
+            if (computed_width == -1    ||
+                computed_height == -1   ||
+                computed_planes == -1)  { compute_sizes(); }
         }
     
     ImageList& ImageList::operator=(ImageList&& other) noexcept {
@@ -73,21 +73,21 @@ namespace im {
             computed_width = other.computed_width;
             computed_height = other.computed_height;
             computed_planes = other.computed_planes;
-            // if (computed_width == -1    ||
-            //     computed_height == -1   ||
-            //     computed_planes == -1)  { compute_sizes(); }
+            if (computed_width == -1    ||
+                computed_height == -1   ||
+                computed_planes == -1)  { compute_sizes(); }
         }
         return *this;
     }
     
-    // ImageList& ImageList::operator=(ImageList::pointerlist_t pointerlist) {
-    //     ImageList(pointerlist).swap(*this);
-    //     images.erase(std::remove_if(images.begin(),
-    //                                 images.end(), detail::nullchecker),
-    //                                 images.end());
-    //     compute_sizes();
-    //     return *this;
-    // }
+    ImageList& ImageList::operator=(ImageList::pointerlist_t pointerlist) {
+        ImageList(pointerlist).swap(*this);
+        images.erase(std::remove_if(images.begin(),
+                                    images.end(), detail::nullchecker),
+                                    images.end());
+        compute_sizes();
+        return *this;
+    }
     
     ImageList::~ImageList() { reset(); }
     

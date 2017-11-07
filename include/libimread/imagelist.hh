@@ -7,7 +7,6 @@
 #include <tuple>
 #include <vector>
 #include <memory>
-#include <string>
 #include <algorithm>
 #include <initializer_list>
 #include <type_traits>
@@ -27,7 +26,7 @@ namespace im {
         using unique_t       = std::unique_ptr<Image>;
         using vector_t       = std::vector<pointer_t>;
         using sizevec_t      = std::vector<int>;
-        // using sizes_t        = std::tuple<int, int, int>;
+        using sizes_t        = std::tuple<int, int, int>;
         using pointerlist_t  = std::initializer_list<pointer_t>;
         using vector_size_t  = vector_t::size_type;
         using iterator       = vector_t::iterator;
@@ -63,7 +62,7 @@ namespace im {
         ImageList& operator=(ImageList&&) noexcept;
         
         /// “list literal” initializer-list assignment operator
-        // ImageList& operator=(pointerlist_t);
+        ImageList& operator=(pointerlist_t);
         
         /// virtual destructor
         virtual ~ImageList();

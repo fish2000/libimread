@@ -139,11 +139,13 @@ namespace filesystem {
             };
             
             kinfo_proc_t kinfo = { 0 };
-            std::size_t size = sizeof(kinfo);
+            std::size_t mib_size = sizeof(mib) / sizeof(*mib);
+            std::size_t kinfo_size = sizeof(kinfo);
+            std::size_t zero_size = 0;
             
-            int result = ::sysctl(mib, sizeof(mib) / sizeof(*mib),
-                                  &kinfo, &size,
-                                  nullptr, 0);
+            int result = ::sysctl(mib,      mib_size,
+                                 &kinfo,   &kinfo_size,
+                                  nullptr,  zero_size);
             
             if (result != 0) { return clock_t::from_time_t(0); } /// ERROR!
             
@@ -411,7 +413,7 @@ namespace filesystem {
             directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
-                    "Internal error in opendir():", strerror(errno),
+                    "Internal error in opendir():", std::strerror(errno),
                     "For path:", str());
             }
             detail::dirent_t* entp;
@@ -460,7 +462,7 @@ namespace filesystem {
             directory d = detail::ddopen(make_absolute().str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
-                    "Internal error in opendir():", strerror(errno),
+                    "Internal error in opendir():", std::strerror(errno),
                     "For path:", FF("***%s***", make_absolute().c_str()));
             }
             detail::dirent_t* entp;
