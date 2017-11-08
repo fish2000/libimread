@@ -290,6 +290,15 @@ namespace filesystem {
                 return path(std::forward<P>(p)).touched();
             }
             
+            /// Resolve a path that leads to a symlink:
+            path resolve() const;
+            
+            /// Static forwarder for path::resolve<P>(p):
+            template <typename P> inline
+            static path resolve(P&& p) {
+                return path(std::forward<P>(p)).resolve();
+            }
+            
             /// Convenience funcs for running a std::regex against the path in question:
             /// match(), search() and replace() hand respectively straight off to std::regex_match,
             /// std::regex_search(), and std::regex_replace, using the stringified path.

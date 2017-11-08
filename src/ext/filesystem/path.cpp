@@ -71,6 +71,7 @@ namespace filesystem {
             /// using either std::getenv() or, barring that, POSIX ::getlogin().
             char const* username = nullptr;
             username = std::getenv("USER");
+            if (nullptr == username) { username = std::getenv("LOGNAME"); }
             if (nullptr == username) { username = ::getlogin(); }
             if (nullptr == username) { username = "nobody"; }
             return username;
@@ -742,6 +743,25 @@ namespace filesystem {
         bool preexisting = path::exists();
         path::touch();
         return (!preexisting) && path::exists();
+    }
+    
+    path path::resolve() const {
+        /// ensure we are pointing to a symlink, or bail early:
+        detail::stat_t sb;
+        std::string thispath = str();
+        if (::lstat(thispath.c_str(), &sb)) { return path(); }
+        if (!S_ISLNK(sb.st_mode))           { return path(*this); }
+        /// read the symlink’s value and return a new path:
+        char linkbuf[PATH_MAX] = { 0 };
+        ssize_t result = ::readlink(thispath.c_str(), linkbuf, sizeof(linkbuf));
+        if (result > 0 && result < PATH_MAX) {
+            return path(std::string(linkbuf, linkbuf + result));
+        } else {
+            imread_raise(FileSystemError,
+                "In reference to path value:", thispath,
+                "FATAL internal error in path::resolve() call to ::readlink():",
+                std::strerror(errno));
+        }
     }
     
     path::size_type path::total_size() const {
