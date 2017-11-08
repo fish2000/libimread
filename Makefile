@@ -2,13 +2,15 @@
 all: clean multi
 
 multi:
-		mgmt/parallel-run-tests.sh
+		COVERAGE=OFF mgmt/parallel-run-tests.sh
+
+coverage:
+		COVERAGE=ON mgmt/parallel-run-tests.sh
 
 solo:
 		mgmt/run-tests.sh
 
 guard:
-		mgmt/clean.sh
 		GMALLOC=1 mgmt/parallel-run-tests.sh
 
 re:

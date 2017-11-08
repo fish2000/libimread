@@ -16,6 +16,7 @@
 *.pyc
 *.pyo
 *.xcuserstate
+*.profraw
 .DS_Store
 .vscode
 # *.capnp.c++

@@ -35,8 +35,7 @@ set(TEST_SOURCES ${TEST_SOURCES}
     PARENT_SCOPE)
 
 macro(add_imread_test test_name)
-    add_test(
-        NAME "${test_name}"
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        COMMAND ./build/imread_tests "*${test_name}*" --durations yes --abortx 10)
+    add_test(NAME "${test_name}"
+             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+             COMMAND ./build/imread_tests "*${test_name}*" --durations yes --abortx 10)
 endmacro()

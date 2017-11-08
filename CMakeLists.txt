@@ -10,6 +10,7 @@ project(libimread VERSION 0.2.0
 
 option(IM_TESTS             "Compile and run tests"                             ON)
 option(IM_APPS              "Compile companion apps"                            ON)
+option(IM_COVERAGE          "Run code coverage analysis"                        OFF)
 option(IM_USE_GCC           "Compile using GCC"                                 OFF)
 option(IM_RESYMBOLIZE       "Regenerate include/libimread/symbols.hpp"          OFF)
 option(IM_GENERATE_HEADER   "Only generate libimread.hpp (do not compile)"      OFF)
@@ -78,6 +79,10 @@ include(IodSymbolize)
 # Include ECMGeneratePkgConfigFile.cmake, in order to generate a pkg-config file.
 # include(GetCompilerFlags)
 include(ECMGeneratePkgConfigFile)
+
+if(IM_COVERAGE)
+    include(CodeCoverage)
+endif()
 
 # Set the location of the library configuration file if it has not already been
 # set. This allow the library to be used by an external project without
@@ -165,7 +170,7 @@ pkg_check_modules(YAMLCPP REQUIRED yaml-cpp)
 # set(${PROJECT_NAME}_include_dir ${CMAKE_SOURCE_DIR}/include)
 include_directories(${${PROJECT_NAME}_include_dir})     # libimread/include/ (from a find_path() in libimreadConfig.cmake)
 include_directories(${${PROJECT_NAME}_include_dir}/..)  # parent directory of libimread/include/
-include_directories("${CMAKE_BINARY_DIR}/include")      # generated headers e.g. “libimread.hpp” wind up include here
+include_directories("${CMAKE_BINARY_DIR}/include")      # generated headers e.g. “libimread.hpp” wind up here
 
 # Include the `deps` library `include` directories:
 include_directories("${CROSSGUID_DIR}")
@@ -380,6 +385,12 @@ if(IM_TESTS)
     enable_testing()
     include(CTest)
     
+    if(IM_COVERAGE)
+        SETUP_TARGET_FOR_COVERAGE_COBERTURA(NAME imread_tests_coverage
+                                            EXECUTABLE ctest
+                                            DEPENDENCIES imread_tests)
+    endif()
+    
     # Set up individual test suites --
     # … the add_imread_test() macro is defined in tests/CMakeLists.txt:
     add_imread_test("arrayview")
@@ -392,7 +403,7 @@ if(IM_TESTS)
     add_imread_test("filesystem")
     add_imread_test("attributes") # filesystem-attributes
     add_imread_test("execute") # filesystem-execute
-    add_imread_test("gif-write")
+    # add_imread_test("gif-write")
     add_imread_test("glob-stringview")
     add_imread_test("halide-io")
     add_imread_test("hdf5-io")
@@ -407,7 +418,7 @@ if(IM_TESTS)
     add_imread_test("terminator")
     add_imread_test("tif-write-multi")
     add_imread_test("uri")
-    add_imread_test("interleaved-io")
+    # add_imread_test("interleaved-io")
 
 endif(IM_TESTS)
 

@@ -287,9 +287,21 @@ IF(APPLE)
     
 ENDIF(APPLE)
 
-add_definitions(
-    ${CXX_OPTIONS}
-    -DWITH_SCHEMA
-    -O3 -funroll-loops
-    -mtune=native
-    -fstrict-aliasing)
+if(IM_COVERAGE)
+    
+    add_definitions(
+        ${CXX_OPTIONS}
+        -DWITH_SCHEMA)
+    
+    APPEND_COVERAGE_COMPILER_FLAGS()
+    
+else()
+    
+    add_definitions(
+        ${CXX_OPTIONS}
+        -DWITH_SCHEMA
+        -O3 -funroll-loops
+        -mtune=native
+        -fstrict-aliasing)
+    
+endif()
