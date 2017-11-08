@@ -181,7 +181,7 @@ include_directories("${INICPP_DIR}/include")
 # include_directories("${LMDBXX_DIR}")
 # include_directories("${LRUCACHE11_DIR}")
 include_directories("${IOD_DIR}")
-# include_directories("${SG14_DIR}")
+include_directories("${SG14_DIR}")
 
 # Ugh
 link_directories(/usr/lib)
@@ -236,7 +236,7 @@ set_target_properties(imread_static
 target_link_libraries(
     imread_shared                           # imread library (shared)
     z png                                   # shared libraries (dylib) linked normally
-    GSL                                     # “INTERFACE” (header-only) library
+    GSL SG14                                # “INTERFACE” (header-only) libraries
     $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
     # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
@@ -259,7 +259,7 @@ target_link_libraries(
 target_link_libraries(
     imread_static                           # imread library (static)
     z png                                   # static libraries (“.a” archive files) linked normally
-    GSL                                     # “INTERFACE” (header-only) library
+    GSL SG14                                # “INTERFACE” (header-only) libraries
     $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
     # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
