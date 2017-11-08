@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.8.0)
 
 project(GSL CXX)
 
@@ -31,7 +31,8 @@ if(CMAKE_MAJOR_VERSION VERSION_LESS 3.7.9)
     endif()
 else()
     # set the GSL library to be compiled only with c++14
-    target_compile_features(GSL INTERFACE cxx_std_14)
+    # target_compile_features(GSL INTERFACE cxx_std_14)
+    target_compile_features(GSL INTERFACE cxx_std_17)
     # on *nix systems force the use of -std=c++XX instead of -std=gnu++XX (default)
     set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
