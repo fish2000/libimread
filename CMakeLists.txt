@@ -213,8 +213,9 @@ set_target_properties(imread
 add_dependencies(imread "project_header")
 add_dependencies(imread "guid")
 # add_dependencies(imread "depixelate")
-add_dependencies(imread "GSL")
 # add_dependencies(imread "imagecompression")
+add_dependencies(imread "GSL")
+add_dependencies(imread "SG14")
 add_dependencies(imread "inicpp")
 add_dependencies(imread "iod_symbolize")
 
