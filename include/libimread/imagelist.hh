@@ -28,13 +28,12 @@ namespace im {
         using sizevec_t      = std::vector<int>;
         using sizes_t        = std::tuple<int, int, int>;
         using pointerlist_t  = std::initializer_list<pointer_t>;
-        using vector_size_t  = vector_t::size_type;
+        using size_type      = vector_t::size_type;
         using iterator       = vector_t::iterator;
         using const_iterator = vector_t::const_iterator;
         
         /// default constructor
         ImageList() noexcept = default;
-        // ImageList();
         
         /// construct from multiple arguments
         /// ... using boolean tag for first arg
@@ -67,7 +66,7 @@ namespace im {
         /// virtual destructor
         virtual ~ImageList();
         
-        vector_size_t size() const;
+        size_type size() const;
         iterator begin();
         iterator end();
         const_iterator begin() const;
@@ -89,9 +88,9 @@ namespace im {
         int height() const;
         int planes() const;
         
-        pointer_t get(vector_size_t) const;
-        pointer_t at(vector_size_t) const;
-        unique_t yank(vector_size_t);
+        pointer_t get(size_type) const;
+        pointer_t at(size_type) const;
+        unique_t yank(size_type);
         unique_t pop();
         void reset();
         void reset(vector_t&&);
@@ -106,7 +105,7 @@ namespace im {
         void swap(ImageList&) noexcept;
         
         /// member hash method
-        std::size_t hash(std::size_t seed = 0) const noexcept;
+        size_type hash(size_type seed = 0) const noexcept;
         
         private:
             /// copy construct/assign are invalid
@@ -118,6 +117,10 @@ namespace im {
             int compute_width() const;
             int compute_height() const;
             int compute_planes() const;
+            
+        protected:
+            /// reset all the computed dimension variables to -1
+            void reset_dimensions() const;
         
         protected:
             /// internal pointer vector

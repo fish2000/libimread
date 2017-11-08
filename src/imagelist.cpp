@@ -21,7 +21,7 @@
         int base = images[0]->__dimension__();                                      \
         if (std::all_of(sizes.cbegin(),                                             \
                         sizes.cend(),                                               \
-                    [=](int size) { return size == base; })) { return base; }       \
+                 [base](int size) { return size == base; })) { return base; }       \
         return -1;                                                                  \
     }
 
@@ -35,8 +35,6 @@ namespace im {
         /// non-capturing lambda, converted inline to a function pointer:
         static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
     }
-    
-    // ImageList::ImageList() {}
     
     ImageList::ImageList(ImageList::pointerlist_t pointerlist)
         :images(pointerlist)
@@ -62,7 +60,7 @@ namespace im {
         ,computed_height(other.computed_height)
         ,computed_planes(other.computed_planes)
         {
-            if (computed_width == -1    ||
+             if (computed_width == -1   ||
                 computed_height == -1   ||
                 computed_planes == -1)  { compute_sizes(); }
         }
@@ -73,7 +71,7 @@ namespace im {
             computed_width = other.computed_width;
             computed_height = other.computed_height;
             computed_planes = other.computed_planes;
-            if (computed_width == -1    ||
+             if (computed_width == -1   ||
                 computed_height == -1   ||
                 computed_planes == -1)  { compute_sizes(); }
         }
@@ -91,7 +89,7 @@ namespace im {
     
     ImageList::~ImageList() { reset(); }
     
-    ImageList::vector_size_t ImageList::size() const          { return images.size(); }
+    ImageList::size_type ImageList::size() const              { return images.size(); }
     ImageList::iterator ImageList::begin()                    { return images.begin(); }
     ImageList::iterator ImageList::end()                      { return images.end(); }
     ImageList::const_iterator ImageList::begin() const        { return images.begin(); }
@@ -114,20 +112,18 @@ namespace im {
     int ImageList::height() const { return computed_height; }
     int ImageList::planes() const { return computed_planes; }
     
-    ImageList::pointer_t ImageList::get(ImageList::vector_size_t idx) const   { return images[idx]; }
-    ImageList::pointer_t ImageList::at(ImageList::vector_size_t idx) const    { return images.at(idx); }
+    ImageList::pointer_t ImageList::get(ImageList::size_type idx) const   { return images[idx]; }
+    ImageList::pointer_t ImageList::at(ImageList::size_type idx) const    { return images.at(idx); }
     
-    ImageList::unique_t ImageList::yank(ImageList::vector_size_t idx) {
+    ImageList::unique_t ImageList::yank(ImageList::size_type idx) {
         /// remove the pointer at idx, resizing the internal vector;
         /// return it as managed by a new unique_ptr
         /// ... this'll throw std::out_of_range if idx > images.size()
         ImageList::pointer_t outptr = images[idx];
-        images.erase(
-            std::remove_if(images.begin(),
-                           images.end(),
-                  [outptr](ImageList::pointer_t p) {
-            return p == outptr ||
-                   p == nullptr; }), images.end());
+        images.erase(std::remove_if(images.begin(), images.end(),
+                           [outptr](ImageList::pointer_t p) { return p == outptr ||
+                                                                     p == nullptr; }),
+                                                    images.end());
         images.shrink_to_fit();
         return unique_t(outptr);
     }
@@ -139,10 +135,10 @@ namespace im {
     }
     
     void ImageList::reset() {
-        ImageList::vector_size_t idx = 0,
-                                 max = images.size();
+        ImageList::size_type idx = 0,
+                             max = images.size();
         for (; idx != max; ++idx) { delete images[idx]; }
-        computed_width = computed_height = computed_planes = -1;
+        reset_dimensions();
     }
     
     void ImageList::reset(ImageList::vector_t&& vector) {
@@ -153,14 +149,14 @@ namespace im {
     ImageList::vector_t ImageList::release() {
         ImageList::vector_t out;
         out.swap(images);
-        computed_width = computed_height = computed_planes = -1;
+        reset_dimensions();
         return out;
     }
     
     ImageList::vector_t ImageList::release(ImageList::vector_t&& vector) {
         ImageList::vector_t out = std::move(vector);
         out.swap(images);
-        computed_width = computed_height = computed_planes = -1;
+        reset_dimensions();
         return out;
     }
     
@@ -172,7 +168,7 @@ namespace im {
         swap(computed_planes, other.computed_planes);
     }
     
-    std::size_t ImageList::hash(std::size_t seed) const noexcept {
+    ImageList::size_type ImageList::hash(ImageList::size_type seed) const noexcept {
         return std::accumulate(images.begin(),
                                images.end(),
                                seed, detail::rehasher_t());
@@ -181,6 +177,10 @@ namespace im {
     DEFINE_DIMENSION_COMPUTE_FN(width);
     DEFINE_DIMENSION_COMPUTE_FN(height);
     DEFINE_DIMENSION_COMPUTE_FN(planes);
+    
+    void ImageList::reset_dimensions() const {
+        computed_width = computed_height = computed_planes = -1;
+    }
     
 } /// namespace im
 
