@@ -2,7 +2,7 @@
 #include <regex>
 #include <vector>
 #include <memory>
-#include <new>
+// #include <new>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>

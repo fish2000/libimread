@@ -233,9 +233,11 @@ set_target_properties(imread_static
 # Actually build the library II: electric boogaloo
 # ... these two target_link_libraries() calls set up the actual
 # for-reals building up in all this:
-target_link_libraries(imread_shared
-    z png guid                              # shared libraries (dylib) linked normally
+target_link_libraries(
+    imread_shared                           # imread library (shared)
+    z png                                   # shared libraries (dylib) linked normally
     GSL                                     # “INTERFACE” (header-only) library
+    $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
     # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
     # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library
@@ -254,9 +256,11 @@ target_link_libraries(imread_shared
     ${LIBPLISTPP_LIBRARIES}
     ${YAMLCPP_LIBRARIES})
 
-target_link_libraries(imread_static
-    z png guid                              # static libraries (“.a” archive files) linked normally
+target_link_libraries(
+    imread_static                           # imread library (static)
+    z png                                   # static libraries (“.a” archive files) linked normally
     GSL                                     # “INTERFACE” (header-only) library
+    $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
     # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
     # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library
@@ -403,7 +407,7 @@ if(IM_TESTS)
     add_imread_test("filesystem")
     add_imread_test("attributes") # filesystem-attributes
     add_imread_test("execute") # filesystem-execute
-    # add_imread_test("gif-write")
+    add_imread_test("gif-write")
     add_imread_test("glob-stringview")
     add_imread_test("halide-io")
     add_imread_test("hdf5-io")

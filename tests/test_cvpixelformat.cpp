@@ -8,7 +8,7 @@
 #include <libimread/store.hh>
 #include <libimread/corefoundation.hh>
 #include <libimread/coregraphics.hh>
-// #include <libkern/OSTypes.h>
+#include <libkern/OSTypes.h>
 
 #include "include/test_data.hpp"
 #include "include/catch.hpp"
@@ -43,9 +43,7 @@ namespace {
         
     }
     
+    /// CVPixelFormatDescriptionCreateWithPixelFormatType
+    /// CVPixelFormatDescriptionRegisterDescriptionWithPixelFormatType
+    
 }
-
-
-
-/// CVPixelFormatDescriptionCreateWithPixelFormatType
-/// CVPixelFormatDescriptionRegisterDescriptionWithPixelFormatType

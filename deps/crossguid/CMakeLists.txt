@@ -38,14 +38,39 @@ endforeach()
 set(hdrs
     "guid.h")
 
-add_library(guid SHARED ${srcs} ${hdrs})
-
-set_target_properties(guid
+# Add an “OBJECT” library target called “guid”:
+add_library(
+    guid
+    OBJECT ${srcs} ${hdrs})
+set_target_properties(
+    guid
     PROPERTIES LIBRARY_OUTPUT_NAME "guid")
-target_link_libraries(guid
-    ${COREFOUNDATION_LIBRARY})
+set_property(
+    TARGET guid
+    PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-install(TARGETS guid DESTINATION lib)
+# Add shared and static library targets, based on the “OBJECT” library,
+# respectively  called “guid_shared” and “guid_static”:
+add_library(
+    guid_shared
+    SHARED $<TARGET_OBJECTS:guid>)
+add_library(
+    guid_static
+    STATIC $<TARGET_OBJECTS:guid>)
+set_target_properties(
+    guid_shared
+    PROPERTIES LIBRARY_OUTPUT_NAME "guid")
+set_target_properties(
+    guid_static
+    PROPERTIES ARCHIVE_OUTPUT_NAME "guid")
+target_link_libraries(guid_shared ${COREFOUNDATION_LIBRARY})
+target_link_libraries(guid_static ${COREFOUNDATION_LIBRARY})
+
+# Install the shared and static library target outputs:
+install(TARGETS guid_shared DESTINATION lib)
+install(TARGETS guid_static DESTINATION lib)
+
+# Install the header files:
 install(DIRECTORY ./ DESTINATION include/libguid
     FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY ./ DESTINATION include/libguid
