@@ -1,3 +1,6 @@
+
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <sys/ioctl.h>
 #include <cstdio>
 #include <unistd.h>

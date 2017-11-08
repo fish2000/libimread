@@ -1,4 +1,6 @@
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <cmath>
 #include <string>
 #include <vector>

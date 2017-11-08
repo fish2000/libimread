@@ -1,4 +1,6 @@
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <libimread/errors.hh>
 #include <guid.h>
 #include "include/catch.hpp"

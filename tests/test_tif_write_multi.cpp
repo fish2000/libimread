@@ -1,4 +1,6 @@
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <regex>
 #include <vector>
 #include <memory>

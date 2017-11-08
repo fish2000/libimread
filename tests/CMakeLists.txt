@@ -34,6 +34,8 @@ set(TEST_SOURCES ${TEST_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/test_Zinterleaved_io.cpp
     PARENT_SCOPE)
 
+add_definitions(-DCATCH_CONFIG_FAST_COMPILE)
+
 macro(add_imread_test test_name)
     add_test(NAME "${test_name}"
              WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

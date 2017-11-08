@@ -1,4 +1,6 @@
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <libimread/libimread.hpp>
 #include <libimread/ext/memory/refcount.hh>
 #include <libimread/errors.hh>

@@ -1,4 +1,6 @@
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <unistd.h>
 #include <string>
 #include <vector>

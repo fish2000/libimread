@@ -1,6 +1,7 @@
 
 #ifndef IMREAD_TESTDATA_HPP_
 #define IMREAD_TESTDATA_HPP_
+#define CATCH_CONFIG_FAST_COMPILE
 
 ///
 /// test_data.hpp

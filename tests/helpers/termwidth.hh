@@ -3,6 +3,7 @@
 
 #ifndef LIBIMREAD_TESTS_HELPERS_TERMWIDTH_HH_
 #define LIBIMREAD_TESTS_HELPERS_TERMWIDTH_HH_
+#define CATCH_CONFIG_FAST_COMPILE
 
 #include <libimread/libimread.hpp>
 

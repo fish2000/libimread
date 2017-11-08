@@ -1,4 +1,6 @@
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <cstdlib>
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>

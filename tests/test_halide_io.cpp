@@ -1,4 +1,6 @@
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <libimread/libimread.hpp>
 #include <libimread/base.hh>
 #include <libimread/halide.hh>
