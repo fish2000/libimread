@@ -21,6 +21,9 @@ extern "C" {
 #include <jpeglib.h>
 }
 
+#define BOOLEAN_TRUE()  static_cast<boolean>(true)
+#define BOOLEAN_FALSE() static_cast<boolean>(false)
+
 namespace im {
     
     DECLARE_FORMAT_OPTIONS(JPEGFormat);
@@ -29,37 +32,43 @@ namespace im {
         
         const std::size_t buffer_size = JPEGFormat::options.buffer_size;
         
-        struct jpeg_source_adaptor {
+        struct JPEGSourceAdaptor {
             jpeg_source_mgr mgr;
-            byte_source* s;
+            byte_source* source;
             byte* __restrict__ buf;
             
-            jpeg_source_adaptor(byte_source* s);
-            ~jpeg_source_adaptor() { delete[] buf; }
+            JPEGSourceAdaptor(byte_source*);
+            ~JPEGSourceAdaptor() { delete[] buf; }
+            
+            JPEGSourceAdaptor(JPEGSourceAdaptor const&) = delete;
+            JPEGSourceAdaptor(JPEGSourceAdaptor&&) = delete;
         };
         
-        struct jpeg_dst_adaptor {
+        struct JPEGDestinationAdaptor {
             jpeg_destination_mgr mgr;
-            byte_sink* s;
+            byte_sink* sink;
             byte* __restrict__ buf;
             
-            jpeg_dst_adaptor(byte_sink* s);
-            ~jpeg_dst_adaptor() { delete[] buf; }
+            JPEGDestinationAdaptor(byte_sink*);
+            ~JPEGDestinationAdaptor() { delete[] buf; }
+            
+            JPEGDestinationAdaptor(JPEGDestinationAdaptor const&) = delete;
+            JPEGDestinationAdaptor(JPEGDestinationAdaptor&&) = delete;
         };
         
-        void nop(j_decompress_ptr cinfo) {}
-        void nop_dst(j_compress_ptr cinfo) {}
+        void nop(j_decompress_ptr) {}
+        void nop_dst(j_compress_ptr) {}
         
         boolean fill_input_buffer(j_decompress_ptr cinfo) {
-            jpeg_source_adaptor* adaptor = reinterpret_cast<jpeg_source_adaptor*>(cinfo->src);
+            JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
             adaptor->mgr.next_input_byte = adaptor->buf;
-            adaptor->mgr.bytes_in_buffer = adaptor->s->read(adaptor->buf, buffer_size);
-            return (boolean)true;
+            adaptor->mgr.bytes_in_buffer = adaptor->source->read(adaptor->buf, buffer_size);
+            return BOOLEAN_TRUE();
         }
         
         void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
             if (num_bytes <= 0) { return; }
-            jpeg_source_adaptor* adaptor = reinterpret_cast<jpeg_source_adaptor*>(cinfo->src);
+            JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
             while (num_bytes > long(adaptor->mgr.bytes_in_buffer)) {
                 num_bytes -= adaptor->mgr.bytes_in_buffer;
                 fill_input_buffer(cinfo);
@@ -69,70 +78,106 @@ namespace im {
         }
         
         boolean empty_output_buffer(j_compress_ptr cinfo) {
-            jpeg_dst_adaptor* adaptor = reinterpret_cast<jpeg_dst_adaptor*>(cinfo->dest);
-            adaptor->s->write(
-                adaptor->buf,
-                buffer_size);
+            JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
+            adaptor->sink->write(adaptor->buf,
+                                 buffer_size);
             adaptor->mgr.next_output_byte = adaptor->buf;
             adaptor->mgr.free_in_buffer = buffer_size;
-            return (boolean)true;
+            return BOOLEAN_TRUE();
         }
         
         void flush_output_buffer(j_compress_ptr cinfo) {
-            jpeg_dst_adaptor* adaptor = reinterpret_cast<jpeg_dst_adaptor*>(cinfo->dest);
-            adaptor->s->write(
-                adaptor->buf,
-                adaptor->mgr.next_output_byte - adaptor->buf);
-            adaptor->s->flush();
+            JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
+            adaptor->sink->write(adaptor->buf,
+                                 adaptor->mgr.next_output_byte - adaptor->buf);
+            adaptor->sink->flush();
         }
         
-        jpeg_source_adaptor::jpeg_source_adaptor(byte_source* s)
-            :s(s)
+        JPEGSourceAdaptor::JPEGSourceAdaptor(byte_source* s)
+            :source(s)
+            ,buf{ new byte[buffer_size] }
             {
-                buf = new byte[buffer_size];
-                mgr.next_input_byte = buf;
-                mgr.bytes_in_buffer = 0;
-                mgr.init_source = nop;
-                mgr.fill_input_buffer = fill_input_buffer;
-                mgr.skip_input_data = skip_input_data;
-                mgr.resync_to_restart = jpeg_resync_to_restart;
-                mgr.term_source = nop;
+                mgr.next_input_byte     = buf;
+                mgr.bytes_in_buffer     = 0;
+                mgr.init_source         = nop;
+                mgr.fill_input_buffer   = fill_input_buffer;
+                mgr.skip_input_data     = skip_input_data;
+                mgr.resync_to_restart   = jpeg_resync_to_restart;
+                mgr.term_source         = nop;
             }
         
-        jpeg_dst_adaptor::jpeg_dst_adaptor(byte_sink* s)
-            :s(s)
+        JPEGDestinationAdaptor::JPEGDestinationAdaptor(byte_sink* s)
+            :sink(s)
+            ,buf{ new byte[buffer_size] }
             {
-                buf = new byte[buffer_size];
-                mgr.next_output_byte = buf;
-                mgr.free_in_buffer = buffer_size;
-                mgr.init_destination = nop_dst;
+                mgr.next_output_byte    = buf;
+                mgr.free_in_buffer      = buffer_size;
+                mgr.init_destination    = nop_dst;
                 mgr.empty_output_buffer = empty_output_buffer;
-                mgr.term_destination = flush_output_buffer;
+                mgr.term_destination    = flush_output_buffer;
             }
         
         inline J_COLOR_SPACE color_space(int components) {
-            if (components == 1) { return JCS_GRAYSCALE; }
-            if (components == 3) { return JCS_RGB; }
-            if (components == 4) { return JCS_CMYK; }
-            imread_raise(CannotReadError,
-                "\tim::(anon)::color_space() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
-             FF("\tim::(anon)::color_space() got:    `components` = (int){ %i }", components),
-                "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3, 4 }");
+            switch (components) {
+                case 3: return JCS_RGB;
+                case 1: return JCS_GRAYSCALE;
+                case 4: return JCS_CMYK;
+                default: {
+                    imread_raise(CannotReadError,
+                        "\tim::(anon)::color_space() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
+                     FF("\tim::(anon)::color_space() got:    `components` = (int){ %i }", components),
+                        "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3, 4 }");
+                }
+            }
         }
         
-        struct jpeg_decompress_holder {
+        struct JPEGCompressionBase {
             
-            jpeg_decompress_holder() {
-                jpeg_create_decompress(&info);
-            }
+            public:
+                struct ErrorManager {
+                    
+                    ErrorManager();
+                    
+                    mutable struct jpeg_error_mgr pub;
+                    mutable jmp_buf setjmp_buffer;
+                    mutable char error_message[JMSG_LENGTH_MAX];
+                    
+                    bool has_error() const {
+                        return setjmp(this->setjmp_buffer);
+                    }
+                    
+                } errormgr;
             
-            ~jpeg_decompress_holder() {
+            public:
+                bool has_error() const {
+                    return errormgr.has_error();
+                }
+                
+                std::string error_message() const {
+                    return std::string(errormgr.error_message);
+                }
+            
+        };
+        
+        struct JPEGDecompressor : public JPEGCompressionBase {
+            
+            using JPEGCompressionBase::ErrorManager;
+            
+            JPEGDecompressor(byte_source* source)
+                :adaptor(source)
+                {
+                    jpeg_create_decompress(&info);
+                    info.err = &errormgr.pub;
+                    info.src = &adaptor.mgr;
+                }
+            
+            ~JPEGDecompressor() {
                 jpeg_finish_decompress(&info);
                 jpeg_destroy_decompress(&info);
             }
             
             void start() {
-                jpeg_read_header(&info, (boolean)true);
+                jpeg_read_header(&info, BOOLEAN_TRUE());
                 jpeg_start_decompress(&info);
             }
             
@@ -152,22 +197,29 @@ namespace im {
             }
             
             public:
+                JPEGSourceAdaptor adaptor;
                 jpeg_decompress_struct info;
         };
         
-        struct jpeg_compress_holder {
+        struct JPEGCompressor : public JPEGCompressionBase {
             
-            jpeg_compress_holder() {
-                jpeg_create_compress(&info);
-            }
+            using JPEGCompressionBase::ErrorManager;
             
-            ~jpeg_compress_holder() {
+            JPEGCompressor(byte_sink* sink)
+                :adaptor(sink)
+                {
+                    jpeg_create_compress(&info);
+                    info.err = &errormgr.pub;
+                    info.dest = &adaptor.mgr;
+                }
+            
+            ~JPEGCompressor() {
                 jpeg_finish_compress(&info);
                 jpeg_destroy_compress(&info);
             }
             
             void start() {
-                jpeg_start_compress(&info, (boolean)true);
+                jpeg_start_compress(&info, BOOLEAN_TRUE());
             }
             
             void set_defaults() {
@@ -176,11 +228,12 @@ namespace im {
             
             void set_quality(std::size_t quality) {
                 if (quality > 100) { quality = 100; }
-                jpeg_set_quality(&info, quality, (boolean)false);
+                jpeg_set_quality(&info, quality, BOOLEAN_FALSE());
             }
             
             int height() const          { return info.image_height; }
             int width() const           { return info.image_width; }
+            int components() const      { return info.input_components; }
             int next_scanline() const   { return info.next_scanline; }
             
             void set_height(int height)         { info.image_height = height; }
@@ -193,35 +246,26 @@ namespace im {
             }
             
             public:
+                JPEGDestinationAdaptor adaptor;
                 jpeg_compress_struct info;
         };
         
-        struct error_mgr {
-            error_mgr();
-            mutable struct jpeg_error_mgr pub;
-            mutable jmp_buf setjmp_buffer;
-            mutable char error_message[JMSG_LENGTH_MAX];
-            
-            bool has_error() const {
-                return setjmp(this->setjmp_buffer);
-            }
-        };
-        
         void err_long_jump(j_common_ptr cinfo) {
-            error_mgr* err = reinterpret_cast<error_mgr*>(cinfo->err);
+            JPEGCompressionBase::ErrorManager* err = reinterpret_cast<JPEGCompressionBase::ErrorManager*>(cinfo->err);
             (*cinfo->err->format_message)(cinfo, err->error_message);
             longjmp(err->setjmp_buffer, 1);
         }
         
-        error_mgr::error_mgr() {
+        /// out-of-line ErrorManager constructor definition:
+        JPEGCompressionBase::ErrorManager::ErrorManager() {
             jpeg_std_error(&pub);
             pub.error_exit = err_long_jump;
             error_message[0] = 0;
         }
         
+        /// extract size of an EXIF byte region:
         template <typename Iterator>
         uint16_t parse_size(Iterator it) {
-            /// extract size of an EXIF byte region:
             Iterator siz0 = std::next(it, 2);
             Iterator siz1 = std::next(it, 3);
             return (static_cast<uint16_t>(*siz0) << 8) | *siz1;
@@ -236,39 +280,35 @@ namespace im {
                                             ImageFactory* factory,
                                             Options const& opts)  {
         
-        jpeg_source_adaptor adaptor(src);
-        jpeg_decompress_holder decompressor;
+        JPEGDecompressor decompressor(src);
         
-        /// error management
-        error_mgr jerr;
-        decompressor.info.err = &jerr.pub;
-        
-        /// source
-        decompressor.info.src = &adaptor.mgr;
-        
-        /// now read the header & image data
+        /// first, read the header & image data:
         decompressor.start();
         
-        if (jerr.has_error()) {
+        /// initial error check:
+        if (decompressor.has_error()) {
             imread_raise(CannotReadError,
                 "libjpeg internal error:",
-                jerr.error_message);
+                decompressor.error_message());
         }
         
+        /// stash dimension values:
         const int h = decompressor.height();
         const int w = decompressor.width();
         const int d = decompressor.components();
         
+        /// create the output image:
         std::unique_ptr<Image> output(factory->create(8, h, w, d));
         
-        /// allocate single-row sample array
+        /// allocate a single-row sample array:
         JSAMPARRAY samples = decompressor.allocate_samples(w, d, 1);
         
-        /// Hardcoding uint8_t as the type for now
+        /// Hardcoding uint8_t as the type for now:
         int c_stride = (d == 1) ? 0 : output->stride(2);
         uint8_t* __restrict__ ptr = output->rowp_as<uint8_t>(0);
         
-        while (decompressor.scanline() < decompressor.height()) {
+        /// read scanlines in loop:
+        while (decompressor.scanline() < h) {
             decompressor.read_samples(samples);
             JSAMPLE* srcPtr = samples[0];
             for (int x = 0; x < w; ++x) {
@@ -282,10 +322,11 @@ namespace im {
             }
         }
         
-        if (jerr.has_error()) {
+        /// final error check:
+        if (decompressor.has_error()) {
             imread_raise(CannotReadError,
                 "libjpeg internal error:",
-                jerr.error_message);
+                decompressor.error_message());
         }
         
         return output;
@@ -372,49 +413,41 @@ namespace im {
                     input.nbits()));
         }
         
-        jpeg_dst_adaptor adaptor(output);
-        jpeg_compress_holder compressor;
-        
-        /// error management
-        error_mgr jerr;
-        compressor.info.err = &jerr.pub;
-        
-        /// destination
-        compressor.info.dest = &adaptor.mgr;
+        JPEGCompressor compressor(output);
         
         const int w = input.dim(0);
         const int h = input.dim(1);
         const int d = std::min(3, input.dim(2));
         
-        /// assign image values
+        /// assign image values:
         compressor.set_width(w);
         compressor.set_height(h);
         compressor.set_components(d);
         
-        /// set 'defaults'
+        /// set 'defaults':
         compressor.set_defaults();
         
-        /// set quality value (0 ≤ quality ≤ 100)
+        /// set quality value (0 ≤ quality ≤ 100):
         compressor.set_quality(opts.cast<std::size_t>("jpg:quality", 100));
         
-        /// start compression!
+        /// start the compression!
         compressor.start();
         
-        /// error check
-        if (jerr.has_error()) {
+        /// first error check:
+        if (compressor.has_error()) {
             imread_raise(CannotWriteError,
                 "libjpeg internal error:",
-                jerr.error_message);
+                compressor.error_message());
         }
         
-        /// allocate row buffer
+        /// allocate a row buffer:
         JSAMPLE* rowbuf = new JSAMPLE[w * d]; /// width * channels
         
-        /// access pixels as type JSAMPLE
+        /// access pixels as type JSAMPLE:
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
-        /// write scanlines in pixel loop
-        while (compressor.next_scanline() < compressor.height()) {
+        /// write scanlines in pixel loop:
+        while (compressor.next_scanline() < h) {
             JSAMPLE* __restrict__ dstPtr = rowbuf;
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
@@ -426,14 +459,14 @@ namespace im {
             compressor.write_scanlines(&rowbuf);
         }
         
-        /// error check
-        if (jerr.has_error()) {
+        /// final error check:
+        if (compressor.has_error()) {
             imread_raise(CannotWriteError,
                 "libjpeg internal error:",
-                jerr.error_message);
+                compressor.error_message());
         }
         
-        /// deallocate row buffer
+        /// deallocate row buffer:
         delete[] rowbuf;
     }
 }
