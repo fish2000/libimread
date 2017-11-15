@@ -5,6 +5,7 @@
 #include <csetjmp>
 #include <algorithm>
 #include <vector>
+#include <memory>
 #include <array>
 
 #include <iod/json.hh>
@@ -31,92 +32,101 @@ namespace im {
     namespace {
         
         const std::size_t buffer_size = JPEGFormat::options.buffer_size;
+        using byte_ptr = std::unique_ptr<byte[]>;
         
+        /// forward-declare this one non-NOP function
+        /// whose pointer is referenced more than once:
+        boolean fill_input_buffer(j_decompress_ptr cinfo);
+        
+        /// Adaptor-specific NOP functions:
+        void NOP_SRC(j_decompress_ptr)  {}
+        void NOP_DST(j_compress_ptr)    {}
+        
+        /// RAII-ish wrapper for holding the `jpeg_source_mgr` structure,
+        /// initializing it with functions binding it to an instance of
+        /// `im::byte_source` that, in turn, reads from an underlying
+        /// byte array (both of which are allocated as member instances).
         struct JPEGSourceAdaptor {
             jpeg_source_mgr mgr;
             byte_source* source;
-            byte* __restrict__ buf;
+            byte_ptr buffer;
             
-            JPEGSourceAdaptor(byte_source*);
-            ~JPEGSourceAdaptor() { delete[] buf; }
+            JPEGSourceAdaptor(byte_source* s)
+                :source(s)
+                ,buffer{ std::make_unique<byte[]>(buffer_size) }
+                {
+                    mgr.next_input_byte     = buffer.get();
+                    mgr.bytes_in_buffer     = 0;
+                    mgr.init_source         = NOP_SRC;
+                    mgr.fill_input_buffer   = fill_input_buffer;
+                    
+                    mgr.skip_input_data     = [](j_decompress_ptr cinfo, long num_bytes) {
+                        if (num_bytes <= 0) { return; }
+                        JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
+                        while (num_bytes > long(adaptor->mgr.bytes_in_buffer)) {
+                            num_bytes -= adaptor->mgr.bytes_in_buffer;
+                            fill_input_buffer(cinfo);
+                        }
+                        adaptor->mgr.next_input_byte += num_bytes;
+                        adaptor->mgr.bytes_in_buffer -= num_bytes;
+                    };
+                    
+                    mgr.resync_to_restart   = jpeg_resync_to_restart;
+                    mgr.term_source         = NOP_SRC;
+                }
             
             JPEGSourceAdaptor(JPEGSourceAdaptor const&) = delete;
             JPEGSourceAdaptor(JPEGSourceAdaptor&&) = delete;
         };
         
+        /// RAII-ish wrapper for holding the `jpeg_destination_mgr` structure,
+        /// initializing it with functions binding it to an instance of
+        /// `im::byte_sink` that, in turn, writes to an underlying
+        /// byte array (both of which are allocated as member instances).
         struct JPEGDestinationAdaptor {
             jpeg_destination_mgr mgr;
             byte_sink* sink;
-            byte* __restrict__ buf;
+            byte_ptr buffer;
             
-            JPEGDestinationAdaptor(byte_sink*);
-            ~JPEGDestinationAdaptor() { delete[] buf; }
+            JPEGDestinationAdaptor(byte_sink* s)
+                :sink(s)
+                ,buffer{ std::make_unique<byte[]>(buffer_size) }
+                {
+                    mgr.next_output_byte    = buffer.get();
+                    mgr.free_in_buffer      = buffer_size;
+                    mgr.init_destination    = NOP_DST;
+                    
+                    mgr.empty_output_buffer = [](j_compress_ptr cinfo) {
+                        JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
+                        adaptor->sink->write(adaptor->buffer.get(),
+                                             buffer_size);
+                        adaptor->mgr.next_output_byte = adaptor->buffer.get();
+                        adaptor->mgr.free_in_buffer = buffer_size;
+                        return BOOLEAN_TRUE();
+                    };
+                    
+                    mgr.term_destination    = [](j_compress_ptr cinfo) {
+                        JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
+                        adaptor->sink->write(adaptor->buffer.get(),
+                                             adaptor->mgr.next_output_byte - adaptor->buffer.get());
+                        adaptor->sink->flush();
+                    };
+                }
             
             JPEGDestinationAdaptor(JPEGDestinationAdaptor const&) = delete;
             JPEGDestinationAdaptor(JPEGDestinationAdaptor&&) = delete;
         };
         
-        void nop(j_decompress_ptr) {}
-        void nop_dst(j_compress_ptr) {}
-        
+        /// definition for `fill_input_buffer(…)` as declared above:
         boolean fill_input_buffer(j_decompress_ptr cinfo) {
             JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
-            adaptor->mgr.next_input_byte = adaptor->buf;
-            adaptor->mgr.bytes_in_buffer = adaptor->source->read(adaptor->buf, buffer_size);
+            adaptor->mgr.next_input_byte = adaptor->buffer.get();
+            adaptor->mgr.bytes_in_buffer = adaptor->source->read(adaptor->buffer.get(), buffer_size);
             return BOOLEAN_TRUE();
         }
         
-        void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
-            if (num_bytes <= 0) { return; }
-            JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
-            while (num_bytes > long(adaptor->mgr.bytes_in_buffer)) {
-                num_bytes -= adaptor->mgr.bytes_in_buffer;
-                fill_input_buffer(cinfo);
-            }
-            adaptor->mgr.next_input_byte += num_bytes;
-            adaptor->mgr.bytes_in_buffer -= num_bytes;
-        }
-        
-        boolean empty_output_buffer(j_compress_ptr cinfo) {
-            JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
-            adaptor->sink->write(adaptor->buf,
-                                 buffer_size);
-            adaptor->mgr.next_output_byte = adaptor->buf;
-            adaptor->mgr.free_in_buffer = buffer_size;
-            return BOOLEAN_TRUE();
-        }
-        
-        void flush_output_buffer(j_compress_ptr cinfo) {
-            JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
-            adaptor->sink->write(adaptor->buf,
-                                 adaptor->mgr.next_output_byte - adaptor->buf);
-            adaptor->sink->flush();
-        }
-        
-        JPEGSourceAdaptor::JPEGSourceAdaptor(byte_source* s)
-            :source(s)
-            ,buf{ new byte[buffer_size] }
-            {
-                mgr.next_input_byte     = buf;
-                mgr.bytes_in_buffer     = 0;
-                mgr.init_source         = nop;
-                mgr.fill_input_buffer   = fill_input_buffer;
-                mgr.skip_input_data     = skip_input_data;
-                mgr.resync_to_restart   = jpeg_resync_to_restart;
-                mgr.term_source         = nop;
-            }
-        
-        JPEGDestinationAdaptor::JPEGDestinationAdaptor(byte_sink* s)
-            :sink(s)
-            ,buf{ new byte[buffer_size] }
-            {
-                mgr.next_output_byte    = buf;
-                mgr.free_in_buffer      = buffer_size;
-                mgr.init_destination    = nop_dst;
-                mgr.empty_output_buffer = empty_output_buffer;
-                mgr.term_destination    = flush_output_buffer;
-            }
-        
+        /// function to match a J_COLOR_SPACE constant up (coarsely) to
+        /// an image, per the number of color channels it has:
         inline J_COLOR_SPACE color_space(int components) {
             switch (components) {
                 case 3: return JCS_RGB;
@@ -131,12 +141,26 @@ namespace im {
             }
         }
         
+        /// Base class for JPEG compressor wrappers:
+        /// holds an instance of the `jpeg_error_mgr` structure,
+        /// wrapped in a very simple inner-holding class,
+        /// which furnishes some accessors and a `jmp_buf` setup,
+        /// used by jpeglib for raising exception-style conditions:
         struct JPEGCompressionBase {
             
             public:
                 struct ErrorManager {
                     
-                    ErrorManager();
+                    ErrorManager() {
+                        jpeg_std_error(&pub);
+                        pub.error_exit = [](j_common_ptr cinfo) {
+                            using ErrorManager = JPEGCompressionBase::ErrorManager;
+                            ErrorManager* err = reinterpret_cast<ErrorManager*>(cinfo->err);
+                            (*cinfo->err->format_message)(cinfo, err->error_message);
+                            longjmp(err->setjmp_buffer, 1);
+                        };
+                        error_message[0] = 0;
+                    }
                     
                     mutable struct jpeg_error_mgr pub;
                     mutable jmp_buf setjmp_buffer;
@@ -155,9 +179,10 @@ namespace im {
             
         };
         
+        /// JPEG decompressor API class, wrapping the `jpeg_decompress_struct`
+        /// from jpeglib, alongside a JPEGSourceAdapter instance (q.v. implementation,
+        /// above) and furnishing accessor shortcut methods.
         struct JPEGDecompressor : public JPEGCompressionBase {
-            
-            using JPEGCompressionBase::ErrorManager;
             
             JPEGDecompressor(byte_source* source)
                 :adaptor(source)
@@ -197,9 +222,10 @@ namespace im {
                 jpeg_decompress_struct info;
         };
         
+        /// JPEG compressor API class, wrapping the `jpeg_compress_struct`
+        /// from jpeglib, alongside a JPEGDestinationAdapter instance (q.v. implementation,
+        /// above) and furnishing accessor shortcut methods.
         struct JPEGCompressor : public JPEGCompressionBase {
-            
-            using JPEGCompressionBase::ErrorManager;
             
             JPEGCompressor(byte_sink* sink)
                 :adaptor(sink)
@@ -246,20 +272,8 @@ namespace im {
                 jpeg_compress_struct info;
         };
         
-        void err_long_jump(j_common_ptr cinfo) {
-            JPEGCompressionBase::ErrorManager* err = reinterpret_cast<JPEGCompressionBase::ErrorManager*>(cinfo->err);
-            (*cinfo->err->format_message)(cinfo, err->error_message);
-            longjmp(err->setjmp_buffer, 1);
-        }
-        
-        /// out-of-line ErrorManager constructor definition:
-        JPEGCompressionBase::ErrorManager::ErrorManager() {
-            jpeg_std_error(&pub);
-            pub.error_exit = err_long_jump;
-            error_message[0] = 0;
-        }
-        
-        /// extract size of an EXIF byte region:
+        /// Shortcut template function to extract the size
+        /// of an EXIF byte region:
         template <typename Iterator>
         uint16_t parse_size(Iterator it) {
             Iterator siz0 = std::next(it, 2);
@@ -267,7 +281,7 @@ namespace im {
             return (static_cast<uint16_t>(*siz0) << 8) | *siz1;
         }
         
-        /// the marker for EXIF byte regions:
+        /// The byte marker signature for EXIF byte regions:
         const std::array<byte, 2> marker{ 0xFF, 0xE1 };
     
     } /// namespace (anon.)
@@ -437,14 +451,15 @@ namespace im {
         }
         
         /// allocate a row buffer:
-        JSAMPLE* rowbuf = new JSAMPLE[w * d]; /// width * channels
+        std::unique_ptr<JSAMPLE[]> rowbuf = std::make_unique<JSAMPLE[]>(w * d);
+        JSAMPLE* rowptr = rowbuf.get();
         
         /// access pixels as type JSAMPLE:
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
         /// write scanlines in pixel loop:
         while (compressor.next_scanline() < h) {
-            JSAMPLE* __restrict__ dstPtr = rowbuf;
+            JSAMPLE* __restrict__ dstPtr = rowbuf.get();
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
                     pix::convert(
@@ -452,7 +467,7 @@ namespace im {
                         *dstPtr++);
                 }
             }
-            compressor.write_scanlines(&rowbuf);
+            compressor.write_scanlines(std::addressof(rowptr));
         }
         
         /// final error check:
@@ -462,7 +477,5 @@ namespace im {
                 compressor.error_message());
         }
         
-        /// deallocate row buffer:
-        delete[] rowbuf;
     }
 }
