@@ -142,15 +142,11 @@ namespace im {
                     mutable jmp_buf setjmp_buffer;
                     mutable char error_message[JMSG_LENGTH_MAX];
                     
-                    bool has_error() const {
-                        return setjmp(this->setjmp_buffer);
-                    }
-                    
                 } errormgr;
             
             public:
                 bool has_error() const {
-                    return errormgr.has_error();
+                    return setjmp(errormgr.setjmp_buffer);
                 }
                 
                 std::string error_message() const {
