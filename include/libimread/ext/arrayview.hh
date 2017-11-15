@@ -313,12 +313,16 @@ namespace av {
     
     template <std::size_t Rank>
     class offset;
+    
     template <std::size_t Rank>
     class bounds;
+    
     template <std::size_t Rank>
     class bounds_iterator;
+    
     template <typename T, std::size_t Rank>
     class array_view;
+    
     template <typename T, std::size_t Rank>
     class strided_array_view;
     
