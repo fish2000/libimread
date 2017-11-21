@@ -11,7 +11,6 @@
 #include <libimread/libimread.hpp>
 #include <libimread/ext/arrayview.hh>
 
-// #include "include/test_data.hpp"
 #include "include/catch.hpp"
 
 namespace {
@@ -138,7 +137,7 @@ namespace {
                 av::bounds<3> testBounds;
                 av::offset<3> testStride;
                 av::array_view<int, 3> av;              /// objects under test, one of each
-                av::strided_array_view<int, 3> sav;     /// …but both under contigious data
+                av::strided_array_view<int, 3> sav;     /// …but both under contiguous data
         
         }; /// class ArrayViewTestFixture
         
@@ -165,10 +164,10 @@ namespace {
                 av::offset<3> testStride;
                 av::strided_array_view<int, 3> strided_sav;     /// object under test, a strided class
                                                                 /// with alternate spacing in z
-                                                                /// … even's only!
+                                                                /// … even values only!
         }; /// class StridedDataTestFixture
     
-    } /// namespace fixies
+    } /// namespace “fixies”
     
     /// TEST FUNCTION TEMPLATES:
     /// TEST FUNCTION TEMPLATES:
@@ -445,7 +444,7 @@ namespace {
         int x0 = 5;
         int y0 = 3;
         av::array_view<int, 2> slice2d = av[x0];      // a 2d slice in the yz plane
-        av::array_view<int, 1> slice1d = av[x0][y0];  // a row in z (also the contigious dimension)
+        av::array_view<int, 1> slice1d = av[x0][y0];  // a row in z (also the contiguous dimension)
         
         CHECK(30 == slice2d[{ 3, 2 }]);
         CHECK(30 == slice1d[2]);

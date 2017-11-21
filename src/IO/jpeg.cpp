@@ -171,6 +171,8 @@ namespace im {
                 } error;
             
             public:
+                virtual ~JPEGCompressionBase() {}
+                
                 bool has_error() const {
                     return setjmp(error.jumpbuffer);
                 }
@@ -194,7 +196,7 @@ namespace im {
                     info.src = &adaptor.mgr;
                 }
             
-            ~JPEGDecompressor() {
+            virtual ~JPEGDecompressor() {
                 jpeg_finish_decompress(&info);
                 jpeg_destroy_decompress(&info);
             }
@@ -247,7 +249,7 @@ namespace im {
                     info.dest = &adaptor.mgr;
                 }
             
-            ~JPEGCompressor() {
+            virtual ~JPEGCompressor() {
                 jpeg_finish_compress(&info);
                 jpeg_destroy_compress(&info);
             }

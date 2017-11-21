@@ -625,7 +625,7 @@ namespace av {
                       R == 1 && is_viewable_on_u<Viewable, value_type>::value
                       // todo: && decay_t<Viewable> is not a specialization of array_view
                       >>
-        // todo: assert static_cast<U*>(vw.data()) points to contigious data of at least vw.size()
+        // todo: assert static_cast<U*>(vw.data()) points to contiguous data of at least vw.size()
         constexpr array_view(Viewable&& vw)
             : data_(vw.data())
             , bounds_(vw.size()) {}
