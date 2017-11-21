@@ -9,7 +9,6 @@
 #include <libimread/IO/gif.hh>
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
-#include <libimread/pixels.hh>
 
 namespace im {
     
@@ -87,14 +86,14 @@ namespace im {
         
         /// Do the pixel loop to interleave RGB data
         byte* __restrict__ data = gbuf.data();
-        pix::accessor<byte> at = input.access();
+        av::strided_array_view<byte, 3> view = input.view();
         
         unsigned char* __restrict__ rgb;
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 rgb = data + 3 * (width * y + x);
                 for (int c = 0; c < channels; ++c) {
-                    pix::convert(at(x, y, c)[0], rgb[c]);
+                    rgb[c] = view[{x, y, c}];
                 }
             }
         }

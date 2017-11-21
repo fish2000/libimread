@@ -14,7 +14,6 @@
 #include <libimread/IO/png.hh>
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
-#include <libimread/pixels.hh>
 
 #ifdef __APPLE__
     #include <libpng16/png.h>   /* this is the Homebrew path */
@@ -279,7 +278,7 @@ namespace im {
                 uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (int x = 0; x < w; ++x) {
                     for (int c = 0; c < d; ++c) {
-                        pix::convert(*srcPtr++, ptr[c*c_stride]);
+                        ptr[c*c_stride] = *srcPtr++;
                     }
                     ++ptr;
                 }
@@ -292,7 +291,7 @@ namespace im {
                     for (int c = 0; c < d; ++c) {
                         uint16_t hi = (*srcPtr++) << 8;
                         uint16_t lo = hi | (*srcPtr++);
-                        pix::convert(lo, ptr[c*c_stride]);
+                        ptr[c*c_stride] = lo;
                     }
                     ++ptr;
                 }
@@ -348,22 +347,23 @@ namespace im {
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (x = 0; x < width; ++x) {
                     for (c = 0; c < channels; c++) {
-                        pix::convert(srcPtr[c*c_stride], *dstPtr++);
-                        // *dstPtr++ = out;
+                        *dstPtr++ = srcPtr[c*c_stride];
                     }
                     srcPtr++;
                 }
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
-            pix::accessor<byte> at = input.access();
+            // pix::accessor<byte> at = input.access();
+            av::strided_array_view<byte, 3> view = input.view();
             
             for (y = 0; y < height; ++y) {
                 row_pointers[y] = new png_byte[rowbytes];
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (x = 0; x < width; ++x) {
                     for (c = 0; c < channels; c++) {
-                        pix::convert(at(x, y, c)[0], *dstPtr++);
+                        *dstPtr++ = view[{x, y, c}];
+                        // *dstPtr++ = at(x, y, c)[0];
                     }
                 }
             }
@@ -484,7 +484,7 @@ namespace im {
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (x = 0; x < width; ++x) {
                     for (c = 0; c < channels; ++c) {
-                        pix::convert(srcPtr[c*c_stride], out);
+                        out = srcPtr[c*c_stride];
                         *dstPtr++ = out;
                     }
                     ++srcPtr;
@@ -499,7 +499,7 @@ namespace im {
                 dstPtr = static_cast<uint8_t*>(row_pointers[y]);
                 for (x = 0; x < width; ++x) {
                     for (c = 0; c < channels; ++c) {
-                        pix::convert(srcPtr[c*c_stride], out);
+                        out = srcPtr[c*c_stride];
                         *dstPtr++ = out;
                     }
                     ++srcPtr;
