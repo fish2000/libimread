@@ -49,7 +49,6 @@
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
 #include <libimread/ext/lzw.hh>
-#include <libimread/pixels.hh>
 
 #define TIF_NEWSUBFILETYPE 254
 #define TIF_IMAGEWIDTH 256
