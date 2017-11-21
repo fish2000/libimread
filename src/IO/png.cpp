@@ -354,7 +354,6 @@ namespace im {
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
-            // pix::accessor<byte> at = input.access();
             av::strided_array_view<byte, 3> view = input.view();
             
             for (y = 0; y < height; ++y) {
@@ -363,7 +362,6 @@ namespace im {
                 for (x = 0; x < width; ++x) {
                     for (c = 0; c < channels; c++) {
                         *dstPtr++ = view[{x, y, c}];
-                        // *dstPtr++ = at(x, y, c)[0];
                     }
                 }
             }
