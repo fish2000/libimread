@@ -13,7 +13,6 @@
 #include <libimread/options.hh>
 #include <libimread/ext/memory/fmemopen.hh>
 #include <libimread/base.hh>
-#include <libimread/pixels.hh>
 
 #define SWAP_ENDIAN16(value) \
     (value) = (((value) & 0xff)<<8)|(((value) & 0xff00)>>8)
@@ -45,9 +44,13 @@ namespace im {
                       "Could not read char from PPM\n");
         
         int bit_depth = 0;
-        if (maxval == 255) { bit_depth = 8; }
-        else if (maxval == 65535) { bit_depth = 16; }
-        else { imread_assert(false, "Invalid max bit-depth value in PPM\n"); }
+        if (maxval == 255) {
+            bit_depth = 8;
+        } else if (maxval == 65535) {
+            bit_depth = 16;
+        } else {
+            imread_assert(false, "Invalid max bit-depth value in PPM\n");
+        }
         
         imread_assert(std::strcmp(header, "P6") == 0 || std::strcmp(header, "p6") == 0,
                       "Input is not binary PPM\n");
@@ -68,7 +71,7 @@ namespace im {
                 uint8_t* __restrict__ row = static_cast<uint8_t*>(&data[(y*width)*channels]);
                 for (int x = 0; x < width; x++) {
                     for (int c = 0; c < channels; c++) {
-                        pix::convert(*row++, im_data[(c*height+y)*width+x]);
+                        im_data[(c*height+y)*width+x] = *row++;
                     }
                 }
             }
@@ -88,7 +91,7 @@ namespace im {
                         for (int c = 0; c < channels; c++) {
                             value = *row++;
                             SWAP_ENDIAN16(value);
-                            pix::convert(value, im_data[(c*height+y)*width+x]);
+                            im_data[(c*height+y)*width+x] = value;
                         }
                     }
                 }
@@ -97,7 +100,7 @@ namespace im {
                     uint16_t* __restrict__ row = static_cast<uint16_t*>(&data[(y*width)*channels]);
                     for (int x = 0; x < width; x++) {
                         for (int c = 0; c < channels; c++) {
-                            pix::convert(*row++, im_data[(c*height+y)*width+x]);
+                            im_data[(c*height+y)*width+x] = *row++;
                         }
                     }
                 }
@@ -123,12 +126,12 @@ namespace im {
         /// write data
         if (bit_depth == 8) {
             uint8_t* __restrict__ data = new uint8_t[full_size];
-            pix::accessor<byte> at = input.access();
+            av::strided_array_view<byte, 3> view = input.view();
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     uint8_t* __restrict__ p = static_cast<uint8_t*>(&data[(y*width+x)*channels]);
                     for (int c = 0; c < channels; c++) {
-                        pix::convert(at(x, y, c)[0], p[c]);
+                        p[c] = view[{x, y, c}];
                     }
                 }
             }
@@ -136,7 +139,7 @@ namespace im {
                 "Could not write 8-bit PPM data\n");
             delete[] data;
         } else if (bit_depth == 16) {
-            pix::accessor<uint16_t> at = input.access<uint16_t>();
+            av::strided_array_view<byte, 3> view = input.view();
             uint16_t* __restrict__ data = new uint16_t[full_size];
             if (detail::littleendian()) {
                 uint16_t value;
@@ -144,7 +147,7 @@ namespace im {
                     for (int x = 0; x < width; x++) {
                         uint16_t* __restrict__ p = static_cast<uint16_t *>(&data[(y*width+x)*channels]);
                         for (int c = 0; c < channels; c++) {
-                            pix::convert(at(x, y, c)[0], value);
+                            value = view[{x, y, c}];
                             SWAP_ENDIAN16(value);
                             p[c] = value;
                         }
@@ -155,7 +158,7 @@ namespace im {
                     for (int x = 0; x < width; x++) {
                         uint16_t* __restrict__ p = static_cast<uint16_t *>(&data[(y*width+x)*channels]);
                         for (int c = 0; c < channels; c++) {
-                            pix::convert(at(x, y, c)[0], p[c]);
+                            p[c] = view[{x, y, c}];
                         }
                     }
                 }
