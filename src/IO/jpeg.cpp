@@ -56,7 +56,7 @@ namespace im {
                     mgr.init_source         = NOP_SRC;
                     mgr.fill_input_buffer   = [](j_decompress_ptr cinfo) {
                         JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
-                        jpeg_source_mgr mgr = adaptor->mgr;
+                        jpeg_source_mgr& mgr = adaptor->mgr;
                         mgr.next_input_byte = adaptor->buffer.get();
                         mgr.bytes_in_buffer = adaptor->source->read(adaptor->buffer.get(),
                                                                              buffer_size);
@@ -65,7 +65,7 @@ namespace im {
                     
                     mgr.skip_input_data     = [](j_decompress_ptr cinfo, long num_bytes) {
                         if (num_bytes <= 0) { return; }
-                        jpeg_source_mgr mgr = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src)->mgr;
+                        jpeg_source_mgr& mgr = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src)->mgr;
                         while (num_bytes > long(mgr.bytes_in_buffer)) {
                             num_bytes -= mgr.bytes_in_buffer;
                             mgr.fill_input_buffer(cinfo); /// calls lambda defined above
@@ -101,7 +101,7 @@ namespace im {
                     
                     mgr.empty_output_buffer = [](j_compress_ptr cinfo) {
                         JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
-                        jpeg_destination_mgr mgr = adaptor->mgr;
+                        jpeg_destination_mgr& mgr = adaptor->mgr;
                         adaptor->sink->write(adaptor->buffer.get(),
                                              buffer_size);
                         mgr.next_output_byte = adaptor->buffer.get();
