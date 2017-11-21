@@ -11,12 +11,18 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/pixels.hh>
+#include <libimread/ext/arrayview.hh>
 
 namespace im {
     
+    /// forward-declare class Histogram:
     class Histogram;
     
     class Image {
+        
+        public:
+            using size_type     = std::ptrdiff_t;
+            using value_type    = byte;
         
         public:
             using unique_image_t = std::unique_ptr<Image>;
@@ -35,6 +41,7 @@ namespace im {
         public:
             virtual void* rowp(int r) const = 0;
             virtual void* rowp() const;
+            // virtual byte* data() const;
             virtual int nbits() const = 0;
             
         public:
@@ -69,16 +76,34 @@ namespace im {
         public:
             template <typename T> inline
             T* rowp_as(const int r) const {
-                return static_cast<T*>(this->rowp(r));
+                return static_cast<T*>(rowp(r));
             }
             
-            template <typename T = byte> inline
+        public:
+            template <typename T = value_type> inline
             pix::accessor<T> access() const {
                 return pix::accessor<T>(rowp_as<T>(0), stride(0),
                                                        stride(1),
                                                        stride(2));
             }
-            
+        
+        public:
+            template <typename T = value_type> inline
+            av::strided_array_view<T, 3> view(int X = -1,
+                                              int Y = -1,
+                                              int Z = -1) const {
+                /// Extents default to current values:
+                if (X == -1) { X = dim(0); }
+                if (Y == -1) { Y = dim(1); }
+                if (Z == -1) { Z = dim(2); }
+                /// Return a strided array view, typed accordingly,
+                /// initialized with the current stride values:
+                return av::strided_array_view<T, 3>(static_cast<T*>(rowp(0)),
+                                                    { X,         Y,         Z         },
+                                                    { stride(0), stride(1), stride(2) });
+            }
+        
+        public:
             template <typename T> inline
             std::vector<T*> allrows() const {
                 using pointervec_t = std::vector<T*>;
@@ -90,7 +115,7 @@ namespace im {
                 return rows;
             }
             
-            template <typename T, typename U = byte> inline
+            template <typename T, typename U = value_type> inline
             std::vector<T> plane(int idx) const {
                 /// types
                 using planevec_t = std::vector<T>;
@@ -116,7 +141,7 @@ namespace im {
                 return out;
             }
             
-            template <typename T, typename U = byte> inline
+            template <typename T, typename U = value_type> inline
             std::vector<std::vector<T>> allplanes(int lastplane = 255) const {
                 using planevec_t = std::vector<T>;
                 using pixvec_t = std::vector<planevec_t>;

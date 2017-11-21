@@ -488,14 +488,21 @@ namespace im {
         /// access pixels as type JSAMPLE (== unsigned char == uint8_t):
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
+        /// view data as type JSAMPLE:
+        av::strided_array_view<JSAMPLE, 3> sav = input.view<JSAMPLE>();
+        
         /// write scanlines in pixel loop:
         while (compressor.next_scanline() < h) {
             JSAMPLE* __restrict__ dstPtr = samples[0];
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
+                    int scan = compressor.next_scanline();
                     pix::convert(
-                        at(x, compressor.next_scanline(), c)[0],
+                        at(x, scan, c)[0],
                         *dstPtr++);
+                    
+                    imread_assert((at(x, scan, c)[0] == sav[{x, scan, c}]),
+                                 "Strided arrayview and pixel accessor are unequal");
                 }
             }
             compressor.write_scanlines(samples);
