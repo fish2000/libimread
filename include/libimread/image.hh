@@ -10,7 +10,6 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
-#include <libimread/pixels.hh>
 #include <libimread/ext/arrayview.hh>
 
 namespace im {
@@ -79,13 +78,13 @@ namespace im {
                 return static_cast<T*>(rowp(r));
             }
             
-        public:
-            template <typename T = value_type> inline
-            pix::accessor<T> access() const {
-                return pix::accessor<T>(rowp_as<T>(0), stride(0),
-                                                       stride(1),
-                                                       stride(2));
-            }
+        // public:
+        //     template <typename T = value_type> inline
+        //     pix::accessor<T> access() const {
+        //         return pix::accessor<T>(rowp_as<T>(0), stride(0),
+        //                                                stride(1),
+        //                                                stride(2));
+        //     }
         
         public:
             template <typename T = value_type> inline
@@ -119,23 +118,21 @@ namespace im {
             std::vector<T> plane(int idx) const {
                 /// types
                 using planevec_t = std::vector<T>;
-                using access_t = pix::accessor<T>;
+                using view_t = av::strided_array_view<T, 3>;
                 if (idx >= planes()) { return planevec_t{}; }
                 
                 /// image dimensions
                 const int w = dim(0);
                 const int h = dim(1);
                 const int siz = w * h;
-                access_t accessor = access<T>();
+                view_t viewer = view<T>();
                 
                 /// fill plane vector
                 planevec_t out;
                 out.resize(siz, 0);
                 for (int x = 0; x < w; ++x) {
                     for (int y = 0; y < h; ++y) {
-                        pix::convert(static_cast<U>(
-                            accessor(x, y, idx)[0]),
-                                     out[y * w + x]);
+                        out[y * w + x] = static_cast<U>(viewer[{x, y, idx}]);
                     }
                 }
                 return out;

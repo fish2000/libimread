@@ -10,7 +10,6 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
-#include <libimread/pixels.hh>
 #include <libimread/ext/arrayview.hh>
 
 
@@ -89,13 +88,13 @@ namespace im {
                 return static_cast<T*>(rowp(r));
             }
             
-        public:
-            template <typename T = value_type> inline
-            pix::accessor<T> access() const {
-                return pix::accessor<T>(rowp_as<T>(0), stride(0),
-                                                       stride(1),
-                                                       stride(2));
-            }
+        // public:
+        //     template <typename T = value_type> inline
+        //     pix::accessor<T> access() const {
+        //         return pix::accessor<T>(rowp_as<T>(0), stride(0),
+        //                                                stride(1),
+        //                                                stride(2));
+        //     }
         
         public:
             template <typename T = value_type> inline
@@ -117,9 +116,9 @@ namespace im {
             std::vector<T*> allrows() const {
                 using pointervec_t = std::vector<T*>;
                 pointervec_t rows;
-                const int h = this->dim(0);
+                const int h = dim(0);
                 for (int r = 0; r != h; ++r) {
-                    rows.push_back(this->rowp_as<T>(r));
+                    rows.push_back(rowp_as<T>(r));
                 }
                 return rows;
             }

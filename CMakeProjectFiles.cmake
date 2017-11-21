@@ -144,7 +144,6 @@ set(hdrs
     ${hdrs_dir}/metadata.hh
     ${hdrs_dir}/options.hh
     ${hdrs_dir}/palette.hh
-    ${hdrs_dir}/pixels.hh
     ${hdrs_dir}/preview.hh
     ${hdrs_dir}/rehash.hh
     ${hdrs_dir}/rocks.hh
