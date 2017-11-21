@@ -87,14 +87,6 @@ namespace im {
             T* rowp_as(const int r) const {
                 return static_cast<T*>(rowp(r));
             }
-            
-        // public:
-        //     template <typename T = value_type> inline
-        //     pix::accessor<T> access() const {
-        //         return pix::accessor<T>(rowp_as<T>(0), stride(0),
-        //                                                stride(1),
-        //                                                stride(2));
-        //     }
         
         public:
             template <typename T = value_type> inline
