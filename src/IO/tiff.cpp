@@ -10,7 +10,6 @@
 #include <libimread/IO/tiff.hh>
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
-#include <libimread/pixels.hh>
 
 extern "C" {
    #include <tiffio.h>
@@ -341,7 +340,7 @@ namespace im {
                     /// this pixel loop de-interleaves the destination buffer in-place
                     for (int x = 0; x < w; ++x) {
                         for (int c = 0; c < depth; ++c) {
-                            pix::convert(*ptr++, dstPtr[c*c_stride]);
+                            dstPtr[c*c_stride] = *ptr++;
                         }
                         dstPtr++;
                     }
@@ -365,7 +364,7 @@ namespace im {
                         for (int c = 0; c < depth; ++c) {
                             uint16_t hi = (*ptr16++) << 8;
                             uint16_t lo = hi | (*ptr16++);
-                            pix::convert(lo, dstPtr[c*c_stride]);
+                            dstPtr[c*c_stride] = lo;
                         }
                         dstPtr++;
                     }
@@ -489,17 +488,17 @@ namespace im {
                     B = pixel;
                     srcp = input.rowp_as<byte>(r);
                     for (x = 0; x < w; ++x) {
-                        pix::convert(*srcp++, *R);
+                        *R = *srcp++;
                         R += ch;
                     }
                     srcp = input.rowp_as<byte>(r) + cs1;
                     for (x = 0; x < w; ++x) {
-                        pix::convert(*srcp++, *G);
+                        *G = *srcp++;
                         G += ch;
                     }
                     srcp = input.rowp_as<byte>(r) + cs2;
                     for (x = 0; x < w; ++x) {
-                        pix::convert(*srcp++, *B);
+                        *B = *srcp++;
                         B += ch;
                     }
                 }
@@ -509,7 +508,6 @@ namespace im {
         }
         
         for (int rr = 0; rr != h; ++rr) {
-            // void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : input.rowp(rr);
             void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : input.rowp(rr);
             if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
                 imread_raise(TIFFIOError, "Error writing scanline");
@@ -649,17 +647,17 @@ namespace im {
                         B = pixel;
                         srcp = im->rowp_as<byte>(r);
                         for (x = 0; x < w; ++x) {
-                            pix::convert(*srcp++, *R);
+                            *R = *srcp++;
                             R += ch;
                         }
                         srcp = im->rowp_as<byte>(r) + cs1;
                         for (x = 0; x < w; ++x) {
-                            pix::convert(*srcp++, *G);
+                            *G = *srcp++;
                             G += ch;
                         }
                         srcp = im->rowp_as<byte>(r) + cs2;
                         for (x = 0; x < w; ++x) {
-                            pix::convert(*srcp++, *B);
+                            *B = *srcp++;
                             B += ch;
                         }
                     }
@@ -668,7 +666,6 @@ namespace im {
             }
             
             for (int rr = 0; rr != h; ++rr) {
-                // void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : im->rowp(rr);
                 void* __restrict__ rowp = copy_data ? bufp + (rr * h * nbytes) : im->rowp(rr);
                 if (TIFFWriteScanline(t.tif, rowp, rr) == -1) {
                     imread_raise(TIFFIOError, "Error writing scanline");
