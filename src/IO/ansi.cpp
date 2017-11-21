@@ -11,7 +11,6 @@
 #include <libimread/IO/ansi.hh>
 #include <libimread/process/jitresize.hh>
 #include <libimread/image.hh>
-#include <libimread/pixels.hh>
 
 #ifdef __GCC__
 #pragma STDC FENV_ACCESS ON
