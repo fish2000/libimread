@@ -39,6 +39,8 @@ namespace blockhash {
     
     namespace detail {
         
+        using strided_view_t = av::strided_array_view<byte, 3>;
+        
         template <std::size_t NN, typename Iterator>
         float median(Iterator begin, Iterator end) {
             using Type = typename std::remove_pointer_t<std::decay_t<Iterator>>;
@@ -97,7 +99,7 @@ namespace blockhash {
         float                   m[4];
         std::bitset<NN>         out;
         std::array<int, NN>     blocks;
-        im::pix::accessor<byte> at = image.access();
+        detail::strided_view_t  view = image.view();
         
         for (y = 0; y < N; y++) {
             for (x = 0; x < N; x++) {
@@ -105,9 +107,9 @@ namespace blockhash {
                 for (iy = 0; iy < block_height; iy++) {
                     for (ix = 0; ix < block_width; ix++) {
                         /// calculate offset
-                        value += at((x * block_width + ix), (y * block_height + iy), 0)[0] +
-                                 at((x * block_width + ix), (y * block_height + iy), 1)[0] +
-                                 at((x * block_width + ix), (y * block_height + iy), 2)[0];
+                        value += view[{(x * block_width + ix), (y * block_height + iy), 0}] +
+                                 view[{(x * block_width + ix), (y * block_height + iy), 1}] +
+                                 view[{(x * block_width + ix), (y * block_height + iy), 2}];
                     }
                 }
                 blocks[y * N + x] = value;
@@ -154,7 +156,7 @@ namespace blockhash {
         int                         i, x, y;
         std::bitset<NN>             out;
         std::array<float, NN>       blocks;
-        im::pix::accessor<byte>     at = image.access();
+        detail::strided_view_t      view = image.view();
         
         if (width % N == 0 && height % N == 0) {
             return blockhash_quick<N>(image);
@@ -190,9 +192,9 @@ namespace blockhash {
                 }
                 
                 /// get value at coords
-                value = (float) at(x, y, 0)[0] +
-                        (float) at(x, y, 1)[0] +
-                        (float) at(x, y, 2)[0];
+                value = (float) view[{x, y, 0}] +
+                        (float) view[{x, y, 1}] +
+                        (float) view[{x, y, 2}];
                 
                 /// add weighted pixel value to relevant blocks
                 blocks[block_top * N + block_left] += value * weight_top * weight_left;
