@@ -14,7 +14,6 @@
 #include "../exceptions.hpp"
 
 #include <libimread/ext/errors/demangle.hh>
-#include <libimread/pixels.hh>
 
 #include "typecheck.hh"
 #include "../models/buffermodel.hh"

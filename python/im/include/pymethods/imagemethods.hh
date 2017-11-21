@@ -26,7 +26,6 @@
 #include <libimread/file.hh>
 #include <libimread/filehandle.hh>
 #include <libimread/hashing.hh>
-#include <libimread/pixels.hh>
 
 #include "../models/models.hh"
 

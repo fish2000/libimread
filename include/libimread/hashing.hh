@@ -14,7 +14,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
-#include <libimread/pixels.hh>
 
 using im::Image;
 using im::byte;

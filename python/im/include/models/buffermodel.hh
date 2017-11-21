@@ -23,7 +23,7 @@
 // #include "resize.h"
 // }
 
-#include <libimread/pixels.hh>
+#include <libimread/ext/arrayview.hh>
 
 namespace py {
     
@@ -37,7 +37,7 @@ namespace py {
             
             using pixel_t = byte;
             using unique_buffer_t = std::unique_ptr<BufferType>;
-            using accessor_t = im::pix::accessor<pixel_t>;
+            using accessor_t = av::strided_array_view<pixel_t, 3>;
             using allocation_t = std::unique_ptr<pixel_t[]>;
             
             static PyTypeObject* type_ptr() { return &BufferModel_Type; }
@@ -80,23 +80,32 @@ namespace py {
             explicit BufferModelBase(BufferType* buffer)
                 :clean(true)
                 ,internal(unique_buffer_t(buffer))
-                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
-                                          internal->extent[1] ? internal->stride[1] : 0,
-                                          internal->extent[2] ? internal->stride[2] : 0)
+                ,accessor(internal->host, { internal->extent[0] ? internal->extent[0] : 0,
+                                            internal->extent[1] ? internal->extent[1] : 0,
+                                            internal->extent[2] ? internal->extent[2] : 0 },
+                                          { internal->extent[0] ? internal->stride[0] : 0,
+                                            internal->extent[1] ? internal->stride[1] : 0,
+                                            internal->extent[2] ? internal->stride[2] : 0 })
                 {}
             
             BufferModelBase(BufferModelBase const& other)
                 :internal(im::buffer::heapcopy(other.internal.get()))
-                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
-                                          internal->extent[1] ? internal->stride[1] : 0,
-                                          internal->extent[2] ? internal->stride[2] : 0)
+                ,accessor(internal->host, { internal->extent[0] ? internal->extent[0] : 0,
+                                            internal->extent[1] ? internal->extent[1] : 0,
+                                            internal->extent[2] ? internal->extent[2] : 0 },
+                                          { internal->extent[0] ? internal->stride[0] : 0,
+                                            internal->extent[1] ? internal->stride[1] : 0,
+                                            internal->extent[2] ? internal->stride[2] : 0 })
                 {}
             
             explicit BufferModelBase(Py_buffer* view)
                 :internal(im::buffer::heapcopy(view))
-                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
-                                          internal->extent[1] ? internal->stride[1] : 0,
-                                          internal->extent[2] ? internal->stride[2] : 0)
+                ,accessor(internal->host, { internal->extent[0] ? internal->extent[0] : 0,
+                                            internal->extent[1] ? internal->extent[1] : 0,
+                                            internal->extent[2] ? internal->extent[2] : 0 },
+                                          { internal->extent[0] ? internal->stride[0] : 0,
+                                            internal->extent[1] ? internal->stride[1] : 0,
+                                            internal->extent[2] ? internal->stride[2] : 0 })
                 {}
             
             explicit BufferModelBase(int width, int height,
@@ -119,9 +128,12 @@ namespace py {
                     });
                     
                     /// initialize accessor:
-                    accessor = accessor_t(internal->host, stridings[0],
-                                                          stridings[1],
-                                                          stridings[2]);
+                    accessor = accessor_t(internal->host, { internal->extent[0] ? internal->extent[0] : 0,
+                                                            internal->extent[1] ? internal->extent[1] : 0,
+                                                            internal->extent[2] ? internal->extent[2] : 0 },
+                                                          { internal->extent[0] ? internal->stride[0] : 0,
+                                                            internal->extent[1] ? internal->stride[1] : 0,
+                                                            internal->extent[2] ? internal->stride[2] : 0 });
                     
                     /// blanket-set the whole allocation:
                     std::memset(internal->host, value,
@@ -132,9 +144,12 @@ namespace py {
                                      float scale,
                                      int value = 0x00)
                 :internal(im::buffer::heapcopy(other.internal.get(), scale))
-                ,accessor(internal->host, internal->extent[0] ? internal->stride[0] : 0,
-                                          internal->extent[1] ? internal->stride[1] : 0,
-                                          internal->extent[2] ? internal->stride[2] : 0)
+                ,accessor(internal->host, { internal->extent[0] ? internal->extent[0] : 0,
+                                            internal->extent[1] ? internal->extent[1] : 0,
+                                            internal->extent[2] ? internal->extent[2] : 0 },
+                                          { internal->extent[0] ? internal->stride[0] : 0,
+                                            internal->extent[1] ? internal->stride[1] : 0,
+                                            internal->extent[2] ? internal->stride[2] : 0 })
                 ,allocation{ new pixel_t[im::buffer::length(*internal.get())] }
                 {
                     /// reset buffer host pointer to new allocation:
@@ -161,9 +176,12 @@ namespace py {
                 Py_buffer view{ 0 };
                 if (PyObject_GetBuffer(bufferhost, &view, PyBUF_ND | PyBUF_STRIDES) != -1) {
                     internal = unique_buffer_t(im::buffer::heapcopy(&view));
-                    accessor = accessor_t(internal->host, internal->extent[0] ? internal->stride[0] : 0,
-                                                          internal->extent[1] ? internal->stride[1] : 0,
-                                                          internal->extent[2] ? internal->stride[2] : 0);
+                    accessor = accessor_t(internal->host, { internal->extent[0] ? internal->extent[0] : 0,
+                                                            internal->extent[1] ? internal->extent[1] : 0,
+                                                            internal->extent[2] ? internal->extent[2] : 0 },
+                                                          { internal->extent[0] ? internal->stride[0] : 0,
+                                                            internal->extent[1] ? internal->stride[1] : 0,
+                                                            internal->extent[2] ? internal->stride[2] : 0 });
                 } else {
                     internal = std::make_unique<BufferType>();
                     accessor = accessor_t{};
