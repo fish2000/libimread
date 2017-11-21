@@ -632,7 +632,8 @@ namespace im {
                         source_array_t source_colors = get(x, y).to_array();
                         dest_color_t dest_color = converter(source_colors.data());
                         dest = data + (y * x);
-                        pix::convert(dest_color.composite, *dest);
+                        // pix::convert(dest_color.composite, *dest);
+                        *dest = dest_color.composite;
                     }
                 }
                 
