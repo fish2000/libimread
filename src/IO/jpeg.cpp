@@ -15,7 +15,6 @@
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
 #include <libimread/metadata.hh>
-#include <libimread/pixels.hh>
 #include <libimread/ext/exif.hh>
 
 extern "C" {
@@ -353,10 +352,9 @@ namespace im {
             JSAMPLE* __restrict__ srcPtr = samples[0];
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
-                    /// theoretically you would want to scale this next bit,
-                    /// depending on whatever the bit depth may be
-                    /// -- SOMEDAAAAAAAAAAAAAAY.....
-                    pix::convert(*srcPtr++, ptr[c*c_stride]);
+                    /// theoretically you would want to scale this next value,
+                    /// depending on the bit depth -- SOMEDAAAAAAAAAAAAAAY.....
+                    ptr[c*c_stride] = *srcPtr++;
                 }
                 ++ptr;
             }
@@ -397,7 +395,6 @@ namespace im {
         if (exif.parseFromEXIFSegment(&data[0], data.size()) != PARSE_EXIF_SUCCESS) {
             imread_raise(MetadataReadError,
                 "Error parsing JPEG EXIF metadata");
-            // return meta;
         }
         
         /// strings
@@ -485,24 +482,16 @@ namespace im {
         /// allocate a single-row sample array:
         JSAMPARRAY samples = compressor.allocate_samples();
         
-        /// access pixels as type JSAMPLE (== unsigned char == uint8_t):
-        pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
-        
         /// view data as type JSAMPLE:
-        av::strided_array_view<JSAMPLE, 3> sav = input.view<JSAMPLE>();
+        av::strided_array_view<JSAMPLE, 3> view = input.view<JSAMPLE>();
         
         /// write scanlines in pixel loop:
-        while (compressor.next_scanline() < h) {
+        int scan;
+        while ((scan = compressor.next_scanline()) < h) {
             JSAMPLE* __restrict__ dstPtr = samples[0];
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
-                    int scan = compressor.next_scanline();
-                    pix::convert(
-                        at(x, scan, c)[0],
-                        *dstPtr++);
-                    
-                    imread_assert((at(x, scan, c)[0] == sav[{x, scan, c}]),
-                                 "Strided arrayview and pixel accessor are unequal");
+                    *dstPtr++ = view[{x, scan, c}];
                 }
             }
             compressor.write_scanlines(samples);
