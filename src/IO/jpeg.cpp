@@ -23,8 +23,8 @@ extern "C" {
 }
 
 /// “boolean” is a jpeglib type, evidently:
-#define BOOLEAN_TRUE()  static_cast<boolean>(true)
-#define BOOLEAN_FALSE() static_cast<boolean>(false)
+#define BOOLEAN_TRUE()  (static_cast<boolean>(true))
+#define BOOLEAN_FALSE() (static_cast<boolean>(false))
 
 namespace im {
     
@@ -32,8 +32,11 @@ namespace im {
     
     namespace {
         
-        const std::size_t kBufferSize = JPEGFormat::options.buffer_size;
         using byte_ptr = std::unique_ptr<byte[]>;
+        
+        /// Constants
+        const std::size_t kBufferSize = JPEGFormat::options.buffer_size;
+        const std::size_t kDefaultQuality = static_cast<std::size_t>(JPEGFormat::options.writeopts.quality * 100);
         
         /// Adaptor-specific NOP functions:
         void NOP_SRC(j_decompress_ptr)  {}
@@ -206,14 +209,24 @@ namespace im {
             int components() const  { return info.output_components; }
             int scanline() const    { return info.output_scanline; }
             
-            JSAMPARRAY allocate_samples(int width, int depth, int height = 1) {
+            JSAMPARRAY allocate_samples(int width = 0,
+                                        int depth = 0,
+                                        int height = 1) {
+                /// default to values read from JPEG header:
+                if (!width) { width = info.output_width;      }
+                if (!depth) { depth = info.output_components; }
+                /// allocate using internal function pointer:
                 return (*info.mem->alloc_sarray)((j_common_ptr)&info, JPOOL_IMAGE,
                                                                       width * depth,
                                                                       height);
             }
             
-            void read_samples(JSAMPARRAY samples, int idx = 1) {
-                jpeg_read_scanlines(&info, samples, idx);
+            void read_scanlines(JSAMPLE** rows, int idx = 1) {
+                jpeg_read_scanlines(&info, rows, idx);
+            }
+            
+            void read_scanlines(JSAMPLE* rows, int idx = 1) {
+                jpeg_read_scanlines(&info, std::addressof(rows), idx);
             }
             
             public:
@@ -262,8 +275,24 @@ namespace im {
             void set_components(int components) { info.input_components = components;
                                                   info.in_color_space = color_space(components); }
             
+            JSAMPARRAY allocate_samples(int width = 0,
+                                        int depth = 0,
+                                        int height = 1) {
+                /// default to values attached to ‘info’ struct:
+                if (!width) { width = info.image_width;      }
+                if (!depth) { depth = info.input_components; }
+                /// allocate using internal function pointer:
+                return (*info.mem->alloc_sarray)((j_common_ptr)&info, JPOOL_IMAGE,
+                                                                      width * depth,
+                                                                      height);
+            }
+            
             void write_scanlines(JSAMPLE** rows, int idx = 1) {
                 jpeg_write_scanlines(&info, rows, idx);
+            }
+            
+            void write_scanlines(JSAMPLE* rows, int idx = 1) {
+                jpeg_write_scanlines(&info, std::addressof(rows), idx);
             }
             
             public:
@@ -310,16 +339,16 @@ namespace im {
         std::unique_ptr<Image> output(factory->create(8, h, w, d));
         
         /// allocate a single-row sample array:
-        JSAMPARRAY samples = decompressor.allocate_samples(w, d, 1);
+        JSAMPARRAY samples = decompressor.allocate_samples();
         
-        /// Hardcoding uint8_t as the type for now:
+        /// Hardcoding JSAMPLE (== uint8_t) as the type for now:
         int c_stride = (d == 1) ? 0 : output->stride(2);
-        uint8_t* __restrict__ ptr = output->rowp_as<uint8_t>(0);
+        JSAMPLE* __restrict__ ptr = output->rowp_as<JSAMPLE>(0);
         
         /// read scanlines in loop:
         while (decompressor.scanline() < h) {
-            decompressor.read_samples(samples);
-            JSAMPLE* srcPtr = samples[0];
+            decompressor.read_scanlines(samples);
+            JSAMPLE* __restrict__ srcPtr = samples[0];
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
                     /// theoretically you would want to scale this next bit,
@@ -437,28 +466,29 @@ namespace im {
         compressor.set_defaults();
         
         /// set quality value (0 ≤ quality ≤ 100):
-        compressor.set_quality(opts.cast<std::size_t>("jpg:quality", 100));
+        compressor.set_quality(
+              opts.cast<std::size_t>("jpg:quality",
+                                      kDefaultQuality));
         
         /// start the compression!
         compressor.start();
         
-        /// first error check:
+        /// initial error check:
         if (compressor.has_error()) {
             imread_raise(CannotWriteError,
                 "libjpeg internal error:",
                 compressor.error_message());
         }
         
-        /// allocate a row buffer:
-        std::unique_ptr<JSAMPLE[]> rowbuf = std::make_unique<JSAMPLE[]>(w * d);
-        JSAMPLE* rowptr = rowbuf.get();
+        /// allocate a single-row sample array:
+        JSAMPARRAY samples = compressor.allocate_samples();
         
-        /// access pixels as type JSAMPLE:
+        /// access pixels as type JSAMPLE (== unsigned char == uint8_t):
         pix::accessor<JSAMPLE> at = input.access<JSAMPLE>();
         
         /// write scanlines in pixel loop:
         while (compressor.next_scanline() < h) {
-            JSAMPLE* __restrict__ dstPtr = rowbuf.get();
+            JSAMPLE* __restrict__ dstPtr = samples[0];
             for (int x = 0; x < w; ++x) {
                 for (int c = 0; c < d; ++c) {
                     pix::convert(
@@ -466,7 +496,7 @@ namespace im {
                         *dstPtr++);
                 }
             }
-            compressor.write_scanlines(std::addressof(rowptr));
+            compressor.write_scanlines(samples);
         }
         
         /// final error check:
