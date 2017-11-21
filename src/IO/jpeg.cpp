@@ -22,6 +22,7 @@ extern "C" {
 #include <jpeglib.h>
 }
 
+/// “boolean” is a jpeglib type, evidently:
 #define BOOLEAN_TRUE()  static_cast<boolean>(true)
 #define BOOLEAN_FALSE() static_cast<boolean>(false)
 
@@ -31,7 +32,7 @@ namespace im {
     
     namespace {
         
-        const std::size_t buffer_size = JPEGFormat::options.buffer_size;
+        const std::size_t kBufferSize = JPEGFormat::options.buffer_size;
         using byte_ptr = std::unique_ptr<byte[]>;
         
         /// Adaptor-specific NOP functions:
@@ -49,21 +50,21 @@ namespace im {
             
             JPEGSourceAdaptor(byte_source* s)
                 :source(s)
-                ,buffer{ std::make_unique<byte[]>(buffer_size) }
+                ,buffer{ std::make_unique<byte[]>(kBufferSize) }
                 {
                     mgr.next_input_byte     = buffer.get();
                     mgr.bytes_in_buffer     = 0;
                     mgr.init_source         = NOP_SRC;
-                    mgr.fill_input_buffer   = [](j_decompress_ptr cinfo) {
+                    mgr.fill_input_buffer   = [](j_decompress_ptr cinfo) -> boolean {
                         JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
                         jpeg_source_mgr& mgr = adaptor->mgr;
                         mgr.next_input_byte = adaptor->buffer.get();
                         mgr.bytes_in_buffer = adaptor->source->read(adaptor->buffer.get(),
-                                                                             buffer_size);
+                                                                             kBufferSize);
                         return BOOLEAN_TRUE();
                     };
                     
-                    mgr.skip_input_data     = [](j_decompress_ptr cinfo, long num_bytes) {
+                    mgr.skip_input_data     = [](j_decompress_ptr cinfo, long num_bytes) -> void {
                         if (num_bytes <= 0) { return; }
                         jpeg_source_mgr& mgr = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src)->mgr;
                         while (num_bytes > long(mgr.bytes_in_buffer)) {
@@ -93,23 +94,23 @@ namespace im {
             
             JPEGDestinationAdaptor(byte_sink* s)
                 :sink(s)
-                ,buffer{ std::make_unique<byte[]>(buffer_size) }
+                ,buffer{ std::make_unique<byte[]>(kBufferSize) }
                 {
                     mgr.next_output_byte    = buffer.get();
-                    mgr.free_in_buffer      = buffer_size;
+                    mgr.free_in_buffer      = kBufferSize;
                     mgr.init_destination    = NOP_DST;
                     
-                    mgr.empty_output_buffer = [](j_compress_ptr cinfo) {
+                    mgr.empty_output_buffer = [](j_compress_ptr cinfo) -> boolean {
                         JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
                         jpeg_destination_mgr& mgr = adaptor->mgr;
                         adaptor->sink->write(adaptor->buffer.get(),
-                                             buffer_size);
+                                             kBufferSize);
                         mgr.next_output_byte = adaptor->buffer.get();
-                        mgr.free_in_buffer = buffer_size;
+                        mgr.free_in_buffer = kBufferSize;
                         return BOOLEAN_TRUE();
                     };
                     
-                    mgr.term_destination    = [](j_compress_ptr cinfo) {
+                    mgr.term_destination    = [](j_compress_ptr cinfo) -> void {
                         JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
                         adaptor->sink->write(adaptor->buffer.get(),
                                              adaptor->mgr.next_output_byte - adaptor->buffer.get());
@@ -145,32 +146,34 @@ namespace im {
         struct JPEGCompressionBase {
             
             public:
+                using jpeg_error_mgr_t = struct jpeg_error_mgr;
+            
+            public:
                 struct ErrorManager {
+                    mutable jpeg_error_mgr_t mgr;
+                    mutable jmp_buf jumpbuffer;
+                    mutable char message[JMSG_LENGTH_MAX];
                     
                     ErrorManager() {
-                        jpeg_std_error(&pub);
-                        pub.error_exit = [](j_common_ptr cinfo) {
+                        jpeg_std_error(&mgr);
+                        mgr.error_exit = [](j_common_ptr cinfo) {
                             using ErrorManager = JPEGCompressionBase::ErrorManager;
                             ErrorManager* err = reinterpret_cast<ErrorManager*>(cinfo->err);
-                            (*cinfo->err->format_message)(cinfo, err->error_message);
-                            longjmp(err->setjmp_buffer, 1);
+                            (*cinfo->err->format_message)(cinfo, err->message);
+                            longjmp(err->jumpbuffer, 1);
                         };
-                        error_message[0] = 0;
+                        message[0] = 0;
                     }
                     
-                    mutable struct jpeg_error_mgr pub;
-                    mutable jmp_buf setjmp_buffer;
-                    mutable char error_message[JMSG_LENGTH_MAX];
-                    
-                } errormgr;
+                } error;
             
             public:
                 bool has_error() const {
-                    return setjmp(errormgr.setjmp_buffer);
+                    return setjmp(error.jumpbuffer);
                 }
                 
                 std::string error_message() const {
-                    return std::string(errormgr.error_message);
+                    return std::string(error.message);
                 }
             
         };
@@ -184,7 +187,7 @@ namespace im {
                 :adaptor(source)
                 {
                     jpeg_create_decompress(&info);
-                    info.err = &errormgr.pub;
+                    info.err = &error.mgr;
                     info.src = &adaptor.mgr;
                 }
             
@@ -227,7 +230,7 @@ namespace im {
                 :adaptor(sink)
                 {
                     jpeg_create_compress(&info);
-                    info.err = &errormgr.pub;
+                    info.err = &error.mgr;
                     info.dest = &adaptor.mgr;
                 }
             
