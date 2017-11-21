@@ -34,10 +34,6 @@ namespace im {
         const std::size_t buffer_size = JPEGFormat::options.buffer_size;
         using byte_ptr = std::unique_ptr<byte[]>;
         
-        /// forward-declare this one non-NOP function
-        /// whose pointer is referenced more than once:
-        boolean fill_input_buffer(j_decompress_ptr cinfo);
-        
         /// Adaptor-specific NOP functions:
         void NOP_SRC(j_decompress_ptr)  {}
         void NOP_DST(j_compress_ptr)    {}
@@ -58,17 +54,24 @@ namespace im {
                     mgr.next_input_byte     = buffer.get();
                     mgr.bytes_in_buffer     = 0;
                     mgr.init_source         = NOP_SRC;
-                    mgr.fill_input_buffer   = fill_input_buffer;
+                    mgr.fill_input_buffer   = [](j_decompress_ptr cinfo) {
+                        JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
+                        jpeg_source_mgr mgr = adaptor->mgr;
+                        mgr.next_input_byte = adaptor->buffer.get();
+                        mgr.bytes_in_buffer = adaptor->source->read(adaptor->buffer.get(),
+                                                                             buffer_size);
+                        return BOOLEAN_TRUE();
+                    };
                     
                     mgr.skip_input_data     = [](j_decompress_ptr cinfo, long num_bytes) {
                         if (num_bytes <= 0) { return; }
-                        JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
-                        while (num_bytes > long(adaptor->mgr.bytes_in_buffer)) {
-                            num_bytes -= adaptor->mgr.bytes_in_buffer;
-                            fill_input_buffer(cinfo);
+                        jpeg_source_mgr mgr = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src)->mgr;
+                        while (num_bytes > long(mgr.bytes_in_buffer)) {
+                            num_bytes -= mgr.bytes_in_buffer;
+                            mgr.fill_input_buffer(cinfo); /// calls lambda defined above
                         }
-                        adaptor->mgr.next_input_byte += num_bytes;
-                        adaptor->mgr.bytes_in_buffer -= num_bytes;
+                        mgr.next_input_byte += num_bytes;
+                        mgr.bytes_in_buffer -= num_bytes;
                     };
                     
                     mgr.resync_to_restart   = jpeg_resync_to_restart;
@@ -98,10 +101,11 @@ namespace im {
                     
                     mgr.empty_output_buffer = [](j_compress_ptr cinfo) {
                         JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
+                        jpeg_destination_mgr mgr = adaptor->mgr;
                         adaptor->sink->write(adaptor->buffer.get(),
                                              buffer_size);
-                        adaptor->mgr.next_output_byte = adaptor->buffer.get();
-                        adaptor->mgr.free_in_buffer = buffer_size;
+                        mgr.next_output_byte = adaptor->buffer.get();
+                        mgr.free_in_buffer = buffer_size;
                         return BOOLEAN_TRUE();
                     };
                     
@@ -116,14 +120,6 @@ namespace im {
             JPEGDestinationAdaptor(JPEGDestinationAdaptor const&) = delete;
             JPEGDestinationAdaptor(JPEGDestinationAdaptor&&) = delete;
         };
-        
-        /// definition for `fill_input_buffer(…)` as declared above:
-        boolean fill_input_buffer(j_decompress_ptr cinfo) {
-            JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
-            adaptor->mgr.next_input_byte = adaptor->buffer.get();
-            adaptor->mgr.bytes_in_buffer = adaptor->source->read(adaptor->buffer.get(), buffer_size);
-            return BOOLEAN_TRUE();
-        }
         
         /// function to match a J_COLOR_SPACE constant up (coarsely) to
         /// an image, per the number of color channels it has:
