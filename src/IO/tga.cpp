@@ -6,7 +6,6 @@
 #include <libimread/IO/tga.hh>
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
-#include <libimread/pixels.hh>
 
 namespace im {
     
