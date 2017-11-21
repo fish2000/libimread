@@ -56,259 +56,6 @@
 #include <array>
 #include <cassert>
 
-
-/*
-template <std::size_t Rank>
-class offset
-{
-public:
-    // constants and types
-    static constexpr std::size_t rank = Rank;
-    using reference              = ptrdiff_t&;
-    using const_reference        = const ptrdiff_t&;
-    using size_type              = std::size_t;
-    using value_type             = ptrdiff_t;
-
-    static_assert(Rank > 0, "Size of Rank must be greater than 0");
-
-    // construction
-    constexpr offset() noexcept;
-    template <std::size_t R = Rank, typename = std::enable_if_t<R == 1>>
-    constexpr offset(value_type v) noexcept;
-    constexpr offset(std::initializer_list<value_type> il);
-
-    // element access
-    constexpr reference       operator[](size_type n);
-    constexpr const_reference operator[](size_type n) const;
-
-    // arithmetic
-    constexpr offset& operator+=(const offset& rhs);
-    constexpr offset& operator-=(const offset& rhs);
-
-    template <std::size_t R = Rank, typename = std::enable_if_t<R == 1>>
-    constexpr offset& operator++();
-    template <std::size_t R = Rank, typename = std::enable_if_t<R == 1>>
-    constexpr offset  operator++(int);
-    template <std::size_t R = Rank, typename = std::enable_if_t<R == 1>>
-    constexpr offset& operator--();
-    template <std::size_t R = Rank, typename = std::enable_if_t<R == 1>>
-    constexpr offset  operator--(int);
-
-    constexpr offset  operator+() const noexcept;
-    constexpr offset  operator-() const;
-
-    constexpr offset& operator*=(value_type v);
-    constexpr offset& operator/=(value_type v);
-
-private:
-    std::array<value_type, rank> offset_ = {};
-};
-
-// offset equality
-template <std::size_t Rank>
-constexpr bool operator==(const offset<Rank>& lhs, const offset<Rank>& rhs) noexcept;
-template <std::size_t Rank>
-constexpr bool operator!=(const offset<Rank>& lhs, const offset<Rank>& rhs) noexcept;
-
-// offset arithmetic
-template <std::size_t Rank>
-constexpr offset<Rank> operator+(const offset<Rank>& lhs, const offset<Rank>& rhs);
-template <std::size_t Rank>
-constexpr offset<Rank> operator-(const offset<Rank>& lhs, const offset<Rank>& rhs);
-template <std::size_t Rank>
-constexpr offset<Rank> operator*(const offset<Rank>& lhs, ptrdiff_t v);
-template <std::size_t Rank>
-constexpr offset<Rank> operator*(ptrdiff_t v, const offset<Rank>& rhs);
-template <std::size_t Rank>
-constexpr offset<Rank> operator/(const offset<Rank>& lhs, ptrdiff_t v);
-
-
-template <std::size_t Rank>
-class bounds
-{
-public:
-    // constants and types
-    static constexpr std::size_t rank = Rank;
-    using reference              = ptrdiff_t&;
-    using const_reference        = const ptrdiff_t&;
-    using iterator               = bounds_iterator<Rank>;
-    using const_iterator         = bounds_iterator<Rank>;
-    using size_type              = std::size_t;
-    using value_type             = ptrdiff_t;
-
-    // construction
-    constexpr bounds() noexcept;
-    template <std::size_t R = Rank, typename = std::enable_if_t<R == 1>>
-    constexpr bounds(value_type v);
-    constexpr bounds(std::initializer_list<value_type> il);
-
-    // observers
-    constexpr size_type size() const noexcept;
-    constexpr bool      contains(const offset<Rank>& idx) const noexcept;
-
-    // iterators
-    const_iterator begin() const noexcept;
-    const_iterator end() const noexcept;
-
-    // element access
-    constexpr reference       operator[](size_type n);
-    constexpr const_reference operator[](size_type n) const;
-
-    // arithmetic
-    constexpr bounds& operator+=(const offset<Rank>& rhs);
-    constexpr bounds& operator-=(const offset<Rank>& rhs);
-
-    constexpr bounds& operator*=(value_type v);
-    constexpr bounds& operator/=(value_type v);
-
-private:
-    std::array<value_type, rank> bounds_ = {};
-};
-
-
-// bounds equality
-template <std::size_t Rank>
-constexpr bool operator==(const bounds<Rank>& lhs, const bounds<Rank>& rhs) noexcept;
-template <std::size_t Rank>
-constexpr bool operator!=(const bounds<Rank>& lhs, const bounds<Rank>& rhs) noexcept;
-
-// bounds arithmetic
-template <std::size_t Rank>
-constexpr bounds<Rank> operator+(const bounds<Rank>& lhs, const offset<Rank>& rhs);
-template <std::size_t Rank>
-constexpr bounds<Rank> operator+(const offset<Rank>& lhs, const bounds<Rank>& rhs);
-template <std::size_t Rank>
-constexpr bounds<Rank> operator-(const bounds<Rank>& lhs, const offset<Rank>& rhs);
-template <std::size_t Rank>
-constexpr bounds<Rank> operator*(const bounds<Rank>& lhs, ptrdiff_t v);
-template <std::size_t Rank>
-constexpr bounds<Rank> operator*(ptrdiff_t v, const bounds<Rank>& rhs);
-template <std::size_t Rank>
-constexpr bounds<Rank> operator/(const bounds<Rank>& lhs, ptrdiff_t v);
-
-
-template <std::size_t Rank>
-class bounds_iterator
-{
-public:
-    using iterator_category = unspecified;
-    using value_type        = offset<Rank>;
-    using difference_type   = ptrdiff_t;
-    using pointer           = unspecified;
-    using reference         = const offset<Rank>;
-
-    bounds_iterator& operator++();
-    bounds_iterator  operator++(int);
-    bounds_iterator& operator--();
-    bounds_iterator  operator--(int);
-
-    bounds_iterator  operator+(difference_type n) const;
-    bounds_iterator& operator+=(difference_type n);
-    bounds_iterator  operator-(difference_type n) const;
-    bounds_iterator& operator-=(difference_type n);
-
-    difference_type  operator-(const bounds_iterator& rhs) const;
-
-    reference operator*() const;
-    pointer   operator->() const;
-    reference operator[](difference_type n) const;
-};
-
-template <typename T, std::size_t Rank = 1>
-class array_view
-{
-public:
-    static constexpr std::size_t rank = Rank;
-    using offset_type            = offset<Rank>;
-    using bounds_type            = bounds<Rank>;
-    using size_type              = std::size_t;
-    using value_type             = T;
-    using pointer                = T*;
-    using reference              = T&;
-
-    constexpr array_view() noexcept;
-
-    template <typename Viewable>             // only if Rank == 1
-    constexpr array_view(Viewable&& vw);
-
-    template <typename U, std::size_t R = Rank>   // only if Rank == 1
-    constexpr array_view(const array_view<U, R>& rhs) noexcept;
-
-    template <std::size_t Extent>                 // only if Rank == 1
-    constexpr array_view(value_type (&arr)[Extent]) noexcept;
-
-    template <typename U>
-    constexpr array_view(const array_view<U, Rank>& rhs) noexcept;
-
-    template <typename Viewable>
-    constexpr array_view(Viewable&& vw, bounds_type bounds);
-
-    constexpr array_view(pointer ptr, bounds_type bounds);
-
-    // observers
-    constexpr bounds_type bounds() const noexcept;
-    constexpr size_type   size()   const noexcept;
-    constexpr offset_type stride() const noexcept;
-    constexpr pointer     data()   const noexcept;
-
-    constexpr reference operator[](const offset_type& idx) const;
-
-    // slicing and sectioning
-    template <std::size_t R = Rank>                // only if Rank > 1
-    constexpr array_view<T, Rank-1> operator[](ptrdiff_t slice) const;
-
-    constexpr strided_array_view<T, Rank>
-    section(const offset_type& origin, const bounds_type& section_bounds) const;
-
-    constexpr strided_array_view<T, Rank>
-    section(const offset_type& origin) const;
-};
-
-
-template <class T, std::size_t Rank = 1>
-class strided_array_view
-{
-public:
-    // constants and types
-    static constexpr std::size_t rank = Rank;
-    using offset_type            = offset<Rank>;
-    using bounds_type            = bounds<Rank>;
-    using size_type              = std::size_t;
-    using value_type             = T;
-    using pointer                = T*;
-    using reference              = T&;
-
-    // constructors, copy, and assignment
-    constexpr strided_array_view() noexcept;
-
-    template <typename U>
-    constexpr strided_array_view(const array_view<U, Rank>& rhs) noexcept;
-
-    template <typename U>
-    constexpr strided_array_view(const strided_array_view<U, Rank>& rhs) noexcept;
-
-    constexpr strided_array_view(pointer ptr, bounds_type bounds, offset_type stride);
-
-    // observers
-    constexpr bounds_type bounds() const noexcept;
-    constexpr size_type   size()   const noexcept;
-    constexpr offset_type stride() const noexcept;
-
-    // element access
-    constexpr reference operator[](const offset_type& idx) const;
-
-    // slicing and sectioning
-    template <std::size_t R = Rank>                // Only if Rank > 1
-    constexpr strided_array_view<T, Rank-1> operator[](ptrdiff_t slice) const;
-
-    constexpr strided_array_view<T, Rank>
-    section(const offset_type& origin, const bounds_type& section_bounds) const;
-
-    constexpr strided_array_view<T, Rank>
-    section(const offset_type& origin) const;
-};
-*/
-
 namespace av {
     
     template <std::size_t Rank>
@@ -393,7 +140,7 @@ namespace av {
         assert(il.size() == Rank);
         std::copy(il.begin(), il.end(), offset_.data());
     }
-
+    
     // arithmetic
     template <std::size_t Rank>
     constexpr offset<Rank>& offset<Rank>::operator+=(const offset& rhs) {
@@ -450,7 +197,7 @@ namespace av {
     constexpr offset<Rank> operator+(const offset<Rank>& lhs, const offset<Rank>& rhs) {
         return offset<Rank>{ lhs } += rhs;
     }
-
+    
     template <std::size_t Rank>
     constexpr offset<Rank> operator-(const offset<Rank>& lhs, const offset<Rank>& rhs) {
         return offset<Rank>{ lhs } -= rhs;
@@ -951,7 +698,7 @@ namespace av {
             pointer     data_;
             bounds_type bounds_;
     };
-
+    
     template <typename T, std::size_t Rank>
     constexpr typename array_view<T, Rank>::offset_type array_view<T, Rank>::stride() const
         noexcept {
@@ -962,7 +709,7 @@ namespace av {
         }
         return stride;
     }
-
+    
     template <class T, std::size_t Rank = 1>
     class strided_array_view {
     public:
