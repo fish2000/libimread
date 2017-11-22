@@ -100,6 +100,8 @@ namespace im {
                 :halide_image_t(b, name), Image(), Metadata(name)
                 {}
             
+            /// TODO: halide_buffer_t !
+            
             HybridImage(HybridImage const& other)
                 :halide_image_t(dynamic_cast<halide_image_t const&>(other))
                 ,Image(dynamic_cast<Image const&>(other))
