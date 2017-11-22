@@ -5,14 +5,16 @@
  * and array_view_][1] by Mendakiewicz & Sutter.  This implements the original
  * proposal [N3851][1] up to the last [revision 7][3].  As I understand it,
  * the proposal was with an aim for inclusion in C++17 although is no longer
- * under consideration in it's current form.  For later contributions, see
+ * under consideration in its current form.  For later contributions, see
  * the successive proposal [p0122r0][4] (and related [GSL][5] implementation),
  * and alternative proposals such as [P0546][6].
  * 
  * This implementation follows the original proposal by Mendakiewicz & Sutter
  * and subsequent revisions ([latest revision 7][7]). As noted in the proposal,
  * the proposal itself builds on previous work by Callahan, Levanoni and Sutter
- * for their work designing the original interfaces for C++ AMP.
+ * for their work designing the original interfaces for C++ AMP. Minor post-hoc
+ * [additions][8] by Alexander Böhn expand on, and slightly depart from, these
+ * design documents.
  * 
  * [1]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3851.pdf
  * [2]: https://msdn.microsoft.com/en-us/library/hh265137.aspx
@@ -21,6 +23,7 @@
  * [5]: https://github.com/Microsoft/GSL
  * [6]: https://github.com/kokkos/array_ref/blob/master/proposals/P0546.rst
  * [7]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4512.html
+ * [8]: https://git.io/vFNCY
  *
  * BSD 2-clause “Simplified” License
  * 
