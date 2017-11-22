@@ -131,6 +131,8 @@ namespace av {
         constexpr offset& operator*=(value_type v);
         constexpr offset& operator/=(value_type v);
         
+        constexpr offset transpose() const noexcept;
+        
         private:
             std::array<value_type, rank> offset_ = {};
     };
@@ -173,6 +175,15 @@ namespace av {
             elem /= v;
         }
         return *this;
+    }
+    
+    template <std::size_t Rank>
+    constexpr offset<Rank> offset<Rank>::transpose() const noexcept {
+        offset<Rank> transposed{ *this };
+        std::reverse_copy(std::begin(offset_),
+                          std::end(offset_),
+                          std::begin(transposed.offset_));
+        return transposed;
     }
     
     // Free functions
@@ -266,6 +277,8 @@ namespace av {
         constexpr bounds& operator*=(value_type v);
         constexpr bounds& operator/=(value_type v);
         
+        constexpr bounds transpose() const noexcept;
+        
         private:
             std::array<value_type, rank> bounds_ = {};
             void postcondition() {
@@ -300,6 +313,17 @@ namespace av {
         }
         return true;
     }
+    
+    template <std::size_t Rank>
+    constexpr bounds<Rank> bounds<Rank>::transpose() const noexcept {
+        bounds<Rank> transposed{ *this };
+        std::reverse_copy(std::begin(bounds_),
+                          std::end(bounds_),
+                          std::begin(transposed.bounds_));
+        postcondition();
+        return transposed;
+    }
+    
     
     // iterators
     // todo
@@ -718,23 +742,21 @@ namespace av {
     // template <std::size_t R, typename>
     constexpr array_view<T, Rank> array_view<T, Rank>::transpose() const
         noexcept {
-        std::size_t   R = Rank, idx{};
-        std::intptr_t permutation[Rank];
-        bounds_type   initial = bounds();
-        bounds_type   transposed = bounds();
+        // std::size_t   R = Rank, idx{};
+        // std::intptr_t permutation[Rank];
+        // bounds_type   initial = bounds();
+        bounds_type   transposed = bounds().transpose();
         
         /// We could substitute a custom “permutation” mapping here,
         /// via a tuple-ish argument; q.v. numpy array.transpose()
-        for (idx = 0; idx < R; ++idx) {
-            permutation[idx] = R - 1 - idx;
-        }
+        // for (idx = 0; idx < R; ++idx) {
+        //     permutation[idx] = R - 1 - idx;
+        // }
         
-        for (idx = 0; idx < R; ++idx) {
-            transposed[idx] = initial[permutation[idx]];
-        }
+        // for (idx = 0; idx < R; ++idx) {
+        //     transposed[idx] = initial[permutation[idx]];
+        // }
         
-        // array_view<T, Rank> transposed(*this, transposed);
-        // return transposed;
         return array_view<T, Rank>(*this, transposed);
     }
     

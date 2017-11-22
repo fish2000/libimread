@@ -475,4 +475,33 @@ namespace {
         
         for (auto& idx : sav.bounds()) { CHECK(0 == (sav[idx] % 3)); }
     }
+    
+    
+    TEST_CASE("[arrayview] Additional Tests: av::array_view::transpose() method",
+              "[arrayview][additional-tests][arrayview-transpose-method]")
+    {
+        int X = 12;
+        int Y = 8;
+        int Z = 6;
+        
+        std::vector<int> vec(X * Y * Z);
+        
+        av::bounds<3> extents = { X, Y, Z };
+        av::array_view<int, 3> view(vec, extents);
+        
+        av::bounds<3> transposed_extents = { Z, Y, X };
+        av::array_view<int, 3> transposed_view(vec, transposed_extents);
+        
+        // CHECK(view.transpose() == transposed_view);
+        CHECK(view.transpose().bounds() == transposed_extents);
+        
+        for (auto& idx : view.bounds()) {
+            // auto i = idx[0];
+            // auto j = idx[1];
+            // auto k = idx[2];
+            // av[idx] = i * j * k;
+        }
+        
+    }
+    
 } /// namespace (anon.)
