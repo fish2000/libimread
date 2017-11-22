@@ -506,6 +506,7 @@ namespace {
                                                     extents,
                                                     view.stride());
         
+        /// NOTE TO SELF: DOUBLE-CHECK THE FUCK OUT OF THIS
         av::bounds<3> transposed_extents = { Z, Y, X };
         av::array_view<int, 3> transposed_view(vec, transposed_extents);
         av::strided_array_view<int, 3> transposed_strided_view(vec.data(),
