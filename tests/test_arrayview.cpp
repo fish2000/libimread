@@ -15,28 +15,6 @@
 
 namespace {
     
-    template <std::size_t Rank>
-    std::ostream& operator<<(std::ostream& os, av::offset<Rank> const& off) {
-        /// av::offset<…> output stream print helper,
-        /// from original testsuite
-        os << "(" << off[0];
-        for (std::size_t i = 1; i < off.rank; ++i) {
-            os << "," << off[i];
-        }
-        return os << ")";
-    }
-    
-    template <std::size_t Rank>
-    std::ostream& operator<<(std::ostream& os, av::bounds<Rank> const& bnd) {
-        /// av::offset<…> output stream print helper,
-        /// from original testsuite
-        os << "{" << bnd[0];
-        for (std::size_t i = 1; i < bnd.rank; ++i) {
-            os << "," << bnd[i];
-        }
-        return os << "}";
-    }
-    
     TEST_CASE("[arrayview] Bundled Tests: av::offset initialization",
               "[arrayview][bundled-tests][offset-initialization]")
     {
@@ -536,7 +514,7 @@ namespace {
         
         /// verify that transposed bounds matches expectations:
         CHECK(strided_view.transpose().bounds() == transposed_extents);
-        // CHECK(strided_view.transpose().stride() == transposed_strided_view.stride());
+        CHECK(strided_view.transpose().stride() == transposed_strided_view.stride().transpose());
         
         /// verify that view value for a given bounds index matches
         /// the value of the transposed view at the transposed bounds index:

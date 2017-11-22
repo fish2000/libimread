@@ -52,6 +52,7 @@
 #pragma once
 
 #include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <array>
 #include <cassert>
@@ -826,5 +827,28 @@ namespace av {
             bounds_type bounds_;
             offset_type stride_;
     };
-
+    
+    template <std::size_t Rank>
+    std::ostream& operator<<(std::ostream& os, av::offset<Rank> const& off) {
+        /// av::offset<…> output stream print helper
+        /// reproduced verbatim, more or less, from original testsuite
+        os << "(" << off[0];
+        for (std::size_t i = 1; i < off.rank; ++i) {
+            os << "," << off[i];
+        }
+        return os << ")";
+    }
+    
+    template <std::size_t Rank>
+    std::ostream& operator<<(std::ostream& os, av::bounds<Rank> const& bnd) {
+        /// av::bounds<…> output stream print helper
+        /// adapted from av::offset<…> stream print helper
+        /// from original testsuite
+        os << "{" << bnd[0];
+        for (std::size_t i = 1; i < bnd.rank; ++i) {
+            os << "," << bnd[i];
+        }
+        return os << "}";
+    }
+    
 } // namespace av
