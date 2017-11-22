@@ -320,7 +320,7 @@ namespace av {
         std::reverse_copy(std::begin(bounds_),
                           std::end(bounds_),
                           std::begin(transposed.bounds_));
-        postcondition();
+        transposed.postcondition();
         return transposed;
     }
     
@@ -719,8 +719,9 @@ namespace av {
             return strided_array_view<T, Rank>(&(*this)[origin], bounds() - origin, stride());
         }
         
-        // template <std::size_t R = Rank, typename = std::enable_if_t<R >= 2>>
-        constexpr array_view<T, Rank> transpose() const noexcept;
+        constexpr array_view<T, Rank> transpose() const noexcept {
+            return array_view<T, Rank>(*this, bounds().transpose()); 
+        }
         
         private:
             pointer     data_;
@@ -736,28 +737,6 @@ namespace av {
             stride[dim] = stride[dim + 1] * bounds()[dim + 1];
         }
         return stride;
-    }
-    
-    template <typename T, std::size_t Rank>
-    // template <std::size_t R, typename>
-    constexpr array_view<T, Rank> array_view<T, Rank>::transpose() const
-        noexcept {
-        // std::size_t   R = Rank, idx{};
-        // std::intptr_t permutation[Rank];
-        // bounds_type   initial = bounds();
-        bounds_type   transposed = bounds().transpose();
-        
-        /// We could substitute a custom “permutation” mapping here,
-        /// via a tuple-ish argument; q.v. numpy array.transpose()
-        // for (idx = 0; idx < R; ++idx) {
-        //     permutation[idx] = R - 1 - idx;
-        // }
-        
-        // for (idx = 0; idx < R; ++idx) {
-        //     transposed[idx] = initial[permutation[idx]];
-        // }
-        
-        return array_view<T, Rank>(*this, transposed);
     }
     
     template <class T, std::size_t Rank = 1>
@@ -837,10 +816,15 @@ namespace av {
             return strided_array_view<T, Rank>(&(*this)[origin], bounds() - origin, stride());
         }
         
-    private:
-        pointer     data_;
-        bounds_type bounds_;
-        offset_type stride_;
+        constexpr strided_array_view<T, Rank> transpose() const noexcept {
+            return strided_array_view<T, Rank>(data_, bounds().transpose(),
+                                                      stride().transpose()); 
+        }
+        
+        private:
+            pointer     data_;
+            bounds_type bounds_;
+            offset_type stride_;
     };
 
 } // namespace av

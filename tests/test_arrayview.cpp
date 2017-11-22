@@ -26,6 +26,17 @@ namespace {
         return os << ")";
     }
     
+    template <std::size_t Rank>
+    std::ostream& operator<<(std::ostream& os, av::bounds<Rank> const& bnd) {
+        /// av::offset<…> output stream print helper,
+        /// from original testsuite
+        os << "{" << bnd[0];
+        for (std::size_t i = 1; i < bnd.rank; ++i) {
+            os << "," << bnd[i];
+        }
+        return os << "}";
+    }
+    
     TEST_CASE("[arrayview] Bundled Tests: av::offset initialization",
               "[arrayview][bundled-tests][offset-initialization]")
     {
@@ -476,7 +487,6 @@ namespace {
         for (auto& idx : sav.bounds()) { CHECK(0 == (sav[idx] % 3)); }
     }
     
-    
     TEST_CASE("[arrayview] Additional Tests: av::array_view::transpose() method",
               "[arrayview][additional-tests][arrayview-transpose-method]")
     {
@@ -492,14 +502,46 @@ namespace {
         av::bounds<3> transposed_extents = { Z, Y, X };
         av::array_view<int, 3> transposed_view(vec, transposed_extents);
         
-        // CHECK(view.transpose() == transposed_view);
+        /// verify that transposed bounds matches expectations:
         CHECK(view.transpose().bounds() == transposed_extents);
         
+        /// verify that view value for a given bounds index matches
+        /// the value of the transposed view at the transposed bounds index:
         for (auto& idx : view.bounds()) {
-            // auto i = idx[0];
-            // auto j = idx[1];
-            // auto k = idx[2];
-            // av[idx] = i * j * k;
+            CHECK(view[idx] == transposed_view[idx.transpose()]);
+        }
+        
+    }
+    
+    TEST_CASE("[arrayview] Additional Tests: av::strided_array_view::transpose() method",
+              "[arrayview][additional-tests][strided-arrayview-transpose-method]")
+    {
+        int X = 12;
+        int Y = 8;
+        int Z = 6;
+        
+        std::vector<int> vec(X * Y * Z);
+        
+        av::bounds<3> extents = { X, Y, Z };
+        av::array_view<int, 3> view(vec, extents);
+        av::strided_array_view<int, 3> strided_view(vec.data(),
+                                                    extents,
+                                                    view.stride());
+        
+        av::bounds<3> transposed_extents = { Z, Y, X };
+        av::array_view<int, 3> transposed_view(vec, transposed_extents);
+        av::strided_array_view<int, 3> transposed_strided_view(vec.data(),
+                                                               transposed_extents,
+                                                               transposed_view.stride());
+        
+        /// verify that transposed bounds matches expectations:
+        CHECK(strided_view.transpose().bounds() == transposed_extents);
+        // CHECK(strided_view.transpose().stride() == transposed_strided_view.stride());
+        
+        /// verify that view value for a given bounds index matches
+        /// the value of the transposed view at the transposed bounds index:
+        for (auto& idx : strided_view.bounds()) {
+            CHECK(strided_view[idx] == transposed_strided_view[idx.transpose()]);
         }
         
     }
