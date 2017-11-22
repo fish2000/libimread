@@ -15,24 +15,17 @@
 namespace im {
     
     /// forward-declare class Histogram:
-    class Histogram;
+    // class Histogram;
+    
+    namespace detail {
+        static constexpr std::size_t kHistogramSize = UCHAR_MAX + 1;
+    }
     
     class Image {
         
         public:
             using size_type     = std::ptrdiff_t;
             using value_type    = byte;
-        
-        public:
-            using unique_image_t = std::unique_ptr<Image>;
-            using shared_image_t = std::shared_ptr<Image>;
-            using weak_image_t   = std::weak_ptr<Image>;
-            using image_ptr_t    = std::add_pointer_t<Image>;
-            
-            using const_unique_image_t = std::unique_ptr<Image const>;
-            using const_shared_image_t = std::shared_ptr<Image const>;
-            using const_weak_image_t   = std::weak_ptr<Image const>;
-            using const_image_ptr_t    = std::add_pointer_t<Image const>;
             
         public:
             virtual ~Image();
@@ -51,26 +44,6 @@ namespace im {
             virtual int min(int) const;
             virtual bool is_signed() const = 0;
             virtual bool is_floating_point() const = 0;
-            
-        public:
-            virtual int dim_or(int dimension, int default_value = 1) const;
-            virtual int stride_or(int dimension, int default_value = 1) const;
-            virtual int min_or(int dimension, int default_value = 0) const;
-            
-        public:
-            virtual int width() const;
-            virtual int height() const;
-            virtual int planes() const;
-            virtual int size() const;
-            virtual int left() const;
-            virtual int right() const;
-            virtual int top() const;
-            virtual int bottom() const;
-            
-        public:
-            virtual Histogram histogram() const;
-            virtual float entropy() const;
-            virtual int otsu() const;
             
         public:
             template <typename T> inline
@@ -93,6 +66,50 @@ namespace im {
                                                     { X,         Y,         Z         },
                                                     { stride(0), stride(1), stride(2) });
             }
+            
+        public:
+            int dim_or(int dimension, int default_value = 1) const;
+            int stride_or(int dimension, int default_value = 1) const;
+            int min_or(int dimension, int default_value = 0) const;
+            
+        public:
+            virtual int width() const;
+            virtual int height() const;
+            virtual int planes() const;
+            virtual int size() const;
+            
+        public:
+            int left() const;
+            int right() const;
+            int top() const;
+            int bottom() const;
+        
+        protected:
+            
+            class ChannelHistogram {
+                
+                public:
+                    ChannelHistogram()
+                        :internal(0.00, detail::kHistogramSize)
+                        {}
+                
+                    float entropy();
+                    int otsu();
+                
+                protected:
+                    std::vector<double> internal;
+                    bool calculated = false;
+                
+            };
+            
+        // protected:
+        //     std::set<std::string> channels;
+        //     std::map<std::string, Histogram> histograms;
+            
+        public:
+            // Histogram histogram() const;
+            float entropy() const;
+            int otsu() const;
         
         public:
             template <typename T> inline
@@ -119,6 +136,9 @@ namespace im {
                 const int h = dim(1);
                 const int siz = w * h;
                 view_t viewer = view<T>();
+                
+                /// TODO: Do not fill plane vector
+                /// TODO: arrayview transpose?
                 
                 /// fill plane vector
                 planevec_t out;

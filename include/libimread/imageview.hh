@@ -26,24 +26,14 @@ namespace im {
             using value_type    = byte;
         
         public:
-            using unique_image_t = std::unique_ptr<Image>;
-            using shared_image_t = std::shared_ptr<Image>;
-            using weak_image_t   = std::weak_ptr<Image>;
             using image_ptr_t    = std::add_pointer_t<Image>;
             
-            using const_unique_image_t = std::unique_ptr<Image const>;
-            using const_shared_image_t = std::shared_ptr<Image const>;
-            using const_weak_image_t   = std::weak_ptr<Image const>;
-            using const_image_ptr_t    = std::add_pointer_t<Image const>;
-            
+        public:
             using shared_imageview_t = std::shared_ptr<ImageView>;
             using weak_imageview_t   = std::weak_ptr<ImageView>;
             using imageview_ptr_t    = std::add_pointer_t<ImageView>;
             
-            using shared_histogram_t = std::shared_ptr<Histogram>;
-            using weak_histogram_t   = std::weak_ptr<Histogram>;
-            using histogram_ptr_t    = std::add_pointer_t<Histogram>;
-            
+        public:
             ImageView(ImageView const& other);
             ImageView(ImageView&& other) noexcept;
             explicit ImageView(Image* image);
@@ -123,8 +113,9 @@ namespace im {
             friend void swap(ImageView& lhs, ImageView& rhs);
             
         protected:
-            
             Image* source;
+            
+        private:
             ImageView(void);
     };
     

@@ -80,9 +80,9 @@ namespace im {
         return min(1) + dim(1) - 1;
     }
     
-    Histogram Image::histogram() const {
-        return Histogram(this);
-    }
+    // Histogram Image::histogram() const {
+    //     return Histogram(this);
+    // }
     
     float Image::entropy() const {
         Histogram histo(this);
