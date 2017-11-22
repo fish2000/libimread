@@ -106,6 +106,7 @@ namespace im {
                 return rows;
             }
             
+        public:
             template <typename T, typename U = value_type> inline
             std::vector<T> plane(int idx) const {
                 /// types
@@ -130,6 +131,7 @@ namespace im {
                 return out;
             }
             
+        public:
             template <typename T, typename U = value_type> inline
             std::vector<std::vector<T>> allplanes(int lastplane = 255) const {
                 using planevec_t = std::vector<T>;
