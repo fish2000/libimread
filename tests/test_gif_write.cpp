@@ -107,7 +107,6 @@ namespace {
             CHECK(first_hybrid.ndims()                  == second_hybrid.ndims());
             CHECK(first_hybrid.is_signed()              == second_hybrid.is_signed());
             CHECK(first_hybrid.is_floating_point()      == second_hybrid.is_floating_point());
-            CHECK(first_hybrid.rowp_stride()            == second_hybrid.rowp_stride());
             CHECK(first_hybrid.size()                   == second_hybrid.size());
             
             /// N.B. these fail to compile because of overload-resolution errors on the methods:

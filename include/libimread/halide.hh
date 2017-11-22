@@ -65,55 +65,71 @@ namespace im {
         
     } /* namespace detail */
     
+#define CALCULATE_ROWP_STRIDE() (halide_image_t::channels() == 1 ? 0 : static_cast<off_t>(halide_image_t::stride(1)))
+    
     template <typename T>
     using HalImage = Halide::Buffer<std::decay_t<T>>;
     
     template <typename pT,
               typename hT = HalImage<pT>>
-    class HybridImage : public hT, public Image, public Metadata {
+    class HybridImage final : public hT, public Image, public Metadata {
         
         public:
             using pixel_t = pT;
             using halide_image_t = hT;
             
+        public:
             HybridImage()
                 :halide_image_t(), Image(), Metadata()
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
             HybridImage(int x, int y, int z, int w, std::string const& name="")
                 :halide_image_t(x, y, z, w), Image(), Metadata(name)
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
             HybridImage(int x, int y, int z, std::string const& name="")
                 :halide_image_t(x, y, z), Image(), Metadata(name)
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
             HybridImage(int x, int y, std::string const& name="")
                 :halide_image_t(x, y), Image(), Metadata(name)
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
             HybridImage(int x, std::string const& name="")
                 :halide_image_t(x), Image(), Metadata(name)
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
             HybridImage(buffer_t const* b, std::string const& name="")
                 :halide_image_t(b, name), Image(), Metadata(name)
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
             /// TODO: halide_buffer_t !
             
+        public:
+            /// copy constructor
             HybridImage(HybridImage const& other)
                 :halide_image_t(dynamic_cast<halide_image_t const&>(other))
                 ,Image(dynamic_cast<Image const&>(other))
                 ,Metadata(dynamic_cast<Metadata const&>(other))
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
+        public:
+            /// move constructor
             HybridImage(HybridImage&& other) noexcept
                 :halide_image_t(dynamic_cast<halide_image_t&&>(other))
                 ,Image(dynamic_cast<Image&&>(other))
                 ,Metadata(dynamic_cast<Metadata&&>(other))
+                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
                 {}
             
+        public:
             using halide_image_t::operator();
             using halide_image_t::dimensions;
             using halide_image_t::extent;
@@ -122,12 +138,15 @@ namespace im {
             using halide_image_t::data;
             using halide_image_t::type;
             
+        public:
             virtual ~HybridImage() {}
             
+        public:
             Halide::Type type() const {
                 return halide_image_t::type();
             }
             
+        public:
             virtual int nbits() const override {
                 return sizeof(pT) * 8;
             }
@@ -160,18 +179,18 @@ namespace im {
                 return std::is_floating_point<pT>::value;
             }
             
-            inline off_t rowp_stride() const {
-                return halide_image_t::channels() == 1 ? 0 : off_t(halide_image_t::stride(1));
-            }
-            
-            virtual void* rowp(int r) const override {
+            virtual void* rowp(int row_idx) const override {
                 /// WARNING: FREAKY POINTERMATH FOLLOWS
-                pT* host = (pT*)halide_image_t::data();
-                host += off_t(r * rowp_stride());
-                return static_cast<void*>(host);
+                pixel_t* pointer = (pixel_t*)halide_image_t::data() +
+                                   static_cast<off_t>(row_idx * rowp_stride);
+                return static_cast<void*>(pointer);
             }
             
+        protected:
+            off_t rowp_stride;
     };
+    
+#undef CALCULATE_ROWP_STRIDE
     
 #define xWIDTH d1
 #define xHEIGHT d0
