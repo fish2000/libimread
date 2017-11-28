@@ -15,10 +15,6 @@ namespace im {
         return rowp(0);
     }
     
-    // byte* Image::data() const {
-    //     return static_cast<byte*>(rowp(0));
-    // }
-    
     int Image::nbytes() const {
         const int bits = nbits();
         return (bits / 8) + bool(bits % 8);

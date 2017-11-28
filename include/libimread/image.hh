@@ -33,7 +33,6 @@ namespace im {
         public:
             virtual void* rowp(int r) const = 0;
             virtual void* rowp() const;
-            // virtual byte* data() const;
             virtual int nbits() const = 0;
             
         public:
