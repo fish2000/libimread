@@ -724,7 +724,7 @@ namespace av {
         }
         
         constexpr array_view<T, Rank> transpose() const noexcept {
-            return array_view<T, Rank>(*this, bounds().transpose()); 
+            return array_view<T, Rank>(*this, bounds_.transpose()); 
         }
         
         private:
@@ -821,8 +821,8 @@ namespace av {
         }
         
         constexpr strided_array_view<T, Rank> transpose() const noexcept {
-            return strided_array_view<T, Rank>(data_, bounds().transpose(),
-                                                      stride().transpose()); 
+            return strided_array_view<T, Rank>(data_, bounds_.transpose(),
+                                                      stride_.transpose()); 
         }
         
         private:
