@@ -18,6 +18,9 @@ option(IM_COLOR_TRACE       "Use ANSI color in debug and error trace output"    
 option(IM_VERBOSE           "Print (highly nerd-oriented) verbose debug output" ON)
 option(IM_TERMINATOR        "Use a libunwind-based termination handler"         ON)
 
+# option(IM_LLVM_DIR          "Path to LLVM config files"                         "/usr/local/opt/llvm/lib/cmake/llvm")
+
+unset(IM_CLANG_RUNTIME_HEADERS CACHE)
 unset(HAVE_AUTOFS_NOWAIT CACHE)
 unset(HAVE_AUTOFS_NOTRIGGER CACHE)
 
@@ -60,14 +63,24 @@ set(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
                               $ENV{LD_LIBRARY_PATH}
                               /usr/lib/system)
 
+if(NOT DEFINED IM_LLVM_DIR)
+    set(IM_LLVM_DIR "/usr/local/opt/llvm/lib/cmake/llvm")
+endif()
+message(STATUS "LLVM Configuration Path: ${IM_LLVM_DIR}")
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+                      ${IM_LLVM_DIR})
+
 # Include the library build configuration. This will also include the custom
 # macro defined for the project.
 include(build_config)
 
+# deal with LLVM:
+include(LLVMConfiguration)
+
 # Include the HalideGenerator.cmake library -- exposing the cmake function
 # halide_add_generator_dependency() allowing Halide generator use in-project.
-include(HalideProject)
-include(HalideGenerator)
+# include(HalideProject)
+# include(HalideGenerator)
 
 # Include the ansi_message(…) function, for color terminal output.
 include(ANSIMessage)
@@ -171,6 +184,7 @@ pkg_check_modules(YAMLCPP REQUIRED yaml-cpp)
 include_directories(${${PROJECT_NAME}_include_dir})     # libimread/include/ (from a find_path() in libimreadConfig.cmake)
 include_directories(${${PROJECT_NAME}_include_dir}/..)  # parent directory of libimread/include/
 include_directories("${CMAKE_BINARY_DIR}/include")      # generated headers e.g. “libimread.hpp” wind up here
+# include_directories("${IM_CLANG_RUNTIME_HEADERS}")      # clang headers
 
 # Include the `deps` library `include` directories:
 include_directories("${CROSSGUID_DIR}")
@@ -182,6 +196,7 @@ include_directories("${INICPP_DIR}/include")
 # include_directories("${LRUCACHE11_DIR}")
 include_directories("${IOD_DIR}")
 include_directories("${SG14_DIR}")
+
 
 # Ugh
 link_directories(/usr/lib)
@@ -298,10 +313,37 @@ set(IM_DYLIB_SUFFIX             ${CMAKE_SHARED_LIBRARY_SUFFIX}
                                 CACHE STRING "Dynamic library suffix")
 
 # set stuff from cache
-set(IM_HAVE_STRINGVIEW_HH       ${HAVE_STRINGVIEW_HH} CACHE BOOL "Is std::string_vew available?")
-set(IM_HAVE_SYS_SENDFILE_H      ${HAVE_SYS_SENDFILE_H} CACHE BOOL "Is sys/sendfile.h available?")
-set(IM_HAVE_AUTOFS_NOWAIT       ${HAVE_AUTOFS_NOWAIT} CACHE BOOL "Is /dev/autofs_nowait available?")
-set(IM_HAVE_AUTOFS_NOTRIGGER    ${HAVE_AUTOFS_NOTRIGGER} CACHE BOOL "Is /dev/autofs_notrigger available?")
+set(IM_HAVE_STRINGVIEW_HH               ${HAVE_STRINGVIEW_HH} CACHE BOOL "Is std::string_vew available?")
+set(IM_HAVE_EXPERIMENTAL_STRINGVIEW_HH  ${IM_HAVE_EXPERIMENTAL_STRINGVIEW_HH} CACHE BOOL "Is std::experimental::string_vew available?")
+set(IM_HAVE_SYS_SENDFILE_H              ${HAVE_SYS_SENDFILE_H} CACHE BOOL "Is sys/sendfile.h available?")
+
+set(IM_HAVE_X86INTRIN_H                 ${HAVE_X86INTRIN_H} CACHE BOOL "Is an X86 intrinsics header available?")
+set(IM_HAVE_IMMINTRIN_H                 ${HAVE_IMMINTRIN_H} CACHE BOOL "Is an Intel-ISA intrinsics header available?")
+
+if(HAVE_IMMINTRIN_H)
+    if(HAVE_X86INTRIN_H)
+        find_path(INTRINSICS_HEADERS NAME x86intrin.h PATHS "${IM_CLANG_RUNTIME_HEADERS}"
+                                                            "${${PROJECT_NAME}_include_dir}"
+                                                            "${${PROJECT_NAME}_include_dir}/..")
+        set(IM_INTRINSICS_HEADER "${INTRINSICS_HEADERS}/x86intrin.h" CACHE STRING "Path to intrinsics header (if available)")
+        else()
+        find_path(INTRINSICS_HEADERS NAME immintrin.h PATHS "${IM_CLANG_RUNTIME_HEADERS}"
+                                                            "${${PROJECT_NAME}_include_dir}"
+                                                            "${${PROJECT_NAME}_include_dir}/..")
+        set(IM_INTRINSICS_HEADER "${INTRINSICS_HEADERS}/immintrin.h" CACHE STRING "Path to intrinsics header (if available)")
+    endif()
+else()
+    if(HAVE_X86INTRIN_H)
+        find_path(INTRINSICS_HEADERS NAME x86intrin.h PATHS "${IM_CLANG_RUNTIME_HEADERS}"
+                                                            "${${PROJECT_NAME}_include_dir}"
+                                                            "${${PROJECT_NAME}_include_dir}/..")
+        set(IM_INTRINSICS_HEADER "${INTRINSICS_HEADERS}/x86intrin.h" CACHE STRING "Path to intrinsics header (if available)")
+    endif()
+endif()
+
+
+set(IM_HAVE_AUTOFS_NOWAIT               ${HAVE_AUTOFS_NOWAIT} CACHE BOOL "Is /dev/autofs_nowait available?")
+set(IM_HAVE_AUTOFS_NOTRIGGER            ${HAVE_AUTOFS_NOTRIGGER} CACHE BOOL "Is /dev/autofs_notrigger available?")
 
 # set(IMREAD_FLAGS "")
 # GET_COMPILER_FLAGS(imread_shared IMREAD_FLAGS)
@@ -311,6 +353,10 @@ ansi_message(STATUS "Compile-Time System Information:")
 
 ansi_message(STATUS "IM_HAVE_STRINGVIEW_HH = ${IM_HAVE_STRINGVIEW_HH}")
 ansi_message(STATUS "IM_HAVE_SYS_SENDFILE_H = ${IM_HAVE_SYS_SENDFILE_H}")
+ansi_message(STATUS "IM_HAVE_X86INTRIN_H = ${IM_HAVE_X86INTRIN_H}")
+ansi_message(STATUS "IM_HAVE_IMMINTRIN_H = ${IM_HAVE_IMMINTRIN_H}")
+# ansi_message(STATUS "INTRINSICS_HEADERS = ${INTRINSICS_HEADERS}")
+ansi_message(STATUS "IM_INTRINSICS_HEADER = ${IM_INTRINSICS_HEADER}")
 ansi_message(STATUS "IM_HAVE_AUTOFS_NOWAIT = ${IM_HAVE_AUTOFS_NOWAIT}")
 ansi_message(STATUS "IM_HAVE_AUTOFS_NOTRIGGER = ${IM_HAVE_AUTOFS_NOTRIGGER}")
 
@@ -320,6 +366,10 @@ ansi_message(STATUS "Compile-Time Configuration Settings:")
 ansi_message(STATUS "IM_VERSION = ${IM_VERSION}")
 ansi_message(STATUS "IM_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 ansi_message(STATUS "IM_CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+
+ansi_message(STATUS "IM_LLVM_DIR = ${IM_LLVM_DIR}")
+ansi_message(STATUS "IM_CLANG_RUNTIME_HEADERS = ${IM_CLANG_RUNTIME_HEADERS}")
+
 # ansi_message(STATUS "IMREAD_FLAGS = ${IMREAD_FLAGS}")
 ansi_message(STATUS "IM_COMPILE_OPTIONS = ${IM_COMPILE_OPTIONS}")
 ansi_message(STATUS "IM_COMPILE_FLAGS = ${IM_COMPILE_FLAGS}")

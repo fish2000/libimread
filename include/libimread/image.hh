@@ -11,6 +11,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/arrayview.hh>
+// #include IM_INTRINSICS_HEADER
 
 namespace im {
     

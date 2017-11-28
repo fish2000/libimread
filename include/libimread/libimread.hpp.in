@@ -21,6 +21,8 @@
 #define IM_LINK_FLAGS                   "@IM_LINK_FLAGS@"
 #define IM_DYLIB_SUFFIX                 "@IM_DYLIB_SUFFIX@"
 
+#cmakedefine IM_INTRINSICS_HEADER       "@IM_INTRINSICS_HEADER@"
+
 #cmakedefine IM_COLOR_TRACE             1
 #cmakedefine IM_VERBOSE                 1
 #cmakedefine IM_HAVE_STRINGVIEW_HH      1
