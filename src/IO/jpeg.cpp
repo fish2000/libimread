@@ -37,15 +37,17 @@ namespace im {
         const std::size_t kBufferSize = JPEGFormat::options.buffer_size;
         const std::size_t kDefaultQuality = static_cast<std::size_t>(JPEGFormat::options.writeopts.quality * 100);
         
-        /// Adaptor-specific NOP functions:
-        void NOP_SRC(j_decompress_ptr)  {}
-        void NOP_DST(j_compress_ptr)    {}
+        /// Adaptor-specific NOP function types:
+        using NOP_SRC = std::add_pointer_t<void(j_decompress_ptr)>;
+        using NOP_DST = std::add_pointer_t<void(j_compress_ptr)>;
         
         /// RAII-ish wrapper for holding the `jpeg_source_mgr` structure,
         /// initializing it with functions binding it to an instance of
         /// `im::byte_source` that, in turn, reads from an underlying
         /// byte array (both of which are allocated as member instances).
         struct JPEGSourceAdaptor {
+            constexpr static const NOP_SRC NOP = [](j_decompress_ptr) -> void {};
+            
             jpeg_source_mgr mgr;
             byte_source* source;
             byte_ptr buffer;
@@ -56,7 +58,7 @@ namespace im {
                 {
                     mgr.next_input_byte     = buffer.get();
                     mgr.bytes_in_buffer     = 0;
-                    mgr.init_source         = NOP_SRC;
+                    mgr.init_source         = NOP;
                     mgr.fill_input_buffer   = [](j_decompress_ptr cinfo) -> boolean {
                         JPEGSourceAdaptor* adaptor = reinterpret_cast<JPEGSourceAdaptor*>(cinfo->src);
                         jpeg_source_mgr& mgr = adaptor->mgr;
@@ -78,7 +80,7 @@ namespace im {
                     };
                     
                     mgr.resync_to_restart   = jpeg_resync_to_restart;
-                    mgr.term_source         = NOP_SRC;
+                    mgr.term_source         = NOP;
                 }
             
             JPEGSourceAdaptor(JPEGSourceAdaptor const&) = delete;
@@ -90,6 +92,8 @@ namespace im {
         /// `im::byte_sink` that, in turn, writes to an underlying
         /// byte array (both of which are allocated as member instances).
         struct JPEGDestinationAdaptor {
+            constexpr static const NOP_DST NOP = [](j_compress_ptr) -> void {};
+            
             jpeg_destination_mgr mgr;
             byte_sink* sink;
             byte_ptr buffer;
@@ -100,7 +104,7 @@ namespace im {
                 {
                     mgr.next_output_byte    = buffer.get();
                     mgr.free_in_buffer      = kBufferSize;
-                    mgr.init_destination    = NOP_DST;
+                    mgr.init_destination    = NOP;
                     
                     mgr.empty_output_buffer = [](j_compress_ptr cinfo) -> boolean {
                         JPEGDestinationAdaptor* adaptor = reinterpret_cast<JPEGDestinationAdaptor*>(cinfo->dest);
@@ -126,16 +130,31 @@ namespace im {
         
         /// function to match a J_COLOR_SPACE constant up (coarsely) to
         /// an image, per the number of color channels it has:
-        inline J_COLOR_SPACE color_space(int components) {
+        inline J_COLOR_SPACE color_space_for_components(int components) {
             switch (components) {
                 case 3: return JCS_RGB;
                 case 1: return JCS_GRAYSCALE;
                 case 4: return JCS_CMYK;
                 default: {
-                    imread_raise(CannotReadError,
-                        "\tim::(anon)::color_space() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
-                     FF("\tim::(anon)::color_space() got:    `components` = (int){ %i }", components),
-                        "\tim::(anon)::color_space() needs:  `components` = (int){ 1, 3, 4 }");
+                    imread_raise(JPEGIOError,
+                        "\tim::(anon)::color_space_for_components() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
+                     FF("\tim::(anon)::color_space_for_components() got:    `components` = (int){ %i }", components),
+                        "\tim::(anon)::color_space_for_components() needs:  `components` = (int){ 1, 3, 4 }");
+                }
+            }
+        }
+        
+        /// ... basically, the inverse of the 
+        inline int components_for_color_space(J_COLOR_SPACE color_space) {
+            switch (color_space) {
+                case JCS_RGB: return 3;
+                case JCS_GRAYSCALE: return 1;
+                case JCS_CMYK: return 4;
+                default: {
+                    imread_raise(JPEGIOError,
+                        "\tim::(anon)::components_for_color_space() says:   \"UNSUPPORTED COLOR SPACE CONSTANT\"",
+                     FF("\tim::(anon)::components_for_color_space() got:    `color_space` = (J_COLOR_SPACE){ %i }", color_space),
+                        "\tim::(anon)::components_for_color_space() needs:  `color_space` = (J_COLOR_SPACE)JCS_{ RGB, GRAYSCALE, CMYK }");
                 }
             }
         }
@@ -205,21 +224,40 @@ namespace im {
                 jpeg_start_decompress(&info);
             }
             
-            int height() const      { return info.output_height; }
-            int width() const       { return info.output_width; }
-            int components() const  { return info.output_components; }
-            int scanline() const    { return info.output_scanline; }
+            int height() const                  { return info.output_height; }
+            int width() const                   { return info.output_width; }
+            J_COLOR_SPACE color_space() const   { return color_space_for_components(info.output_components); }
+            int components() const              { return info.output_components; }
+            int scanline() const                { return info.output_scanline; }
             
-            JSAMPARRAY allocate_samples(int width = 0,
-                                        int depth = 0,
+            JSAMPARRAY allocate_samples(int components = 0,
+                                        int width = 0,
                                         int height = 1) {
+                /// blow up for invalid heights:
+                if (height < 1) {
+                    imread_raise(JPEGIOError,
+                       "\tim::(anon)::JPEGDecompressor::allocate_samples() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
+                    FF("\tim::(anon)::JPEGDecompressor::allocate_samples() got:    `height` = (int){ %i }", height),
+                       "\tim::(anon)::JPEGDecompressor::allocate_samples() needs:  `height` > (int){ 0 }");
+                }
                 /// default to values read from JPEG header:
-                if (!width) { width = info.output_width;      }
-                if (!depth) { depth = info.output_components; }
+                if (!width)      { width = info.output_width;      }
+                if (!components) { components = info.output_components; }
                 /// allocate using internal function pointer:
-                return (*info.mem->alloc_sarray)((j_common_ptr)&info, JPOOL_IMAGE,
-                                                                      width * depth,
-                                                                      height);
+                return (*info.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&info),
+                                                                  JPOOL_IMAGE,
+                                                                  width * components,
+                                                                  height);
+            }
+            
+            JSAMPARRAY allocate_samples(J_COLOR_SPACE color_space,
+                                        int width = 0,
+                                        int height = 1) {
+                /// convert the color space constant,
+                /// and delegate to the all-ints version above:
+                return allocate_samples(components_for_color_space(color_space),
+                                        width,
+                                        height);
             }
             
             void read_scanlines(JSAMPLE** rows, int idx = 1) {
@@ -266,26 +304,48 @@ namespace im {
                 jpeg_set_quality(&info, quality, BOOLEAN_FALSE());
             }
             
-            int height() const          { return info.image_height; }
-            int width() const           { return info.image_width; }
-            int components() const      { return info.input_components; }
-            int next_scanline() const   { return info.next_scanline; }
+            int height() const                  { return info.image_height; }
+            int width() const                   { return info.image_width; }
+            J_COLOR_SPACE color_space() const   { return color_space_for_components(info.input_components); }
+            int components() const              { return info.input_components; }
+            int next_scanline() const           { return info.next_scanline; }
             
             void set_height(int height)         { info.image_height = height; }
             void set_width(int width)           { info.image_width = width; }
+            void set_color_space(J_COLOR_SPACE color_space) {
+                                                  info.input_components = components_for_color_space(color_space);
+                                                  info.in_color_space = color_space; }
             void set_components(int components) { info.input_components = components;
-                                                  info.in_color_space = color_space(components); }
+                                                  info.in_color_space = color_space_for_components(components); }
             
-            JSAMPARRAY allocate_samples(int width = 0,
-                                        int depth = 0,
+            JSAMPARRAY allocate_samples(int components = 0,
+                                        int width = 0,
                                         int height = 1) {
+                /// blow up for invalid heights:
+                if (height < 1) {
+                    imread_raise(JPEGIOError,
+                       "\tim::(anon)::JPEGCompressor::allocate_samples() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
+                    FF("\tim::(anon)::JPEGCompressor::allocate_samples() got:    `height` = (int){ %i }", height),
+                       "\tim::(anon)::JPEGCompressor::allocate_samples() needs:  `height` > (int){ 0 }");
+                }
                 /// default to values attached to ‘info’ struct:
-                if (!width) { width = info.image_width;      }
-                if (!depth) { depth = info.input_components; }
+                if (!width)      { width = info.image_width;      }
+                if (!components) { components = info.input_components; }
                 /// allocate using internal function pointer:
-                return (*info.mem->alloc_sarray)((j_common_ptr)&info, JPOOL_IMAGE,
-                                                                      width * depth,
-                                                                      height);
+                return (*info.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&info),
+                                                                  JPOOL_IMAGE,
+                                                                  width * components,
+                                                                  height);
+            }
+            
+            JSAMPARRAY allocate_samples(J_COLOR_SPACE color_space,
+                                        int width = 0,
+                                        int height = 1) {
+                /// convert the color space constant,
+                /// and delegate to the all-ints version above:
+                return allocate_samples(components_for_color_space(color_space),
+                                        width,
+                                        height);
             }
             
             void write_scanlines(JSAMPLE** rows, int idx = 1) {
@@ -326,7 +386,7 @@ namespace im {
         
         /// initial error check:
         if (decompressor.has_error()) {
-            imread_raise(CannotReadError,
+            imread_raise(JPEGIOError,
                 "libjpeg internal error:",
                 decompressor.error_message());
         }
@@ -334,16 +394,16 @@ namespace im {
         /// stash dimension values:
         const int h = decompressor.height();
         const int w = decompressor.width();
-        const int d = decompressor.components();
+        const int c = decompressor.components();
         
         /// create the output image:
-        std::unique_ptr<Image> output(factory->create(8, h, w, d));
+        std::unique_ptr<Image> output(factory->create(8, h, w, c));
         
         /// allocate a single-row sample array:
         JSAMPARRAY samples = decompressor.allocate_samples();
         
         /// Hardcoding JSAMPLE (== uint8_t) as the type for now:
-        int c_stride = (d == 1) ? 0 : output->stride(2);
+        int color_stride = (c == 1) ? 0 : output->stride(2);
         JSAMPLE* __restrict__ ptr = output->rowp_as<JSAMPLE>(0);
         
         /// read scanlines in loop:
@@ -351,10 +411,10 @@ namespace im {
             decompressor.read_scanlines(samples);
             JSAMPLE* __restrict__ srcPtr = samples[0];
             for (int x = 0; x < w; ++x) {
-                for (int c = 0; c < d; ++c) {
+                for (int cc = 0; cc < c; ++cc) {
                     /// theoretically you would want to scale this next value,
                     /// depending on the bit depth -- SOMEDAAAAAAAAAAAAAAY.....
-                    ptr[c*c_stride] = *srcPtr++;
+                    ptr[cc*color_stride] = *srcPtr++;
                 }
                 ++ptr;
             }
@@ -362,7 +422,7 @@ namespace im {
         
         /// final error check:
         if (decompressor.has_error()) {
-            imread_raise(CannotReadError,
+            imread_raise(JPEGIOError,
                 "libjpeg internal error:",
                 decompressor.error_message());
         }
@@ -454,12 +514,12 @@ namespace im {
         
         const int w = input.dim(0);
         const int h = input.dim(1);
-        const int d = std::min(3, input.dim(2));
+        const int c = std::min(3, input.dim(2));
         
         /// assign image values:
         compressor.set_width(w);
         compressor.set_height(h);
-        compressor.set_components(d);
+        compressor.set_components(c);
         
         /// set 'defaults':
         compressor.set_defaults();
@@ -474,7 +534,7 @@ namespace im {
         
         /// initial error check:
         if (compressor.has_error()) {
-            imread_raise(CannotWriteError,
+            imread_raise(JPEGIOError,
                 "libjpeg internal error:",
                 compressor.error_message());
         }
@@ -490,8 +550,8 @@ namespace im {
         while ((scan = compressor.next_scanline()) < h) {
             JSAMPLE* __restrict__ dstPtr = samples[0];
             for (int x = 0; x < w; ++x) {
-                for (int c = 0; c < d; ++c) {
-                    *dstPtr++ = view[{x, scan, c}];
+                for (int cc = 0; cc < c; ++cc) {
+                    *dstPtr++ = view[{x, scan, cc}];
                 }
             }
             compressor.write_scanlines(samples);
@@ -499,7 +559,7 @@ namespace im {
         
         /// final error check:
         if (compressor.has_error()) {
-            imread_raise(CannotWriteError,
+            imread_raise(JPEGIOError,
                 "libjpeg internal error:",
                 compressor.error_message());
         }

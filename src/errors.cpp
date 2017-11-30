@@ -46,6 +46,7 @@ namespace im {
     DECLARE_IMREAD_ERROR_DEFAULT(YAMLIOError,              "Error in YAML I/O");
     
     DECLARE_IMREAD_ERROR_DEFAULT(HDF5IOError,              "Error in HDF5 I/O");
+    DECLARE_IMREAD_ERROR_DEFAULT(JPEGIOError,              "Error in JPEG/jpeglib I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(PNGIOError,               "Error in PNG/libpng I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(TIFFIOError,              "Error in TIFF/libtiff I/O");
 }

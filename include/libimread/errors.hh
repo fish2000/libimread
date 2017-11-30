@@ -229,9 +229,9 @@ DECLARE_IMREAD_ERROR_TYPE(IniIOError,               "Error in Ini File I/O");
 DECLARE_IMREAD_ERROR_TYPE(YAMLIOError,              "Error in YAML I/O");
 
 DECLARE_IMREAD_ERROR_TYPE(HDF5IOError,              "Error in HDF5 I/O");
+DECLARE_IMREAD_ERROR_TYPE(JPEGIOError,              "Error in JPEG/jpeglib I/O");
 DECLARE_IMREAD_ERROR_TYPE(PNGIOError,               "Error in PNG/libpng I/O");
 DECLARE_IMREAD_ERROR_TYPE(TIFFIOError,              "Error in TIFF/libtiff I/O");
-
 
 }
 
