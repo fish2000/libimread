@@ -179,24 +179,25 @@ namespace im {
                         jpeg_std_error(&mgr);
                         mgr.error_exit = [](j_common_ptr cinfo) {
                             using ErrorManager = JPEGCompressionBase::ErrorManager;
-                            ErrorManager* err = reinterpret_cast<ErrorManager*>(cinfo->err);
-                            (*cinfo->err->format_message)(cinfo, err->message);
-                            longjmp(err->jumpbuffer, 1);
+                            ErrorManager* error_state_ptr = reinterpret_cast<ErrorManager*>(cinfo->err);
+                            (*cinfo->err->format_message)(cinfo,
+                                                          error_state_ptr->message);
+                            longjmp(error_state_ptr->jumpbuffer, 1);
                         };
                         message[0] = 0;
                     }
                     
-                } error;
+                } error_state;
             
             public:
                 virtual ~JPEGCompressionBase() {}
                 
                 bool has_error() const {
-                    return setjmp(error.jumpbuffer);
+                    return setjmp(error_state.jumpbuffer);
                 }
                 
                 std::string error_message() const {
-                    return std::string(error.message);
+                    return std::string(error_state.message);
                 }
             
         };
@@ -209,26 +210,26 @@ namespace im {
             JPEGDecompressor(byte_source* source)
                 :adaptor(source)
                 {
-                    jpeg_create_decompress(&info);
-                    info.err = &error.mgr;
-                    info.src = &adaptor.mgr;
+                    jpeg_create_decompress(&decompress_state);
+                    decompress_state.err = &error_state.mgr;
+                    decompress_state.src = &adaptor.mgr;
                 }
             
             virtual ~JPEGDecompressor() {
-                jpeg_finish_decompress(&info);
-                jpeg_destroy_decompress(&info);
+                jpeg_finish_decompress(&decompress_state);
+                jpeg_destroy_decompress(&decompress_state);
             }
             
             void start() {
-                jpeg_read_header(&info, BOOLEAN_TRUE());
-                jpeg_start_decompress(&info);
+                jpeg_read_header(&decompress_state, BOOLEAN_TRUE());
+                jpeg_start_decompress(&decompress_state);
             }
             
-            int height() const                  { return info.output_height; }
-            int width() const                   { return info.output_width; }
-            J_COLOR_SPACE color_space() const   { return color_space_for_components(info.output_components); }
-            int components() const              { return info.output_components; }
-            int scanline() const                { return info.output_scanline; }
+            int height() const                  { return decompress_state.output_height; }
+            int width() const                   { return decompress_state.output_width; }
+            J_COLOR_SPACE color_space() const   { return color_space_for_components(decompress_state.output_components); }
+            int components() const              { return decompress_state.output_components; }
+            int scanline() const                { return decompress_state.output_scanline; }
             
             JSAMPARRAY allocate_samples(int components = 0,
                                         int width = 0,
@@ -241,13 +242,13 @@ namespace im {
                        "\tim::(anon)::JPEGDecompressor::allocate_samples() needs:  `height` > (int){ 0 }");
                 }
                 /// default to values read from JPEG header:
-                if (!width)      { width = info.output_width;      }
-                if (!components) { components = info.output_components; }
+                if (!width)      { width = decompress_state.output_width;      }
+                if (!components) { components = decompress_state.output_components; }
                 /// allocate using internal function pointer:
-                return (*info.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&info),
-                                                                  JPOOL_IMAGE,
-                                                                  width * components,
-                                                                  height);
+                return (*decompress_state.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&decompress_state),
+                                                                              JPOOL_IMAGE,
+                                                                              width * components,
+                                                                              height);
             }
             
             JSAMPARRAY allocate_samples(J_COLOR_SPACE color_space,
@@ -261,16 +262,16 @@ namespace im {
             }
             
             void read_scanlines(JSAMPLE** rows, int idx = 1) {
-                jpeg_read_scanlines(&info, rows, idx);
+                jpeg_read_scanlines(&decompress_state, rows, idx);
             }
             
             void read_scanlines(JSAMPLE* rows, int idx = 1) {
-                jpeg_read_scanlines(&info, std::addressof(rows), idx);
+                jpeg_read_scanlines(&decompress_state, std::addressof(rows), idx);
             }
             
             public:
                 JPEGSourceAdaptor adaptor;
-                jpeg_decompress_struct info;
+                jpeg_decompress_struct decompress_state;
         };
         
         /// JPEG compressor API class, wrapping the `jpeg_compress_struct`
@@ -281,42 +282,42 @@ namespace im {
             JPEGCompressor(byte_sink* sink)
                 :adaptor(sink)
                 {
-                    jpeg_create_compress(&info);
-                    info.err = &error.mgr;
-                    info.dest = &adaptor.mgr;
+                    jpeg_create_compress(&compress_state);
+                    compress_state.err = &error_state.mgr;
+                    compress_state.dest = &adaptor.mgr;
                 }
             
             virtual ~JPEGCompressor() {
-                jpeg_finish_compress(&info);
-                jpeg_destroy_compress(&info);
+                jpeg_finish_compress(&compress_state);
+                jpeg_destroy_compress(&compress_state);
             }
             
             void start() {
-                jpeg_start_compress(&info, BOOLEAN_TRUE());
+                jpeg_start_compress(&compress_state, BOOLEAN_TRUE());
             }
             
             void set_defaults() {
-                jpeg_set_defaults(&info);
+                jpeg_set_defaults(&compress_state);
             }
             
             void set_quality(std::size_t quality) {
                 if (quality > 100) { quality = 100; }
-                jpeg_set_quality(&info, quality, BOOLEAN_FALSE());
+                jpeg_set_quality(&compress_state, quality, BOOLEAN_FALSE());
             }
             
-            int height() const                  { return info.image_height; }
-            int width() const                   { return info.image_width; }
-            J_COLOR_SPACE color_space() const   { return color_space_for_components(info.input_components); }
-            int components() const              { return info.input_components; }
-            int next_scanline() const           { return info.next_scanline; }
+            int height() const                  { return compress_state.image_height; }
+            int width() const                   { return compress_state.image_width; }
+            J_COLOR_SPACE color_space() const   { return color_space_for_components(compress_state.input_components); }
+            int components() const              { return compress_state.input_components; }
+            int next_scanline() const           { return compress_state.next_scanline; }
             
-            void set_height(int height)         { info.image_height = height; }
-            void set_width(int width)           { info.image_width = width; }
+            void set_height(int height)         { compress_state.image_height = height; }
+            void set_width(int width)           { compress_state.image_width = width; }
             void set_color_space(J_COLOR_SPACE color_space) {
-                                                  info.input_components = components_for_color_space(color_space);
-                                                  info.in_color_space = color_space; }
-            void set_components(int components) { info.input_components = components;
-                                                  info.in_color_space = color_space_for_components(components); }
+                                                  compress_state.input_components = components_for_color_space(color_space);
+                                                  compress_state.in_color_space = color_space; }
+            void set_components(int components) { compress_state.input_components = components;
+                                                  compress_state.in_color_space = color_space_for_components(components); }
             
             JSAMPARRAY allocate_samples(int components = 0,
                                         int width = 0,
@@ -329,13 +330,13 @@ namespace im {
                        "\tim::(anon)::JPEGCompressor::allocate_samples() needs:  `height` > (int){ 0 }");
                 }
                 /// default to values attached to ‘info’ struct:
-                if (!width)      { width = info.image_width;      }
-                if (!components) { components = info.input_components; }
+                if (!width)      { width = compress_state.image_width;      }
+                if (!components) { components = compress_state.input_components; }
                 /// allocate using internal function pointer:
-                return (*info.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&info),
-                                                                  JPOOL_IMAGE,
-                                                                  width * components,
-                                                                  height);
+                return (*compress_state.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&compress_state),
+                                                                            JPOOL_IMAGE,
+                                                                            width * components,
+                                                                            height);
             }
             
             JSAMPARRAY allocate_samples(J_COLOR_SPACE color_space,
@@ -349,16 +350,16 @@ namespace im {
             }
             
             void write_scanlines(JSAMPLE** rows, int idx = 1) {
-                jpeg_write_scanlines(&info, rows, idx);
+                jpeg_write_scanlines(&compress_state, rows, idx);
             }
             
             void write_scanlines(JSAMPLE* rows, int idx = 1) {
-                jpeg_write_scanlines(&info, std::addressof(rows), idx);
+                jpeg_write_scanlines(&compress_state, std::addressof(rows), idx);
             }
             
             public:
                 JPEGDestinationAdaptor adaptor;
-                jpeg_compress_struct info;
+                jpeg_compress_struct compress_state;
         };
         
         /// Shortcut template function to extract the size
