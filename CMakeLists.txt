@@ -341,7 +341,6 @@ else()
     endif()
 endif()
 
-
 set(IM_HAVE_AUTOFS_NOWAIT               ${HAVE_AUTOFS_NOWAIT} CACHE BOOL "Is /dev/autofs_nowait available?")
 set(IM_HAVE_AUTOFS_NOTRIGGER            ${HAVE_AUTOFS_NOTRIGGER} CACHE BOOL "Is /dev/autofs_notrigger available?")
 
