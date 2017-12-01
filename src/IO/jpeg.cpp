@@ -31,22 +31,23 @@ namespace im {
     
     namespace {
         
-        using byte_ptr = std::unique_ptr<byte[]>;
-        
         /// Constants
         const std::size_t kBufferSize = JPEGFormat::options.buffer_size;
         const std::size_t kDefaultQuality = static_cast<std::size_t>(JPEGFormat::options.writeopts.quality * 100);
         
+        /// Unique pointer type, holding an array of JPEG bytes:
+        using byte_ptr = std::unique_ptr<JOCTET[]>;
+        
         /// Adaptor-specific NOP function types:
-        using NOP_SRC = std::add_pointer_t<void(j_decompress_ptr)>;
-        using NOP_DST = std::add_pointer_t<void(j_compress_ptr)>;
+        using nop_src_t = std::add_pointer_t<void(j_decompress_ptr)>;
+        using nop_dst_t = std::add_pointer_t<void(j_compress_ptr)>;
         
         /// RAII-ish wrapper for holding the `jpeg_source_mgr` structure,
         /// initializing it with functions binding it to an instance of
         /// `im::byte_source` that, in turn, reads from an underlying
         /// byte array (both of which are allocated as member instances).
         struct JPEGSourceAdaptor {
-            constexpr static const NOP_SRC NOP = [](j_decompress_ptr) -> void {};
+            constexpr static const nop_src_t NOP = [](j_decompress_ptr) -> void {};
             
             jpeg_source_mgr mgr;
             byte_source* source;
@@ -54,7 +55,7 @@ namespace im {
             
             JPEGSourceAdaptor(byte_source* s)
                 :source(s)
-                ,buffer{ std::make_unique<byte[]>(kBufferSize) }
+                ,buffer{ std::make_unique<JOCTET[]>(kBufferSize) }
                 {
                     mgr.next_input_byte     = buffer.get();
                     mgr.bytes_in_buffer     = 0;
@@ -92,7 +93,7 @@ namespace im {
         /// `im::byte_sink` that, in turn, writes to an underlying
         /// byte array (both of which are allocated as member instances).
         struct JPEGDestinationAdaptor {
-            constexpr static const NOP_DST NOP = [](j_compress_ptr) -> void {};
+            constexpr static const nop_dst_t NOP = [](j_compress_ptr) -> void {};
             
             jpeg_destination_mgr mgr;
             byte_sink* sink;
@@ -100,7 +101,7 @@ namespace im {
             
             JPEGDestinationAdaptor(byte_sink* s)
                 :sink(s)
-                ,buffer{ std::make_unique<byte[]>(kBufferSize) }
+                ,buffer{ std::make_unique<JOCTET[]>(kBufferSize) }
                 {
                     mgr.next_output_byte    = buffer.get();
                     mgr.free_in_buffer      = kBufferSize;
@@ -220,14 +221,16 @@ namespace im {
                 jpeg_destroy_decompress(&decompress_state);
             }
             
-            void start() {
-                jpeg_read_header(&decompress_state, BOOLEAN_TRUE());
-                jpeg_start_decompress(&decompress_state);
+            bool start() {
+                int const header_status = jpeg_read_header(&decompress_state, BOOLEAN_TRUE());
+                bool start_status = jpeg_start_decompress(&decompress_state);
+                return start_status && header_status == JPEG_HEADER_OK;
             }
             
             int height() const                  { return decompress_state.output_height; }
             int width() const                   { return decompress_state.output_width; }
-            J_COLOR_SPACE color_space() const   { return color_space_for_components(decompress_state.output_components); }
+            J_COLOR_SPACE color_space() const   { return color_space_for_components(
+                                                         decompress_state.output_components); }
             int components() const              { return decompress_state.output_components; }
             int scanline() const                { return decompress_state.output_scanline; }
             
@@ -242,7 +245,7 @@ namespace im {
                        "\tim::(anon)::JPEGDecompressor::allocate_samples() needs:  `height` > (int){ 0 }");
                 }
                 /// default to values read from JPEG header:
-                if (!width)      { width = decompress_state.output_width;      }
+                if (!width)      {      width = decompress_state.output_width;      }
                 if (!components) { components = decompress_state.output_components; }
                 /// allocate using internal function pointer:
                 return (*decompress_state.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&decompress_state),
@@ -307,17 +310,20 @@ namespace im {
             
             int height() const                  { return compress_state.image_height; }
             int width() const                   { return compress_state.image_width; }
-            J_COLOR_SPACE color_space() const   { return color_space_for_components(compress_state.input_components); }
+            J_COLOR_SPACE color_space() const   { return color_space_for_components(
+                                                         compress_state.input_components); }
             int components() const              { return compress_state.input_components; }
             int next_scanline() const           { return compress_state.next_scanline; }
             
             void set_height(int height)         { compress_state.image_height = height; }
             void set_width(int width)           { compress_state.image_width = width; }
             void set_color_space(J_COLOR_SPACE color_space) {
-                                                  compress_state.input_components = components_for_color_space(color_space);
+                                                  compress_state.input_components = 
+                                                       components_for_color_space(color_space);
                                                   compress_state.in_color_space = color_space; }
             void set_components(int components) { compress_state.input_components = components;
-                                                  compress_state.in_color_space = color_space_for_components(components); }
+                                                  compress_state.in_color_space =
+                                                         color_space_for_components(components); }
             
             JSAMPARRAY allocate_samples(int components = 0,
                                         int width = 0,
@@ -330,7 +336,7 @@ namespace im {
                        "\tim::(anon)::JPEGCompressor::allocate_samples() needs:  `height` > (int){ 0 }");
                 }
                 /// default to values attached to ‘info’ struct:
-                if (!width)      { width = compress_state.image_width;      }
+                if (!width)      {      width = compress_state.image_width;      }
                 if (!components) { components = compress_state.input_components; }
                 /// allocate using internal function pointer:
                 return (*compress_state.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&compress_state),
