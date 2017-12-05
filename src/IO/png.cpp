@@ -456,33 +456,6 @@ namespace im {
         }
         
         /// figure out the (potentially problematic) PNG color data situation:
-        // switch (png_get_color_type(p.png_ptr(), p.png_info())) {
-        //     case PNG_COLOR_TYPE_PALETTE:
-        //         png_set_palette_to_rgb(p.png_ptr()); /// ??
-        //     case PNG_COLOR_TYPE_RGB:
-        //         d = 3;
-        //         break;
-        //     case PNG_COLOR_TYPE_RGB_ALPHA:
-        //         d = 4;
-        //         break;
-        //     case PNG_COLOR_TYPE_GRAY:
-        //         d = 1;
-        //         if (bit_depth < 8) {
-        //             png_set_expand_gray_1_2_4_to_8(p.png_ptr());
-        //         }
-        //         break;
-        //     case PNG_COLOR_TYPE_GRAY_ALPHA:
-        //         d = 1;
-        //         imread_raise(PNGIOError,
-        //             "Color type ( 4: grayscale with alpha channel ) cannot be handled\n"
-        //             "without opts[\"png:strip_alpha\"] = true");
-        //         break;
-        //     default: {
-        //         imread_raise(PNGIOError,
-        //             FF("Color type ( %i ) cannot be handled",
-        //                 int(png_get_color_type(p.png_ptr(), p.png_info()))));
-        //     }
-        // }
         const int d = p.components();
         
         /// error check: after “elaboration”
@@ -523,7 +496,7 @@ namespace im {
         p.update();
         
         /// allocate:
-        volatile int row_bytes = png_get_rowbytes(p.png_ptr(), p.png_info());
+        const int row_bytes = png_get_rowbytes(p.png_ptr(), p.png_info());
         png_bytep* __restrict__ row_pointers = new png_bytep[h];
         for (int y = 0; y < h; ++y) {
             row_pointers[y] = new png_byte[row_bytes];
