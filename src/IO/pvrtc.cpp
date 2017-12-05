@@ -14,14 +14,18 @@ namespace im {
     
     DECLARE_FORMAT_OPTIONS(PVRTCFormat);
     
+    namespace detail {
+        constexpr static const std::size_t kHeaderSize = sizeof(PVRHeader);
+    }
+    
     bool PVRTCFormat::match_format(byte_source* src) {
         /// Adapted from the standard match_format() case, using techniques found in
         /// PVRTexture::loadApplePVRTC() and PVRTexture::load(), from ext/pvr.cpp
-        bytevec_t headerbuf(sizeof(PVRHeader));
-        const int bytesread = static_cast<int>(src->read(&headerbuf.front(), sizeof(PVRHeader)));
+        bytevec_t headerbuf(detail::kHeaderSize);
+        const int bytesread = static_cast<int>(src->read(&headerbuf.front(), detail::kHeaderSize));
         src->seek_relative(-bytesread);
         PVRHeader* header = (PVRHeader*)&headerbuf.front();
-        return (bytesread == sizeof(PVRHeader) &&
+        return (bytesread == detail::kHeaderSize &&
                 header->magic == options.signatures[0]) ||
                (countBits(src->size()) == 1);
     }
