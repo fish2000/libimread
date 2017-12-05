@@ -100,13 +100,10 @@ namespace im {
                         case 1024: nbits = 11; break;
                         case 2048: nbits = 11; break;
                     }
-                    // if (table.size() == ( 512-detail::kCodeOffset)) nbits = 10;
-                    // if (table.size() == (1024-detail::kCodeOffset)) nbits = 11;
-                    // if (table.size() == (2048-detail::kCodeOffset)) nbits = 12;
                     old_code = code;
                 }
-           }
-           return output;
+            }
+            return output;
         }
     
     } /// namespace lzw
