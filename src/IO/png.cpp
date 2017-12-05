@@ -8,7 +8,7 @@
 
 #include <iod/json.hh>
 
-#include <libimread/base.hh>
+#include <libimread/endian.hh>
 #include <libimread/metadata.hh>
 #include <libimread/ext/base64.hh>
 #include <libimread/IO/png.hh>
@@ -29,19 +29,27 @@ namespace im {
     
     namespace {
         
-        void throw_error(png_structp png_ptr, png_const_charp msg) {
-            imread_raise(PNGIOError, msg);
-        }
-        
         class png_holder {
             public:
                 png_holder(int m)
-                    :png_ptr((m == write_mode ? png_create_write_struct : png_create_read_struct)(
-                        PNG_LIBPNG_VER_STRING, 0, throw_error, 0)), png_info(0), mode(holder_mode(m))
-                        {}
+                    :png_ptr((m == write_mode ? png_create_write_struct
+                                              : png_create_read_struct)(
+                        PNG_LIBPNG_VER_STRING, 0,
+                        [](png_structp png_ptr, png_const_charp message) -> void {
+                            imread_raise(PNGIOError, message);
+                        }, 0))
+                    ,png_info(png_create_info_struct(png_ptr))
+                    ,mode(static_cast<holder_mode>(m))
+                    {
+                        if (!png_info) {
+                            imread_raise(ProgrammingError,
+                                "Error returned from png_create_info_struct");
+                        }
+                    }
                 
+            public:
                 ~png_holder() {
-                    png_infopp pp = (png_info ? &png_info : 0);
+                    png_infopp pp = (png_info ? &png_info : nullptr);
                     if (mode == read_mode) {
                         png_destroy_read_struct(&png_ptr, pp, 0);
                     } else {
@@ -49,29 +57,203 @@ namespace im {
                     }
                 }
                 
-                void create_info() {
-                    png_info = png_create_info_struct(png_ptr);
-                    if (!png_info) {
-                        imread_raise(ProgrammingError,
-                            "Error returned from png_create_info_struct");
+            public:
+                void start(im::seekable* source_sink) {
+                    if (mode == read_mode) {
+                        png_set_read_fn(png_ptr,
+                                        dynamic_cast<im::byte_source*>(source_sink),
+                                        [](png_structp png_ptr, png_byte* buffer, std::size_t n) -> void {
+                                            im::byte_source* source = static_cast<im::byte_source*>(
+                                                                      png_get_io_ptr(png_ptr));
+                                            const std::size_t actual = source->read(reinterpret_cast<byte*>(buffer), n);
+                                            if (actual != n) {
+                                                imread_raise_default(CannotReadError);
+                                            }
+                                        });
+                        png_read_info(png_ptr, png_info);
+                    } else {
+                        png_set_write_fn(png_ptr,
+                                         dynamic_cast<im::byte_sink*>(source_sink),
+                                         [](png_structp png_ptr, png_byte* buffer, std::size_t n) -> void {
+                                             im::byte_sink* sink = static_cast<im::byte_sink*>(
+                                                                   png_get_io_ptr(png_ptr));
+                                             const std::size_t actual = sink->write(reinterpret_cast<byte*>(buffer), n);
+                                             if (actual != n) {
+                                                 imread_raise_default(CannotWriteError);
+                                             }
+                                         },
+                                         [](png_structp png_ptr) -> void {
+                                             im::byte_sink* sink = static_cast<im::byte_sink*>(png_get_io_ptr(png_ptr));
+                                             sink->flush();
+                                         });
+                        png_write_info(png_ptr, png_info);
                     }
                 }
                 
+            public:
                 png_structp png_ptr;
                 png_infop png_info;
+                
+            public:
                 enum holder_mode { read_mode, write_mode } mode;
         };
         
+        class PNGErrorReporter {
+            
+            public:
+                PNGErrorReporter(png_structp struct_ptr, bool m)
+                    :structure_ptr(struct_ptr)
+                    ,mode(static_cast<reporter_mode>(m))
+                    {}
+            
+            public:
+                virtual ~PNGErrorReporter() {}
+            
+            public:
+                bool has_error() const {
+                    if (structure_ptr) {
+                        return setjmp(png_jmpbuf(structure_ptr));
+                    }
+                    return true;
+                }
+                
+            public:
+                png_structp png_ptr() const {
+                    return structure_ptr;
+                }
+                
+            public:
+                virtual void start() const = 0;
+                virtual png_infop png_info() const = 0;
+                
+            public:
+                mutable png_structp structure_ptr;
+                
+            public:
+                enum reporter_mode : bool {  read_mode = false,
+                                            write_mode = true  } mode;
+            
+        };
+        
+        class PNGReader : public PNGErrorReporter {
+            
+            public:
+                PNGReader(byte_source* source)
+                    :PNGErrorReporter(png_create_read_struct(
+                        PNG_LIBPNG_VER_STRING, 0,
+                        [](png_structp struct_ptr, png_const_charp message) -> void {
+                            imread_raise(PNGIOError, message);
+                        }, 0), false)
+                    ,source_ptr(source)
+                    ,info_ptr(png_create_info_struct(structure_ptr))
+                    {
+                        if (!structure_ptr) {
+                            imread_raise(ProgrammingError,
+                                "Error returned from png_create_read_struct");
+                        }
+                        if (!info_ptr) {
+                            imread_raise(ProgrammingError,
+                                "Error returned from png_create_info_struct");
+                        }
+                    }
+            
+            public:
+                virtual ~PNGReader() {
+                    png_infopp infop = info_ptr ? &info_ptr : nullptr;
+                    png_destroy_read_struct(&structure_ptr, infop, 0);
+                }
+            
+            public:
+                virtual void start() const override {
+                    png_set_read_fn(structure_ptr, source_ptr,
+                                 [](png_structp struct_ptr, png_byte* buffer, std::size_t n) -> void {
+                                      im::byte_source* source = static_cast<im::byte_source*>(png_get_io_ptr(struct_ptr));
+                                      const std::size_t actual = source->read(reinterpret_cast<byte*>(buffer), n);
+                                      if (actual != n) {
+                                          imread_raise_default(CannotReadError);
+                                      }
+                                 });
+                    png_read_info(structure_ptr, info_ptr);
+                }
+                
+                virtual png_infop png_info() const override {
+                    return info_ptr;
+                }
+            
+            public:
+                mutable byte_source* source_ptr;
+                mutable png_infop info_ptr;
+        
+        };
+        
+        class PNGWriter : public PNGErrorReporter {
+            
+            public:
+                PNGWriter(byte_sink* sink)
+                    :PNGErrorReporter(png_create_write_struct(
+                        PNG_LIBPNG_VER_STRING, 0,
+                        [](png_structp struct_ptr, png_const_charp message) -> void {
+                            imread_raise(PNGIOError, message);
+                        }, 0), true)
+                    ,sink_ptr(sink)
+                    ,info_ptr(png_create_info_struct(structure_ptr))
+                    {
+                        if (!structure_ptr) {
+                            imread_raise(ProgrammingError,
+                                "Error returned from png_create_write_struct");
+                        }
+                        if (!info_ptr) {
+                            imread_raise(ProgrammingError,
+                                "Error returned from png_create_info_struct");
+                        }
+                    }
+            
+            public:
+                ~PNGWriter() {
+                    png_infopp infop = info_ptr ? &info_ptr : nullptr;
+                    png_destroy_write_struct(&structure_ptr, infop);
+                }
+            
+            public:
+                virtual void start() const override {
+                    png_set_write_fn(structure_ptr, sink_ptr,
+                                  [](png_structp struct_ptr, png_byte* buffer, std::size_t n) -> void {
+                                      im::byte_sink* sink = static_cast<im::byte_sink*>(png_get_io_ptr(struct_ptr));
+                                      const std::size_t actual = sink->write(reinterpret_cast<byte*>(buffer), n);
+                                      if (actual != n) {
+                                          imread_raise_default(CannotWriteError);
+                                      }
+                                  },
+                                  [](png_structp struct_ptr) -> void {
+                                      static_cast<im::byte_sink*>(png_get_io_ptr(struct_ptr))->flush();
+                                  });
+                    png_write_info(structure_ptr, info_ptr);
+                }
+                
+                virtual png_infop png_info() const override {
+                    return info_ptr;
+                }
+                
+            public:
+                mutable byte_sink* sink_ptr;
+                mutable png_infop info_ptr;
+        
+        };
+        
         void read_from_source(png_structp png_ptr, png_byte* buffer, std::size_t n) {
-            byte_source* s = static_cast<byte_source*>(png_get_io_ptr(png_ptr));
-            const std::size_t actual = s->read(reinterpret_cast<byte*>(buffer), n);
-            if (actual != n) { imread_raise_default(CannotReadError); }
+            byte_source* source = static_cast<byte_source*>(png_get_io_ptr(png_ptr));
+            const std::size_t actual = source->read(reinterpret_cast<byte*>(buffer), n);
+            if (actual != n) {
+                imread_raise_default(CannotReadError);
+            }
         }
         
         void write_to_source(png_structp png_ptr, png_byte* buffer, std::size_t n) {
-            byte_sink* s = static_cast<byte_sink*>(png_get_io_ptr(png_ptr));
-            const std::size_t actual = s->write(reinterpret_cast<byte*>(buffer), n);
-            if (actual != n) { imread_raise_default(CannotWriteError); }
+            byte_sink* sink = static_cast<byte_sink*>(png_get_io_ptr(png_ptr));
+            const std::size_t actual = sink->write(reinterpret_cast<byte*>(buffer), n);
+            if (actual != n) {
+                imread_raise_default(CannotWriteError);
+            }
         }
         
         void flush_source(png_structp png_ptr) {
@@ -146,7 +328,7 @@ namespace im {
         
         __attribute__((unused))
         int unknown_chunk_read_cb(png_structp ptr, png_unknown_chunkp chunk) {
-            if (!strncmp(reinterpret_cast<char*>(chunk->name), "CgBI", 4)) {
+            if (!std::strncmp(reinterpret_cast<char*>(chunk->name), "CgBI", 4)) {
                 WTF("This file is already crushed and how the hell did you get here?");
                 // std::exit(1);
             }
@@ -172,35 +354,42 @@ namespace im {
     } /* namespace (anon.) */
     
     std::unique_ptr<Image> PNGFormat::read(byte_source* src, ImageFactory* factory, Options const& opts) {
-        png_holder p(png_holder::read_mode);
-        png_set_read_fn(p.png_ptr, src, read_from_source);
-        p.create_info();
-        png_read_info(p.png_ptr, p.png_info);
+        // png_holder p(png_holder::read_mode);
+        // p.start(src);
+        // png_set_read_fn(p.png_ptr, src, read_from_source);
+        // p.create_info();
+        // png_read_info(p.png_ptr, p.png_info);
+        PNGReader p(src);
+        p.start();
         
-        PP_CHECK(p.png_ptr, "PNG read struct setup failure");
+        // PP_CHECK(p.png_ptr, "PNG read struct setup failure");
+        if (p.has_error()) {
+            imread_raise(PNGIOError,
+                "PNG read struct setup failure");
+        }
         
-        const int w =  png_get_image_width(p.png_ptr, p.png_info);
-        const int h = png_get_image_height(p.png_ptr, p.png_info);
-        volatile int channels = png_get_channels(p.png_ptr, p.png_info);
-        volatile int bit_depth = png_get_bit_depth(p.png_ptr, p.png_info);
+        const int w =  png_get_image_width(p.png_ptr(), p.png_info());
+        const int h = png_get_image_height(p.png_ptr(), p.png_info());
+        volatile int channels = png_get_channels(p.png_ptr(), p.png_info());
+        volatile int bit_depth = png_get_bit_depth(p.png_ptr(), p.png_info());
         
         if (bit_depth != 1 && bit_depth != 8 && bit_depth != 16) {
             imread_raise(CannotReadError,
                 FF("Cannot read this bit depth ( %i ).", bit_depth),
                    "Only bit depths ∈ {1,8,16} are supported.");
         }
-        if (bit_depth == 16 && !detail::bigendian()) { png_set_swap(p.png_ptr); }
+        if (bit_depth == 16 && !detail::bigendian()) { png_set_swap(p.png_ptr()); }
         
         volatile int d = -1;
         const bool strip_alpha = opts.cast<bool>("png:strip_alpha", false);
         
         if (strip_alpha) {
-            png_set_strip_alpha(p.png_ptr);
+            png_set_strip_alpha(p.png_ptr());
         }
         
-        switch (png_get_color_type(p.png_ptr, p.png_info)) {
+        switch (png_get_color_type(p.png_ptr(), p.png_info())) {
             case PNG_COLOR_TYPE_PALETTE:
-                png_set_palette_to_rgb(p.png_ptr); /// ??
+                png_set_palette_to_rgb(p.png_ptr()); /// ??
             case PNG_COLOR_TYPE_RGB:
                 d = 3;
                 break;
@@ -211,58 +400,72 @@ namespace im {
                 //d = -1;
                 d = 1;
                 if (bit_depth < 8) {
-                    png_set_expand_gray_1_2_4_to_8(p.png_ptr);
+                    png_set_expand_gray_1_2_4_to_8(p.png_ptr());
                 }
                 break;
             case PNG_COLOR_TYPE_GRAY_ALPHA:
                 d = 1;
-                imread_raise(CannotReadError,
+                imread_raise(PNGIOError,
                     "Color type ( 4: grayscale with alpha channel ) cannot be handled\n"
                     "without opts[\"png:strip_alpha\"] = true");
                 break;
             default: {
-                imread_raise(CannotReadError,
+                imread_raise(PNGIOError,
                     FF("Color type ( %i ) cannot be handled",
-                        int(png_get_color_type(p.png_ptr, p.png_info))));
+                        int(png_get_color_type(p.png_ptr(), p.png_info()))));
             }
         }
         
         // PP_CHECK(p.png_ptr, "PNG read elaboration failure");
+        if (p.has_error()) {
+            imread_raise(PNGIOError,
+                "PNG read elaboration failure");
+        }
+        
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         
         /// GET METADATA (just ICC data for now)
         if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
-            if (png_get_valid(p.png_ptr, p.png_info, PNG_INFO_iCCP)) {
+            if (png_get_valid(p.png_ptr(), p.png_info(), PNG_INFO_iCCP)) {
                 /// extract the embedded ICC profile
                 int compression;
                 uint32_t length;
                 byte* data;
                 char* name;
                 
-                png_get_iCCP(p.png_ptr, p.png_info, &name,
-                                                    &compression,
-                                                    &data,
-                                                    &length);
+                png_get_iCCP(p.png_ptr(), p.png_info(), &name,
+                                                        &compression,
+                                                        &data,
+                                                        &length);
                 
                 meta->set_icc_name(std::string(name));
                 meta->set_icc_data(&data[0], std::size_t(length));
             }
         }
         
-        png_set_interlace_handling(p.png_ptr);
-        png_read_update_info(p.png_ptr, p.png_info);
+        png_set_interlace_handling(p.png_ptr());
+        png_read_update_info(p.png_ptr(), p.png_info());
         
-        volatile int row_bytes = png_get_rowbytes(p.png_ptr, p.png_info);
+        volatile int row_bytes = png_get_rowbytes(p.png_ptr(), p.png_info());
         png_bytep* __restrict__ row_pointers = new png_bytep[h];
         for (int y = 0; y < h; ++y) {
             row_pointers[y] = new png_byte[row_bytes];
         }
         
         // PP_CHECK(p.png_ptr, "PNG read rowbytes failure");
+        if (p.has_error()) {
+            imread_raise(PNGIOError,
+                "PNG read rowbytes failure");
+        }
         
-        png_read_image(p.png_ptr, row_pointers);
+        png_read_image(p.png_ptr(), row_pointers);
         
-        PP_CHECK(p.png_ptr, "PNG read image failure");
+        // PP_CHECK(p.png_ptr(), "PNG read image failure");
+        if (p.has_error()) {
+            imread_raise(PNGIOError,
+                "PNG read image failure");
+        }
+        
         
         /// convert the data to T (fake it for now with uint8_t)
         //T *ptr = (T*)output->data();
@@ -307,9 +510,11 @@ namespace im {
     }
     
     void PNGFormat::write(Image& input, byte_sink* output, Options const& opts) {
-        png_holder p(png_holder::write_mode);
-        p.create_info();
-        png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
+        // png_holder p(png_holder::write_mode);
+        // p.create_info();
+        // png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
+        
+        PNGWriter p(output);
         
         const int width = input.dim(0);
         const int height = input.dim(1);
@@ -319,21 +524,22 @@ namespace im {
         png_bytep* __restrict__ row_pointers;
         const png_byte color_type = color_types[channels - 1];
         
-        png_set_IHDR(p.png_ptr, p.png_info,
+        png_set_IHDR(p.png_ptr(), p.png_info(),
                      width, height, bit_depth, color_type,
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                      PNG_FILTER_TYPE_BASE);
         
         const int compression = opts.cast<int>("png:compression", 0);
         if (compression) {
-            png_set_compression_level(p.png_ptr, compression);
+            png_set_compression_level(p.png_ptr(), compression);
         }
         
-        png_write_info(p.png_ptr, p.png_info);
+        // png_write_info(p.png_ptr, p.png_info);
+        p.start();
         row_pointers = new png_bytep[height];
         
         const int c_stride = (channels == 1) ? 0 : input.stride(2);
-        const int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
+        const int rowbytes = png_get_rowbytes(p.png_ptr(), p.png_info());
         int x = 0, y = 0, c = 0;
         uint8_t* __restrict__ dstPtr;
         uint8_t out;
@@ -373,12 +579,12 @@ namespace im {
         // write data
         // imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
         //     "[write_png_file] Error during writing bytes");
-        png_write_image(p.png_ptr, row_pointers);
+        png_write_image(p.png_ptr(), row_pointers);
         
         // finish write
-        imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
+        imread_assert(!setjmp(png_jmpbuf(p.png_ptr())),
             "[write_png_file] Error during end of write");
-        png_write_end(p.png_ptr, p.png_info);
+        png_write_end(p.png_ptr(), p.png_info());
         
         // clean up
         for (int y = 0; y < height; ++y) { delete[] row_pointers[y]; }
@@ -394,7 +600,7 @@ namespace im {
                                      options.signatures[0].length);
         
         png_holder p(png_holder::write_mode);
-        p.create_info();
+        // p.create_info();
         png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
         png_set_sig_bytes(p.png_ptr, 8);
         
