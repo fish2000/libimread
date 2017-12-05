@@ -139,10 +139,11 @@ static void Unpack5554Colour(const AMTC_BLOCK_STRUCT* pBlock, int ABColours[2][4
 */
 /***********************************************************/
 
-static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
-                              const int Do2bitMode, int ModulationVals[8][16],
-                              int ModulationModes[8][16], int StartX,
-                              int StartY) {
+static void UnpackModulations(const AMTC_BLOCK_STRUCT* pBlock,
+                              const int Do2bitMode,
+                              int ModulationVals[8][16],
+                              int ModulationModes[8][16],
+                              int StartX, int StartY) {
     uint32_t ModulationBits;
     int BlockModMode, x, y;
     
@@ -190,7 +191,7 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
     }
     
     // make sure nothing is left over
-    imread_assert(ModulationBits == 0);
+    // imread_assert(ModulationBits == 0);
 }
 
 /***********************************************************/
@@ -208,7 +209,8 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
 
 static void InterpolateColours(const int ColourP[4], const int ColourQ[4],
                                const int ColourR[4], const int ColourS[4],
-                               const int Do2bitMode, const int x, const int y,
+                               const int Do2bitMode,
+                               const int x, const int y,
                                int Result[4]) {
     int u, v, uscale;
     int k, tmp1, tmp2;
@@ -258,9 +260,9 @@ static void InterpolateColours(const int ColourP[4], const int ColourQ[4],
     }
     
     // sanity check
-    for (k = 0; k < 4; k++) {
-        imread_assert(Result[k] < 256);
-    }
+    // for (k = 0; k < 4; k++) {
+    //     imread_assert(Result[k] < 256);
+    // }
     
     // Convert from 5554 to 8888
     // do RGB 5.3 => 8
@@ -268,9 +270,9 @@ static void InterpolateColours(const int ColourP[4], const int ColourQ[4],
     Result[3] += Result[3] >> 4;
     
     // 2nd sanity check
-    for (k = 0; k < 4; k++) {
-        imread_assert(Result[k] < 256);
-    }
+    // for (k = 0; k < 4; k++) {
+    //     imread_assert(Result[k] < 256);
+    // }
 }
 
 /***********************************************************/
@@ -280,12 +282,13 @@ static void InterpolateColours(const int ColourP[4], const int ColourQ[4],
 // Get the modulation value as a numerator of a fraction of 8ths
 */
 /***********************************************************/
-static void GetModulationValue(int x, int y, const int Do2bitMode,
+static void GetModulationValue(int x, int y,
+                               const int Do2bitMode,
                                const int ModulationVals[8][16],
-                               const int ModulationModes[8][16], int *Mod,
-                               int *DoPT) {
-    static const int RepVals0[4] = {0, 3, 5, 8};
-    static const int RepVals1[4] = {0, 4, 4, 8};
+                               const int ModulationModes[8][16],
+                               int* Mod, int* DoPT) {
+    static const int RepVals0[4] = { 0, 3, 5, 8 };
+    static const int RepVals1[4] = { 0, 4, 4, 8 };
     int ModVal;
     
     // Map X and Y into the local 2x2 block
@@ -345,17 +348,17 @@ static void GetModulationValue(int x, int y, const int Do2bitMode,
 
 static int DisableTwiddlingRoutine = 0;
 
-static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos,
-                          uint32_t XPos) {
+static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize,
+                          uint32_t YPos,  uint32_t XPos) {
     uint32_t Twiddled, MinDimension,
              MaxValue, SrcBitPos,
              DstBitPos;
     int ShiftCount;
     
-    imread_assert(YPos < YSize);
-    imread_assert(XPos < XSize);
-    imread_assert(POWER_OF_2(YSize));
-    imread_assert(POWER_OF_2(XSize));
+    // imread_assert(YPos < YSize);
+    // imread_assert(XPos < XSize);
+    // imread_assert(POWER_OF_2(YSize));
+    // imread_assert(POWER_OF_2(XSize));
     
     if (YSize < XSize) {
         MinDimension = YSize;
@@ -398,7 +401,8 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos,
 /***********************************************************/
 
 extern void Decompress(AMTC_BLOCK_STRUCT* pCompressedData,
-                       const int Do2bitMode, const int XDim, const int YDim,
+                       const int Do2bitMode,
+                       const int XDim, const int YDim,
                        const int AssumeImageTiles,
                        unsigned char* pResultImage) {
     int x, y, i, j;
@@ -413,7 +417,8 @@ extern void Decompress(AMTC_BLOCK_STRUCT* pCompressedData,
     
     // local neighbourhood of blocks
     AMTC_BLOCK_STRUCT* pBlocks[2][2];
-    AMTC_BLOCK_STRUCT* pPrevious[2][2] = {{NULL, NULL}, {NULL, NULL}};
+    AMTC_BLOCK_STRUCT* pPrevious[2][2] = {{ nullptr, nullptr },
+                                          { nullptr, nullptr }};
     
     // Low precision colours extracted from the blocks
     struct {
@@ -499,14 +504,15 @@ extern void Decompress(AMTC_BLOCK_STRUCT* pCompressedData,
                 Result[i] = ASig[i] * 8 + Mod * (BSig[i] - ASig[i]);
                 Result[i] >>= 3;
             }
+            
             if (DoPT) { Result[3] = 0; }
             
             // Store the result in the output image
             uPosition = (x + y * XDim) << 2;
-            pResultImage[uPosition + 0] = (uint8_t)Result[0];
-            pResultImage[uPosition + 1] = (uint8_t)Result[1];
-            pResultImage[uPosition + 2] = (uint8_t)Result[2];
-            pResultImage[uPosition + 3] = (uint8_t)Result[3];
+            pResultImage[uPosition + 0] = static_cast<uint8_t>(Result[0]);
+            pResultImage[uPosition + 1] = static_cast<uint8_t>(Result[1]);
+            pResultImage[uPosition + 2] = static_cast<uint8_t>(Result[2]);
+            pResultImage[uPosition + 3] = static_cast<uint8_t>(Result[3]);
         }
     }
 }

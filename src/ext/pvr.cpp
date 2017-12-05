@@ -70,7 +70,7 @@ const char* typeStrings[] = {
     "PVRTC2", "PVRTC4"
 };
 
-PVRTexture::PVRTexture() : data(NULL) {}
+PVRTexture::PVRTexture() : data(nullptr) {}
 
 PVRTexture::~PVRTexture() {
     if (this->data) { free(this->data); }
@@ -129,7 +129,8 @@ bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
     this->height = res;
     this->bpp = (mode + 1) * 2;
     this->numMips = 0;
-    this->data = (uint8_t*)std::malloc(this->width * this->height * 4);
+    this->data = static_cast<uint8_t*>(
+                 std::malloc(this->width * this->height * 4));
     
     Decompress((AMTC_BLOCK_STRUCT*)data, mode,
                 this->width, this->height, 0,
@@ -193,7 +194,8 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
     this->height = header->height;
     this->numMips = header->mipcount;
     this->bpp = header->bpp;
-    this->data = (uint8_t*)std::malloc(this->width * this->height * 4);
+    this->data = static_cast<uint8_t*>(
+                 std::malloc(this->width * this->height * 4));
     
     if (ptype < PVR_MAX_TYPE) {
         this->format = typeStrings[ptype];
