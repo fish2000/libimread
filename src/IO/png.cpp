@@ -117,6 +117,18 @@ namespace im {
                     return true;
                 }
                 
+                void set_swap() const {
+                    png_set_swap(structure_ptr);
+                }
+                
+                void set_strip_alpha() const {
+                    png_set_strip_alpha(structure_ptr);
+                }
+                
+                void set_interlace_handling() const {
+                    png_set_interlace_handling(structure_ptr);
+                }
+                
             public:
                 png_structp png_ptr() const {
                     return structure_ptr;
@@ -124,6 +136,7 @@ namespace im {
                 
             public:
                 virtual void start() const = 0;
+                virtual void update() const = 0;
                 virtual png_infop png_info() const = 0;
                 
             public:
@@ -174,15 +187,66 @@ namespace im {
                                       }
                                  });
                     png_read_info(structure_ptr, info_ptr);
+                    if (png_get_bit_depth(structure_ptr, info_ptr) == 16 && !detail::bigendian()) {
+                        PNGErrorReporter::set_swap();
+                    }
+                }
+                
+                virtual void update() const override {
+                    png_read_update_info(structure_ptr, info_ptr);
                 }
                 
                 virtual png_infop png_info() const override {
                     return info_ptr;
                 }
-            
+                
+            public:
+                int width() const           { return png_get_image_width(structure_ptr, info_ptr);  }
+                int height() const          { return png_get_image_height(structure_ptr, info_ptr); }
+                int channels() const        { return png_get_channels(structure_ptr, info_ptr);     }
+                int bit_depth() const       { return png_get_bit_depth(structure_ptr, info_ptr);    }
+                
+                int components() const {
+                    if (image_components == 0) {
+                        switch (png_get_color_type(structure_ptr, info_ptr)) {
+                            case PNG_COLOR_TYPE_PALETTE:
+                                png_set_palette_to_rgb(structure_ptr); /// ??
+                            case PNG_COLOR_TYPE_RGB:
+                                image_components = 3;
+                                break;
+                            case PNG_COLOR_TYPE_RGB_ALPHA:
+                                image_components = 4;
+                                break;
+                            case PNG_COLOR_TYPE_GRAY:
+                                image_components = 1;
+                                if (png_get_bit_depth(structure_ptr, info_ptr) < 8) {
+                                    png_set_expand_gray_1_2_4_to_8(structure_ptr);
+                                }
+                                break;
+                            case PNG_COLOR_TYPE_GRAY_ALPHA:
+                                image_components = 1;
+                                imread_raise(PNGIOError,
+                                    "Color type ( 4: grayscale with alpha channel ) cannot be handled\n"
+                                    "without opts[\"png:strip_alpha\"] = true");
+                                break;
+                            default: {
+                                imread_raise(PNGIOError,
+                                    FF("Color type ( %i ) cannot be handled",
+                                        int(png_get_color_type(structure_ptr, info_ptr))));
+                            }
+                        }
+                    }
+                    return image_components;
+                }
+                
+                bool has_valid_ICC_data() const {
+                    return png_get_valid(structure_ptr, info_ptr, PNG_INFO_iCCP);
+                }
+                
             public:
                 mutable byte_source* source_ptr;
                 mutable png_infop info_ptr;
+                mutable int image_components{ 0 };
         
         };
         
@@ -229,6 +293,8 @@ namespace im {
                                   });
                     png_write_info(structure_ptr, info_ptr);
                 }
+                
+                virtual void update() const override {}
                 
                 virtual png_infop png_info() const override {
                     return info_ptr;
@@ -353,80 +419,84 @@ namespace im {
         
     } /* namespace (anon.) */
     
-    std::unique_ptr<Image> PNGFormat::read(byte_source* src, ImageFactory* factory, Options const& opts) {
-        // png_holder p(png_holder::read_mode);
-        // p.start(src);
-        // png_set_read_fn(p.png_ptr, src, read_from_source);
-        // p.create_info();
-        // png_read_info(p.png_ptr, p.png_info);
+    std::unique_ptr<Image> PNGFormat::read(byte_source* src,
+                                           ImageFactory* factory,
+                                           Options const& opts) {
         PNGReader p(src);
         p.start();
         
-        // PP_CHECK(p.png_ptr, "PNG read struct setup failure");
+        /// error check: initial
         if (p.has_error()) {
             imread_raise(PNGIOError,
                 "PNG read struct setup failure");
         }
         
-        const int w =  png_get_image_width(p.png_ptr(), p.png_info());
-        const int h = png_get_image_height(p.png_ptr(), p.png_info());
-        volatile int channels = png_get_channels(p.png_ptr(), p.png_info());
-        volatile int bit_depth = png_get_bit_depth(p.png_ptr(), p.png_info());
+        /// store the width/height/channels/bit depth image information:
+        const int w = p.width();
+        const int h = p.height();
+        const int channels = p.channels();
+        const int bit_depth = p.bit_depth();
         
+        /// error-check the bit depth we read from the PNG structure:
         if (bit_depth != 1 && bit_depth != 8 && bit_depth != 16) {
             imread_raise(CannotReadError,
                 FF("Cannot read this bit depth ( %i ).", bit_depth),
                    "Only bit depths ∈ {1,8,16} are supported.");
         }
-        if (bit_depth == 16 && !detail::bigendian()) { png_set_swap(p.png_ptr()); }
         
-        volatile int d = -1;
+        /// set “swap” if we are big-endian and the bit depth is high enough:
+        if (bit_depth == 16 && !detail::bigendian()) { p.set_swap(); }
+        
+        // volatile int d = -1;
         const bool strip_alpha = opts.cast<bool>("png:strip_alpha", false);
         
+        /// Strip alpha channel, if we asked to do so:
         if (strip_alpha) {
-            png_set_strip_alpha(p.png_ptr());
+            p.set_strip_alpha();
         }
         
-        switch (png_get_color_type(p.png_ptr(), p.png_info())) {
-            case PNG_COLOR_TYPE_PALETTE:
-                png_set_palette_to_rgb(p.png_ptr()); /// ??
-            case PNG_COLOR_TYPE_RGB:
-                d = 3;
-                break;
-            case PNG_COLOR_TYPE_RGB_ALPHA:
-                d = 4;
-                break;
-            case PNG_COLOR_TYPE_GRAY:
-                //d = -1;
-                d = 1;
-                if (bit_depth < 8) {
-                    png_set_expand_gray_1_2_4_to_8(p.png_ptr());
-                }
-                break;
-            case PNG_COLOR_TYPE_GRAY_ALPHA:
-                d = 1;
-                imread_raise(PNGIOError,
-                    "Color type ( 4: grayscale with alpha channel ) cannot be handled\n"
-                    "without opts[\"png:strip_alpha\"] = true");
-                break;
-            default: {
-                imread_raise(PNGIOError,
-                    FF("Color type ( %i ) cannot be handled",
-                        int(png_get_color_type(p.png_ptr(), p.png_info()))));
-            }
-        }
+        /// figure out the (potentially problematic) PNG color data situation:
+        // switch (png_get_color_type(p.png_ptr(), p.png_info())) {
+        //     case PNG_COLOR_TYPE_PALETTE:
+        //         png_set_palette_to_rgb(p.png_ptr()); /// ??
+        //     case PNG_COLOR_TYPE_RGB:
+        //         d = 3;
+        //         break;
+        //     case PNG_COLOR_TYPE_RGB_ALPHA:
+        //         d = 4;
+        //         break;
+        //     case PNG_COLOR_TYPE_GRAY:
+        //         d = 1;
+        //         if (bit_depth < 8) {
+        //             png_set_expand_gray_1_2_4_to_8(p.png_ptr());
+        //         }
+        //         break;
+        //     case PNG_COLOR_TYPE_GRAY_ALPHA:
+        //         d = 1;
+        //         imread_raise(PNGIOError,
+        //             "Color type ( 4: grayscale with alpha channel ) cannot be handled\n"
+        //             "without opts[\"png:strip_alpha\"] = true");
+        //         break;
+        //     default: {
+        //         imread_raise(PNGIOError,
+        //             FF("Color type ( %i ) cannot be handled",
+        //                 int(png_get_color_type(p.png_ptr(), p.png_info()))));
+        //     }
+        // }
+        const int d = p.components();
         
-        // PP_CHECK(p.png_ptr, "PNG read elaboration failure");
+        /// error check: after “elaboration”
         if (p.has_error()) {
             imread_raise(PNGIOError,
                 "PNG read elaboration failure");
         }
         
+        /// create the output image:
         std::unique_ptr<Image> output(factory->create(bit_depth, h, w, d));
         
-        /// GET METADATA (just ICC data for now)
+        /// GET METADATA - just ICC data for now
         if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
-            if (png_get_valid(p.png_ptr(), p.png_info(), PNG_INFO_iCCP)) {
+            if (p.has_valid_ICC_data()) {
                 /// extract the embedded ICC profile
                 int compression;
                 uint32_t length;
@@ -443,24 +513,32 @@ namespace im {
             }
         }
         
-        png_set_interlace_handling(p.png_ptr());
-        png_read_update_info(p.png_ptr(), p.png_info());
+        /// set interlace handling:
+        // png_set_interlace_handling(p.png_ptr());
+        p.set_interlace_handling();
         
+        /// UPDATE the info struct --
+        /// note no analog to this in PNGFormat::write():
+        // png_read_update_info(p.png_ptr(), p.png_info());
+        p.update();
+        
+        /// allocate:
         volatile int row_bytes = png_get_rowbytes(p.png_ptr(), p.png_info());
         png_bytep* __restrict__ row_pointers = new png_bytep[h];
         for (int y = 0; y < h; ++y) {
             row_pointers[y] = new png_byte[row_bytes];
         }
         
-        // PP_CHECK(p.png_ptr, "PNG read rowbytes failure");
+        /// error check: after rowbytes allocation
         if (p.has_error()) {
             imread_raise(PNGIOError,
-                "PNG read rowbytes failure");
+                "PNG read/allocate rowbytes failure");
         }
         
+        /// actually read the image data into row_pointers:
         png_read_image(p.png_ptr(), row_pointers);
         
-        // PP_CHECK(p.png_ptr(), "PNG read image failure");
+        /// error check: after image data read
         if (p.has_error()) {
             imread_raise(PNGIOError,
                 "PNG read image failure");
@@ -503,25 +581,27 @@ namespace im {
         }
         
         /// clean up
-        // for (int y = 0; y < h; y++) { delete[] row_pointers[y]; }
         delete[] row_pointers;
         
         return output;
     }
     
-    void PNGFormat::write(Image& input, byte_sink* output, Options const& opts) {
-        // png_holder p(png_holder::write_mode);
-        // p.create_info();
-        // png_set_write_fn(p.png_ptr, output, write_to_source, flush_source);
-        
+    void PNGFormat::write(Image& input,
+                          byte_sink* output,
+                          Options const& opts) {
+        /// create outr PNGWriter wrapper-class instance:
         PNGWriter p(output);
         
+        /// store the width/height/channels/bit depth image info:
         const int width = input.dim(0);
         const int height = input.dim(1);
         const int channels = input.dim(2);
         const int bit_depth = input.nbits();
         
         png_bytep* __restrict__ row_pointers;
+        
+        /// map the channel count to a PNG color constant --
+        /// q.v. the static array allocated in the anon. namespace above:
         const png_byte color_type = color_types[channels - 1];
         
         png_set_IHDR(p.png_ptr(), p.png_info(),
@@ -529,15 +609,19 @@ namespace im {
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
                      PNG_FILTER_TYPE_BASE);
         
+        /// set the compression level, as we specified:
         const int compression = opts.cast<int>("png:compression", 0);
         if (compression) {
             png_set_compression_level(p.png_ptr(), compression);
         }
         
-        // png_write_info(p.png_ptr, p.png_info);
+        /// start the compression!
         p.start();
+        
+        /// allocate byte array for row_pointers per the image height:
         row_pointers = new png_bytep[height];
         
+        /// sort out the stride and rowbytes situation:
         const int c_stride = (channels == 1) ? 0 : input.stride(2);
         const int rowbytes = png_get_rowbytes(p.png_ptr(), p.png_info());
         int x = 0, y = 0, c = 0;
