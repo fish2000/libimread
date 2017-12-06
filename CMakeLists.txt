@@ -129,8 +129,9 @@ SET(CROSSGUID_DIR "${DEPS_DIR}/crossguid")
 SET(DEPIXELATE_DIR "${DEPS_DIR}/depixelate")
 SET(DOCOPT_DIR "${DEPS_DIR}/docopt")
 SET(GSL_DIR "${DEPS_DIR}/GSL")
-SET(INICPP_DIR "${DEPS_DIR}/inicpp")
+SET(ICCJPEG_DIR "${DEPS_DIR}/iccjpeg")
 SET(IMAGECOMPRESSION_DIR "${DEPS_DIR}/imagecompression")
+SET(INICPP_DIR "${DEPS_DIR}/inicpp")
 SET(LMDBXX_DIR "${DEPS_DIR}/lmdbxx")
 SET(LRUCACHE11_DIR "${DEPS_DIR}/lrucache11")
 SET(SG14_DIR "${DEPS_DIR}/SG14")
@@ -190,6 +191,7 @@ include_directories("${CMAKE_BINARY_DIR}/include")      # generated headers e.g.
 include_directories("${CROSSGUID_DIR}")
 # include_directories("${DEPIXELATE_DIR}")
 include_directories("${DOCOPT_DIR}")
+include_directories("${ICCJPEG_DIR}")
 # include_directories("${IMAGECOMPRESSION_DIR}")
 include_directories("${INICPP_DIR}/include")
 # include_directories("${LMDBXX_DIR}")
@@ -231,6 +233,7 @@ add_dependencies(imread "guid")
 # add_dependencies(imread "imagecompression")
 add_dependencies(imread "GSL")
 add_dependencies(imread "SG14")
+add_dependencies(imread "iccjpeg")
 add_dependencies(imread "inicpp")
 add_dependencies(imread "iod_symbolize")
 
@@ -254,6 +257,7 @@ target_link_libraries(
     z png                                   # shared libraries (dylib) linked normally
     GSL SG14                                # “INTERFACE” (header-only) libraries
     $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
+    $<TARGET_OBJECTS:iccjpeg>               # merge objects from ‘iccjpeg’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
     # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
     # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library
@@ -277,6 +281,7 @@ target_link_libraries(
     z png                                   # static libraries (“.a” archive files) linked normally
     GSL SG14                                # “INTERFACE” (header-only) libraries
     $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
+    $<TARGET_OBJECTS:iccjpeg>               # merge objects from ‘iccjpeg’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
     # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
     # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library

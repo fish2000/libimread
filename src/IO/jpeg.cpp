@@ -217,14 +217,14 @@ namespace im {
                 }
             
             virtual ~JPEGDecompressor() {
-                jpeg_finish_decompress(&decompress_state);
+                if (decompress_started) { jpeg_finish_decompress(&decompress_state); }
                 jpeg_destroy_decompress(&decompress_state);
             }
             
             bool start() {
                 int const header_status = jpeg_read_header(&decompress_state, BOOLEAN_TRUE());
-                bool start_status = jpeg_start_decompress(&decompress_state);
-                return start_status && header_status == JPEG_HEADER_OK;
+                decompress_started = jpeg_start_decompress(&decompress_state);
+                return decompress_started && header_status == JPEG_HEADER_OK;
             }
             
             int height() const                  { return decompress_state.output_height; }
@@ -275,6 +275,7 @@ namespace im {
             public:
                 JPEGSourceAdaptor adaptor;
                 jpeg_decompress_struct decompress_state;
+                bool decompress_started{ false };
         };
         
         /// JPEG compressor API class, wrapping the `jpeg_compress_struct`
@@ -291,12 +292,13 @@ namespace im {
                 }
             
             virtual ~JPEGCompressor() {
-                jpeg_finish_compress(&compress_state);
+                if (compress_started) { jpeg_finish_compress(&compress_state); }
                 jpeg_destroy_compress(&compress_state);
             }
             
             void start() {
                 jpeg_start_compress(&compress_state, BOOLEAN_TRUE());
+                compress_started = true;
             }
             
             void set_defaults() {
@@ -366,6 +368,7 @@ namespace im {
             public:
                 JPEGDestinationAdaptor adaptor;
                 jpeg_compress_struct compress_state;
+                bool compress_started{ false };
         };
         
         /// Shortcut template function to extract the size

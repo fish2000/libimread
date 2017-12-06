@@ -5,6 +5,8 @@
 #include <csetjmp>
 #include <sstream>
 #include <iostream>
+#include <memory>
+#include <array>
 
 #include <iod/json.hh>
 
@@ -28,6 +30,112 @@ namespace im {
     DECLARE_FORMAT_OPTIONS(PNGFormat);
     
     namespace {
+        
+        class PNGByteArray {
+            
+            public:
+                using value_type = png_byte;
+                using pointer = png_bytep;
+                using reference = std::add_lvalue_reference_t<value_type>;
+                using const_reference = std::add_const_t<reference>;
+                using size_type = std::size_t;
+            
+            public:
+                /// Construct with height and “rowbytes” values:
+                PNGByteArray(std::size_t h, std::size_t rb)
+                    :data_ptr{ new png_bytep[h] }
+                    ,m_height{ h }
+                    ,m_rowbytes{ rb }
+                    {
+                        for (std::size_t idx = 0; idx < m_height; ++idx) {
+                            data_ptr[idx] = new png_byte[m_rowbytes];
+                        }
+                    }
+            
+            public:
+                /// Move constructor:
+                PNGByteArray(PNGByteArray&& other) noexcept
+                    :data_ptr(std::exchange(other.data_ptr, nullptr))
+                    ,m_height(std::exchange(other.m_height, 0))
+                    ,m_rowbytes(std::exchange(other.m_rowbytes, 0))
+                    {
+                        other.deallocate = false;
+                    }
+                
+                /// Move assignment operator:
+                PNGByteArray& operator=(PNGByteArray&& other) noexcept {
+                    if (data_ptr != other.data_ptr) {
+                        data_ptr = std::exchange(other.data_ptr, nullptr);
+                        m_height = std::exchange(other.m_height, 0);
+                        m_rowbytes = std::exchange(other.m_rowbytes, 0);
+                        other.deallocate = false;
+                    }
+                    return *this;
+                }
+            
+            public:
+                /// Destructor:
+                virtual ~PNGByteArray() {
+                    if (deallocate) {
+                        for (std::size_t idx = 0; idx < m_height; ++idx) {
+                            delete[] data_ptr[idx];
+                        }
+                        delete[] data_ptr;
+                    }
+                }
+            
+            public:
+                /// API - accessors:
+                constexpr std::size_t height() const      { return m_height;              }
+                constexpr std::size_t rowbytes() const    { return m_rowbytes;            }
+                constexpr std::size_t size() const        { return m_height * m_rowbytes; }
+                constexpr png_bytep*  data() const        { return data_ptr;              }
+                constexpr operator png_bytep*() const     { return data_ptr;              }
+            
+            public:
+                /// API - subscript operator:
+                constexpr png_byte* operator[](std::size_t idx) const {
+                    return data_ptr[idx];
+                }
+                
+                /// API - “at(…)” a la std::vector<…> and friends:
+                constexpr png_byte* at(std::size_t idx) const {
+                    if (!(idx < m_height)) {
+                        imread_raise(PNGIOError,
+                            "PNGByteArray::at() called with out-of-bounds index",
+                         FF("PNGByteArray::at( %u ) -> height = %u", idx,
+                                                                     m_height));
+                    }
+                    return data_ptr[idx];
+                }
+                
+                /// API - “at(…)” returns a specific byte, from a row and a byte index:
+                constexpr png_byte at(std::size_t row_idx, std::size_t byte_idx) const {
+                    if ((!(row_idx < m_height)) || (!(byte_idx < m_rowbytes))) {
+                        imread_raise(PNGIOError,
+                            "PNGByteArray::at() called with an out-of-bounds index",
+                         FF("PNGByteArray::at( %u, %u ) -> height = %u, rowbytes = %u", row_idx,
+                                                                                        byte_idx,
+                                                                                        m_height,
+                                                                                        m_rowbytes));
+                    }
+                    return data_ptr[row_idx][byte_idx];
+                }
+            
+            protected:
+                png_bytep* __restrict__ data_ptr{ nullptr };    /// root data pointer
+                std::size_t m_height{ 1 };                      /// “height” value
+                std::size_t m_rowbytes{ 0 };                    /// “rowbytes” value
+                bool deallocate = true;                         /// whether or not deallocation happens on destruction
+            
+            private:
+                /// Disallow default-construct, copy-construct and copy-assign:
+                constexpr PNGByteArray() noexcept = default;
+                constexpr PNGByteArray(PNGByteArray const&);
+                constexpr PNGByteArray& operator=(PNGByteArray const&);
+            
+        };
+        
         
         class png_holder {
             public:
@@ -140,6 +248,11 @@ namespace im {
                 virtual png_infop png_info() const = 0;
                 
             public:
+                int rowbytes() const {
+                    return png_get_rowbytes(structure_ptr, png_info());
+                }
+                
+            public:
                 mutable png_structp structure_ptr;
                 
             public:
@@ -243,6 +356,12 @@ namespace im {
                     return png_get_valid(structure_ptr, info_ptr, PNG_INFO_iCCP);
                 }
                 
+                PNGByteArray bytearray() const {
+                    PNGByteArray out(height(), rowbytes());
+                    png_read_image(structure_ptr, out.data());
+                    return out;
+                }
+                
             public:
                 mutable byte_source* source_ptr;
                 mutable png_infop info_ptr;
@@ -327,26 +446,28 @@ namespace im {
             s->flush();
         }
         
-        __attribute__((unused))
-        int color_type_of(Image* im) {
-            if (im->nbits() != 8 && im->nbits() != 16) {
-                imread_raise(CannotWriteError,
-                    "Image must be 8 or 16 bits for saving in PNG format");
-            }
-            if (im->ndims() == 2) { return PNG_COLOR_TYPE_GRAY; }
-            if (im->ndims() != 3) {
-                imread_raise(CannotWriteError,
-                    "Image must be either 2 or 3 dimensional");
-            }
-            if (im->dim(2) == 3) { return PNG_COLOR_TYPE_RGB; }
-            if (im->dim(2) == 4) { return PNG_COLOR_TYPE_RGBA; }
-            imread_raise_default(CannotWriteError);
-        }
+        // __attribute__((unused))
+        // int color_type_of(Image* im) {
+        //     if (im->nbits() != 8 && im->nbits() != 16) {
+        //         imread_raise(CannotWriteError,
+        //             "Image must be 8 or 16 bits for saving in PNG format");
+        //     }
+        //     if (im->ndims() == 2) { return PNG_COLOR_TYPE_GRAY; }
+        //     if (im->ndims() != 3) {
+        //         imread_raise(CannotWriteError,
+        //             "Image must be either 2 or 3 dimensional");
+        //     }
+        //     if (im->dim(2) == 3) { return PNG_COLOR_TYPE_RGB; }
+        //     if (im->dim(2) == 4) { return PNG_COLOR_TYPE_RGBA; }
+        //     imread_raise_default(CannotWriteError);
+        // }
         
-        static png_byte color_types[4] = {
-            PNG_COLOR_TYPE_GRAY, PNG_COLOR_TYPE_GRAY_ALPHA,
-            PNG_COLOR_TYPE_RGB,  PNG_COLOR_TYPE_RGB_ALPHA
-        };
+        static std::array<png_byte, 4> color_types{{
+            PNG_COLOR_TYPE_GRAY,
+            PNG_COLOR_TYPE_GRAY_ALPHA,
+            PNG_COLOR_TYPE_RGB, 
+            PNG_COLOR_TYPE_RGB_ALPHA
+        }};
         
         /// XXX: I kind of hate this thing, for not being
         /// a real allocator (which means I am an allocatorist, right?)
@@ -422,20 +543,20 @@ namespace im {
     std::unique_ptr<Image> PNGFormat::read(byte_source* src,
                                            ImageFactory* factory,
                                            Options const& opts) {
-        PNGReader p(src);
-        p.start();
+        PNGReader reader(src);
+        reader.start();
         
         /// error check: initial
-        if (p.has_error()) {
+        if (reader.has_error()) {
             imread_raise(PNGIOError,
                 "PNG read struct setup failure");
         }
         
         /// store the width/height/channels/bit depth image information:
-        const int w = p.width();
-        const int h = p.height();
-        const int channels = p.channels();
-        const int bit_depth = p.bit_depth();
+        const int w = reader.width();
+        const int h = reader.height();
+        const int channels = reader.channels();
+        const int bit_depth = reader.bit_depth();
         
         /// error-check the bit depth we read from the PNG structure:
         if (bit_depth != 1 && bit_depth != 8 && bit_depth != 16) {
@@ -445,21 +566,21 @@ namespace im {
         }
         
         /// set “swap” if we are big-endian and the bit depth is high enough:
-        if (bit_depth == 16 && !detail::bigendian()) { p.set_swap(); }
+        // if (bit_depth == 16 && !detail::bigendian()) { p.set_swap(); }
         
         // volatile int d = -1;
         const bool strip_alpha = opts.cast<bool>("png:strip_alpha", false);
         
         /// Strip alpha channel, if we asked to do so:
         if (strip_alpha) {
-            p.set_strip_alpha();
+            reader.set_strip_alpha();
         }
         
         /// figure out the (potentially problematic) PNG color data situation:
-        const int d = p.components();
+        const int d = reader.components();
         
         /// error check: after “elaboration”
-        if (p.has_error()) {
+        if (reader.has_error()) {
             imread_raise(PNGIOError,
                 "PNG read elaboration failure");
         }
@@ -469,17 +590,17 @@ namespace im {
         
         /// GET METADATA - just ICC data for now
         if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
-            if (p.has_valid_ICC_data()) {
+            if (reader.has_valid_ICC_data()) {
                 /// extract the embedded ICC profile
                 int compression;
                 uint32_t length;
                 byte* data;
                 char* name;
                 
-                png_get_iCCP(p.png_ptr(), p.png_info(), &name,
-                                                        &compression,
-                                                        &data,
-                                                        &length);
+                png_get_iCCP(reader.png_ptr(), reader.png_info(), &name,
+                                                                  &compression,
+                                                                  &data,
+                                                                  &length);
                 
                 meta->set_icc_name(std::string(name));
                 meta->set_icc_data(&data[0], std::size_t(length));
@@ -487,36 +608,37 @@ namespace im {
         }
         
         /// set interlace handling:
-        // png_set_interlace_handling(p.png_ptr());
-        p.set_interlace_handling();
+        // png_set_interlace_handling(reader.png_ptr());
+        reader.set_interlace_handling();
         
         /// UPDATE the info struct --
         /// note no analog to this in PNGFormat::write():
-        // png_read_update_info(p.png_ptr(), p.png_info());
-        p.update();
+        // png_read_update_info(reader.png_ptr(), reader.png_info());
+        reader.update();
         
         /// allocate:
-        const int row_bytes = png_get_rowbytes(p.png_ptr(), p.png_info());
-        png_bytep* __restrict__ row_pointers = new png_bytep[h];
-        for (int y = 0; y < h; ++y) {
-            row_pointers[y] = new png_byte[row_bytes];
-        }
+        // const int row_bytes = png_get_rowbytes(reader.png_ptr(), reader.png_info());
+        // png_bytep* __restrict__ row_pointers = new png_bytep[h];
+        // for (int y = 0; y < h; ++y) {
+        //     row_pointers[y] = new png_byte[row_bytes];
+        // }
+        // const int rowbytes = reader.rowbytes();
+        PNGByteArray bytes(reader.bytearray());
         
         /// error check: after rowbytes allocation
-        if (p.has_error()) {
+        if (reader.has_error()) {
             imread_raise(PNGIOError,
                 "PNG read/allocate rowbytes failure");
         }
         
         /// actually read the image data into row_pointers:
-        png_read_image(p.png_ptr(), row_pointers);
+        // png_read_image(reader.png_ptr(), row_pointers);
         
         /// error check: after image data read
-        if (p.has_error()) {
-            imread_raise(PNGIOError,
-                "PNG read image failure");
-        }
-        
+        // if (reader.has_error()) {
+        //     imread_raise(PNGIOError,
+        //         "PNG read image failure");
+        // }
         
         /// convert the data to T (fake it for now with uint8_t)
         //T *ptr = (T*)output->data();
@@ -529,18 +651,18 @@ namespace im {
         
         if (bit_depth == 8) {
             for (int y = 0; y < h; ++y) {
-                uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(row_pointers[y]);
+                uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(bytes[y]);
                 for (int x = 0; x < w; ++x) {
                     for (int c = 0; c < d; ++c) {
                         ptr[c*c_stride] = *srcPtr++;
                     }
                     ++ptr;
                 }
-                delete[] row_pointers[y];
+                // delete[] row_pointers[y];
             }
         } else if (bit_depth == 16) {
             for (int y = 0; y < h; ++y) {
-                uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(row_pointers[y]);
+                uint8_t* __restrict__ srcPtr = static_cast<uint8_t*>(bytes[y]);
                 for (int x = 0; x < w; ++x) {
                     for (int c = 0; c < d; ++c) {
                         uint16_t hi = (*srcPtr++) << 8;
@@ -549,12 +671,12 @@ namespace im {
                     }
                     ++ptr;
                 }
-                delete[] row_pointers[y];
+                // delete[] row_pointers[y];
             }
         }
         
         /// clean up
-        delete[] row_pointers;
+        // delete[] row_pointers;
         
         return output;
     }
