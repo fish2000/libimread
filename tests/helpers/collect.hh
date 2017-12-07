@@ -7,7 +7,7 @@
 #include <libimread/ext/filesystem/path.h>
 
 #ifndef COLLECT_TEMPORARIES
-#define COLLECT_TEMPORARIES 0
+#define COLLECT_TEMPORARIES 1
 #endif
 
 #ifndef CHECK_DIRECTORY
