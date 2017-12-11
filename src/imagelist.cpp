@@ -33,7 +33,7 @@ namespace im {
         using nullchecker_f = std::add_pointer_t<bool(pointer_t)>;
         
         /// non-capturing lambda, converted inline to a function pointer:
-        static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
+        constexpr static const nullchecker_f nullchecker = [](pointer_t p) { return p == nullptr; };
     }
     
     ImageList::ImageList(ImageList::pointerlist_t pointerlist)
@@ -178,7 +178,7 @@ namespace im {
     DEFINE_DIMENSION_COMPUTE_FN(height);
     DEFINE_DIMENSION_COMPUTE_FN(planes);
     
-    void ImageList::reset_dimensions() const {
+    constexpr void ImageList::reset_dimensions() const {
         computed_width = computed_height = computed_planes = -1;
     }
     

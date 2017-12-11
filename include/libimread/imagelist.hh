@@ -120,7 +120,7 @@ namespace im {
             
         protected:
             /// reset all the computed dimension variables to -1
-            void reset_dimensions() const;
+            constexpr void reset_dimensions() const;
         
         protected:
             /// internal pointer vector
@@ -128,9 +128,9 @@ namespace im {
         
         protected:
             /// computed dimension values
-            mutable int computed_width = -1,
-                       computed_height = -1,
-                       computed_planes = -1;
+            mutable int computed_width{ -1 },
+                       computed_height{ -1 },
+                       computed_planes{ -1 };
     };
     
 } /* namespace im */
