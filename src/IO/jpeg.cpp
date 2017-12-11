@@ -170,11 +170,12 @@ namespace im {
             
             public:
                 using jpeg_error_mgr_t = struct jpeg_error_mgr;
+                using jumpbuffer_t = std::jmp_buf;
             
             public:
                 struct ErrorManager {
                     mutable jpeg_error_mgr_t mgr;
-                    mutable jmp_buf jumpbuffer;
+                    mutable jumpbuffer_t jumpbuffer;
                     mutable char message[JMSG_LENGTH_MAX];
                     
                     ErrorManager() {
@@ -184,7 +185,7 @@ namespace im {
                             ErrorManager* error_state_ptr = reinterpret_cast<ErrorManager*>(cinfo->err);
                             (*cinfo->err->format_message)(cinfo,
                                                           error_state_ptr->message);
-                            longjmp(error_state_ptr->jumpbuffer, 1);
+                            std::longjmp(error_state_ptr->jumpbuffer, 1);
                         };
                         message[0] = 0;
                     }
