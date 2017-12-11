@@ -18,7 +18,8 @@
 #include <libimread/ext/exif.hh>
 
 extern "C" {
-#include <jpeglib.h>
+    #include <jpeglib.h>
+    #include "iccjpeg/iccjpeg.h"
 }
 
 /// “boolean” is a jpeglib type, evidently:
@@ -222,7 +223,22 @@ namespace im {
             }
             
             bool start() {
+                /// see “iccjpeg” functions for documentation of the non-standard
+                /// JPEG functions setup_read_icc_profile(…) and read_icc_profile(…):
+                setup_read_icc_profile(&decompress_state);
                 int const header_status = jpeg_read_header(&decompress_state, BOOLEAN_TRUE());
+                if (header_status == JPEG_HEADER_OK) {
+                    JOCTET* icc_data;
+                    unsigned int icc_length;
+                    boolean const icc_profile_status = read_icc_profile(&decompress_state,
+                                                                        &icc_data,
+                                                                        &icc_length);
+                    if (icc_profile_status == BOOLEAN_TRUE()) {
+                        icc_profile = std::make_unique<JOCTET[]>(icc_length);
+                        std::memcpy(icc_profile.get(), icc_data, icc_length);
+                        std::free(icc_data);
+                    }
+                }
                 decompress_started = jpeg_start_decompress(&decompress_state);
                 return decompress_started && header_status == JPEG_HEADER_OK;
             }
@@ -276,6 +292,7 @@ namespace im {
                 JPEGSourceAdaptor adaptor;
                 jpeg_decompress_struct decompress_state;
                 bool decompress_started{ false };
+                byte_ptr icc_profile{ nullptr };
         };
         
         /// JPEG compressor API class, wrapping the `jpeg_compress_struct`
@@ -326,6 +343,20 @@ namespace im {
             void set_components(int components) { compress_state.input_components = components;
                                                   compress_state.in_color_space =
                                                          color_space_for_components(components); }
+            
+            void set_icc_profile(JOCTET const* icc_data, unsigned int icc_size) {
+                /// Call this BEFORE jpeg_write_scanlines()!
+                write_icc_profile(&compress_state,
+                                   icc_data,
+                                   icc_size);
+            }
+            
+            void set_icc_profile(const void* icc_data, std::size_t icc_size) {
+                /// Call this BEFORE jpeg_write_scanlines()!
+                write_icc_profile(&compress_state,
+                                   static_cast<JOCTET const*>(icc_data),
+                                   static_cast<unsigned int>(icc_size));
+            }
             
             JSAMPARRAY allocate_samples(int components = 0,
                                         int width = 0,

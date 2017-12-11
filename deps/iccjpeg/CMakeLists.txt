@@ -25,10 +25,10 @@ include_directories(/usr/local/include)
 link_directories(/usr/local/lib)
 
 # Project header file:
-set(hdrs "iccjpeg.h")
+set(hdrs "iccjpeg/iccjpeg.h")
 
 # Project source file:
-set(srcs "iccjpeg.c")
+set(srcs "iccjpeg/iccjpeg.c")
 
 # Add an “OBJECT” library target called “iccjpeg”:
 add_library(
@@ -65,6 +65,6 @@ install(TARGETS iccjpeg_static
         DESTINATION lib)
 
 # Install the header files:
-install(DIRECTORY   ./
+install(DIRECTORY   iccjpeg/
         DESTINATION include/iccjpeg
         FILES_MATCHING PATTERN "*.h")
