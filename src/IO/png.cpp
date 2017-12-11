@@ -96,12 +96,12 @@ namespace im {
             
             public:
                 /// API - subscript operator:
-                constexpr png_bytep operator[](std::size_t idx) const {
+                constexpr png_byte* operator[](std::size_t idx) const {
                     return data_ptr[idx];
                 }
                 
                 /// API - “at(…)” a la std::vector<…> and friends:
-                constexpr png_bytep at(std::size_t idx) const {
+                constexpr png_byte* at(std::size_t idx) const {
                     if (!(idx < m_height)) {
                         imread_raise(PNGIOError,
                             "PNGByteArray::at() called with out-of-bounds index",
@@ -123,6 +123,7 @@ namespace im {
                     }
                     return data_ptr[row_idx][byte_idx];
                 }
+                
                 
                 template <typename CastType> inline
                 constexpr CastType* at(std::size_t idx) const {
@@ -218,23 +219,6 @@ namespace im {
                 enum holder_mode { read_mode, write_mode } mode;
         };
         
-        static const std::array<int, 4> color_types{{
-            PNG_COLOR_TYPE_GRAY,    PNG_COLOR_TYPE_GRAY_ALPHA,
-            PNG_COLOR_TYPE_RGB,     PNG_COLOR_TYPE_RGB_ALPHA
-        }};
-        
-        int color_type_for(std::size_t channel_count) {
-            return color_types[channel_count - 1];
-        }
-        
-        int channel_count_for(png_byte color_type) {
-            auto found = std::find(std::begin(color_types),
-                                   std::end(color_types),
-                                   color_type);
-            if (found == std::end(color_types)) { return 0; }
-            return std::distance(std::begin(color_types), found) + 1;
-        }
-        
         class PNGErrorReporter {
             
             public:
@@ -274,7 +258,6 @@ namespace im {
             public:
                 virtual void start() const = 0;
                 virtual void update() const = 0;
-                virtual void finish() const = 0;
                 virtual png_infop png_info() const = 0;
                 
             public:
@@ -311,14 +294,6 @@ namespace im {
                             imread_raise(ProgrammingError,
                                 "Error returned from png_create_info_struct");
                         }
-                        png_set_read_fn(structure_ptr, source_ptr,
-                                     [](png_structp struct_ptr, png_byte* buffer, std::size_t n) -> void {
-                                          im::byte_source* source = static_cast<im::byte_source*>(png_get_io_ptr(struct_ptr));
-                                          const std::size_t actual = source->read(reinterpret_cast<byte*>(buffer), n);
-                                          if (actual != n) {
-                                              imread_raise_default(CannotReadError);
-                                          }
-                                     });
                     }
             
             public:
@@ -329,32 +304,22 @@ namespace im {
             
             public:
                 virtual void start() const override {
+                    png_set_read_fn(structure_ptr, source_ptr,
+                                 [](png_structp struct_ptr, png_byte* buffer, std::size_t n) -> void {
+                                      im::byte_source* source = static_cast<im::byte_source*>(png_get_io_ptr(struct_ptr));
+                                      const std::size_t actual = source->read(reinterpret_cast<byte*>(buffer), n);
+                                      if (actual != n) {
+                                          imread_raise_default(CannotReadError);
+                                      }
+                                 });
                     png_read_info(structure_ptr, info_ptr);
+                    
+                    /// set “swap” if necessary
                     if (png_get_bit_depth(structure_ptr, info_ptr) == 16 && !detail::bigendian()) {
                         PNGErrorReporter::set_swap();
                     }
-                }
-                
-            public:
-                virtual void update() const override {
-                    png_read_update_info(structure_ptr, info_ptr);
-                }
-                
-            public:
-                virtual void finish() const override {}
-                
-            public:
-                virtual png_infop png_info() const override {
-                    return info_ptr;
-                }
-                
-            public:
-                int width() const           { return png_get_image_width(structure_ptr, info_ptr);  }
-                int height() const          { return png_get_image_height(structure_ptr, info_ptr); }
-                int channels() const        { return png_get_channels(structure_ptr, info_ptr);     }
-                int bit_depth() const       { return png_get_bit_depth(structure_ptr, info_ptr);    }
-                
-                int components() const {
+                    
+                    /// compute `image_components` and call relevant PNG-API functions as needed:
                     if (image_components == 0) {
                         switch (png_get_color_type(structure_ptr, info_ptr)) {
                             case PNG_COLOR_TYPE_PALETTE:
@@ -384,22 +349,35 @@ namespace im {
                             }
                         }
                     }
-                    return image_components;
+                }
+                
+                virtual void update() const override {
+                    png_read_update_info(structure_ptr, info_ptr);
+                }
+                
+                virtual png_infop png_info() const override {
+                    return info_ptr;
                 }
                 
             public:
+                int width() const           { return png_get_image_width(structure_ptr, info_ptr);  }
+                int height() const          { return png_get_image_height(structure_ptr, info_ptr); }
+                int channels() const        { return png_get_channels(structure_ptr, info_ptr);     }
+                int bit_depth() const       { return png_get_bit_depth(structure_ptr, info_ptr);    }
+                
+                int components() const      { return image_components;                              }
+                
                 bool has_valid_ICC_data() const {
                     return png_get_valid(structure_ptr, info_ptr, PNG_INFO_iCCP);
                 }
                 
-            public:
                 PNGByteArray bytearray() const {
                     PNGByteArray out(height(), rowbytes());
                     png_read_image(structure_ptr, out.data());
                     return out;
                 }
                 
-            protected:
+            public:
                 mutable byte_source* source_ptr;
                 mutable png_infop info_ptr;
                 mutable int image_components{ 0 };
@@ -426,17 +404,6 @@ namespace im {
                             imread_raise(ProgrammingError,
                                 "Error returned from png_create_info_struct");
                         }
-                        png_set_write_fn(structure_ptr, sink_ptr,
-                                      [](png_structp struct_ptr, png_byte* buffer, std::size_t n) -> void {
-                                          im::byte_sink* sink = static_cast<im::byte_sink*>(png_get_io_ptr(struct_ptr));
-                                          const std::size_t actual = sink->write(reinterpret_cast<byte*>(buffer), n);
-                                          if (actual != n) {
-                                              imread_raise_default(CannotWriteError);
-                                          }
-                                      },
-                                      [](png_structp struct_ptr) -> void {
-                                          static_cast<im::byte_sink*>(png_get_io_ptr(struct_ptr))->flush();
-                                      });
                     }
             
             public:
@@ -447,81 +414,29 @@ namespace im {
             
             public:
                 virtual void start() const override {
+                    png_set_write_fn(structure_ptr, sink_ptr,
+                                  [](png_structp struct_ptr, png_byte* buffer, std::size_t n) -> void {
+                                      im::byte_sink* sink = static_cast<im::byte_sink*>(png_get_io_ptr(struct_ptr));
+                                      const std::size_t actual = sink->write(reinterpret_cast<byte*>(buffer), n);
+                                      if (actual != n) {
+                                          imread_raise_default(CannotWriteError);
+                                      }
+                                  },
+                                  [](png_structp struct_ptr) -> void {
+                                      static_cast<im::byte_sink*>(png_get_io_ptr(struct_ptr))->flush();
+                                  });
                     png_write_info(structure_ptr, info_ptr);
                 }
                 
-            public:
-                int width() const               { return dimensions.width;                              }
-                int height() const              { return dimensions.height;                             }
-                int channels() const            { return dimensions.channels;                           }
-                int bit_depth() const           { return dimensions.bit_depth;                          }
-                png_byte color_type() const     { return dimensions.color_type;                         }
-                png_byte interlace() const      { return dimensions.interlace;                          }
-                png_byte compression() const    { return dimensions.compression;                        }
-                png_byte filter() const         { return dimensions.filter;                             }
+                virtual void update() const override {}
                 
-            public:
-                void set_width(int width)       { dimensions.width = width;                             }
-                void set_height(int height)     { dimensions.height = height;                           }
-                void set_channels(int channels) { dimensions.channels = channels;
-                                                  dimensions.color_type = color_type_for(channels);     }
-                void set_bit_depth(int depth)   { dimensions.bit_depth = depth;                         }
-                void set_color_type(int coltyp) { dimensions.color_type = coltyp;
-                                                  dimensions.channels = channel_count_for(coltyp);      }
-                
-                void set_compression(int level) { png_set_compression_level(structure_ptr, level); }
-                
-            public:
-                void retrieve_headers() const   { dimensions.from_IHDR(structure_ptr, info_ptr); } /// populates “dimension”
-                void commit_headers() const     { dimensions.to_IHDR(structure_ptr, info_ptr); } /// writes “dimension” values
-                
-                virtual void update() const override { dimensions.to_IHDR(structure_ptr, info_ptr); }
-                
-            public:
-                PNGByteArray bytearray() const {
-                    return PNGByteArray(height(), rowbytes());
-                }
-                
-                void write_bytes(png_bytep* row_pointers) const {
-                    if (row_pointers) {
-                        png_write_image(structure_ptr, row_pointers);
-                    }
-                }
-                
-            public:
-                virtual void finish() const override {
-                    png_write_end(structure_ptr, info_ptr);
-                }
-                
-            public:
                 virtual png_infop png_info() const override {
                     return info_ptr;
                 }
                 
-            protected:
+            public:
                 mutable byte_sink* sink_ptr;
                 mutable png_infop info_ptr;
-                mutable struct dimension_cache_t {
-                    uint32_t width{0},
-                             height{0},
-                             channels{0};
-                     int32_t bit_depth{0},
-                             color_type{PNG_COLOR_TYPE_RGB},
-                             interlace{PNG_INTERLACE_NONE},
-                             compression{PNG_COMPRESSION_TYPE_BASE},
-                             filter{PNG_FILTER_TYPE_BASE};
-                    void to_IHDR(png_structp structure, png_infop info) {
-                                       png_set_IHDR(structure, info,
-                                                    width, height,
-                                                    bit_depth, color_type,
-                                                    interlace, compression, filter); }
-                    void from_IHDR(png_structp structure, png_infop info) {
-                                       png_get_IHDR(structure, info,
-                                                    &width, &height,
-                                                    &bit_depth, &color_type,
-                                                    &interlace, &compression, &filter);
-                                       channels = channel_count_for(color_type); }
-                } dimensions;
         
         };
         
@@ -545,6 +460,29 @@ namespace im {
             byte_sink* s = static_cast<byte_sink*>(png_get_io_ptr(png_ptr));
             s->flush();
         }
+        
+        // __attribute__((unused))
+        // int color_type_of(Image* im) {
+        //     if (im->nbits() != 8 && im->nbits() != 16) {
+        //         imread_raise(CannotWriteError,
+        //             "Image must be 8 or 16 bits for saving in PNG format");
+        //     }
+        //     if (im->ndims() == 2) { return PNG_COLOR_TYPE_GRAY; }
+        //     if (im->ndims() != 3) {
+        //         imread_raise(CannotWriteError,
+        //             "Image must be either 2 or 3 dimensional");
+        //     }
+        //     if (im->dim(2) == 3) { return PNG_COLOR_TYPE_RGB; }
+        //     if (im->dim(2) == 4) { return PNG_COLOR_TYPE_RGBA; }
+        //     imread_raise_default(CannotWriteError);
+        // }
+        
+        static std::array<png_byte, 4> color_types{{
+            PNG_COLOR_TYPE_GRAY,
+            PNG_COLOR_TYPE_GRAY_ALPHA,
+            PNG_COLOR_TYPE_RGB, 
+            PNG_COLOR_TYPE_RGB_ALPHA
+        }};
         
         /// XXX: I kind of hate this thing, for not being
         /// a real allocator (which means I am an allocatorist, right?)
@@ -620,10 +558,7 @@ namespace im {
     std::unique_ptr<Image> PNGFormat::read(byte_source* src,
                                            ImageFactory* factory,
                                            Options const& opts) {
-        /// Create our PNGReader wrapper-class instance:
         PNGReader reader(src);
-        
-        /// Start the decompression immediately:
         reader.start();
         
         /// error check: initial
@@ -645,13 +580,8 @@ namespace im {
                    "Only bit depths ∈ {1,8,16} are supported.");
         }
         
-        /// set “swap” if we are big-endian and the bit depth is high enough:
-        // if (bit_depth == 16 && !detail::bigendian()) { p.set_swap(); }
-        
-        // volatile int d = -1;
-        const bool strip_alpha = opts.cast<bool>("png:strip_alpha", false);
-        
         /// Strip alpha channel, if we asked to do so:
+        const bool strip_alpha = opts.cast<bool>("png:strip_alpha", false);
         if (strip_alpha) {
             reader.set_strip_alpha();
         }
@@ -690,14 +620,13 @@ namespace im {
         /// set interlace handling:
         reader.set_interlace_handling();
         
-        /// UPDATE the info struct --
-        /// note no analog to this in PNGFormat::write():
+        /// UPDATE the info struct:
         reader.update();
         
-        /// allocate and fill row pointer byte array:
+        /// allocate:
         PNGByteArray bytes(reader.bytearray());
         
-        /// error check: after row pointer allocation and preparation:
+        /// error check: after rowbytes allocation
         if (reader.has_error()) {
             imread_raise(PNGIOError,
                 "PNG read/allocate rowbytes failure");
@@ -712,45 +641,37 @@ namespace im {
         //         w, h, channels, bit_depth, d));
         
         if (bit_depth == 8) {
-            int x{0}, y{0}, c{0}, cc{0};
-            for (; y < h; ++y) {
+            for (int y = 0; y < h; ++y) {
                 uint8_t* __restrict__ srcPtr = bytes.at<uint8_t>(y);
-                for (; x < w; ++x) {
-                    for (c = cc = 0; c < d; ++c, cc += c_stride) {
-                        ptr[cc] = *srcPtr++;
+                for (int x = 0; x < w; ++x) {
+                    for (int c = 0; c < d; ++c) {
+                        ptr[c*c_stride] = *srcPtr++;
                     }
                     ++ptr;
                 }
             }
         } else if (bit_depth == 16) {
-            int x{0}, y{0},
-                c{0}, cc{0};
-             uint16_t hi{0},
-                      lo{0};
-            for (; y < h; ++y) {
+            for (int y = 0; y < h; ++y) {
                 uint8_t* __restrict__ srcPtr = bytes.at<uint8_t>(y);
-                for (; x < w; ++x) {
-                    for (c = cc = 0; c < d; ++c, cc += c_stride) {
-                        hi = (*srcPtr++) << 8;
-                        lo = hi | (*srcPtr++);
-                        ptr[cc] = lo;
+                for (int x = 0; x < w; ++x) {
+                    for (int c = 0; c < d; ++c) {
+                        uint16_t hi = (*srcPtr++) << 8;
+                        uint16_t lo = hi | (*srcPtr++);
+                        ptr[c*c_stride] = lo;
                     }
                     ++ptr;
                 }
             }
         }
         
-        /// finish up what needs finishing:
-        reader.finish();
-        
-        /// return newly created image:
+        /// return freshly created image:
         return output;
     }
     
     void PNGFormat::write(Image& input,
                           byte_sink* output,
                           Options const& opts) {
-        /// create our PNGWriter wrapper-class instance:
+        /// create outr PNGWriter wrapper-class instance:
         PNGWriter writer(output);
         
         /// store the width/height/channels/bit depth image info:
@@ -759,61 +680,33 @@ namespace im {
         const int channels = input.dim(2);
         const int bit_depth = input.nbits();
         
-        /// error-check the bit depth we read from the Image instance:
-        if (bit_depth != 1 && bit_depth != 8 && bit_depth != 16) {
-            imread_raise(CannotWriteError,
-                FF("Cannot write this bit depth ( %i ).", bit_depth),
-                   "Only bit depths ∈ {1,8,16} are supported.");
-        }
-        
-        // png_bytep* __restrict__ row_pointers;
+        png_bytep* __restrict__ row_pointers;
         
         /// map the channel count to a PNG color constant --
         /// q.v. the static array allocated in the anon. namespace above:
-        // const png_byte color_type = color_type_as_channel_count(channels);
+        const png_byte color_type = color_types[channels - 1];
         
-        /// set the dimensions and other meta-info values:
-        writer.set_width(width);
-        writer.set_height(height);
-        writer.set_channels(channels);
-        writer.set_bit_depth(bit_depth);
+        png_set_IHDR(writer.png_ptr(), writer.png_info(),
+                     width, height, bit_depth, color_type,
+                     PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
+                     PNG_FILTER_TYPE_BASE);
         
         /// set the compression level, as we specified:
-        // const int zlevel = opts.cast<int>("png:compression", Z_BEST_COMPRESSION);
-        const int zlevel = opts.cast<int>("png:compression", 0);
-        if (zlevel) {
-            // png_set_compression_level(writer.png_ptr(), compression);
-            writer.set_compression(zlevel);
+        const int compression = opts.cast<int>("png:compression", Z_BEST_COMPRESSION);
+        if (compression) {
+            png_set_compression_level(writer.png_ptr(), compression);
         }
-        
-        /// update libpng’s PNG struct with the latest dimensions:
-        writer.update();
-        
-        // png_set_IHDR(writer.png_ptr(),
-        //              writer.png_info(),
-        //              width, height, bit_depth,
-        //              color_type_for(channels),
-        //              PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
-        //                                  PNG_FILTER_TYPE_BASE);
         
         /// start the compression!
         writer.start();
         
-        /// error check: initial
-        if (writer.has_error()) {
-            imread_raise(PNGIOError,
-                "PNG write struct setup failure");
-        }
-        
         /// allocate byte array for row_pointers per the image height:
-        // row_pointers = new png_bytep[height];
-        
-        PNGByteArray bytes(writer.bytearray());
+        row_pointers = new png_bytep[height];
         
         /// sort out the stride and rowbytes situation:
         const int c_stride = (channels == 1) ? 0 : input.stride(2);
-        // const int rowbytes = png_get_rowbytes(writer.png_ptr(), writer.png_info());
-        int x{0}, y{0}, c{0}, cc{0};
+        const int rowbytes = png_get_rowbytes(writer.png_ptr(), writer.png_info());
+        int x = 0, y = 0, c = 0;
         uint8_t* __restrict__ dstPtr;
         uint8_t out;
         
@@ -821,30 +714,26 @@ namespace im {
             // downconvert to uint8_t from uint16_t-ish data
             uint16_t* __restrict__ srcPtr = input.rowp_as<uint16_t>(0);
             
-            for (; y < height; ++y) {
-                // row_pointers[y] = new png_byte[rowbytes];
-                // dstPtr = static_cast<uint8_t*>(row_pointers[y]);
-                dstPtr = bytes.at<uint8_t>(y);
-                for (; x < width; ++x) {
-                    for (; c < channels; ++c) {
-                        *dstPtr++ = srcPtr[c*c_stride] >> 8;
+            for (y = 0; y < height; ++y) {
+                row_pointers[y] = new png_byte[rowbytes];
+                dstPtr = static_cast<uint8_t*>(row_pointers[y]);
+                for (x = 0; x < width; ++x) {
+                    for (c = 0; c < channels; c++) {
+                        *dstPtr++ = srcPtr[c*c_stride];
                     }
                     srcPtr++;
                 }
             }
         } else if (bit_depth == 8) {
             // stick with uint8_t
-            av::strided_array_view<uint8_t, 3> view = input.view<uint8_t>();
+            av::strided_array_view<byte, 3> view = input.view();
             
-            for (; y < height; ++y) {
-                // row_pointers[y] = new png_byte[rowbytes];
-                // dstPtr = static_cast<uint8_t*>(row_pointers[y]);
-                dstPtr = bytes.at<uint8_t>(y);
-                for (; x < width; ++x) {
-                    // av::strided_array_view<uint8_t, 1> pixel = view[x][y];
-                    for (; c < channels; c++) {
-                        *dstPtr++ = view[{ x, y, c }];
-                        // *dstPtr++ = pixel[c];
+            for (y = 0; y < height; ++y) {
+                row_pointers[y] = new png_byte[rowbytes];
+                dstPtr = static_cast<uint8_t*>(row_pointers[y]);
+                for (x = 0; x < width; ++x) {
+                    for (c = 0; c < channels; c++) {
+                        *dstPtr++ = view[{x, y, c}];
                     }
                 }
             }
@@ -854,26 +743,18 @@ namespace im {
         }
         
         // write data
-        // imread_assert(!setjmp(png_jmpbuf(writer.png_ptr)),
+        // imread_assert(!setjmp(png_jmpbuf(p.png_ptr)),
         //     "[write_png_file] Error during writing bytes");
-        // png_write_image(writer.png_ptr(), row_pointers);
-        writer.write_bytes(bytes.data());
+        png_write_image(writer.png_ptr(), row_pointers);
         
         // finish write
-        // imread_assert(!setjmp(png_jmpbuf(writer.png_ptr())),
-        //     "[write_png_file] Error during end of write");
-        // png_write_end(writer.png_ptr(), writer.png_info());
-        writer.finish();
-        
-        /// error check: final
-        if (writer.has_error()) {
-            imread_raise(PNGIOError,
-                "PNG error after calling PNGWriter::finish()");
-        }
+        imread_assert(!setjmp(png_jmpbuf(writer.png_ptr())),
+            "[write_png_file] Error during end of write");
+        png_write_end(writer.png_ptr(), writer.png_info());
         
         // clean up
-        // for (int y = 0; y < height; ++y) { delete[] row_pointers[y]; }
-        // delete[] row_pointers;
+        for (int y = 0; y < height; ++y) { delete[] row_pointers[y]; }
+        delete[] row_pointers;
     }
     
     
