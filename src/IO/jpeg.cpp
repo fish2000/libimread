@@ -223,12 +223,12 @@ namespace im {
                 jpeg_destroy_decompress(&decompress_state);
             }
             
-            bool start() {
+            bool start(bool read_icc = false) {
                 /// see “iccjpeg” functions for documentation of the non-standard
                 /// JPEG functions setup_read_icc_profile(…) and read_icc_profile(…):
-                setup_read_icc_profile(&decompress_state);
+                if (read_icc) { setup_read_icc_profile(&decompress_state); }
                 int const header_status = jpeg_read_header(&decompress_state, BOOLEAN_TRUE());
-                if (header_status == JPEG_HEADER_OK) {
+                if (read_icc && header_status == JPEG_HEADER_OK) {
                     JOCTET* icc_data;
                     unsigned int icc_length;
                     boolean const icc_profile_status = read_icc_profile(&decompress_state,
@@ -423,8 +423,10 @@ namespace im {
         
         JPEGDecompressor decompressor(src);
         
-        /// first, read the header & image data:
-        decompressor.start();
+        /// first, read the JPEG header, the image metadata,
+        /// and (optionally) the embedded ICC profile data:
+        bool read_icc_profile = opts.cast<bool>("jpg:read_icc_profile", false);
+        decompressor.start(read_icc_profile);
         
         /// initial error check:
         if (decompressor.has_error()) {
@@ -448,7 +450,7 @@ namespace im {
         int color_stride = (c == 1) ? 0 : output->stride(2);
         JSAMPLE* __restrict__ ptr = output->rowp_as<JSAMPLE>(0);
         
-        /// read scanlines in loop:
+        /// read image data as scanlines, in a loop:
         while (decompressor.scanline() < h) {
             decompressor.read_scanlines(samples);
             JSAMPLE* __restrict__ srcPtr = samples[0];
@@ -586,7 +588,7 @@ namespace im {
         /// view data as type JSAMPLE:
         av::strided_array_view<JSAMPLE, 3> view = input.view<JSAMPLE>();
         
-        /// write scanlines in pixel loop:
+        /// write image data as scanlines, in a pixel loop:
         int scan;
         while ((scan = compressor.next_scanline()) < h) {
             JSAMPLE* __restrict__ dstPtr = samples[0];
