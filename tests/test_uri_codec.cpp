@@ -40,7 +40,7 @@ namespace {
         CHECK(uri::decode(unsafe_encoded) == unsafe);
         
         /// random-character test:
-        const int MAX_LEN = 128;
+        constexpr static const int MAX_LEN = 128;
         char a[MAX_LEN];
         int i = 0,
             j = 0;
