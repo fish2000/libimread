@@ -446,23 +446,22 @@ namespace im {
         using im::byte_iterator;
         
         Metadata meta;
-        // src->seek_absolute(0);
         
         byte_iterator result = std::search(src->begin(),   src->end(),
                                            marker.begin(), marker.end());
         bool has_exif = result != src->end();
         if (!has_exif) { return meta; }
         
-        bytevec_t data;
+        bytevec_t rawbytes;
         uint16_t size = parse_size(result);
-        data.reserve(size);
+        rawbytes.reserve(size);
         
         std::advance(result, 4);
         std::copy(result, result + size,
-                  std::back_inserter(data));
+                  std::back_inserter(rawbytes));
         
         EXIFInfo exif;
-        if (exif.parseFromEXIFSegment(&data[0], data.size()) != PARSE_EXIF_SUCCESS) {
+        if (exif.parseFromEXIFSegment(rawbytes.data(), rawbytes.size()) != PARSE_EXIF_SUCCESS) {
             imread_raise(MetadataReadError,
                 "Error parsing JPEG EXIF metadata");
         }
