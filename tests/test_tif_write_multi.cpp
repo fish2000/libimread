@@ -47,8 +47,15 @@ namespace {
         CHECK(readback.size() == sequence.size());
         CHECK(readback.size() == outlist.size());
         
-        /// double-check image sizes
+        /// double-check individual Image and ImageList sizes
         int max = readback.size();
+        outlist.compute_sizes();
+        readback.compute_sizes();
+        
+        CHECK(outlist.width()  == readback.width());
+        CHECK(outlist.height() == readback.height());
+        CHECK(outlist.planes() == readback.planes());
+        
         for (int idx = 0; idx < max; ++idx) {
             CHECK(outlist.at(idx)->width()  == readback.at(idx)->width());
             CHECK(outlist.at(idx)->height() == readback.at(idx)->height());
@@ -80,8 +87,15 @@ namespace {
         CHECK(readback.size() == sequence.size());
         CHECK(readback.size() == outlist.size());
         
-        /// double-check image sizes
+        /// double-check individual Image and ImageList sizes
         int max = readback.size();
+        outlist.compute_sizes();
+        readback.compute_sizes();
+        
+        CHECK(outlist.width()  == readback.width());
+        CHECK(outlist.height() == readback.height());
+        CHECK(outlist.planes() == readback.planes());
+        
         for (int idx = 0; idx < max; ++idx) {
             CHECK(outlist.at(idx)->width()  == readback.at(idx)->width());
             CHECK(outlist.at(idx)->height() == readback.at(idx)->height());
