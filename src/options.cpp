@@ -659,7 +659,7 @@ namespace im {
         /// unhoisted prefix sets -- so we recursively call Options::extrude():
         for (std::string const& groupname : Json::subgroups()) {
             Options subgrp = Json::operator[](groupname).target();
-            subgrp.extrude();
+            subgrp.extrude(separator);
         }
         return *this;
     }
