@@ -57,15 +57,15 @@ namespace im {
         :OptionsList()
         {
             root->unref();
-            Node* node = other.root;
-            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+            Json::Node* node = other.root;
+            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         }
     
     OptionsList::OptionsList(OptionsList&& other) noexcept
         :OptionsList()
         {
-            Node* node = std::exchange(other.root, root);
-            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+            Json::Node* node = std::exchange(other.root, root);
+            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         }
     
     OptionsList::OptionsList(std::istream& is, bool full)
@@ -114,8 +114,8 @@ namespace im {
     }
     
     OptionsList& OptionsList::operator=(Json&& json) noexcept {
-        Node* node = std::exchange(json.root, root);
-        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        Json::Node* node = std::exchange(json.root, root);
+        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         return *this;
     }
     
@@ -127,8 +127,8 @@ namespace im {
     }
     
     OptionsList& OptionsList::operator=(OptionsList&& other) noexcept {
-        Node* node = std::exchange(other.root, root);
-        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        Json::Node* node = std::exchange(other.root, root);
+        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         return *this;
     }
     
@@ -191,16 +191,16 @@ namespace im {
         :Options(other.cache)
         {
             root->unref();
-            Node* node = other.root;
-            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+            Json::Node* node = other.root;
+            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         }
     
     /// Move constructor:
     Options::Options(Options&& other) noexcept
         :Options(std::move(other.cache))
         {
-            Node* node = std::exchange(other.root, root);
-            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+            Json::Node* node = std::exchange(other.root, root);
+            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         }
     
     /// Input-stream constructor, for JSON stream-parsing:
@@ -229,8 +229,8 @@ namespace im {
             Json::jsonmap_t jsonmap(stringpair_init.begin(),
                                     stringpair_init.end());
             Json json(jsonmap);
-            Node* node = std::exchange(json.root, root);
-            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+            Json::Node* node = std::exchange(json.root, root);
+            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         }
     
     Options::Options(detail::listpair_t listpair)
@@ -279,8 +279,8 @@ namespace im {
     }
     
     Options& Options::operator=(Json&& json) noexcept {
-        Node* node = std::exchange(json.root, root);
-        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        Json::Node* node = std::exchange(json.root, root);
+        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         cache.clear();
         return *this;
     }
@@ -293,8 +293,8 @@ namespace im {
     }
     
     Options& Options::operator=(Options&& other) noexcept {
-        Node* node = std::exchange(other.root, root);
-        (root = (node == nullptr ? &Node::null : node))->refcnt++;
+        Json::Node* node = std::exchange(other.root, root);
+        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
         cache = std::exchange(other.cache, cache);
         return *this;
     }
@@ -649,6 +649,14 @@ namespace im {
                                separator);
             }
         } while (Options::prefixes(separator).size());
+        for (std::string const& group : Json::subgroups()) {
+            // Json jsonsg = Json::operator[](group).target();
+            // Options& sg = dynamic_cast<Options&>(jsonsg);
+            // Options&& sg = reinterpret_cast<Options&&>(Json::operator[](group));
+            // Options::extrude(separator);
+            // static_cast<Object*>(Json::operator[](group).root)->get(key);
+            // sg.extrude();
+        }
         return *this;
     }
     
