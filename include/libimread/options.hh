@@ -109,7 +109,6 @@ namespace im {
             using Json::subgroups;
             
         public:
-            using store::stringmapper::empty;
             using store::stringmapper::clear;
             using store::stringmapper::cache;
         
@@ -180,6 +179,7 @@ namespace im {
                           virtual bool del(std::string const&);
                    virtual std::size_t count() const;
                    virtual stringvec_t list() const;
+                          virtual bool empty() const;
         
         public:
                    virtual std::size_t count(std::regex const& pattern) const;                              /// #keys matching a given pattern
@@ -191,6 +191,7 @@ namespace im {
              virtual std::size_t prefixcount(std::string::value_type sep = detail::kDefaultSepChar) const;  /// #keys SANS prefix (per separator)
         
         public:
+               stringvec_t prefixes(std::string const& separator = detail::kDefaultSep) const;
              prefixpair_t prefixset(std::string const& separator = detail::kDefaultSep) const;
             prefixgram_t prefixgram(std::string const& separator = detail::kDefaultSep) const;
                     ratios_t ratios(std::string const& separator = detail::kDefaultSep) const;
@@ -201,6 +202,7 @@ namespace im {
                                   std::string const& replacement = detail::kDefaultRep) const;
             Options subset(std::string const& prefix, bool defix = true,
                                     std::string const& separator = detail::kDefaultSep) const;
+            Options subset(std::string::value_type sep = detail::kDefaultSepChar) const;
            Options replace(std::regex const& pattern, bool defix = true,
                                   std::string const& replacement = detail::kDefaultRep) const;
             Options underscores_to_dashes() const;
@@ -229,12 +231,12 @@ namespace im {
         public:
             /// in-place regroup: pull a subgroup down and prefix it:
             Options& regroup(std::string const& subgroupname,
-                                       std::string const& prefix = detail::kDefaultRep,                     /// defaults to the subgroup name
+                                       std::string const& prefix,                           /// defaults to the subgroup name
                                     std::string const& separator = detail::kDefaultSep);
             
             /// in-place hoist: pull out a subset and hoist it into a subgroup:
             Options& hoist(std::string const& subsetname,
-                                       std::string const& prefix = detail::kDefaultRep,                     /// defaults to the subgroup name
+                                       std::string const& prefix = detail::kDefaultRep,     /// defaults to the subgroup name
                                     std::string const& separator = detail::kDefaultSep);
             
             /// in-place “regroup all”: regroup with current subgroup names,

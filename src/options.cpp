@@ -107,7 +107,9 @@ namespace im {
     }
     
     OptionsList& OptionsList::operator=(Json const& json) {
-        OptionsList(json).swap(*this);
+        if (root != json.root) {
+            OptionsList(json).swap(*this);
+        }
         return *this;
     }
     
@@ -118,7 +120,9 @@ namespace im {
     }
     
     OptionsList& OptionsList::operator=(OptionsList const& other) {
-        OptionsList(other).swap(*this);
+        if (root != other.root) {
+            OptionsList(other).swap(*this);
+        }
         return *this;
     }
     
@@ -268,7 +272,9 @@ namespace im {
     }
     
     Options& Options::operator=(Json const& json) {
-        Options(json).swap(*this);
+        if (root != json.root) {
+            Options(json).swap(*this);
+        }
         return *this;
     }
     
@@ -280,7 +286,9 @@ namespace im {
     }
     
     Options& Options::operator=(Options const& other) {
-        Options(other).swap(*this);
+        if (root != other.root) {
+            Options(other).swap(*this);
+        }
         return *this;
     }
     
@@ -345,10 +353,11 @@ namespace im {
     }
     
     std::size_t Options::count() const { return Json::size(); }
-    stringvec_t Options::list() const { return Json::keys(); }
+    stringvec_t Options::list() const  { return Json::keys(); }
+           bool Options::empty() const { return Json::size() == 0; }
     
     std::size_t Options::count(std::regex const& pattern) const {
-        stringvec_t keys = Options::list();
+        stringvec_t keys = Json::keys();
         return std::count_if(keys.begin(), keys.end(),
                          [&](std::string const& key) { return std::regex_search(key, pattern,
                                                               std::regex_constants::match_default); });
@@ -379,17 +388,16 @@ namespace im {
     std::size_t Options::prefixcount(std::string::value_type sep) const {
         /// Count only the NON-prefixed keys in this version -- which means,
         /// count those keys that do not contain the separator of choice, yes!
-        stringvec_t keys = Options::list();
+        stringvec_t keys = Json::keys();
         return std::count_if(keys.begin(), keys.end(),
                          [&](std::string const& key) { return STRINGUNFOUND(key.find(sep)); });
     }
     
-    prefixpair_t Options::prefixset(std::string const& separator) const {
-        stringvec_t keys = Options::list();
+    stringvec_t Options::prefixes(std::string const& separator) const {
+        stringvec_t keys = Json::keys();
         stringvec_t prefixvec;
-        prefixset_t prefixes;
         
-        /// fill a vector with prefixed keys:
+        /// fill vector with prefixed keys:
         prefixvec.reserve(keys.size());
         std::copy_if(keys.begin(), keys.end(),
                      std::back_inserter(prefixvec),
@@ -406,6 +414,15 @@ namespace im {
         std::sort(prefixvec.begin(), prefixvec.end());
         auto last = std::unique(prefixvec.begin(), prefixvec.end());
         prefixvec.erase(last, prefixvec.end());
+        
+        /// return vector:
+        return prefixvec;
+    }
+    
+    prefixpair_t Options::prefixset(std::string const& separator) const {
+        stringvec_t keys = Json::keys();
+        stringvec_t prefixvec = Options::prefixes(separator);
+        prefixset_t prefixes;
         
         /// copy the unique prefixes into a set for output and return it:
         prefixes.reserve(prefixvec.size());
@@ -484,7 +501,7 @@ namespace im {
     Options Options::subset(std::regex const& pattern,
                                          bool defix,
                            std::string const& replacement) const {
-        stringvec_t keys = Options::list();
+        stringvec_t keys = Json::keys();
         stringvec_t pks;
         std::copy_if(keys.begin(), keys.end(),
                      std::back_inserter(pks),
@@ -513,8 +530,28 @@ namespace im {
     Options Options::subset(std::string const& prefix,
                                           bool defix,
                             std::string const& separator) const {
+        if (prefix == detail::kDefaultRep) {
+            return Options::subset(separator[0]);
+        }
         std::regex prefix_re("^" + prefix + separator, std::regex::extended);
         return Options::subset(prefix_re, defix);
+    }
+    
+    Options Options::subset(std::string::value_type sep) const {
+        /// Fill an output Options instance containing only items with NON-prefixed keys,
+        /// in this version -- which means, include items whose key does not contain
+        /// the separator of choice, yes!
+        stringvec_t keys = Json::keys();
+        stringvec_t pks;
+        std::copy_if(keys.begin(), keys.end(),
+                     std::back_inserter(pks),
+                 [&](std::string const& key) { return STRINGUNFOUND(key.find(sep)); });
+        Options out;
+        if (pks.empty()) { return out; }
+        for (std::string const& pkey : pks) {
+            out.set(pkey, Json::get(pkey));
+        }
+        return out;
     }
     
     Options Options::replace(std::regex const& pattern,
@@ -524,15 +561,15 @@ namespace im {
         /// value copies for “de-fixed” keys (the default), or:
         /// value copies for identical keys, matching the original.
         Options out;
-        stringvec_t list = Options::list();
-        if (list.empty()) { return out; }
+        stringvec_t keys = Json::keys();
+        if (keys.empty()) { return out; }
         if (defix) {
-            for (std::string const& pkey : list) {
+            for (std::string const& pkey : keys) {
                 out.set(std::regex_replace(pkey, pattern, replacement),
                         Json::get(pkey));           /// strip pattern from key string
             }
         } else {
-            for (std::string const& pkey : list) {
+            for (std::string const& pkey : keys) {
                 out.set(pkey, Json::get(pkey));     /// use key string as-is
             }
         }
@@ -572,22 +609,32 @@ namespace im {
     Options& Options::hoist(std::string const& subsetname,
                             std::string const& prefix,
                             std::string const& separator) {
-        std::string fix(prefix);
-        if (fix == detail::kDefaultRep) {
-            fix = subsetname;
+        Options sub;
+        if (prefix == detail::kDefaultRep) {
+            sub = Options::subset(separator[0]);
+            if (!sub.empty()) {
+                for (std::string const& key : sub.list()) {
+                    Options::del(key);
+                }
+                Json::set(subsetname, sub);
+            }
+        } else {
+            sub = Options::subset(subsetname, true, separator);
+            if (!sub.empty()) {
+                for (std::string const& key : sub.list()) {
+                    Options::del(prefix + separator + key);
+                }
+                Json::set(subsetname, sub);
+            }
         }
-        Options sub = Options::subset(subsetname, true, separator);
-        for (std::string const& key : sub.list()) {
-            Options::del(fix + separator + key);
-        }
-        Json::set(subsetname, sub);
         return *this;
     }
     
     Options& Options::flatten(std::string const& separator) {
         do {
             for (std::string const& group : Json::subgroups()) {
-                Options::regroup(group, detail::kDefaultRep,
+                Options::regroup(group,
+                                 detail::kDefaultRep,
                                  separator);
             }
         } while (Json::subgroups().size());
@@ -596,11 +643,12 @@ namespace im {
     
     Options& Options::extrude(std::string const& separator) {
         do {
-            for (std::string const& prefix : Options::prefixset().first) {
-                Options::hoist(prefix, detail::kDefaultRep,
+            for (std::string const& prefix : Options::prefixset(separator).first) {
+                Options::hoist(prefix,
+                               prefix,
                                separator);
             }
-        } while (Options::prefixset().first.size());
+        } while (Options::prefixes(separator).size());
         return *this;
     }
     
