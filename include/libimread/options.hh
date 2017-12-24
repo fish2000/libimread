@@ -231,7 +231,7 @@ namespace im {
         public:
             /// in-place regroup: pull a subgroup down and prefix it:
             Options& regroup(std::string const& subgroupname,
-                                       std::string const& prefix,                           /// defaults to the subgroup name
+                                    std::string const& prefix,                              /// defaults to the subgroup name
                                     std::string const& separator = detail::kDefaultSep);
             
             /// in-place hoist: pull out a subset and hoist it into a subgroup:
