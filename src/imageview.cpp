@@ -13,7 +13,7 @@ namespace im {
         {}
         
     ImageView::ImageView(ImageView&& other) noexcept
-        :source(std::move(other.source))
+        :source(std::exchange(other.source, nullptr))
         {}
     
     ImageView::ImageView(Image* image)
@@ -22,18 +22,24 @@ namespace im {
     
     ImageView::~ImageView() {}
     
-    ImageView& ImageView::operator=(ImageView const& other) {
-        ImageView(other).swap(*this);
+    ImageView& ImageView::operator=(ImageView const& other) & {
+        if (source != other.source) {
+            ImageView(other).swap(*this);
+        }
         return *this;
     }
     
-    ImageView& ImageView::operator=(ImageView&& other) noexcept {
-        ImageView(std::move(other)).swap(*this);
+    ImageView& ImageView::operator=(ImageView&& other) & noexcept {
+        if (source != other.source) {
+            source = std::exchange(other.source, nullptr);
+        }
         return *this;
     }
     
-    ImageView& ImageView::operator=(Image* image_ptr) {
-        source = image_ptr;
+    ImageView& ImageView::operator=(Image* image_ptr) & {
+        if (source != image_ptr) {
+            source = image_ptr;
+        }
         return *this;
     }
     

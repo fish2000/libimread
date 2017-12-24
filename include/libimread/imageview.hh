@@ -39,9 +39,9 @@ namespace im {
             explicit ImageView(Image* image);
             virtual ~ImageView();
             
-            ImageView& operator=(ImageView const& other);
-            ImageView& operator=(ImageView&& other) noexcept;
-            ImageView& operator=(Image* image_ptr);
+            ImageView& operator=(ImageView const& other) &;
+            ImageView& operator=(ImageView&& other) & noexcept;
+            ImageView& operator=(Image* image_ptr) &;
             
             /// delegate the core Image API methods
             /// back to the source image
