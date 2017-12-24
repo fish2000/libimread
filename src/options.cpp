@@ -665,25 +665,25 @@ namespace im {
     }
     
     OptionsList Options::keylist() const {
-        OptionsList out(Options::list());
+        OptionsList out(Json::keys());
         return out;
     }
     
     OptionsList Options::valuelist() const {
-        OptionsList out;
-        for (std::string const& key : Options::list()) {
-            out.append(Json::get(key));
+        OptionsList values;
+        for (std::string const& key : Json::keys()) {
+            values.append(Json::get(key));
         }
-        return out;
+        return values;
     }
     
     detail::listpair_t Options::items() const {
-        stringvec_t list = Options::list();
+        stringvec_t keys = Json::keys();
         OptionsList values;
-        for (std::string const& key : list) {
+        for (std::string const& key : keys) {
             values.append(Json::get(key));
         }
-        return std::make_pair(OptionsList(list),
+        return std::make_pair(OptionsList(keys),
                               std::move(values));
     }
     
