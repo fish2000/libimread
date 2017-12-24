@@ -631,9 +631,12 @@ namespace im {
     }
     
     Options& Options::flatten(std::string const& separator) {
+        /// Regroup each subgroup onto the first level --
+        /// this has the effect of possibly adding new subgroups
+        /// to be regrouped, hence the do/while flow construct:
         do {
-            for (std::string const& group : Json::subgroups()) {
-                Options::regroup(group,
+            for (std::string const& groupname : Json::subgroups()) {
+                Options::regroup(groupname,
                                  detail::kDefaultRep,
                                  separator);
             }
@@ -642,6 +645,9 @@ namespace im {
     }
     
     Options& Options::extrude(std::string const& separator) {
+        /// Hoist each subset by its prefix name --
+        /// this has the effect of possibly adding new prefix sets
+        /// to be hoisted, hence the do/while flow construct:
         do {
             for (std::string const& prefix : Options::prefixset(separator).first) {
                 Options::hoist(prefix,
@@ -649,13 +655,11 @@ namespace im {
                                separator);
             }
         } while (Options::prefixes(separator).size());
-        for (std::string const& group : Json::subgroups()) {
-            // Json jsonsg = Json::operator[](group).target();
-            // Options& sg = dynamic_cast<Options&>(jsonsg);
-            // Options&& sg = reinterpret_cast<Options&&>(Json::operator[](group));
-            // Options::extrude(separator);
-            // static_cast<Object*>(Json::operator[](group).root)->get(key);
-            // sg.extrude();
+        /// The hoisting operations may have set up subgroups containing
+        /// unhoisted prefix sets -- so we recursively call Options::extrude():
+        for (std::string const& groupname : Json::subgroups()) {
+            Options subgrp = Json::operator[](groupname).target();
+            subgrp.extrude();
         }
         return *this;
     }

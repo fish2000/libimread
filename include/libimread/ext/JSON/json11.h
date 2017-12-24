@@ -341,7 +341,7 @@ class Json {
                 std::string key;
                 int kidx;
                 
-            protected:
+            public:
                 Json target() const;
             
             public:
