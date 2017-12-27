@@ -117,28 +117,28 @@ namespace im {
         
         /// If our newly-created im::Image supports metadata,
         /// read and store HDF5 attributes as such:
-        // if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
-        //     /// ATTRIBUTES!
-        //     using detail::h5a_t;
-        //
-        //     h5a_t nbits(dataset_id,   "nbits");
-        //     h5a_t ndims(dataset_id,   "ndims");
-        //     h5a_t dim0(dataset_id,    "dim0");
-        //     h5a_t dim1(dataset_id,    "dim1");
-        //     h5a_t dim2(dataset_id,    "dim2");
-        //     h5a_t stride0(dataset_id, "stride0");
-        //     h5a_t stride1(dataset_id, "stride1");
-        //     h5a_t stride2(dataset_id, "stride2");
-        //
-        //     meta->set("nbits",   std::to_string(nbits.typed_read<int>()));
-        //     meta->set("ndims",   std::to_string(ndims.typed_read<int>()));
-        //     meta->set("dim0",    std::to_string(dim0.typed_read<int>()));
-        //     meta->set("dim1",    std::to_string(dim1.typed_read<int>()));
-        //     meta->set("dim2",    std::to_string(dim2.typed_read<int>()));
-        //     meta->set("stride0", std::to_string(stride0.typed_read<int>()));
-        //     meta->set("stride1", std::to_string(stride1.typed_read<int>()));
-        //     meta->set("stride2", std::to_string(stride2.typed_read<int>()));
-        // }
+        if (Metadata* meta = &output->metadata()) {
+            /// ATTRIBUTES!
+            using detail::h5a_t;
+            
+            h5a_t nbits(dataset_id,   "nbits");
+            h5a_t ndims(dataset_id,   "ndims");
+            h5a_t dim0(dataset_id,    "dim0");
+            h5a_t dim1(dataset_id,    "dim1");
+            h5a_t dim2(dataset_id,    "dim2");
+            h5a_t stride0(dataset_id, "stride0");
+            h5a_t stride1(dataset_id, "stride1");
+            h5a_t stride2(dataset_id, "stride2");
+            
+            meta->set("nbits",   std::to_string(nbits.typed_read<int>()));
+            meta->set("ndims",   std::to_string(ndims.typed_read<int>()));
+            meta->set("dim0",    std::to_string(dim0.typed_read<int>()));
+            meta->set("dim1",    std::to_string(dim1.typed_read<int>()));
+            meta->set("dim2",    std::to_string(dim2.typed_read<int>()));
+            meta->set("stride0", std::to_string(stride0.typed_read<int>()));
+            meta->set("stride1", std::to_string(stride1.typed_read<int>()));
+            meta->set("stride2", std::to_string(stride2.typed_read<int>()));
+        }
         
         /// Close HDF5 hid_t handle types:
         H5Sclose(dataspace_id);

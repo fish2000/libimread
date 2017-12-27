@@ -5,6 +5,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 #include <libimread/histogram.hh>
+#include <libimread/metadata.hh>
 #include <libimread/rehash.hh>
 
 namespace im {
@@ -76,10 +77,6 @@ namespace im {
         return min(1) + dim(1) - 1;
     }
     
-    // Histogram Image::histogram() const {
-    //     return Histogram(this);
-    // }
-    
     float Image::entropy() const {
         Histogram histo(this);
         return histo.entropy();
@@ -88,6 +85,19 @@ namespace im {
     int Image::otsu() const {
         Histogram histo(this);
         return histo.otsu();
+    }
+    
+    Metadata& Image::metadata() {
+        return md;
+    }
+    
+    Metadata const& Image::metadata() const {
+        return md;
+    }
+    
+    Metadata& Image::metadata(Metadata& new_md) {
+        md = Metadata(new_md);
+        return md;
     }
     
     ImageFactory::~ImageFactory() {}

@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/metadata.hh>
 #include <libimread/ext/arrayview.hh>
 // #include IM_INTRINSICS_HEADER
 
@@ -17,6 +18,9 @@ namespace im {
     
     /// forward-declare class Histogram:
     // class Histogram;
+    
+    /// forward-declare class Metadata:
+    // class Metadata;
     
     namespace detail {
         static constexpr std::size_t kHistogramSize = UCHAR_MAX + 1;
@@ -84,32 +88,39 @@ namespace im {
             int top() const;
             int bottom() const;
         
-        protected:
-            
-            class ChannelHistogram {
-                
-                public:
-                    ChannelHistogram()
-                        :internal(0.00, detail::kHistogramSize)
-                        {}
-                
-                    float entropy();
-                    int otsu();
-                
-                protected:
-                    std::vector<double> internal;
-                    bool calculated = false;
-                
-            };
-            
+        // protected:
+        //
+        //     class ChannelHistogram {
+        //
+        //         public:
+        //             ChannelHistogram()
+        //                 :internal(0.00, detail::kHistogramSize)
+        //                 {}
+        //
+        //             float entropy();
+        //             int otsu();
+        //
+        //         protected:
+        //             std::vector<double> internal;
+        //             bool calculated = false;
+        //
+        //     };
+        
         // protected:
         //     std::set<std::string> channels;
         //     std::map<std::string, Histogram> histograms;
             
         public:
-            // Histogram histogram() const;
             float entropy() const;
             int otsu() const;
+        
+        public:
+            Metadata&       metadata();
+            Metadata const& metadata() const;
+            Metadata&       metadata(Metadata&);
+        
+        protected:
+            Metadata md;
         
         public:
             template <typename T> inline
