@@ -48,6 +48,7 @@ namespace im {
     DECLARE_IMREAD_ERROR_DEFAULT(HDF5IOError,              "Error in HDF5 I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(JPEGIOError,              "Error in JPEG/jpeglib I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(PNGIOError,               "Error in PNG/libpng I/O");
+    DECLARE_IMREAD_ERROR_DEFAULT(GIFIOError,               "Error in GIF/WriteGIF.hh I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(PPMIOError,               "Error in PPM binary I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(TIFFIOError,              "Error in TIFF/libtiff I/O");
 }

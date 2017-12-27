@@ -17,16 +17,27 @@ namespace im {
     
     namespace detail {
         
+        /// Shared pointer, holding a pointer to gif::GIF:
         using gifholder = std::shared_ptr<gif::GIF>;
+        
+        /// Forward declaration --
+        /// GIF Image pixel-data buffer-babysitter structure:
         struct gifbuffer;
         
+        /// Deleter functor template for gif::GIF data --
+        /// For use with std::unique_ptr or std::shared_ptr:
         template <typename G>
         struct gifdisposer {
             constexpr gifdisposer() noexcept = default;
             template <typename U> gifdisposer(gifdisposer<U> const&) noexcept {};
-            void operator()(G* gp) { gif::dispose(gp); gp = nullptr; }
+            void operator()(std::add_pointer_t<G> gp) {
+                gif::dispose(gp);
+                gp = nullptr; 
+            }
         };
         
+        /// “gifholder” shared-pointer factory function --
+        /// calls pseudo-constructor gif::newGIF():
         gifholder gifsink(int frame_interval = 3);
     }
     

@@ -16,22 +16,16 @@ namespace im {
     
     namespace detail {
         
-        __attribute__((unused))
-        inline void setPixel(unsigned char* rgb, int r, int g, int b) {
-            rgb[0] = r; rgb[1] = g; rgb[2] = b;
-        }
-        
-        gifholder gifsink(int frame_interval) {
-            return gifholder{ gif::newGIF(frame_interval),
-                              gifdisposer<gif::GIF>() };
-        }
-        
+        /// GIF Image pixel-data buffer-babysitter structure --
+        /// Wraps a unique_ptr to an allocated byte array with
+        /// some sugarary-sweet convenience methods, and a
+        /// RAII lifecycle-management guarantee:
         struct gifbuffer {
             
             public:
                 explicit gifbuffer(int w, int h, int c = 3)
                     :width(w), height(h), channels(c)
-                    { allocate(); }
+                   { check(w); check(h); check(c); allocate(); }
                 
                 virtual ~gifbuffer()            {}
                 void allocate()                 { data_ptr = 
@@ -42,6 +36,14 @@ namespace im {
                 std::size_t size() const        { return width
                                                       * height
                                                     * channels; }
+                void check(int dimension) {
+                    if (dimension < 1) {
+                        imread_raise(GIFIOError,
+                                "im::detail::gifbuffer::check() says:   \"UNSUPPORTED DIMENSION VALUE\"",
+                             FF("im::detail::gifbuffer::check() got:    `dimension` == (int){ %d }", dimension),
+                                "im::detail::gifbuffer::check() needs:  `dimension` >= (int){ 1 }");
+                    }
+                }
             
             public:
                 int width, height, channels;
@@ -57,6 +59,11 @@ namespace im {
                 gifbuffer& operator=(gifbuffer&&);
             
         };
+        
+        gifholder gifsink(int frame_interval) {
+            return gifholder{ gif::newGIF(frame_interval),
+                              gifdisposer<gif::GIF>() };
+        }
     
     } /* namespace detail */
     
@@ -71,14 +78,15 @@ namespace im {
         
         /// Check bit depth
         if (bit_depth != 8) {
-            imread_raise(CannotWriteError,
+            imread_raise(GIFIOError,
                     "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE BIT DEPTH\"",
                  FF("im::GIFFormat::write() got:    `bit_depth` = (int){ %d }", bit_depth),
                     "im::GIFFormat::write() needs:  `bit_depth` = (int){ 8 }");
         }
+        
         /// Check channel count
         if (channels != 3) {
-            imread_raise(CannotWriteError,
+            imread_raise(GIFIOError,
                     "im::GIFFormat::write() says:   \"UNSUPPORTED IMAGE COLOR MODE\"",
                  FF("im::GIFFormat::write() got:    `channels` = (int){ %d }", channels),
                     "im::GIFFormat::write() needs:  `channels` = (int){ 3 }");
@@ -96,7 +104,7 @@ namespace im {
                 rgb = data + 3 * (width * y + x);
                 subview = view[x][y];
                 for (int c = 0; c < channels; ++c) {
-                    rgb[c] = subview[c]; // rgb[c] = view[{x, y, c}];
+                    rgb[c] = subview[c];
                 }
             }
         }
