@@ -126,12 +126,8 @@ namespace im {
                                                 input.planes());
         write_impl(input, g, b);
         
-        bytevec_t out = gif::write(g.get());
-        output->write(out);
+        output->write(gif::write(g.get()));
         output->flush();
-        
-        // imread_assert(out.size() > 0,
-        //     "gif::write() returned a size-zero byte vector!");
     }
     
     void GIFFormat::write_multi(ImageList& input,
@@ -152,12 +148,8 @@ namespace im {
         std::for_each(input.begin(), input.end(),
                   [&](Image* image) { write_impl(*image, g, b, delay); });
         
-        bytevec_t out = gif::write(g.get());
-        output->write(out);
+        output->write(gif::write(g.get()));
         output->flush();
-        
-        // imread_assert(out.size() > 0,
-        //     "gif::write() returned a size-zero byte vector!");
     }
     
 }
