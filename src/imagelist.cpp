@@ -105,9 +105,9 @@ namespace im {
     void ImageList::shrink_to_fit()                           { images.shrink_to_fit(); }
     
     void ImageList::compute_sizes() const {
-         computed_width = compute_width();
-        computed_height = compute_height();
-        computed_planes = compute_planes();
+        if (computed_width  == -1) {  computed_width = compute_width(); }
+        if (computed_height == -1) { computed_height = compute_height(); }
+        if (computed_planes == -1) { computed_planes = compute_planes(); }
     }
     
     int ImageList::width() const  { return computed_width;  }
