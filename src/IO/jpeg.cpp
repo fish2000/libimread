@@ -700,14 +700,16 @@ namespace im {
         
         /// view data as type JSAMPLE:
         av::strided_array_view<JSAMPLE, 3> view = input.view<JSAMPLE>();
+        av::strided_array_view<JSAMPLE, 1> subview;
         
         /// write image data as scanlines, in a pixel loop:
         int scan;
         while ((scan = compressor.next_scanline()) < h) {
             JSAMPLE* __restrict__ dstPtr = samples[0];
             for (int x = 0; x < w; ++x) {
+                subview = view[x][scan];
                 for (int cc = 0; cc < c; ++cc) {
-                    *dstPtr++ = view[{x, scan, cc}];
+                    *dstPtr++ = subview[cc];
                 }
             }
             compressor.write_scanlines(samples);
