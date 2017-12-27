@@ -525,6 +525,7 @@ namespace im {
                                             Options const& opts)  {
         
         JPEGDecompressor decompressor(src);
+        bool read_metadata_inline = opts.cast<bool>("read_metadata", true);
         bool read_icc_profile = opts.cast<bool>("jpg:read_icc_profile", false);
         
         /// first, read the JPEG header, the image metadata,
@@ -582,7 +583,9 @@ namespace im {
         }
         
         /// add metadata:
-        output->metadata(read_metadata(src, opts));
+        if (read_metadata_inline) {
+            output->metadata(read_metadata(src, opts));
+        }
         
         return output;
     }
