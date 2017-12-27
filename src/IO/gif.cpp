@@ -110,11 +110,9 @@ namespace im {
         }
         
         /// DO IT DOUG
-        gif::addFrame(
-            g.get(),
-            gbuf.width, gbuf.height,
-            gbuf.data(),
-            framedelay);
+        gif::addFrame(g.get(), gbuf.width,
+                               gbuf.height,
+                               gbuf.data(), framedelay);
     }
     
     void GIFFormat::write(Image& input,
@@ -132,8 +130,8 @@ namespace im {
         output->write(out);
         output->flush();
         
-        imread_assert(out.size() > 0,
-            "gif::write() returned a size-zero byte vector!");
+        // imread_assert(out.size() > 0,
+        //     "gif::write() returned a size-zero byte vector!");
     }
     
     void GIFFormat::write_multi(ImageList& input,
@@ -158,8 +156,8 @@ namespace im {
         output->write(out);
         output->flush();
         
-        imread_assert(out.size() > 0,
-            "gif::write() returned a size-zero byte vector!");
+        // imread_assert(out.size() > 0,
+        //     "gif::write() returned a size-zero byte vector!");
     }
     
 }
