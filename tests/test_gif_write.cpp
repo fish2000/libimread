@@ -144,34 +144,34 @@ namespace {
         });
     }
     
-    TEST_CASE("[gif-write] WHAT THE HELL PEOPLE",
-              "[gif-write-what-the-hell-people]") {
-        ImageList what_the_hell_people, dogg_why_you_even_got_to_do_a_thing;
-        path basedir(im::test::basedir);
-        const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
-        std::for_each(sequence.begin(), sequence.end(),
-                  [&](path const& p) {
-            HybridImage* halim = new HybridImage(im::halide::read((basedir/p).str()));
-            what_the_hell_people.push_back(halim);
-        
-            /// confirm lack of pre-computed image sizes:
-            CHECK(what_the_hell_people.width() == -1);
-            CHECK(what_the_hell_people.height() == -1);
-            CHECK(what_the_hell_people.planes() == -1);
-            
-            try {
-                TemporaryName composite(".gif");
-                
-                /// GIFFormat::write_multi(ilist) calls ilist.compute_sizes():
-                im::halide::write_multi(what_the_hell_people, composite.str());
-                REQUIRE(composite.pathname.is_file());
-            } catch (std::bad_alloc& exc) {
-                WTF("BAD ALLOCATION:",
-                    FF("\t%s\n", exc.what()));
-            }
-            
-        });
-    }
+    // TEST_CASE("[gif-write] WHAT THE HELL PEOPLE",
+    //           "[gif-write-what-the-hell-people]") {
+    //     ImageList what_the_hell_people, dogg_why_you_even_got_to_do_a_thing;
+    //     path basedir(im::test::basedir);
+    //     const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
+    //     std::for_each(sequence.begin(), sequence.end(),
+    //               [&](path const& p) {
+    //         HybridImage* halim = new HybridImage(im::halide::read((basedir/p).str()));
+    //         what_the_hell_people.push_back(halim);
+    //
+    //         /// confirm lack of pre-computed image sizes:
+    //         CHECK(what_the_hell_people.width() == -1);
+    //         CHECK(what_the_hell_people.height() == -1);
+    //         CHECK(what_the_hell_people.planes() == -1);
+    //
+    //         try {
+    //             TemporaryName composite(".gif");
+    //
+    //             /// GIFFormat::write_multi(ilist) calls ilist.compute_sizes():
+    //             im::halide::write_multi(what_the_hell_people, composite.str());
+    //             REQUIRE(composite.pathname.is_file());
+    //         } catch (std::bad_alloc& exc) {
+    //             WTF("BAD ALLOCATION:",
+    //                 FF("\t%s\n", exc.what()));
+    //         }
+    //
+    //     });
+    // }
     
     TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file",
               "[gif-write-multi-animated]")
@@ -180,23 +180,33 @@ namespace {
         std::unique_ptr<HalideFactory> factory{ new HalideFactory };
         std::unique_ptr<formats::GIF> gif_format{ new formats::GIF };
         Options read_options;
+        Options write_options;
         ImageList outlist, inlist;
         path basedir(im::test::basedir);
         const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
         
-        std::for_each(sequence.begin(), sequence.end(),
-                  [&](path const& p) {
-            HybridImage* halim = new HybridImage(im::halide::read((basedir/p).str()));
-            outlist.push_back(halim);
-        });
+        outlist.reserve(sequence.size());
+        std::for_each(sequence.begin(),
+                      sequence.end(),
+                  [&](path const& p) { outlist.push_back(im::halide::unique((basedir/p).str())); });
+        
+        /// confirm that the image list is the right size:
+        CHECK(outlist.size() == sequence.size());
         
         /// confirm lack of pre-computed image sizes:
         CHECK(outlist.width() == -1);
         CHECK(outlist.height() == -1);
         CHECK(outlist.planes() == -1);
         
+        outlist.compute_sizes();
+        
+        /// confirm values for newly pre-computed image sizes:
+        CHECK(outlist.width() == outlist[0]->width());
+        CHECK(outlist.height() == outlist[0]->height());
+        CHECK(outlist.planes() == outlist[0]->planes());
+        
         /// GIFFormat::write_multi(ilist) calls ilist.compute_sizes():
-        im::halide::write_multi(outlist, composite.str());
+        im::halide::write_multi(outlist, composite.str(), write_options);
         REQUIRE(composite.pathname.is_file());
         
         {
@@ -210,14 +220,7 @@ namespace {
         REQUIRE(inlist.size() == sequence.size());
         REQUIRE(inlist.size() == outlist.size());
         
-        /// confirm lack of pre-computed image sizes:
-        CHECK(inlist.width() == -1);
-        CHECK(inlist.height() == -1);
-        CHECK(inlist.planes() == -1);
-        
         /// check computed image sizes:
-        inlist.compute_sizes();
-        
         CHECK(inlist.width() == outlist.width());
         CHECK(inlist.height() == outlist.height());
         CHECK(inlist.planes() == outlist.planes());

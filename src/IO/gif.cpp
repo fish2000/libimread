@@ -86,14 +86,17 @@ namespace im {
         
         /// Do the pixel loop to interleave RGB data
         byte* __restrict__ data = gbuf.data();
-        av::strided_array_view<byte, 3> view = input.view();
-        
         unsigned char* __restrict__ rgb;
+        
+        av::strided_array_view<byte, 3> view = input.view();
+        av::strided_array_view<byte, 1> subview;
+        
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 rgb = data + 3 * (width * y + x);
+                subview = view[x][y];
                 for (int c = 0; c < channels; ++c) {
-                    rgb[c] = view[{x, y, c}];
+                    rgb[c] = subview[c]; // rgb[c] = view[{x, y, c}];
                 }
             }
         }
@@ -132,7 +135,7 @@ namespace im {
         input.compute_sizes();
         
         /// Sort out frame delay
-        int delay = opts.cast<int>("delay", GIFFormat::options.delay);
+        int delay = opts.cast<int>("gif:delay", GIFFormat::options.delay);
         
         /// Do some GIF stuff
         detail::gifholder g = detail::gifsink(delay);

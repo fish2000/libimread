@@ -78,6 +78,8 @@ namespace im {
         void append(pointer_t);
         void push_back(pointer_t);
         void push_back(unique_t);
+        void reserve(size_type);
+        void shrink_to_fit();
         
         /// calculate and cache the width/height/planecount
         /// dimensions, for the lists’ managed images
@@ -89,6 +91,7 @@ namespace im {
         int planes() const;
         
         pointer_t get(size_type) const;
+        pointer_t operator[](size_type) const;
         pointer_t at(size_type) const;
         unique_t yank(size_type);
         unique_t pop();
@@ -120,7 +123,7 @@ namespace im {
             
         protected:
             /// reset all the computed dimension variables to -1
-            constexpr void reset_dimensions() const;
+            void reset_dimensions() const;
         
         protected:
             /// internal pointer vector

@@ -101,19 +101,22 @@ namespace im {
     void ImageList::append(ImageList::pointer_t image)        { images.push_back(image); }
     void ImageList::push_back(ImageList::pointer_t image)     { images.push_back(image); }
     void ImageList::push_back(ImageList::unique_t unique)     { images.push_back(unique.release()); }
+    void ImageList::reserve(ImageList::size_type reservation) { images.reserve(reservation); }
+    void ImageList::shrink_to_fit()                           { images.shrink_to_fit(); }
     
     void ImageList::compute_sizes() const {
-        compute_width();
-        compute_height();
-        compute_planes();
+         computed_width = compute_width();
+        computed_height = compute_height();
+        computed_planes = compute_planes();
     }
     
     int ImageList::width() const  { return computed_width;  }
     int ImageList::height() const { return computed_height; }
     int ImageList::planes() const { return computed_planes; }
     
-    ImageList::pointer_t ImageList::get(ImageList::size_type idx) const   { return images[idx]; }
-    ImageList::pointer_t ImageList::at(ImageList::size_type idx) const    { return images.at(idx); }
+    ImageList::pointer_t ImageList::get(ImageList::size_type idx) const         { return images[idx]; }
+    ImageList::pointer_t ImageList::operator[](ImageList::size_type idx) const  { return images[idx]; }
+    ImageList::pointer_t ImageList::at(ImageList::size_type idx) const          { return images.at(idx); }
     
     ImageList::unique_t ImageList::yank(ImageList::size_type idx) {
         /// remove the pointer at idx, resizing the internal vector;
@@ -178,7 +181,7 @@ namespace im {
     DEFINE_DIMENSION_COMPUTE_FN(height);
     DEFINE_DIMENSION_COMPUTE_FN(planes);
     
-    constexpr void ImageList::reset_dimensions() const {
+    void ImageList::reset_dimensions() const {
         computed_width = computed_height = computed_planes = -1;
     }
     
