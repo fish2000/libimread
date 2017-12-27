@@ -33,8 +33,10 @@ namespace im {
     namespace {
         
         /// Constants
-        const std::size_t kBufferSize = JPEGFormat::options.buffer_size;
+        const bool        kDefaultProgressive = static_cast<bool>(JPEGFormat::options.writeopts.progressive);
+        const std::size_t kDefaultQuantization = JPEGFormat::options.quantization;
         const std::size_t kDefaultQuality = static_cast<std::size_t>(JPEGFormat::options.writeopts.quality * 100);
+        const std::size_t kBufferSize = JPEGFormat::options.buffer_size;
         
         /// Unique pointer type, holding an array of JPEG bytes:
         using byte_ptr = std::unique_ptr<JOCTET[]>;
@@ -134,7 +136,7 @@ namespace im {
         
         /// function to match a J_COLOR_SPACE constant up (coarsely) to
         /// an image, per the number of color channels it has:
-        inline J_COLOR_SPACE color_space_for_components(int components) {
+        static J_COLOR_SPACE color_space_for_components(int components) {
             switch (components) {
                 case 3: return JCS_RGB;
                 case 1: return JCS_GRAYSCALE;
@@ -149,7 +151,7 @@ namespace im {
         }
         
         /// ... basically, the inverse of the 
-        inline int components_for_color_space(J_COLOR_SPACE color_space) {
+        static int components_for_color_space(J_COLOR_SPACE color_space) {
             switch (color_space) {
                 case JCS_RGB: return 3;
                 case JCS_GRAYSCALE: return 1;
@@ -185,8 +187,7 @@ namespace im {
                         mgr.error_exit = [](j_common_ptr cinfo) {
                             using ErrorManager = JPEGCompressionBase::ErrorManager;
                             ErrorManager* error_state_ptr = reinterpret_cast<ErrorManager*>(cinfo->err);
-                            (*cinfo->err->format_message)(cinfo,
-                                                          error_state_ptr->message);
+                            (*cinfo->err->format_message)(cinfo, error_state_ptr->message);
                             std::longjmp(error_state_ptr->jumpbuffer, 1);
                         };
                         message[0] = 0;
@@ -201,6 +202,10 @@ namespace im {
                     return setjmp(error_state.jumpbuffer);
                 }
                 
+                bool has_warnings() const {
+                    return error_state.mgr.num_warnings > 0;
+                }
+                
                 std::string error_message() const {
                     return std::string(error_state.message);
                 }
@@ -211,6 +216,13 @@ namespace im {
         /// from jpeglib, alongside a JPEGSourceAdapter instance (q.v. implementation,
         /// above) and furnishing accessor shortcut methods.
         struct JPEGDecompressor : public JPEGCompressionBase {
+            
+            enum struct scaling : uint8_t {
+                NONE            = 1,
+                ONE_HALF        = 2,
+                ONE_QUARTER     = 4,
+                ONE_EIGHTH      = 8
+            };
             
             JPEGDecompressor(byte_source* source)
                 :adaptor(source)
@@ -227,6 +239,53 @@ namespace im {
             virtual ~JPEGDecompressor() {
                 if (decompress_started) { jpeg_finish_decompress(&decompress_state); }
                 jpeg_destroy_decompress(&decompress_state);
+            }
+            
+            void set_scaling(scaling scale_denominator = scaling::NONE) {
+                decompress_state.scale_num = 1;
+                decompress_state.scale_denom = int(scale_denominator);
+            }
+            
+            void set_quantize_colors(bool quantize_colors = true) {
+                decompress_state.quantize_colors = quantize_colors ? BOOLEAN_TRUE()
+                                                                   : BOOLEAN_FALSE();
+            }
+            
+            void set_desired_number_of_colors(int desired_number_of_colors = kDefaultQuantization) {
+                decompress_state.desired_number_of_colors = desired_number_of_colors;
+            }
+            
+            void set_quantize_two_pass(bool two_pass_quantize = true) {
+                decompress_state.two_pass_quantize = two_pass_quantize ? BOOLEAN_TRUE()
+                                                                       : BOOLEAN_FALSE();
+            }
+            
+            void set_dither_mode(J_DITHER_MODE dither_mode = JDITHER_FS) {
+                /// other options are JDITHER_NONE and JDITHER_ORDERED --
+                /// default (JDITHER_FS) is Floyd-Steinberg dithering:
+                decompress_state.dither_mode = dither_mode;
+            }
+            
+            void set_quantization(bool quantization = true, int colorcount = kDefaultQuantization) {
+                if (quantization) {
+                    set_quantize_colors(true);
+                    set_desired_number_of_colors(colorcount);
+                    set_quantize_two_pass(true);
+                    set_dither_mode(JDITHER_FS);
+                    decompress_state.out_color_space = JCS_RGB;
+                } else {
+                    set_quantize_colors(false);
+                }
+            }
+            
+            void set_fancy_upsampling(bool do_fancy_upsampling = true) {
+                decompress_state.do_fancy_upsampling = do_fancy_upsampling ? BOOLEAN_TRUE()
+                                                                           : BOOLEAN_FALSE();
+            }
+            
+            void set_block_smoothing(bool do_block_smoothing = true) {
+                decompress_state.do_block_smoothing = do_block_smoothing ? BOOLEAN_TRUE()
+                                                                         : BOOLEAN_FALSE();
             }
             
             bool start(bool read_icc = false) {
@@ -250,12 +309,39 @@ namespace im {
                 return decompress_started && header_status == JPEG_HEADER_OK;
             }
             
-            int height() const                  { return decompress_state.output_height; }
-            int width() const                   { return decompress_state.output_width; }
-            J_COLOR_SPACE color_space() const   { return color_space_for_components(
-                                                         decompress_state.output_components); }
-            int components() const              { return decompress_state.output_components; }
-            int scanline() const                { return decompress_state.output_scanline; }
+            int height() const                  { return decompress_state.output_height;                }
+            int width() const                   { return decompress_state.output_width;                 }
+            J_COLOR_SPACE _color_space() const  { return color_space_for_components(
+                                                         decompress_state.output_components);           }
+            J_COLOR_SPACE color_space() const   { return decompress_state.out_color_space;              }
+            
+            int bit_depth() const               { return decompress_state.data_precision;               }
+            int components() const              { return decompress_state.output_components;            }
+            int quantized_colors() const        { return decompress_state.actual_number_of_colors;      }
+            int scanline() const                { return decompress_state.output_scanline;              }
+            
+            bool is_multiscan() const           { return jpeg_has_multiple_scans(
+                                              const_cast<jpeg_decompress_struct*>(&decompress_state));  }
+            bool is_progressive() const         { return decompress_state.progressive_mode;             }
+            bool is_quantized() const           { return decompress_state.quantize_colors;              }
+            bool is_jfif() const                { return decompress_state.saw_JFIF_marker;              }
+            bool is_adobe() const               { return decompress_state.saw_Adobe_marker;             }
+            
+            byte_ptr colormap() const {
+                if (!quantized_colors() || !is_quantized()) {
+                    return byte_ptr{ nullptr };
+                }
+                int colors = quantized_colors();
+                int components = decompress_state.out_color_components;
+                int mapsize = components * colors;
+                byte_ptr output{ std::make_unique<JOCTET[]>(mapsize) };
+                for (int idx = 0; idx < components; ++idx) {
+                    std::memcpy(output.get() + ptrdiff_t(colors * idx),
+                                decompress_state.colormap[idx],
+                                colors);
+                }
+                return output;
+            }
             
             JSAMPARRAY allocate_samples(int components = 0,
                                         int width = 0,
@@ -269,6 +355,7 @@ namespace im {
                 }
                 /// default to values read from JPEG header:
                 if (!width)      {      width = decompress_state.output_width;      }
+                if (!height)     {     height = decompress_state.output_height;     }
                 if (!components) { components = decompress_state.output_components; }
                 /// allocate using internal function pointer:
                 return (*decompress_state.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&decompress_state),
@@ -333,9 +420,14 @@ namespace im {
                 jpeg_set_defaults(&compress_state);
             }
             
-            void set_quality(std::size_t quality) {
+            void set_quality(std::size_t quality = kDefaultQuality) {
                 if (quality > 100) { quality = 100; }
                 jpeg_set_quality(&compress_state, quality, BOOLEAN_FALSE());
+            }
+            
+            void set_optimal_coding(bool optimal_coding = true) {
+                compress_state.optimize_coding = optimal_coding ? BOOLEAN_TRUE()
+                                                                : BOOLEAN_FALSE();
             }
             
             int height() const                  { return compress_state.image_height; }
@@ -381,6 +473,7 @@ namespace im {
                 }
                 /// default to values attached to ‘info’ struct:
                 if (!width)      {      width = compress_state.image_width;      }
+                if (!height)     {     height = compress_state.image_height;     }
                 if (!components) { components = compress_state.input_components; }
                 /// allocate using internal function pointer:
                 return (*compress_state.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&compress_state),
@@ -432,10 +525,10 @@ namespace im {
                                             Options const& opts)  {
         
         JPEGDecompressor decompressor(src);
+        bool read_icc_profile = opts.cast<bool>("jpg:read_icc_profile", false);
         
         /// first, read the JPEG header, the image metadata,
         /// and (optionally) the embedded ICC profile data:
-        bool read_icc_profile = opts.cast<bool>("jpg:read_icc_profile", false);
         decompressor.start(read_icc_profile);
         
         /// initial error check:
@@ -449,9 +542,16 @@ namespace im {
         const int h = decompressor.height();
         const int w = decompressor.width();
         const int c = decompressor.components();
+        const int b = decompressor.bit_depth();
+        
+        /// sanity-check JPEG source’s bit depth:
+        if (b != 8) {
+            imread_raise(JPEGIOError,
+                FF("JPEG bit depth must be 8 (got bit_depth = %i)", b));
+        }
         
         /// create the output image:
-        std::unique_ptr<Image> output(factory->create(8, h, w, c));
+        std::unique_ptr<Image> output(factory->create(b, h, w, c));
         
         /// allocate a single-row sample array:
         JSAMPARRAY samples = decompressor.allocate_samples();
@@ -556,7 +656,7 @@ namespace im {
                            byte_sink* output,
                            Options const& opts) {
         
-        /// sanity-check input bit depth
+        /// sanity-check input bit depth:
         if (input.nbits() != 8) {
             imread_raise(CannotWriteError,
                 FF("Image must be 8 bits for JPEG saving (got %i)",
@@ -573,6 +673,9 @@ namespace im {
         compressor.set_width(w);
         compressor.set_height(h);
         compressor.set_components(c);
+        
+        /// optimize Huffman coding tables:
+        compressor.set_optimal_coding();
         
         /// set 'defaults':
         compressor.set_defaults();

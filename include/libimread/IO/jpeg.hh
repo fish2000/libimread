@@ -25,10 +25,12 @@ namespace im {
                 _suffixes = { "jpg", "jpeg", "jpe" },
                 _mimetype = "image/jpeg",
                 _buffer_size = 4096,
+                _quantization = 256,
                 _readopts = D(
                     _read_icc_profile = false
                 ),
                 _writeopts = D(
+                    _progressive = false,
                     _quality = 0.75
                 )
             );
