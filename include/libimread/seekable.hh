@@ -113,6 +113,7 @@ namespace im {
             virtual ~byte_sink();
             virtual size_type write(const void*, size_type) = 0;
             virtual size_type write(bytevec_t const&);
+            virtual size_type write(bytevec_t&&);
             virtual void flush();
             
         public:

@@ -105,7 +105,12 @@ namespace im {
     
     byte_sink::size_type byte_sink::write(bytevec_t const& bytevec) {
         if (bytevec.empty()) { return 0; }
-        return write(static_cast<const void*>(&bytevec[0]), bytevec.size());
+        return write(static_cast<const void*>(bytevec.data()), bytevec.size());
+    }
+    
+    byte_sink::size_type byte_sink::write(bytevec_t&& bytevec) {
+        if (bytevec.empty()) { return 0; }
+        return write(static_cast<const void*>(bytevec.data()), bytevec.size());
     }
     
     void byte_sink::flush() {}
