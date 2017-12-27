@@ -581,6 +581,9 @@ namespace im {
                 decompressor.error_message());
         }
         
+        /// add metadata:
+        output->metadata(read_metadata(src, opts));
+        
         return output;
     }
     

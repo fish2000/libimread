@@ -100,6 +100,11 @@ namespace im {
         return md;
     }
     
+    Metadata& Image::metadata(Metadata&& new_md) {
+        md = std::move(new_md);
+        return md;
+    }
+    
     Metadata* Image::metadata_ptr() {
         return &md;
     }
