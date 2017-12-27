@@ -118,6 +118,8 @@ namespace im {
             Metadata&       metadata();
             Metadata const& metadata() const;
             Metadata&       metadata(Metadata&);
+            Metadata*       metadata_ptr();
+            Metadata const* metadata_ptr() const;
         
         protected:
             Metadata md;

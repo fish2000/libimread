@@ -71,7 +71,7 @@ namespace {
             
             CHECK(COLLECT(np));
             
-            Metadata* meta = &hdf.metadata();
+            Metadata* meta = hdf.metadata_ptr();
             CHECK(meta != nullptr);
             
             /// comparing as integer:

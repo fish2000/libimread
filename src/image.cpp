@@ -100,6 +100,14 @@ namespace im {
         return md;
     }
     
+    Metadata* Image::metadata_ptr() {
+        return &md;
+    }
+    
+    Metadata const* Image::metadata_ptr() const {
+        return &md;
+    }
+    
     ImageFactory::~ImageFactory() {}
     
 }

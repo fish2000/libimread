@@ -117,7 +117,7 @@ namespace im {
         
         /// If our newly-created im::Image supports metadata,
         /// read and store HDF5 attributes as such:
-        if (Metadata* meta = &output->metadata()) {
+        if (Metadata* meta = output->metadata_ptr()) {
             /// ATTRIBUTES!
             using detail::h5a_t;
             
