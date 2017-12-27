@@ -85,6 +85,7 @@ namespace im {
                     mgr.term_source         = NOP;
                 }
             
+            JPEGSourceAdaptor(void) = delete;
             JPEGSourceAdaptor(JPEGSourceAdaptor const&) = delete;
             JPEGSourceAdaptor(JPEGSourceAdaptor&&) = delete;
         };
@@ -126,6 +127,7 @@ namespace im {
                     };
                 }
             
+            JPEGDestinationAdaptor(void) = delete;
             JPEGDestinationAdaptor(JPEGDestinationAdaptor const&) = delete;
             JPEGDestinationAdaptor(JPEGDestinationAdaptor&&) = delete;
         };
@@ -218,6 +220,10 @@ namespace im {
                     decompress_state.src = &adaptor.mgr;
                 }
             
+            JPEGDecompressor(void) = delete;
+            JPEGDecompressor(JPEGDecompressor const&) = delete;
+            JPEGDecompressor(JPEGDecompressor&&) = delete;
+            
             virtual ~JPEGDecompressor() {
                 if (decompress_started) { jpeg_finish_decompress(&decompress_state); }
                 jpeg_destroy_decompress(&decompress_state);
@@ -308,6 +314,10 @@ namespace im {
                     compress_state.err = &error_state.mgr;
                     compress_state.dest = &adaptor.mgr;
                 }
+            
+            JPEGCompressor(void) = delete;
+            JPEGCompressor(JPEGCompressor const&) = delete;
+            JPEGCompressor(JPEGCompressor&&) = delete;
             
             virtual ~JPEGCompressor() {
                 if (compress_started) { jpeg_finish_compress(&compress_state); }
