@@ -49,7 +49,7 @@ namespace im {
         {}
     
     Metadata& Metadata::operator=(Metadata const& other) {
-        if (other != *this) {
+        if (std::addressof(other.values) != std::addressof(values)) {
             values.clear();
             store::value_copy(other.values, values);
         }
@@ -57,8 +57,8 @@ namespace im {
     }
     
     Metadata& Metadata::operator=(Metadata&& other) noexcept {
-        if (other != *this) {
-            values = std::exchange(other.values, store::stringmap{});
+        if (std::addressof(other.values) != std::addressof(values)) {
+            values = std::exchange(other.values, values);
         }
         return *this;
     }
