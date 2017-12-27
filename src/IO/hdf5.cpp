@@ -117,28 +117,28 @@ namespace im {
         
         /// If our newly-created im::Image supports metadata,
         /// read and store HDF5 attributes as such:
-        if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
-            /// ATTRIBUTES!
-            using detail::h5a_t;
-            
-            h5a_t nbits(dataset_id,   "nbits");
-            h5a_t ndims(dataset_id,   "ndims");
-            h5a_t dim0(dataset_id,    "dim0");
-            h5a_t dim1(dataset_id,    "dim1");
-            h5a_t dim2(dataset_id,    "dim2");
-            h5a_t stride0(dataset_id, "stride0");
-            h5a_t stride1(dataset_id, "stride1");
-            h5a_t stride2(dataset_id, "stride2");
-            
-            meta->set("nbits",   std::to_string(nbits.typed_read<int>()));
-            meta->set("ndims",   std::to_string(ndims.typed_read<int>()));
-            meta->set("dim0",    std::to_string(dim0.typed_read<int>()));
-            meta->set("dim1",    std::to_string(dim1.typed_read<int>()));
-            meta->set("dim2",    std::to_string(dim2.typed_read<int>()));
-            meta->set("stride0", std::to_string(stride0.typed_read<int>()));
-            meta->set("stride1", std::to_string(stride1.typed_read<int>()));
-            meta->set("stride2", std::to_string(stride2.typed_read<int>()));
-        }
+        // if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
+        //     /// ATTRIBUTES!
+        //     using detail::h5a_t;
+        //
+        //     h5a_t nbits(dataset_id,   "nbits");
+        //     h5a_t ndims(dataset_id,   "ndims");
+        //     h5a_t dim0(dataset_id,    "dim0");
+        //     h5a_t dim1(dataset_id,    "dim1");
+        //     h5a_t dim2(dataset_id,    "dim2");
+        //     h5a_t stride0(dataset_id, "stride0");
+        //     h5a_t stride1(dataset_id, "stride1");
+        //     h5a_t stride2(dataset_id, "stride2");
+        //
+        //     meta->set("nbits",   std::to_string(nbits.typed_read<int>()));
+        //     meta->set("ndims",   std::to_string(ndims.typed_read<int>()));
+        //     meta->set("dim0",    std::to_string(dim0.typed_read<int>()));
+        //     meta->set("dim1",    std::to_string(dim1.typed_read<int>()));
+        //     meta->set("dim2",    std::to_string(dim2.typed_read<int>()));
+        //     meta->set("stride0", std::to_string(stride0.typed_read<int>()));
+        //     meta->set("stride1", std::to_string(stride1.typed_read<int>()));
+        //     meta->set("stride2", std::to_string(stride2.typed_read<int>()));
+        // }
         
         /// Close HDF5 hid_t handle types:
         H5Sclose(dataspace_id);
@@ -163,7 +163,12 @@ namespace im {
         
         /// create a temporary HDF5 file for all writes to target:
         NamedTemporaryFile tf(suffix(true)); /// period = true
+        
+        /// Allocate some HDF5 ids:
         hid_t file_id = -1;
+        hid_t dataspace_id = -1;
+        hid_t memspace_id = -1;
+        hid_t dataset_id = -1;
         
         {
             std::string tpth = tf.str();
@@ -177,29 +182,30 @@ namespace im {
         
         /// Stow the input image dimensions in an hsize_t std::array,
         /// and create two HDF5 dataspaces based on that array:
-        
-        std::array<hsize_t, kDimensions> dimensions{{
-            static_cast<hsize_t>(input.dim(0)),
-            static_cast<hsize_t>(input.dim(1)),
-            static_cast<hsize_t>(input.dim(2))
-        }};
-        
-        std::array<hsize_t, 1> flattened{{
-            static_cast<hsize_t>(input.dim(0) *
-                                 input.dim(1) *
-                                 input.dim(2))
-        }};
-        
-        /// space_id    --> “dataspace”: possibly strided dimensional data;
-        /// memspace_id --> “memoryspace”: flattened 1-D view of dataspace;
-        /// … the first arg to H5Screate_simple() is the rank (aka “ndims”)
-        hid_t dataspace_id = IM_H5S_CREATE(kDimensions, dimensions.data());
-        hid_t memspace_id  = IM_H5S_CREATE(1,           flattened.data());
+        {
+            std::array<hsize_t, kDimensions> dimensions{{
+                static_cast<hsize_t>(input.dim(0)),
+                static_cast<hsize_t>(input.dim(1)),
+                static_cast<hsize_t>(input.dim(2))
+            }};
+            
+            std::array<hsize_t, 1> flattened{{
+                static_cast<hsize_t>(input.dim(0) *
+                                     input.dim(1) *
+                                     input.dim(2))
+            }};
+            
+            /// space_id    --> “dataspace”: possibly strided dimensional data;
+            /// memspace_id --> “memoryspace”: flattened 1-D view of dataspace;
+            /// … the first arg to H5Screate_simple() is the rank (aka “ndims”)
+            dataspace_id = IM_H5S_CREATE(kDimensions, dimensions.data());
+            memspace_id  = IM_H5S_CREATE(1,           flattened.data());
+        }
         
         /// Try creating a new dataset --
-        hid_t dataset_id = IM_H5D_CREATE(file_id, name.c_str(),
-                                         detail::typecode<byte>(),
-                                         dataspace_id);
+        dataset_id = IM_H5D_CREATE(file_id, name.c_str(),
+                                   detail::typecode<byte>(),
+                                   dataspace_id);
         
         /// -- If that didn't work, try opening an existant one:
         if (dataset_id < 0) {
