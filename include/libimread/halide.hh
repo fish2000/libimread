@@ -72,7 +72,7 @@ namespace im {
     
     template <typename pT,
               typename hT = HalImage<pT>>
-    class HybridImage final : public hT, public Image, public Metadata {
+    class HybridImage final : public hT, public Image {
         
         public:
             using pixel_t = pT;
@@ -80,34 +80,28 @@ namespace im {
             
         public:
             HybridImage()
-                :halide_image_t(), Image(), Metadata()
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                :halide_image_t(), Image()
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
             HybridImage(int x, int y, int z, int w, std::string const& name="")
-                :halide_image_t(x, y, z, w), Image(), Metadata(name)
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                :halide_image_t(x, y, z, w), Image()
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
             HybridImage(int x, int y, int z, std::string const& name="")
-                :halide_image_t(x, y, z), Image(), Metadata(name)
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                :halide_image_t(x, y, z), Image()
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
             HybridImage(int x, int y, std::string const& name="")
-                :halide_image_t(x, y), Image(), Metadata(name)
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                :halide_image_t(x, y), Image()
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
             HybridImage(int x, std::string const& name="")
-                :halide_image_t(x), Image(), Metadata(name)
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                :halide_image_t(x), Image()
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
             HybridImage(buffer_t const* b, std::string const& name="")
-                :halide_image_t(b, name), Image(), Metadata(name)
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                :halide_image_t(b, name), Image()
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
             /// TODO: halide_buffer_t !
             
@@ -116,18 +110,14 @@ namespace im {
             HybridImage(HybridImage const& other)
                 :halide_image_t(dynamic_cast<halide_image_t const&>(other))
                 ,Image(dynamic_cast<Image const&>(other))
-                ,Metadata(dynamic_cast<Metadata const&>(other))
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
         public:
             /// move constructor
             HybridImage(HybridImage&& other) noexcept
                 :halide_image_t(dynamic_cast<halide_image_t&&>(other))
                 ,Image(dynamic_cast<Image&&>(other))
-                ,Metadata(dynamic_cast<Metadata&&>(other))
-                ,rowp_stride{ CALCULATE_ROWP_STRIDE() }
-                {}
+                { rowp_stride = CALCULATE_ROWP_STRIDE(); }
             
         public:
             using halide_image_t::operator();

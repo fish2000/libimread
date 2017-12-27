@@ -269,13 +269,13 @@ namespace im {
             moved->shift(z * raw_strip_size);
             std::unique_ptr<Image> output(factory->create(bits_per_sample, h, w, depth));
             
-            if (Metadata* metaout = dynamic_cast<Metadata*>(output.get())) {
-                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
-                                                                   options.metadata);
-                if (description.size()) {
-                    metaout->set_meta(description);
-                }
-            }
+            // if (Metadata* metaout = dynamic_cast<Metadata*>(output.get())) {
+            //     std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
+            //                                                        options.metadata);
+            //     if (description.size()) {
+            //         metaout->set_meta(description);
+            //     }
+            // }
             
             byte* start = output->rowp_as<byte>(0);
             for (int st = 0; st != n_strips; ++st) {
@@ -318,13 +318,13 @@ namespace im {
         do {
             std::unique_ptr<Image> output = factory->create(bits_per_sample, h, w, depth);
             
-            if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
-                std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
-                                                                   options.metadata);
-                if (description.size()) {
-                    meta->set_meta(description);
-                }
-            }
+            // if (Metadata* meta = dynamic_cast<Metadata*>(output.get())) {
+            //     std::string description = tiff_get<std::string>(t, TIFFTAG_IMAGEDESCRIPTION,
+            //                                                        options.metadata);
+            //     if (description.size()) {
+            //         meta->set_meta(description);
+            //     }
+            // }
             
             if (bits_per_sample == 8) {
                 /// Hardcoding uint8_t as the type for now

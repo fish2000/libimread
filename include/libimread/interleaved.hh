@@ -290,7 +290,7 @@ namespace im {
     
     template <typename Color = color::RGBA,
               std::size_t Dimensions = 3>
-    class InterleavedImage : public Image, public Metadata {
+    class InterleavedImage : public Image {
         
         public:
             static constexpr std::size_t C      = Color::Meta::channel_count;
@@ -430,21 +430,21 @@ namespace im {
             
             /// default constructor
             InterleavedImage(void)
-                :Image(), Metadata()
+                :Image()
                 {}
             
             explicit InterleavedImage(int x, int y)
-                :Image(), Metadata(), meta()
+                :Image(), meta()
                 {
                     init(x, y);
                 }
             
             explicit InterleavedImage(Contents c, Meta m)
-                :Image(), Metadata(), contents(c), meta(m)
+                :Image(), contents(c), meta(m)
                 {}
             
             InterleavedImage(InterleavedImage const& other)
-                :Image(), Metadata(), contents(other.contents), meta(other.meta)
+                :Image(), contents(other.contents), meta(other.meta)
                 {}
             
             /// NB: is this really necessary?
@@ -484,7 +484,7 @@ namespace im {
             }
             
             explicit InterleavedImage(channel_t vals[])
-                :Image(), Metadata()
+                :Image()
                 {
                     init(sizeof(vals) / sizeof(channel_t), 1);
                     for (int idx = 0; idx < sizeof(vals); idx++) {
@@ -493,7 +493,7 @@ namespace im {
                 }
             
             explicit InterleavedImage(composite_list_t list)
-                :Image(), Metadata()
+                :Image()
                 {
                     int idx = 0;
                     init(list.size(), 1);
@@ -505,7 +505,7 @@ namespace im {
                 }
             
             explicit InterleavedImage(channel_listlist_t list)
-                :Image(), Metadata()
+                :Image()
                 {
                     int idx = 0;
                     init(list.size(), 1, C);

@@ -13,13 +13,16 @@ namespace im {
     
     using stringvec_t = std::vector<std::string>;
     
-    class Metadata {
+    class Metadata : public store::stringmapper {
         
         public:
             Metadata();
             Metadata(std::string const&);
             virtual ~Metadata();
-            
+        
+        public:
+            DECLARE_STRINGMAPPER_TEMPLATES(Metadata);
+        
         public:
             void swap(Metadata&) noexcept;
             friend void swap(Metadata&, Metadata&) noexcept;
@@ -33,22 +36,24 @@ namespace im {
             Metadata& operator=(Metadata&&) noexcept;
             
         public:
-            std::string&       get(std::string const&);
-            std::string const& get(std::string const&) const;
-            bool set(std::string const&, std::string const&);
-            bool del(std::string const&);
-            std::size_t count() const;
-            stringvec_t list() const;
+            virtual std::string&       get(std::string const&) override;
+            virtual std::string const& get(std::string const&) const override;
+            virtual bool set(std::string const&, std::string const&) override;
+            virtual bool del(std::string const&) override;
+            virtual std::size_t count() const override;
+            virtual stringvec_t list() const override;
             
         public:
             bool has_meta() const;
             std::string const& get_meta() const;
             std::string const& set_meta(std::string const&);
             
+        public:
             bool has_icc_name() const;
             std::string const& get_icc_name() const;
             std::string const& set_icc_name(std::string const&);
             
+        public:
             bool has_icc_data() const;
             bytevec_t get_icc_data() const;
             std::string const& set_icc_data(std::string const&);
@@ -56,10 +61,10 @@ namespace im {
             std::string const& set_icc_data(byte*, std::size_t);
             
         public:
-            std::size_t hash(std::size_t H = 0) const;
+            virtual std::size_t hash(std::size_t H = 0) const override;
             
-        public:
-            store::stringmap values;
+        protected:
+            mutable store::stringmap values;
     };
     
 } /* namespace im */

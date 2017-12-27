@@ -197,7 +197,7 @@ namespace im {
                                                                 CF_IDX(idx),
                                                                 options.get())));
             
-            out.values.update(metadata);
+            out.update(metadata);
             
             /// increment image idx:
             ++idx;

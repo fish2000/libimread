@@ -7,7 +7,6 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/halide.hh>
-#include <libimread/metadata.hh>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/filesystem/temporary.h>
 #include <libimread/file.hh>
@@ -23,7 +22,6 @@ namespace {
     using filesystem::path;
     using filesystem::TemporaryDirectory;
     using HybridImage = im::HybridImage<uint8_t>;
-    using Metadata = im::Metadata;
     using pathvec_t = std::vector<path>;
     
     TEST_CASE("[hdf5-io] Read PNG and JPEG files and write as individual HDF5 binary store files",
@@ -72,24 +70,24 @@ namespace {
             
             CHECK(COLLECT(np));
             
-            Metadata* meta = dynamic_cast<Metadata*>(&hdf);
-            CHECK(meta != nullptr);
+            // Metadata* meta = dynamic_cast<Metadata*>(&hdf);
+            // CHECK(meta != nullptr);
             
             /// comparing as integer:
-            CHECK(hdf.dim(0) == std::stoi(meta->get("dim0")));
-            CHECK(hdf.dim(1) == std::stoi(meta->get("dim1")));
-            CHECK(hdf.dim(2) == std::stoi(meta->get("dim2")));
-            CHECK(hdf.stride(0) == std::stoi(meta->get("stride0")));
-            CHECK(hdf.stride(1) == std::stoi(meta->get("stride1")));
-            CHECK(hdf.stride(2) == std::stoi(meta->get("stride2")));
+            // CHECK(hdf.dim(0) == std::stoi(meta->get("dim0")));
+            // CHECK(hdf.dim(1) == std::stoi(meta->get("dim1")));
+            // CHECK(hdf.dim(2) == std::stoi(meta->get("dim2")));
+            // CHECK(hdf.stride(0) == std::stoi(meta->get("stride0")));
+            // CHECK(hdf.stride(1) == std::stoi(meta->get("stride1")));
+            // CHECK(hdf.stride(2) == std::stoi(meta->get("stride2")));
             
             /// comparing as std::string:
-            CHECK(std::to_string(hdf.dim(0)) == meta->get("dim0"));
-            CHECK(std::to_string(hdf.dim(1)) == meta->get("dim1"));
-            CHECK(std::to_string(hdf.dim(2)) == meta->get("dim2"));
-            CHECK(std::to_string(hdf.stride(0)) == meta->get("stride0"));
-            CHECK(std::to_string(hdf.stride(1)) == meta->get("stride1"));
-            CHECK(std::to_string(hdf.stride(2)) == meta->get("stride2"));
+            // CHECK(std::to_string(hdf.dim(0)) == meta->get("dim0"));
+            // CHECK(std::to_string(hdf.dim(1)) == meta->get("dim1"));
+            // CHECK(std::to_string(hdf.dim(2)) == meta->get("dim2"));
+            // CHECK(std::to_string(hdf.stride(0)) == meta->get("stride0"));
+            // CHECK(std::to_string(hdf.stride(1)) == meta->get("stride1"));
+            // CHECK(std::to_string(hdf.stride(2)) == meta->get("stride2"));
             
             // WTF("Values: ", meta->values.to_string());
             
