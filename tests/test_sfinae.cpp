@@ -48,17 +48,17 @@ namespace {
         CHECK(!im::format::WebP::capacity.can_write);
     }
     
-    TEST_CASE("[SFINAE] Confirm PVR can NOT write",
-              "[sfinae-PVR-confirm-no-write]")
+    TEST_CASE("[SFINAE] Confirm PVR can read and write",
+              "[sfinae-PVR-confirm-read-write]")
     {
         CHECK(im::traits::has_read<im::format::PVR>());
         CHECK(im::traits::has_read<im::format::PVRTC>());
-        CHECK(!im::traits::has_write<im::format::PVR>());
-        CHECK(!im::traits::has_write<im::format::PVRTC>());
+        CHECK(im::traits::has_write<im::format::PVR>());
+        CHECK(im::traits::has_write<im::format::PVRTC>());
         CHECK(im::format::PVR::capacity.can_read);
         CHECK(im::format::PVRTC::capacity.can_read);
-        CHECK(!im::format::PVR::capacity.can_write);
-        CHECK(!im::format::PVRTC::capacity.can_write);
+        CHECK(im::format::PVR::capacity.can_write);
+        CHECK(im::format::PVRTC::capacity.can_write);
     }
     
 } /// namespace (anon.)

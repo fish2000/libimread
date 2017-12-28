@@ -12,9 +12,12 @@
 namespace im {
     
     class PVRTCFormat : public ImageFormatBase<PVRTCFormat> {
+        
         public:
             using can_read = std::true_type;
+            using can_write = std::true_type;
             
+        public:
             /// PVRTC "magic" tag is internal
             DECLARE_OPTIONS(
                 _signatures = { 0x21525650 },
@@ -22,11 +25,28 @@ namespace im {
                 _mimetype = "image/x-pvr"
             );
             
+        public:
+            /// bespoke version of “match_format()” --
+            /// reads just enough bytes to construct a PVRHeader,
+            /// and then inspect the relevant “magic” member value
             static bool match_format(byte_source* src);
             
+            /// PVRTC read -- makes use of:
+            ///   * ext/pvrtc.hh
+            ///   * ext/pvr.cpp
+            ///   * ext/pvrtc.cpp
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
                                                 Options const& opts) override;
+            
+            /// PVRTC write -- makes use of:
+            ///   * deps/imagecompression/image_compression/public/compressed_image.h
+            ///   * deps/imagecompression/image_compression/public/pvrtc_compressor.h
+            ///   * deps/imagecompression/image_compression/internal/pvrtc_compressor.cc
+            virtual void write(Image& input,
+                               byte_sink* output,
+                               Options const& opts) override;
+
     };
     
     namespace format {

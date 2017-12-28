@@ -8,7 +8,14 @@
 #include <libimread/seekable.hh>
 #include <libimread/options.hh>
 #include <libimread/errors.hh>
+
+/// support for PVRTCFormat::read():
 #include <libimread/ext/pvr.hh>
+
+/// support for PVRTCFormat::write():
+#include "image_compression/public/compressed_image.h"
+#include "image_compression/public/pvrtc_compressor.h"
+
 
 namespace im {
     
@@ -54,6 +61,13 @@ namespace im {
         }
         
         return output;
+    }
+    
+    void PVRTCFormat::write(Image& input,
+                            byte_sink* output,
+                            Options const& opts) {
+        // imread_raise_default(NotImplementedError);
+        
     }
     
 }

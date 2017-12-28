@@ -192,13 +192,12 @@ include_directories("${CROSSGUID_DIR}")
 # include_directories("${DEPIXELATE_DIR}")
 include_directories("${DOCOPT_DIR}")
 include_directories("${ICCJPEG_DIR}")
-# include_directories("${IMAGECOMPRESSION_DIR}")
+include_directories("${IMAGECOMPRESSION_DIR}")
 include_directories("${INICPP_DIR}/include")
+include_directories("${IOD_DIR}")
 # include_directories("${LMDBXX_DIR}")
 # include_directories("${LRUCACHE11_DIR}")
-include_directories("${IOD_DIR}")
 include_directories("${SG14_DIR}")
-
 
 # Ugh
 link_directories(/usr/lib)
@@ -227,15 +226,22 @@ add_library(imread OBJECT ${srcs} ${hdrs})
 set_target_properties(imread
     PROPERTIES LIBRARY_OUTPUT_NAME "imread")
 
+# command-execution deps:
 add_dependencies(imread "project_header")
-add_dependencies(imread "guid")
-# add_dependencies(imread "depixelate")
-# add_dependencies(imread "imagecompression")
+add_dependencies(imread "iod_symbolize")
+
+# “INTERFACE” (header-only) library deps:
 add_dependencies(imread "GSL")
 add_dependencies(imread "SG14")
+
+# standard-issue C/C++/ObjectiveC/ObjectiveC++ libraries --
+# may be linked as such or, alternatively, merged directly
+# with the libraries’ “TARGET_OBJECT” files:
+# add_dependencies(imread "depixelate")
+add_dependencies(imread "guid")
 add_dependencies(imread "iccjpeg")
 add_dependencies(imread "inicpp")
-add_dependencies(imread "iod_symbolize")
+add_dependencies(imread "imagecompression")
 
 # ... and build shared and static target libraries,
 # based on the `OBJECT` target:
@@ -256,13 +262,13 @@ target_link_libraries(
     imread_shared                           # imread library (shared)
     z png                                   # shared libraries (dylib) linked normally
     GSL SG14                                # “INTERFACE” (header-only) libraries
+    # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate “hqx” sub-library
+    # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate “scale2x” sub-library
+    # $<TARGET_OBJECTS:depixelate_xbrz>       # merges objects from depixelate “xbrz” sub-library
     $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
     $<TARGET_OBJECTS:iccjpeg>               # merge objects from ‘iccjpeg’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
-    # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
-    # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library
-    # $<TARGET_OBJECTS:depixelate_xbrz>       # merges objects from depixelate sub-library
-    # $<TARGET_OBJECTS:imagecompression>      # merges objects from depixelate sub-library
+    $<TARGET_OBJECTS:imagecompression>      # merges objects from ‘image-compression’ sub-library
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
@@ -280,13 +286,13 @@ target_link_libraries(
     imread_static                           # imread library (static)
     z png                                   # static libraries (“.a” archive files) linked normally
     GSL SG14                                # “INTERFACE” (header-only) libraries
+    # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate “hqx” sub-library
+    # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate “scale2x” sub-library
+    # $<TARGET_OBJECTS:depixelate_xbrz>       # merges objects from depixelate “xbrz” sub-library
     $<TARGET_OBJECTS:guid>                  # merge objects from ‘guid’ library
     $<TARGET_OBJECTS:iccjpeg>               # merge objects from ‘iccjpeg’ library
     $<TARGET_OBJECTS:inicpp>                # merge objects from ‘inicpp’ library
-    # $<TARGET_OBJECTS:depixelate_hqx>        # merges objects from depixelate sub-library
-    # $<TARGET_OBJECTS:depixelate_scale2x>    # merges objects from depixelate sub-library
-    # $<TARGET_OBJECTS:depixelate_xbrz>       # merges objects from depixelate sub-library
-    # $<TARGET_OBJECTS:imagecompression>      # merges objects from depixelate sub-library
+    $<TARGET_OBJECTS:imagecompression>      # merges objects from ‘image-compression’ sub-library
     ${EXTRA_LIBS}
     ${TIFF_LIBRARIES}
     ${JPEG_LIBRARIES}
