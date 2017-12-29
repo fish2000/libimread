@@ -106,7 +106,7 @@ namespace im {
         
         /// fill pixelbuffer with image data from input:
         if (channels == 3) {
-            /// use constant alpha value:
+            /// set alpha value to 255 -- fully opaque:
             for (; y < height; ++y) {
                 for (; x < width; ++x) {
                     rgb = data + (width * y + x);
@@ -114,11 +114,11 @@ namespace im {
                     for (; c < 3; ++c) {
                         rgb[c] = subview[c];
                     }
-                    rgb[3] = 0;
+                    rgb[3] = 255;
                 }
             }
         } else if (channels == 4) {
-            /// use image alpha value:
+            /// use the alpha value provided by the image:
             for (; y < height; ++y) {
                 for (; x < width; ++x) {
                     rgb = data + (width * y + x);
