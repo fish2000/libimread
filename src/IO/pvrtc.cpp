@@ -92,9 +92,6 @@ namespace im {
         
         /// allocate aux::Rgb8888 pixel buffer block,
         /// per input image dimensions:
-        // aux::Rgb8888* pixelbuffer = new aux::Rgb8888[input.width() *
-        //                                              input.height()];
-        // 0, /// padding_bytes_per_row MUST BE ZERO (?!)
         std::size_t pixelbuffer_size = width * height;
         detail::pixelbuffer_t pixelbuffer = std::make_unique<aux::Rgba8888[]>(pixelbuffer_size);
         
