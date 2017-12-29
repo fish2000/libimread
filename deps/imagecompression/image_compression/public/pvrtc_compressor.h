@@ -91,6 +91,12 @@ namespace imagecompression {
                                     const uint8_t* buffer,
                                     CompressedImage* image);
             
+            virtual bool   Compress(CompressedImage::Format format,                         /// OK with kRGBA,
+                                    uint32_t height,                                        /// power2(height),
+                                    uint32_t width,                                         /// power2(width)
+                                    const uint8_t* buffer,
+                                    CompressedImage* image);
+            
             virtual bool   Decompress(CompressedImage const& image,
                                       std::vector<uint8_t>* decompressed_buffer);
             

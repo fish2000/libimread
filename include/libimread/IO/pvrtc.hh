@@ -40,6 +40,7 @@ namespace im {
                                                 Options const& opts) override;
             
             /// PVRTC write -- makes use of:
+            ///   * libimread/include/endian.hh
             ///   * deps/imagecompression/image_compression/public/compressed_image.h
             ///   * deps/imagecompression/image_compression/public/pvrtc_compressor.h
             ///   * deps/imagecompression/image_compression/internal/pvrtc_compressor.cc

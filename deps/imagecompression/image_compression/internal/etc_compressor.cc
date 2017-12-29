@@ -149,7 +149,7 @@ namespace imagecompression {
             // Splits a 64-bit block into two 32-bit words, swizzling bytes as necessary
             // to get the correct endian ordering.
             static void SplitBlock(uint64_t block, uint32_t* hi_word, uint32_t* lo_word) {
-    #if defined IS_LITTLE_ENDIAN
+    #if defined __LITTLE_ENDIAN__
                 *hi_word = Swizzle32(block & 0xffffffff);
                 *lo_word = Swizzle32(block >> 32);
     #else
@@ -161,7 +161,7 @@ namespace imagecompression {
             // Glues two 32-bit words together to form a 64-bit block, swizzling bytes as
             // necessary to get the correct byte order expected by hardware.
             static uint64_t BuildBlock(uint32_t hi_word, uint32_t lo_word) {
-    #if defined IS_LITTLE_ENDIAN
+    #if defined __LITTLE_ENDIAN__
                 const uint32_t swizzled_hi_word = Swizzle32(hi_word);
                 const uint32_t swizzled_lo_word = Swizzle32(lo_word);
                 return (static_cast<uint64_t>(swizzled_lo_word) << 32) | swizzled_hi_word;
@@ -172,7 +172,7 @@ namespace imagecompression {
             
             // Swizzles a 32-bit word in ETC1 order to match the host endianness.
             static uint32_t Swizzle32(uint32_t n) {
-    #if defined IS_LITTLE_ENDIAN
+    #if defined __LITTLE_ENDIAN__
                 const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&n);
                 return static_cast<uint32_t>(bytes[0]) << 24 | static_cast<uint32_t>(bytes[1]) << 16 |
                        static_cast<uint32_t>(bytes[2]) << 8  | static_cast<uint32_t>(bytes[3]);

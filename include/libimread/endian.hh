@@ -15,6 +15,11 @@ namespace im {
         #    define __LITTLE_ENDIAN__ 1
         #    undef __BIG_ENDIAN__
         #  endif
+        #else
+        #  ifndef __BIG_ENDIAN__
+        #    define __BIG_ENDIAN__ 1
+        #    undef __LITTLE_ENDIAN__
+        #  endif
         #endif
         
         template <typename T, typename U> inline

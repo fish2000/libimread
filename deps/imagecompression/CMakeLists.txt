@@ -9,7 +9,7 @@ set(imagecompression_VERSION_PATCH "5")
 
 # Compilation options:
 add_definitions(
-    -DIS_LITTLE_ENDIAN
+    -D__LITTLE_ENDIAN__
     -Wall -Werror
     -std=c++17 -stdlib=libc++ -O3
     -mtune=native -fstrict-aliasing)

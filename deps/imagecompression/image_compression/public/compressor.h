@@ -81,6 +81,13 @@ namespace imagecompression {
                                   const uint8_t* buffer,
                                   CompressedImage* image) = 0;
             
+            // Override dispensing with the (in some implementation cases gratuitous)
+            // padding_bytes_per_row parameter.
+            virtual bool Compress(CompressedImage::Format format,
+                                  uint32_t height, uint32_t width,
+                                  const uint8_t* buffer,
+                                  CompressedImage* image) { return false; }
+            
             // Decompresses a compressed image. The destination buffer vector
             // will be resized correctly to contain the decompressed data.
             // Returns false on error.

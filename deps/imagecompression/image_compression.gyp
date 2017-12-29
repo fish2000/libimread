@@ -41,11 +41,11 @@
       ],
       'include_dirs': ['.'],
       'defines': [
-        'IS_LITTLE_ENDIAN',
+        '__LITTLE_ENDIAN__',
       ],
       'direct_dependent_settings': {
         'defines': [
-          'IS_LITTLE_ENDIAN',
+          '__LITTLE_ENDIAN__',
         ],
       },
     },

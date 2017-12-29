@@ -142,16 +142,16 @@ namespace imagecompression {
         // Equality operator for testing.
         bool operator==(Rgb565 const& c) const { return r == c.r && g == c.g && b == c.b; }
         
-#if defined IS_LITTLE_ENDIAN
+#if defined __LITTLE_ENDIAN__
         unsigned int b : 5;
         unsigned int g : 6;
         unsigned int r : 5;
-#elif defined IS_BIG_ENDIAN
+#elif defined __BIG_ENDIAN__
         unsigned int r : 5;
         unsigned int g : 6;
         unsigned int b : 5;
 #else
-#error Neither IS_LITTLE_ENDIAN nor IS_BIG_ENDIAN is defined
+#error Neither __LITTLE_ENDIAN__ nor __BIG_ENDIAN__ is defined
 #endif
     };
     

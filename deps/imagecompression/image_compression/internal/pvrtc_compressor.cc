@@ -632,6 +632,13 @@ namespace imagecompression {
         return true;
     }
     
+    bool PvrtcCompressor::Compress(CompressedImage::Format format,
+                                   uint32_t height, uint32_t width,
+                                   const uint8_t* buffer,
+                                   CompressedImage* image) {
+        return Compress(format, height, width, 0, buffer, image);
+    }
+    
     bool PvrtcCompressor::Decompress(CompressedImage const& image,
                                      std::vector<uint8_t>* decompressed_buffer) {
         return false;

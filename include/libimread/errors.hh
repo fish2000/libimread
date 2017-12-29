@@ -234,6 +234,7 @@ DECLARE_IMREAD_ERROR_TYPE(PNGIOError,               "Error in PNG/libpng I/O");
 DECLARE_IMREAD_ERROR_TYPE(GIFIOError,               "Error in GIF/WriteGIF.hh I/O");
 DECLARE_IMREAD_ERROR_TYPE(PPMIOError,               "Error in PPM binary I/O");
 DECLARE_IMREAD_ERROR_TYPE(TIFFIOError,              "Error in TIFF/libtiff I/O");
+DECLARE_IMREAD_ERROR_TYPE(PVRTCIOError,             "Error in PVRTC/imagecompression I/O");
 
 }
 
