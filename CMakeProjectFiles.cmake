@@ -125,6 +125,7 @@ set(hdrs
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
     ${hdrs_dir}/color.hh
+    ${hdrs_dir}/crop.hh
     ${hdrs_dir}/endian.hh
     ${hdrs_dir}/env.hh
     ${hdrs_dir}/errors.hh

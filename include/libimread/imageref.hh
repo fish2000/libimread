@@ -25,17 +25,17 @@ namespace im {
             friend class Image;
         
         public:
-            using type = typename std::remove_cv_t<std::decay_t<ImageType>>;
-            using size_type = typename type::size_type;
-            using value_type = typename type::value_type;
-            using reference_type = typename std::add_lvalue_reference_t<type>;
-            using const_reference_type = typename std::add_const_t<reference_type>;
-            using pointer_type = typename std::add_pointer_t<type>;
+            using type                      = typename std::remove_cv_t<std::decay_t<ImageType>>;
+            using size_type                 = typename type::size_type;
+            using value_type                = typename type::value_type;
+            using reference_type            = typename std::add_lvalue_reference_t<type>;
+            using const_reference_type      = typename std::add_const_t<reference_type>;
+            using pointer_type              = typename std::add_pointer_t<type>;
         
         public:
-            ImageRef() noexcept = delete;
-            ImageRef(ImageRef const&) = default;
-            ImageRef(ImageRef&&) noexcept = default;
+            ImageRef() noexcept             = delete;
+            ImageRef(ImageRef const&)       = default;
+            ImageRef(ImageRef&&) noexcept   = default;
             
         public:
             template <typename ImageClass,
@@ -60,30 +60,28 @@ namespace im {
                 { /* ¿NON-NULL? */ }
         
         public:
-            bool is_valid() const { return pointer != nullptr; }
+            virtual bool is_valid() const               { return pointer != nullptr; }
         
         public:
             virtual ~ImageRef() {}
         
         public:
-            virtual void* rowp(int r) const { return pointer->rowp(r); }
-            virtual void* rowp() const { return pointer->rowp(); }
-            virtual int nbits() const { return pointer->nbits(); }
+            virtual void* rowp(int r) const             { return pointer->rowp(r); }
+            virtual void* rowp() const                  { return pointer->rowp(); }
+            virtual int nbits() const                   { return pointer->nbits(); }
             
         public:
-            virtual int nbytes() const { return pointer->nbytes(); }
-            virtual int ndims() const { return pointer->ndims(); }
-            virtual int dim(int d) const { return pointer->dim(d); }
-            virtual int stride(int s) const { return pointer->stride(s); }
-            virtual int min(int m) const { return pointer->min(m); }
-            virtual bool is_signed() const { return pointer->is_signed(); }
-            virtual bool is_floating_point() const { return pointer->is_floating_point(); }
+            virtual int nbytes() const                  { return pointer->nbytes(); }
+            virtual int ndims() const                   { return pointer->ndims(); }
+            virtual int dim(int d) const                { return pointer->dim(d); }
+            virtual int stride(int s) const             { return pointer->stride(s); }
+            virtual int min(int m) const                { return pointer->min(m); }
+            virtual bool is_signed() const              { return pointer->is_signed(); }
+            virtual bool is_floating_point() const      { return pointer->is_floating_point(); }
         
         public:
             template <typename T> inline
-            T* rowp_as(const int r) const {
-                return static_cast<T*>(pointer->rowp(r));
-            }
+            T* rowp_as(const int r) const               { return static_cast<T*>(pointer->rowp(r)); }
         
         public:
             template <typename T = value_type> inline
@@ -97,30 +95,38 @@ namespace im {
                 /// Return a strided array view, typed accordingly,
                 /// initialized with the current stride values:
                 return av::strided_array_view<T, 3>(static_cast<T*>(pointer->rowp(0)),
-                                                    { X,                  Y,                  Z                  },
-                                                    { pointer->stride(0), pointer->stride(1), pointer->stride(2) });
+                                                    { X, Y, Z },
+                                                    { pointer->stride(0),
+                                                      pointer->stride(1),
+                                                      pointer->stride(2) });
             }
             
         public:
-            int dim_or(int dimension, int default_value = 1) const { return pointer->dim_or(dimension, default_value); }
-            int stride_or(int dimension, int default_value = 1) const { return pointer->stride_or(dimension, default_value); }
-            int min_or(int dimension, int default_value = 0) const { return pointer->min_or(dimension, default_value); }
+            int dim_or(int dimension,
+                       int default_value = 1) const     { return pointer->dim_or(dimension,
+                                                                                 default_value); }
+            int stride_or(int dimension,
+                          int default_value = 1) const  { return pointer->stride_or(dimension,
+                                                                                    default_value); }
+            int min_or(int dimension,
+                       int default_value = 0) const     { return pointer->min_or(dimension,
+                                                                                 default_value); }
             
         public:
-            virtual int width() const { return pointer->width(); }
-            virtual int height() const { return pointer->height(); }
-            virtual int planes() const { return pointer->planes(); }
-            virtual int size() const { return pointer->size(); }
+            virtual int width() const                   { return pointer->width(); }
+            virtual int height() const                  { return pointer->height(); }
+            virtual int planes() const                  { return pointer->planes(); }
+            virtual int size() const                    { return pointer->size(); }
             
         public:
-            int left() const { return pointer->left(); }
-            int right() const { return pointer->right(); }
-            int top() const { return pointer->top(); }
-            int bottom() const { return pointer->bottom(); }
+            int left() const                            { return pointer->left(); }
+            int right() const                           { return pointer->right(); }
+            int top() const                             { return pointer->top(); }
+            int bottom() const                          { return pointer->bottom(); }
         
         public:
-            float entropy() const { return pointer->entropy(); }
-            int otsu() const { return pointer->otsu(); }
+            float entropy() const                       { return pointer->entropy(); }
+            int otsu() const                            { return pointer->otsu(); }
         
         public:
             Metadata&       metadata()                  { return pointer->metadata();                               }
@@ -134,6 +140,12 @@ namespace im {
             pointer_type pointer{ nullptr };
         
     };
+    
+    /// I think C++17 affords typename inference for class and struct templates,
+    /// but I find that coarse, and vulgar:
+    
+    template <typename ImageType> inline
+    ImageRef<ImageType> make_imageref(ImageType const& image) { return ImageRef<ImageType>(image); }
     
 } /// namespace im
 
