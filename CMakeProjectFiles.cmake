@@ -138,6 +138,7 @@ set(hdrs
     ${hdrs_dir}/image.hh
     ${hdrs_dir}/imageformat.hh
     ${hdrs_dir}/imagelist.hh
+    ${hdrs_dir}/imageref.hh
     ${hdrs_dir}/imageview.hh
     ${hdrs_dir}/interleaved.hh
     ${hdrs_dir}/iterators.hh
