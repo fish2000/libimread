@@ -76,8 +76,7 @@ namespace im {
                             Options const& opts) {
         /// inspect input image dimensions:
         int x = 0,
-            y = 0,
-            c = 0;
+            y = 0;
         const int width = input.width(),
                   height = input.height(),
                   channels = input.planes();
