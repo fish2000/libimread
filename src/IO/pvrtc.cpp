@@ -100,15 +100,12 @@ namespace im {
         /// prepare image view and subview:
         av::strided_array_view<byte, 3> view = input.view();
         av::strided_array_view<byte, 1> subview;
-        // byte* __restrict__ data = reinterpret_cast<byte*>(pixelbuffer.get());
-        // byte* __restrict__ rgba;
         
         /// fill pixelbuffer with image data from input:
         if (channels == 3) {
             /// set alpha value to 255 -- fully opaque:
             for (; y < height; ++y) {
                 for (; x < width; ++x) {
-                    // rgba = data + sizeof(aux::Rgba8888) * (width * y + x);
                     rgba = aux::GetMutableColorInImageBuffer(pixelbuffer.get(),
                                                              pixelbuffer_rowbytes,
                                                              y, x);
@@ -123,7 +120,6 @@ namespace im {
             /// use the alpha value provided by the image:
             for (; y < height; ++y) {
                 for (; x < width; ++x) {
-                    // rgba = data + sizeof(aux::Rgba8888) * (width * y + x);
                     rgba = aux::GetMutableColorInImageBuffer(pixelbuffer.get(),
                                                              pixelbuffer_rowbytes,
                                                              y, x);
@@ -145,7 +141,7 @@ namespace im {
         detail::bytebuffer_t bytebuffer = std::make_unique<byte[]>(intermediate_size);
         aux::CompressedImage intermediate(intermediate_size, bytebuffer.get());
         
-        /// create an instance of the internal Metadata class,
+        /// create an instance of the internal aux::CompressedImage::Metadata class,
         /// and assign it to the compressed image instance:
         aux::CompressedImage::Metadata metadata(aux::CompressedImage::kRGBA, "PVRTC",
                                                 static_cast<uint32_t>(height),      /// uncompressed height
