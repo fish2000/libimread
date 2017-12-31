@@ -77,8 +77,8 @@ namespace im {
             explicit CroppedImageRef(ImageClass const& image, int crop_to_width,
                                                               int crop_to_height)
                 :ImageRef(image)
-                ,boundaries_t(crop_to_width,
-                              crop_to_height)
+                ,boundaries(crop_to_width,
+                            crop_to_height)
                 {}
             template <typename ImageClass,
                       typename std::enable_if_t<
@@ -86,22 +86,22 @@ namespace im {
             explicit CroppedImageRef(ImageClass* image, int crop_to_width,
                                                         int crop_to_height)
                 :ImageRef(image)
-                ,boundaries_t(crop_to_width,
-                              crop_to_height)
+                ,boundaries(crop_to_width,
+                            crop_to_height)
                 {}
                 
         public:
             explicit CroppedImageRef(const_reference_type image, int crop_to_width,
                                                                  int crop_to_height)
                 :ImageRef(image)
-                ,boundaries_t(crop_to_width,
-                              crop_to_height)
+                ,boundaries(crop_to_width,
+                            crop_to_height)
                 {}
             explicit CroppedImageRef(pointer_type image_ptr, int crop_to_width,
                                                              int crop_to_height)
                 :ImageRef(image_ptr)
-                ,boundaries_t(crop_to_width,
-                              crop_to_height)
+                ,boundaries(crop_to_width,
+                            crop_to_height)
                 {}
         
         public:
