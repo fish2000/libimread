@@ -93,36 +93,45 @@ namespace im {
         /// allocate aux::Rgb8888 pixel buffer block,
         /// per input image dimensions:
         std::size_t pixelbuffer_size = width * height;
+        std::size_t pixelbuffer_rowbytes = sizeof(aux::Rgba8888) * width;
         detail::pixelbuffer_t pixelbuffer = std::make_unique<aux::Rgba8888[]>(pixelbuffer_size);
+        aux::Rgba8888* rgba;
         
         /// prepare image view and subview:
         av::strided_array_view<byte, 3> view = input.view();
         av::strided_array_view<byte, 1> subview;
-        byte* __restrict__ data = reinterpret_cast<byte*>(pixelbuffer.get());
-        byte* __restrict__ rgb;
+        // byte* __restrict__ data = reinterpret_cast<byte*>(pixelbuffer.get());
+        // byte* __restrict__ rgba;
         
         /// fill pixelbuffer with image data from input:
         if (channels == 3) {
             /// set alpha value to 255 -- fully opaque:
             for (; y < height; ++y) {
                 for (; x < width; ++x) {
-                    rgb = data + (width * y + x);
+                    // rgba = data + sizeof(aux::Rgba8888) * (width * y + x);
+                    rgba = aux::GetMutableColorInImageBuffer(pixelbuffer.get(),
+                                                             pixelbuffer_rowbytes,
+                                                             y, x);
                     subview = view[x][y];
-                    for (; c < 3; ++c) {
-                        rgb[c] = subview[c];
-                    }
-                    rgb[3] = 255;
+                    rgba->r = subview[0];
+                    rgba->g = subview[1];
+                    rgba->b = subview[2];
+                    rgba->a = 255;
                 }
             }
         } else if (channels == 4) {
             /// use the alpha value provided by the image:
             for (; y < height; ++y) {
                 for (; x < width; ++x) {
-                    rgb = data + (width * y + x);
+                    // rgba = data + sizeof(aux::Rgba8888) * (width * y + x);
+                    rgba = aux::GetMutableColorInImageBuffer(pixelbuffer.get(),
+                                                             pixelbuffer_rowbytes,
+                                                             y, x);
                     subview = view[x][y];
-                    for (; c < 4; ++c) {
-                        rgb[c] = subview[c];
-                    }
+                    rgba->r = subview[0];
+                    rgba->g = subview[1];
+                    rgba->b = subview[2];
+                    rgba->a = subview[3];
                 }
             }
         }
@@ -135,6 +144,16 @@ namespace im {
         
         detail::bytebuffer_t bytebuffer = std::make_unique<byte[]>(intermediate_size);
         aux::CompressedImage intermediate(intermediate_size, bytebuffer.get());
+        
+        /// create an instance of the internal Metadata class,
+        /// and assign it to the compressed image instance:
+        aux::CompressedImage::Metadata metadata(aux::CompressedImage::kRGBA, "PVRTC",
+                                                static_cast<uint32_t>(height),      /// uncompressed height
+                                                static_cast<uint32_t>(width),       /// uncompressed width
+                                                static_cast<uint32_t>(height),      /// compressed height
+                                                static_cast<uint32_t>(width), 0);   /// compressed width
+        
+        intermediate.SetMetadata(metadata);
         
         /// perform the actual act of compression:
         bool success = compressor.Compress(aux::CompressedImage::kRGBA,

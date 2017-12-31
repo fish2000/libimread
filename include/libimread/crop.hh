@@ -54,16 +54,16 @@ namespace im {
             friend class Image;
         
         public:
-            using base = ImageRef<ImageType>;
-            using base::type;
-            using base::size_type;
-            using base::value_type;
-            using base::reference_type;
-            using base::const_reference_type;
-            using base::pointer_type;
+            using base_t = ImageRef<ImageType>;
+            using base_t::type;
+            using base_t::size_type;
+            using base_t::value_type;
+            using base_t::reference_type;
+            using base_t::const_reference_type;
+            using base_t::pointer_type;
             
         public:
-            using base::pointer;
+            using base_t::pointer;
         
         public:
             CroppedImageRef() noexcept = delete;
@@ -74,34 +74,70 @@ namespace im {
             template <typename ImageClass,
                       typename std::enable_if_t<
                                std::is_base_of_v<Image, ImageClass>>>
-            explicit CroppedImageRef(ImageClass const& image, int crop_to_width,
-                                                              int crop_to_height)
-                :ImageRef(image)
-                ,boundaries(crop_to_width,
-                            crop_to_height)
+            explicit CroppedImageRef(ImageClass const& image, int maxX,
+                                                              int maxY)
+                :base_t(image)
+                ,boundaries(maxX, maxY)
                 {}
+            
             template <typename ImageClass,
                       typename std::enable_if_t<
                                std::is_base_of_v<Image, ImageClass>>>
-            explicit CroppedImageRef(ImageClass* image, int crop_to_width,
-                                                        int crop_to_height)
-                :ImageRef(image)
-                ,boundaries(crop_to_width,
-                            crop_to_height)
+            explicit CroppedImageRef(ImageClass const& image, int minX,
+                                                              int minY,
+                                                              int maxX,
+                                                              int maxY)
+                :base_t(image)
+                ,boundaries(minX, minY, maxX, maxY)
+                {}
+            
+            template <typename ImageClass,
+                      typename std::enable_if_t<
+                               std::is_base_of_v<Image, ImageClass>>>
+            explicit CroppedImageRef(ImageClass* image, int maxX,
+                                                        int maxY)
+                :base_t(image)
+                ,boundaries(maxX, maxY)
+                {}
+            
+            template <typename ImageClass,
+                      typename std::enable_if_t<
+                               std::is_base_of_v<Image, ImageClass>>>
+            explicit CroppedImageRef(ImageClass* image, int minX,
+                                                        int minY,
+                                                        int maxX,
+                                                        int maxY)
+                :base_t(image)
+                ,boundaries(minX, minY, maxX, maxY)
                 {}
                 
         public:
-            explicit CroppedImageRef(const_reference_type image, int crop_to_width,
-                                                                 int crop_to_height)
-                :ImageRef(image)
-                ,boundaries(crop_to_width,
-                            crop_to_height)
+            explicit CroppedImageRef(const_reference_type image, int maxX,
+                                                                 int maxY)
+                :base_t(image)
+                ,boundaries(maxX, maxY)
                 {}
-            explicit CroppedImageRef(pointer_type image_ptr, int crop_to_width,
-                                                             int crop_to_height)
-                :ImageRef(image_ptr)
-                ,boundaries(crop_to_width,
-                            crop_to_height)
+            
+            explicit CroppedImageRef(const_reference_type image, int minX,
+                                                                 int minY,
+                                                                 int maxX,
+                                                                 int maxY)
+                :base_t(image)
+                ,boundaries(minX, minY, maxX, maxY)
+                {}
+            
+            explicit CroppedImageRef(pointer_type image_ptr, int maxX,
+                                                             int maxY)
+                :base_t(image_ptr)
+                ,boundaries(maxX, maxY)
+                {}
+            
+            explicit CroppedImageRef(pointer_type image_ptr, int minX,
+                                                             int minY,
+                                                             int maxX,
+                                                             int maxY)
+                :base_t(image_ptr)
+                ,boundaries(minX, minY, maxX, maxY)
                 {}
         
         public:
@@ -116,22 +152,6 @@ namespace im {
                     case 0:  return boundaries.width(pointer->dim(0));
                     case 1:  return boundaries.height(pointer->dim(1));
                     default: return pointer->dim(d);
-                }
-            }
-            
-            virtual int stride(int s) const {
-                switch (s) {
-                    case 0:  return boundaries.width(pointer->stride(0));
-                    case 1:  return boundaries.height(pointer->stride(1));
-                    default: return pointer->stride(s);
-                }
-            }
-            
-            virtual int min(int m) const {
-                switch (m) {
-                    case 0:  return boundaries.width(pointer->min(0));
-                    case 1:  return boundaries.height(pointer->min(1));
-                    default: return pointer->min(m);
                 }
             }
         
@@ -150,11 +170,13 @@ namespace im {
                 if (Z == -1) { Z = pointer->dim(2); }
                 /// Return a strided array view, typed accordingly,
                 /// initialized with the current stride values:
-                return av::strided_array_view<T, 3>(static_cast<T*>(pointer->rowp()),
+                return av::strided_array_view<T, 3>(static_cast<T*>(pointer->rowp(0)),
                                                     { X, Y, Z },
-                                                    { boundaries.width(pointer->stride(0)),
-                                                      boundaries.height(pointer->stride(1)),
-                                                      pointer->stride(2) });
+                                                    { pointer->stride(0),
+                                                      pointer->stride(1),
+                                                      pointer->stride(2) }).section({ boundaries.width(0),
+                                                                                      boundaries.height(0),
+                                                                                      0 });
             }
         
         public:
@@ -166,26 +188,9 @@ namespace im {
                 }
             }
             
-            int stride_or(int dimension, int default_value = 1) const  {
-                switch (dimension) {
-                    case 0:  return boundaries.width(pointer->stride(0));
-                    case 1:  return boundaries.height(pointer->stride(1));
-                    default: return pointer->stride_or(dimension, default_value);
-                }
-            }
-            
-            int min_or(int dimension, int default_value = 0) const {
-                switch (dimension) {
-                    case 0:  return boundaries.width(pointer->min(0));
-                    case 1:  return boundaries.height(pointer->min(1));
-                    default: return pointer->min_or(dimension, default_value);
-                }
-            }
-            
         public:
             virtual int width() const                   { return boundaries.width(pointer->width()); }
             virtual int height() const                  { return boundaries.height(pointer->height()); }
-            virtual int planes() const                  { return pointer->planes(); }
             virtual int size() const                    { return boundaries.width(pointer->width()) *
                                                                  boundaries.height(pointer->height()) *
                                                                  pointer->planes(); }
@@ -206,9 +211,15 @@ namespace im {
                 clamper_f<int> width;
                 clamper_f<int> height;
                 
-                boundaries_t(int w, int h)
-                    :width(clamper(w))
-                    ,height(clamper(h))
+                boundaries_t(int maxX, int maxY)
+                    :width(clamper(maxX))
+                    ,height(clamper(maxY))
+                    {}
+                
+                boundaries_t(int minX, int minY,
+                             int maxX, int maxY)
+                    :width(clamper(minX, maxX))
+                    ,height(clamper(minY, maxY))
                     {}
                 
             } boundaries;
