@@ -42,8 +42,8 @@ namespace {
     
     using pathvec_t = std::vector<path>;
     
-    TEST_CASE("[gif-write] Read PNG files and write as individual GIF files",
-              "[gif-write-individual-files]")
+    TEST_CASE("[gif-io] Read PNG files and write as individual GIF files",
+              "[gif-io-write-individual-files]")
     {
         TemporaryDirectory td("write-individual-gifs");
         path basedir(im::test::basedir);
@@ -144,8 +144,8 @@ namespace {
         });
     }
     
-    // TEST_CASE("[gif-write] WHAT THE HELL PEOPLE",
-    //           "[gif-write-what-the-hell-people]") {
+    // TEST_CASE("[gif-io] WHAT THE HELL PEOPLE",
+    //           "[gif-io-what-the-hell-people]") {
     //     ImageList what_the_hell_people, dogg_why_you_even_got_to_do_a_thing;
     //     path basedir(im::test::basedir);
     //     const pathvec_t sequence = basedir.list(std::regex("output_([0-9]+).png"));
@@ -173,8 +173,8 @@ namespace {
     //     });
     // }
     
-    TEST_CASE("[gif-write] Read PNG files and write as a single animated GIF file",
-              "[gif-write-multi-animated]")
+    TEST_CASE("[gif-io] Read PNG files and write as a single animated GIF file",
+              "[gif-io-multi-animated]")
     {
         TemporaryName composite(".gif");
         std::unique_ptr<HalideFactory> factory{ new HalideFactory };
