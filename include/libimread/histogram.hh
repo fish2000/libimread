@@ -21,7 +21,6 @@ namespace im {
         
         public:
             
-            // using byteva_t  = std::valarray<byte>;
             using floatva_t = std::valarray<float>;
             
             using value_type = float;
@@ -63,7 +62,6 @@ namespace im {
             int otsu() const;
             
             floatva_t normalized() const;
-            // byteva_t const& sourcedata() const;
             floatva_t& values();
             floatva_t const& values() const;
             float* data();
@@ -81,7 +79,6 @@ namespace im {
             mutable int otsu_value = 0;
             mutable bool entropy_calculated = false;
             mutable bool otsu_calculated = false;
-            // byteva_t source;
             floatva_t histogram;
         
     };

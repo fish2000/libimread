@@ -18,7 +18,6 @@ namespace im {
     }
     
     Histogram::Histogram(bytevec_t const& plane)
-        // :source(plane.data(), plane.size())
         :histogram(std::cref(detail::flinitial), detail::histogram_size)
         {
             std::for_each(std::begin(plane), std::end(plane),
@@ -26,7 +25,6 @@ namespace im {
         }
     
     Histogram::Histogram(Image const* image)
-        // :source((byte*)image->rowp(), image->size())
         :histogram(std::cref(detail::flinitial), detail::histogram_size)
         {
             std::size_t imagesize = image->size();
@@ -34,8 +32,6 @@ namespace im {
             for (std::size_t idx = 0; idx < imagesize; ++idx) {
                 histogram[std::size_t(byteptr[idx])] += 1.0;
             }
-            // std::for_each(std::begin(source), std::end(source),
-            //               [this](byte b) { histogram[std::size_t(b)] += 1.0; });
         }
     
     Histogram::Histogram(Image const* image, int zidx)
@@ -115,7 +111,6 @@ namespace im {
     float Histogram::entropy() const {
         if (!entropy_calculated) {
             float histosize = 1.0 / histogram.sum();
-            // floatva_t histofloat = histogram * histosize;
             floatva_t divisor = (histogram * histosize).apply([](float d) -> float {
                 float out = d * std::log(d);
                 return std::isnan(out) ? 0.00 : out;
@@ -171,7 +166,6 @@ namespace im {
                 }
             }
             
-            // return bestT;
             otsu_value = bestT;
             otsu_calculated = true;
         }
@@ -181,10 +175,6 @@ namespace im {
     Histogram::floatva_t Histogram::normalized() const {
         return histogram / histogram.max();
     }
-    
-    // Histogram::byteva_t const& Histogram::sourcedata() const {
-    //     return source;
-    // }
     
     Histogram::floatva_t& Histogram::values() {
         return histogram;
@@ -200,7 +190,6 @@ namespace im {
     
     void Histogram::swap(Histogram& other) noexcept {
         using std::swap;
-        // swap(source,             other.source);
         swap(histogram,          other.histogram);
         swap(entropy_value,      other.entropy_value);
         swap(entropy_calculated, other.entropy_calculated);
