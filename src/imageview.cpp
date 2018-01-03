@@ -3,7 +3,6 @@
 
 #include <libimread/imageview.hh>
 #include <libimread/histogram.hh>
-#include <libimread/image.hh>
 #include <libimread/rehash.hh>
 
 namespace im {

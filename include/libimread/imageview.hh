@@ -9,13 +9,14 @@
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
+#include <libimread/image.hh>
 #include <libimread/accessors.hh>
 
 
 namespace im {
     
     /// forward-declare im::Image and im::Histogram
-    class Image;
+    // class Image;
     class Histogram;
     
     class ImageView : public std::enable_shared_from_this<ImageView> {
@@ -73,11 +74,11 @@ namespace im {
             
         public:
             /// Accessor definition macros -- q.v. accessors.hh:
-            IMAGE_ACCESSOR_ROWP_AS(this);
-            IMAGE_ACCESSOR_VIEW(this);
-            IMAGE_ACCESSOR_ALLROWS(this);
-            IMAGE_ACCESSOR_PLANE(this);
-            IMAGE_ACCESSOR_ALLPLANES(this);
+            IMAGE_ACCESSOR_ROWP_AS(source);
+            IMAGE_ACCESSOR_VIEW(source);
+            IMAGE_ACCESSOR_ALLROWS(source);
+            IMAGE_ACCESSOR_PLANE(source);
+            IMAGE_ACCESSOR_ALLPLANES(source);
             
         public:
             virtual shared_imageview_t shared();
