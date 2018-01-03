@@ -15,8 +15,7 @@
 
 namespace im {
     
-    /// forward-declare im::Image and im::Histogram
-    // class Image;
+    /// forward-declare im::Histogram
     class Histogram;
     
     class ImageView : public std::enable_shared_from_this<ImageView> {
