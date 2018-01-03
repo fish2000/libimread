@@ -97,7 +97,7 @@ namespace im {
             }
             
             static uint32_t nearest_lesser(uint32_t x) {
-                if (detail::pow2::is_pow2(x)) { x >>= 1; }
+                // if (detail::pow2::is_pow2(x)) { x >>= 1; }
                 x = x | (x >> 1);
                 x = x | (x >> 2);
                 x = x | (x >> 4);
