@@ -494,8 +494,8 @@ int easyexif::EXIFInfo::parseFrom(const unsigned char* buf, unsigned len) {
     return parseFromEXIFSegment(buf + offs, len - offs);
 }
 
-int easyexif::EXIFInfo::parseFrom(std::string const& data) {
-    return parseFrom((const unsigned char*)data.data(), data.length());
+int easyexif::EXIFInfo::parseFrom(std::string const& content) {
+    return parseFrom((const unsigned char*)content.data(), content.length());
 }
 
 //
