@@ -21,9 +21,10 @@ namespace im {
         
         public:
             
-            using floatva_t = std::valarray<float>;
-            
             using value_type = float;
+            using size_type = std::size_t;
+            using floatva_t = std::valarray<value_type>;
+            
             using begin_t = decltype(std::begin(std::declval<floatva_t>()));
             using   end_t = decltype(  std::end(std::declval<floatva_t>()));
             using const_begin_t = decltype(std::begin(std::declval<floatva_t const&>()));
@@ -39,7 +40,7 @@ namespace im {
             explicit Histogram(Image const*, int);
             virtual ~Histogram();
             
-            std::size_t size() const;
+            size_type size() const;
             bool empty() const;
             
             begin_t begin();
@@ -52,30 +53,30 @@ namespace im {
             const_reverse_iterator rbegin() const;
             const_reverse_iterator rend() const;
             
-            float sum() const;
-            float min() const;
-            float max() const;
+            value_type sum() const;
+            value_type min() const;
+            value_type max() const;
             int min_value() const;
             int max_value() const;
             
-            float entropy() const;
+            value_type entropy() const;
             int otsu() const;
             
             floatva_t normalized() const;
             floatva_t& values();
             floatva_t const& values() const;
-            float* data();
+            value_type* data();
             
             /// noexcept member swap
             void swap(Histogram& other) noexcept;
             friend void swap(Histogram& lhs, Histogram& rhs) noexcept;
             
             /// member hash method
-            std::size_t hash(std::size_t seed = 0) const noexcept;
+            size_type hash(size_type seed = 0) const noexcept;
             
         protected:
             
-            mutable float entropy_value = 0.0;
+            mutable value_type entropy_value = 0.0;
             mutable int otsu_value = 0;
             mutable bool entropy_calculated = false;
             mutable bool otsu_calculated = false;
@@ -95,7 +96,7 @@ namespace std {
     struct hash<im::Histogram> {
         
         typedef im::Histogram argument_type;
-        typedef std::size_t result_type;
+        typedef im::Histogram::size_type result_type;
         
         result_type operator()(argument_type const& histogram) const {
             return static_cast<result_type>(histogram.hash());

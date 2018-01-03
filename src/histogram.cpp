@@ -12,9 +12,9 @@
 namespace im {
     
     namespace detail {
-        using rehasher_t = hash::rehasher<float>;
-        static const std::size_t histogram_size = UCHAR_MAX + 1;
-        static const float flinitial = 0.00000000;
+        using rehasher_t = hash::rehasher<Histogram::value_type>;
+        static const Histogram::size_type histogram_size = UCHAR_MAX + 1;
+        static const Histogram::value_type flinitial = 0.00000000;
     }
     
     Histogram::Histogram(bytevec_t const& plane)
@@ -27,9 +27,9 @@ namespace im {
     Histogram::Histogram(Image const* image)
         :histogram(std::cref(detail::flinitial), detail::histogram_size)
         {
-            std::size_t imagesize = image->size();
+            Histogram::size_type imagesize = image->size();
             byte* byteptr = image->rowp_as<byte>(0);
-            for (std::size_t idx = 0; idx < imagesize; ++idx) {
+            for (Histogram::size_type idx = 0; idx < imagesize; ++idx) {
                 histogram[std::size_t(byteptr[idx])] += 1.0;
             }
         }
@@ -72,7 +72,7 @@ namespace im {
         return std::make_reverse_iterator(std::end(histogram));
     }
     
-    std::size_t Histogram::size() const {
+    Histogram::size_type Histogram::size() const {
         return histogram.size();
     }
     
@@ -80,15 +80,15 @@ namespace im {
         return histogram.size() == 0;
     }
     
-    float Histogram::sum() const {
+    Histogram::value_type Histogram::sum() const {
         return histogram.sum();
     }
     
-    float Histogram::min() const {
+    Histogram::value_type Histogram::min() const {
         return histogram.min();
     }
     
-    float Histogram::max() const {
+    Histogram::value_type Histogram::max() const {
         return histogram.max();
     }
     
@@ -108,11 +108,11 @@ namespace im {
         return result == std::end(histogram) ? -1 : *result;
     }
     
-    float Histogram::entropy() const {
+    Histogram::value_type Histogram::entropy() const {
         if (!entropy_calculated) {
-            float histosize = 1.0 / histogram.sum();
+            Histogram::value_type histosize = 1.0 / histogram.sum();
             floatva_t divisor = (histogram * histosize).apply([](float d) -> float {
-                float out = d * std::log(d);
+                Histogram::value_type out = d * std::log(d);
                 return std::isnan(out) ? 0.00 : out;
             });
             entropy_value = -divisor.sum();
@@ -184,7 +184,7 @@ namespace im {
         return histogram;
     }
     
-    float* Histogram::data() {
+    Histogram::value_type* Histogram::data() {
         return &histogram[0];
     }
     
@@ -199,7 +199,7 @@ namespace im {
         p0.swap(p1);
     }
     
-    std::size_t Histogram::hash(std::size_t seed) const noexcept {
+    Histogram::size_type Histogram::hash(Histogram::size_type seed) const noexcept {
         return std::accumulate(std::begin(histogram),
                                std::end(histogram),
                                seed, detail::rehasher_t());

@@ -123,6 +123,7 @@ set(hdrs
     ${hdrs_dir}/process/neuquant.hh
     ${hdrs_dir}/process/neuquant.inl
     
+    ${hdrs_dir}/accessors.hh
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
     ${hdrs_dir}/color.hh

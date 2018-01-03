@@ -4,14 +4,13 @@
 #ifndef LIBIMREAD_IMAGEREF_HH_
 #define LIBIMREAD_IMAGEREF_HH_
 
-#include <vector>
 #include <memory>
 #include <string>
 #include <type_traits>
 
 #include <libimread/libimread.hpp>
 #include <libimread/metadata.hh>
-#include <libimread/ext/arrayview.hh>
+#include <libimread/accessors.hh>
 
 namespace im {
     
@@ -78,28 +77,14 @@ namespace im {
             virtual int min(int m) const                { return pointer->min(m); }
             virtual bool is_signed() const              { return pointer->is_signed(); }
             virtual bool is_floating_point() const      { return pointer->is_floating_point(); }
-        
+            
         public:
-            template <typename T> inline
-            T* rowp_as(const int r) const               { return static_cast<T*>(pointer->rowp(r)); }
-        
-        public:
-            template <typename T = value_type> inline
-            av::strided_array_view<T, 3> view(int X = -1,
-                                              int Y = -1,
-                                              int Z = -1) const {
-                /// Extents default to current values:
-                if (X == -1) { X = pointer->dim(0); }
-                if (Y == -1) { Y = pointer->dim(1); }
-                if (Z == -1) { Z = pointer->dim(2); }
-                /// Return a strided array view, typed accordingly,
-                /// initialized with the current stride values:
-                return av::strided_array_view<T, 3>(static_cast<T*>(pointer->rowp(0)),
-                                                    { X, Y, Z },
-                                                    { pointer->stride(0),
-                                                      pointer->stride(1),
-                                                      pointer->stride(2) });
-            }
+            /// Accessor definition macros -- q.v. accessors.hh:
+            IMAGE_ACCESSOR_ROWP_AS(pointer);
+            IMAGE_ACCESSOR_VIEW(pointer);
+            IMAGE_ACCESSOR_ALLROWS(pointer);
+            IMAGE_ACCESSOR_PLANE(pointer);
+            IMAGE_ACCESSOR_ALLPLANES(pointer);
             
         public:
             int dim_or(int dimension,
