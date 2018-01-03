@@ -106,9 +106,9 @@ namespace im {
                 return x - (x >> 1);
             }
             
-        }
+        } /// namespace pow2
         
-    }
+    } /// namespace detail
     
     void PVRTCFormat::write(Image& uncropped,
                             byte_sink* output,

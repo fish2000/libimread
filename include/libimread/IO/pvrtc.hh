@@ -32,15 +32,22 @@ namespace im {
             static bool match_format(byte_source* src);
             
             /// PVRTC read -- makes use of:
-            ///   * ext/pvrtc.hh
-            ///   * ext/pvr.cpp
-            ///   * ext/pvrtc.cpp
+            ///   * libimread/include/ext/pvrtc.hh
+            ///   * libimread/src/ext/pvr.cpp
+            ///   * libimread/src/ext/pvrtc.cpp
             virtual std::unique_ptr<Image> read(byte_source* src,
                                                 ImageFactory* factory,
                                                 Options const& opts) override;
             
             /// PVRTC write -- makes use of:
             ///   * libimread/include/endian.hh
+            ///   * libimread/include/imageref.hh
+            ///   * libimread/include/image.hh
+            ///   * libimread/src/image.cpp
+            ///   * libimread/include/ext/boundaries.hh
+            ///   * libimread/include/crop.hh
+            ///   * deps/imagecompression/image_compression/internal/color_types.h
+            ///   * deps/imagecompression/image_compression/internal/color_util.h
             ///   * deps/imagecompression/image_compression/public/compressed_image.h
             ///   * deps/imagecompression/image_compression/public/pvrtc_compressor.h
             ///   * deps/imagecompression/image_compression/internal/pvrtc_compressor.cc

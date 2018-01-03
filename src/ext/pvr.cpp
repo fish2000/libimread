@@ -73,7 +73,7 @@ const char* typeStrings[] = {
 PVRTexture::PVRTexture() : data(nullptr) {}
 
 PVRTexture::~PVRTexture() {
-    if (this->data) { free(this->data); }
+    if (this->data) { std::free(this->data); }
 }
 
 bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
@@ -147,7 +147,7 @@ bool PVRTexture::loadApplePVRTC(uint8_t* data, int size) {
             }
         }
     }
-
+    
     return true;
 }
 
