@@ -14,6 +14,8 @@
 
 /// support for PVRTCFormat::write():
 #include <libimread/endian.hh>
+#include <libimread/crop.hh>
+#include <libimread/image.hh>
 #include "image_compression/internal/color_types.h"
 #include "image_compression/internal/color_util.h"
 #include "image_compression/public/compressed_image.h"
@@ -67,16 +69,57 @@ namespace im {
     }
     
     namespace detail {
+        
         using bytebuffer_t  = std::unique_ptr<byte[]>;
         using pixelbuffer_t = std::unique_ptr<aux::Rgba8888[]>;
+        
+        constexpr static const std::size_t kPixelSize = sizeof(aux::Rgba8888);
+        
+        namespace pow2 {
+            
+            /// Power-of-2 convenience functions:
+            
+            template <typename T,
+                      typename = std::enable_if_t<std::is_arithmetic<
+                                                  std::remove_cv_t<T>>::value>>
+            bool is_pow2(T input) {
+                if (!input) { return false; }
+                T minus1 = input - 1;
+                return ((input | minus1) == (input ^ minus1));
+            }
+            
+            static uint32_t nearest_greater(uint32_t x) {
+                uint32_t n = 1;
+                while (n < x) {
+                    n <<= 1;
+                }
+                return n;
+            }
+            
+            static uint32_t nearest_lesser(uint32_t x) {
+                if (detail::pow2::is_pow2(x)) { x >>= 1; }
+                x = x | (x >> 1);
+                x = x | (x >> 2);
+                x = x | (x >> 4);
+                x = x | (x >> 8);
+                x = x | (x >> 16);
+                return x - (x >> 1);
+            }
+            
+        }
+        
     }
     
-    void PVRTCFormat::write(Image& input,
+    void PVRTCFormat::write(Image& uncropped,
                             byte_sink* output,
                             Options const& opts) {
+        /// crop image:
+        CroppedImageRef<Image> input = im::crop(uncropped,
+                   detail::pow2::nearest_lesser(uncropped.width()),
+                   detail::pow2::nearest_lesser(uncropped.height()));
+        
         /// inspect input image dimensions:
-        int x = 0,
-            y = 0;
+        int x = 0, y = 0;
         const int width = input.width(),
                   height = input.height(),
                   channels = input.planes();
@@ -92,7 +135,7 @@ namespace im {
         /// allocate aux::Rgb8888 pixel buffer block,
         /// per input image dimensions:
         std::size_t pixelbuffer_size = width * height;
-        std::size_t pixelbuffer_rowbytes = sizeof(aux::Rgba8888) * width;
+        std::size_t pixelbuffer_rowbytes = detail::kPixelSize * width;
         detail::pixelbuffer_t pixelbuffer = std::make_unique<aux::Rgba8888[]>(pixelbuffer_size);
         aux::Rgba8888* rgba;
         

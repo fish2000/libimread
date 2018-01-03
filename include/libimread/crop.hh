@@ -4,45 +4,10 @@
 #ifndef LIBIMREAD_CROP_HH_
 #define LIBIMREAD_CROP_HH_
 
-#include <algorithm>
-#include <functional>
 #include <libimread/imageref.hh>
+#include <libimread/ext/boundaries.hh>
 
 namespace im {
-    
-    namespace detail {
-        
-        struct ARG {} arg;
-        
-    }
-    
-}
-
-namespace std {
-    
-    template <>
-    struct is_placeholder<im::detail::ARG> : public std::integral_constant<int, 1> {};
-    
-}
-
-namespace im {
-    
-    template <typename T>
-    using clamper_f = std::function<T&(T&...)>;
-    
-    template <typename T,
-              typename = std::enable_if_t<std::is_arithmetic<
-                                          std::remove_cv_t<T>>::value>
-    clamper_f<T> clamper(T& lower_bound, T& upper_bound) {
-        return std::bind(std::clamp<T>, detail::arg, lower_bound, upper_bound);
-    }
-    
-    template <typename T,
-              typename = std::enable_if_t<std::is_arithmetic<
-                                          std::remove_cv_t<T>>::value>
-    clamper_f<T> clamper(T& upper_bound) {
-        return std::bind(std::clamp<T>, detail::arg, 0, upper_bound);
-    }
     
     /// An im::CroppedImageRef manages an im::Image, clamped to
     /// provided maximums for its width and height dimensions.
@@ -55,12 +20,12 @@ namespace im {
         
         public:
             using base_t = ImageRef<ImageType>;
-            using base_t::type;
-            using base_t::size_type;
-            using base_t::value_type;
-            using base_t::reference_type;
-            using base_t::const_reference_type;
-            using base_t::pointer_type;
+            using typename base_t::type;
+            using typename base_t::size_type;
+            using typename base_t::value_type;
+            using typename base_t::reference_type;
+            using typename base_t::const_reference_type;
+            using typename base_t::pointer_type;
             
         public:
             using base_t::pointer;
@@ -167,7 +132,7 @@ namespace im {
                 /// Extents default to current values:
                 if (X == -1) { X = boundaries.width(pointer->dim(0)); }
                 if (Y == -1) { Y = boundaries.height(pointer->dim(1)); }
-                if (Z == -1) { Z = pointer->dim(2); }
+                if (Z == -1) { Z = pointer->dim_or(2); }
                 /// Return a strided array view, typed accordingly,
                 /// initialized with the current stride values:
                 return av::strided_array_view<T, 3>(static_cast<T*>(pointer->rowp(0)),
@@ -184,16 +149,17 @@ namespace im {
                 switch (dimension) {
                     case 0:  return boundaries.width(pointer->dim(0));
                     case 1:  return boundaries.height(pointer->dim(1));
-                    default: return pointer->dim_or(dimension, default_value);
+                    case 2:  return pointer->dim_or(2, default_value);
+                    default: return default_value;
                 }
             }
             
         public:
-            virtual int width() const                   { return boundaries.width(pointer->width()); }
-            virtual int height() const                  { return boundaries.height(pointer->height()); }
-            virtual int size() const                    { return boundaries.width(pointer->width()) *
-                                                                 boundaries.height(pointer->height()) *
-                                                                 pointer->planes(); }
+            virtual int width() const                   { return boundaries.width(pointer->dim(0)); }
+            virtual int height() const                  { return boundaries.height(pointer->dim(1)); }
+            virtual int size() const                    { return boundaries.width(pointer->dim(0)) *
+                                                                 boundaries.height(pointer->dim(1)) *
+                                                                 pointer->dim_or(2); }
             
         public:
             int left() const                            { return boundaries.width(pointer->left()); }
@@ -206,25 +172,16 @@ namespace im {
             int otsu() const                            { return pointer->otsu(); }
         
         protected:
-            struct boundaries_t {
-                
-                clamper_f<int> width;
-                clamper_f<int> height;
-                
-                boundaries_t(int maxX, int maxY)
-                    :width(clamper(maxX))
-                    ,height(clamper(maxY))
-                    {}
-                
-                boundaries_t(int minX, int minY,
-                             int maxX, int maxY)
-                    :width(clamper(minX, maxX))
-                    ,height(clamper(minY, maxY))
-                    {}
-                
-            } boundaries;
-        
+            boundaries_t<int> boundaries{ 0, 0, 0, 0 };
     };
+    
+    template <typename ImageType> inline
+    CroppedImageRef<ImageType> crop(ImageType& image, int maxX, int maxY) { return CroppedImageRef<ImageType>(image, maxX, maxY); }
+    
+    template <typename ImageType> inline
+    CroppedImageRef<ImageType> crop(ImageType& image, int minX, int minY,
+                                                      int maxX, int maxY) { return CroppedImageRef<ImageType>(image, minX, minY,
+                                                                                                                     maxX, maxY); }
     
 } /// namespace im
 

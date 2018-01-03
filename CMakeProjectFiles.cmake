@@ -87,6 +87,7 @@ set(hdrs
     ${hdrs_dir}/ext/JSON/json11.h
     ${hdrs_dir}/ext/arrayview.hh
     ${hdrs_dir}/ext/base64.hh
+    ${hdrs_dir}/ext/boundaries.hh
     ${hdrs_dir}/ext/butteraugli.hh
     ${hdrs_dir}/ext/exif.hh
     ${hdrs_dir}/ext/glob.hh
