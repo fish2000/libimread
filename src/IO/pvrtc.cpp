@@ -50,7 +50,8 @@ namespace im {
         
         if (result) {
             imread_raise(PVRTCIOError,
-                "File isn't a valid PVRTC texture.");
+                "File isn't a valid PVRTC texture",
+             FF("Load result code = %s", loadResultString(result)));
         }
         
         std::unique_ptr<Image> output(factory->create(8, pvr.height,

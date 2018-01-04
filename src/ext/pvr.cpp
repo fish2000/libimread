@@ -39,6 +39,21 @@ unsigned int countBits(unsigned int x) {
     return (x * 0x01010101) >> 24;
 }
 
+char const* loadResultString(ePVRLoadResult loadResult) {
+    switch (loadResult) {
+        case PVR_LOAD_OKAY:                     return "PVR_LOAD_OKAY";
+        case PVR_LOAD_INVALID_FILE:             return "PVR_LOAD_INVALID_FILE";
+        case PVR_LOAD_FILE_DATA_TOO_SMALL:      return "PVR_LOAD_FILE_DATA_TOO_SMALL";
+        case PVR_LOAD_BAD_HEADER_SIZE_VALUE:    return "PVR_LOAD_BAD_HEADER_SIZE_VALUE";
+        case PVR_LOAD_BAD_HEADER_MAGIC_VALUE:   return "PVR_LOAD_BAD_HEADER_MAGIC_VALUE";
+        case PVR_LOAD_MORE_THAN_ONE_SURFACE:    return "PVR_LOAD_MORE_THAN_ONE_SURFACE";
+        case PVR_LOAD_FILE_NOT_FOUND:           return "PVR_LOAD_FILE_NOT_FOUND";
+        case PVR_LOAD_UNKNOWN_TYPE:             return "PVR_LOAD_UNKNOWN_TYPE";
+        case PVR_LOAD_UNKNOWN_ERROR:            return "PVR_LOAD_UNKNOWN_ERROR";
+        default:                                return "PVR_LOAD_UTTERLY_NOVEL_ERROR";
+    }
+}
+
 typedef struct {
     uint32_t PackedData[2];
 } AMTC_BLOCK_STRUCT;
@@ -160,7 +175,7 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
     }
     
     if (length < sizeof(PVRHeader)) {
-        return PVR_LOAD_INVALID_FILE;
+        return PVR_LOAD_FILE_DATA_TOO_SMALL;
     }
 
     // parse the header
@@ -169,11 +184,11 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
     p += sizeof(PVRHeader);
     
     if (header->size != sizeof(PVRHeader)) {
-        return PVR_LOAD_INVALID_FILE;
+        return PVR_LOAD_BAD_HEADER_SIZE_VALUE;
     }
     
     if (header->magic != 0x21525650) {
-        return PVR_LOAD_INVALID_FILE;
+        return PVR_LOAD_BAD_HEADER_MAGIC_VALUE;
     }
     
     if (header->numtex < 1) {

@@ -50,6 +50,9 @@ enum ePVRLoadResult
 {
     PVR_LOAD_OKAY,
     PVR_LOAD_INVALID_FILE,
+    PVR_LOAD_FILE_DATA_TOO_SMALL,
+    PVR_LOAD_BAD_HEADER_SIZE_VALUE,
+    PVR_LOAD_BAD_HEADER_MAGIC_VALUE,
     PVR_LOAD_MORE_THAN_ONE_SURFACE,
     PVR_LOAD_FILE_NOT_FOUND,
     PVR_LOAD_UNKNOWN_TYPE,
@@ -72,7 +75,8 @@ typedef struct PVRHeader {
     uint32_t      numtex;
 } PVRHeader;
 
-unsigned int countBits(unsigned int x);
+unsigned int countBits(unsigned int);
+char const* loadResultString(ePVRLoadResult);
 
 struct PVRTexture {
     
