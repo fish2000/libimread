@@ -237,10 +237,13 @@ namespace im {
     
     int fd_source_sink::open(std::string const& spath,
                              filesystem::mode fmode) {
+        std::string open_error = "";
         if (fmode == filesystem::mode::WRITE) {
             descriptor = open_write(spath.c_str());
+            if (descriptor < 0) {
+                open_error = std::strerror(errno);
+            }
             if (!fd_source_sink::check_descriptor(descriptor)) {
-                std::string open_error = std::strerror(errno);
                 imread_raise(CannotWriteError, "descriptor open-to-write failure:",
                     FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
                     FF("\treturned invalid descriptor: %i", descriptor),
@@ -249,8 +252,10 @@ namespace im {
             }
         } else {
             descriptor = open_read(spath.c_str());
+            if (descriptor < 0) {
+                open_error = std::strerror(errno);
+            }
             if (!fd_source_sink::check_descriptor(descriptor)) {
-                std::string open_error = std::strerror(errno);
                 imread_raise(CannotReadError, "descriptor open-to-read failure:",
                     FF("\t::open(\"%s\", O_RDONLY | O_FSYNC | O_CLOEXEC)", spath.c_str()),
                     FF("\treturned invalid descriptor: %i", descriptor),
