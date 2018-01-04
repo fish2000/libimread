@@ -38,14 +38,18 @@ namespace im {
             static int open_write(char const* p, int mask = kWriteCreateMask);
             static int fifo_open_read(char const* p);
             static int fifo_open_write(char const* p);
+            static bool check_descriptor(int fd);
         
         public:
             static std::size_t max_descriptor_count();
             static std::size_t max_descriptor_count(std::size_t);
         
         public:
-            fd_source_sink();
-            fd_source_sink(int fd);
+            fd_source_sink() noexcept = default;
+            fd_source_sink(int fd) noexcept;
+            
+            fd_source_sink(fd_source_sink const&);
+            fd_source_sink(fd_source_sink&&) noexcept;
             
             virtual ~fd_source_sink();
             
@@ -84,11 +88,12 @@ namespace im {
             
         public:
             virtual bool exists() const noexcept;
+            virtual bool is_open() const noexcept;
             virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ);
             virtual int close();
             
         protected:
-            int descriptor = -1;
+            int descriptor{ -1 };
             mutable detail::mapped_t mapped;
     };
     

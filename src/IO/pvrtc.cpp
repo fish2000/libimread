@@ -196,10 +196,10 @@ namespace im {
         /// create an instance of the internal aux::CompressedImage::Metadata class,
         /// and assign it to the compressed image instance:
         aux::CompressedImage::Metadata metadata(aux::CompressedImage::kRGBA, "pvrtc",
-                                                static_cast<uint32_t>(detail::kBlockHeight),    /// uncompressed height
-                                                static_cast<uint32_t>(detail::kBlockWidth),     /// uncompressed width
-                                                static_cast<uint32_t>(height),                  /// compressed height
-                                                static_cast<uint32_t>(width), 0);               /// compressed width
+                                                static_cast<uint32_t>(height),    /// uncompressed height
+                                                static_cast<uint32_t>(width),     /// uncompressed width
+                                                static_cast<uint32_t>(height),    /// compressed height
+                                                static_cast<uint32_t>(width), 0); /// compressed width
 
         intermediate.SetMetadata(metadata);
         

@@ -41,6 +41,10 @@ namespace im {
         return ::open(p, kFIFOWriteFlags);
     }
     
+    bool fd_source_sink::check_descriptor(int fd) {
+        return (::fcntl(fd, F_GETFD) != -1);
+    }
+    
     std::size_t fd_source_sink::max_descriptor_count() {
         detail::rlimit_t rl;
         if (::getrlimit(RLIMIT_NOFILE, &rl) == -1) {
@@ -65,10 +69,20 @@ namespace im {
         return new_max;
     }
     
-    fd_source_sink::fd_source_sink() {}
-    fd_source_sink::fd_source_sink(int fd)
-        :descriptor(fd)
+    fd_source_sink::fd_source_sink(int fd) noexcept
+        :descriptor{ fd }
         {}
+    
+    fd_source_sink::fd_source_sink(fd_source_sink const& other)
+        :descriptor{ ::dup(other.descriptor) }
+        {}
+    
+    fd_source_sink::fd_source_sink(fd_source_sink&& other) noexcept
+        :descriptor{ ::dup2(other.descriptor,
+                            other.descriptor) }
+            ,mapped{ std::exchange(other.mapped,
+                                 detail::mapped_t{ nullptr }) }
+        { other.descriptor = -1; }
     
     fd_source_sink::~fd_source_sink() { close(); }
     
@@ -192,7 +206,9 @@ namespace im {
     }
     
     void fd_source_sink::fd(int fd) noexcept {
-        descriptor = fd;
+        if (fd_source_sink::check_descriptor(fd)) {
+            descriptor = fd;
+        }
     }
     
     filesystem::file fd_source_sink::fh() const noexcept {
@@ -200,34 +216,41 @@ namespace im {
     }
     
     void fd_source_sink::fh(FILE* fh) noexcept {
-        descriptor = ::fileno(fh);
+        int fd = ::fileno(fh);
+        if (fd_source_sink::check_descriptor(fd)) {
+            descriptor = fd;
+        }
     }
     
     bool fd_source_sink::exists() const noexcept {
         try {
             this->stat();
-        } catch (CannotReadError const& e) {
+        } catch (CannotReadError&) {
             return false;
         }
         return true;
+    }
+    
+    bool fd_source_sink::is_open() const noexcept {
+        return fd_source_sink::check_descriptor(descriptor);
     }
     
     int fd_source_sink::open(std::string const& spath,
                              filesystem::mode fmode) {
         if (fmode == filesystem::mode::WRITE) {
             descriptor = open_write(spath.c_str());
-            if (descriptor < 0) {
+            if (!fd_source_sink::check_descriptor(descriptor)) {
                 imread_raise(CannotWriteError, "descriptor open-to-write failure:",
                     FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
-                    FF("\treturned negative value: %i", descriptor),
+                    FF("\treturned invalid descriptor: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }
         } else {
             descriptor = open_read(spath.c_str());
-            if (descriptor < 0) {
+            if (!fd_source_sink::check_descriptor(descriptor)) {
                 imread_raise(CannotReadError, "descriptor open-to-read failure:",
                     FF("\t::open(\"%s\", O_RDONLY | O_FSYNC | O_CLOEXEC)", spath.c_str()),
-                    FF("\treturned negative value: %i", descriptor),
+                    FF("\treturned invalid descriptor: %i", descriptor),
                        "\tERROR MESSAGE IS: ", std::strerror(errno));
             }
         }
@@ -238,7 +261,7 @@ namespace im {
         using std::swap;
         int out = -1;
         mapped.reset(nullptr);
-        if (descriptor > 0) {
+        if (fd_source_sink::check_descriptor(descriptor)) {
             if (::close(descriptor) != -1) {
                 swap(out, descriptor);
             }
