@@ -18,7 +18,7 @@ namespace im {
             using can_write = std::true_type;
             
         public:
-            /// PVRTC "magic" tag is internal
+            /// PVRTC "magic" tag is internal:
             DECLARE_OPTIONS(
                 _signatures = { 0x21525650 },
                 _suffixes = { "pvr", "pvrtc" },

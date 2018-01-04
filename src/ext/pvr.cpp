@@ -184,6 +184,8 @@ ePVRLoadResult PVRTexture::load(uint8_t* data, unsigned int length) {
     p += sizeof(PVRHeader);
     
     if (header->size != sizeof(PVRHeader)) {
+        printf("sizeof(PVRHeader): %lu\n", sizeof(PVRHeader));
+        printf("Loaded header size: %u\n", header->size);
         return PVR_LOAD_BAD_HEADER_SIZE_VALUE;
     }
     

@@ -2,6 +2,7 @@
 /// License: MIT (see COPYING.MIT file)
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <iod/json.hh>
 #include <libimread/IO/pvrtc.hh>
@@ -225,11 +226,34 @@ namespace im {
                 "im::PVRTCFormat::write() says:   \"PVRTC COMPRESSOR YIELDED ZERO-LENGTH COMPRESSED DATA\"");
         }
         
+        /// build a PVRTC file header:
+        // PVRHeader* header = (PVRHeader*)std::malloc(32, sizeof(PVRHeader));
+        PVRHeader* header   = new PVRHeader{ 0 };
+        header->size        = static_cast<uint32_t>(sizeof(PVRHeader)); /// header size, NOT image size
+        header->height      = static_cast<uint32_t>(height);
+        header->width       = static_cast<uint32_t>(width);
+        header->mipcount    = 1;
+        header->flags       = 1;
+        header->texdatasize = intermediate.GetDataSize();
+        header->bpp         = 32; /// bits per pixel
+        // header->rmask       = 255;
+        // header->gmask       = 255;
+        // header->bmask       = 255;
+        // header->amask       = 255;
+        header->magic       = options.signatures[0];
+        header->numtex      = 1;
+        
+        /// write the header out to the sink:
+        output->write(header, sizeof(PVRHeader));
+        
         /// write the compressed images’ data out to the sink:
         output->write((const void*)intermediate.GetData(),
                                    intermediate.GetDataSize());
         output->flush();
         
+        /// free the header memory:
+        // std::free(header);
+        delete header;
     }
     
 }
