@@ -240,18 +240,22 @@ namespace im {
         if (fmode == filesystem::mode::WRITE) {
             descriptor = open_write(spath.c_str());
             if (!fd_source_sink::check_descriptor(descriptor)) {
+                std::string open_error = std::strerror(errno);
                 imread_raise(CannotWriteError, "descriptor open-to-write failure:",
                     FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
                     FF("\treturned invalid descriptor: %i", descriptor),
-                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+                       "\tERROR MESSAGE IS:  ", std::strerror(errno),
+                       "\tERROR MESSAGE WAS: ", open_error);
             }
         } else {
             descriptor = open_read(spath.c_str());
             if (!fd_source_sink::check_descriptor(descriptor)) {
+                std::string open_error = std::strerror(errno);
                 imread_raise(CannotReadError, "descriptor open-to-read failure:",
                     FF("\t::open(\"%s\", O_RDONLY | O_FSYNC | O_CLOEXEC)", spath.c_str()),
                     FF("\treturned invalid descriptor: %i", descriptor),
-                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+                       "\tERROR MESSAGE IS:  ", std::strerror(errno),
+                       "\tERROR MESSAGE WAS: ", open_error);
             }
         }
         return descriptor;
