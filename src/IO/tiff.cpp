@@ -20,42 +20,32 @@ namespace im {
     DECLARE_FORMAT_OPTIONS(STKFormat);
     DECLARE_FORMAT_OPTIONS(TIFFFormat);
     
+    /// TIFF read function pointer type:
     using tiff_read_f = std::add_pointer_t<tsize_t(thandle_t, void*, tsize_t)>;
+    
+    /// Buffer size constant:
+    const std::size_t kBufferSize = TIFFFormat::options.buffer_size;
     
     namespace {
         
-        void show_tiff_warning(const char* module, const char* fmt, va_list ap) {
-            std::fprintf(stderr, "[TIFF/WARNING] %s: ", module);
-            std::vfprintf(stderr, fmt, ap);
-            std::fprintf(stderr, "\n");
-        }
-        
-        void tiff_error(const char* module, const char* fmt, va_list ap) {
-            char buffer[4096];
-            std::vsnprintf(buffer, sizeof(char)*4096, fmt, ap);
-            imread_raise(TIFFIOError, "FATAL in TIFF I/O",
-                FF("[TIFF/ERROR***] %s: ", module),
-                FF("%s\n", std::string(buffer).c_str()));
-        }
-        
         tsize_t tiff_read(thandle_t handle, void* data, tsize_t n) {
-            byte_source* s = static_cast<byte_source*>(handle);
-            return s->read(static_cast<byte*>(data), n);
+            byte_source* source = static_cast<byte_source*>(handle);
+            return source->read(static_cast<byte*>(data), n);
         }
         
         tsize_t tiff_read_from_writer(thandle_t handle, void* data, tsize_t n) {
-            byte_sink* s = static_cast<byte_sink*>(handle);
-            byte_source* src = dynamic_cast<byte_source*>(s);
-            if (!src) {
+            byte_sink* sink = static_cast<byte_sink*>(handle);
+            byte_source* source = dynamic_cast<byte_source*>(sink);
+            if (!source) {
                 imread_raise(ProgrammingError,
                     "Could not dynamic_cast<> to byte_source");
             }
-            return src->read(static_cast<byte*>(data), n);
+            return source->read(static_cast<byte*>(data), n);
         }
         
         tsize_t tiff_write(thandle_t handle, void* data, tsize_t n) {
-            byte_sink* s = static_cast<byte_sink*>(handle);
-            return s->write(static_cast<byte*>(data), n);
+            byte_sink* sink = static_cast<byte_sink*>(handle);
+            return sink->write(static_cast<byte*>(data), n);
         }
         
         tsize_t tiff_no_read(thandle_t, void*, tsize_t) {
@@ -70,11 +60,11 @@ namespace im {
         template <typename Seekable>
         toff_t tiff_seek(thandle_t handle, toff_t off, int whence) {
             using pointer_t = std::add_pointer_t<Seekable>;
-            pointer_t seek = static_cast<pointer_t>(handle);
+            pointer_t seekable = static_cast<pointer_t>(handle);
             switch (whence) {
-                case SEEK_SET: return seek->seek_absolute(off);
-                case SEEK_CUR: return seek->seek_relative(off);
-                case SEEK_END: return seek->seek_end(off);
+                case SEEK_SET: return seekable->seek_absolute(off);
+                case SEEK_CUR: return seekable->seek_relative(off);
+                case SEEK_END: return seekable->seek_end(off);
             }
             return -1;
         }
@@ -82,14 +72,15 @@ namespace im {
         template <typename Seekable>
         toff_t tiff_size(thandle_t handle) {
             using pointer_t = std::add_pointer_t<Seekable>;
-            pointer_t seek = static_cast<pointer_t>(handle);
-            const std::size_t curpos = seek->seek_relative(0);
-            const std::size_t size = seek->seek_end(0);
-            seek->seek_absolute(curpos);
+            pointer_t seekable = static_cast<pointer_t>(handle);
+            const std::size_t curpos = seekable->seek_relative(0);
+            const std::size_t size = seekable->seek_end(0);
+            seekable->seek_absolute(curpos);
             return toff_t(size);
         }
         
-        toff_t tiff_size_source(thandle_t handle) {
+        template <>
+        toff_t tiff_size<byte_source>(thandle_t handle) {
             using pointer_t = std::add_pointer_t<byte_source>;
             pointer_t source = static_cast<pointer_t>(handle);
             return toff_t(source->size());
@@ -97,43 +88,58 @@ namespace im {
         
         int tiff_close(thandle_t handle) { return 0; }
         
-        struct tif_holder {
+        struct TIFFWrapperBase {
             TIFF* tif;
             
-            tif_holder(TIFF* t)
+            TIFFWrapperBase(TIFF* t)
                 :tif(t)
                 {}
             
-            ~tif_holder() {
+            ~TIFFWrapperBase() {
                 // TIFFClose(tif);
             }
             
         };
         
-        struct tiff_warn_error {
-            /// Newer versions of TIFF seem to call this TIFFWarningHandler,
-            /// but older versions do not have this type
-            using tiff_handler_f = std::add_pointer_t<void(char const* module,
-                                                           char const* fmt,
-                                                           va_list ap)>;
+        class TIFFWarningsAndErrors {
             
-            tiff_handler_f warning_handle;
-            tiff_handler_f error_handle;
+            public:
+                /// Newer versions of TIFF seem to call this TIFFWarningHandler,
+                /// but older versions do not have this type
+                using tiff_handler_f = std::add_pointer_t<void(char const* module,
+                                                               char const* fmt,
+                                                               va_list ap)>;
             
-            tiff_warn_error()
-                :warning_handle(TIFFSetWarningHandler(show_tiff_warning))
-                ,error_handle(TIFFSetErrorHandler(tiff_error))
-                {}
+            public:
+                TIFFWarningsAndErrors()
+                      
+                      :warning_handle(TIFFSetWarningHandler([](const char* module,
+                                                               const char* fmt,
+                                                               va_list ap) { std::fprintf(stderr, "[TIFF/WARNING] %s: ", module);
+                                                                             std::vfprintf(stderr, fmt, ap);
+                                                                             std::fprintf(stderr, "\n"); }))
+                          
+                          ,error_handle(TIFFSetErrorHandler([](const char* module,
+                                                               const char* fmt,
+                                                               va_list ap) { char buffer[kBufferSize];
+                                                                             std::vsnprintf(buffer, sizeof(char) * kBufferSize, fmt, ap);
+                                                                             imread_raise(TIFFIOError, "FATAL in TIFF I/O",
+                                                                                 FF("[TIFF/ERROR***] %s: ", module),
+                                                                                 FF("%s\n", std::string(buffer).c_str())); }))
+                    {}
             
-            ~tiff_warn_error() {
-                TIFFSetWarningHandler(warning_handle);
-                TIFFSetErrorHandler(error_handle);
-            }
+            public:
+                ~TIFFWarningsAndErrors() { TIFFSetWarningHandler(warning_handle);
+                                           TIFFSetErrorHandler(error_handle); }
+            
+            protected:
+                tiff_handler_f warning_handle;
+                tiff_handler_f error_handle;
             
         };
         
-        template <typename ReadType> inline
-        ReadType tiff_get(tif_holder const& t, const int tag) {
+        template <typename ReadType>
+        ReadType tiff_get(TIFFWrapperBase const& t, const int tag) {
             ReadType val;
             if (!TIFFGetField(t.tif, tag, &val)) {
                 imread_raise(TIFFIOError,
@@ -143,8 +149,8 @@ namespace im {
             return val;
         }
         
-        template <typename ReadType> inline
-        ReadType tiff_get(tif_holder const& t, const int tag,
+        template <typename ReadType>
+        ReadType tiff_get(TIFFWrapperBase const& t, const int tag,
                                                const ReadType default_value) {
             ReadType val;
             if (!TIFFGetField(t.tif, tag, &val)) {
@@ -153,8 +159,8 @@ namespace im {
             return val;
         }
         
-        template <> inline
-        std::string tiff_get<std::string>(tif_holder const& t, const int tag,
+        template <>
+        std::string tiff_get<std::string>(TIFFWrapperBase const& t, const int tag,
                                           const std::string default_value) {
             char* val;
             if (!TIFFGetField(t.tif, tag, &val)) {
@@ -172,7 +178,7 @@ namespace im {
                             tiff_no_write,
                             tiff_seek<byte_source>,
                             tiff_close,
-                            tiff_size_source,
+                            tiff_size<byte_source>,
                             nullptr,
                             nullptr);
         }
@@ -191,54 +197,84 @@ namespace im {
             { UIC4Tag, -1,-1,   TIFF_LONG,        FIELD_CUSTOM, true, true,   const_cast<char*>("UIC4Tag") },
         }};
         
-        void set_stk_tags(TIFF* tif) {
-            TIFFMergeFieldInfo(tif, stkTags.data(), stkTags.size());
-        }
-        
-        class shift_source : public byte_source {
+        template <typename ByteSource,
+                  typename = std::enable_if_t<
+                             std::is_base_of<ByteSource,
+                                             im::byte_source>::value>>
+        class SourceShifter : public ByteSource {
+            
             public:
-                explicit shift_source(byte_source* s)
-                    :s(s), shift_(0)
+                using type = ByteSource;
+            
+            public:
+                explicit SourceShifter(ByteSource* s)
+                    :source(s)
+                    ,shift_by{ 0 }
                     {}
                 
-                virtual std::size_t read(byte* buf, std::size_t n) const { return s->read(buf, n); }
-                virtual std::size_t seek_absolute(std::size_t pos) { return s->seek_absolute(pos + shift_)-shift_; }
-                virtual std::size_t seek_relative(int n) { return s->seek_relative(n)-shift_; }
-                virtual std::size_t seek_end(int n) { return s->seek_end(n+shift_)-shift_; }
+                explicit SourceShifter(ByteSource* s, int nshift)
+                    :source(s)
+                    ,shift_by{ nshift }
+                    { source->seek_relative(nshift); }
                 
-                /// delegate these fully, to avoid using naive implementations:
-                virtual bytevec_t full_data() const { return s->full_data(); }
-                virtual std::size_t size() const { return s->size(); }
-                virtual void* readmap(std::size_t pageoffset = 0) const { return s->readmap(pageoffset); }
+            public:
+                virtual std::size_t seek_absolute(std::size_t pos)          { return source->seek_absolute(pos + shift_by) - shift_by; }
+                virtual std::size_t seek_relative(int n)                    { return source->seek_relative(n) - shift_by; }
+                virtual std::size_t seek_end(int n)                         { return source->seek_end(n + shift_by) - shift_by; }
+                virtual std::size_t read(byte* buf, std::size_t n) const    { return source->read(buf, n); }
                 
+            public:
+                /// delegate these fully, to avoid
+                /// invoking the naive implementations:
+                virtual bytevec_t full_data() const                         { return source->full_data(); }
+                virtual std::size_t size() const                            { return source->size(); }
+                virtual void* readmap(std::size_t pageoffset = 0) const     { return source->readmap(pageoffset); }
+                
+            public:
+                /// non-override setter assigns the shift:
                 void shift(int nshift) {
-                    s->seek_relative(nshift - shift_);
-                    shift_ = nshift;
+                    source->seek_relative(nshift - shift_by);
+                    shift_by = nshift;
                 }
                 
-                byte_source* s;
-                int shift_;
+            protected:
+                ByteSource* source;
+                int shift_by;
+                
+            private:
+                SourceShifter(SourceShifter const&);
+                SourceShifter(SourceShifter&&);
         };
         
-        struct stk_extend {
-            stk_extend()
-                :proc(TIFFSetTagExtender(set_stk_tags))
-                {}
-            ~stk_extend() {
-                TIFFSetTagExtender(proc);
-            }
-            TIFFExtendProc proc;
+        using ShiftSource = SourceShifter<im::byte_source>;
+        
+        class STKTagExtender {
+            
+            public:
+                STKTagExtender()
+                    :proc(TIFFSetTagExtender([](TIFF* tif) -> void {
+                          TIFFMergeFieldInfo(tif,
+                                             stkTags.data(),
+                                             stkTags.size()); }))
+                    {}
+            
+            public:
+                ~STKTagExtender() { TIFFSetTagExtender(proc); }
+            
+            protected:
+                TIFFExtendProc proc;
         };
         
-    } /// namespace
+    } /// namespace (anon.)
     
-    ImageList STKFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
-                                 Options const& opts) {
+    ImageList STKFormat::do_read(byte_source* src, ImageFactory* factory,
+                                                   bool is_multi,
+                                                   Options const& opts) {
         
-        stk_extend ext;
-        tiff_warn_error twe;
-        std::unique_ptr<shift_source> moved = std::make_unique<shift_source>(src);
-        tif_holder t = read_client(moved.get());
+        STKTagExtender ext;
+        TIFFWarningsAndErrors twe;
+        std::unique_ptr<ShiftSource> moved = std::make_unique<ShiftSource>(src);
+        TIFFWrapperBase t = read_client(moved.get());
         ImageList images;
         
         const uint32_t h                    = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
@@ -286,8 +322,13 @@ namespace im {
                 }
                 start += offset;
             }
+            
+            /// Add image to image list for return:
             images.push_back(std::move(output));
+            
+            /// Increment image index (z):
             ++z;
+            
         } while (is_multi && z < n_planes);
         
         TIFFClose(t.tif);
@@ -303,10 +344,11 @@ namespace im {
                                                options.signatures[2].length);
     }
     
-    ImageList TIFFFormat::do_read(byte_source* src, ImageFactory* factory, bool is_multi,
-                                  Options const& opts) {
-        tiff_warn_error twe;
-        tif_holder t = read_client(src);
+    ImageList TIFFFormat::do_read(byte_source* src, ImageFactory* factory,
+                                                    bool is_multi,
+                                                    Options const& opts) {
+        TIFFWarningsAndErrors twe;
+        TIFFWrapperBase t = read_client(src);
         ImageList images;
         
         const uint32_t h                = tiff_get<uint32_t>(t, TIFFTAG_IMAGELENGTH);
@@ -335,7 +377,7 @@ namespace im {
                     byte* ptr = output->rowp_as<byte>(r);
                     byte* dstPtr = output->rowp_as<byte>(r);
                     if (TIFFReadScanline(t.tif, ptr, r) == -1) {
-                        imread_raise(TIFFIOError, "Error reading scanline");
+                        imread_raise(TIFFIOError, "Error in pixel read loop", FF("scanline = %i", r));
                     }
                     /// this pixel loop de-interleaves the destination buffer in-place
                     for (int x = 0; x < w; ++x) {
@@ -357,7 +399,7 @@ namespace im {
                     byte* dstPtr = output->rowp_as<byte>(r);
                     if (TIFFReadScanline(t.tif, ptr16, r) == -1) {
                         std::free(ptr16);
-                        imread_raise(TIFFIOError, "Error reading scanline");
+                        imread_raise(TIFFIOError, "Error in pixel read loop", FF("scanline = %i", r));
                     }
                     /// this pixel loop de-interleaves the destination buffer in-place
                     for (int x = 0; x < w; ++x) {
@@ -380,9 +422,10 @@ namespace im {
         return images;
     }
     
-    void TIFFFormat::write(Image& input, byte_sink* output, Options const& opts) {
-        tiff_warn_error twe;
-        tif_holder t = TIFFClientOpen(
+    void TIFFFormat::write(Image& input, byte_sink* output,
+                                         Options const& opts) {
+        TIFFWarningsAndErrors twe;
+        TIFFWrapperBase t = TIFFClientOpen(
                         "internal",
                         "w",
                         output,
@@ -518,17 +561,20 @@ namespace im {
         TIFFClose(t.tif);
     }
     
-    void TIFFFormat::write_multi(ImageList& input, byte_sink* output, Options const& opts) {
+    void TIFFFormat::write_multi(ImageList& input, byte_sink* output,
+                                                   Options const& opts) {
         do_write(input, output, true, opts);
     }
     
-    void TIFFFormat::do_write(ImageList& input, byte_sink* output, bool is_multi, Options const& opts) {
-        tiff_warn_error twe;
+    void TIFFFormat::do_write(ImageList& input, byte_sink* output,
+                                                bool is_multi,
+                                                Options const& opts) {
+        TIFFWarningsAndErrors twe;
         tiff_read_f read_function = dynamic_cast<byte_source*>(output) ?
                                     tiff_read_from_writer :
                                     tiff_no_read;
         
-        tif_holder t = TIFFClientOpen(
+        TIFFWrapperBase t = TIFFClientOpen(
                         "internal",
                         "w",
                         output,

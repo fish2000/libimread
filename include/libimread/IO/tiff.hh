@@ -57,6 +57,7 @@ namespace im {
                 _suffixes = { "tif", "tiff" },
                 _mimetype = "image/tiff",
                 _metadata = "<TIFF METADATA STRING>",
+                _buffer_size = 4096,
                 _readopts = detail::readopts(),
                 _writeopts = detail::writeopts()
             );
