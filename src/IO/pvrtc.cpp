@@ -75,6 +75,11 @@ namespace im {
         
         constexpr static const std::size_t kPixelSize = sizeof(aux::Rgba8888);
         
+        constexpr static const uint32_t kLog2BlockWidth = 3;
+        constexpr static const uint32_t kLog2BlockHeight = 2;
+        constexpr static const uint32_t kBlockWidth = (1 << kLog2BlockWidth);
+        constexpr static const uint32_t kBlockHeight = (1 << kLog2BlockHeight);
+        
         namespace pow2 {
             
             /// Power-of-2 convenience functions:
@@ -113,16 +118,21 @@ namespace im {
     void PVRTCFormat::write(Image& uncropped,
                             byte_sink* output,
                             Options const& opts) {
+        
+        int axis_length = std::min(detail::pow2::nearest_lesser(uncropped.width()),
+                                   detail::pow2::nearest_lesser(uncropped.height()));
+        
         /// crop image:
-        CroppedImageRef<Image> input = im::crop(uncropped,
-                   detail::pow2::nearest_lesser(uncropped.width()),
-                   detail::pow2::nearest_lesser(uncropped.height()));
+        CroppedImageRef<Image> input = im::crop(uncropped, axis_length, axis_length);
         
         /// inspect input image dimensions:
         int x = 0, y = 0;
         const int width = input.width(),
                   height = input.height(),
                   channels = input.planes();
+        
+        WTF("Cropped image size:",
+            FF("width = %i, height = %i, channels = %i", width, height, channels));
         
         /// check that channel count isn’t BU SAN BU SI:
         if (channels != 3 && channels != 4) {
@@ -185,12 +195,12 @@ namespace im {
         
         /// create an instance of the internal aux::CompressedImage::Metadata class,
         /// and assign it to the compressed image instance:
-        aux::CompressedImage::Metadata metadata(aux::CompressedImage::kRGBA, "PVRTC",
-                                                static_cast<uint32_t>(height),      /// uncompressed height
-                                                static_cast<uint32_t>(width),       /// uncompressed width
-                                                static_cast<uint32_t>(height),      /// compressed height
-                                                static_cast<uint32_t>(width), 0);   /// compressed width
-        
+        aux::CompressedImage::Metadata metadata(aux::CompressedImage::kRGBA, "pvrtc",
+                                                static_cast<uint32_t>(detail::kBlockHeight),    /// uncompressed height
+                                                static_cast<uint32_t>(detail::kBlockWidth),     /// uncompressed width
+                                                static_cast<uint32_t>(height),                  /// compressed height
+                                                static_cast<uint32_t>(width), 0);               /// compressed width
+
         intermediate.SetMetadata(metadata);
         
         /// perform the actual act of compression:
@@ -205,10 +215,10 @@ namespace im {
             imread_raise(PVRTCIOError,
                 "im::PVRTCFormat::write() says:   \"PVRTC COMPRESSOR FAILED TO COMPRESS\"");
         }
-        if (!compressor.IsValidCompressedImage(intermediate)) {
-            imread_raise(PVRTCIOError,
-                "im::PVRTCFormat::write() says:   \"PVRTC COMPRESSOR YIELDED INVALID COMPRESSED IMAGE\"");
-        }
+        // if (!compressor.IsValidCompressedImage(intermediate)) {
+        //     imread_raise(PVRTCIOError,
+        //         "im::PVRTCFormat::write() says:   \"PVRTC COMPRESSOR YIELDED INVALID COMPRESSED IMAGE\"");
+        // }
         if (!intermediate.GetDataSize()) {
             imread_raise(PVRTCIOError,
                 "im::PVRTCFormat::write() says:   \"PVRTC COMPRESSOR YIELDED ZERO-LENGTH COMPRESSED DATA\"");
