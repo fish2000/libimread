@@ -113,6 +113,47 @@ namespace im {
         return write(static_cast<const void*>(bytevec.data()), bytevec.size());
     }
     
+    void byte_sink::push_back(byte_sink::value_type const& value) {
+        write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
+    }
+    
+    void byte_sink::push_back(byte_sink::value_type&& value) {
+        write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
+    }
+    
+    namespace {
+        
+        struct SeekToFront {
+            
+            explicit SeekToFront(byte_sink* ptr)
+                :sink{ ptr }
+                ,orig{ ptr->seek_absolute(0) }
+                {}
+            
+            ~SeekToFront() {
+                sink->seek_absolute(orig);
+            }
+            
+            byte_sink* sink;
+            byte_sink::size_type orig;
+            
+        };
+        
+    } /// namespace (anon.)
+    
+    void byte_sink::push_front(byte_sink::value_type const& value) {
+        // std::size_t orig = seek_absolute(0);
+        // write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
+        // seek_absolute(orig);
+        SeekToFront(this);
+        write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
+    }
+    
+    void byte_sink::push_front(byte_sink::value_type&& value) {
+        SeekToFront(this);
+        write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
+    }
+    
     void byte_sink::flush() {}
 
 } /* namespace im */

@@ -111,14 +111,22 @@ namespace im {
             using seekable::const_iterator;
             using seekable::reverse_iterator;
             using seekable::const_reverse_iterator;
-            
+        
         public:
             virtual ~byte_sink();
             virtual size_type write(const void*, size_type) = 0;
             virtual size_type write(vector_type const&);
             virtual size_type write(vector_type&&);
             virtual void flush();
+        
+        public:
+            void push_back(value_type const&);
+            void push_back(value_type&&);
             
+        public:
+            void push_front(value_type const&);
+            void push_front(value_type&&);
+        
         public:
             template <typename ...Args>
             __attribute__((nonnull(2)))
