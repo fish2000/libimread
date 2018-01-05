@@ -30,6 +30,7 @@ namespace im {
             using reference = std::add_lvalue_reference_t<value_type>;
             using const_reference = std::add_const_t<reference>;
             using pointer = std::add_pointer_t<value_type>;
+            using vector_type = std::vector<value_type>;
         
         public:
             using iterator = byte_iterator;
@@ -62,6 +63,7 @@ namespace im {
             using seekable::reference;
             using seekable::const_reference;
             using seekable::pointer;
+            using seekable::vector_type;
             using seekable::iterator;
             using seekable::const_iterator;
             using seekable::reverse_iterator;
@@ -69,12 +71,12 @@ namespace im {
         
         public:
             virtual ~byte_source();
-            virtual size_type read(byte*, size_type) const warn_unused = 0;
+            virtual size_type read(pointer, size_type) const warn_unused = 0;
             virtual void* readmap(size_type pageoffset = 0) const = 0;
-            virtual bytevec_t full_data() const;
+            virtual vector_type full_data() const;
             virtual size_type size() const;
             bool empty() const;
-            byte* data() const;
+            pointer data() const;
             
         public:
             iterator begin();
@@ -104,6 +106,7 @@ namespace im {
             using seekable::reference;
             using seekable::const_reference;
             using seekable::pointer;
+            using seekable::vector_type;
             using seekable::iterator;
             using seekable::const_iterator;
             using seekable::reverse_iterator;
@@ -112,8 +115,8 @@ namespace im {
         public:
             virtual ~byte_sink();
             virtual size_type write(const void*, size_type) = 0;
-            virtual size_type write(bytevec_t const&);
-            virtual size_type write(bytevec_t&&);
+            virtual size_type write(vector_type const&);
+            virtual size_type write(vector_type&&);
             virtual void flush();
             
         public:

@@ -31,10 +31,10 @@ namespace im {
     
     byte_source::~byte_source() {}
     
-    bytevec_t byte_source::full_data() const {
-        bytevec_t result;
+    byte_source::vector_type byte_source::full_data() const {
+        byte_source::vector_type result;
         byte_source::size_type n;
-        byte buffer[kBufferSize];
+        byte_source::value_type buffer[kBufferSize];
         while ((n = read(buffer, sizeof(buffer)))) {
             result.insert(result.end(), buffer, buffer + n);
         }
@@ -49,9 +49,9 @@ namespace im {
         /// super-naive implementation...
         /// OVERRIDE THIS HORRIDNESS, DOGG
         if (!__sized) {
-            bytevec_t all_of_it;
+            byte_source::vector_type all_of_it;
             byte_source::size_type n;
-            byte buffer[kBufferSize];
+            byte_source::value_type buffer[kBufferSize];
             while ((n = read(buffer, sizeof(buffer)))) {
                 all_of_it.insert(all_of_it.end(), buffer, buffer + n);
             }
@@ -65,8 +65,8 @@ namespace im {
         return size() == 0;
     }
     
-    byte* byte_source::data() const {
-        return (byte*)readmap();
+    byte_source::pointer byte_source::data() const {
+        return (byte_source::pointer)readmap();
     }
     
     byte_source::iterator byte_source::begin() {
@@ -103,12 +103,12 @@ namespace im {
     
     byte_sink::~byte_sink() {}
     
-    byte_sink::size_type byte_sink::write(bytevec_t const& bytevec) {
+    byte_sink::size_type byte_sink::write(byte_sink::vector_type const& bytevec) {
         if (bytevec.empty()) { return 0; }
         return write(static_cast<const void*>(bytevec.data()), bytevec.size());
     }
     
-    byte_sink::size_type byte_sink::write(bytevec_t&& bytevec) {
+    byte_sink::size_type byte_sink::write(byte_sink::vector_type&& bytevec) {
         if (bytevec.empty()) { return 0; }
         return write(static_cast<const void*>(bytevec.data()), bytevec.size());
     }

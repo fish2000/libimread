@@ -151,7 +151,7 @@ namespace im {
         
         template <typename ReadType>
         ReadType tiff_get(TIFFWrapperBase const& t, const int tag,
-                                               const ReadType default_value) {
+                                                    const ReadType default_value) {
             ReadType val;
             if (!TIFFGetField(t.tif, tag, &val)) {
                 return default_value;
@@ -161,7 +161,7 @@ namespace im {
         
         template <>
         std::string tiff_get<std::string>(TIFFWrapperBase const& t, const int tag,
-                                          const std::string default_value) {
+                                                                    const std::string default_value) {
             char* val;
             if (!TIFFGetField(t.tif, tag, &val)) {
                 return default_value;
