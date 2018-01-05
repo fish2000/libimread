@@ -65,8 +65,8 @@ namespace im {
             {}
         
         constexpr boundaries_t() noexcept = delete;
-        boundaries_t(boundaries_t const&) = default;
-        boundaries_t(boundaries_t&&) noexcept = default;
+        constexpr boundaries_t(boundaries_t const&) = default;
+        constexpr boundaries_t(boundaries_t&&) noexcept = default;
         
         constexpr T&       width(T arg)       & { return std::clamp(arg, min_x, max_x); }
         constexpr T&       height(T arg)      & { return std::clamp(arg, min_y, max_y); }

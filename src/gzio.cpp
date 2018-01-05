@@ -131,11 +131,12 @@ namespace im {
         return static_cast<std::size_t>(out);
     }
     
-    std::size_t gzio_source_sink::write(bytevec_t const& bv) {
-        if (bv.empty()) { return 0; }
-        return this->write(
-            static_cast<const void*>(&bv[0]),
-            bv.size());
+    std::size_t gzio_source_sink::write(bytevec_t const& bytevec) {
+        return byte_sink::write(bytevec);
+    }
+    
+    std::size_t gzio_source_sink::write(bytevec_t&& bytevec) {
+        return byte_sink::write(std::forward<bytevec_t>(bytevec));
     }
     
     detail::stat_t gzio_source_sink::stat() const {

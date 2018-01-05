@@ -5,6 +5,7 @@
 #define LIBIMREAD_ACCESSORS_HH_
 
 #include <vector>
+#include <algorithm>
 #include <libimread/ext/arrayview.hh>
 
 
@@ -53,7 +54,7 @@
     std::vector<T> plane(int idx) const {                                                           \
         /* types */                                                                                 \
         using planevec_t = std::vector<T>;                                                          \
-        using view_t = av::strided_array_view<T, 3>;                                                \
+        using view_t    = av::strided_array_view<T, 3>;                                             \
         if (idx >= __pointer__->planes()) { return planevec_t{}; }                                  \
         /* image dimensions */                                                                      \
         const int w = __pointer__->dim(0);                                                          \
