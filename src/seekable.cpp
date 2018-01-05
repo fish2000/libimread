@@ -142,9 +142,6 @@ namespace im {
     } /// namespace (anon.)
     
     void byte_sink::push_front(byte_sink::value_type const& value) {
-        // std::size_t orig = seek_absolute(0);
-        // write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
-        // seek_absolute(orig);
         SeekToFront(this);
         write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
     }
