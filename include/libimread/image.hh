@@ -11,6 +11,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/accessors.hh>
 #include <libimread/metadata.hh>
+#include <libimread/histogram.hh>
 #include <libimread/imageref.hh>
 // #include IM_INTRINSICS_HEADER
 
@@ -50,6 +51,9 @@ namespace im {
             /// Accessor definition macros -- q.v. accessors.hh:
             IMAGE_ACCESSOR_ROWP_AS(this);
             IMAGE_ACCESSOR_VIEW(this);
+            IMAGE_ACCESSOR_ALLROWS(this);
+            IMAGE_ACCESSOR_PLANE(this);
+            IMAGE_ACCESSOR_ALLPLANES(this);
         
         public:
             int dim_or(int dimension, int default_value = 1) const;
@@ -104,12 +108,7 @@ namespace im {
         
         protected:
             Metadata md;
-        
-        public:
-            /// Accessor definition macros -- q.v. accessors.hh:
-            IMAGE_ACCESSOR_ALLROWS(this);
-            IMAGE_ACCESSOR_PLANE(this);
-            IMAGE_ACCESSOR_ALLPLANES(this);
+            mutable std::shared_ptr<Histogram> histo;
         
     };
     

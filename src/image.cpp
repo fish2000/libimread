@@ -4,7 +4,6 @@
 #include <numeric>
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
-#include <libimread/histogram.hh>
 #include <libimread/metadata.hh>
 #include <libimread/rehash.hh>
 
@@ -78,13 +77,17 @@ namespace im {
     }
     
     float Image::entropy() const {
-        Histogram histo(this);
-        return histo.entropy();
+        if (!histo.get()) {
+            histo = std::make_shared<Histogram>(this);
+        }
+        return histo->entropy();
     }
     
     int Image::otsu() const {
-        Histogram histo(this);
-        return histo.otsu();
+        if (!histo.get()) {
+            histo = std::make_shared<Histogram>(this);
+        }
+        return histo->otsu();
     }
     
     Metadata& Image::metadata() {

@@ -125,12 +125,14 @@ namespace {
         for (auto const& p : entropies) {
             auto image = im::halide::read(p.first.str());
             CHECK(p.second == image.entropy());
+            /// checking this next bit is way faster than using another loop:
+            CHECK(otsus[p.first] == image.otsu());
         }
         
-        for (auto const& p : otsus) {
-            auto image = im::halide::read(p.first.str());
-            CHECK(p.second == image.otsu());
-        }
+        // for (auto const& p : otsus) {
+        //     auto image = im::halide::read(p.first.str());
+        //     CHECK(p.second == image.otsu());
+        // }
         
     }
     
