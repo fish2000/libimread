@@ -558,7 +558,7 @@ namespace im {
         JSAMPARRAY samples = decompressor.allocate_samples();
         
         /// Hardcoding JSAMPLE (== uint8_t) as the type for now:
-        int color_stride = (c == 1) ? 0 : output->stride(2);
+        int color_stride = output->stride_or(2, 0);
         JSAMPLE* __restrict__ ptr = output->rowp_as<JSAMPLE>(0);
         
         /// read image data as scanlines, in a loop:
@@ -673,7 +673,7 @@ namespace im {
         
         const int w = input.dim(0);
         const int h = input.dim(1);
-        const int c = std::min(3, input.dim(2));
+        const int c = std::min(3, input.dim_or(2));
         
         /// assign image values:
         compressor.set_width(w);

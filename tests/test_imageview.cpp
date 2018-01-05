@@ -102,24 +102,24 @@ namespace {
             path imagepath = basedir/p;
             auto png = im::halide::unique(imagepath);
             shared_t png_view = std::make_shared<ImageView>(png.get());
-            Histogram histo = png_view->histogram();
-            CHECK(histo.entropy() != 0.00);
-            CHECK(histo.otsu() != 0);
-            CHECK(!std::isnan(histo.entropy()));
-            entropies.insert({ imagepath, histo.entropy() });
-            otsus.insert({ imagepath, histo.otsu() });
+            // Histogram histo = png_view->histogram();
+            CHECK(png_view->entropy() != 0.00);
+            CHECK(png_view->otsu() != 0);
+            CHECK(!std::isnan(png_view->entropy()));
+            entropies.insert({ imagepath, png_view->entropy() });
+            otsus.insert({ imagepath, png_view->otsu() });
         });
         
         std::for_each(jpgs.begin(), jpgs.end(), [&](path const& p) {
             path imagepath = basedir/p;
             auto jpg = im::halide::unique(imagepath);
             shared_t jpg_view = std::make_shared<ImageView>(jpg.get());
-            Histogram histo = jpg_view->histogram();
-            CHECK(histo.entropy() != 0.00);
-            CHECK(histo.otsu() != 0);
-            CHECK(!std::isnan(histo.entropy()));
-            entropies.insert({ imagepath, histo.entropy() });
-            otsus.insert({ imagepath, histo.otsu() });
+            // Histogram histo = jpg_view->histogram();
+            CHECK(jpg_view->entropy() != 0.00);
+            CHECK(jpg_view->otsu() != 0);
+            CHECK(!std::isnan(jpg_view->entropy()));
+            entropies.insert({ imagepath, jpg_view->entropy() });
+            otsus.insert({ imagepath, jpg_view->otsu() });
         });
         
         for (auto const& p : entropies) {

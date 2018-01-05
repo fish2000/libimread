@@ -20,12 +20,15 @@ namespace im {
         static constexpr std::size_t kHistogramSize = UCHAR_MAX + 1;
     }
     
+    class ImageView;
+    
     class Image {
         
         public:
             using size_type     = std::ptrdiff_t;
             using value_type    = byte;
-            
+            friend class ImageView;
+        
         public:
             virtual ~Image();
             

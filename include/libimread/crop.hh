@@ -139,9 +139,9 @@ namespace im {
                                                     { X, Y, Z },
                                                     { pointer->stride(0),
                                                       pointer->stride(1),
-                                                      pointer->stride(2) }).section({ boundaries.width(0),
-                                                                                      boundaries.height(0),
-                                                                                      0 });
+                                                      pointer->stride_or(2) }).section({ boundaries.width(0),
+                                                                                         boundaries.height(0),
+                                                                                         0 });
             }
         
         public:

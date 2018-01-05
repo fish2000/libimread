@@ -11,7 +11,7 @@
 #include <libimread/libimread.hpp>
 #include <libimread/image.hh>
 #include <libimread/accessors.hh>
-
+#include <libimread/metadata.hh>
 
 namespace im {
     
@@ -38,14 +38,18 @@ namespace im {
             explicit ImageView(Image* image);
             virtual ~ImageView();
             
+        public:
             ImageView& operator=(ImageView const& other) &;
             ImageView& operator=(ImageView&& other) & noexcept;
             ImageView& operator=(Image* image_ptr) &;
             
+        public:
             /// delegate the core Image API methods
             /// back to the source image
             virtual void* rowp(int r) const;
             virtual void* rowp() const;
+            
+        public:
             virtual int nbits() const;
             virtual int nbytes() const;
             virtual int ndims() const;
@@ -55,21 +59,35 @@ namespace im {
             virtual bool is_signed() const;
             virtual bool is_floating_point() const;
             
-            virtual int dim_or(int dim, int default_value = 1) const;
-            virtual int stride_or(int dim, int default_value = 1) const;
-            virtual int min_or(int dim, int default_value = 0) const;
+        public:
+            int dim_or(int dim, int default_value = 1) const;
+            int stride_or(int dim, int default_value = 1) const;
+            int min_or(int dim, int default_value = 0) const;
             
+        public:
             virtual int width() const;
             virtual int height() const;
             virtual int planes() const;
             virtual int size() const;
-            virtual int left() const;
-            virtual int right() const;
-            virtual int top() const;
-            virtual int bottom() const;
             
-            virtual Histogram histogram() const;
-            virtual float entropy() const;
+        public:
+            int left() const;
+            int right() const;
+            int top() const;
+            int bottom() const;
+            
+        public:
+            // Histogram histogram() const;
+            float entropy() const;
+            int otsu() const;
+        
+        public:
+            Metadata&       metadata();
+            Metadata const& metadata() const;
+            Metadata&       metadata(Metadata&);
+            Metadata&       metadata(Metadata&&);
+            Metadata*       metadata_ptr();
+            Metadata const* metadata_ptr() const;
             
         public:
             /// Accessor definition macros -- q.v. accessors.hh:
@@ -90,6 +108,7 @@ namespace im {
             
         protected:
             Image* source;
+            mutable std::unique_ptr<Histogram> histo;
             
         private:
             ImageView(void);

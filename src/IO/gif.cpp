@@ -73,7 +73,7 @@ namespace im {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
-        const int channels = input.dim(2); /// should be 3
+        const int channels = input.dim_or(2); /// should be 3
         const int bit_depth = input.nbits();
         
         /// Check bit depth

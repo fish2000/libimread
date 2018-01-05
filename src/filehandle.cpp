@@ -71,7 +71,6 @@ namespace im {
         /// grab stat struct and store initial seek position:
         detail::stat_t info = this->stat();
         std::size_t fsize = info.st_size * sizeof(byte);
-        std::size_t orig = std::ftell(handle);
         
         /// allocate output vector per size of file:
         bytevec_t result(fsize);
@@ -86,6 +85,7 @@ namespace im {
         }
         
         /// start as you mean to go on:
+        std::size_t orig = std::ftell(handle);
         std::rewind(handle);
         
         /// read directly from filehandle:

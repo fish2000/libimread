@@ -472,8 +472,8 @@ namespace im {
         //         imread_raise(CannotWriteError,
         //             "Image must be either 2 or 3 dimensional");
         //     }
-        //     if (im->dim(2) == 3) { return PNG_COLOR_TYPE_RGB; }
-        //     if (im->dim(2) == 4) { return PNG_COLOR_TYPE_RGBA; }
+        //     if (im->dim_or(2) == 3) { return PNG_COLOR_TYPE_RGB; }
+        //     if (im->dim_or(2) == 4) { return PNG_COLOR_TYPE_RGBA; }
         //     imread_raise_default(CannotWriteError);
         // }
         
@@ -633,7 +633,7 @@ namespace im {
         }
         
         /// convert the data to T (fake it for now with uint8_t)
-        const int c_stride = (d == 1) ? 0 : output->stride(2);
+        const int c_stride = output->stride_or(2, 0);
         uint8_t* __restrict__ ptr = output->rowp_as<uint8_t>(0);
         
         // WTF("About to enter pixel access loop...",
@@ -677,7 +677,7 @@ namespace im {
         /// store the width/height/channels/bit depth image info:
         const int width = input.dim(0);
         const int height = input.dim(1);
-        const int channels = input.dim(2);
+        const int channels = input.dim_or(2);
         const int bit_depth = input.nbits();
         
         png_bytep* __restrict__ row_pointers;
@@ -704,7 +704,7 @@ namespace im {
         row_pointers = new png_bytep[height];
         
         /// sort out the stride and rowbytes situation:
-        const int c_stride = (channels == 1) ? 0 : input.stride(2);
+        const int c_stride = input.stride_or(2, 0);
         const int rowbytes = png_get_rowbytes(writer.png_ptr(), writer.png_info());
         int x = 0, y = 0, c = 0;
         uint8_t* __restrict__ dstPtr;
@@ -781,7 +781,7 @@ namespace im {
         
         const int width = input.dim(0);
         const int height = input.dim(1);
-        const int channels = input.dim(2);
+        const int channels = input.dim_or(2);
         const int bit_depth = input.nbits();
         
         png_bytep* __restrict__ row_pointers;
@@ -839,7 +839,7 @@ namespace im {
         row_pointers = new png_bytep[height];
         
         /// NEED TO STOP HARDCODING IN UNSIGNED FUCKING CHAR FOR THE PIXEL TYPES SOMETIME
-        int c_stride = (channels == 1) ? 0 : input.stride(2);
+        int c_stride = input.stride_or(2, 0);
         int rowbytes = png_get_rowbytes(p.png_ptr, p.png_info);
         int x = 0, y = 0, c = 0;
         uint8_t* __restrict__ dstPtr;

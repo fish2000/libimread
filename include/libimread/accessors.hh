@@ -24,12 +24,12 @@
                                       int Z = -1) const {                                           \
         if (X == -1) { X = __pointer__->dim(0); }                                                   \
         if (Y == -1) { Y = __pointer__->dim(1); }                                                   \
-        if (Z == -1) { Z = __pointer__->dim(2); }                                                   \
+        if (Z == -1) { Z = __pointer__->dim_or(2); }                                                \
         return av::strided_array_view<T, 3>(static_cast<T*>(__pointer__->rowp(0)),                  \
                                             { X, Y, Z },                                            \
                                             { __pointer__->stride(0),                               \
                                               __pointer__->stride(1),                               \
-                                              __pointer__->stride(2) });                            \
+                                              __pointer__->stride_or(2) });                         \
     }
 
 #define IMAGE_ACCESSOR_ALLROWS(__pointer__)                                                         \
@@ -55,7 +55,7 @@
         /* types */                                                                                 \
         using planevec_t = std::vector<T>;                                                          \
         using view_t    = av::strided_array_view<T, 3>;                                             \
-        if (idx >= __pointer__->planes()) { return planevec_t{}; }                                  \
+        if (idx >= __pointer__->dim_or(2)) { return planevec_t{}; }                                 \
         /* image dimensions */                                                                      \
         const int w = __pointer__->dim(0);                                                          \
         const int h = __pointer__->dim(1);                                                          \
@@ -78,7 +78,7 @@
     std::vector<std::vector<T>> allplanes(int lastplane = 255) const {                              \
         using planevec_t = std::vector<T>;                                                          \
         using pixvec_t = std::vector<planevec_t>;                                                   \
-        const int planecount = std::min(__pointer__->planes(), lastplane);                          \
+        const int planecount = std::min(__pointer__->dim_or(2), lastplane);                         \
         pixvec_t out;                                                                               \
         out.reserve(planecount);                                                                    \
         for (int idx = 0; idx < planecount; ++idx) {                                                \

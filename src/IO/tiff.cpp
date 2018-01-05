@@ -370,7 +370,7 @@ namespace im {
             
             if (bits_per_sample == 8) {
                 /// Hardcoding uint8_t as the type for now
-                int c_stride = (depth == 1) ? 0 : output->stride(2);
+                int c_stride = output->stride_or(2, 0);
                 
                 for (int r = 0; r != h; ++r) {
                     /// NB. This is highly specious
@@ -390,7 +390,7 @@ namespace im {
                 
             } else if (bits_per_sample == 16) {
                 /// Hardcoding uint16_t as the type for now
-                int c_stride = (depth == 1) ? 0 : output->stride(2);
+                int c_stride = output->stride_or(2, 0);
                 uint16_t* ptr16 = (uint16_t*)std::calloc(sizeof(uint16_t), TIFFScanlineSize(t.tif)*3);
                 
                 WTF("About to enter 16-bit pixel loop...");
@@ -444,7 +444,7 @@ namespace im {
                          options.writeopts.copy_data);
         const uint32_t w = input.dim(0);
         const uint32_t h = input.dim(1);
-        const uint32_t ch = input.dim(2);
+        const uint32_t ch = input.dim_or(2);
         const uint32_t siz = input.size();
         const uint32_t nbytes = input.nbytes();
         const uint16_t photometric = ((input.ndims() == 3 && ch) ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);
@@ -601,7 +601,7 @@ namespace im {
                              options.writeopts.copy_data);
             const uint32_t w = im->dim(0);
             const uint32_t h = im->dim(1);
-            const uint32_t ch = im->dim(2);
+            const uint32_t ch = im->dim_or(2);
             const uint32_t siz = im->size();
             const uint32_t nbytes = im->nbytes();
             const uint16_t photometric = ((im->ndims() == 3 && ch) ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);

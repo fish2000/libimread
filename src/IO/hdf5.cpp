@@ -186,13 +186,13 @@ namespace im {
             std::array<hsize_t, kDimensions> dimensions{{
                 static_cast<hsize_t>(input.dim(0)),
                 static_cast<hsize_t>(input.dim(1)),
-                static_cast<hsize_t>(input.dim(2))
+                static_cast<hsize_t>(input.dim_or(2))
             }};
             
             std::array<hsize_t, 1> flattened{{
                 static_cast<hsize_t>(input.dim(0) *
                                      input.dim(1) *
-                                     input.dim(2))
+                                     input.dim_or(2))
             }};
             
             /// space_id    --> “dataspace”: possibly strided dimensional data;
@@ -254,10 +254,10 @@ namespace im {
             ndims.typed_write(input.ndims());
             dim0.typed_write(input.dim(0));
             dim1.typed_write(input.dim(1));
-            dim2.typed_write(input.dim(2));
+            dim2.typed_write(input.dim_or(2));
             stride0.typed_write(input.stride(0));
             stride1.typed_write(input.stride(1));
-            stride2.typed_write(input.stride(2));
+            stride2.typed_write(input.stride_or(2));
             
         } /// end of ATTRIBUTES! scope exit closes all the things!
         
