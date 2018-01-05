@@ -166,6 +166,9 @@ namespace std {
     decltype(std::declval<im::byte_source const>().rend())
         crend(im::byte_source const*);
     
+    std::back_insert_iterator<im::byte_sink>    back_inserter(im::byte_sink*);
+    std::front_insert_iterator<im::byte_sink>   front_inserter(im::byte_sink*);
+    
 } /* namespace std */
 
 #endif /// LIBIMREAD_SEEKABLE_HH_

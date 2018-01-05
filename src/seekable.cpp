@@ -184,4 +184,12 @@ namespace std {
     decltype(std::declval<im::byte_source const>().rend())
         crend(im::byte_source const* source) { return source->rend(); }
     
+    std::back_insert_iterator<im::byte_sink>    back_inserter(im::byte_sink* sink) {
+        return std::back_inserter(*sink);
+    }
+    
+    std::front_insert_iterator<im::byte_sink>   front_inserter(im::byte_sink* sink) {
+        return std::front_inserter(*sink);
+    }
+    
 } /* namespace std */
