@@ -50,8 +50,11 @@ namespace filesystem {
         };
         
         template <typename T>
-        using handle_ptr = std::unique_ptr<typename closer<T>::opaque_t,
-                                                    closer<T>>;
+        using handle_unique_ptr = std::unique_ptr<typename closer<T>::opaque_t,
+                                                           closer<T>>;
+        template <typename T>
+        using handle_shared_ptr = std::shared_ptr<typename closer<T>::opaque_t>;
+        
         
     } /// namespace detail
     
@@ -62,8 +65,15 @@ namespace filesystem {
     /// herein wrapped neatly out of sight forever in std::unique_ptrs.
     /// ... YOURE WELCOME.
     
-    using directory  = detail::handle_ptr<DIR>;
-    using file       = detail::handle_ptr<FILE>;
+    using directory         = detail::handle_unique_ptr<DIR>;
+    using file              = detail::handle_unique_ptr<FILE>;
+    
+    namespace shared {
+        
+        using directory     = detail::handle_shared_ptr<DIR>;
+        using file          = detail::handle_shared_ptr<FILE>;
+        
+    } /// namespace shared
     
     namespace detail {
         
@@ -81,13 +91,25 @@ namespace filesystem {
         ///     
         /// ... see? see what I am getting at with all this? NO DIR!! haha. anyway.
         
-        filesystem::directory   ddopen(filesystem::path const& p);
-        filesystem::directory   ddopen(std::string const& s);
-        filesystem::directory   ddopen(int const descriptor);
+        filesystem::directory               ddopen(filesystem::path const& p);
+        filesystem::directory               ddopen(std::string const& s);
+        filesystem::directory               ddopen(int const descriptor);
         
-        filesystem::file        ffopen(filesystem::path const& p,   mode m = mode::READ);
-        filesystem::file        ffopen(std::string const& s,        mode m = mode::READ);
-        filesystem::file        ffopen(int const descriptor,        mode m = mode::READ);
+        filesystem::file                    ffopen(filesystem::path const& p,   mode m = mode::READ);
+        filesystem::file                    ffopen(std::string const& s,        mode m = mode::READ);
+        filesystem::file                    ffopen(int const descriptor,        mode m = mode::READ);
+        
+        namespace shared {
+            
+            filesystem::shared::directory   ddopen(filesystem::path const& p);
+            filesystem::shared::directory   ddopen(std::string const& s);
+            filesystem::shared::directory   ddopen(int const descriptor);
+            
+            filesystem::shared::file        ffopen(filesystem::path const& p,   mode m = mode::READ);
+            filesystem::shared::file        ffopen(std::string const& s,        mode m = mode::READ);
+            filesystem::shared::file        ffopen(int const descriptor,        mode m = mode::READ);
+            
+        }
         
     } /// namespace detail
     
