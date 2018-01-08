@@ -1,27 +1,28 @@
-/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// Copyright 2012-2018 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_EXT_FILESYSTEM_OPAQUES_H_
 #define LIBIMREAD_EXT_FILESYSTEM_OPAQUES_H_
+
+#include <string>
+#include <memory>
+#include <type_traits>
 
 #include <cctype>
 #include <cstdio>
 #include <cstddef>
 #include <dirent.h>
 
-#include <string>
-#include <memory>
-#include <type_traits>
-
 #include <libimread/ext/filesystem/mode.h>
 
 namespace filesystem {
     
-    /// forward declaration for these next few prototypes/templates
-    class path;
+    class path; /// forward declaration for the following prototypes
     
     namespace detail {
-        /// Deleter structures to close directory and file handles
+        
+        /// Deleter structures to close directory and file handles:
+        
         template <typename HandleType>
         struct handle_helper;
         
@@ -51,35 +52,45 @@ namespace filesystem {
         template <typename T>
         using handle_ptr = std::unique_ptr<typename closer<T>::opaque_t,
                                                     closer<T>>;
-    }
+        
+    } /// namespace detail
     
     /// RAII-ified simplifications, for opening directory and file handles
     /// ... also known by their obnoxiously-capitalized type names
     /// dating from the dark days of early C without the plus-plus--
     /// the original opaques: FILE* and DIR*,
-    /// herein wrapped neatly out of sight forever in unique_ptrs.
+    /// herein wrapped neatly out of sight forever in std::unique_ptrs.
     /// ... YOURE WELCOME.
+    
     using directory  = detail::handle_ptr<DIR>;
     using file       = detail::handle_ptr<FILE>;
     
     namespace detail {
+        
         using dirent_t = struct dirent;
         
-        /// We can construct the above unique_ptr type aliases directly from FILE* and DIR* --
-        /// ... these are shortcuts that wrap calls to ::opendir() and std::fopen(), respectively;
-        /// so you can be like:
-        ///
-        ///     filesystem::directory dir = detail::ddopen("the/path/to/it/");
-        ///     /// dir will auto-close on scope exit
-        ///     ::some_posix_func_that_wants_a_dirhandle(dir.get());
+        /// We can construct the above std::unique_ptr type aliases directly for FILE* and DIR* --
+        /// ... these are shortcuts that wrap calls to ::opendir(), ::fdopendir(), std::fopen(),
+        /// and ::fdopen(), respectively; so you can be like:
+        ///     
+        ///     {
+        ///         filesystem::directory dir = detail::ddopen("the/path/to/it/");
+        ///         /// dir will auto-close on scope exit
+        ///         ::some_posix_func_that_wants_a_dirhandle(dir.get());
+        ///     }
         ///     
         /// ... see? see what I am getting at with all this? NO DIR!! haha. anyway.
-        directory ddopen(char const* c);
-        directory ddopen(std::string const& s);
-        directory ddopen(path const& p);
-        filesystem::file ffopen(std::string const& s, mode m = mode::READ);
-    }
-
-} /* namespace filesystem */
+        
+        filesystem::directory   ddopen(filesystem::path const& p);
+        filesystem::directory   ddopen(std::string const& s);
+        filesystem::directory   ddopen(int const descriptor);
+        
+        filesystem::file        ffopen(filesystem::path const& p,   mode m = mode::READ);
+        filesystem::file        ffopen(std::string const& s,        mode m = mode::READ);
+        filesystem::file        ffopen(int const descriptor,        mode m = mode::READ);
+        
+    } /// namespace detail
+    
+} /// namespace filesystem
 
 #endif /// LIBIMREAD_EXT_FILESYSTEM_OPAQUES_H_

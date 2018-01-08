@@ -38,7 +38,7 @@ namespace im {
             static int open_write(char const* p, int mask = kWriteCreateMask);
             static int fifo_open_read(char const* p);
             static int fifo_open_write(char const* p);
-            static bool check_descriptor(int fd);
+            static bool check_descriptor(int fd) noexcept;
         
         public:
             static std::size_t max_descriptor_count();

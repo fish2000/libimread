@@ -1,41 +1,52 @@
 
-#include <array>
-#include <stdexcept>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
+
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
-#include <libimread/ext/filesystem/directory.h>
 
 namespace filesystem {
     
     namespace detail {
         
-        directory ddopen(char const* c) {
-            return directory(::opendir(path::absolute(c).c_str()));
+        using filesystem::path;
+        
+        filesystem::directory ddopen(path const& p) {
+            return filesystem::directory(::opendir(p.make_absolute().c_str()));
         }
         
-        directory ddopen(std::string const& s) {
-            return directory(::opendir(path::absolute(s).c_str()));
+        filesystem::directory ddopen(std::string const& s) {
+            return filesystem::directory(::opendir(path::absolute(s).c_str()));
         }
         
-        directory ddopen(path const& p) {
-            return directory(::opendir(p.make_absolute().c_str()));
+        filesystem::directory ddopen(int const descriptor) {
+            return filesystem::directory(::fdopendir(descriptor));
         }
         
-        inline char const* fm(mode m) noexcept {
+        __attribute__((always_inline))
+        static char const* fm(mode m) noexcept {
             return m == mode::READ ? "r+b" : "w+x";
         }
         
-        inline int dm(mode m) noexcept {
+        __attribute__((always_inline))
+        static int dm(mode m) noexcept {
             return m == mode::READ ? O_RDWR | O_NONBLOCK | O_CLOEXEC :
                                      O_RDWR | O_NONBLOCK | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC;
         }
         
-        filesystem::file ffopen(std::string const& s, mode m) {
-            return filesystem::file(std::fopen(s.c_str(), fm(m)));
+        filesystem::file ffopen(path const& p, mode m) {
+            return filesystem::file(std::fopen(p.normalize().c_str(), fm(m)));
         }
         
-    } /* namespace detail */
-
-} /* namespace filesystem */
+        filesystem::file ffopen(std::string const& s, mode m) {
+            return filesystem::file(std::fopen(path::normalize(s).c_str(), fm(m)));
+        }
+        
+        filesystem::file ffopen(int const descriptor, mode m) {
+            return filesystem::file(::fdopen(descriptor, fm(m)));
+        }
+        
+    } /// namespace detail
+    
+} /// namespace filesystem

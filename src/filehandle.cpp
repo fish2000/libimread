@@ -58,7 +58,7 @@ namespace im {
     detail::stat_t handle_source_sink::stat() const {
         detail::stat_t info;
         if (::fstat(::fileno(handle), &info) == -1) {
-            imread_raise(CannotReadError,
+            imread_raise(FileSystemError,
                 "::fstat(::fileno()) returned -1",
                 std::strerror(errno));
         }
@@ -78,7 +78,7 @@ namespace im {
         /// if necessary, set optimal buffer size with std::setvbuf():
         if (BUFSIZ != info.st_blksize) {
             if (std::setvbuf(handle, nullptr, _IOFBF, info.st_blksize) != 0) {
-                imread_raise(CannotReadError,
+                imread_raise(FileSystemError,
                     "handle_source_sink::full_data():",
                     "std::setvbuf() returned -1", std::strerror(errno));
             };
@@ -169,7 +169,7 @@ namespace im {
     bool handle_source_sink::exists() const noexcept {
         try {
             this->stat();
-        } catch (CannotReadError const& e) {
+        } catch (CannotReadError&) {
             return false;
         }
         return true;
@@ -178,7 +178,7 @@ namespace im {
     FILE* handle_source_sink::open(char* cpath, filesystem::mode fmode) {
         handle = std::fopen(cpath, fmode == filesystem::mode::READ ? "r+" : "w+");
         if (!handle) {
-            imread_raise(CannotReadError, "filehandle open failure:",
+            imread_raise(FileSystemError, "filehandle open failure:",
                 FF("\tstd::fopen(\"%s\", \"%s\")", cpath,
                         fmode == filesystem::mode::READ ? "r+" : "w+"),
                     "\treturned nullptr value",

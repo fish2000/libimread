@@ -41,7 +41,7 @@ namespace im {
         return ::open(p, kFIFOWriteFlags);
     }
     
-    bool fd_source_sink::check_descriptor(int fd) {
+    bool fd_source_sink::check_descriptor(int fd) noexcept {
         return (::fcntl(fd, F_GETFD) != -1);
     }
     
