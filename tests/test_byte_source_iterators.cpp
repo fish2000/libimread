@@ -129,49 +129,49 @@ namespace {
         // std::for_each(tifs.begin(), tifs.end(), exif_extractor);
     }
     
-    TEST_CASE("[byte-sink-iterators] Test FileSink iterators",
-              "[byte-sink-iterators-test-FileSink-iterators]")
-    {
-        path basedir(im::test::basedir);
-        TemporaryDirectory td("test-byte-sink-iterators");
-        const pathvec_t pngs = basedir.list("*.png", false); /// full_paths=false
-        
-        std::for_each(pngs.begin(), pngs.end(), [&td, &basedir](path const& p) {
-            path fullpath = basedir/p;
-            path newpath(td.dirpath/p);
-            
-            bytevec_t data;
-            std::unique_ptr<FileSource> source = std::make_unique<FileSource>(fullpath);
-            
-            {
-                std::unique_ptr<FileSink> sink = std::make_unique<FileSink>(newpath);
-                
-                /// Copy source to data with a std::back_inserter(…):
-                std::copy(std::begin(source.get()),
-                          std::end(source.get()),
-                          std::back_inserter(data));
-                
-                /// Copy data to sink with a std::back_inserter(…):
-                std::copy(std::begin(data),
-                          std::end(data),
-                          std::back_inserter(sink.get()));
-                
-                /// ensure sink data has been written:
-                sink->flush();
-            }
-            
-            {
-                std::unique_ptr<FileSource> readback = std::make_unique<FileSource>(newpath);
-                bytevec_t fulldata(readback->full_data());
-                
-                CHECK(data.size() == fulldata.size());
-                CHECK(std::equal(data.begin(),     data.end(),
-                                 fulldata.begin(), fulldata.end(),
-                                 std::equal_to<byte>()));
-            }
-            
-        });
-    }
+    // TEST_CASE("[byte-sink-iterators] Test FileSink iterators",
+    //           "[byte-sink-iterators-test-FileSink-iterators]")
+    // {
+    //     path basedir(im::test::basedir);
+    //     TemporaryDirectory td("test-byte-sink-iterators");
+    //     const pathvec_t pngs = basedir.list("*.png", false); /// full_paths=false
+    //
+    //     std::for_each(pngs.begin(), pngs.end(), [&td, &basedir](path const& p) {
+    //         path fullpath = basedir/p;
+    //         path newpath(td.dirpath/p);
+    //
+    //         bytevec_t data;
+    //         std::unique_ptr<FileSource> source = std::make_unique<FileSource>(fullpath);
+    //
+    //         {
+    //             std::unique_ptr<FileSink> sink = std::make_unique<FileSink>(newpath);
+    //
+    //             /// Copy source to data with a std::back_inserter(…):
+    //             std::copy(std::begin(source.get()),
+    //                       std::end(source.get()),
+    //                       std::back_inserter(data));
+    //
+    //             /// Copy data to sink with a std::back_inserter(…):
+    //             std::copy(std::begin(data),
+    //                       std::end(data),
+    //                       std::back_inserter(sink.get()));
+    //
+    //             /// ensure sink data has been written:
+    //             sink->flush();
+    //         }
+    //
+    //         {
+    //             std::unique_ptr<FileSource> readback = std::make_unique<FileSource>(newpath);
+    //             bytevec_t fulldata(readback->full_data());
+    //
+    //             CHECK(data.size() == fulldata.size());
+    //             CHECK(std::equal(data.begin(),     data.end(),
+    //                              fulldata.begin(), fulldata.end(),
+    //                              std::equal_to<byte>()));
+    //         }
+    //
+    //     });
+    // }
     
     TEST_CASE("[byte-sink-iterators] Test im::handle::sink iterators",
               "[byte-sink-iterators-test-handle-sink-iterators]")
