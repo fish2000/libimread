@@ -130,6 +130,12 @@ namespace im {
                 ,orig{ ptr->seek_absolute(0) }
                 {}
             
+            byte_sink::size_type write(const void* buffer, byte_sink::size_type size) {
+                byte_sink::size_type delta = sink->write(buffer, size);
+                orig += delta;
+                return delta;
+            }
+            
             ~SeekToFront() {
                 sink->seek_absolute(orig);
             }
@@ -142,13 +148,11 @@ namespace im {
     } /// namespace (anon.)
     
     void byte_sink::push_front(byte_sink::value_type const& value) {
-        SeekToFront(this);
-        write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
+        SeekToFront(this).write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
     }
     
     void byte_sink::push_front(byte_sink::value_type&& value) {
-        SeekToFront(this);
-        write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
+        SeekToFront(this).write(static_cast<const void*>(&value), sizeof(byte_sink::value_type));
     }
     
     void byte_sink::flush() {}
