@@ -26,7 +26,7 @@ namespace im {
         
         public:
             handle_source_sink();
-            handle_source_sink(FILE* fh);
+            handle_source_sink(FILE*);
             
             virtual ~handle_source_sink();
             
@@ -40,10 +40,10 @@ namespace im {
             
         public:
             /// im::byte_source and im::byte_sink methods
-            virtual std::size_t read(byte* buffer, std::size_t n) const override;
+            virtual std::size_t read(byte*, std::size_t) const override;
             virtual bytevec_t full_data() const override;
             virtual std::size_t size() const override;
-            virtual std::size_t write(const void* buffer, std::size_t n) override;
+            virtual std::size_t write(const void*, std::size_t) override;
             virtual std::size_t write(bytevec_t const&) override;
             virtual std::size_t write(bytevec_t&&) override;
             virtual detail::stat_t stat() const;
@@ -60,13 +60,13 @@ namespace im {
             
         public:
             virtual int fd() const noexcept;
-            virtual void fd(int fd) noexcept;
+            virtual void fd(int) noexcept;
             virtual FILE* fh() const noexcept;
-            virtual void fh(FILE* fh) noexcept;
+            virtual void fh(FILE*) noexcept;
             
         public:
             virtual bool exists() const noexcept;
-            virtual FILE* open(char* cpath, filesystem::mode fmode = filesystem::mode::READ);
+            virtual FILE* open(char*, filesystem::mode fmode = filesystem::mode::READ);
             virtual FILE* close();
             
         protected:
@@ -79,17 +79,17 @@ namespace im {
         
         public:
             filehandle_source_sink(filesystem::mode fmode = filesystem::mode::READ);
-            filehandle_source_sink(FILE* fh, filesystem::mode fmode = filesystem::mode::READ);
-            filehandle_source_sink(char* cpath, filesystem::mode fmode = filesystem::mode::READ);
-            filehandle_source_sink(char const* ccpath, filesystem::mode fmode = filesystem::mode::READ);
-            filehandle_source_sink(std::string& spath, filesystem::mode fmode = filesystem::mode::READ);
-            filehandle_source_sink(std::string const& cspath, filesystem::mode fmode = filesystem::mode::READ);
-            filehandle_source_sink(filesystem::path const& ppath, filesystem::mode fmode = filesystem::mode::READ);
+            filehandle_source_sink(FILE*, filesystem::mode fmode = filesystem::mode::READ);
+            filehandle_source_sink(char*, filesystem::mode fmode = filesystem::mode::READ);
+            filehandle_source_sink(char const*, filesystem::mode fmode = filesystem::mode::READ);
+            filehandle_source_sink(std::string&, filesystem::mode fmode = filesystem::mode::READ);
+            filehandle_source_sink(std::string const&, filesystem::mode fmode = filesystem::mode::READ);
+            filehandle_source_sink(filesystem::path const&, filesystem::mode fmode = filesystem::mode::READ);
             
         public:
             filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
-            filesystem::mode mode(filesystem::mode m);
+            filesystem::mode mode(filesystem::mode);
             filesystem::mode mode() const;
             
         protected:
@@ -106,12 +106,12 @@ namespace im {
             
             public:
                 source();
-                source(FILE* fh);
-                source(char* cpath);
-                source(char const* ccpath);
-                source(std::string& spath);
-                source(std::string const& cspath);
-                source(filesystem::path const& ppath);
+                source(FILE*);
+                source(char*);
+                source(char const*);
+                source(std::string&);
+                source(std::string const&);
+                source(filesystem::path const&);
         };
         
         class sink : public filehandle_source_sink {
@@ -121,12 +121,12 @@ namespace im {
             
             public:
                 sink();
-                sink(FILE* fh);
-                sink(char* cpath);
-                sink(char const* ccpath);
-                sink(std::string& spath);
-                sink(std::string const& cspath);
-                sink(filesystem::path const& ppath);
+                sink(FILE*);
+                sink(char*);
+                sink(char const*);
+                sink(std::string&);
+                sink(std::string const&);
+                sink(filesystem::path const&);
         };
         
     } /* namespace handle */

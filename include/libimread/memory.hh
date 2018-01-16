@@ -13,14 +13,14 @@ namespace im {
     
     class memory_source : public byte_source {
         public:
-            memory_source(const byte* c, const int len);
+            memory_source(const byte*, const int);
             virtual ~memory_source();
             
-            virtual std::size_t read(byte* buffer, std::size_t n) const;
+            virtual std::size_t read(byte*, std::size_t) const;
             virtual bool can_seek() const noexcept;
-            virtual std::size_t seek_absolute(std::size_t p);
-            virtual std::size_t seek_relative(int delta);
-            virtual std::size_t seek_end(int delta);
+            virtual std::size_t seek_absolute(std::size_t);
+            virtual std::size_t seek_relative(int);
+            virtual std::size_t seek_end(int);
             virtual bytevec_t full_data() const;
             virtual std::size_t size() const;
             
@@ -34,16 +34,16 @@ namespace im {
     
     class memory_sink : public byte_sink {
         public:
-            memory_sink(byte* c, std::size_t len);
-            memory_sink(std::size_t len);
+            memory_sink(byte*, std::size_t);
+            memory_sink(std::size_t);
             virtual ~memory_sink();
             
             virtual bool can_seek() const noexcept;
-            virtual std::size_t seek_absolute(std::size_t pos);
-            virtual std::size_t seek_relative(int delta);
-            virtual std::size_t seek_end(int delta);
+            virtual std::size_t seek_absolute(std::size_t);
+            virtual std::size_t seek_relative(int);
+            virtual std::size_t seek_end(int);
             
-            virtual std::size_t write(const void* buffer, std::size_t n);
+            virtual std::size_t write(const void*, std::size_t);
             virtual void flush();
             
             virtual bytevec_t contents();

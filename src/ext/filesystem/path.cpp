@@ -159,8 +159,10 @@ namespace filesystem {
         static constexpr int    copyfile_destination_flags      = O_RDWR   | O_CLOEXEC | O_CREAT;
         static constexpr mode_t copyfile_destination_mode       = 0644;
         
+        #if defined(__APPLE__) || defined(__FreeBSD__)
         static constexpr copyfile_flags_t copy_with_xattrs      = COPYFILE_SECURITY | COPYFILE_XATTR | COPYFILE_DATA;
         static constexpr copyfile_flags_t copy_without_xattrs   = COPYFILE_SECURITY | COPYFILE_DATA;
+        #endif
         
         ssize_t copyfile(char const* source, char const* destination, bool copy_attributes = true) {
             /// Copy a file from source to destination

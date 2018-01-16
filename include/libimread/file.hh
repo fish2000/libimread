@@ -1,4 +1,4 @@
-/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// Copyright 2012-2018 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #ifndef LIBIMREAD_FILE_HH_
@@ -34,11 +34,11 @@ namespace im {
             static constexpr int kWriteCreateMask   = 0644;
             
         protected:
-            static int open_read(char const* p);
-            static int open_write(char const* p, int mask = kWriteCreateMask);
-            static int fifo_open_read(char const* p);
-            static int fifo_open_write(char const* p);
-            static bool check_descriptor(int fd) noexcept;
+            static int open_read(char const*);
+            static int open_write(char const*, int mask = kWriteCreateMask);
+            static int fifo_open_read(char const*);
+            static int fifo_open_write(char const*);
+            static bool check_descriptor(int) noexcept;
         
         public:
             static std::size_t max_descriptor_count();
@@ -46,7 +46,7 @@ namespace im {
         
         public:
             fd_source_sink() noexcept = default;
-            fd_source_sink(int fd) noexcept;
+            fd_source_sink(int) noexcept;
             
             fd_source_sink(fd_source_sink const&);
             fd_source_sink(fd_source_sink&&) noexcept;
@@ -57,13 +57,13 @@ namespace im {
             /// im::seekable methods
             virtual bool can_seek() const noexcept override;
             virtual bool can_store() const noexcept override;
-            virtual std::size_t seek_absolute(std::size_t pos) override;
-            virtual std::size_t seek_relative(int delta) override;
-            virtual std::size_t seek_end(int delta) override;
+            virtual std::size_t seek_absolute(std::size_t) override;
+            virtual std::size_t seek_relative(int) override;
+            virtual std::size_t seek_end(int) override;
             
         public:
             /// im::byte_source and im::byte_sink methods
-            virtual std::size_t read(byte* buffer, std::size_t n) const override;
+            virtual std::size_t read(byte*, std::size_t) const override;
             virtual bytevec_t full_data() const override;
             virtual std::size_t size() const override;
             virtual std::size_t write(const void* buffer, std::size_t n) override;
@@ -72,6 +72,7 @@ namespace im {
             virtual detail::stat_t stat() const;
             virtual void flush() override;
             
+        public:
             virtual void* readmap(std::size_t pageoffset = 0) const override;
             
         public:
@@ -83,14 +84,14 @@ namespace im {
             
         public:
             virtual int fd() const noexcept;
-            virtual void fd(int fd) noexcept;
+            virtual void fd(int) noexcept;
             virtual filesystem::file fh() const noexcept;
-            virtual void fh(FILE* fh) noexcept;
+            virtual void fh(FILE*) noexcept;
             
         public:
             virtual bool exists() const noexcept;
             virtual bool is_open() const noexcept;
-            virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ);
+            virtual int open(std::string const&, filesystem::mode fmode = filesystem::mode::READ);
             virtual int close();
             
         protected:
@@ -102,21 +103,21 @@ namespace im {
         
         public:
             file_source_sink(filesystem::mode fmode = filesystem::mode::READ);
-            file_source_sink(char* cpath,
+            file_source_sink(char*,
                              filesystem::mode fmode = filesystem::mode::READ);
-            file_source_sink(char const* ccpath,
+            file_source_sink(char const*,
                              filesystem::mode fmode = filesystem::mode::READ);
-            file_source_sink(std::string& spath,
+            file_source_sink(std::string&,
                              filesystem::mode fmode = filesystem::mode::READ);
-            file_source_sink(std::string const& cspath,
+            file_source_sink(std::string const&,
                              filesystem::mode fmode = filesystem::mode::READ);
-            file_source_sink(filesystem::path const& ppath,
+            file_source_sink(filesystem::path const&,
                              filesystem::mode fmode = filesystem::mode::READ);
             
         public:
             filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
-            filesystem::mode mode(filesystem::mode m);
+            filesystem::mode mode(filesystem::mode);
             filesystem::mode mode() const;
         
         protected:
@@ -128,22 +129,22 @@ namespace im {
         
         public:
             fifo_source_sink(filesystem::mode fmode = filesystem::mode::READ);
-            fifo_source_sink(char* cpath,
+            fifo_source_sink(char*,
                              filesystem::mode fmode = filesystem::mode::READ);
-            fifo_source_sink(char const* ccpath,
+            fifo_source_sink(char const*,
                              filesystem::mode fmode = filesystem::mode::READ);
-            fifo_source_sink(std::string& spath,
+            fifo_source_sink(std::string&,
                              filesystem::mode fmode = filesystem::mode::READ);
-            fifo_source_sink(std::string const& cspath,
+            fifo_source_sink(std::string const&,
                              filesystem::mode fmode = filesystem::mode::READ);
-            fifo_source_sink(filesystem::path const& ppath,
+            fifo_source_sink(filesystem::path const&,
                              filesystem::mode fmode = filesystem::mode::READ);
             
         public:
             filesystem::path const& path() const;
             virtual bool exists() const noexcept override;
-            virtual int open(std::string const& spath, filesystem::mode fmode = filesystem::mode::READ) override;
-            filesystem::mode mode(filesystem::mode m);
+            virtual int open(std::string const&, filesystem::mode fmode = filesystem::mode::READ) override;
+            filesystem::mode mode(filesystem::mode);
             filesystem::mode mode() const;
         
         protected:
@@ -155,11 +156,11 @@ namespace im {
         
         public:
             FileSource();
-            FileSource(char* cpath);
-            FileSource(char const* ccpath);
-            FileSource(std::string& spath);
-            FileSource(std::string const& cspath);
-            FileSource(filesystem::path const& ppath);
+            FileSource(char*);
+            FileSource(char const*);
+            FileSource(std::string&);
+            FileSource(std::string const&);
+            FileSource(filesystem::path const&);
             
         public:
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FileSource);
@@ -169,11 +170,11 @@ namespace im {
         
         public:
             FileSink();
-            FileSink(char* cpath);
-            FileSink(char const* ccpath);
-            FileSink(std::string& spath);
-            FileSink(std::string const& cspath);
-            FileSink(filesystem::path const& ppath);
+            FileSink(char*);
+            FileSink(char const*);
+            FileSink(std::string&);
+            FileSink(std::string const&);
+            FileSink(filesystem::path const&);
             
         public:
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FileSink);
@@ -183,11 +184,11 @@ namespace im {
         
         public:
             FIFOSource();
-            FIFOSource(char* cpath);
-            FIFOSource(char const* ccpath);
-            FIFOSource(std::string& spath);
-            FIFOSource(std::string const& cspath);
-            FIFOSource(filesystem::path const& ppath);
+            FIFOSource(char*);
+            FIFOSource(char const*);
+            FIFOSource(std::string&);
+            FIFOSource(std::string const&);
+            FIFOSource(filesystem::path const&);
             
         public:
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSource);
@@ -197,11 +198,11 @@ namespace im {
         
         public:
             FIFOSink();
-            FIFOSink(char* cpath);
-            FIFOSink(char const* ccpath);
-            FIFOSink(std::string& spath);
-            FIFOSink(std::string const& cspath);
-            FIFOSink(filesystem::path const& ppath);
+            FIFOSink(char*);
+            FIFOSink(char const*);
+            FIFOSink(std::string&);
+            FIFOSink(std::string const&);
+            FIFOSink(filesystem::path const&);
             
         public:
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSink);

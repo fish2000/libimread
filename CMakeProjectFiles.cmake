@@ -126,6 +126,7 @@ set(hdrs
     ${hdrs_dir}/accessors.hh
     ${hdrs_dir}/ansicolor.hh
     ${hdrs_dir}/base.hh
+    ${hdrs_dir}/buffered_io.hh
     ${hdrs_dir}/color.hh
     ${hdrs_dir}/crop.hh
     ${hdrs_dir}/endian.hh
@@ -206,9 +207,10 @@ set(srcs
     # ${srcs_dir}/process/jitresize.cpp
     # ${srcs_dir}/process/neuquant.cpp
     
-    # ${srcs_dir}/base.cpp
-    # ${srcs_dir}/color.cpp
     ${srcs_dir}/ansicolor.cpp
+    # ${srcs_dir}/base.cpp
+    ${srcs_dir}/buffered_io.cpp
+    # ${srcs_dir}/color.cpp
     ${srcs_dir}/env.cpp
     ${srcs_dir}/errors.cpp
     ${srcs_dir}/file.cpp
