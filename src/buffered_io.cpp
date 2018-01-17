@@ -166,6 +166,10 @@ namespace im {
         vector_ptr->reserve(new_cap);
     }
     
+    void vector_source_sink::clear() noexcept {
+        vector_ptr->clear();
+    }
+    
     void vector_source_sink::push_back(byte const& value) {
         vector_ptr->reserve(vector_ptr->capacity() + 1);
         vector_ptr->emplace_back(value);

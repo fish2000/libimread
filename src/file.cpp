@@ -495,4 +495,60 @@ namespace im {
         :fifo_source_sink(ppath, filesystem::mode::WRITE)
         {}
     
+    BufferedFileSink::BufferedFileSink()
+        :BufferedFileSink::BufferedSink(new FileSink())
+        {}
+    
+    BufferedFileSink::BufferedFileSink(char* cpath)
+        :BufferedFileSink::BufferedSink(new FileSink(cpath))
+        {}
+    
+    BufferedFileSink::BufferedFileSink(char const* ccpath)
+        :BufferedFileSink::BufferedSink(new FileSink(ccpath))
+        {}
+    
+    BufferedFileSink::BufferedFileSink(std::string& spath)
+        :BufferedFileSink::BufferedSink(new FileSink(spath))
+        {}
+    
+    BufferedFileSink::BufferedFileSink(std::string const& cspath)
+        :BufferedFileSink::BufferedSink(new FileSink(cspath))
+        {}
+    
+    BufferedFileSink::BufferedFileSink(filesystem::path const& ppath)
+        :BufferedFileSink::BufferedSink(new FileSink(ppath))
+        {}
+    
+    BufferedFileSink::~BufferedFileSink() {
+        delete get_primary();
+    }
+    
+    BufferedFIFOSink::BufferedFIFOSink()
+        :BufferedFIFOSink::BufferedSink(new FIFOSink())
+        {}
+    
+    BufferedFIFOSink::BufferedFIFOSink(char* cpath)
+        :BufferedFIFOSink::BufferedSink(new FIFOSink(cpath))
+        {}
+    
+    BufferedFIFOSink::BufferedFIFOSink(char const* ccpath)
+        :BufferedFIFOSink::BufferedSink(new FIFOSink(ccpath))
+        {}
+    
+    BufferedFIFOSink::BufferedFIFOSink(std::string& spath)
+        :BufferedFIFOSink::BufferedSink(new FIFOSink(spath))
+        {}
+    
+    BufferedFIFOSink::BufferedFIFOSink(std::string const& cspath)
+        :BufferedFIFOSink::BufferedSink(new FIFOSink(cspath))
+        {}
+    
+    BufferedFIFOSink::BufferedFIFOSink(filesystem::path const& ppath)
+        :BufferedFIFOSink::BufferedSink(new FIFOSink(ppath))
+        {}
+    
+    BufferedFIFOSink::~BufferedFIFOSink() {
+        delete get_primary();
+    }
+    
 }

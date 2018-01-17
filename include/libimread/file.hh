@@ -15,6 +15,7 @@
 #include <libimread/ext/filesystem/opaques.h>
 #include <libimread/ext/filesystem/path.h>
 #include <libimread/seekable.hh>
+#include <libimread/buffered_io.hh>
 #include <libimread/store.hh>
 
 namespace im {
@@ -166,7 +167,7 @@ namespace im {
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FileSource);
     };
     
-    class FileSink final : public file_source_sink {
+    class FileSink : public file_source_sink {
         
         public:
             FileSink();
@@ -194,7 +195,7 @@ namespace im {
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSource);
     };
     
-    class FIFOSink final : public fifo_source_sink {
+    class FIFOSink : public fifo_source_sink {
         
         public:
             FIFOSink();
@@ -206,6 +207,45 @@ namespace im {
             
         public:
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSink);
+    };
+    
+    // using BufferedFileSink = buffered_sink<FileSink>;
+    // using BufferedFIFOSink = buffered_sink<FIFOSink>;
+    
+    class BufferedFileSink final : public buffered_sink<FileSink> {
+        
+        public:
+            using BufferedSink = buffered_sink<FileSink>;
+            using BufferedSink::get_primary;
+        
+        public:
+            BufferedFileSink();
+            BufferedFileSink(char*);
+            BufferedFileSink(char const*);
+            BufferedFileSink(std::string&);
+            BufferedFileSink(std::string const&);
+            BufferedFileSink(filesystem::path const&);
+        
+        public:
+            ~BufferedFileSink();
+    };
+    
+    class BufferedFIFOSink final : public buffered_sink<FIFOSink> {
+    
+        public:
+            using BufferedSink = buffered_sink<FIFOSink>;
+            using BufferedSink::get_primary;
+        
+        public:
+            BufferedFIFOSink();
+            BufferedFIFOSink(char*);
+            BufferedFIFOSink(char const*);
+            BufferedFIFOSink(std::string&);
+            BufferedFIFOSink(std::string const&);
+            BufferedFIFOSink(filesystem::path const&);
+        
+        public:
+            ~BufferedFIFOSink();
     };
     
 }
