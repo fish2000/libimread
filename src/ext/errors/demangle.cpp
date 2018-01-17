@@ -16,7 +16,7 @@ namespace terminator {
         /// define one singular, private, static std::mutex,
         /// to keep the demangler from reentering itself
         /// ... which wow that does sound really dirty, actually
-        static std::mutex mangle_barrier;
+        std::mutex mangle_barrier;
         
         /// define a corresponding private and static std::unique_ptr,
         /// using a delete-expression to reclaim the memory malloc()'ed by
@@ -35,10 +35,9 @@ namespace terminator {
         std::lock_guard<std::mutex> lock(mangle_barrier);
         int status = -4;
         demangled_name.reset(
-            abi::__cxa_demangle(symbol,
-                                demangled_name.get(),
-                                nullptr, &status));
-        return ((status == 0) ? demangled_name.get() : symbol);
+            abi::__cxa_demangle(symbol, nullptr,
+                                        nullptr, &status));
+        return status == 0 ? demangled_name.get() : symbol;
     }
 
 } /* namespace terminator */

@@ -1,4 +1,4 @@
-/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2014-2018 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
@@ -8,6 +8,8 @@
 /// set up the terminator
 #ifdef IM_TERMINATOR
 static bool did_setup_terminator = terminator::setup();
+#else
+static bool did_setup_terminator = false;
 #endif
 
 namespace im {
@@ -20,7 +22,7 @@ namespace im {
 #define DECLARE_IMREAD_ERROR_DEFAULT(TypeName, DefaultMsg) \
     constexpr char TypeName::default_message[static_strlen(ST(DefaultMsg))];
 #endif /// DECLARE_IMREAD_ERROR_DEFAULT
-
+    
     DECLARE_IMREAD_ERROR_DEFAULT(CannotReadError,          "Read Error");
     DECLARE_IMREAD_ERROR_DEFAULT(CannotWriteError,         "Write Error");
     DECLARE_IMREAD_ERROR_DEFAULT(MetadataReadError,        "Metadata Read Error");
@@ -52,5 +54,5 @@ namespace im {
     DECLARE_IMREAD_ERROR_DEFAULT(PPMIOError,               "Error in PPM binary I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(TIFFIOError,              "Error in TIFF/libtiff I/O");
     DECLARE_IMREAD_ERROR_DEFAULT(PVRTCIOError,             "Error in PVRTC/imagecompression I/O");
-
-}
+    
+} /// namespace im

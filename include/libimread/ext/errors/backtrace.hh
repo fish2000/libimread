@@ -7,7 +7,7 @@
 
 namespace terminator {
     
-    void backtrace(std::ostream& _out) noexcept;
+    void backtrace(std::ostream& ostream) noexcept;
     
 } /* namespace terminator */
 

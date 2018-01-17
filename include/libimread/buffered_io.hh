@@ -4,6 +4,7 @@
 #ifndef LIBIMREAD_BUFFERED_IO_HH_
 #define LIBIMREAD_BUFFERED_IO_HH_
 
+#include <iostream>
 #include <vector>
 #include <mutex>
 
@@ -13,6 +14,9 @@
 namespace im {
     
     class vector_source_sink : public byte_source, public byte_sink {
+        
+        protected:
+            using byte_sink::kBufferSize;
         
         public:
             using bytevec_t                 = std::vector<byte>;
@@ -120,7 +124,9 @@ namespace im {
                 {}
         
         public:
-            virtual ~modal_sink() {}
+            virtual ~modal_sink() {
+                std::cerr << "modal_sink destructor" << std::endl;
+            }
         
         public:
             /// im::seekable methods
@@ -197,33 +203,40 @@ namespace im {
             using typename modal_t::const_reverse_iterator;
         
         public:
-            explicit buffered_sink(sink_t* sink_ptr)
+            buffered_sink(sink_t* sink_ptr)
                 :modal_t(sink_ptr, new sink_buffer_t)
-                ,sink{ get_primary() }
-                ,sink_buffer{ get_alternate() }
+                ,sink{ modal_t::get_primary() }
+                ,sink_buffer{ modal_t::get_alternate() }
                 {
-                    enable_alternate();
+                    modal_t::enable_alternate();
                 }
             
         public:
-            virtual ~buffered_sink() {}
-            
-        public:
-            virtual void flush() override {
-                sink_buffer_t* vecbuf = dynamic_cast<sink_buffer_t*>(alternate);
-                sink_t* target = dynamic_cast<sink_t*>(primary);
-                std::size_t siz = vecbuf->size();
-                if (siz < 1) { return; }
-                __attribute__((unused))
-                std::size_t written = target->write((const void*)vecbuf->data(),
-                                                                 vecbuf->size());
-                // if (written != siz) {} /// RAISE?!?!
-                target->flush();
-                vecbuf->clear();
+            virtual ~buffered_sink() {
+                std::cerr << "buffered_sink destructor" << std::endl;
             }
             
         public:
-            void enable_buffering() const { enable_alternate(); }
+            virtual void flush() override {
+                // sink_buffer_t* vecbuf = dynamic_cast<sink_buffer_t*>(alternate);
+                // sink_t* target = dynamic_cast<sink_t*>(primary);
+                // sink_buffer_t* vecbuf = dynamic_cast<sink_buffer_t*>(sink_buffer.get());
+                // sink_t* target = dynamic_cast<sink_t*>(sink.get());
+                // sink_buffer_t* vecbuf = sink_buffer.get();
+                // sink_t* target = sink.get();
+                std::size_t siz = sink_buffer->size();
+                if (siz < 1) { return; }
+                // __attribute__((unused))
+                // std::size_t written = target->write((const void*)vecbuf->data(), siz);
+                // if (written != siz) {} /// RAISE?!?!
+                // sink->write((const void*)vecbuf->data(), siz);
+                sink->write(sink_buffer->full_data());
+                // sink->flush();
+                sink_buffer->clear();
+            }
+            
+        public:
+            void enable_buffering()  const { enable_alternate(); }
             void disable_buffering() const { enable_primary(); }
             bool buffering_enabled() const { return current == alternate; }
             

@@ -1,4 +1,4 @@
-/// Copyright 2012-2015 Alexander Bohn <fish2000@gmail.com>
+/// Copyright 2012-2018 Alexander Bohn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #include <libimread/libimread.hpp>
@@ -157,7 +157,7 @@ namespace im {
     
     void byte_sink::flush() {}
 
-} /* namespace im */
+} /// namespace im
 
 namespace std {
     
@@ -193,4 +193,4 @@ namespace std {
         return std::front_inserter(*sink);
     }
     
-} /* namespace std */
+} /// namespace std

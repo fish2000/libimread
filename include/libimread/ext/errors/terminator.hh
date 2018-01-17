@@ -1,4 +1,4 @@
-/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2014-2018 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 /// Adapted from http://stackoverflow.com/a/31633962/298171
 
@@ -36,7 +36,8 @@ namespace {
     
     __attribute__((noreturn))
     void backtrace_on_terminate() noexcept {
-        std::set_terminate(terminate_handler.release()); /// avoid infinite looping
+        // std::set_terminate(terminate_handler.release());
+        terminate_handler.release(); /// avoid infinite looping
         terminator::backtrace(std::clog);
         if (std::exception_ptr ep = std::current_exception()) {
             try {
@@ -57,9 +58,8 @@ namespace {
         }
         std::_Exit(EXIT_FAILURE);
     }
-
-}
-
+    
+} /// namespace (anon.)
 
 namespace terminator {
     
@@ -81,6 +81,6 @@ namespace terminator {
         return did_setup;
     }
     
-}
+} /// namespace terminator
 
 #endif /// LIBIMREAD_EXT_ERRORS_TERMINATOR_HH_

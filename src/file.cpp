@@ -1,4 +1,4 @@
-/// Copyright 2014 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2014-2018 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #include <unistd.h>
@@ -7,6 +7,7 @@
 #include <sys/resource.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <iostream>
 
 #include <libimread/libimread.hpp>
 #include <libimread/errors.hh>
@@ -520,7 +521,7 @@ namespace im {
         {}
     
     BufferedFileSink::~BufferedFileSink() {
-        delete get_primary();
+        std::cerr << "BufferedFileSink destructor" << std::endl;
     }
     
     BufferedFIFOSink::BufferedFIFOSink()
@@ -548,7 +549,27 @@ namespace im {
         {}
     
     BufferedFIFOSink::~BufferedFIFOSink() {
-        delete get_primary();
+        std::cerr << "BufferedFIFOSink destructor" << std::endl;
     }
     
-}
+} /// namespace im
+
+namespace std {
+    
+    std::back_insert_iterator<im::FileSink>             back_inserter(im::FileSink* sink) {
+        return std::back_inserter(*sink);
+    }
+    
+    std::back_insert_iterator<im::BufferedFileSink>     back_inserter(im::BufferedFileSink* sink) {
+        return std::back_inserter(*sink);
+    }
+    
+    std::front_insert_iterator<im::FileSink>            front_inserter(im::FileSink* sink) {
+        return std::front_inserter(*sink);
+    }
+    
+    std::front_insert_iterator<im::BufferedFileSink>    front_inserter(im::BufferedFileSink* sink) {
+        return std::front_inserter(*sink);
+    }
+    
+} /// namespace std

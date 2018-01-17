@@ -24,7 +24,6 @@ namespace {
     using im::bytevec_t;
     using im::FileSource;
     using im::FileSink;
-    // using im::BufferedFileSource; DOES NOT EXIST
     using im::BufferedFileSink;
     using HandleSource = im::handle::source;
     using HandleSink = im::handle::sink;
@@ -162,15 +161,15 @@ namespace {
                 sink->flush();
             }
             
-            {
-                std::unique_ptr<FileSource> readback = std::make_unique<FileSource>(newpath);
-                bytevec_t fulldata(readback->full_data());
-                
-                CHECK(data.size() == fulldata.size());
-                CHECK(std::equal(data.begin(),     data.end(),
-                                 fulldata.begin(), fulldata.end(),
-                                 std::equal_to<byte>()));
-            }
+            // {
+            //     std::unique_ptr<FileSource> readback = std::make_unique<FileSource>(newpath);
+            //     bytevec_t fulldata(readback->full_data());
+            //
+            //     CHECK(data.size() == fulldata.size());
+            //     CHECK(std::equal(data.begin(),     data.end(),
+            //                      fulldata.begin(), fulldata.end(),
+            //                      std::equal_to<byte>()));
+            // }
             
         });
     }

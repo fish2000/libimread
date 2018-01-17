@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <iterator>
 #include <functional>
 
 #include <libimread/libimread.hpp>
@@ -26,6 +27,9 @@ namespace im {
     }
     
     class fd_source_sink : public byte_source, public byte_sink, public store::xattrmap {
+        
+        public:
+            using typename byte_source::value_type;
         
         protected:
             static constexpr int kReadFlags         = O_RDWR | O_NONBLOCK | O_CLOEXEC;
@@ -167,7 +171,7 @@ namespace im {
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FileSource);
     };
     
-    class FileSink : public file_source_sink {
+    class FileSink final : public file_source_sink {
         
         public:
             FileSink();
@@ -195,7 +199,7 @@ namespace im {
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSource);
     };
     
-    class FIFOSink : public fifo_source_sink {
+    class FIFOSink final : public fifo_source_sink {
         
         public:
             FIFOSink();
@@ -209,14 +213,10 @@ namespace im {
             DECLARE_STRINGMAPPER_TEMPLATE_CONSTRUCTORS(FIFOSink);
     };
     
-    // using BufferedFileSink = buffered_sink<FileSink>;
-    // using BufferedFIFOSink = buffered_sink<FIFOSink>;
-    
     class BufferedFileSink final : public buffered_sink<FileSink> {
         
         public:
             using BufferedSink = buffered_sink<FileSink>;
-            using BufferedSink::get_primary;
         
         public:
             BufferedFileSink();
@@ -227,14 +227,13 @@ namespace im {
             BufferedFileSink(filesystem::path const&);
         
         public:
-            ~BufferedFileSink();
+            virtual ~BufferedFileSink();
     };
     
     class BufferedFIFOSink final : public buffered_sink<FIFOSink> {
     
         public:
             using BufferedSink = buffered_sink<FIFOSink>;
-            using BufferedSink::get_primary;
         
         public:
             BufferedFIFOSink();
@@ -245,9 +244,18 @@ namespace im {
             BufferedFIFOSink(filesystem::path const&);
         
         public:
-            ~BufferedFIFOSink();
+            virtual ~BufferedFIFOSink();
     };
     
-}
+} /// namespace im
+
+namespace std {
+    
+    std::back_insert_iterator<im::FileSink>             back_inserter(im::FileSink*);
+    std::back_insert_iterator<im::BufferedFileSink>     back_inserter(im::BufferedFileSink*);
+    std::front_insert_iterator<im::FileSink>            front_inserter(im::FileSink*);
+    std::front_insert_iterator<im::BufferedFileSink>    front_inserter(im::BufferedFileSink*);
+    
+} /// namespace std
 
 #endif /// LIBIMREAD_FILE_HH_
