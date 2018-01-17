@@ -23,6 +23,20 @@ namespace im {
         ,iterator{ vector_ptr->end() }
         {}
     
+    vector_source_sink::vector_source_sink(bytevec_t const& bytevec)
+        :vector_ptr{ new bytevec_t(bytevec) }
+        ,mutex_ptr{ new mutex_t }
+        ,iterator{ vector_ptr->end() }
+        ,deallocate{ true }
+        {}
+    
+    vector_source_sink::vector_source_sink(bytevec_t&& bytevec)
+        :vector_ptr{ new bytevec_t(std::move(bytevec)) }
+        ,mutex_ptr{ new mutex_t }
+        ,iterator{ vector_ptr->end() }
+        ,deallocate{ true }
+        {}
+    
     vector_source_sink::vector_source_sink(vector_source_sink const& other)
         :vector_ptr{ new bytevec_t(*other.vector_ptr) }
         ,mutex_ptr{ new mutex_t }
@@ -97,7 +111,7 @@ namespace im {
     }
     
     vector_source_sink::bytevec_t vector_source_sink::full_data() const {
-        return vector_source_sink::bytevec_t(*vector_ptr);
+        return bytevec_t(*vector_ptr);
     }
     
     std::size_t vector_source_sink::size() const {
@@ -154,25 +168,25 @@ namespace im {
     
     void vector_source_sink::push_back(byte const& value) {
         vector_ptr->reserve(vector_ptr->capacity() + 1);
-        vector_ptr->push_back(value);
+        vector_ptr->emplace_back(value);
         iterator = vector_ptr->end();
     }
     
     void vector_source_sink::push_back(byte&& value) {
         vector_ptr->reserve(vector_ptr->capacity() + 1);
-        vector_ptr->push_back(value);
+        vector_ptr->emplace_back(value);
         iterator = vector_ptr->end();
     }
     
     void vector_source_sink::push_front(byte const& value) {
         vector_ptr->reserve(vector_ptr->capacity() + 1);
-        vector_ptr->insert(vector_ptr->begin(), value);
+        vector_ptr->emplace(vector_ptr->begin(), value);
         iterator = vector_ptr->begin();
     }
     
     void vector_source_sink::push_front(byte&& value) {
         vector_ptr->reserve(vector_ptr->capacity() + 1);
-        vector_ptr->insert(vector_ptr->begin(), value);
+        vector_ptr->emplace(vector_ptr->begin(), value);
         iterator = vector_ptr->begin();
     }
     

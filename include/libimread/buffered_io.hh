@@ -15,26 +15,28 @@ namespace im {
     class vector_source_sink : public byte_source, public byte_sink {
         
         public:
-            using bytevec_t     = std::vector<byte>;
-            using iterator_t    = typename bytevec_t::iterator;
-            using mutex_t       = std::mutex;
+            using bytevec_t                 = std::vector<byte>;
+            using iterator_t                = typename bytevec_t::iterator;
+            using mutex_t                   = std::mutex;
         
         public:
-            using value_type = typename bytevec_t::value_type;
-            using difference_type = typename bytevec_t::difference_type;
-            using size_type = typename bytevec_t::size_type;
-            using reference_type = typename bytevec_t::reference;
-            using reference = typename bytevec_t::reference;
-            using const_reference = typename bytevec_t::const_reference;
-            using pointer = typename bytevec_t::pointer;
-            using iterator_type = typename bytevec_t::iterator;
-            using const_iterator = typename bytevec_t::const_iterator;
-            using reverse_iterator = typename bytevec_t::reverse_iterator;
-            using const_reverse_iterator = typename bytevec_t::const_reverse_iterator;
+            using value_type                = typename bytevec_t::value_type;
+            using difference_type           = typename bytevec_t::difference_type;
+            using size_type                 = typename bytevec_t::size_type;
+            using reference_type            = typename bytevec_t::reference;
+            using reference                 = typename bytevec_t::reference;
+            using const_reference           = typename bytevec_t::const_reference;
+            using pointer                   = typename bytevec_t::pointer;
+            using iterator_type             = typename bytevec_t::iterator;
+            using const_iterator            = typename bytevec_t::const_iterator;
+            using reverse_iterator          = typename bytevec_t::reverse_iterator;
+            using const_reverse_iterator    = typename bytevec_t::const_reverse_iterator;
         
         public:
             vector_source_sink() noexcept;
             explicit vector_source_sink(bytevec_t*);
+            explicit vector_source_sink(bytevec_t const&);
+            explicit vector_source_sink(bytevec_t&&);
         
         public:
             vector_source_sink(vector_source_sink const&);
