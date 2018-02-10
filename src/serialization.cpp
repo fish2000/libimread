@@ -210,7 +210,7 @@ namespace store {
         }
         
         store::stringmapper::formatter for_path(std::string const& pth) {
-            /// Return a formatter type (q.v the store::stringmapper:formatter enum)
+            /// Return a formatter type (q.v the store::stringmapper::formatter enum)
             /// appropriate for the file extension of a given filepath string:
             using filesystem::path;
             std::string ext = pystring::lower(path::extension(pth));
