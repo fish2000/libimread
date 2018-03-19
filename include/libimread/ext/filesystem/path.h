@@ -114,6 +114,7 @@ namespace filesystem {
             bool empty() const;
             detail::inode_t inode() const;
             size_type filesize() const;
+            size_type hardlinkcount() const;
             
             /// static forwarder for path::is_absolute<P>(p)
             template <typename P> inline
@@ -126,6 +127,10 @@ namespace filesystem {
             /// static forwarder for path::filesize<P>(p)
             template <typename P> inline
             static size_type filesize(P&& p) { return path(std::forward<P>(p)).filesize(); }
+            
+            /// static forwarder for path::filesize<P>(p)
+            template <typename P> inline
+            static size_type hardlinkcount(P&& p) { return path(std::forward<P>(p)).hardlinkcount(); }
             
             /// return a new and fully-absolute path wrapper,
             /// based on the path in question

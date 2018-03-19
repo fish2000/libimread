@@ -319,6 +319,12 @@ namespace filesystem {
         return sb.st_size * sizeof(byte);
     }
     
+    path::size_type path::hardlinkcount() const {
+        detail::stat_t sb;
+        if (::lstat(c_str(), &sb)) { return 0; }
+        return sb.st_nlink;
+    }
+    
     bool path::match(std::regex const& pattern, bool case_sensitive) const {
         return std::regex_match(str(), pattern);
     }
@@ -742,9 +748,10 @@ namespace filesystem {
     /// “true” iff, in the course of its call, a file is created at the path in question --
     /// a path at which, prior to said call, there wasn’t any kind of anything, filewise.
     bool path::touched() const {
-        bool preexisting = path::exists();
-        path::touch();
-        return (!preexisting) && path::exists();
+        std::string thispath = str();
+        bool preexisting = !bool(::access(thispath.c_str(), F_OK));
+        bool updated = path::touch(thispath);
+        return (!preexisting) && updated && !bool(::access(thispath.c_str(), F_OK));
     }
     
     path path::resolve() const {
