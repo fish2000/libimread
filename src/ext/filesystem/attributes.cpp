@@ -152,9 +152,10 @@ namespace filesystem {
                  std::string const& value,
                  attribute::flags options,
                  attribute::ns domain) {
+            if (value == detail::nullstring) { return del(pth, name_, options, domain); }
+            
             std::string name = detail::sysname(name_);
             if (name == detail::nullstring) { return false; }
-            if (value == detail::nullstring) { return del(pth, name_, options, domain); }
             
             int status = -1;
             
@@ -300,21 +301,22 @@ namespace filesystem {
             
             detail::stringvec_t out{};
             
-            #if defined(__FreeBSD__)
-                char* buffer_pos = attrbuffer.get();
-                char* cp = attrbuffer.get();
-                std::size_t len;
-                while (cp < buffer_pos + status + 1) {
-                    len = *cp;
-                    *cp = 0;
-                    cp += len + 1;
-                }
-                buffer_start = buffer_pos + 1;
-                /// don't forget, we allocated one more
-                *cp = 0;
-            #endif
-            
             if (status > 0) {
+                
+                #if defined(__FreeBSD__)
+                    char* buffer_pos = attrbuffer.get();
+                    char* cp = attrbuffer.get();
+                    std::size_t len;
+                    while (cp < buffer_pos + status + 1) {
+                        len = *cp;
+                        *cp = 0;
+                        cp += len + 1;
+                    }
+                    buffer_start = buffer_pos + 1;
+                    /// don't forget, we allocated one more
+                    *cp = 0;
+                #endif
+                
                 int pos = 0;
                 while (pos < status) {
                     std::string n = std::string(buffer_start + pos);
@@ -324,6 +326,7 @@ namespace filesystem {
                     }
                     pos += n.length() + 1;
                 }
+                
             }
             return out;
         }
@@ -377,24 +380,26 @@ namespace filesystem {
             if (!attrbuffer.get()) { return -1; }
             char* buffer_start = attrbuffer.get();
             
-            #if defined(__FreeBSD__)
-                char* buffer_pos = attrbuffer.get();
-                char* cp = attrbuffer.get();
-                std::size_t len;
-                while (cp < buffer_pos + status + 1) {
-                    len = *cp;
-                    *cp = 0;
-                    cp += len + 1;
-                }
-                buffer_start = buffer_pos + 1;
-                /// don't forget, we allocated one more
-                *cp = 0;
-            #endif
-            
             if (status > 0) {
+                
+                #if defined(__FreeBSD__)
+                    char* buffer_pos = attrbuffer.get();
+                    char* cp = attrbuffer.get();
+                    std::size_t len;
+                    while (cp < buffer_pos + status + 1) {
+                        len = *cp;
+                        *cp = 0;
+                        cp += len + 1;
+                    }
+                    buffer_start = buffer_pos + 1;
+                    /// don't forget, we allocated one more
+                    *cp = 0;
+                #endif
+                
                 std::string_view bufferview(attrbuffer.get(), status);
                 return std::count(std::begin(bufferview),
                                   std::end(bufferview), 0);
+                
             }
             return status;
         }
@@ -443,10 +448,10 @@ namespace filesystem {
                    attribute::flags options,
                    attribute::ns domain) {
             if (descriptor < 0) { return false; }
+            if (value == detail::nullstring) { return fddel(descriptor, name_, options, domain); }
             
             std::string name = detail::sysname(name_);
             if (name == detail::nullstring) { return false; }
-            if (value == detail::nullstring) { return fddel(descriptor, name_, options, domain); }
             
             int status = -1;
             
@@ -554,21 +559,22 @@ namespace filesystem {
             
             detail::stringvec_t out{};
             
-            #if defined(__FreeBSD__)
-                char* buffer_pos = attrbuffer.get();
-                char* cp = attrbuffer.get();
-                std::size_t len;
-                while (cp < buffer_pos + status + 1) {
-                    len = *cp;
-                    *cp = 0;
-                    cp += len + 1;
-                }
-                buffer_start = buffer_pos + 1;
-                /// don't forget, we allocated one more
-                *cp = 0;
-            #endif
-            
             if (status > 0) {
+                
+                #if defined(__FreeBSD__)
+                    char* buffer_pos = attrbuffer.get();
+                    char* cp = attrbuffer.get();
+                    std::size_t len;
+                    while (cp < buffer_pos + status + 1) {
+                        len = *cp;
+                        *cp = 0;
+                        cp += len + 1;
+                    }
+                    buffer_start = buffer_pos + 1;
+                    /// don't forget, we allocated one more
+                    *cp = 0;
+                #endif
+                
                 int pos = 0;
                 while (pos < status) {
                     std::string n = std::string(buffer_start + pos);
@@ -578,6 +584,7 @@ namespace filesystem {
                     }
                     pos += n.length() + 1;
                 }
+                
             }
             return out;
         }
@@ -614,24 +621,26 @@ namespace filesystem {
             if (!attrbuffer.get()) { return 0; }
             char* buffer_start = attrbuffer.get();
             
-            #if defined(__FreeBSD__)
-                char* buffer_pos = attrbuffer.get();
-                char* cp = attrbuffer.get();
-                std::size_t len;
-                while (cp < buffer_pos + status + 1) {
-                    len = *cp;
-                    *cp = 0;
-                    cp += len + 1;
-                }
-                buffer_start = buffer_pos + 1;
-                /// don't forget, we allocated one more
-                *cp = 0;
-            #endif
-            
             if (status > 0) {
+                
+                #if defined(__FreeBSD__)
+                    char* buffer_pos = attrbuffer.get();
+                    char* cp = attrbuffer.get();
+                    std::size_t len;
+                    while (cp < buffer_pos + status + 1) {
+                        len = *cp;
+                        *cp = 0;
+                        cp += len + 1;
+                    }
+                    buffer_start = buffer_pos + 1;
+                    /// don't forget, we allocated one more
+                    *cp = 0;
+                #endif
+                
                 std::string_view bufferview(attrbuffer.get(), status);
                 return std::count(std::begin(bufferview),
                                   std::end(bufferview), 0);
+                
             }
             return status;
         }
