@@ -100,9 +100,7 @@ namespace filesystem {
                     status = ::extattr_get_file(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
                 }
                 if (status < 0) { return detail::nullstring; }
-                
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 
                 if (bool(options & attribute::flags::nofollow)) {
                     status = ::extattr_get_link(pth.c_str(), EXTATTR_NAMESPACE_USER, name.c_str(), attrbuffer.get(), status);
@@ -117,9 +115,7 @@ namespace filesystem {
                     status = ::getxattr(pth.c_str(), name.c_str(), 0, 0);
                 }
                 if (status < 0) { return detail::nullstring; }
-                
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 
                 if (bool(options & attribute::flags::nofollow)) {
                     status = ::lgetxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status);
@@ -128,21 +124,11 @@ namespace filesystem {
                 }
             
             #elif defined(__APPLE__)
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::getxattr(pth.c_str(), name.c_str(), 0, 0, 0, XATTR_NOFOLLOW);
-                } else {
-                    status = ::getxattr(pth.c_str(), name.c_str(), 0, 0, 0, 0);
-                }
+                int attrflag = bool(options & attribute::flags::nofollow) ? XATTR_NOFOLLOW : 0;
+                status = ::getxattr(pth.c_str(), name.c_str(), 0, 0, 0, attrflag);
                 if (status < 0) { return detail::nullstring; }
-                
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
-                
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::getxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status, 0, XATTR_NOFOLLOW);
-                } else {
-                    status = ::getxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status, 0, 0);
-                }
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
+                status = ::getxattr(pth.c_str(), name.c_str(), attrbuffer.get(), status, 0, attrflag);
             
             #endif
             
@@ -214,11 +200,8 @@ namespace filesystem {
                 } else if (bool(options & attribute::flags::replace)) {
                     callopts = XATTR_REPLACE;
                 }
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::setxattr(pth.c_str(), name.c_str(), value.c_str(), value.length(), 0, XATTR_NOFOLLOW | callopts);
-                } else {
-                    status = ::setxattr(pth.c_str(), name.c_str(), value.c_str(), value.length(), 0, callopts);
-                }
+                int attrflag = bool(options & attribute::flags::nofollow) ? (XATTR_NOFOLLOW | callopts) : callopts;
+                status = ::setxattr(pth.c_str(), name.c_str(), value.c_str(), value.length(), 0, attrflag);
             
             #endif
             
@@ -249,11 +232,8 @@ namespace filesystem {
                 }
             
             #elif defined(__APPLE__)
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::removexattr(pth.c_str(), name.c_str(), XATTR_NOFOLLOW);
-                } else {
-                    status = ::removexattr(pth.c_str(), name.c_str(), 0);
-                }
+                int attrflag = bool(options & attribute::flags::nofollow) ? XATTR_NOFOLLOW : 0;
+                status = ::removexattr(pth.c_str(), name.c_str(), attrflag);
             
             #endif
             
@@ -273,9 +253,7 @@ namespace filesystem {
                     status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
                 }
                 if (status < 0) { return detail::stringvec_t{}; }
-                
-                /// NEEDED on FreeBSD (no ending null):
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// NEEDED on FreeBSD (no ending null)
                 attrbuffer.get()[status] = 0;
                 
                 if (bool(options & attribute::flags::nofollow)) {
@@ -291,9 +269,7 @@ namespace filesystem {
                     status = ::listxattr(pth.c_str(), 0, 0);
                 }
                 if (status < 0) { return detail::stringvec_t{}; }
-                
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 
                 if (bool(options & attribute::flags::nofollow)) {
                     status = ::llistxattr(pth.c_str(), attrbuffer.get(), status);
@@ -302,21 +278,11 @@ namespace filesystem {
                 }
             
             #elif defined(__APPLE__)
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::listxattr(pth.c_str(), 0, 0, XATTR_NOFOLLOW);
-                } else {
-                    status = ::listxattr(pth.c_str(), 0, 0, 0);
-                }
+                int attrflag = bool(options & attribute::flags::nofollow) ? XATTR_NOFOLLOW : 0;
+                status = ::listxattr(pth.c_str(), 0, 0, attrflag);
                 if (status < 0) { return detail::stringvec_t{}; }
-                
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
-                
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::listxattr(pth.c_str(), attrbuffer.get(), status, XATTR_NOFOLLOW);
-                } else {
-                    status = ::listxattr(pth.c_str(), attrbuffer.get(), status, 0);
-                }
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
+                status = ::listxattr(pth.c_str(), attrbuffer.get(), status, attrflag);
                 
             #endif
             
@@ -366,9 +332,7 @@ namespace filesystem {
                     status = ::extattr_list_file(pth.c_str(), EXTATTR_NAMESPACE_USER, 0, 0);
                 }
                 if (status < 0) { return -1; }
-                
-                /// NEEDED on FreeBSD (no ending null):
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// NEEDED on FreeBSD (no ending null)
                 attrbuffer.get()[status] = 0;
                 
                 if (bool(options & attribute::flags::nofollow)) {
@@ -384,9 +348,7 @@ namespace filesystem {
                     status = ::listxattr(pth.c_str(), 0, 0);
                 }
                 if (status < 0) { return -1; }
-                
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 
                 if (bool(options & attribute::flags::nofollow)) {
                     status = ::llistxattr(pth.c_str(), attrbuffer.get(), status);
@@ -395,21 +357,11 @@ namespace filesystem {
                 }
             
             #elif defined(__APPLE__)
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::listxattr(pth.c_str(), 0, 0, XATTR_NOFOLLOW);
-                } else {
-                    status = ::listxattr(pth.c_str(), 0, 0, 0);
-                }
+                int attrflag = bool(options & attribute::flags::nofollow) ? XATTR_NOFOLLOW : 0;
+                status = ::listxattr(pth.c_str(), 0, 0, attrflag);
                 if (status < 0) { return -1; }
-                
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
-                
-                if (bool(options & attribute::flags::nofollow)) {
-                    status = ::listxattr(pth.c_str(), attrbuffer.get(), status, XATTR_NOFOLLOW);
-                } else {
-                    status = ::listxattr(pth.c_str(), attrbuffer.get(), status, 0);
-                }
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
+                status = ::listxattr(pth.c_str(), attrbuffer.get(), status, attrflag);
                 
             #endif
             
@@ -442,6 +394,8 @@ namespace filesystem {
                           std::string const& name_,
                           attribute::flags options,
                           attribute::ns domain) {
+            if (descriptor < 0) { return detail::nullstring; }
+            
             std::string name = detail::sysname(name_);
             if (name == detail::nullstring) { return detail::nullstring; }
             
@@ -449,31 +403,22 @@ namespace filesystem {
             detail::attrbuf_t attrbuffer;
             
             #if defined(__FreeBSD__)
-                if (descriptor > 0) {
-                    status = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
-                    if (status < 0) { return detail::nullstring; }
-                    /// Don't want to deal with possible status = 0:
-                    attrbuffer = detail::attrbuf(status + 1);
-                    status = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), attrbuffer.get(), status);
-                }
+                status = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
+                if (status < 0) { return detail::nullstring; }
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
+                status = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), attrbuffer.get(), status);
             
             #elif defined(PXALINUX)
-                if (descriptor > 0) {
-                    status = ::fgetxattr(descriptor, name.c_str(), 0, 0);
-                    if (status < 0) { return detail::nullstring; }
-                    /// Don't want to deal with possible status = 0:
-                    attrbuffer = detail::attrbuf(status + 1);
-                    status = ::fgetxattr(descriptor, name.c_str(), attrbuffer.get(), status);
-                }
+                status = ::fgetxattr(descriptor, name.c_str(), 0, 0);
+                if (status < 0) { return detail::nullstring; }
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
+                status = ::fgetxattr(descriptor, name.c_str(), attrbuffer.get(), status);
             
             #elif defined(__APPLE__)
-                if (descriptor > 0) {
-                    status = ::fgetxattr(descriptor, name.c_str(), 0, 0, 0, 0);
-                    if (status < 0) { return detail::nullstring; }
-                    /// Don't want to deal with possible status = 0:
-                    attrbuffer = detail::attrbuf(status + 1);
-                    status = ::fgetxattr(descriptor, name.c_str(), attrbuffer.get(), status, 0, 0);
-                }
+                status = ::fgetxattr(descriptor, name.c_str(), 0, 0, 0, 0);
+                if (status < 0) { return detail::nullstring; }
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
+                status = ::fgetxattr(descriptor, name.c_str(), attrbuffer.get(), status, 0, 0);
             
             #endif
             
@@ -488,6 +433,8 @@ namespace filesystem {
                    std::string const& value,
                    attribute::flags options,
                    attribute::ns domain) {
+            if (descriptor < 0) { return false; }
+            
             std::string name = detail::sysname(name_);
             if (name == detail::nullstring) { return false; }
             if (value == detail::nullstring) { return fddel(descriptor, name_, options, domain); }
@@ -498,10 +445,7 @@ namespace filesystem {
                 if (bool(options & (attribute::flags::create | attribute::flags::replace))) {
                     /// Need to test for existence:
                     bool exists = false;
-                    ssize_t error_value;
-                    if (descriptor > 0) {
-                        error_value = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
-                    }
+                    ssize_t error_value = ::extattr_get_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), 0, 0);
                     if (error_value >= 0) {
                         exists = true;
                     }
@@ -517,9 +461,7 @@ namespace filesystem {
                         return false;
                     }
                 }
-                if (descriptor > 0) {
-                    status = ::extattr_set_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), value.c_str(), value.length());
-                }
+                status = ::extattr_set_fd(descriptor, EXTATTR_NAMESPACE_USER, name.c_str(), value.c_str(), value.length());
             
             #elif defined(PXALINUX)
                 int callopts = 0;
@@ -528,9 +470,7 @@ namespace filesystem {
                 } else if (bool(options & attribute::flags::replace)) {
                     callopts = XATTR_REPLACE;
                 }
-                if (descriptor > 0) {
-                    status = ::fsetxattr(descriptor, name.c_str(), value.c_str(), value.length(), callopts);
-                }
+                status = ::fsetxattr(descriptor, name.c_str(), value.c_str(), value.length(), callopts);
             
             #elif defined(__APPLE__)
                 int callopts = 0;
@@ -539,9 +479,7 @@ namespace filesystem {
                 } else if (bool(options & attribute::flags::replace)) {
                     callopts = XATTR_REPLACE;
                 }
-                if (descriptor > 0) {
-                    status = ::fsetxattr(descriptor, name.c_str(), value.c_str(), value.length(), 0, callopts);
-                }
+                status = ::fsetxattr(descriptor, name.c_str(), value.c_str(), value.length(), 0, callopts);
             
             #endif
             
@@ -552,9 +490,11 @@ namespace filesystem {
                    std::string const& name_,
                    attribute::flags options,
                    attribute::ns domain) {
+            if (descriptor < 0) { return false; }
+            
             std::string name = detail::sysname(name_);
             if (name == detail::nullstring) { return false; }
-            if (descriptor < 0) { return false; }
+            
             int status = -1;
             
             #if defined(__FreeBSD__)
@@ -574,30 +514,28 @@ namespace filesystem {
         detail::stringvec_t fdlist(int descriptor,
                                    attribute::flags options,
                                    attribute::ns domain) {
+            if (descriptor < 0) { return detail::stringvec_t{}; }
+            
             int status = -1;
             detail::attrbuf_t attrbuffer;
-            if (descriptor < 0) { return detail::stringvec_t{}; }
             
             #if defined(__FreeBSD__)
                 status = ::extattr_list_fd(descriptor, EXTATTR_NAMESPACE_USER, 0, 0);
                 if (status < 0) { return detail::stringvec_t{}; }
-                /// NEEDED on FreeBSD (no ending null):
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// NEEDED on FreeBSD (no ending null)
                 attrbuffer.get()[status] = 0;
                 status = ::extattr_list_fd(descriptor, EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
             
             #elif defined(PXALINUX)
                 status = ::flistxattr(descriptor, 0, 0);
                 if (status < 0) { return detail::stringvec_t{}; }
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 status = ::flistxattr(descriptor, attrbuffer.get(), status);
             
             #elif defined(__APPLE__)
                 status = ::flistxattr(descriptor, 0, 0, 0);
                 if (status < 0) { return detail::stringvec_t{}; }
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 status = ::flistxattr(descriptor, attrbuffer.get(), status, 0);
                 
             #endif
@@ -638,30 +576,28 @@ namespace filesystem {
         int fdcount(int descriptor,
                     attribute::flags options,
                     attribute::ns domain) {
+            if (descriptor < 0) { return 0; }
+            
             int status = -1;
             detail::attrbuf_t attrbuffer;
-            if (descriptor < 0) { return 0; }
             
             #if defined(__FreeBSD__)
                 status = ::extattr_list_fd(descriptor, EXTATTR_NAMESPACE_USER, 0, 0);
                 if (status < 0) { return detail::stringvec_t{}; }
-                /// NEEDED on FreeBSD (no ending null):
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// NEEDED on FreeBSD (no ending null)
                 attrbuffer.get()[status] = 0;
                 status = ::extattr_list_fd(descriptor, EXTATTR_NAMESPACE_USER, attrbuffer.get(), status);
             
             #elif defined(PXALINUX)
                 status = ::flistxattr(descriptor, 0, 0);
                 if (status < 0) { return detail::stringvec_t{}; }
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 status = ::flistxattr(descriptor, attrbuffer.get(), status);
             
             #elif defined(__APPLE__)
                 status = ::flistxattr(descriptor, 0, 0, 0);
                 if (status < 0) { return 0; }
-                /// Don't want to deal with possible status = 0:
-                attrbuffer = detail::attrbuf(status + 1);
+                attrbuffer = detail::attrbuf(status + 1); /// Don't want to deal with possible status = 0
                 status = ::flistxattr(descriptor, attrbuffer.get(), status, 0);
                 
             #endif
@@ -782,7 +718,7 @@ namespace filesystem {
         std::string accessor_t::get(attribute::flags o,
                                     attribute::ns d) const {
             if (m_descriptor > 0) {
-                return attribute::fdget(descriptor(), name(),
+                return attribute::fdget(m_descriptor, name(),
                                         options(), domain());
             }
             return attribute::get(pathstring(), name(),
@@ -793,7 +729,7 @@ namespace filesystem {
                              attribute::flags o,
                              attribute::ns d) const {
             if (m_descriptor > 0) {
-                 return attribute::fdset(descriptor(), name(), value,
+                 return attribute::fdset(m_descriptor, name(), value,
                                          options(), domain());
             }
             return attribute::set(pathstring(), name(), value,
@@ -803,7 +739,7 @@ namespace filesystem {
         bool accessor_t::del(attribute::flags o,
                              attribute::ns d) const {
             if (m_descriptor > 0) {
-                return attribute::fddel(descriptor(), name(),
+                return attribute::fddel(m_descriptor, name(),
                                         options(), domain());
             }
             return attribute::del(pathstring(), name(),
