@@ -55,12 +55,20 @@ namespace filesystem {
     dotpath::dotpath(path const& p)
         :m_absolute(p.is_absolute())
         ,m_path(p.components())
-        {}
+        {
+            m_path.back() = std::regex_replace(m_path.back(),
+                                               std::regex("\\" + std::string(1, path::extsep)),
+                                               detail::extsepstring);
+        }
     
     dotpath::dotpath(path&& p) noexcept
         :m_absolute(p.is_absolute())
         ,m_path(p.components())
-        {}
+        {
+            m_path.back() = std::regex_replace(m_path.back(),
+                                               std::regex("\\" + std::string(1, path::extsep)),
+                                               detail::extsepstring);
+        }
     
     dotpath::dotpath(char* st)              { set(st); }
     dotpath::dotpath(char const* st)        { set(st); }
