@@ -164,6 +164,9 @@ namespace filesystem {
             
             #endif
             
+            if (status <= 0) {
+                return detail::nullstring;
+            }
             if (attrbuffer.get()) {
                 return std::string(attrbuffer.get(), status);
             }
@@ -459,6 +462,9 @@ namespace filesystem {
             
             #endif
             
+            if (status <= 0) {
+                return detail::nullstring;
+            }
             if (attrbuffer.get()) {
                 return std::string(attrbuffer.get(), status);
             }
