@@ -49,8 +49,8 @@ namespace filesystem {
             dotpath(dotpath const&);                            /// Copy constructor
             dotpath(dotpath&&) noexcept;                        /// MOVE CONSTRUCTA!!
             
-            dotpath(path const&);
-            dotpath(path&&) noexcept;
+            explicit dotpath(path const&);                      /// Convert from path const& (reference)
+            explicit dotpath(path&&) noexcept;                  /// Convert from path&& (temporary)
             
             dotpath(char*);                                     /// C-string constructors
             dotpath(char const*);
