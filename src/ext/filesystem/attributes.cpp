@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <cstdlib>
 #include <algorithm>
+#include <experimental/string_view>
 
 #if defined(__FreeBSD__)
     #include <sys/extattr.h>
@@ -391,9 +392,9 @@ namespace filesystem {
             #endif
             
             if (status > 0) {
-                std::string stringbuffer(attrbuffer.get(), status);
-                return std::count(std::begin(stringbuffer),
-                                  std::end(stringbuffer), 0);
+                std::string_view bufferview(attrbuffer.get(), status);
+                return std::count(std::begin(bufferview),
+                                  std::end(bufferview), 0);
             }
             return status;
         }
@@ -628,9 +629,9 @@ namespace filesystem {
             #endif
             
             if (status > 0) {
-                std::string stringbuffer(attrbuffer.get(), status);
-                return std::count(std::begin(stringbuffer),
-                                  std::end(stringbuffer), 0);
+                std::string_view bufferview(attrbuffer.get(), status);
+                return std::count(std::begin(bufferview),
+                                  std::end(bufferview), 0);
             }
             return status;
         }
