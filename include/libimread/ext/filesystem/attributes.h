@@ -12,6 +12,8 @@
 
 #include <libimread/libimread.hpp>
 
+/// Determine if attribute access API is LINUX-like:
+
 #if defined(__gnu_linux__)
     #define PXALINUX 1
 
@@ -23,7 +25,20 @@
 
 #endif /// define PXALINUX
 
+/// LINUX-style attribute access mandates a namespace-esque prefix:
+
+#if defined(PXALINUX) || defined(COMPAT1)
+    #define USER_STR "user."
+
+#else
+    #define USER_STR ""
+
+#endif /// defined(PXALINUX) || defined(COMPAT1)
+
+/// shortcut macro to get the zero-value for a given enum class:
+
 #define ENUMBASE(__enumclass__) (static_cast<__enumclass__>(0))
+
 
 namespace filesystem {
     
@@ -39,11 +54,7 @@ namespace filesystem {
             using stringvec_t = std::vector<std::string>;
             using attrbuf_t = std::unique_ptr<char[]>;
             
-            #if defined(PXALINUX) || defined(COMPAT1)
-            static const std::string userstring("user.");
-            #else
-            static const std::string userstring("");
-            #endif
+            static const std::string userstring{ USER_STR };
             static const std::string nullstring{ NULL_STR };
             
             std::string sysname(std::string const&, attribute::ns domain = ENUMBASE(attribute::ns));
@@ -171,6 +182,7 @@ namespace filesystem {
     
 } /// namespace filesystem
 
+#undef USER_STR
 #undef ENUMBASE
 
 #endif /// LIBIMREAD_EXT_FILESYSTEM_ATTRIBUTES_H_
