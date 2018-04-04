@@ -1,4 +1,4 @@
-/// Copyright 2014-2017 Alexander Böhn <fish2000@gmail.com>
+/// Copyright 2014-2018 Alexander Böhn <fish2000@gmail.com>
 /// License: MIT (see COPYING.MIT file)
 
 #include <sys/stat.h>
