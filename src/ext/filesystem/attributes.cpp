@@ -66,19 +66,27 @@ namespace filesystem {
             }
             
             std::string sysname(std::string const& pname, attribute::ns domain) {
-                if (domain != attribute::ns::user) {
-                    errno = EINVAL;
-                    return detail::nullstring;
-                }
-                return std::string(detail::userstring + pname);
+                #if defined(PXALINUX) || defined(COMPAT1)
+                    if (domain != attribute::ns::user) {
+                        errno = EINVAL;
+                        return detail::nullstring;
+                    }
+                    return std::string(detail::userstring + pname);
+                #else
+                    return pname;
+                #endif
             }
             
             std::string pxaname(std::string const& sname, attribute::ns domain) {
-                if (!userstring.empty() && sname.find(userstring) != 0) {
-                    errno = EINVAL;
-                    return detail::nullstring;
-                }
-                return std::string(sname.substr(userstring.length()));
+                #if defined(PXALINUX) || defined(COMPAT1)
+                    if (!userstring.empty() && sname.find(userstring) != 0) {
+                        errno = EINVAL;
+                        return detail::nullstring;
+                    }
+                    return std::string(sname.substr(userstring.length()));
+                #else
+                    return sname;
+                #endif
             }
             
         } /// namespace detail
