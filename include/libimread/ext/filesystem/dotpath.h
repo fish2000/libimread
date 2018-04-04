@@ -15,6 +15,7 @@
 namespace filesystem {
     
     /// forward declaration for these next few prototypes/templates
+    class path;
     class dotpath;
     
     namespace detail {
@@ -47,6 +48,9 @@ namespace filesystem {
             
             dotpath(dotpath const&);                            /// Copy constructor
             dotpath(dotpath&&) noexcept;                        /// MOVE CONSTRUCTA!!
+            
+            dotpath(path const&);
+            dotpath(path&&) noexcept;
             
             dotpath(char*);                                     /// C-string constructors
             dotpath(char const*);

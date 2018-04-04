@@ -13,6 +13,7 @@
 
 #include <libimread/libimread.hpp>
 #include <libimread/ext/filesystem/dotpath.h>
+#include <libimread/ext/filesystem/path.h>
 #include <libimread/ext/pystring.hh>
 #include <libimread/errors.hh>
 #include <libimread/rehash.hh>
@@ -49,6 +50,16 @@ namespace filesystem {
     dotpath::dotpath(dotpath&& dp) noexcept
         :m_absolute(dp.m_absolute)
         ,m_path(std::move(dp.m_path))
+        {}
+    
+    dotpath::dotpath(path const& p)
+        :m_absolute(p.is_absolute())
+        ,m_path(p.components())
+        {}
+    
+    dotpath::dotpath(path&& p) noexcept
+        :m_absolute(p.is_absolute())
+        ,m_path(p.components())
         {}
     
     dotpath::dotpath(char* st)              { set(st); }
