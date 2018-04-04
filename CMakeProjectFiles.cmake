@@ -74,6 +74,7 @@ set(hdrs
     ${hdrs_dir}/ext/errors/terminator.hh
     ${hdrs_dir}/ext/filesystem/attributes.h
     ${hdrs_dir}/ext/filesystem/directory.h
+    ${hdrs_dir}/ext/filesystem/dotpath.h
     ${hdrs_dir}/ext/filesystem/execute.h
     ${hdrs_dir}/ext/filesystem/mode.h
     ${hdrs_dir}/ext/filesystem/nowait.h
@@ -168,6 +169,7 @@ set(srcs
     ${srcs_dir}/ext/errors/backtrace.cpp
     ${srcs_dir}/ext/errors/demangle.cpp
     ${srcs_dir}/ext/filesystem/attributes.cpp
+    ${srcs_dir}/ext/filesystem/dotpath.cpp
     ${srcs_dir}/ext/filesystem/execute.cpp
     ${srcs_dir}/ext/filesystem/nowait.cpp
     ${srcs_dir}/ext/filesystem/opaques.cpp
