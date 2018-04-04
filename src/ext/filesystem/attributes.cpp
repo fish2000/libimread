@@ -11,7 +11,6 @@
 #include <sys/types.h>
 #include <cstdlib>
 #include <algorithm>
-#include <experimental/string_view>
 
 #if defined(__FreeBSD__)
     #include <sys/extattr.h>
@@ -78,6 +77,18 @@ namespace filesystem {
                 #endif
             }
             
+            std::string sysname(std::string_view pview, attribute::ns domain) {
+                #if defined(PXALINUX) || defined(COMPAT1)
+                    if (domain != attribute::ns::user) {
+                        errno = EINVAL;
+                        return detail::nullstring;
+                    }
+                    return std::string(detail::userstring + pview);
+                #else
+                    return std::string(pview.data(), pview.size());
+                #endif
+            }
+            
             std::string pxaname(std::string const& sname, attribute::ns domain) {
                 #if defined(PXALINUX) || defined(COMPAT1)
                     if (!userstring.empty() && sname.find(userstring) != 0) {
@@ -87,6 +98,18 @@ namespace filesystem {
                     return std::string(sname.substr(userstring.length()));
                 #else
                     return sname;
+                #endif
+            }
+            
+            std::string pxaname(std::string_view sview, attribute::ns domain) {
+                #if defined(PXALINUX) || defined(COMPAT1)
+                    if (!userstring.empty() && sview.find(userstring) != 0) {
+                        errno = EINVAL;
+                        return detail::nullstring;
+                    }
+                    return std::string(sview.substr(userstring.length()));
+                #else
+                    return std::string(sview.data(), sview.size());
                 #endif
             }
             
@@ -319,7 +342,7 @@ namespace filesystem {
                 
                 int pos = 0;
                 while (pos < status) {
-                    std::string n = std::string(buffer_start + pos);
+                    std::string_view n(buffer_start + pos);
                     std::string pxn = detail::pxaname(n);
                     if (pxn != detail::nullstring) {
                         out.push_back(pxn);
@@ -396,9 +419,9 @@ namespace filesystem {
                     *cp = 0;
                 #endif
                 
-                std::string_view bufferview(attrbuffer.get(), status);
-                return std::count(std::begin(bufferview),
-                                  std::end(bufferview), 0);
+                std::string_view buffer_view(buffer_start, status);
+                return std::count(std::begin(buffer_view),
+                                  std::end(buffer_view), 0);
                 
             }
             return status;
@@ -577,7 +600,7 @@ namespace filesystem {
                 
                 int pos = 0;
                 while (pos < status) {
-                    std::string n = std::string(buffer_start + pos);
+                    std::string_view n(buffer_start + pos);
                     std::string pxn = detail::pxaname(n);
                     if (pxn != detail::nullstring) {
                         out.push_back(pxn);
@@ -637,9 +660,9 @@ namespace filesystem {
                     *cp = 0;
                 #endif
                 
-                std::string_view bufferview(attrbuffer.get(), status);
-                return std::count(std::begin(bufferview),
-                                  std::end(bufferview), 0);
+                std::string_view buffer_view(buffer_start, status);
+                return std::count(std::begin(buffer_view),
+                                  std::end(buffer_view), 0);
                 
             }
             return status;

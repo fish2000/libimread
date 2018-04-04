@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <string>
+#include <experimental/string_view>
 
 #include <libimread/libimread.hpp>
 
@@ -46,7 +47,9 @@ namespace filesystem {
             static const std::string nullstring{ NULL_STR };
             
             std::string sysname(std::string const&, attribute::ns domain = ENUMBASE(attribute::ns));
+            std::string sysname(std::string_view,   attribute::ns domain = ENUMBASE(attribute::ns));
             std::string pxaname(std::string const&, attribute::ns domain = ENUMBASE(attribute::ns));
+            std::string pxaname(std::string_view,   attribute::ns domain = ENUMBASE(attribute::ns));
             
         }
         
