@@ -254,13 +254,18 @@ namespace filesystem {
         return *this;
     }
     
-    dotpath dotpath::operator+(dotpath const& other) const     { return append(other.str()); }
-    dotpath dotpath::operator+(char const* other) const        { return append(other); }
-    dotpath dotpath::operator+(std::string const& other) const { return append(other); }
+    std::string&       dotpath::operator[](size_type idx)       { return m_path[idx]; }
+    std::string const& dotpath::operator[](size_type idx) const { return m_path[idx]; }
+    std::string&               dotpath::at(size_type idx)       { return m_path.at(idx); }
+    std::string const&         dotpath::at(size_type idx) const { return m_path.at(idx); }
     
-    dotpath& dotpath::operator+=(dotpath const& other)     { return extend(other.str()); }
-    dotpath& dotpath::operator+=(char const* other)        { return extend(other); }
-    dotpath& dotpath::operator+=(std::string const& other) { return extend(other); }
+    dotpath dotpath::operator+(dotpath const& other) const      { return append(other.str()); }
+    dotpath dotpath::operator+(char const* other) const         { return append(other); }
+    dotpath dotpath::operator+(std::string const& other) const  { return append(other); }
+    
+    dotpath& dotpath::operator+=(dotpath const& other)          { return extend(other.str()); }
+    dotpath& dotpath::operator+=(char const* other)             { return extend(other); }
+    dotpath& dotpath::operator+=(std::string const& other)      { return extend(other); }
     
     std::string dotpath::str() const {
         return std::accumulate(m_path.begin(),

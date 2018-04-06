@@ -274,6 +274,12 @@ namespace filesystem {
                 return dotpath(std::forward<P>(one)) + std::forward<Q>(theother);
             }
             
+            /// std::vector<…>-style subscripting for per-segment access to the dotpath’s tokens:
+            std::string&       operator[](size_type idx);
+            std::string const& operator[](size_type idx) const;
+            std::string&               at(size_type idx);
+            std::string const&         at(size_type idx) const;
+            
             /// Stringify the dotpath
             std::string str() const;
             
