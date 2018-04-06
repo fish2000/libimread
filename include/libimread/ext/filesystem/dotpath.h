@@ -280,6 +280,12 @@ namespace filesystem {
             std::string&               at(size_type idx);
             std::string const&         at(size_type idx) const;
             
+            /// Convenience front()/back() segment access:
+            std::string&            front();
+            std::string const&      front() const;
+            std::string&             back();
+            std::string const&       back() const;
+            
             /// Stringify the dotpath
             std::string str() const;
             

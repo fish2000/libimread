@@ -259,6 +259,11 @@ namespace filesystem {
     std::string&               dotpath::at(size_type idx)       { return m_path.at(idx); }
     std::string const&         dotpath::at(size_type idx) const { return m_path.at(idx); }
     
+    std::string&            dotpath::front()                    { return m_path.front(); }
+    std::string const&      dotpath::front() const              { return m_path.front(); }
+    std::string&            dotpath::back()                     { return m_path.back(); }
+    std::string const&      dotpath::back() const               { return m_path.back(); }
+    
     dotpath dotpath::operator+(dotpath const& other) const      { return append(other.str()); }
     dotpath dotpath::operator+(char const* other) const         { return append(other); }
     dotpath dotpath::operator+(std::string const& other) const  { return append(other); }
