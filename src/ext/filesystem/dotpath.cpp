@@ -288,6 +288,10 @@ namespace filesystem {
         return str().c_str();
     }
     
+    char const* dotpath::data() const {
+        return str().data();
+    }
+    
     dotpath::size_type dotpath::rank(std::string const& ext) const {
         /// I can't remember from whence I stole this implementation:
         std::string thisdotpath = str();

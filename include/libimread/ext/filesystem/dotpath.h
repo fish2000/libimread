@@ -286,11 +286,12 @@ namespace filesystem {
             std::string&             back();
             std::string const&       back() const;
             
-            /// Stringify the dotpath
+            /// Stringify the dotpath:
             std::string str() const;
             
-            /// Convenience function to get a C-style string, a la std::string's API
+            /// Convenience functions to get C-style strings, a la std::string's API:
             char const* c_str() const;
+            char const* data() const;
             
             /// Dotpath rank value per extension
             size_type rank(std::string const&) const;
