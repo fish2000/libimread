@@ -109,10 +109,10 @@ namespace filesystem {
             bool operator==(dotpath const&) const;
             bool operator!=(dotpath const&) const;
             
-            /// self-explanatory interrogatives
+            /// self-explanatory interrogative
             bool exists() const;
             
-            /// Static forwarders for the aforementioned interrogatives
+            /// Static forwarder for the aforementioned interrogative
             template <typename P> inline
             static bool exists(P&& p) { return dotpath(std::forward<P>(p)).exists(); }
             
@@ -268,7 +268,7 @@ namespace filesystem {
             
             /// Static forwarder for dotpath::append<P, Q>(p, q) --
             /// you *get* this by now, rite? It's just like some shorthand for
-            ///     dotpath p = dotpath::append(p, ".newFileExt"); /// OR WHATEVER DUDE SRSLY UGH
+            ///     dotpath p = dotpath::append(p, ":newFileExt"); /// OR WHATEVER DUDE SRSLY UGH
             template <typename P, typename Q> inline
             static dotpath append(P&& one, Q&& theother) {
                 return dotpath(std::forward<P>(one)) + std::forward<Q>(theother);
@@ -285,6 +285,19 @@ namespace filesystem {
             std::string const&      front() const;
             std::string&             back();
             std::string const&       back() const;
+            
+            dotpath& reverse();
+            dotpath reversed() const;
+            
+            template <typename P> inline
+            static dotpath& reverse(P&& p) {
+                return dotpath(std::forward<P>(p)).reverse();
+            }
+            
+            template <typename P> inline
+            static dotpath reversed(P&& p) {
+                return dotpath(std::forward<P>(p)).reversed();
+            }
             
             /// Stringify the dotpath:
             std::string str() const;

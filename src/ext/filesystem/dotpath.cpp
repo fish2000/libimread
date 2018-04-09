@@ -6,7 +6,6 @@
 
 #include <cstdlib>
 #include <cerrno>
-#include <thread>
 #include <numeric>
 #include <algorithm>
 #include <type_traits>
@@ -56,18 +55,22 @@ namespace filesystem {
         :m_absolute(p.is_absolute())
         ,m_path(p.components())
         {
-            m_path.back() = std::regex_replace(m_path.back(),
-                                               std::regex("\\" + std::string(1, path::extsep)),
-                                               detail::extsepstring);
+            if (!m_path.empty()) {
+                m_path.back() = std::regex_replace(m_path.back(),
+                                                   std::regex("\\" + std::string(1, path::extsep)),
+                                                   detail::extsepstring);
+            }
         }
     
     dotpath::dotpath(path&& p) noexcept
         :m_absolute(p.is_absolute())
         ,m_path(p.components())
         {
-            m_path.back() = std::regex_replace(m_path.back(),
-                                               std::regex("\\" + std::string(1, path::extsep)),
-                                               detail::extsepstring);
+            if (!m_path.empty()) {
+                m_path.back() = std::regex_replace(m_path.back(),
+                                                   std::regex("\\" + std::string(1, path::extsep)),
+                                                   detail::extsepstring);
+            }
         }
     
     dotpath::dotpath(char* st)              { set(st); }
@@ -261,8 +264,8 @@ namespace filesystem {
     
     std::string&            dotpath::front()                    { return m_path.front(); }
     std::string const&      dotpath::front() const              { return m_path.front(); }
-    std::string&            dotpath::back()                     { return m_path.back(); }
-    std::string const&      dotpath::back() const               { return m_path.back(); }
+    std::string&             dotpath::back()                    { return m_path.back(); }
+    std::string const&       dotpath::back() const              { return m_path.back(); }
     
     dotpath dotpath::operator+(dotpath const& other) const      { return append(other.str()); }
     dotpath dotpath::operator+(char const* other) const         { return append(other); }
@@ -284,6 +287,21 @@ namespace filesystem {
         });
     }
     
+    dotpath& dotpath::reverse() {
+        std::reverse(std::begin(m_path),
+                     std::end(m_path));
+        return *this;
+    }
+    
+    dotpath dotpath::reversed() const {
+        dotpath out(m_absolute);
+        out.m_path.reserve(m_path.size());
+        std::reverse_copy(std::begin(m_path),
+                          std::end(m_path),
+                          std::begin(out.m_path));
+        return out;
+    }
+    
     char const* dotpath::c_str() const {
         return str().c_str();
     }
@@ -301,9 +319,9 @@ namespace filesystem {
                 return ext.size();
             }
             char ch = thisdotpath[thisdotpath.size() - ext.size() - 1];
-            if (ch == '.' || ch == '_') {
+            if (ch == '/' || ch == '_') {
                 return ext.size() + 1;
-            } else if (ch == '/') {
+            } else if (ch == '.') {
                 return ext.size();
             }
         }
@@ -318,15 +336,15 @@ namespace filesystem {
     dotpath::operator char const*() const  { return c_str(); }
     
     bool dotpath::operator<(dotpath const& rhs) const noexcept {
-        return size() < rhs.size();
+        return str().size() < rhs.str().size();
     }
     
     bool dotpath::operator>(dotpath const& rhs) const noexcept {
-        return size() > rhs.size();
+        return str().size() > rhs.str().size();
     }
     
     void dotpath::set(std::string const& str) {
-        m_absolute = !str.empty() && str[0] == dotpath::sep;
+        m_absolute = !(!str.empty() && str[0] == dotpath::sep);
         m_path = tokenize(str, dotpath::sep);
     }
     

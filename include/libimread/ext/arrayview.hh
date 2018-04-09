@@ -84,7 +84,7 @@ namespace av {
             // constants and types
             static constexpr std::size_t rank = Rank;
             using reference              = std::ptrdiff_t&;
-            using const_reference        = const std::ptrdiff_t&;
+            using const_reference        = std::ptrdiff_t const&;
             using size_type              = std::size_t;
             using value_type             = std::ptrdiff_t;
             
@@ -120,8 +120,8 @@ namespace av {
                 return offset<Rank>{ (*this)[0]-- };
             }
             
-            constexpr offset& operator+=(const offset& rhs);
-            constexpr offset& operator-=(const offset& rhs);
+            constexpr offset& operator+=(offset const& rhs);
+            constexpr offset& operator-=(offset const& rhs);
             
             constexpr offset operator+() const noexcept { return *this; }
             constexpr offset operator-() const {
@@ -150,7 +150,7 @@ namespace av {
     
     // arithmetic
     template <std::size_t Rank>
-    constexpr offset<Rank>& offset<Rank>::operator+=(const offset& rhs) {
+    constexpr offset<Rank>& offset<Rank>::operator+=(offset const& rhs) {
         for (size_type i = 0; i < Rank; ++i) {
             (*this)[i] += rhs[i];
         }
@@ -158,7 +158,7 @@ namespace av {
     }
     
     template <std::size_t Rank>
-    constexpr offset<Rank>& offset<Rank>::operator-=(const offset& rhs) {
+    constexpr offset<Rank>& offset<Rank>::operator-=(offset const& rhs) {
         for (size_type i = 0; i < Rank; ++i) {
             (*this)[i] -= rhs[i];
         }
@@ -194,7 +194,7 @@ namespace av {
     
     // offset equality
     template <std::size_t Rank>
-    constexpr bool operator==(const offset<Rank>& lhs, const offset<Rank>& rhs) noexcept {
+    constexpr bool operator==(offset<Rank> const& lhs, offset<Rank> const& rhs) noexcept {
         for (std::size_t i = 0; i < Rank; ++i) {
             if (lhs[i] != rhs[i]) {
                 return false;
@@ -204,33 +204,33 @@ namespace av {
     }
     
     template <std::size_t Rank>
-    constexpr bool operator!=(const offset<Rank>& lhs, const offset<Rank>& rhs) noexcept {
+    constexpr bool operator!=(offset<Rank> const& lhs, offset<Rank> const& rhs) noexcept {
         return !(lhs == rhs);
     }
     
     // offset arithmetic
     template <std::size_t Rank>
-    constexpr offset<Rank> operator+(const offset<Rank>& lhs, const offset<Rank>& rhs) {
+    constexpr offset<Rank> operator+(offset<Rank> const& lhs, offset<Rank> const& rhs) {
         return offset<Rank>{ lhs } += rhs;
     }
     
     template <std::size_t Rank>
-    constexpr offset<Rank> operator-(const offset<Rank>& lhs, const offset<Rank>& rhs) {
+    constexpr offset<Rank> operator-(offset<Rank> const& lhs, offset<Rank> const& rhs) {
         return offset<Rank>{ lhs } -= rhs;
     }
 
     template <std::size_t Rank>
-    constexpr offset<Rank> operator*(const offset<Rank>& lhs, std::ptrdiff_t v) {
+    constexpr offset<Rank> operator*(offset<Rank> const& lhs, std::ptrdiff_t v) {
         return offset<Rank>{ lhs } *= v;
     }
     
     template <std::size_t Rank>
-    constexpr offset<Rank> operator*(std::ptrdiff_t v, const offset<Rank>& rhs) {
+    constexpr offset<Rank> operator*(std::ptrdiff_t v, offset<Rank> const& rhs) {
         return offset<Rank>{ rhs } *= v;
     }
     
     template <std::size_t Rank>
-    constexpr offset<Rank> operator/(const offset<Rank>& lhs, std::ptrdiff_t v) {
+    constexpr offset<Rank> operator/(offset<Rank> const& lhs, std::ptrdiff_t v) {
         return offset<Rank>{ lhs } /= v;
     }
     
@@ -240,7 +240,7 @@ namespace av {
             // constants and types
             static constexpr std::size_t rank = Rank;
             using reference              = std::ptrdiff_t&;
-            using const_reference        = const std::ptrdiff_t&;
+            using const_reference        = std::ptrdiff_t const&;
             using iterator               = bounds_iterator<Rank>;
             using const_iterator         = bounds_iterator<Rank>;
             using size_type              = std::size_t;
@@ -261,7 +261,7 @@ namespace av {
             
             // observers
             constexpr size_type size() const noexcept;
-            constexpr bool      contains(const offset<Rank>& idx) const noexcept;
+            constexpr bool      contains(offset<Rank> const& idx) const noexcept;
             
             // iterators
             const_iterator begin() const noexcept { return const_iterator{ *this }; };
@@ -275,8 +275,8 @@ namespace av {
             constexpr const_reference operator[](size_type n) const { return bounds_[n]; }
             
             // arithmetic
-            constexpr bounds& operator+=(const offset<Rank>& rhs);
-            constexpr bounds& operator-=(const offset<Rank>& rhs);
+            constexpr bounds& operator+=(offset<Rank> const& rhs);
+            constexpr bounds& operator-=(offset<Rank> const& rhs);
             
             constexpr bounds& operator*=(value_type v);
             constexpr bounds& operator/=(value_type v);
@@ -309,7 +309,7 @@ namespace av {
     }
     
     template <std::size_t Rank>
-    constexpr bool bounds<Rank>::contains(const offset<Rank>& idx) const noexcept {
+    constexpr bool bounds<Rank>::contains(offset<Rank> const& idx) const noexcept {
         for (size_type i = 0; i < Rank; ++i) {
             if (!(0 <= idx[i] && idx[i] < (*this)[i])) {
                 return false;
@@ -334,7 +334,7 @@ namespace av {
     
     // arithmetic
     template <std::size_t Rank>
-    constexpr bounds<Rank>& bounds<Rank>::operator+=(const offset<Rank>& rhs) {
+    constexpr bounds<Rank>& bounds<Rank>::operator+=(offset<Rank> const& rhs) {
         for (size_type i = 0; i < Rank; ++i) {
             bounds_[i] += rhs[i];
         }
@@ -343,7 +343,7 @@ namespace av {
     }
     
     template <std::size_t Rank>
-    constexpr bounds<Rank>& bounds<Rank>::operator-=(const offset<Rank>& rhs) {
+    constexpr bounds<Rank>& bounds<Rank>::operator-=(offset<Rank> const& rhs) {
         for (size_type i = 0; i < Rank; ++i) {
             bounds_[i] -= rhs[i];
         }
@@ -373,7 +373,7 @@ namespace av {
     
     // bounds equality
     template <std::size_t Rank>
-    constexpr bool operator==(const bounds<Rank>& lhs, const bounds<Rank>& rhs) noexcept {
+    constexpr bool operator==(bounds<Rank> const& lhs, bounds<Rank> const& rhs) noexcept {
         for (std::size_t i = 0; i < Rank; ++i) {
             if (lhs[i] != rhs[i]) {
                 return false;
@@ -383,48 +383,48 @@ namespace av {
     }
     
     template <std::size_t Rank>
-    constexpr bool operator!=(const bounds<Rank>& lhs, const bounds<Rank>& rhs) noexcept {
+    constexpr bool operator!=(bounds<Rank> const& lhs, bounds<Rank> const& rhs) noexcept {
         return !(lhs == rhs);
     }
     
     // bounds arithmetic
     template <std::size_t Rank>
-    constexpr bounds<Rank> operator+(const bounds<Rank>& lhs, const offset<Rank>& rhs) {
+    constexpr bounds<Rank> operator+(bounds<Rank> const& lhs, offset<Rank> const& rhs) {
         return bounds<Rank>{ lhs } += rhs;
     }
 
     template <std::size_t Rank>
-    constexpr bounds<Rank> operator+(const offset<Rank>& lhs, const bounds<Rank>& rhs) {
+    constexpr bounds<Rank> operator+(offset<Rank> const& lhs, bounds<Rank> const& rhs) {
         return bounds<Rank>{ rhs } += lhs;
     }
     
     template <std::size_t Rank>
-    constexpr bounds<Rank> operator-(const bounds<Rank>& lhs, const offset<Rank>& rhs) {
+    constexpr bounds<Rank> operator-(bounds<Rank> const& lhs, offset<Rank> const& rhs) {
         return bounds<Rank>{ lhs } -= rhs;
     }
     
     template <std::size_t Rank>
-    constexpr bounds<Rank> operator*(const bounds<Rank>& lhs, std::ptrdiff_t v) {
+    constexpr bounds<Rank> operator*(bounds<Rank> const& lhs, std::ptrdiff_t v) {
         return bounds<Rank>{ lhs } *= v;
     }
     
     template <std::size_t Rank>
-    constexpr bounds<Rank> operator*(std::ptrdiff_t v, const bounds<Rank>& rhs) {
+    constexpr bounds<Rank> operator*(std::ptrdiff_t v, bounds<Rank> const& rhs) {
         return bounds<Rank>{ rhs } *= v;
     }
     
     template <std::size_t Rank>
-    constexpr bounds<Rank> operator/(const bounds<Rank>& lhs, std::ptrdiff_t v) {
+    constexpr bounds<Rank> operator/(bounds<Rank> const& lhs, std::ptrdiff_t v) {
         return bounds<Rank>{ lhs } /= v;
     }
     
     template <std::size_t Rank>
-    bounds_iterator<Rank> begin(const bounds<Rank>& b) noexcept {
+    bounds_iterator<Rank> begin(bounds<Rank> const& b) noexcept {
         return b.begin();
     }
     
     template <std::size_t Rank>
-    bounds_iterator<Rank> end(const bounds<Rank>& b) noexcept {
+    bounds_iterator<Rank> end(bounds<Rank> const& b) noexcept {
         return b.end();
     }
     
@@ -443,7 +443,7 @@ namespace av {
                 : bounds_(bounds)
                 , offset_(off) {}
             
-            bool operator==(const bounds_iterator& rhs) const {
+            bool operator==(bounds_iterator const& rhs) const {
                 // Requires *this and rhs are iterators over the same bounds object.
                 return offset_ == rhs.offset_;
             }
@@ -458,7 +458,7 @@ namespace av {
             bounds_iterator  operator-(difference_type n) const;
             bounds_iterator& operator-=(difference_type n);
             
-            difference_type operator-(const bounds_iterator& rhs) const;
+            difference_type operator-(bounds_iterator const& rhs) const;
             
             // Note this iterator is not a true random access iterator, nor meets N4512
             // + operator* returns a value type (and not a reference)
@@ -583,38 +583,38 @@ namespace av {
     // Free functions
     
     template <std::size_t Rank>
-    bool operator==(const bounds_iterator<Rank>& lhs, const bounds_iterator<Rank>& rhs) {
+    bool operator==(bounds_iterator<Rank> const& lhs, bounds_iterator<Rank> const& rhs) {
         return lhs.operator==(rhs);
     }
     
     template <std::size_t Rank>
-    bool operator!=(const bounds_iterator<Rank>& lhs, const bounds_iterator<Rank>& rhs) {
+    bool operator!=(bounds_iterator<Rank> const& lhs, bounds_iterator<Rank> const& rhs) {
         return !lhs.operator==(rhs);
     }
     
     template <std::size_t Rank>
-    bool operator<(const bounds_iterator<Rank>& lhs, const bounds_iterator<Rank>& rhs) {
+    bool operator<(bounds_iterator<Rank> const& lhs, bounds_iterator<Rank> const& rhs) {
         return rhs - lhs > 0;
     }
     
     template <std::size_t Rank>
-    bool operator<=(const bounds_iterator<Rank>& lhs, const bounds_iterator<Rank>& rhs) {
+    bool operator<=(bounds_iterator<Rank> const& lhs, bounds_iterator<Rank> const& rhs) {
         return !(lhs > rhs);
     }
     
     template <std::size_t Rank>
-    bool operator>(const bounds_iterator<Rank>& lhs, const bounds_iterator<Rank>& rhs) {
+    bool operator>(bounds_iterator<Rank> const& lhs, bounds_iterator<Rank> const& rhs) {
         return rhs < lhs;
     }
     
     template <std::size_t Rank>
-    bool operator>=(const bounds_iterator<Rank>& lhs, const bounds_iterator<Rank>& rhs) {
+    bool operator>=(bounds_iterator<Rank> const& lhs, bounds_iterator<Rank> const& rhs) {
         return !(lhs < rhs);
     }
     
     template <std::size_t Rank>
     bounds_iterator<Rank> operator+(typename bounds_iterator<Rank>::difference_type n,
-                                    const bounds_iterator<Rank>&                    rhs);
+                                    bounds_iterator<Rank> const&                    rhs);
     
     namespace {
         
@@ -631,7 +631,7 @@ namespace av {
                       std::is_same<std::remove_cv_t<T>, std::remove_cv_t<U>>::value>;
         
         template <typename T, std::size_t Rank>
-        constexpr T& view_access(T* data, const offset<Rank>& idx, const offset<Rank>& stride) {
+        constexpr T& view_access(T* data, offset<Rank> const& idx, offset<Rank> const& stride) {
             std::ptrdiff_t off{};
             for (std::size_t i = 0; i < Rank; ++i) {
                 off += idx[i] * stride[i];
@@ -669,7 +669,7 @@ namespace av {
                       
             template <typename U, std::size_t R = Rank,
                       typename = std::enable_if_t<R == 1 && is_viewable_value<U, value_type>::value>>
-            constexpr array_view(const array_view<U, R>& rhs) noexcept
+            constexpr array_view(array_view<U, R> const& rhs) noexcept
                 : data_(rhs.data())
                 , bounds_(rhs.bounds()) {}
             
@@ -679,7 +679,7 @@ namespace av {
                 , bounds_(Extent) {}
             
             template <typename U, typename = std::enable_if_t<is_viewable_value<U, value_type>::value>>
-            constexpr array_view(const array_view<U, Rank>& rhs) noexcept
+            constexpr array_view(array_view<U, Rank> const& rhs) noexcept
                 : data_(rhs.data())
                 , bounds_(rhs.bounds()) {}
             
@@ -701,7 +701,7 @@ namespace av {
             constexpr offset_type stride() const noexcept;
             constexpr pointer     data() const noexcept { return data_; }
             
-            constexpr reference operator[](const offset_type& idx) const {
+            constexpr reference operator[](offset_type const& idx) const {
                 assert(bounds().contains(idx) == true);
                 return view_access(data_, idx, stride());
             }
@@ -718,14 +718,14 @@ namespace av {
                 return array_view<T, Rank - 1>(data_ + off, new_bounds);
             }
             
-            constexpr strided_array_view<T, Rank> section(const offset_type& origin,
-                                                          const bounds_type& section_bounds) const {
+            constexpr strided_array_view<T, Rank> section(offset_type const& origin,
+                                                          bounds_type const& section_bounds) const {
                 // todo: requirement is for any idx in section_bounds (boundary fail)
                 // assert(bounds().contains(origin + section_bounds) == true);
                 return strided_array_view<T, Rank>(&(*this)[origin], section_bounds, stride());
             }
             
-            constexpr strided_array_view<T, Rank> section(const offset_type& origin) const {
+            constexpr strided_array_view<T, Rank> section(offset_type const& origin) const {
                 // todo: requires checking for any idx in bounds() - origin
                 // assert(bounds().contains(bounds()) == true);
                 return strided_array_view<T, Rank>(&(*this)[origin], bounds() - origin, stride());
@@ -769,13 +769,13 @@ namespace av {
                 , stride_{} {}
             
             template <typename U, typename = std::enable_if_t<is_viewable_value<U, value_type>::value>>
-            constexpr strided_array_view(const array_view<U, Rank>& rhs) noexcept
+            constexpr strided_array_view(array_view<U, Rank> const& rhs) noexcept
                 : data_{ rhs.data() }
                 , bounds_{ rhs.bounds() }
                 , stride_{ rhs.stride() } {}
             
             template <typename U, typename = std::enable_if_t<is_viewable_value<U, value_type>::value>>
-            constexpr strided_array_view(const strided_array_view<U, Rank>& rhs) noexcept
+            constexpr strided_array_view(strided_array_view<U, Rank> const& rhs) noexcept
                 : data_{ rhs.data_ }
                 , bounds_{ rhs.bounds() }
                 , stride_{ rhs.stride() } {}
@@ -793,7 +793,7 @@ namespace av {
             constexpr offset_type stride() const noexcept { return stride_; }
             
             // element access
-            constexpr reference operator[](const offset_type& idx) const {
+            constexpr reference operator[](offset_type const& idx) const {
                 assert(bounds().contains(idx) == true);
                 return view_access(data_, idx, stride_);
             }
@@ -814,14 +814,14 @@ namespace av {
                 return strided_array_view<T, Rank - 1>(data_ + off, new_bounds, new_stride);
             }
             
-            constexpr strided_array_view<T, Rank> section(const offset_type& origin,
-                                                          const bounds_type& section_bounds) const {
+            constexpr strided_array_view<T, Rank> section(offset_type const& origin,
+                                                          bounds_type const& section_bounds) const {
                 // todo: requirement is for any idx in section_bounds (boundary fail)
                 // assert(bounds().contains(origin + section_bounds) == true);
                 return strided_array_view<T, Rank>(&(*this)[origin], section_bounds, stride());
             }
             
-            constexpr strided_array_view<T, Rank> section(const offset_type& origin) const {
+            constexpr strided_array_view<T, Rank> section(offset_type const& origin) const {
                 // todo: requires checking for any idx in bounds() - origin
                 // assert(bounds().contains(bounds()) == true);
                 return strided_array_view<T, Rank>(&(*this)[origin], bounds() - origin, stride());
