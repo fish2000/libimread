@@ -89,7 +89,7 @@ namespace filesystem {
                                                           /// this fails with nonexistant dotpaths
             
             bool compare(dotpath const&) const noexcept;  /// compare stringified dotpaths using fast-as-fuck dotpath::hash() --
-                                                          /// this works as expected with nonexistant dotpath
+                                                          /// this works as expected with nonexistant dotpaths
             
             /// static forwarders for dotpath::compare_lexical<P, Q>(p, q) and dotpath::compare<P, Q>(p, q)
             template <typename P, typename Q> inline

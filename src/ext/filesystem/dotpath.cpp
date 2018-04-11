@@ -133,7 +133,7 @@ namespace filesystem {
     }
 
     bool dotpath::compare_lexical(dotpath const& other) const {
-        if (!exists() || !other.exists()) { return false; }
+        // if (!exists() || !other.exists()) { return false; }
         std::string self_string = str(),
                     other_string = other.str();
         return bool(std::strcmp(self_string.c_str(), other_string.c_str()) == 0);
