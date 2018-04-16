@@ -57,9 +57,9 @@ namespace filesystem {
             dotpath(std::string const&);                        /// STL-string constructor
             
             explicit dotpath(detail::stringvec_t const& vec,
-                             bool absolute = false);            /// String-vector copy-constructor
+                             bool absolute = true);             /// String-vector copy-constructor
             explicit dotpath(detail::stringvec_t&& vec,
-                             bool absolute = false) noexcept;   /// String-vector move-constructor
+                             bool absolute = true) noexcept;    /// String-vector move-constructor
             explicit dotpath(detail::stringlist_t);             /// Initializer-list constructor
             
             virtual ~dotpath();                                 /// The dotpath class has a vtable
