@@ -96,7 +96,7 @@ namespace filesystem {
             static bool compare_lexical(P&& p, Q&& q) {
                 dotpath lhs(std::forward<P>(p));
                 dotpath rhs(std::forward<Q>(q));
-                if (!lhs.exists() || !rhs.exists()) { return false; }
+                // if (!lhs.exists() || !rhs.exists()) { return false; }
                 return lhs.compare_lexical(rhs);
             }
             
@@ -338,6 +338,8 @@ namespace filesystem {
             dotpath& operator=(char const*);
             dotpath& operator=(dotpath const&);
             dotpath& operator=(dotpath&&) noexcept;
+            dotpath& operator=(path const&);
+            dotpath& operator=(path&&) noexcept;
             dotpath& operator=(detail::stringvec_t const&);
             dotpath& operator=(detail::stringvec_t&&) noexcept;
             dotpath& operator=(detail::stringlist_t);
@@ -366,7 +368,7 @@ namespace filesystem {
                                                 character_type const delim);
             
         protected:
-            bool m_absolute = false;        /// Do we lead to our destination absolutely?
+            bool m_absolute = true;        /// Do we lead to our destination absolutely?
             detail::stringvec_t m_path;     /// But to where, do we eventually indexically indicate?
     
     }; /* class path */

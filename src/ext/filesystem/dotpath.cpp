@@ -147,7 +147,6 @@ namespace filesystem {
     bool dotpath::operator!=(dotpath const& other) const { return bool(hash() != other.hash()); }
     
     bool dotpath::exists() const {
-        // return ::access(c_str(), F_OK) != -1;
         return true;
     }
     
@@ -160,7 +159,7 @@ namespace filesystem {
         std::string const& last = m_path.back();
         size_type pos = last.find_last_of(dotpath::extsep);
         if (pos == std::string::npos) { return ""; }
-        return last.substr(pos+1);
+        return last.substr(pos + 1);
     }
     
     std::string dotpath::extensions() const {
@@ -168,7 +167,7 @@ namespace filesystem {
         std::string const& last = m_path.back();
         size_type pos = last.find_first_of(dotpath::extsep);
         if (pos == std::string::npos) { return ""; }
-        return last.substr(pos+1);
+        return last.substr(pos + 1);
     }
     
     dotpath dotpath::strip_extension() const {
@@ -344,7 +343,7 @@ namespace filesystem {
     }
     
     void dotpath::set(std::string const& str) {
-        m_absolute = !(!str.empty() && str[0] == dotpath::sep);
+        m_absolute = !str.empty() && str[0] != dotpath::sep;
         m_path = tokenize(str, dotpath::sep);
     }
     
@@ -365,7 +364,20 @@ namespace filesystem {
         return *this;
     }
     
+    dotpath& dotpath::operator=(path const& p) {
+        m_absolute = p.is_absolute();
+        m_path = p.components();
+        return *this;
+    }
+    
+    dotpath& dotpath::operator=(path&& p) noexcept {
+        m_absolute = p.is_absolute();
+        m_path = p.components();
+        return *this;
+    }
+    
     dotpath& dotpath::operator=(detail::stringvec_t const& stringvec) {
+        m_absolute = true;
         m_path = detail::stringvec_t{};
         m_path.reserve(stringvec.size());
         std::copy(stringvec.begin(),
@@ -375,11 +387,13 @@ namespace filesystem {
     }
     
     dotpath& dotpath::operator=(detail::stringvec_t&& stringvec) noexcept {
+        m_absolute = true;
         m_path = std::move(stringvec);
         return *this;
     }
     
     dotpath& dotpath::operator=(detail::stringlist_t stringlist) {
+        m_absolute = true;
         m_path = detail::stringvec_t(stringlist);
         return *this;
     }
