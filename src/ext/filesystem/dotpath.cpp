@@ -297,7 +297,7 @@ namespace filesystem {
         out.m_path.reserve(m_path.size());
         std::reverse_copy(std::begin(m_path),
                           std::end(m_path),
-                          std::begin(out.m_path));
+                          std::back_inserter(out.m_path));
         return out;
     }
     
