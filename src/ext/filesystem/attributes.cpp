@@ -765,10 +765,10 @@ namespace filesystem {
         std::string accessor_t::get(attribute::flags o,
                                     attribute::ns d) const {
             if (m_descriptor > 0) {
-                return attribute::fdget(m_descriptor, name(),
+                return attribute::fdget(m_descriptor, m_name,
                                         options(o), domain(d));
             }
-            return attribute::get(pathstring(), name(),
+            return attribute::get(m_pathstring, m_name,
                                   options(o), domain(d));
         }
         
@@ -776,20 +776,20 @@ namespace filesystem {
                              attribute::flags o,
                              attribute::ns d) const {
             if (m_descriptor > 0) {
-                 return attribute::fdset(m_descriptor, name(), value,
+                 return attribute::fdset(m_descriptor, m_name, value,
                                          options(o), domain(d));
             }
-            return attribute::set(pathstring(), name(), value,
+            return attribute::set(m_pathstring, m_name, value,
                                   options(o), domain(d));
         }
         
         bool accessor_t::del(attribute::flags o,
                              attribute::ns d) const {
             if (m_descriptor > 0) {
-                return attribute::fddel(m_descriptor, name(),
+                return attribute::fddel(m_descriptor, m_name,
                                         options(o), domain(d));
             }
-            return attribute::del(pathstring(), name(),
+            return attribute::del(m_pathstring, m_name,
                                   options(o), domain(d));
         }
         
