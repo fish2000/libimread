@@ -766,10 +766,10 @@ namespace filesystem {
                                     attribute::ns d) const {
             if (m_descriptor > 0) {
                 return attribute::fdget(m_descriptor, name(),
-                                        options(), domain());
+                                        options(o), domain(d));
             }
             return attribute::get(pathstring(), name(),
-                                  options(), domain());
+                                  options(o), domain(d));
         }
         
         bool accessor_t::set(std::string const& value,
@@ -777,20 +777,20 @@ namespace filesystem {
                              attribute::ns d) const {
             if (m_descriptor > 0) {
                  return attribute::fdset(m_descriptor, name(), value,
-                                         options(), domain());
+                                         options(o), domain(d));
             }
             return attribute::set(pathstring(), name(), value,
-                                  options(), domain());
+                                  options(o), domain(d));
         }
         
         bool accessor_t::del(attribute::flags o,
                              attribute::ns d) const {
             if (m_descriptor > 0) {
                 return attribute::fddel(m_descriptor, name(),
-                                        options(), domain());
+                                        options(o), domain(d));
             }
             return attribute::del(pathstring(), name(),
-                                  options(), domain());
+                                  options(o), domain(d));
         }
         
         std::string accessor_t::pathstring() const {
@@ -799,7 +799,9 @@ namespace filesystem {
         
         std::string accessor_t::pathstring(std::string const& newpathstring) {
             m_descriptor = -1;
-            m_pathstring = std::string(newpathstring);
+            if (newpathstring != m_pathstring) {
+                m_pathstring = std::string(newpathstring);
+            }
             return m_pathstring;
         }
         
@@ -808,7 +810,9 @@ namespace filesystem {
         }
         
         std::string accessor_t::name(std::string const& newname) {
-            m_name = std::string(newname);
+            if (newname != m_name) {
+                m_name = std::string(newname);
+            }
             return m_name;
         }
         
@@ -828,8 +832,10 @@ namespace filesystem {
             return m_options;
         }
         
-        attribute::flags accessor_t::options(attribute::flags newflags) {
-            m_options = newflags;
+        attribute::flags accessor_t::options(attribute::flags newflags) const {
+            if (newflags != m_options) {
+                m_options = newflags;
+            }
             return m_options;
         }
         
@@ -837,8 +843,10 @@ namespace filesystem {
             return m_domain;
         }
         
-        attribute::ns accessor_t::domain(attribute::ns newdomain) {
-            m_domain = newdomain;
+        attribute::ns accessor_t::domain(attribute::ns newdomain) const {
+            if (newdomain != m_domain) {
+                m_domain = newdomain;
+            }
             return m_domain;
         }
         

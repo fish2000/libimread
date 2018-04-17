@@ -163,9 +163,9 @@ namespace filesystem {
                 int descriptor() const;
                 int descriptor(int);
                 attribute::flags options() const;
-                attribute::flags options(attribute::flags);
+                attribute::flags options(attribute::flags) const;
                 attribute::ns domain() const;
-                attribute::ns domain(attribute::ns);
+                attribute::ns domain(attribute::ns) const;
                 
                 operator std::string() const;
             
@@ -173,8 +173,8 @@ namespace filesystem {
                 mutable std::string m_pathstring;
                 mutable std::string m_name;
                 mutable int m_descriptor = -1;
-                attribute::flags m_options = ENUMBASE(attribute::flags);
-                attribute::ns m_domain = ENUMBASE(attribute::ns);
+                mutable attribute::flags m_options = ENUMBASE(attribute::flags);
+                mutable attribute::ns m_domain = ENUMBASE(attribute::ns);
             
         };
         
