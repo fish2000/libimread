@@ -170,9 +170,9 @@ namespace filesystem {
                 operator std::string() const;
             
             private:
-                mutable std::string m_pathstring;
-                mutable std::string m_name;
-                mutable int m_descriptor = -1;
+                std::string m_pathstring;
+                std::string m_name;
+                int m_descriptor = -1;
                 mutable attribute::flags m_options = ENUMBASE(attribute::flags);
                 mutable attribute::ns m_domain = ENUMBASE(attribute::ns);
             
