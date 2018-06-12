@@ -52,8 +52,10 @@ namespace py {
     PyObject* format(char const*, ...);
     // PyObject* format(std::string const&, ...);
     PyObject* object(PyObject* arg);
+    #if PY_MAJOR_VERSION < 3
     PyObject* object(PyFileObject* arg);
     PyObject* object(PyStringObject* arg);
+    #endif
     PyObject* object(PyTypeObject* arg);
     PyObject* object(PyArrayObject* arg);
     PyObject* object(PyArray_Descr* arg);
@@ -71,8 +73,10 @@ namespace py {
     }
     
     PyObject* convert(PyObject*);
+    #if PY_MAJOR_VERSION < 3
     PyObject* convert(PyFileObject*);
     PyObject* convert(PyStringObject*);
+    #endif
     PyObject* convert(PyTypeObject*);
     PyObject* convert(PyArrayObject*);
     PyObject* convert(PyArray_Descr*);

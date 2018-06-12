@@ -229,7 +229,7 @@ extra_link_args += generator_ars
 
 ext_modules = []
 
-for key, sources in extensions.iteritems():
+for key, sources in extensions.items():
     ext_modules.append(Extension("im.%s" % key,
         libraries=map(
             lambda lib: lib.endswith('.dylib') and lib.split('.')[0] or lib,

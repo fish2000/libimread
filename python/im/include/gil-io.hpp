@@ -9,6 +9,8 @@
 
 #if PY_MAJOR_VERSION >= 3
 #include <unistd.h>
+// using PyFileObject = PyObject;
+struct PyFileObject : PyObject {};
 #define PyFile_Check(object)        true
 #define PyFile_IncUseCount(object)  Py_INCREF(object)
 #define PyFile_DecUseCount(object)  Py_DECREF(object)

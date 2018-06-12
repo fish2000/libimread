@@ -101,12 +101,16 @@ namespace py {
     PyObject* object(PyObject* arg) {
         return Py_BuildValue("O", arg ? arg : Py_None);
     }
+    
+    #if PY_MAJOR_VERSION < 3
     PyObject* object(PyFileObject* arg) {
         return py::object((PyObject*)arg);
     }
     PyObject* object(PyStringObject* arg) {
         return py::object((PyObject*)arg);
     }
+    #endif
+    
     PyObject* object(PyTypeObject* arg) {
         return py::object((PyObject*)arg);
     }
@@ -121,8 +125,12 @@ namespace py {
     }
     
     PyObject* convert(PyObject* operand)            { return operand; }
+    
+    #if PY_MAJOR_VERSION < 3
     PyObject* convert(PyFileObject* operand)        { return (PyObject*)operand; }
     PyObject* convert(PyStringObject* operand)      { return (PyObject*)operand; }
+    #endif
+    
     PyObject* convert(PyTypeObject* operand)        { return (PyObject*)operand; }
     PyObject* convert(PyArrayObject* operand)       { return (PyObject*)operand; }
     PyObject* convert(PyArray_Descr* operand)       { return (PyObject*)operand; }

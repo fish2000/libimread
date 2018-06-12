@@ -1,8 +1,13 @@
 
 from __future__ import print_function
-from distutils.spawn import find_executable as which
-from distutils.sysconfig import get_python_inc
+from distutils.spawn import find_executable as which # noqa
+from distutils.sysconfig import get_python_inc # noqa
 from functools import wraps
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 # get_terminal_size(): does what you think it does
 # adapted from this: http://stackoverflow.com/a/566752/298171
@@ -38,7 +43,7 @@ def terminal_print(message, color='red', asterisk='*'):
     from clint.textui import colored
     colorizer = getattr(colored, color.lower(), red)
     message = " %s " % message.strip()
-    asterisks = (terminal_width / 2) - (len(message) / 2)
+    asterisks = int(terminal_width / 2) - int(len(message) / 2)
     print(colorizer("""%(aa)s%(message)s%(ab)s""" % dict(
         aa=asterisk[0] * asterisks,
         ab=asterisk[0] * (asterisks + 0 - (len(message) % 2)),
