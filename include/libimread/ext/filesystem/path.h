@@ -60,7 +60,7 @@ namespace filesystem {
         static constexpr char posix_pathvar_separator     = ':';
         
         /// constant for null (nonexistent) inodes and devices:
-        static const inode_t null_inode_v                   = { 0, 0 };
+        static const     inode_t null_inode_v             = { 0, 0 };
         
     }
     
