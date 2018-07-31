@@ -1143,6 +1143,21 @@ namespace filesystem {
     path& path::operator+=(char const* other)        { return extend(other); }
     path& path::operator+=(std::string const& other) { return extend(other); }
     
+    path& path::reverse() {
+        std::reverse(std::begin(m_path),
+                     std::end(m_path));
+        return *this;
+    }
+    
+    path path::reversed() const {
+        path out(m_absolute);
+        out.m_path.reserve(m_path.size());
+        std::reverse_copy(std::begin(m_path),
+                          std::end(m_path),
+                          std::back_inserter(out.m_path));
+        return out;
+    }
+    
     std::string path::str() const {
         return std::accumulate(m_path.begin(),
                                m_path.end(),

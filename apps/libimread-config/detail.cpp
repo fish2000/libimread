@@ -77,8 +77,8 @@ namespace im {
                 });
                 
                 std::string yodogg = IM_CMAKE_BINARY_DIR;
-                bool does_it_end = pystring::endswith(yodogg, "build");
-                bool well_is_it = path::is_directory(yodogg);
+                // bool does_it_end = pystring::endswith(yodogg, "build");
+                // bool well_is_it = path::is_directory(yodogg);
                 std::string yodad = path::parent(yodogg).str();
                 
                 // WTF("PARENT PATH:", yodad, yodogg,
