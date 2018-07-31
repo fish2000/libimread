@@ -641,11 +641,37 @@ namespace filesystem {
                 return path(std::forward<P>(one)) + std::forward<Q>(theother);
             }
             
+            /// std::vector<…>-style subscripting for per-segment access to the path’s tokens:
+            std::string&       operator[](size_type idx);
+            std::string const& operator[](size_type idx) const;
+            std::string&               at(size_type idx);
+            std::string const&         at(size_type idx) const;
+            
+            /// Convenience front()/back() segment access:
+            std::string&            front();
+            std::string const&      front() const;
+            std::string&             back();
+            std::string const&       back() const;
+            
+            path& reverse();
+            path reversed() const;
+            
+            template <typename P> inline
+            static path& reverse(P&& p) {
+                return path(std::forward<P>(p)).reverse();
+            }
+            
+            template <typename P> inline
+            static path reversed(P&& p) {
+                return path(std::forward<P>(p)).reversed();
+            }
+            
             /// Stringify the path (pared down for UNIX-only specifics)
             std::string str() const;
             
-            /// Convenience function to get a C-style string, a la std::string's API
+            /// Convenience functions to get C-style strings, a la std::string's API
             char const* c_str() const;
+            char const* data() const;
             
             /// Filesystem extended attribute (“xattr”) access
             std::string xattr(std::string const&) const;

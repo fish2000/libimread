@@ -1125,6 +1125,16 @@ namespace filesystem {
         return *this;
     }
     
+    std::string&       path::operator[](size_type idx)       { return m_path[idx]; }
+    std::string const& path::operator[](size_type idx) const { return m_path[idx]; }
+    std::string&               path::at(size_type idx)       { return m_path.at(idx); }
+    std::string const&         path::at(size_type idx) const { return m_path.at(idx); }
+    
+    std::string&            path::front()                    { return m_path.front(); }
+    std::string const&      path::front() const              { return m_path.front(); }
+    std::string&             path::back()                    { return m_path.back(); }
+    std::string const&       path::back() const              { return m_path.back(); }
+    
     path path::operator+(path const& other) const        { return append(other.str()); }
     path path::operator+(char const* other) const        { return append(other); }
     path path::operator+(std::string const& other) const { return append(other); }
@@ -1147,6 +1157,10 @@ namespace filesystem {
     
     char const* path::c_str() const {
         return str().c_str();
+    }
+    
+    char const* path::data() const {
+        return str().data();
     }
     
     path::size_type path::rank(std::string const& ext) const {

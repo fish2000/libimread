@@ -274,18 +274,6 @@ namespace filesystem {
     dotpath& dotpath::operator+=(char const* other)             { return extend(other); }
     dotpath& dotpath::operator+=(std::string const& other)      { return extend(other); }
     
-    std::string dotpath::str() const {
-        return std::accumulate(m_path.begin(),
-                               m_path.end(),
-                               m_absolute ? detail::nulstring
-                                          : detail::sepstring,
-                           [&](std::string const& lhs,
-                               std::string const& rhs) {
-            return lhs + rhs + ((rhs.c_str() == m_path.back().c_str()) ? detail::nulstring
-                                                                       : detail::sepstring);
-        });
-    }
-    
     dotpath& dotpath::reverse() {
         std::reverse(std::begin(m_path),
                      std::end(m_path));
@@ -299,6 +287,18 @@ namespace filesystem {
                           std::end(m_path),
                           std::back_inserter(out.m_path));
         return out;
+    }
+    
+    std::string dotpath::str() const {
+        return std::accumulate(m_path.begin(),
+                               m_path.end(),
+                               m_absolute ? detail::nulstring
+                                          : detail::sepstring,
+                           [&](std::string const& lhs,
+                               std::string const& rhs) {
+            return lhs + rhs + ((rhs.c_str() == m_path.back().c_str()) ? detail::nulstring
+                                                                       : detail::sepstring);
+        });
     }
     
     char const* dotpath::c_str() const {
