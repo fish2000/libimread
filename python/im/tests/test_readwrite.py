@@ -210,10 +210,10 @@ class ReadWriteTests(BaseCase):
                     'yodogg:legal-sublist'       : ['yo', 'same', 'shit', 'dogg' ],
                     'yodogg:legal-subset'        : set(['yo', 'dogg',
                                                         'yo', 'seriously', 'dogg']),
-                    'yodogg:more-sublist-types'  : ["yo", 7007, 3.14, 98767576465234L, "DOGG"],
+                    'yodogg:more-sublist-types'  : ["yo", 7007, 3.14, 98767576465234, "DOGG"],
                     'yodogg:float'               : 2.71818,
                     'yodogg:int'                 : 666,
-                    'yodogg:long'                : 6666875764L,
+                    'yodogg:long'                : 6666875764,
                     'yodogg:memoryview'          : memview,
                     'yodogg:str'                 : "SO WE PUT ALL SORTS OF SHIT IN HERE I DUNNO DOGG"
                 })
