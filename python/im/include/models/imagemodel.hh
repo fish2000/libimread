@@ -339,7 +339,10 @@ namespace py {
                                           py::convert(this))))
                 ,readoptDict(PyDict_New())
                 ,writeoptDict(PyDict_New())
-                {}
+                {
+                    PyDict_Update(readoptDict,  other.readoptDict);
+                    PyDict_Update(writeoptDict, other.writeoptDict);
+                }
             
             /// Plane-merge constructor:
             /// Construct a new ImageModelBase instance by appending the planes
@@ -739,7 +742,7 @@ namespace py {
                         std::string("Unimplemented read() in I/O format ") + mime,
                         false);
                 }
-                return py::ValueError("Bad I/O format pointer returned for blob data", false);
+                return py::ValueError("Bad I/O format pointer returned for Python file", false);
             }
             
             bool loadblob(Py_buffer const& view, Options const& opts) {

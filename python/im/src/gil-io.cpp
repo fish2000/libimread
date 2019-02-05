@@ -9,7 +9,7 @@ namespace py {
             :im::handle::source(fh)
             {}
         
-        /// handle + object ctor: requires unlreleased GIL
+        /// handle + object ctor: requires unreleased GIL
         source::source(FILE* fh, PyObject* pyfh)
             :im::handle::source(fh)
             ,object(pyfh)
@@ -22,7 +22,7 @@ namespace py {
             :im::handle::sink(fh)
             {}
         
-        /// handle + object ctor: requires unlreleased GIL
+        /// handle + object ctor: requires unreleased GIL
         sink::sink(FILE* fh, PyObject* pyfh)
             :im::handle::sink(fh)
             ,object(pyfh)
@@ -90,7 +90,7 @@ namespace py {
             state = PyEval_SaveThread();                                        /// release the GIL;
             return out;
         }
-        
-    } /* namespace gil */
     
+    } /* namespace gil */
+
 } /* namespace py */
