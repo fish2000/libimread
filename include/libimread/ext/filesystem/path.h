@@ -658,8 +658,8 @@ namespace filesystem {
             path reversed() const;
             
             template <typename P> inline
-            static path& reverse(P&& p) {
-                return path(std::forward<P>(p)).reverse();
+            static path reverse(P&& p) {
+                return path(std::forward<P>(p)).reversed();
             }
             
             template <typename P> inline
