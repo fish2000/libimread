@@ -224,6 +224,38 @@ namespace filesystem {
         static constexpr int touch_open_flags                       = O_WRONLY | O_CREAT | O_NOCTTY | O_NONBLOCK;
         static constexpr mode_t touch_open_mask                     = 0666;
         
+        /// Re-implementation of the logic behind the “touch” UNIX command-line tool,
+        /// as elucidated by someone named Chris, per this discursive analysis:
+        ///     http://chris-sharpe.blogspot.com/2013/05/better-than-systemtouch.html
+        /// My rewrite plugs the descriptor leak, and also avoids playing the race card
+        /// with regard to our target path, qua the two system calls made.
+        
+        bool touch(char const* target) noexcept {
+            /// Sanity-check `target`:
+            if (!target) { return false; }
+            
+            /// Open and obtain a descriptor for our target path -- using flags specifying
+            /// that the file is to be created in the event of its nonexistence:
+            int descriptor = ::open(target,
+                                    filesystem::detail::touch_open_flags,
+                                    filesystem::detail::touch_open_mask);
+            
+            /// Bail if ::open() choked:
+            if (descriptor < 0) { return false; }
+            
+            /// Update the timestamps for our freshly-opened file, through its descriptor --
+            /// A call to ::futimens() with the second arg (of type `const struct timespec*`)
+            /// value of `nullptr` means “set timestamps to whatever the system clocks’ value
+            /// is for right now”:
+            int status = ::futimens(descriptor, nullptr);
+            
+            /// Close out the descriptor:
+            ::close(descriptor);
+            
+            /// Return, per the inverse of the status result of the ::futimens() call:
+            return !bool(status);
+        }
+        
         static const std::string extsepstring(1, path::extsep);
         static const std::string sepstring(1, path::sep);
         static const std::string nulstring("");
@@ -718,43 +750,21 @@ namespace filesystem {
         return ::utimes(c_str(), nullptr) != -1;
     }
     
-    /// Re-implementation of the logic behind the “touch” UNIX command-line tool,
-    /// as elucidated by someone named Chris, per this discursive analysis:
-    ///     http://chris-sharpe.blogspot.com/2013/05/better-than-systemtouch.html
-    /// My rewrite plugs the descriptor leak, and also avoids playing the race card
-    /// with regard to our path, qua the two system calls made.
+    /// For `path::touch()`, we delegate to `detail::touch(…)` -- q.v. comment notes supra.
     bool path::touch() const {
-        /// Open and obtain a descriptor for our path -- using flags specifying that
-        /// the file is to be created in the event of its nonexistence:
-        int descriptor = ::open(c_str(),
-                                detail::touch_open_flags,
-                                detail::touch_open_mask);
-        
-        /// Bail if ::open() choked:
-        if (descriptor < 0) { return false; }
-        
-        /// Update the timestamps for our freshly-opened file, through its descriptor --
-        /// A call to ::futimens() with the second arg (of type `const struct timespec*`)
-        /// value of `nullptr` means “set timestamps to whatever the system clocks’ value
-        /// is for right now”:
-        int status = ::futimens(descriptor, nullptr);
-        
-        /// Close out the descriptor:
-        ::close(descriptor);
-        
-        /// Return, per the inverse of the status result of the ::futimens() call:
-        return !bool(status);
+        return detail::touch(c_str());
     }
     
     /// The path::touch() method’s return value doesn’t reflect whether or not a file
     /// was created -- only whether or not a given file’s timestamps could be successfully
-    /// updated via descriptor. The path::touched() method wraps path::touch(), only returing
-    /// “true” iff, in the course of its call, a file is created at the path in question --
-    /// a path at which, prior to said call, there wasn’t any kind of anything, filewise.
+    /// updated via descriptor. The `path::touched()` method wraps `detail::touch(…)`, only
+    /// returning “true” iff, in the course of its call, a file is created at the path
+    /// in question -- a path at which, prior to the issuing of said `detail::touch(…)` call,
+    /// there wasn’t any kind of anything, filewise.
     bool path::touched() const {
         std::string thispath = str();
         bool preexisting = (::access(thispath.c_str(), F_OK) != -1);
-        bool updated = touch();
+        bool updated = detail::touch(thispath.c_str());
         return (!preexisting) && updated && (::access(thispath.c_str(), F_OK) != -1);
     }
     
