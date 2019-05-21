@@ -258,7 +258,7 @@ namespace filesystem {
     path::path(int descriptor) {
         /// q.v. https://github.com/textmate/textmate/blob/master/Frameworks/io/src/path.cc#L587
         ///      ... w/r/t why we do ::fcntl() twice:
-        for (std::size_t idx = 0; idx < 100; ++idx) {
+        for (path::size_type idx = 0; idx < 100; ++idx) {
             char fdpath[PATH_MAX];
             bool result = (::fcntl(descriptor, F_GETPATH, fdpath) == 0);
             #ifdef __APPLE__
@@ -416,9 +416,9 @@ namespace filesystem {
         /// list all files
         detail::pathvec_t out;
         if (!is_listable()) { return out; }
-        path abspath = make_absolute();
         {
             detail::nowait_t nowait;
+            path abspath = make_absolute();
             directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
                 imread_raise(FileSystemError,
@@ -472,7 +472,7 @@ namespace filesystem {
             if (!d.get()) {
                 imread_raise(FileSystemError,
                     "Internal error in opendir():", std::strerror(errno),
-                    "For path:", FF("***%s***", make_absolute().c_str()));
+                    "For path:", str());
             }
             detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != nullptr) {
@@ -503,23 +503,25 @@ namespace filesystem {
         detail::pathvec_t out;
         if (!is_listable()) { return out; }
         path abspath = make_absolute();
-        ::glob_t g = { 0 };
+        ::glob_t glob_s = { 0 };
         {
             detail::nowait_t nowait;
             filesystem::switchdir s(abspath);
-            ::glob(pattern, detail::glob_pattern_flags, nullptr, &g);
+            ::glob(pattern, detail::glob_pattern_flags, nullptr, &glob_s);
         }
-        out.reserve(g.gl_pathc);
+        path::size_type idx = 0,
+                        max = glob_s.gl_pathc;
+        out.reserve(max);
         if (full_paths) {
-            for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
-                out.emplace_back(abspath/g.gl_pathv[idx]);
+            for (; idx != max; ++idx) {
+                out.emplace_back(abspath/glob_s.gl_pathv[idx]);
             }
         } else {
-            for (std::size_t idx = 0; idx != g.gl_pathc; ++idx) {
-                out.emplace_back(g.gl_pathv[idx]);
+            for (; idx != max; ++idx) {
+                out.emplace_back(glob_s.gl_pathv[idx]);
             }
         }
-        ::globfree(&g);
+        ::globfree(&glob_s);
         return out;
     }
     
@@ -534,13 +536,15 @@ namespace filesystem {
             filesystem::switchdir s(abspath);
             ::wordexp(pattern.c_str(), &word, detail::wordexp_pattern_flags);
         }
-        out.reserve(word.we_wordc);
+        path::size_type idx = 0,
+                        max = word.we_wordc;
+        out.reserve(max);
         if (full_paths) {
-            for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
+            for (; idx != max; ++idx) {
                 out.emplace_back(abspath/word.we_wordv[idx]);
             }
         } else {
-            for (std::size_t idx = 0; idx != word.we_wordc; ++idx) {
+            for (; idx != max; ++idx) {
                 out.emplace_back(word.we_wordv[idx]);
             }
         }
@@ -749,9 +753,9 @@ namespace filesystem {
     /// a path at which, prior to said call, there wasn’t any kind of anything, filewise.
     bool path::touched() const {
         std::string thispath = str();
-        bool preexisting = !bool(::access(thispath.c_str(), F_OK));
-        bool updated = path::touch(thispath);
-        return (!preexisting) && updated && !bool(::access(thispath.c_str(), F_OK));
+        bool preexisting = (::access(thispath.c_str(), F_OK) != -1);
+        bool updated = touch();
+        return (!preexisting) && updated && (::access(thispath.c_str(), F_OK) != -1);
     }
     
     path path::resolve() const {
@@ -765,12 +769,11 @@ namespace filesystem {
         ssize_t result = ::readlink(thispath.c_str(), linkbuf, sizeof(linkbuf));
         if (result > 0 && result < PATH_MAX) {
             return path(std::string(linkbuf, linkbuf + result));
-        } else {
-            imread_raise(FileSystemError,
-                "In reference to path value:", thispath,
-                "FATAL internal error in path::resolve() call to ::readlink():",
-                std::strerror(errno));
         }
+        imread_raise(FileSystemError,
+            "In reference to path value:", thispath,
+            "FATAL internal error in path::resolve() call to ::readlink():",
+            std::strerror(errno));
     }
     
     path::size_type path::total_size() const {
@@ -869,7 +872,7 @@ namespace filesystem {
         bool out = true;
         
         /// backtrack through path parents to find an existant base:
-        std::size_t idx, max, i;
+        path::size_type idx, max, i;
         idx = max = size();
         for (path p(*this); !p.exists(); p = p.parent()) { --idx; }
         
