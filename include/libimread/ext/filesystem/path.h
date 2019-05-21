@@ -40,6 +40,7 @@ namespace filesystem {
         std::string execpath() noexcept;
         timepoint_t execstarttime() noexcept;
         ssize_t copyfile(char const*, char const*, bool);
+        bool touch(char const*) noexcept;
         
         /// tag for dispatching path::list() returning detail::vector_pair_t,
         /// instead of plain ol' pathvec_t
