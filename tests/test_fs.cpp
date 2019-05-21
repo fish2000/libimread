@@ -31,6 +31,7 @@ namespace {
     using filesystem::resolver;
     using filesystem::NamedTemporaryFile;
     using filesystem::TemporaryDirectory;
+    namespace detail = filesystem::detail;
     
     using stringvec_t = std::vector<std::string>;
     using pathvec_t = std::vector<path>;
@@ -261,18 +262,21 @@ namespace {
         CHECK(dres.contains(path::currentprogram()));
     }
     
-    TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct, path::makedir(), path::touch() and path::touched()",
-              "[fs-temporarydirectory-raii-makedir-touch-touched]")
+    TEST_CASE("[filesystem] Test the TemporaryDirectory RAII struct, path::makedir(), detail::touch(), path::touch() and path::touched()",
+              "[fs-temporarydirectory-raii-makedir-detail-touch-path-touch-touched]")
     {
         TemporaryDirectory td("test-td");
         
         path sub0 = (td.dirpath/"test-td-subdir0");
         path sub1 = (td.dirpath/"test-td-subdir1");
+        path sub2 = (td.dirpath/"test-td-subdir2");
         
         sub0.makedir();
         sub1.makedir();
+        sub2.makedir();
         REQUIRE(sub0.is_listable());
         REQUIRE(sub1.is_listable());
+        REQUIRE(sub2.is_listable());
         
         path f00 = sub0 / "file0.txt";
         path f01 = sub0 / "file1.txt";
@@ -293,6 +297,19 @@ namespace {
         CHECK(!f12.exists());
         f12.touched();
         REQUIRE(f12.exists());
+        
+        path f20 = sub2 / "file0.txt";
+        path f21 = sub2 / "file1.txt";
+        path f22 = sub2 / "file2.txt";
+        
+        std::string s20 = f20.str();
+        REQUIRE(detail::touch(s20.c_str())); /// string pointer into a std::string
+        REQUIRE(detail::touch(f21.c_str())); /// string pointer into a filesystem::path
+        CHECK(!f22.exists());
+        detail::touch(f22.c_str());
+        REQUIRE(f20.exists());
+        REQUIRE(f21.exists());
+        REQUIRE(f22.exists());
     }
     
     TEST_CASE("[filesystem] Test the NamedTemporaryFile RAII struct's stream interface",
