@@ -184,14 +184,8 @@ namespace im {
     }
     
     std::size_t gzio_source_sink::size() const {
-        std::size_t fsize = uncompressed_byte_size();
-        if (fsize == 0) {
-            if (mapped.empty()) {
-                mapped = full_data();
-            }
-            return uncompressed_byte_size(mapped.size());
-        }
-        return fsize;
+        detail::stat_t info = this->stat();
+        return info.st_size * sizeof(byte);
     }
     
     void* gzio_source_sink::readmap(std::size_t pageoffset) const {
@@ -233,6 +227,16 @@ namespace im {
     
     std::size_t gzio_source_sink::uncompressed_byte_size() const {
         std::string out = this->xattr(kUncompressedSize);
+        if (out == STRINGNULL()) {
+            if (mapped.empty()) {
+                mapped = byte_source::full_data();
+                if (mapped.empty()) {
+                    return 0;
+                } else {
+                    out = this->xattr(kUncompressedSize, std::to_string(mapped.size()));
+                }
+            }
+        }
         return out == STRINGNULL() ? 0 : std::stoul(out);
     }
     
