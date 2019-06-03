@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#       geerate-test-filemap.py
+#       generate-test-filemap.py
 #
 #       Scan test data folder and dump discovered image files,
 #           grouped by file type, to a serializable format
