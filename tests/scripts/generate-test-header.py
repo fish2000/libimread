@@ -91,7 +91,7 @@ def main():
     filemap = filemapper(files)
     
     for suffix, filelist in filemap.iteritems():
-        filetpls.update({ suffix: filetype(suffix, filelist) })
+        filetpls[suffix] = filetype(suffix, filelist)
     
     filetpls['basedir'] = basedir
     print(include(**filetpls))
