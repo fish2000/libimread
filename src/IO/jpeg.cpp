@@ -345,9 +345,9 @@ namespace im {
             
             JSAMPARRAY allocate_samples(int components = 0,
                                         int width = 0,
-                                        int height = 1) {
+                                        int height = 0) {
                 /// blow up for invalid heights:
-                if (height < 1) {
+                if (height < 0) {
                     imread_raise(JPEGIOError,
                        "\tim::(anon)::JPEGDecompressor::allocate_samples() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
                     FF("\tim::(anon)::JPEGDecompressor::allocate_samples() got:    `height` = (int){ %i }", height),
@@ -366,7 +366,7 @@ namespace im {
             
             JSAMPARRAY allocate_samples(J_COLOR_SPACE color_space,
                                         int width = 0,
-                                        int height = 1) {
+                                        int height = 0) {
                 /// convert the color space constant,
                 /// and delegate to the all-ints version above:
                 return allocate_samples(components_for_color_space(color_space),
@@ -463,9 +463,9 @@ namespace im {
             
             JSAMPARRAY allocate_samples(int components = 0,
                                         int width = 0,
-                                        int height = 1) {
+                                        int height = 0) {
                 /// blow up for invalid heights:
-                if (height < 1) {
+                if (height < 0) {
                     imread_raise(JPEGIOError,
                        "\tim::(anon)::JPEGCompressor::allocate_samples() says:   \"UNSUPPORTED IMAGE DIMENSIONS\"",
                     FF("\tim::(anon)::JPEGCompressor::allocate_samples() got:    `height` = (int){ %i }", height),
@@ -484,7 +484,7 @@ namespace im {
             
             JSAMPARRAY allocate_samples(J_COLOR_SPACE color_space,
                                         int width = 0,
-                                        int height = 1) {
+                                        int height = 0) {
                 /// convert the color space constant,
                 /// and delegate to the all-ints version above:
                 return allocate_samples(components_for_color_space(color_space),
