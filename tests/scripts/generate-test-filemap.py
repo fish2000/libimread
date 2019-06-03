@@ -10,21 +10,17 @@
 #
 
 from __future__ import print_function
-from os import chdir, listdir, getcwd
-from os.path import dirname
+import sys, os
 from filemap import filemapper
 
 datadir = "../data"
 
-if __name__ == '__main__':
-    import sys
+def main():
+    os.chdir(os.path.dirname(__file__))
+    os.chdir(datadir)
+    basedir = os.getcwd()
+    files = os.listdir(basedir)
     
-    chdir(dirname(__file__))
-    chdir(datadir)
-    basedir = getcwd()
-    files = listdir(basedir)
-    
-    filetpls = dict()
     filemap = filemapper(files)
     filemap['basedir'] = basedir
     
@@ -39,8 +35,11 @@ if __name__ == '__main__':
     else:
         # print xml property list 
         import plistlib
-        print(plistlib.writePlistToString(filemap))
+        if hasattr(plistlib, 'dumps'):
+            print(plistlib.dumps(filemap))
+        if hasattr(plistlib, 'writePlistToString'):
+            print(plistlib.writePlistToString(filemap))
+        raise NameError("Can't find plistlib write-to-string method")
 
-
-
-
+if __name__ == '__main__':
+    main()

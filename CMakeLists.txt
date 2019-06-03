@@ -1,4 +1,4 @@
-# Author: Alexander Böhn (with Félix C. Morency)
+            # Author: Alexander Böhn (with Félix C. Morency)
 # © 2011.10 -- GPL, Motherfuckers
 
 # The minimum CMake version required to build this project

@@ -1,5 +1,6 @@
 
 def filemapper(files):
+    """ Sort a list of files into a dict of separate lists by suffix """
     return dict(
         jpg    = [f for f in files if f.endswith('jpg')],
         jpeg   = [f for f in files if f.endswith('jpeg')],

@@ -7,14 +7,13 @@
 #       (c) 2015 Alexander Bohn, All Rights Reserved
 #
 
-from __future__ import print_function
-from os import chdir, listdir, getcwd
-from os.path import dirname
+from __future__ import print_function, unicode_literals
+import os
 from filemap import filemapper
 
 datadir = "../data"
 
-include_tpl = u"""
+include_tpl = """
 #ifndef IMREAD_TESTDATA_HPP_
 #define IMREAD_TESTDATA_HPP_
 #define CATCH_CONFIG_FAST_COMPILE
@@ -51,14 +50,14 @@ namespace im { namespace test {
 #endif /// IMREAD_TESTDATA_HPP_
 """
 
-filetype_tpl = u"""
+filetype_tpl = """
     static const int num_%(filetype)s = %(num)d;
     static const std::string %(filetype)s[] = {
 %(filestr)s
     };"""
 
 def include(**kwargs):
-    """ Required args:
+    """ Required keyword args:
             basedir:    string, path to base file directory (like duh)
             jpgs:       string, output from filetype() for jpg files
             jpegs:      string, output from filetype() for jpeg files
@@ -78,20 +77,24 @@ def filetype(suffix, files):
             files:      list, strings of actual file names per suffix
     """
     return filetype_tpl % dict(
-        filestr=u",\n".join([u"        \"%s\"" % f for f in files]),
+        filestr=",\n".join(["        \"%s\"" % f for f in files]),
         filetype=suffix,
         num=len(files))
 
-if __name__ == '__main__':
-    chdir(dirname(__file__))
-    chdir(datadir)
-    basedir = getcwd()
-    files = listdir(basedir)
+def main():
+    os.chdir(os.path.dirname(__file__))
+    os.chdir(datadir)
+    basedir = os.getcwd()
+    files = os.listdir(basedir)
     
     filetpls = dict()
     filemap = filemapper(files)
     
     for suffix, filelist in filemap.iteritems():
         filetpls.update({ suffix: filetype(suffix, filelist) })
-    filetpls.update({ 'basedir': basedir })
+    
+    filetpls['basedir'] = basedir
     print(include(**filetpls))
+
+if __name__ == '__main__':
+    main()

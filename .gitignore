@@ -6,6 +6,7 @@
 /python/im/resources/generators/
 /python/imread.egg-info/
 /Testing/
+/CMakeFiles/
 *.dylib
 *.a
 *.so
