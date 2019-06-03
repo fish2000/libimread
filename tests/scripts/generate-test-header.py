@@ -4,7 +4,7 @@
 #
 #       Scan test data folder and write out a header file
 #       For, like, tests and stuff
-#       (c) 2015 Alexander Bohn, All Rights Reserved
+#       (c) 2015-2019 Alexander Bohn, All Rights Reserved
 #
 
 from __future__ import print_function, unicode_literals

@@ -6,10 +6,10 @@
 #           grouped by file type, to a serializable format
 #           e.g. property list, msgpack, json etc
 #       For, like, tests and stuff
-#       (c) 2015 Alexander Bohn, All Rights Reserved
+#       (c) 2015-2019 Alexander Bohn, All Rights Reserved
 #
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import sys, os
 from filemap import filemapper
 

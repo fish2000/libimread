@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+#
+#       filemap.py
+#
+#       Sort a list of files into a dict of separate lists by suffix
+#       For, like, tests and stuff
+#       (c) 2015-2019 Alexander Bohn, All Rights Reserved
+#
+
+from __future__ import print_function, unicode_literals
 
 def filemapper(files):
     """ Sort a list of files into a dict of separate lists by suffix """

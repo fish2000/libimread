@@ -5,7 +5,7 @@
 #
 #       Read and print the first 8 or so bytes of a file,
 #       For, like, tests and stuff
-#       (c) 2015 Alexander Bohn, All Rights Reserved
+#       (c) 2015-2019 Alexander Bohn, All Rights Reserved
 #
 """
 Usage:
