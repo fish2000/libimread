@@ -90,7 +90,7 @@ def main():
     filetpls = dict()
     filemap = filemapper(files)
     
-    for suffix, filelist in filemap.iteritems():
+    for suffix, filelist in filemap.items():
         filetpls[suffix] = filetype(suffix, filelist)
     
     filetpls['basedir'] = basedir
