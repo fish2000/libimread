@@ -607,7 +607,7 @@ namespace filesystem {
         return list_rx(pattern, full_paths, false); /// <---- case_sensitive=false
     }
     
-    // using walk_visitor_t = std::function<void(const path&,       /// root path
+    // using walk_visitor_t = std::function<void(path const&,       /// root path
     //                                      detail::stringvec_t&,   /// directories
     //                                      detail::stringvec_t&)>; /// files
     
