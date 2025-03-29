@@ -64,8 +64,8 @@ endif ()
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibUnwind  DEFAULT_MSG    LIBUNWIND_INCLUDE_DIR
                                                             LIBUNWIND_LIBRARY
-                                                            LIBUNWIND_HAS_UNW_GETCONTEXT
-                                                            LIBUNWIND_HAS_UNW_INIT_LOCAL
+                                                            # LIBUNWIND_HAS_UNW_GETCONTEXT
+                                                            # LIBUNWIND_HAS_UNW_INIT_LOCAL
                                                             # VERSION_VAR
                                                             # LIBUNWIND_VERSION_STRING
                                  )
