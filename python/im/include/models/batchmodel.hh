@@ -822,7 +822,7 @@ namespace py {
                 }
                 
                 as_html = opts.cast<bool>("as_html", as_html);
-                as_url = opts.cast<bool>("as_url", as_html);
+                as_url = opts.cast<bool>("as_url", as_url);
                 if (!as_url) { return py::string(data); }
                 
                 std::string out("data:");
