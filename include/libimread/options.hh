@@ -15,7 +15,7 @@
 #include <libimread/ext/JSON/json11.h>
 #include <libimread/store.hh>
 
-using detail::stringvec_t;                                          /// = std::vector<std::string> (a scommon libimread idiom)
+using detail::stringvec_t;                                          /// = std::vector<std::string> (a common libimread idiom)
 using stringmap_t = store::stringmapper::stringmap_t;               /// = std::unordered_map<std::string, std::string>
 using prefixset_t  = std::unordered_set<std::string>;               /// q.v. Options::prefixset(…), Options::prefixgram(…) [ibid.]
 using prefixgram_t = std::unordered_map<std::string, std::size_t>;  /// prefixgram_t = “prefix histogram”
