@@ -16,6 +16,7 @@
 #include <set>
 #include <string>
 #include <ostream>
+#include <stdfloat>
 #include <exception>
 #include <functional>
 #include <type_traits>
@@ -117,7 +118,6 @@ class Json {
     protected:
         struct Node {
             static constexpr Type typecode = Type::JSNULL;
-            std::size_t refcnt;
             Node(std::size_t init = 0);
             virtual ~Node();
             virtual Type type() const;
@@ -129,7 +129,10 @@ class Json {
             virtual bool operator==(Node const&) const;
             virtual void validate(Schema const&, nodecvec_t&) const;
             virtual bool is_schema() const;
+            mutable std::size_t refcnt;
             void unref();
+			std::size_t incref();
+			std::size_t decref();
             char const* typestr() const;
             static Node null, undefined;
         };
@@ -308,13 +311,13 @@ class Json {
             schemavec_t anyof;
             schemavec_t oneof;
             Schema* s_not = nullptr;
-            long double max_num = LDBL_MAX;
-            long double min_num = -LDBL_MAX;
-            long double mult_of = 0;
+            float64_t max_num = LDBL_MAX;
+            float64_t min_num = -LDBL_MAX;
+            float64_t mult_of = 0;
             bool max_exc = false;
             bool min_exc = false;
-            unsigned long max_len = UINT32_MAX;
-            unsigned long min_len = 0;
+            uint64_t max_len = UINT32_MAX;
+            uint64_t min_len = 0;
             void* pattern = nullptr; /// std::regex
             Schema* item = nullptr;
             schemavec_t items;
@@ -388,7 +391,7 @@ class Json {
         
     protected:
         Json(Node* node) {
-            (root = (node == nullptr ? &Node::null : node))->refcnt++;
+            (root = (node == nullptr ? &Node::null : node))->incref();
         }
         
     protected:
@@ -396,7 +399,7 @@ class Json {
         
     public:
         /// constructors
-        Json() { (root = &Node::null)->refcnt++; }
+        Json() { (root = &Node::null)->incref(); }
         Json(Json const&);
         Json(Json&&) noexcept;
         Json(std::istream&, bool full = true); /// parse
@@ -409,23 +412,23 @@ class Json {
         
     public:
         /// more constructors
-        Json(int x)                 { (root = new Number(x))->refcnt++; }
-        Json(float x)               { (root = new Number(x))->refcnt++; }
-        Json(std::string const& s)  { (root = new String(s))->refcnt++; }
-        Json(bool x)                { (root = (x ? &Bool::T : &Bool::F))->refcnt++; }
-        Json(long x)                { (root = new Number(x))->refcnt++; }
-        Json(long long x)           { (root = new Number(x))->refcnt++; }
-        Json(unsigned int x)        { (root = new Number(x))->refcnt++; }
-        Json(unsigned long x)       { (root = new Number(x))->refcnt++; }
-        Json(double x)              { (root = new Number(x))->refcnt++; }
-        Json(long double x)         { (root = new Number(x))->refcnt++; }
-        Json(char const* s)         { (root = new String(s))->refcnt++; }
-        Json(Property const& p)     { (root = p.target().root)->refcnt++; }
+        Json(int x)                 { (root = new Number(x))->incref(); }
+        Json(float x)               { (root = new Number(x))->incref(); }
+        Json(std::string const& s)  { (root = new String(s))->incref(); }
+        Json(bool x)                { (root = (x ? &Bool::T : &Bool::F))->incref(); }
+        Json(long x)                { (root = new Number(x))->incref(); }
+        Json(long long x)           { (root = new Number(x))->incref(); }
+        Json(unsigned int x)        { (root = new Number(x))->incref(); }
+        Json(unsigned long x)       { (root = new Number(x))->incref(); }
+        Json(double x)              { (root = new Number(x))->incref(); }
+        Json(long double x)         { (root = new Number(x))->incref(); }
+        Json(char const* s)         { (root = new String(s))->incref(); }
+        Json(Property const& p)     { (root = p.target().root)->incref(); }
         
-        explicit Json(uint8_t x)    { (root = new Number(x))->refcnt++; }
-        explicit Json(uint16_t x)   { (root = new Number(x))->refcnt++; }
-        explicit Json(int8_t x)     { (root = new Number(x))->refcnt++; }
-        explicit Json(int16_t x)    { (root = new Number(x))->refcnt++; }
+        explicit Json(uint8_t x)    { (root = new Number(x))->incref(); }
+        explicit Json(uint16_t x)   { (root = new Number(x))->incref(); }
+        explicit Json(int8_t x)     { (root = new Number(x))->incref(); }
+        explicit Json(int16_t x)    { (root = new Number(x))->incref(); }
         
                  Json(jsonlist_t);
         explicit Json(jsonvec_t const&);

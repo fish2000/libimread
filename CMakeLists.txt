@@ -18,7 +18,7 @@ option(IM_COLOR_TRACE       "Use ANSI color in debug and error trace output"    
 option(IM_VERBOSE           "Print (highly nerd-oriented) verbose debug output" ON)
 option(IM_TERMINATOR        "Use a libunwind-based termination handler"         ON)
 
-# option(IM_LLVM_DIR          "Path to LLVM config files"                         "/usr/local/opt/llvm/lib/cmake/llvm")
+# option(IM_LLVM_DIR          "Path to LLVM config files"                         "/opt/homebrew/opt/llvm/lib/cmake/llvm")
 
 unset(IM_CLANG_RUNTIME_HEADERS CACHE)
 unset(HAVE_AUTOFS_NOWAIT CACHE)
@@ -26,8 +26,8 @@ unset(HAVE_AUTOFS_NOTRIGGER CACHE)
 
 if(IM_USE_GCC)
     # hardcode homebrew path for now -- NOTE THAT THIS SHIT IS WAY OLD:
-    set(CMAKE_C_COMPILER    "/usr/local/opt/gcc/bin/gcc-5")
-    set(CMAKE_CXX_COMPILER  "/usr/local/opt/gcc/bin/g++-5")
+    set(CMAKE_C_COMPILER    "/opt/homebrew/opt/gcc/bin/gcc-5")
+    set(CMAKE_CXX_COMPILER  "/opt/homebrew/opt/gcc/bin/g++-5")
 endif()
 
 # C++ standard
@@ -64,18 +64,23 @@ set(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
                               /usr/lib/system)
 
 if(NOT DEFINED IM_LLVM_DIR)
-    set(IM_LLVM_DIR "/usr/local/opt/llvm/lib/cmake/llvm")
+    set(IM_LLVM_DIR "/opt/homebrew/opt/llvm/lib/cmake/llvm")
 endif()
 message(STATUS "LLVM Configuration Path: ${IM_LLVM_DIR}")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
                       ${IM_LLVM_DIR})
+
+# set(LLVM_DIR "/opt/homebrew/opt/llvm/lib/cmake/llvm")
+set(LLVM_DIR "${cmake_directory}")
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
+                      ${LLVM_DIR})
 
 # Include the library build configuration. This will also include the custom
 # macro defined for the project.
 include(build_config)
 
 # deal with LLVM:
-include(LLVMConfiguration)
+include(LLVMConfig)
 
 # Include the HalideGenerator.cmake library -- exposing the cmake function
 # halide_add_generator_dependency() allowing Halide generator use in-project.
@@ -202,6 +207,7 @@ include_directories("${SG14_DIR}")
 # Ugh
 link_directories(/usr/lib)
 link_directories(/usr/local/lib)
+link_directories(/opt/homebrew/lib)
 
 # Include the required dependency `include` directories:
 include_directories(

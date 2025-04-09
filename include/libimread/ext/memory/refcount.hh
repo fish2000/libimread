@@ -9,7 +9,6 @@
 #include <functional>
 #include <utility>
 #include <atomic>
-#include <mutex>
 #include <thread>
 #include <cstddef>
 #include <cstdint>
@@ -26,7 +25,6 @@ namespace memory {
     extern GuidGenerator generator;
     extern refcount_t refcounts;
     // extern thread_t garbagecollector;
-    extern std::mutex mute;
     
     template <typename Target>
     struct DefaultDeleter : public std::unary_function<std::add_pointer_t<Target>, void> {
@@ -123,7 +121,6 @@ namespace memory {
             }
         
         void init() {
-            std::lock_guard<std::mutex> lock(mute);
             guid = generator.newGuid();
             refcounts[guid].store(0);
         }

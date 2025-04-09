@@ -15,7 +15,7 @@ pushd $PROJECT_PATH && \
     mkdir -p ./build ./dist && \
     pushd ./build && \
         anybar white && \
-        cmake .. -Wno-dev -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist" && \
+        cmake .. -Wno-dev -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
         anybar yellow && \
         make install && \
             anybar white && \

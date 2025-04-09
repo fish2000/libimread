@@ -25,6 +25,7 @@ pushd $PROJECT_PATH
     
     pushd ./build
         cmake .. \
+			-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_INSTALL_PREFIX="${PROJECT_PATH}/dist" \
             -DIM_APPS=$APPS \

@@ -55,14 +55,14 @@ namespace tc {
 namespace detail {
     using chartraits = std::char_traits<char>;
     
-    unsigned currpos(std::istream& in, unsigned* pos) {
-        unsigned curr = in.tellg();
+    std::size_t currpos(std::istream& in, std::size_t* pos) {
+        std::size_t curr = in.tellg();
         if (pos != nullptr) { *pos = 0; }
         in.seekg(0); // rewind
         if (in.bad()) { return 0; }
-        unsigned count = 0,
-                  line = 1,
-                   col = 1;
+        std::size_t count = 0,
+                     line = 1,
+                      col = 1;
         while (!in.eof() && !in.fail() && ++count < curr) {
             if (in.get() == '\n') {
                 ++line;
@@ -119,18 +119,49 @@ Json::Node::Node(std::size_t init)
     {}
 
 Json::Node::~Node() {
-    imread_assert(this == &null || this == &undefined || this == &Bool::T || this == &Bool::F || refcnt == 0,
-                  "Non-static Node has non-zero refcount upon destruction");
+    imread_assert(this == &null
+		       || this == &undefined
+			   || this == &Bool::T
+			   || this == &Bool::F
+			   || refcnt == 0, "Non-static Node has non-zero refcount upon destruction");
 }
 
+/// LEGACY FUNCTION:
+/// Decrements a nodes’ reference count,
+/// deleting the node if the count has hit zero.
+/// Returns the current reference count.
 void Json::Node::unref() {
-    if (this == &null || this == &undefined || this == &Bool::T || this == &Bool::F) {
-        return;
-    }
-    imread_assert(refcnt > 0,
-                  "Trying to unref() a node whose refcount <= 0");
+    if (this == &null
+	 || this == &undefined
+	 || this == &Bool::T
+	 || this == &Bool::F) { return; }
+    imread_assert(refcnt > 0, "Trying to unref() a node whose refcount <= 0");
     if (--refcnt == 0) { delete this; }
 }
+
+/// Increments a nodes’ reference count
+/// Returns the current reference count.
+std::size_t Json::Node::incref() {
+    if (this == &null
+	 || this == &undefined
+	 || this == &Bool::T
+	 || this == &Bool::F) { return 1; }
+	return ++refcnt;
+}
+
+/// Decrements a nodes’ reference count,
+/// deleting the node if the count has hit zero.
+/// Returns the current reference count.
+std::size_t Json::Node::decref() {
+    if (this == &null
+     || this == &undefined
+	 || this == &Bool::T
+	 || this == &Bool::F) { return 1; }
+    imread_assert(refcnt > 0, "Trying to decref() a node whose refcount <= 0");
+    if (--refcnt == 0) { delete this; }
+	return refcnt;
+}
+
 
 bool Json::Array::operator==(Node const& that) const {
     if (this == &that) { return true; }
@@ -205,7 +236,7 @@ bool Json::Object::contains(Node const* that) const {
 
 /** Copy constructor. */
 Json::Json(Json const& that) {
-    (root = that.root)->refcnt++;
+    (root = that.root)->incref();
 }
 
 /** Move constructor. */
@@ -215,21 +246,21 @@ Json::Json(Json&& that) noexcept {
 }
 
 Json::Json(Json::jsonlist_t arglist) {
-    (root = new Array())->refcnt++;
+    (root = new Array())->incref();
     for (auto const& arg : arglist) {
         *this << arg;
     }
 }
 
 Json::Json(Json::jsonvec_t const& argvec) {
-    (root = new Array())->refcnt++;
+    (root = new Array())->incref();
     for (auto const& arg : argvec) {
         *this << arg;
     }
 }
 
 Json::Json(Json::jsonmap_t const& propmap) {
-    (root = new Object())->refcnt++;
+    (root = new Object())->incref();
     for (auto const& prop : propmap) {
         set(prop.first, prop.second);
     }
@@ -237,33 +268,33 @@ Json::Json(Json::jsonmap_t const& propmap) {
 
 /** Copy assignment */
 Json& Json::operator=(Json const& that) {
-    root->unref();
-    (root = that.root)->refcnt++;
+    root->decref();
+    (root = that.root)->incref();
     return *this;
 }
 
 /** Move assignment */
 Json& Json::operator=(Json&& that) noexcept {
-    root->unref();
+    root->decref();
     root = std::move(that.root);
     that.root = nullptr;
     return *this;
 }
 
 Json::~Json() {
-    if (root != nullptr) { root->unref(); }
+    if (root != nullptr) { root->decref(); }
 }
 
 Json& Json::reset() {
-    root->unref();
-    (root = &Node::null)->refcnt++;
+    root->decref();
+    (root = &Node::null)->incref();
     return *this;
 }
 
 Json::Object* Json::mkobject() {
     if (root->type() == Type::JSNULL) {
         root = new Object();
-        root->refcnt++;
+        root->incref();
     }
     if (root->type() != Type::OBJECT) {
         imread_raise(JSONUseError,
@@ -285,8 +316,7 @@ Json::Object* Json::mkobject() const {
 
 Json& Json::set(std::string const& key, Json const& value) {
     if (value.root->contains(root)) {
-        imread_raise(JSONUseError,
-            "cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     }
     mkobject()->set(key, value.root);
     return *this;
@@ -295,7 +325,7 @@ Json& Json::set(std::string const& key, Json const& value) {
 Json::Array* Json::mkarray() {
     if (root->type() == Type::JSNULL) {
         root = new Array();
-        root->refcnt++;
+        root->incref();
     }
     if (root->type() != Type::ARRAY) {
         imread_raise(JSONUseError,
@@ -321,8 +351,7 @@ std::string Json::typestring() const { return root->typestr(); }
 
 Json& Json::operator<<(Json const& that) {
     if (that.root->contains(root)) {
-        imread_raise(JSONUseError,
-            "cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     }
     mkarray()->add(that.root);
     return *this;
@@ -330,8 +359,7 @@ Json& Json::operator<<(Json const& that) {
 
 Json& Json::insert(int idx, Json const& that) {
     if (that.root->contains(root)) {
-        imread_raise(JSONUseError,
-            "cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     }
     mkarray()->ins(idx, that.root);
     return *this;
@@ -339,8 +367,7 @@ Json& Json::insert(int idx, Json const& that) {
 
 Json& Json::replace(int idx, Json const& that) {
     if (that.root->contains(root)) {
-        imread_raise(JSONUseError,
-            "cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     }
     mkarray()->repl(idx, that.root);
     return *this;
@@ -366,8 +393,7 @@ Json Json::extend(Json const& other) const {
             "\t(Requires both of Type::ARRAY)");
     }
     if (other.root->contains(root)) {
-        imread_raise(JSONUseError,
-            "cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     }
     Json out = Json{};
     auto const& a = static_cast<Array*>(root)->list;
@@ -382,8 +408,7 @@ Json Json::extend(Json const& other) const {
 
 Json& Json::append(Json const& other) {
     if (other.root->contains(root)) {
-        imread_raise(JSONUseError,
-            "cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     }
     mkarray()->add(other.root);
     return *this;
@@ -396,8 +421,10 @@ int Json::index(Json const& other) const {
     int idx = 0;
     for (auto it = arlist.begin();
          it != arlist.end();
-         ++it) { if (other.root == *it) { return idx; }
-                 ++idx; }
+         ++it) {
+			 if (other.root == *it) { return idx; }
+             ++idx;
+		 }
     return -1;
 }
 
@@ -420,7 +447,7 @@ Json Json::pop() {
 Json Json::Property::operator=(Json const& that) {
     switch (host->type()) {
         case Type::JSNULL:
-            (host = &Node::null)->refcnt++;
+            (host = &Node::null)->incref();
             break;
         case Type::BOOLEAN:
             host = that.root == &Bool::T ? &Bool::T : &Bool::F;
@@ -509,8 +536,7 @@ Json Json::update(Json const& other) const {
             "\t(Requires both of Type::OBJECT)");
     }
     if (other.root->contains(root)) {
-        imread_raise(JSONUseError,
-            "cyclic dependency");
+        imread_raise(JSONUseError, "cyclic dependency");
     }
     Json out = Json{};
     auto const& a = static_cast<Object*>(root)->map;
@@ -543,7 +569,7 @@ Json Json::pop(std::string const& key) {
             "\t(root->pop(key)        == nullptr)");
     }
     Json out(node);                         /// constructor increments refcount (>= 2)
-    out.root->refcnt--;                     /// back to reality (>= 1)
+    out.root->decref();                     /// back to reality (>= 1)
     return out;
 }
 
@@ -551,7 +577,7 @@ Json Json::pop(std::string const& key, Json const& default_value) {
     Node* node = mkobject()->pop(key);      /// refcount unaffected (>= 1)
     if (!node) { return default_value; }
     Json out(node);                         /// constructor increments refcount (>= 2)
-    out.root->refcnt--;                     /// back to reality (>= 1)
+    out.root->decref();                     /// back to reality (>= 1)
     return out;
 }
 
@@ -727,7 +753,8 @@ void Json::String::print(std::ostream& out) const {
 }
 
 void Json::Pointer::print(std::ostream& out) const {
-    out << "#" << (unsigned long)value << "";
+	out << "#" << reinterpret_cast<std::size_t>(value) << "";
+    // out << "#" << (unsigned long)value << "";
 }
 
 Type Json::Object::type() const {
@@ -747,9 +774,8 @@ void Json::Object::traverse(Json::named_traverser_t named_traverser,
                             char const* name) const {
     named_traverser(this, name);
     for (auto const& it : map) {
-        it.second->traverse(
-            named_traverser,
-            it.first->c_str());
+        it.second->traverse(named_traverser,
+        it.first->c_str());
     }
 }
 
@@ -833,8 +859,8 @@ void Json::Array::print(std::ostream& out) const {
 
 Json::Object::~Object() {
     for (auto const& it : map) {
-        Node* np = it.second;
-        np->unref();
+        // Node* np = it.second;
+        it.second->decref();
     }
     map.clear();
 }
@@ -848,27 +874,26 @@ Json::Node* Json::Object::get(std::string const& key) const {
 }
 
 void Json::Object::set(std::string const& k, Node* v) {
-    imread_assert(v != nullptr,
-                  "Json::Object::set(k, v) called with v == nullptr");
+    imread_assert(v != nullptr, "Json::Object::set(k, v) called with v == nullptr");
     auto kit = keyset.insert(keyset.begin(), k);
     auto it = map.find(&*kit);
     if (it != map.end()) {
-        Node* np = it->second;
-        np->unref();
+        // Node* np = it->second;
+		it->second.decref()
         it->second = v;
     } else {
         map[&*kit] = v;
     }
-    v->refcnt++;
+    v->incref();
 }
 
 bool Json::Object::del(std::string const& k) {
-    /// Unrefs Node* for key, erases it from the map and keyset
+    /// Decrefs Node* for key, erases it from the map and keyset
     auto kit = keyset.find(k);
     auto it = map.find(&*kit);
     if (it != map.end()) {
-        Node* np = it->second;
-        np->unref();
+        // Node* np = it->second;
+        it->second->decref();
         map.erase(&*kit);
         // keyset.erase(kit);
         return true;
@@ -890,33 +915,31 @@ Json::Node* Json::Object::pop(std::string const& k) {
 }
 
 Json::Array::~Array() {
-    for (Node* it : list) { it->unref(); }
+    for (Node* it : list) { it->decref(); }
     list.clear();
 }
 
 void Json::Array::add(Node* v) {
-    imread_assert(v != nullptr,
-                  "Json::Array::add(v) called with v == nullptr");
+    imread_assert(v != nullptr, "Json::Array::add(v) called with v == nullptr");
     list.push_back(v);
-    v->refcnt++;
+    v->incref();
 }
 
 void Json::Array::pop() {
     Node* v = static_cast<Node*>(list.back());
-    v->unref();
+    v->decref();
     list.pop_back();
 }
 
 /** Inserts given Node* before index. */
 void Json::Array::ins(int idx, Node* v) {
-    imread_assert(v != nullptr,
-                  "Json::Array::ins(idx, v) called with v == nullptr");
+    imread_assert(v != nullptr, "Json::Array::ins(idx, v) called with v == nullptr");
     if (idx < 0) { idx = list.size(); }
     if (idx < 0 || idx >= (int)list.size()) {
         imread_raise_default(JSONOutOfRange);
     }
     list.insert(list.begin() + idx, v);
-    v->refcnt++;
+    v->incref();
 }
 
 void Json::Array::del(int idx) {
@@ -925,7 +948,7 @@ void Json::Array::del(int idx) {
         imread_raise_default(JSONOutOfRange);
     }
     Node* v = list.at(idx);
-    v->unref();
+    v->decref();
     list.erase(list.begin() + idx);
 }
 
@@ -937,9 +960,9 @@ void Json::Array::repl(int idx, Node* v) {
         imread_raise_default(JSONOutOfRange);
     }
     Node* u = list.at(idx);
-    u->unref();
+    u->decref();
     list[idx] = v;
-    v->refcnt++;
+    v->incref();
 }
 
 Json::Node* Json::Array::at(int idx) const {
@@ -1076,7 +1099,7 @@ Json::Json(std::istream& in, bool full) {
     if (!(in >> c)) { goto out; }
     if (c == '[') {
         root = new Array();
-        root->refcnt++;
+        root->incref();
         while (in >> c) {
             if (c == ']') { goto out; }
             in.putback(c);
@@ -1090,7 +1113,7 @@ Json::Json(std::istream& in, bool full) {
     }
     if (c == '{') {
         root = new Object();
-        root->refcnt++;
+        root->incref();
         while (in >> c) {
             if (c == '}') { goto out; }
             in.putback(c);
@@ -1112,30 +1135,30 @@ Json::Json(std::istream& in, bool full) {
     if (std::isdigit(c) || c == '-') {
         in.putback(c);
         root = new Number(in);
-        root->refcnt++;
+        root->incref();
         goto out;
     }
     if (c == '\"' || c == '\'') {
         in.putback(c);
         root = new String(in);
-        root->refcnt++;
+        root->incref();
         goto out;
     }
     word.push_back(c);
     for (int i = 0; i < 3; i++) { word.push_back(in.get()); }
     if (word == "null") {
         root = &Node::null;
-        root->refcnt++;
+        root->incref();
         goto out;
     }
     if (word == "true") {
         root = &Bool::T;
-        root->refcnt++;
+        root->incref();
         goto out;
     }
     if (word == "fals" && in.get() == 'e') {
         root = &Bool::F;
-        root->refcnt++;
+        root->incref();
         goto out;
     }
     throw parse_error("json format error", in);
