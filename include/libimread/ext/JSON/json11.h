@@ -117,8 +117,8 @@ class Json {
     protected:
         struct Node {
             static constexpr Type typecode = Type::JSNULL;
-            unsigned refcnt;
-            Node(unsigned init = 0);
+            std::size_t refcnt;
+            Node(std::size_t init = 0);
             virtual ~Node();
             virtual Type type() const;
             virtual NodeType nodetype() const;

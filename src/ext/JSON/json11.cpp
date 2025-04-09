@@ -114,7 +114,7 @@ Json::parse_error::parse_error(std::string const& msg, std::istream& in)
     }
 
 /// Node and helper classes
-Json::Node::Node(unsigned init)
+Json::Node::Node(std::size_t init)
     :refcnt(init)
     {}
 
