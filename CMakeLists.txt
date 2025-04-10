@@ -64,14 +64,14 @@ set(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
                               /usr/lib/system)
 
 if(NOT DEFINED IM_LLVM_DIR)
-    set(IM_LLVM_DIR "/opt/homebrew/opt/llvm/lib/cmake/llvm")
+    set(IM_LLVM_DIR "/opt/homebrew/opt/llvm/lib/cmake/llvm/")
 endif()
 message(STATUS "LLVM Configuration Path: ${IM_LLVM_DIR}")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
                       ${IM_LLVM_DIR})
 
 # set(LLVM_DIR "/opt/homebrew/opt/llvm/lib/cmake/llvm")
-set(LLVM_DIR "${cmake_directory}")
+set(LLVM_DIR "/opt/homebrew/opt/llvm/lib/cmake/")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
                       ${LLVM_DIR})
 
@@ -80,10 +80,12 @@ set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}
 include(build_config)
 
 # deal with LLVM:
-include(LLVMConfig)
+# include(LLVM-Config)
+# include(llvm-config)
 
 # Include the HalideGenerator.cmake library -- exposing the cmake function
 # halide_add_generator_dependency() allowing Halide generator use in-project.
+# N.B. – one must deal with configuring LLVM (as above) for these to work:
 # include(HalideProject)
 # include(HalideGenerator)
 
@@ -168,18 +170,17 @@ find_package(TIFF REQUIRED)
 find_package(WEBP REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Halide REQUIRED)
-find_package(LibUnwind REQUIRED)
+# find_package(LibUnwind REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 set(HDF5_USE_STATIC_LIBRARIES false)
 set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE true)
 set(HDF5_COMPILER_NO_INTERROGATE true)
 
-# include(FindHDF5)
 find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
 
 include(FindRocksDB)
-# find_package(RocksDB REQUIRED)
+include(FindLibUnwind)
 
 pkg_check_modules(LIBPLIST REQUIRED libplist)
 pkg_check_modules(LIBPLISTPP REQUIRED libplist++)
