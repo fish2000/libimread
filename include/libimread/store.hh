@@ -413,7 +413,7 @@ namespace store {
             stringmap() noexcept = default;                     /// default (empty) constructor
             stringmap(stringpair_init_t);                       /// construct from initializer list of string pairs
             stringmap(stringmap const&) = default;              /// default copy constructor
-            explicit stringmap(std::string const&,              /// construct from deserialized string (e.g JSON)
+            explicit stringmap(std::string const&,              /// construct from serialized string (e.g JSON)
                                stringmapper::formatter format = stringmapper::default_format);
         
         public:

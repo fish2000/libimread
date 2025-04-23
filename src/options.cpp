@@ -56,16 +56,16 @@ namespace im {
     OptionsList::OptionsList(OptionsList const& other)
         :OptionsList()
         {
-            root->unref();
+            root->decref();
             Json::Node* node = other.root;
-            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+            (root = (node == nullptr ? &Json::Node::null : node))->incref();
         }
     
     OptionsList::OptionsList(OptionsList&& other) noexcept
         :OptionsList()
         {
             Json::Node* node = std::exchange(other.root, root);
-            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+            (root = (node == nullptr ? &Json::Node::null : node))->incref();
         }
     
     OptionsList::OptionsList(std::istream& is, bool full)
@@ -115,7 +115,7 @@ namespace im {
     
     OptionsList& OptionsList::operator=(Json&& json) noexcept {
         Json::Node* node = std::exchange(json.root, root);
-        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+        (root = (node == nullptr ? &Json::Node::null : node))->incref();
         return *this;
     }
     
@@ -128,7 +128,7 @@ namespace im {
     
     OptionsList& OptionsList::operator=(OptionsList&& other) noexcept {
         Json::Node* node = std::exchange(other.root, root);
-        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+        (root = (node == nullptr ? &Json::Node::null : node))->incref();
         return *this;
     }
     
@@ -190,9 +190,9 @@ namespace im {
     Options::Options(Options const& other)
         :Options(other.cache)
         {
-            root->unref();
+            root->decref();
             Json::Node* node = other.root;
-            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+            (root = (node == nullptr ? &Json::Node::null : node))->incref();
         }
     
     /// Move constructor:
@@ -200,7 +200,7 @@ namespace im {
         :Options(std::move(other.cache))
         {
             Json::Node* node = std::exchange(other.root, root);
-            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+            (root = (node == nullptr ? &Json::Node::null : node))->incref();
         }
     
     /// Input-stream constructor, for JSON stream-parsing:
@@ -230,7 +230,7 @@ namespace im {
                                     stringpair_init.end());
             Json json(jsonmap);
             Json::Node* node = std::exchange(json.root, root);
-            (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+            (root = (node == nullptr ? &Json::Node::null : node))->incref();
         }
     
     Options::Options(detail::listpair_t listpair)
@@ -280,7 +280,7 @@ namespace im {
     
     Options& Options::operator=(Json&& json) noexcept {
         Json::Node* node = std::exchange(json.root, root);
-        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+        (root = (node == nullptr ? &Json::Node::null : node))->incref();
         cache.clear();
         return *this;
     }
@@ -294,7 +294,7 @@ namespace im {
     
     Options& Options::operator=(Options&& other) noexcept {
         Json::Node* node = std::exchange(other.root, root);
-        (root = (node == nullptr ? &Json::Node::null : node))->refcnt++;
+        (root = (node == nullptr ? &Json::Node::null : node))->incref();
         cache = std::exchange(other.cache, cache);
         return *this;
     }
@@ -336,7 +336,7 @@ namespace im {
     
     std::string const& Options::get(std::string const& key) const {
         if (cache.find(key) != cache.end()) { return cache[key]; }
-        if (has(key)) {
+        if (Json::has(key)) {
             cache[key] = Json::cast<std::string>(key);
             return cache[key];
         }
