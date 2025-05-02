@@ -310,11 +310,6 @@ namespace filesystem {
         detail::dlinfo_t dlinfo;
         if (::dladdr(address, &dlinfo)) {
             set(dlinfo.dli_fname);
-        } else {
-            imread_raise(FileSystemError,
-                "Internal error in ::dladdr(address, &dlinfo)",
-                "where address = ", reinterpret_cast<long>(address),
-                std::strerror(errno));
         }
     }
     
@@ -376,10 +371,7 @@ namespace filesystem {
         if (m_absolute) { return path(*this); }
         char temp[PATH_MAX];
         if (::realpath(c_str(), temp) == nullptr) {
-            imread_raise(FileSystemError,
-                "In reference to path value:", str(),
-                "FATAL internal error in path::make_absolute() call to ::realpath():",
-                std::strerror(errno));
+			return path();
         }
         return path(temp);
     }
@@ -388,10 +380,7 @@ namespace filesystem {
         /// same as path::make_absolute(), minus the m_absolute precheck:
         char temp[PATH_MAX];
         if (::realpath(c_str(), temp) == nullptr) {
-            imread_raise(FileSystemError,
-                "In reference to path value:", str(),
-                "FATAL internal error in path::make_real() call to ::realpath():",
-                std::strerror(errno));
+			return path();
         }
         return path(temp);
     }
@@ -407,18 +396,10 @@ namespace filesystem {
         char raw_self[PATH_MAX],
              raw_other[PATH_MAX];
         if (::realpath(c_str(), raw_self) == nullptr) {
-            imread_raise(FileSystemError,
-                "FATAL internal error in path::compare_debug() call to ::realpath():",
-             FF("\t%s (%d)", std::strerror(errno), errno),
-                "In reference to SELF path value:",
-                str());
+			return false;
         }
         if (::realpath(other.c_str(), raw_other) == nullptr) {
-            imread_raise(FileSystemError,
-                "FATAL internal error in path::compare_debug() call to ::realpath():",
-             FF("\t%s (%d)", std::strerror(errno), errno),
-                "In reference to OTHER path value:",
-                other.str());
+			return false;
         }
         return bool(std::strcmp(raw_self, raw_other) == 0);
     }
@@ -453,9 +434,7 @@ namespace filesystem {
             path abspath = make_absolute();
             directory d = detail::ddopen(abspath.str());
             if (!d.get()) {
-                imread_raise(FileSystemError,
-                    "Internal error in opendir():", std::strerror(errno),
-                    "For path:", str());
+				return out;
             }
             detail::dirent_t* entp;
             if (full_paths) {
@@ -500,11 +479,9 @@ namespace filesystem {
         detail::stringvec_t files;
         {
             detail::nowait_t nowait;
-            directory d = detail::ddopen(make_absolute().str());
+            directory d = detail::ddopen(str());
             if (!d.get()) {
-                imread_raise(FileSystemError,
-                    "Internal error in opendir():", std::strerror(errno),
-                    "For path:", str());
+				return out;
             }
             detail::dirent_t* entp;
             while ((entp = ::readdir(d.get())) != nullptr) {
@@ -780,10 +757,7 @@ namespace filesystem {
         if (result > 0 && result < PATH_MAX) {
             return path(std::string(linkbuf, linkbuf + result));
         }
-        imread_raise(FileSystemError,
-            "In reference to path value:", thispath,
-            "FATAL internal error in path::resolve() call to ::readlink():",
-            std::strerror(errno));
+		return path();
     }
     
     path::size_type path::total_size() const {
@@ -986,11 +960,6 @@ namespace filesystem {
         bool status = ::rename(str().c_str(), newpath.c_str()) == 0;
         if (status) {
             set(newpath.make_absolute().str());
-        } else {
-            imread_raise(FileSystemError,
-                "In reference to path value:", str(), this->basename(),
-                "internal error raised during path::rename() call to ::rename():",
-                std::strerror(errno));
         }
         return status;
     }
@@ -1072,8 +1041,9 @@ namespace filesystem {
         path result;
         if (m_path.empty()) {
             if (m_absolute) {
-                imread_raise(FileSystemError,
-                    "path::parent() makes no sense for empty absolute paths");
+                // imread_raise(FileSystemError,
+                //     "path::parent() makes no sense for empty absolute paths");
+				return path{};
             } else {
                 result = path::cwd().parent();
             }
@@ -1090,8 +1060,9 @@ namespace filesystem {
     
     path path::join(path const& other) const {
         if (other.m_absolute) {
-            imread_raise(FileSystemError,
-                "path::join() expects a relative-path RHS");
+            // imread_raise(FileSystemError,
+            //     "path::join() expects a relative-path RHS");
+			return path{};
         }
         path result(m_path, m_absolute);
         result.m_path.reserve(m_path.size() + other.m_path.size());
@@ -1103,8 +1074,9 @@ namespace filesystem {
     
     path& path::adjoin(path const& other) {
         if (other.m_absolute) {
-            imread_raise(FileSystemError,
-                "path::adjoin() expects a relative-path RHS");
+            // imread_raise(FileSystemError,
+            //     "path::adjoin() expects a relative-path RHS");
+			return path{};
         }
         m_path.reserve(m_path.size() + other.m_path.size());
         std::copy(other.m_path.begin(),
@@ -1194,16 +1166,18 @@ namespace filesystem {
     path::size_type path::rank(std::string const& ext) const {
         /// I can't remember from whence I stole this implementation:
         std::string thispath = str();
-        if (thispath.size() >= ext.size() &&
-            thispath.compare(thispath.size() - ext.size(), ext.size(), ext) == 0) {
-            if (thispath.size() == ext.size()) {
-                return ext.size();
+		std::size_t thispathsize = thispath.size();
+		std::size_t extsize = ext.size();
+        if (thispathsize >= extsize &&
+            thispath.compare(thispathsize - extsize, extsize, ext) == 0) {
+            if (thispathsize == extsize) {
+                return extsize;
             }
-            char ch = thispath[thispath.size() - ext.size() - 1];
+            char ch = thispath[thispathsize - extsize - 1];
             if (ch == '.' || ch == '_') {
-                return ext.size() + 1;
+                return extsize + 1;
             } else if (ch == '/') {
-                return ext.size();
+                return extsize;
             }
         }
         return 0;
@@ -1235,9 +1209,7 @@ namespace filesystem {
     path path::getcwd() {
         char temp[PATH_MAX];
         if (::getcwd(temp, PATH_MAX) == nullptr) {
-            imread_raise(FileSystemError,
-                "Internal error in getcwd():",
-                std::strerror(errno));
+			return path();
         }
         return path(temp);
     }

@@ -28,8 +28,8 @@ namespace store {
         void yaml_impl(std::string const&, store::stringmapper*);
         
         std::string join(store::stringmapper::stringvec_t const&, std::string const& with = ", ");
-        store::stringmapper::formatter for_path(std::string const&);
         std::string load(std::string const&);
+        store::stringmapper::formatter for_path(std::string const&);
         bool dump(std::string const&, std::string const&, bool overwrite = false);
         
     }

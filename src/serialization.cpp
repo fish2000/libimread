@@ -209,6 +209,57 @@ namespace store {
             });
         }
         
+        std::string load(std::string const& source) {
+            using filesystem::path;
+            
+            /// Properly “normalize” the source filepath --
+            /// N.B. this may raise im::FileSystemError:
+            path sourcepath = path::expand_user(source).make_absolute();
+            
+            /// Examine the source filepath, and ensure
+            /// that it is properly dealt with, depending
+            /// on whether it already exists, and how this
+            /// function was called:
+            if (!sourcepath.exists()) {
+                // imread_raise(CannotReadError,
+                //     "store::detail::load(source): nonexistant source file",
+                //  FF("\tsource == %s", sourcepath.c_str()));
+				return std::string{};
+            }
+            if (!sourcepath.is_file_or_link()) {
+                // imread_raise(CannotReadError,
+                //     "store::detail::load(source): non-file-or-link source file",
+                //  FF("\tsource == %s", sourcepath.c_str()));
+				return std::string{};
+            }
+            if (!sourcepath.is_readable()) {
+                // imread_raise(CannotReadError,
+                //     "store::detail::load(source): unreadable source file",
+                //  FF("\tsource == %s", sourcepath.c_str()));
+				return std::string{};
+            }
+            
+            /// Open a file stream for reading,
+            /// given the source filepath, and raising
+            /// an error if the open attempt fails:
+            std::fstream stream;
+            stream.open(sourcepath.str(), std::ios::in);
+            if (!stream.is_open()) {
+                // imread_raise(CannotReadError,
+                //     "store::detail::load(source): couldn't open a stream to read source file",
+                //  FF("\tsource == %s", sourcepath.c_str()));
+				return std::string{};
+            }
+            
+            /// Read in the contents of the file, to a string, via the stream --
+            /// This was adapted from https://stackoverflow.com/a/3203502/298171
+            std::string out(std::istreambuf_iterator<char>(stream), {});
+            stream.close();
+            
+            /// Return the populated string by value:
+            return out;
+        }
+        
         store::stringmapper::formatter for_path(std::string const& pth) {
             /// Return a formatter type (q.v the store::stringmapper::formatter enum)
             /// appropriate for the file extension of a given filepath string:
@@ -231,54 +282,7 @@ namespace store {
             }
             return stringmapper::default_format; /// JSON
         }
-        
-        std::string load(std::string const& source) {
-            using filesystem::path;
-            
-            /// Properly “normalize” the source filepath --
-            /// N.B. this may raise im::FileSystemError:
-            path sourcepath = path::expand_user(source).make_absolute();
-            
-            /// Examine the source filepath, and ensure
-            /// that it is properly dealt with, depending
-            /// on whether it already exists, and how this
-            /// function was called:
-            if (!sourcepath.exists()) {
-                imread_raise(CannotReadError,
-                    "store::detail::load(source): nonexistant source file",
-                 FF("\tsource == %s", sourcepath.c_str()));
-            }
-            if (!sourcepath.is_file_or_link()) {
-                imread_raise(CannotReadError,
-                    "store::detail::load(source): non-file-or-link source file",
-                 FF("\tsource == %s", sourcepath.c_str()));
-            }
-            if (!sourcepath.is_readable()) {
-                imread_raise(CannotReadError,
-                    "store::detail::load(source): unreadable source file",
-                 FF("\tsource == %s", sourcepath.c_str()));
-            }
-            
-            /// Open a file stream for reading,
-            /// given the source filepath, and raising
-            /// an error if the open attempt fails:
-            std::fstream stream;
-            stream.open(sourcepath.str(), std::ios::in);
-            if (!stream.is_open()) {
-                imread_raise(CannotReadError,
-                    "store::detail::load(source): couldn't open a stream to read source file",
-                 FF("\tsource == %s", sourcepath.c_str()));
-            }
-            
-            /// Read in the contents of the file, to a string, via the stream --
-            /// This was adapted from https://stackoverflow.com/a/3203502/298171
-            std::string out(std::istreambuf_iterator<char>(stream), {});
-            stream.close();
-            
-            /// Return the populated string by value:
-            return out;
-        }
-        
+		
         bool dump(std::string const& content, std::string const& dest, bool overwrite) {
             using filesystem::path;
             using filesystem::NamedTemporaryFile;

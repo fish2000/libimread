@@ -219,8 +219,8 @@ namespace store {
     void value_copy(T&& from, U&& to) {
         static_assert(store::is_stringmapper_v<T, U>,
                      "store::value_copy() operands must derive from store::stringmapper");
-        stringmapper::stringvec_t froms(std::forward<T>(from).list());
-        if (!froms.empty()) {
+		if (!std::forward<T>(from).empty()) {
+			stringmapper::stringvec_t froms(std::forward<T>(from).list());
             for (std::string const& name : froms) { std::forward<U>(to).set(name,
                                                     std::forward<T>(from).get(name)); }
         }
@@ -231,8 +231,8 @@ namespace store {
                                        std::string const& sep = store::detail::kDefaultSep) {
         static_assert(store::is_stringmapper_v<T, U>,
                      "store::prefix_copy() operands must derive from store::stringmapper");
-        stringmapper::stringvec_t froms(std::forward<T>(from).list());
-        if (!froms.empty()) {
+		if (!std::forward<T>(from).empty()) {
+			stringmapper::stringvec_t froms(std::forward<T>(from).list());
             for (std::string const& name : froms) { std::forward<U>(to).set(prefix + sep + name,
                                                     std::forward<T>(from).get(name)); }
         }
@@ -243,8 +243,8 @@ namespace store {
                                       std::string const& sep = store::detail::kDefaultSep) {
         static_assert(store::is_stringmapper_v<T, U>,
                      "store::defix_copy() operands must derive from store::stringmapper");
-        stringmapper::stringvec_t froms(std::forward<T>(from).list());
-        if (!froms.empty()) {
+ 		if (!std::forward<T>(from).empty()) {
+ 			stringmapper::stringvec_t froms(std::forward<T>(from).list());
             std::regex defix_re("^" + prefix + sep, std::regex::extended);
             for (std::string const& name : froms) { std::forward<U>(to).set(
                                                     std::regex_replace(name, defix_re, ""),
@@ -307,7 +307,7 @@ namespace store {
                                       std::move(re)); });                                       \
             X out;                                                                              \
             for (std::string const& name : std::forward<__typename__>(*this).list()) {          \
-                std::string text = std::string(std::forward<__typename__>(*this).get(name));    \
+                std::string text = std::forward<__typename__>(*this).get(name);					\
                 std::for_each(patterns.begin(),                                                 \
                               patterns.end(),                                                   \
                           [&](auto const& item) { if (std::regex_search(text, item.second,      \

@@ -294,9 +294,7 @@ namespace store {
         
         try {
             serialized = detail::load(source);
-        } catch (im::FileSystemError&) {
-            return out;
-        } catch (im::CannotReadError&) {
+        } catch (std::exception&) {
             return out;
         }
         

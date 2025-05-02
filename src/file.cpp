@@ -49,10 +49,7 @@ namespace im {
     std::size_t fd_source_sink::max_descriptor_count() {
         detail::rlimit_t rl;
         if (::getrlimit(RLIMIT_NOFILE, &rl) == -1) {
-            imread_raise(MetadataReadError,
-                "descriptor limit value read failure",
-                "\t::getrlimit(RLIMIT_NOFILE, &rl) returned -1",
-                "\tERROR MESSAGE IS: ", std::strerror(errno));
+			return 0;
         }
         return rl.rlim_cur;
     }
@@ -62,10 +59,7 @@ namespace im {
         rl.rlim_cur = new_max;
         rl.rlim_max = new_max;
         if (::setrlimit(RLIMIT_NOFILE, &rl) == -1) {
-            imread_raise(MetadataWriteError,
-                "descriptor limit value write failure",
-             FF("\t::setrlimit(RLIMIT_NOFILE, &rl) [new_max = %u] returned -1", new_max),
-                "\tERROR MESSAGE IS: ", std::strerror(errno));
+			return 0;
         }
         return new_max;
     }
@@ -97,9 +91,7 @@ namespace im {
     std::size_t fd_source_sink::read(byte* buffer, std::size_t n) const {
         int out = ::read(descriptor, buffer, n);
         if (out == -1) {
-            imread_raise(CannotReadError,
-                "::read() returned -1",
-                std::strerror(errno));
+			return 0;
         }
         return static_cast<std::size_t>(out);
     }
@@ -107,9 +99,7 @@ namespace im {
     std::size_t fd_source_sink::write(const void* buffer, std::size_t n) {
         int out = ::write(descriptor, buffer, n);
         if (out == -1) {
-            imread_raise(CannotWriteError,
-                "::write() returned -1",
-                std::strerror(errno));
+			return 0;
         }
         return static_cast<std::size_t>(out);
     }
@@ -125,9 +115,7 @@ namespace im {
     detail::stat_t fd_source_sink::stat() const {
         detail::stat_t info;
         if (::fstat(descriptor, &info) == -1) {
-            imread_raise(CannotReadError,
-                "::fstat() returned -1",
-                std::strerror(errno));
+			return detail::stat_t{};
         }
         return info;
     }
@@ -148,9 +136,7 @@ namespace im {
         
         /// unbuffered read directly from descriptor:
         if (::read(descriptor, &result[0], fsize) == -1) {
-            imread_raise(CannotReadError,
-                "fd_source_sink::full_data():",
-                "read() returned -1", std::strerror(errno));
+			return bytevec_t{};
         }
         
         /// reset descriptor position before returning
@@ -174,9 +160,7 @@ namespace im {
                                                       descriptor,
                                                       offset);
             if (mapped_ptr == MAP_FAILED) {
-                imread_raise(FileSystemError,
-                    "error mapping file descriptor for reading:",
-                    std::strerror(errno));
+				return nullptr;
             }
             mapped = detail::mapped_t{ mapped_ptr, [fsize](void* mp) {
                 ::munmap(mp, fsize);
@@ -247,11 +231,12 @@ namespace im {
                 open_error = std::strerror(errno);
             }
             if (!fd_source_sink::check_descriptor(descriptor)) {
-                imread_raise(CannotWriteError, "descriptor open-to-write failure:",
-                    FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
-                    FF("\treturned invalid descriptor: %i", descriptor),
-                       "\tERROR MESSAGE IS:  ", std::strerror(errno),
-                       "\tERROR MESSAGE WAS: ", open_error);
+                // imread_raise(CannotWriteError, "descriptor open-to-write failure:",
+                //     FF("\t::open(\"%s\", O_WRONLY | O_FSYNC | O_CLOEXEC | O_CREAT | O_EXCL | O_TRUNC)", spath.c_str()),
+                //     FF("\treturned invalid descriptor: %i", descriptor),
+                //        "\tERROR MESSAGE IS:  ", std::strerror(errno),
+                //        "\tERROR MESSAGE WAS: ", open_error);
+				return -1;
             }
         } else {
             descriptor = open_read(spath.c_str());
@@ -259,11 +244,12 @@ namespace im {
                 open_error = std::strerror(errno);
             }
             if (!fd_source_sink::check_descriptor(descriptor)) {
-                imread_raise(CannotReadError, "descriptor open-to-read failure:",
-                    FF("\t::open(\"%s\", O_RDONLY | O_FSYNC | O_CLOEXEC)", spath.c_str()),
-                    FF("\treturned invalid descriptor: %i", descriptor),
-                       "\tERROR MESSAGE IS:  ", std::strerror(errno),
-                       "\tERROR MESSAGE WAS: ", open_error);
+                // imread_raise(CannotReadError, "descriptor open-to-read failure:",
+                //     FF("\t::open(\"%s\", O_RDONLY | O_FSYNC | O_CLOEXEC)", spath.c_str()),
+                //     FF("\treturned invalid descriptor: %i", descriptor),
+                //        "\tERROR MESSAGE IS:  ", std::strerror(errno),
+                //        "\tERROR MESSAGE WAS: ", open_error);
+				return -1;
             }
         }
         return descriptor;
@@ -374,18 +360,20 @@ namespace im {
         if (fmode == filesystem::mode::WRITE) {
             descriptor = fifo_open_write(spath.c_str());
             if (descriptor < 0) {
-                imread_raise(CannotWriteError, "FIFO descriptor open-to-write failure:",
-                    FF("\t::open(\"%s\", O_WRONLY | O_CLOEXEC)", spath.c_str()),
-                    FF("\treturned negative value: %i", descriptor),
-                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+                // imread_raise(CannotWriteError, "FIFO descriptor open-to-write failure:",
+                //     FF("\t::open(\"%s\", O_WRONLY | O_CLOEXEC)", spath.c_str()),
+                //     FF("\treturned negative value: %i", descriptor),
+                //        "\tERROR MESSAGE IS: ", std::strerror(errno));
+				return -1;
             }
         } else {
             descriptor = fifo_open_read(spath.c_str());
             if (descriptor < 0) {
-                imread_raise(CannotReadError, "FIFO descriptor open-to-read failure:",
-                    FF("\t::open(\"%s\", O_RDONLY | O_CLOEXEC)", spath.c_str()),
-                    FF("\treturned negative value: %i", descriptor),
-                       "\tERROR MESSAGE IS: ", std::strerror(errno));
+                // imread_raise(CannotReadError, "FIFO descriptor open-to-read failure:",
+                //     FF("\t::open(\"%s\", O_RDONLY | O_CLOEXEC)", spath.c_str()),
+                //     FF("\treturned negative value: %i", descriptor),
+                //        "\tERROR MESSAGE IS: ", std::strerror(errno));
+				return -1;
             }
         }
         return descriptor;
