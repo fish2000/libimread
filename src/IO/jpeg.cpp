@@ -215,7 +215,7 @@ namespace im {
         /// JPEG decompressor API class, wrapping the `jpeg_decompress_struct`
         /// from jpeglib, alongside a JPEGSourceAdapter instance (q.v. implementation,
         /// above) and furnishing accessor shortcut methods.
-        struct JPEGDecompressor : public JPEGCompressionBase {
+        struct JPEGDecompressor : public JPEGCompressionBase final {
             
             enum struct scaling : uint8_t {
                 NONE            = 1,
@@ -392,7 +392,7 @@ namespace im {
         /// JPEG compressor API class, wrapping the `jpeg_compress_struct`
         /// from jpeglib, alongside a JPEGDestinationAdapter instance (q.v. implementation,
         /// above) and furnishing accessor shortcut methods.
-        struct JPEGCompressor : public JPEGCompressionBase {
+        struct JPEGCompressor : public JPEGCompressionBase final {
             
             JPEGCompressor(byte_sink* sink)
                 :adaptor(sink)
