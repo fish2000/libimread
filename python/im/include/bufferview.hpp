@@ -22,8 +22,8 @@ namespace im {
     
     namespace buffer {
         
-        /// forward-declare buffer heap deleter template:
-        template <typename BufferType> struct deleter;
+        /// forward-declare buffer heap deleter_t template:
+        template <typename BufferType> struct deleter_t;
         
         /// forward-declare ViewFactory, for friendship:
         class ViewFactory;
